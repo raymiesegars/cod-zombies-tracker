@@ -128,12 +128,22 @@ interface TabsContentProps {
   value: string;
   children: React.ReactNode;
   className?: string;
+  /** When true, content is always in the DOM but hidden when inactive (for SEO/crawlers). */
+  forceMount?: boolean;
 }
 
-export function TabsContent({ value, children, className }: TabsContentProps) {
+export function TabsContent({ value, children, className, forceMount }: TabsContentProps) {
   const { activeTab } = useTabs();
+  const isActive = activeTab === value;
 
-  if (activeTab !== value) return null;
+  if (!forceMount && !isActive) return null;
 
-  return <div className={className}>{children}</div>;
+  return (
+    <div
+      className={forceMount && !isActive ? cn(className, 'hidden') : className}
+      aria-hidden={forceMount ? !isActive : undefined}
+    >
+      {children}
+    </div>
+  );
 }
