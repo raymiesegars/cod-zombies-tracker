@@ -369,7 +369,8 @@ export default function UserProfilePage() {
   const [achievementFilterCategory, setAchievementFilterCategory] = useState('');
   const [achievementMapLoading, setAchievementMapLoading] = useState(false);
 
-  const isOwnProfile = currentProfile?.username === username || currentProfile?.id === username;
+  // Use displayed profile vs current user so map links are correct (runs page for others, map page for self)
+  const isOwnProfile = Boolean(profile && currentProfile && profile.id === currentProfile.id);
 
   const refetchAchievementsAfterRelock = useCallback(async () => {
     await refreshProfile?.();
@@ -609,7 +610,10 @@ export default function UserProfilePage() {
             <div className="max-h-[380px] overflow-y-auto rounded-lg">
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
               {mapStats.map((stats) => (
-                <Link key={stats.mapId} href={`/maps/${stats.mapSlug}`}>
+                <Link
+                  key={stats.mapId}
+                  href={isOwnProfile ? `/maps/${stats.mapSlug}` : `/users/${profile?.username ?? username}/maps/${stats.mapSlug}/runs`}
+                >
                   <Card variant="bordered" interactive className="h-full">
                     <CardContent className="p-3 sm:py-4">
                       <div className="relative aspect-[4/3] mb-2 sm:mb-3 rounded-lg overflow-hidden bg-bunker-800">

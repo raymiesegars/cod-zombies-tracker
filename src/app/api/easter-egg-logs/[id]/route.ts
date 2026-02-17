@@ -24,13 +24,36 @@ async function getLogAndUser(id: string) {
   return { log, user };
 }
 
-// Get your EE log
+// Get EE log: owner always; others can view if log owner's profile is public
 export async function GET(_request: NextRequest, { params }: Params) {
   try {
     const { id } = await params;
-    const result = await getLogAndUser(id);
-    if ('error' in result) return NextResponse.json({ error: result.error }, { status: result.status });
-    return NextResponse.json(result.log);
+    const log = await prisma.easterEggLog.findUnique({
+      where: { id },
+      include: {
+        easterEgg: true,
+        map: { include: { game: true } },
+        user: { select: { id: true, isPublic: true, username: true, displayName: true } },
+      },
+    });
+    if (!log) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+    const supabaseUser = await getUser();
+    const currentUser = supabaseUser
+      ? await prisma.user.findUnique({ where: { supabaseId: supabaseUser.id }, select: { id: true } })
+      : null;
+    const isOwner = currentUser && log.userId === currentUser.id;
+    if (!isOwner && !log.user.isPublic) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+
+    const { user: u, ...logWithoutUser } = log;
+    return NextResponse.json({
+      ...logWithoutUser,
+      isOwner: isOwner ?? false,
+      runOwnerUsername: u.username ?? undefined,
+      runOwnerDisplayName: u.displayName ?? u.username ?? undefined,
+    });
   } catch (error) {
     console.error('Error fetching Easter Egg log:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

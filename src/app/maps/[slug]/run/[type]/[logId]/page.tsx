@@ -60,7 +60,7 @@ function DeleteRunButton({
       <Button
         variant="secondary"
         size="sm"
-        className="flex-1 min-w-0 border-blood-600/50 text-blood-400 hover:bg-blood-950/50 hover:text-blood-300"
+        className="flex-1 min-w-0 border-blood-600/50 text-white hover:bg-blood-950/50 hover:text-white"
         leftIcon={<Trash2 className="w-3.5 h-3.5" />}
         onClick={() => setConfirmOpen(true)}
       >
@@ -134,6 +134,9 @@ export default function RunDetailPage() {
   const logId = params.logId as string;
 
   const [log, setLog] = useState<ChallengeLogDetail | EasterEggLogDetail | null>(null);
+  const [isOwner, setIsOwner] = useState(true);
+  const [runOwnerUsername, setRunOwnerUsername] = useState<string | null>(null);
+  const [runOwnerDisplayName, setRunOwnerDisplayName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -163,6 +166,9 @@ export default function RunDetailPage() {
           setLog(null);
           return;
         }
+        setIsOwner(data.isOwner === true);
+        setRunOwnerUsername(data.runOwnerUsername ?? null);
+        setRunOwnerDisplayName(data.runOwnerDisplayName ?? null);
         setLog(data);
       })
       .catch(() => setError('Failed to load run.'))
@@ -218,11 +224,11 @@ export default function RunDetailPage() {
 
         <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-10">
           <Link
-            href="/maps"
+            href={isOwner ? '/maps' : runOwnerUsername ? `/users/${runOwnerUsername}/maps/${map.slug}/runs` : `/maps/${map.slug}`}
             className="inline-flex items-center gap-2 rounded-lg border border-bunker-500 bg-bunker-800/95 px-3.5 py-2.5 text-sm font-medium text-white shadow-lg backdrop-blur-sm transition-colors hover:border-bunker-400 hover:bg-bunker-700/95 hover:text-white"
           >
             <ChevronLeft className="h-4 w-4 flex-shrink-0" aria-hidden />
-            <span className="hidden sm:inline">All Maps</span>
+            <span className="hidden sm:inline">{isOwner ? 'All Maps' : runOwnerUsername ? "Back to runs" : 'Back to map'}</span>
             <span className="sm:hidden">Back</span>
           </Link>
         </div>
@@ -242,8 +248,23 @@ export default function RunDetailPage() {
                 ? (log as ChallengeLogDetail).challenge.name
                 : (log as EasterEggLogDetail).easterEgg.name}
             </p>
+            {(runOwnerDisplayName || runOwnerUsername) && (
+              <p className="mt-2 text-sm sm:text-base text-white/90 font-medium tracking-wide [text-shadow:0_0_2px_rgba(0,0,0,0.8)]">
+                Logged by{' '}
+                {runOwnerUsername ? (
+                  <Link
+                    href={`/users/${runOwnerUsername}`}
+                    className="text-white hover:text-white/90 underline underline-offset-2"
+                  >
+                    {runOwnerDisplayName || `@${runOwnerUsername}`}
+                  </Link>
+                ) : (
+                  <span>{runOwnerDisplayName}</span>
+                )}
+              </p>
+            )}
             <Link
-              href={`/maps/${map.slug}?tab=your-runs`}
+              href={isOwner ? `/maps/${map.slug}?tab=your-runs` : runOwnerUsername ? `/users/${runOwnerUsername}/maps/${map.slug}/runs` : `/maps/${map.slug}`}
               className="mt-3 inline-flex items-center gap-2 rounded-lg border border-bunker-500 bg-bunker-800/95 px-3.5 py-2 text-sm font-medium text-white shadow-md backdrop-blur-sm transition-colors hover:border-bunker-400 hover:bg-bunker-700/95"
             >
               <ChevronLeft className="h-4 w-4" aria-hidden />
@@ -346,19 +367,21 @@ export default function RunDetailPage() {
                   })}
                 </span>
               </div>
-              <div className="flex flex-wrap gap-2 pt-3 border-t border-bunker-700 mt-3">
-                <Link href={`/maps/${map.slug}/run/${type}/${logId}/edit`} className="flex-1 min-w-0">
-                  <Button variant="secondary" size="sm" className="w-full" leftIcon={<Pencil className="w-3.5 h-3.5" />}>
-                    Edit
-                  </Button>
-                </Link>
-                <DeleteRunButton
-                  logId={logId}
-                  type={type}
-                  mapSlug={map.slug}
-                  label={isChallenge ? (log as ChallengeLogDetail).challenge.name : (log as EasterEggLogDetail).easterEgg.name}
-                />
-              </div>
+              {isOwner && (
+                <div className="flex flex-wrap gap-2 pt-3 border-t border-bunker-700 mt-3">
+                  <Link href={`/maps/${map.slug}/run/${type}/${logId}/edit`} className="flex-1 min-w-0">
+                    <Button variant="secondary" size="sm" className="w-full" leftIcon={<Pencil className="w-3.5 h-3.5" />}>
+                      Edit
+                    </Button>
+                  </Link>
+                  <DeleteRunButton
+                    logId={logId}
+                    type={type}
+                    mapSlug={map.slug}
+                    label={isChallenge ? (log as ChallengeLogDetail).challenge.name : (log as EasterEggLogDetail).easterEgg.name}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
 
