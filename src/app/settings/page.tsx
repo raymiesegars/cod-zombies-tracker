@@ -57,7 +57,7 @@ export default function SettingsPage() {
     setSaveStatus('idle');
 
     try {
-      const res = await fetch(`/api/users/${profile.id}`, {
+      const res = await fetch('/api/users/profile/update', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
