@@ -507,7 +507,10 @@ export default function UserProfilePage() {
   const avgRoundDisplay = avgRound.toFixed(2);
   const mapsPct = totalMaps > 0 ? Math.round((totalMapsPlayed / totalMaps) * 100) : 0;
   const easterEggsPct = totalMainEasterEggs > 0 ? Math.round((totalEasterEggs / totalMainEasterEggs) * 100) : 0;
-  const achievementsUnlocked = achievementsOverview?.unlockedAchievementIds?.length ?? 0;
+  // Use completionByGame sum (same as bottom achievements section); API only populates unlockedAchievementIds when a map is selected
+  const achievementsUnlocked = achievementsOverview?.completionByGame
+    ? achievementsOverview.completionByGame.reduce((s, g) => s + g.unlocked, 0)
+    : (achievementsOverview?.unlockedAchievementIds?.length ?? 0);
   const achievementsPct = totalAchievements > 0 ? Math.round((achievementsUnlocked / totalAchievements) * 100) : 0;
 
   return (
