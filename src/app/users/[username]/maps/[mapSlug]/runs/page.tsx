@@ -241,12 +241,16 @@ export default function UserMapRunsPage() {
                       <span className="hidden sm:flex items-center gap-1.5 text-sm text-bunker-400 flex-shrink-0 col-start-4">
                         <Badge variant="default" size="sm">{(log as ChallengeLog).playerCount}</Badge>
                       </span>
-                      <span className="hidden md:flex items-center gap-1.5 text-sm text-bunker-500 flex-shrink-0 col-start-5" title={(log as ChallengeLog).completionTimeSeconds != null && (log as ChallengeLog).completionTimeSeconds > 0 ? formatCompletionTime((log as ChallengeLog).completionTimeSeconds!) : undefined}>
-                        <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-                        {(log as ChallengeLog).completionTimeSeconds != null && (log as ChallengeLog).completionTimeSeconds > 0
-                          ? formatCompletionTime((log as ChallengeLog).completionTimeSeconds!)
-                          : '—'}
-                      </span>
+                      {(() => {
+                        const sec = (log as ChallengeLog).completionTimeSeconds;
+                        const timeTitle = sec != null && sec > 0 ? formatCompletionTime(sec) : undefined;
+                        return (
+                          <span className="hidden md:flex items-center gap-1.5 text-sm text-bunker-500 flex-shrink-0 col-start-5" title={timeTitle}>
+                            <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+                            {sec != null && sec > 0 ? formatCompletionTime(sec) : '—'}
+                          </span>
+                        );
+                      })()}
                     </CardContent>
                   </Card>
                 </Link>
@@ -271,12 +275,16 @@ export default function UserMapRunsPage() {
                         <span className="text-sm text-bunker-400">{(log as EasterEggLog).playerCount}</span>
                         {(log as EasterEggLog).isSolo && <Badge variant="default" size="sm">Solo</Badge>}
                       </span>
-                      <span className="hidden md:flex items-center gap-1.5 text-sm text-bunker-500 flex-shrink-0 col-start-5" title={(log as EasterEggLog).completionTimeSeconds != null && (log as EasterEggLog).completionTimeSeconds > 0 ? formatCompletionTime((log as EasterEggLog).completionTimeSeconds!) : undefined}>
-                        <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-                        {(log as EasterEggLog).completionTimeSeconds != null && (log as EasterEggLog).completionTimeSeconds > 0
-                          ? formatCompletionTime((log as EasterEggLog).completionTimeSeconds!)
-                          : '—'}
-                      </span>
+                      {(() => {
+                        const sec = (log as EasterEggLog).completionTimeSeconds;
+                        const timeTitle = sec != null && sec > 0 ? formatCompletionTime(sec) : undefined;
+                        return (
+                          <span className="hidden md:flex items-center gap-1.5 text-sm text-bunker-500 flex-shrink-0 col-start-5" title={timeTitle}>
+                            <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+                            {sec != null && sec > 0 ? formatCompletionTime(sec) : '—'}
+                          </span>
+                        );
+                      })()}
                     </CardContent>
                   </Card>
                 </Link>
