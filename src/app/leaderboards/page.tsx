@@ -69,7 +69,7 @@ export default function LeaderboardsPage() {
       if (isRankView) {
         setIsLoading(true);
         try {
-          const res = await fetch('/api/leaderboards/rank');
+          const res = await fetch('/api/leaderboards/rank', { cache: 'no-store' });
           if (res.ok) {
             const data = await res.json();
             setLeaderboard(data);

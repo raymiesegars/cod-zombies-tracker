@@ -44,7 +44,7 @@ export function LeaderboardEntry({
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.05 }}
       className={cn(
-        'flex items-center gap-2 sm:gap-4 p-2 sm:p-4 rounded-lg transition-colors',
+        'flex items-center gap-2 sm:gap-4 p-2 sm:p-4 rounded-lg transition-colors min-h-[3.25rem] sm:min-h-[3.5rem]',
         isCurrentUser
           ? 'bg-blood-950/30 border border-blood-800/30'
           : 'bg-bunker-900/50 hover:bg-bunker-900',
@@ -52,7 +52,7 @@ export function LeaderboardEntry({
       )}
     >
       {/* Rank */}
-      <div className="flex-shrink-0 w-8 sm:w-10 flex justify-center">
+      <div className="flex-shrink-0 w-8 sm:w-10 flex items-center justify-center">
         {isTopThree ? (
           <div
             className={cn(
@@ -63,12 +63,12 @@ export function LeaderboardEntry({
             <Trophy className="w-3 h-3 sm:w-4 sm:h-4 text-bunker-900" />
           </div>
         ) : (
-          <span className="text-base sm:text-lg font-zombies text-blood-500">#{entry.rank}</span>
+          <span className="text-base sm:text-lg font-zombies text-blood-500 leading-none">#{entry.rank}</span>
         )}
       </div>
 
-      {/* User info */}
-      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+      {/* User info – avatar, name, level vertically centered */}
+      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 self-center">
         <UserWithRank
           user={{
             id: entry.user.id,
@@ -82,14 +82,14 @@ export function LeaderboardEntry({
           size="sm"
           linkToProfile={true}
         />
-        <span className="text-xs sm:text-sm text-bunker-400 truncate hidden sm:block">
+        <span className="text-xs sm:text-sm text-bunker-400 truncate hidden sm:inline-block leading-none">
           @{entry.user.username}
         </span>
       </div>
 
       {/* Player count - fixed width so Solo/Duo/Trio/Squad align vertically */}
       {!hidePlayerCount && (
-        <div className="hidden sm:flex flex-shrink-0 w-14 items-center justify-start">
+        <div className="hidden sm:flex flex-shrink-0 w-14 items-center justify-start self-center">
           <Badge variant="default" size="sm">
             {getPlayerCountLabel(entry.playerCount)}
           </Badge>
@@ -100,7 +100,7 @@ export function LeaderboardEntry({
       {(showRound || valueKind === 'xp') && (
         <div className="flex items-center justify-end gap-1 sm:gap-2 flex-shrink-0 min-w-[3.5rem] sm:min-w-[4rem]">
           {valueKind === 'xp' ? (
-            <span className="text-sm sm:text-base font-semibold text-military-400 tabular-nums">
+            <span className="text-sm sm:text-base font-semibold text-military-400 tabular-nums leading-none">
               {entry.value.toLocaleString()} XP
             </span>
           ) : (
@@ -121,7 +121,7 @@ export function LeaderboardEntry({
           href={entry.proofUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="p-1.5 sm:p-2 text-bunker-400 hover:text-blood-400 transition-colors flex-shrink-0"
+          className="p-1.5 sm:p-2 text-bunker-400 hover:text-blood-400 transition-colors flex-shrink-0 flex items-center justify-center self-center"
           onClick={(e) => e.stopPropagation()}
         >
           <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />

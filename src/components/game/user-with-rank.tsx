@@ -46,9 +46,9 @@ export function UserWithRank({
   const displayName = user.displayName || user.username;
 
   const content = (
-    <span className={cn('inline-flex items-center gap-1.5 sm:gap-2 min-w-0', className)}>
+    <span className={cn('inline-flex items-center gap-1.5 sm:gap-2 min-w-0 leading-none', className)}>
       {rankIcon && (
-        <span className={cn('relative flex-shrink-0 rounded translate-y-[2px]', rankIconSizes[size])} title={`Level ${level}`}>
+        <span className={cn('relative flex-shrink-0 rounded flex items-center justify-center', rankIconSizes[size])} title={`Level ${level}`}>
           <Image
             src={rankIcon}
             alt=""
@@ -66,18 +66,18 @@ export function UserWithRank({
           className="flex-shrink-0"
         />
       )}
-      <span className="min-w-0 truncate font-medium text-white">
+      <span className="min-w-0 truncate font-medium text-white leading-none">
         {displayName}
       </span>
       {showLevel && (
-        <span className="flex-shrink-0 text-xs text-bunker-400">Lvl {level}</span>
+        <span className="flex-shrink-0 text-xs text-bunker-400 leading-none">Lvl {level}</span>
       )}
     </span>
   );
 
   if (linkToProfile) {
     return (
-      <Link href={`/users/${user.username}`} className="hover:text-blood-400 transition-colors">
+      <Link href={`/users/${user.username}`} className="inline-flex items-center hover:text-blood-400 transition-colors min-h-0">
         {content}
       </Link>
     );
