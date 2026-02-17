@@ -1,9 +1,11 @@
 import Link from 'next/link';
+import { Logo } from '@/components/ui';
 
 export default function AuthErrorPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-void-950 px-4">
       <div className="max-w-md w-full px-4 sm:px-6 py-8 sm:py-12 text-center">
+        <Logo size="lg" animated={false} className="mx-auto mb-6 opacity-90" />
         <div className="mb-8">
           <div className="w-16 h-16 mx-auto bg-red-500/20 rounded-full flex items-center justify-center">
             <svg

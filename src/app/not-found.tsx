@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui';
+import { Button, Logo } from '@/components/ui';
 import { Home } from 'lucide-react';
 import { MapIcon } from '@/components/ui';
 
@@ -7,6 +7,7 @@ export default function NotFound() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4">
       <div className="text-center">
+        <Logo size="xl" animated={false} className="mx-auto mb-6 opacity-90" />
         {/* 404 Display */}
         <div className="relative mb-8">
           <span className="text-[150px] sm:text-[200px] font-display font-bold text-void-900">
