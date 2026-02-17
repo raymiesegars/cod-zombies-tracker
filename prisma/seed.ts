@@ -175,15 +175,15 @@ async function main() {
       { name: 'Die Rise', slug: 'die-rise', isDlc: true, hasEasterEgg: true, order: 6, description: 'Revolution DLC. A destroyed skyscraper in Shanghai. Verticality is key.' },
       { name: 'Mob of the Dead', slug: 'mob-of-the-dead', isDlc: true, hasEasterEgg: true, order: 7, description: 'Uprising DLC. Alcatraz prison. Play as mobsters trying to escape purgatory.' },
       { name: 'Buried', slug: 'buried', isDlc: true, hasEasterEgg: true, order: 8, description: 'Vengeance DLC. An underground Wild West town. Features the friendly giant Leroy.' },
-      { name: 'Origins', slug: 'origins', isDlc: true, hasEasterEgg: true, order: 9, description: 'Apocalypse DLC. WWI France. Build the elemental staffs and free Samantha.' },
+      { name: 'Origins', slug: 'origins', isDlc: true, hasEasterEgg: true, order: 9, description: 'Origins is the Apocalypse DLC finale for Black Ops II, set in WWI France where the Primis crew must build the four elemental staffs (Ice, Fire, Wind, Lightning) and free Samantha from the clutches of the Apothicons beneath the excavation site.' },
     ],
     BO3: [
       { name: 'Shadows of Evil', slug: 'shadows-of-evil', isDlc: false, hasEasterEgg: true, order: 1, description: 'A noir 1940s city. Four strangers must stop the Shadowman.' },
       { name: 'The Giant', slug: 'the-giant', isDlc: true, hasEasterEgg: true, order: 2, description: 'A reimagining of Der Riese with updated graphics and mechanics.' },
-      { name: 'Der Eisendrache', slug: 'der-eisendrache', isDlc: true, hasEasterEgg: true, order: 3, description: 'An Austrian castle. Build elemental bows to defeat the Keeper.' },
+      { name: 'Der Eisendrache', slug: 'der-eisendrache', isDlc: true, hasEasterEgg: true, order: 3, description: 'Der Eisendrache is a Black Ops III DLC map set in an Austrian castle. The Primis crew must build one of four elemental bows (Wolf, Fire, Void, Lightning) to defeat the Keeper and progress the Origins storyline.' },
       { name: 'Zetsubou No Shima', slug: 'zetsubou-no-shima', isDlc: true, hasEasterEgg: true, order: 4, description: 'A Japanese swamp island. Mutated plants and spiders await.' },
       { name: 'Gorod Krovi', slug: 'gorod-krovi', isDlc: true, hasEasterEgg: true, order: 5, description: 'A war-torn Stalingrad with dragons. The end approaches.' },
-      { name: 'Revelations', slug: 'revelations', isDlc: true, hasEasterEgg: true, order: 6, description: 'The grand finale. Areas from previous maps combined.' },
+      { name: 'Revelations', slug: 'revelations', isDlc: true, hasEasterEgg: true, order: 6, description: 'Revelations is the final, chaotic chapter of the Call of Duty: Black Ops III Origins Zombies saga, where the Primis crew journeys through a cosmic amalgamation of iconic, floating map fragments to battle the Apothicon threat in Agartha.' },
       // Zombie Chronicles DLC (remakes; separate leaderboards, reuse original map images)
       { name: 'Nacht der Untoten (Zombie Chronicles)', slug: 'bo3-nacht-der-untoten', isDlc: true, hasEasterEgg: true, order: 7, imageUrl: '/images/maps/nacht-der-untoten.webp', description: 'Zombie Chronicles. The original Nacht remastered for Black Ops III.' },
       { name: 'Verrückt (Zombie Chronicles)', slug: 'bo3-verruckt', isDlc: true, hasEasterEgg: true, order: 8, imageUrl: '/images/maps/verruckt.webp', description: 'Zombie Chronicles. Verrückt remastered for Black Ops III.' },

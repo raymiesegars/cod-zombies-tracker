@@ -192,6 +192,8 @@ function AchievementsTabContent({
   canRelock?: boolean;
   onRelock?: () => void | Promise<void>;
 }) {
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+
   if (!achievements || achievements.length === 0) {
     return (
       <div className="text-center py-8 sm:py-12">
@@ -210,10 +212,42 @@ function AchievementsTabContent({
   }, {});
 
   const sortedCategories = getSortedCategoryKeys(byCategory as Record<string, unknown[]>);
+  const visibleCategories = categoryFilter ? (sortedCategories.includes(categoryFilter) ? [categoryFilter] : sortedCategories) : sortedCategories;
 
   return (
-    <div className="space-y-6 sm:space-y-8">
-      {sortedCategories.map((cat) => (
+    <div className="space-y-4 sm:space-y-6">
+      {/* Category filter  */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium text-bunker-400 mr-1">Filter:</span>
+        <button
+          type="button"
+          onClick={() => setCategoryFilter(null)}
+          className={`rounded-lg border px-2.5 py-1.5 text-sm font-medium transition-colors ${
+            categoryFilter === null
+              ? 'border-blood-500 bg-blood-950/80 text-white'
+              : 'border-bunker-600 bg-bunker-800/50 text-bunker-300 hover:border-bunker-500 hover:text-bunker-200'
+          }`}
+        >
+          All
+        </button>
+        {sortedCategories.map((cat) => (
+          <button
+            key={cat}
+            type="button"
+            onClick={() => setCategoryFilter(cat)}
+            className={`rounded-lg border px-2.5 py-1.5 text-sm font-medium transition-colors ${
+              categoryFilter === cat
+                ? 'border-blood-500 bg-blood-950/80 text-white'
+                : 'border-bunker-600 bg-bunker-800/50 text-bunker-300 hover:border-bunker-500 hover:text-bunker-200'
+            }`}
+          >
+            {ACHIEVEMENT_CATEGORY_LABELS[cat] ?? cat}
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-6 sm:space-y-8">
+      {visibleCategories.map((cat) => (
         <Card key={cat} variant="bordered">
           <CardHeader>
             <CardTitle className="text-base sm:text-lg">
@@ -266,6 +300,7 @@ function AchievementsTabContent({
           </CardContent>
         </Card>
       ))}
+      </div>
     </div>
   );
 }
@@ -724,6 +759,11 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                   {map.name}
                 </h1>
                 <p className="mt-1 sm:mt-2 text-sm sm:text-base text-white/95 [text-shadow:0_0_2px_rgba(0,0,0,0.95),0_1px_4px_rgba(0,0,0,0.8)]">{map.game.name}</p>
+                {map.description && (
+                  <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-white/85 max-w-2xl [text-shadow:0_0_2px_rgba(0,0,0,0.9),0_1px_3px_rgba(0,0,0,0.7)]">
+                    {map.description}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -741,7 +781,15 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
         >
           <div className="min-w-0">
         <Tabs key={initialTab} value={activeTab} defaultValue={initialTab} onChange={setActiveTab} className="space-y-4 sm:space-y-6">
-          <div className="overflow-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0 flex flex-wrap items-center justify-between gap-3 min-w-0">
+          <div className="overflow-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0 flex flex-wrap items-center gap-3 min-w-0">
+            <HelpTrigger
+              title="Challenges & Easter eggs on this map"
+              description="What counts as a challenge, main vs side EEs, and how to use these tabs."
+              modalSize="md"
+              className="flex-shrink-0 order-first"
+            >
+              <MapChallengesEeHelpContent />
+            </HelpTrigger>
             <div className="overflow-x-auto overflow-y-hidden min-w-0 flex-1 sm:flex-initial [scrollbar-width:thin] [-webkit-overflow-scrolling:touch]">
               <TabsList className="w-max sm:w-auto shrink-0 inline-flex">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -753,13 +801,6 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                 )}
               </TabsList>
             </div>
-            <HelpTrigger
-              title="Challenges & Easter eggs on this map"
-              description="What counts as a challenge, main vs side EEs, and how to use these tabs."
-              modalSize="md"
-            >
-              <MapChallengesEeHelpContent />
-            </HelpTrigger>
             {profile && !(activeTab === 'easter-eggs' && buildables.length > 0) && (
               <Link href={`/maps/${slug}/edit`} className="flex-shrink-0">
                 <Button leftIcon={<span className="mr-2 inline-flex shrink-0"><Edit className="w-4 h-4" /></span>} size="lg" className="!text-white">

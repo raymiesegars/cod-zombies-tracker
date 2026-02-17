@@ -5,6 +5,8 @@ import {
   getMilestonesForChallengeType,
   getCapXp,
 } from './milestones';
+
+const MIN_ACHIEVEMENT_XP = 50;
 import {
   getRoundConfigForMap,
   getXpForRoundFromMilestones,
@@ -107,7 +109,7 @@ export function getMapAchievementDefinitions(
           name: `${cType.replace(/_/g, ' ')} Round ${round}`,
           type: 'CHALLENGE_COMPLETE',
           criteria: { round, challengeType: cType },
-          xpReward: xp,
+          xpReward: Math.max(MIN_ACHIEVEMENT_XP, xp),
           rarity: rarityForRound(round, maxRound),
         });
       }
@@ -174,7 +176,7 @@ export function getMapAchievementDefinitions(
       if (config.flatXp != null) {
         xp = config.flatXp;
       } else {
-        const baseXp = BASE_XP[BASE_ROUNDS.indexOf(round as any)] ?? 50;
+        const baseXp = BASE_XP[BASE_ROUNDS.indexOf(round as any)] ?? MIN_ACHIEVEMENT_XP;
         xp = Math.floor(baseXp * config.multiplier);
       }
       rows.push({
@@ -182,7 +184,7 @@ export function getMapAchievementDefinitions(
         name: `${cType.replace(/_/g, ' ')} Round ${round}`,
         type: 'CHALLENGE_COMPLETE',
         criteria: { round, challengeType: cType },
-        xpReward: xp,
+        xpReward: Math.max(MIN_ACHIEVEMENT_XP, xp),
         rarity: round >= 40 ? 'EPIC' : round >= 20 ? 'RARE' : 'UNCOMMON',
       });
     }
