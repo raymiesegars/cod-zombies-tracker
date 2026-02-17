@@ -732,7 +732,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   return (
     <div className="min-h-screen bg-bunker-950 overflow-x-hidden">
       {/* Hero Section */}
-      <div className="relative h-48 sm:h-64 md:h-80 lg:h-96 overflow-hidden">
+      <div className="relative h-48 sm:h-64 md:h-80 lg:h-96 overflow-hidden pt-14 sm:pt-0">
         {map.imageUrl ? (
           <Image
             src={getAssetUrl(map.imageUrl)}
@@ -748,16 +748,23 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-bunker-950 via-bunker-950/70 to-transparent" />
 
-        {/* Back to Maps - high visibility on hero */}
-        <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-10">
+        {/* Top bar */}
+        <div className="absolute top-3 sm:top-4 left-3 sm:left-4 right-3 sm:right-auto z-10 flex items-center gap-2 flex-wrap">
           <Link
             href="/maps"
-            className="inline-flex items-center gap-2 rounded-lg border border-bunker-500 bg-bunker-800/95 px-3.5 py-2.5 text-sm font-medium text-white shadow-lg backdrop-blur-sm transition-colors hover:border-bunker-400 hover:bg-bunker-700/95 hover:text-white"
+            className="inline-flex items-center gap-2 rounded-lg border border-bunker-500 bg-bunker-800/95 px-3.5 py-2.5 text-sm font-medium text-white shadow-lg backdrop-blur-sm transition-colors hover:border-bunker-400 hover:bg-bunker-700/95 hover:text-white flex-shrink-0"
           >
             <ChevronLeft className="h-4 w-4 flex-shrink-0" aria-hidden />
             <span className="hidden sm:inline">All Maps</span>
             <span className="sm:hidden">Back</span>
           </Link>
+          {/* Mobile only */}
+          <div className="flex items-center gap-2 flex-shrink-0 sm:hidden">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-xs font-semibold shadow-[0_0_1px_rgba(0,0,0,1),0_0_3px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.8)] [text-shadow:0_0_1px_rgba(0,0,0,1),0_0_2px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">
+              {map.game.shortName}
+            </span>
+            {map.isDlc && <Badge variant="purple">DLC</Badge>}
+          </div>
         </div>
 
         {/* Map info overlay */}
@@ -765,7 +772,8 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
-                <div className="flex flex-wrap items-center gap-2 mb-2">
+                {/* Tags: hidden on mobile (shown above under back button), visible sm+ */}
+                <div className="hidden sm:flex flex-wrap items-center gap-2 mb-2">
                   <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-xs font-semibold shadow-[0_0_1px_rgba(0,0,0,1),0_0_3px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.8)] [text-shadow:0_0_1px_rgba(0,0,0,1),0_0_2px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">
                     {map.game.shortName}
                   </span>
@@ -797,33 +805,54 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
         >
           <div className="min-w-0">
         <Tabs key={initialTab} value={activeTab} defaultValue={initialTab} onChange={setActiveTab} className="space-y-4 sm:space-y-6">
-          <div className="overflow-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0 flex flex-wrap items-center gap-3 min-w-0">
-            <HelpTrigger
-              title="Challenges & Easter eggs on this map"
-              description="What counts as a challenge, main vs side EEs, and how to use these tabs."
-              modalSize="md"
-              className="flex-shrink-0 order-first"
-            >
-              <MapChallengesEeHelpContent />
-            </HelpTrigger>
-            <div className="overflow-x-auto overflow-y-hidden min-w-0 flex-1 sm:flex-initial [scrollbar-width:thin] [-webkit-overflow-scrolling:touch]">
-              <TabsList className="w-max sm:w-auto shrink-0 inline-flex">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="achievements">Achievements</TabsTrigger>
-                <TabsTrigger value="easter-eggs">Easter Eggs</TabsTrigger>
-                <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-                {profile && (
-                  <TabsTrigger value="your-runs">Your Runs</TabsTrigger>
-                )}
-              </TabsList>
+          {/* Mobile: help → Log Progress → tab selector. Desktop: single row. */}
+          <div className="overflow-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 min-w-0">
+            <div className="flex-shrink-0 order-first sm:order-none">
+              <HelpTrigger
+                title="Challenges & Easter eggs on this map"
+                description="What counts as a challenge, main vs side EEs, and how to use these tabs."
+                modalSize="md"
+              >
+                <MapChallengesEeHelpContent />
+              </HelpTrigger>
             </div>
             {profile && !(activeTab === 'easter-eggs' && buildables.length > 0) && (
-              <Link href={`/maps/${slug}/edit`} className="flex-shrink-0">
-                <Button leftIcon={<span className="mr-2 inline-flex shrink-0"><Edit className="w-4 h-4" /></span>} size="lg" className="!text-white">
+              <Link href={`/maps/${slug}/edit`} className="flex-shrink-0 w-full sm:w-auto order-2 sm:order-none">
+                <Button leftIcon={<span className="mr-2 inline-flex shrink-0"><Edit className="w-4 h-4" /></span>} size="lg" className="!text-white w-full sm:w-auto justify-center sm:justify-start">
                   Log Progress
                 </Button>
               </Link>
             )}
+            <div className="w-full sm:w-auto sm:flex-1 min-w-0 order-3 sm:order-none">
+              {/* Mobile: dropdown to save space */}
+              <div className="sm:hidden w-full">
+                <Select
+                  options={[
+                    { value: 'overview', label: 'Overview' },
+                    { value: 'achievements', label: 'Achievements' },
+                    { value: 'easter-eggs', label: 'Easter Eggs' },
+                    { value: 'leaderboard', label: 'Leaderboard' },
+                    ...(profile ? [{ value: 'your-runs', label: 'Your Runs' }] : []),
+                  ]}
+                  value={activeTab}
+                  onChange={(e) => setActiveTab(e.target.value)}
+                  className="w-full"
+                  aria-label="Section"
+                />
+              </div>
+              {/* Desktop: tab bar */}
+              <div className="hidden sm:block overflow-x-auto [scrollbar-width:thin] [-webkit-overflow-scrolling:touch]">
+                <TabsList className="w-max inline-flex gap-1 p-1">
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="achievements">Achievements</TabsTrigger>
+                  <TabsTrigger value="easter-eggs">Easter Eggs</TabsTrigger>
+                  <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+                  {profile && (
+                    <TabsTrigger value="your-runs">Your Runs</TabsTrigger>
+                  )}
+                </TabsList>
+              </div>
+            </div>
           </div>
 
           {/* Overview Tab – forceMount so all tab content is in DOM for crawlers */}

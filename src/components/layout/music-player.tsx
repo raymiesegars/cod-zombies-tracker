@@ -30,8 +30,9 @@ export function MusicPlayer() {
   const [ready, setReady] = useState(false);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const userHasToggledMuteRef = useRef(false);
 
-  // Hydrate from localStorage, create audio, and start playback (muted if needed for autoplay policy)
+  // Hydrate from localStorage, create audio, and start playback. Default to playing (unmuted) on first load.
   useEffect(() => {
     const storedVol = getStoredVolume();
     const storedMuted = getStoredMuted();
@@ -47,7 +48,7 @@ export function MusicPlayer() {
     audioRef.current = audio;
     setReady(true);
 
-    // Browsers block autoplay with sound until user interaction. Try unmuted first, then fall back to muted.
+    // Try to play with sound first. If browser blocks autoplay, fall back to muted play (don't persist that mute).
     audio.play().then(() => {
       // Playback started with sound
     }).catch(() => {
@@ -63,7 +64,7 @@ export function MusicPlayer() {
     };
   }, []);
 
-  // Sync volume/muted to audio and localStorage
+  // Sync volume/muted to audio and localStorage (only persist muted when user explicitly toggled, so autoplay-blocked mute isn't saved)
   useEffect(() => {
     if (!ready) return;
     const audio = audioRef.current;
@@ -73,7 +74,9 @@ export function MusicPlayer() {
     }
     try {
       localStorage.setItem(STORAGE_VOLUME, String(volume));
-      localStorage.setItem(STORAGE_MUTED, String(muted));
+      if (userHasToggledMuteRef.current) {
+        localStorage.setItem(STORAGE_MUTED, String(muted));
+      }
     } catch {
       // ignore
     }
@@ -84,6 +87,7 @@ export function MusicPlayer() {
   };
 
   const toggleMute = () => {
+    userHasToggledMuteRef.current = true;
     ensurePlay();
     setAutoplayBlocked(false);
     setMuted((m) => !m);
@@ -92,6 +96,7 @@ export function MusicPlayer() {
   const onVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = Number(e.target.value);
     if (!Number.isFinite(v)) return;
+    userHasToggledMuteRef.current = true;
     ensurePlay();
     setAutoplayBlocked(false);
     const clamped = Math.max(0, Math.min(1, v));
