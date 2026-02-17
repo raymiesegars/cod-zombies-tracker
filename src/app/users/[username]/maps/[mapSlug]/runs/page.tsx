@@ -4,12 +4,11 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
-import { Card, CardContent, Select, Logo, PageLoader } from '@/components/ui';
+import { Badge, Card, CardContent, EasterEggIcon, Logo, PageLoader, Select } from '@/components/ui';
 import { RoundCounter, ChallengeTypeIcon } from '@/components/game';
 import { formatCompletionTime } from '@/components/ui/time-input';
 import { getAssetUrl } from '@/lib/assets';
-import { ChevronLeft, Filter, ListChecks, Clock, EasterEggIcon } from 'lucide-react';
-import { Badge } from '@/components/ui';
+import { ChevronLeft, Filter, ListChecks, Clock } from 'lucide-react';
 
 type ChallengeLog = {
   id: string;
