@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { getAssetUrl } from '@/lib/assets';
 
@@ -314,15 +314,20 @@ function useShowTvs() {
   return show;
 }
 
+function isAuthFlowRoute(pathname: string) {
+  return pathname === '/dashboard' || pathname.startsWith('/auth');
+}
+
 export function TVRoomBackground() {
   const pathname = usePathname();
   const isHome = pathname === '/';
-  const showTvs = useShowTvs();
+  const hideDecoration = isAuthFlowRoute(pathname);
+  const showTvs = useShowTvs() && !hideDecoration;
 
   return (
     <>
       {/* Menu background image: only on home, behind everything (TVs and content) */}
-      {isHome && (
+      {isHome && !hideDecoration && (
         <div
           className="fixed inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat"
           style={{
@@ -331,7 +336,7 @@ export function TVRoomBackground() {
           aria-hidden
         />
       )}
-      {isHome && (
+      {isHome && !hideDecoration && (
         <div
           className="fixed inset-0 pointer-events-none z-0"
           style={{
@@ -341,7 +346,7 @@ export function TVRoomBackground() {
         />
       )}
       {showTvs && (
-        <>
+        <TVLayerFadeIn>
           <div
             className="fixed inset-0 pointer-events-none z-[1]"
             style={{ overflowY: 'hidden' }}
@@ -389,8 +394,32 @@ export function TVRoomBackground() {
               )`,
             }}
           />
-        </>
+        </TVLayerFadeIn>
       )}
     </>
+  );
+}
+
+function TVLayerFadeIn({ children }: { children: React.ReactNode }) {
+  const [opacity, setOpacity] = useState(0);
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      if (mountedRef.current) setOpacity(1);
+    });
+    return () => {
+      mountedRef.current = false;
+      cancelAnimationFrame(id);
+    };
+  }, []);
+  return (
+    <div
+      style={{
+        opacity,
+        transition: 'opacity 0.25s ease-out',
+      }}
+    >
+      {children}
+    </div>
   );
 }

@@ -498,12 +498,13 @@ export default function UserProfilePage() {
   }
 
   // Counts and % for the dashboard
+  const { totalMaps, totalMainEasterEggs, totalAchievements } = statsTotals;
   const totalMapsPlayed = mapStats.length;
   const totalEasterEggs = mapStats.filter((m) => m.hasCompletedMainEE).length;
-  const avgRound = mapStats.length > 0
-    ? Math.round(mapStats.reduce((acc, m) => acc + m.highestRound, 0) / mapStats.length)
-    : 0;
-  const { totalMaps, totalMainEasterEggs, totalAchievements } = statsTotals;
+  // Average highest round across all maps (maps with no score count as 0)
+  const sumHighestRounds = mapStats.reduce((acc, m) => acc + m.highestRound, 0);
+  const avgRound = totalMaps > 0 ? sumHighestRounds / totalMaps : 0;
+  const avgRoundDisplay = avgRound.toFixed(2);
   const mapsPct = totalMaps > 0 ? Math.round((totalMapsPlayed / totalMaps) * 100) : 0;
   const easterEggsPct = totalMainEasterEggs > 0 ? Math.round((totalEasterEggs / totalMainEasterEggs) * 100) : 0;
   const achievementsUnlocked = achievementsOverview?.unlockedAchievementIds?.length ?? 0;
@@ -584,7 +585,7 @@ export default function UserProfilePage() {
           </Card>
           <Card variant="bordered" className="text-center p-3 sm:p-4">
             <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400 mx-auto mb-2" />
-            <p className="text-xl sm:text-2xl font-zombies text-white">{avgRound}</p>
+            <p className="text-xl sm:text-2xl font-zombies text-white">{avgRoundDisplay}</p>
             <p className="text-xs text-bunker-400">Avg Round</p>
           </Card>
           <Card variant="bordered" className="text-center p-3 sm:p-4">
