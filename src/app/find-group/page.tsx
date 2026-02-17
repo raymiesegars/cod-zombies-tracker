@@ -215,11 +215,11 @@ export default function FindGroupPage() {
       <div className="bg-bunker-900 border-b border-bunker-800/50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-start gap-2 sm:gap-3 min-w-0">
               <span className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg bg-blood-950/80 border border-blood-800/60 text-blood-400 flex-shrink-0">
                 <Users className="h-5 w-5 sm:h-6 sm:w-6" />
               </span>
-              <div>
+              <div className="min-w-0">
                 <h1 className="text-2xl sm:text-3xl font-zombies text-white tracking-wide">
                   Find Group
                 </h1>
@@ -230,6 +230,8 @@ export default function FindGroupPage() {
                   Looking for people to do CoD Zombies Easter eggs? Find teammates for main quests and high rounds. Post a listing with your map, player count, and contact (Discord, Steam, Xbox)—or browse listings and message creators to squad up. Free, no ads.
                 </p>
               </div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
               <HelpTrigger
                 title="How Find Group works"
                 description="Post a listing, get messages, squad up."
@@ -237,21 +239,21 @@ export default function FindGroupPage() {
               >
                 <FindGroupHelpContent />
               </HelpTrigger>
+              {authUser && profile && (
+                <Button
+                  leftIcon={
+                    <span className="mr-2 inline-flex shrink-0">
+                      <Plus className="w-4 h-4" />
+                    </span>
+                  }
+                  size="lg"
+                  onClick={() => setCreateOpen(true)}
+                  className="!text-white whitespace-nowrap"
+                >
+                  Create listing
+                </Button>
+              )}
             </div>
-            {authUser && profile && (
-              <Button
-                leftIcon={
-                  <span className="mr-2 inline-flex shrink-0">
-                    <Plus className="w-4 h-4" />
-                  </span>
-                }
-                size="lg"
-                onClick={() => setCreateOpen(true)}
-                className="!text-white"
-              >
-                Create listing
-              </Button>
-            )}
           </div>
         </div>
       </div>
