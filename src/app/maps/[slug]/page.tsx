@@ -438,6 +438,8 @@ export default function MapDetailPage() {
     }
 
     fetchLeaderboard();
+    // Intentionally omit leaderboard.length / leaderboardFetchedOnce to avoid re-fetch loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, slug, selectedPlayerCount, selectedChallengeType]);
 
   // Sync activeTab with URL so switching to Your Runs triggers fetch
@@ -460,6 +462,8 @@ export default function MapDetailPage() {
       })
       .catch(() => setMyRunsData({ challengeLogs: [], easterEggLogs: [] }))
       .finally(() => setMyRunsLoading(false));
+    // Stable deps: map?.id and profile to avoid re-run on object reference change only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, profile, map?.id]);
 
   const myRunsTypeOptions = useMemo(() => {
@@ -611,6 +615,8 @@ export default function MapDetailPage() {
         if (!cancelled) setEeProgressLoading(false);
       });
     return () => { cancelled = true; };
+    // Stable deps by id to avoid re-run on object reference change only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map?.id, slug, profile?.id, sortedEasterEggs]);
 
   const playerCountOptions = [

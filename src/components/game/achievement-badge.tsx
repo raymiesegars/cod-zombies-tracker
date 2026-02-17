@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import type { Achievement, AchievementRarity } from '@/types';
@@ -61,6 +62,12 @@ const iconSizes = {
   lg: 'w-10 h-10',
 };
 
+const iconDimensions: Record<'sm' | 'md' | 'lg', number> = {
+  sm: 20,
+  md: 28,
+  lg: 40,
+};
+
 export function AchievementBadge({
   achievement,
   isUnlocked = false,
@@ -100,9 +107,11 @@ export function AchievementBadge({
         {/* Icon */}
         {unlocked ? (
           achievement.iconUrl ? (
-            <img
+            <Image
               src={achievement.iconUrl}
               alt={achievement.name}
+              width={iconDimensions[size]}
+              height={iconDimensions[size]}
               className={cn('object-contain', iconSizes[size])}
             />
           ) : (

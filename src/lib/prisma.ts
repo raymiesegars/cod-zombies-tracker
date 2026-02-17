@@ -4,10 +4,9 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// Supabase pooler can mess with prepared statements – use direct URL or pgbouncer mode
+// Use DATABASE_URL (pooled) for runtime so serverless/build can reach DB.
+// DIRECT_URL is only for Prisma migrations in schema.prisma; do not use it for the client.
 function getDatabaseUrl(): string {
-  const direct = process.env.DIRECT_URL;
-  if (direct) return direct;
   const url = process.env.DATABASE_URL;
   if (!url) return '';
   if (url.includes('pgbouncer=true')) return url;

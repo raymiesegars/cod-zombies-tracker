@@ -11,14 +11,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/find-group`, lastModified: new Date(), changeFrequency: 'hourly', priority: 0.8 },
   ];
 
-  const mapSlugs = await prisma.map.findMany({ select: { slug: true } });
-
-  const mapRoutes: MetadataRoute.Sitemap = mapSlugs.map((m) => ({
-    url: `${BASE_URL}/maps/${m.slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
-    priority: 0.8,
-  }));
-
-  return [...staticRoutes, ...mapRoutes];
+  try {
+    const mapSlugs = await prisma.map.findMany({ select: { slug: true } });
+    const mapRoutes: MetadataRoute.Sitemap = mapSlugs.map((m) => ({
+      url: `${BASE_URL}/maps/${m.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    }));
+    return [...staticRoutes, ...mapRoutes];
+  } catch {
+    return staticRoutes;
+  }
 }
