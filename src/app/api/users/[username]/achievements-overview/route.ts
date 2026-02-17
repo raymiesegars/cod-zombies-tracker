@@ -1,0 +1,134 @@
+import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
+import { getUser } from '@/lib/supabase/server';
+
+// No mapId = completion by game + map list. mapId = achievements for that map + unlocked ids.
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ username: string }> }
+) {
+  try {
+    const { username } = await params;
+    const { searchParams } = new URL(request.url);
+    const mapId = searchParams.get('mapId') || undefined;
+
+    const user = await prisma.user.findUnique({
+      where: { username },
+      select: { id: true, isPublic: true },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    if (!user.isPublic) {
+      const supabaseUser = await getUser();
+      if (!supabaseUser) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+      const currentUser = await prisma.user.findUnique({
+        where: { supabaseId: supabaseUser.id },
+      });
+      if (!currentUser || currentUser.id !== user.id) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+    }
+
+    const completionRows = await prisma.$queryRaw<
+      { gameId: string; gameName: string; shortName: string; order: number; total: bigint; unlocked: bigint }[]
+    >`
+      SELECT g.id as "gameId", g.name as "gameName", g."shortName", g."order",
+        COUNT(a.id)::bigint as total,
+        COUNT(ua.id)::bigint as unlocked
+      FROM "Game" g
+      JOIN "Map" m ON m."gameId" = g.id
+      JOIN "Achievement" a ON a."mapId" = m.id AND a."isActive" = true
+      LEFT JOIN "UserAchievement" ua ON ua."achievementId" = a.id AND ua."userId" = ${user.id}
+      GROUP BY g.id, g.name, g."shortName", g."order"
+      ORDER BY g."order"
+    `;
+
+    const completionByGame = completionRows.map((r) => ({
+      gameId: r.gameId,
+      gameName: r.gameName,
+      shortName: r.shortName,
+      order: r.order,
+      total: Number(r.total),
+      unlocked: Number(r.unlocked),
+      percentage: Number(r.total) > 0 ? Math.round((Number(r.unlocked) / Number(r.total)) * 100) : 0,
+    }));
+
+    const mapsByGame = await prisma.map.findMany({
+      where: { achievements: { some: { isActive: true } } },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        order: true,
+        gameId: true,
+        game: { select: { id: true, name: true, shortName: true, order: true } },
+      },
+      orderBy: [{ game: { order: 'asc' } }, { order: 'asc' }],
+    });
+
+    const mapsByGameMap = new Map<string, typeof mapsByGame>();
+    for (const m of mapsByGame) {
+      if (!mapsByGameMap.has(m.gameId)) mapsByGameMap.set(m.gameId, []);
+      mapsByGameMap.get(m.gameId)!.push(m);
+    }
+
+    if (!mapId) {
+      return NextResponse.json({
+        completionByGame,
+        mapsByGame: Object.fromEntries(
+          Array.from(mapsByGameMap.entries()).map(([gameId, maps]) => [
+            gameId,
+            maps.map((m) => ({ id: m.id, name: m.name, slug: m.slug, order: m.order, game: m.game })),
+          ])
+        ),
+        achievements: [],
+        unlockedAchievementIds: [],
+      });
+    }
+
+    // They picked a map – only that map’s achievements
+    const [rawAchievements, unlocked] = await Promise.all([
+      prisma.achievement.findMany({
+        where: { isActive: true, mapId },
+        include: {
+          map: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              order: true,
+              game: { select: { id: true, name: true, shortName: true, order: true } },
+            },
+          },
+        },
+        orderBy: { slug: 'asc' },
+      }),
+      prisma.userAchievement.findMany({
+        where: { userId: user.id, achievement: { mapId } },
+        select: { achievementId: true },
+      }),
+    ]);
+
+    const unlockedIds = unlocked.map((u) => u.achievementId);
+
+    return NextResponse.json({
+      completionByGame,
+      mapsByGame: Object.fromEntries(
+        Array.from(mapsByGameMap.entries()).map(([gameId, maps]) => [
+          gameId,
+          maps.map((m) => ({ id: m.id, name: m.name, slug: m.slug, order: m.order, game: m.game })),
+        ])
+      ),
+      achievements: rawAchievements,
+      unlockedAchievementIds: unlockedIds,
+    });
+  } catch (error) {
+    console.error('Error fetching achievements overview:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}

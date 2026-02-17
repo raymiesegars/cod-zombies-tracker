@@ -1,0 +1,490 @@
+// Prisma Schema for Aether Log - Call of Duty Zombies Tracker
+// Uses Supabase PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================================================
+// USER & AUTHENTICATION
+// ============================================================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  username      String    @unique
+  displayName   String?
+  avatarUrl     String?
+  bio           String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Supabase Auth ID (links to auth.users)
+  supabaseId    String    @unique
+  
+  // XP & Leveling
+  totalXp       Int       @default(0)
+  level         Int       @default(1)
+  
+  // Privacy settings
+  isPublic      Boolean   @default(true)
+  
+  // Relations
+  challengeLogs           ChallengeLog[]
+  easterEggLogs            EasterEggLog[]
+  userAchievements         UserAchievement[]
+  easterEggStepProgress    UserEasterEggStepProgress[]
+  mainEasterEggXpAwards    MainEasterEggXpAwarded[]
+  groupListingsCreated     GroupListing[]
+  groupListingMessages    GroupListingMessage[]
+
+  @@index([username])
+  @@index([supabaseId])
+}
+
+// ============================================================================
+// GAME & MAP DATA (Seeded, Admin-managed)
+// ============================================================================
+
+model Game {
+  id            String   @id @default(cuid())
+  name          String   @unique  // "World at War", "Black Ops", etc.
+  shortName     String   @unique  // "WAW", "BO1", "BO2", "BO3", "BO4", "BOCW"
+  releaseYear   Int
+  order         Int      // For sorting games chronologically
+  
+  maps          Map[]
+  
+  @@index([order])
+}
+
+model Map {
+  id            String   @id @default(cuid())
+  name          String   // "Kino der Toten", "Origins", etc.
+  slug          String   @unique  // URL-friendly: "kino-der-toten"
+  description   String?
+  imageUrl      String?
+  
+  // Game relation
+  gameId        String
+  game          Game     @relation(fields: [gameId], references: [id])
+  
+  // Map metadata
+  isDlc         Boolean  @default(false)
+  releaseDate   DateTime?
+  order         Int      @default(0)  // Release order within game: base maps first, then DLC in order
+  roundCap      Int?     // Widely considered round cap for this map (e.g. 255); used for achievement milestones
+  
+  // Relations
+  challenges        Challenge[]
+  easterEggs        EasterEgg[]
+  challengeLogs     ChallengeLog[]
+  easterEggLogs     EasterEggLog[]
+  achievements      Achievement[]
+  groupListings     GroupListing[]
+
+  @@unique([gameId, name])
+  @@index([slug])
+  @@index([gameId])
+  @@index([gameId, order])
+}
+
+// ============================================================================
+// CHALLENGES (Round-based leaderboard challenges)
+// ============================================================================
+
+model Challenge {
+  id            String        @id @default(cuid())
+  name          String        // "Highest Round", "No Downs", etc.
+  slug          String        // "highest-round", "no-downs"
+  description   String?
+  type          ChallengeType
+  
+  // For round milestone challenges
+  roundTarget   Int?          // e.g., 20, 30, 50, 100 for "Reach Round X"
+  
+  // Map relation (nullable for global challenges)
+  mapId         String?
+  map           Map?          @relation(fields: [mapId], references: [id])
+  
+  // XP reward for completing this challenge
+  xpReward      Int           @default(100)
+  
+  // Is this challenge active/available?
+  isActive      Boolean       @default(true)
+  
+  // Relations
+  logs          ChallengeLog[]
+  achievements  Achievement[]
+  
+  @@unique([mapId, slug])
+  @@index([type])
+  @@index([mapId])
+}
+
+enum ChallengeType {
+  HIGHEST_ROUND       // Track highest round reached
+  NO_DOWNS            // Complete X rounds without going down
+  NO_PERKS            // Complete X rounds without buying perks
+  NO_PACK             // Complete X rounds without Pack-a-Punch
+  STARTING_ROOM       // Stay in starting room only
+  ONE_BOX             // Only use mystery box once
+  PISTOL_ONLY         // Only use starting pistol
+  NO_POWER            // Never turn on power
+}
+
+// ============================================================================
+// EASTER EGGS
+// ============================================================================
+
+model EasterEgg {
+  id            String        @id @default(cuid())
+  name          String        // "Main Quest", "Side Quest: Dog Tag"
+  slug          String
+  description   String?
+  type          EasterEggType
+  
+  // Map relation
+  mapId         String
+  map           Map           @relation(fields: [mapId], references: [id])
+  
+  // Optimal round (for round-based EE challenges)
+  // TODO: Add support for tracking "Complete under X rounds"
+  optimalRound  Int?
+  
+  // XP reward
+  xpReward      Int           @default(250)
+  
+  // If set, show "Solo only", "Duo+", etc. so users know player requirement
+  playerCountRequirement  PlayerCountRequirement?
+  
+  // Optional rewards section shown at end of EE card (e.g. "90s Death Machine, Cryogenic Slumber Party achievement")
+  rewardsDescription     String?
+  
+  // Optional YouTube embed URL for main quest guide (e.g. https://www.youtube.com/embed/VIDEO_ID?start=0)
+  videoEmbedUrl          String?
+  
+  // BO2 main quest variant tag (e.g. "Dr. Maxis", "Richtofen") for Tower of Babble–style split paths
+  variantTag             String?
+  
+  // Optional category tag for filtering (e.g. "Cipher" for cipher/collectible EEs)
+  categoryTag            String?
+  
+  isActive      Boolean       @default(true)
+  
+  // Relations
+  steps         EasterEggStep[]
+  logs          EasterEggLog[]
+  achievements  Achievement[]
+  mainEeXpAwards MainEasterEggXpAwarded[]
+  groupListings GroupListing[]
+
+  @@unique([mapId, slug])
+  @@index([mapId])
+  @@index([type])
+}
+
+// Ordered steps for each Easter Egg (main, side, musical). Users check these off as they go.
+model EasterEggStep {
+  id                     String     @id @default(cuid())
+  easterEggId            String
+  easterEgg              EasterEgg   @relation(fields: [easterEggId], references: [id], onDelete: Cascade)
+  order                  Int         // 1-based display order
+  label                  String      // Step description (e.g. "Turn on power")
+  imageUrl               String?     // Optional image for this step (e.g. symbol reference, location)
+  buildableReferenceSlug String?     // When set, UI shows "Reference the [buildable] guide on the right / below" (responsive)
+
+  userProgress  UserEasterEggStepProgress[]
+
+  @@unique([easterEggId, order])
+  @@index([easterEggId])
+}
+
+// Which steps a user has checked off (synced across devices when logged in)
+model UserEasterEggStepProgress {
+  id               String         @id @default(cuid())
+  userId           String
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  easterEggStepId  String
+  easterEggStep    EasterEggStep   @relation(fields: [easterEggStepId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, easterEggStepId])
+  @@index([userId])
+  @@index([easterEggStepId])
+}
+
+// One-time XP award for main Easter Egg completion (step-tracker). Prevents double XP if user resets and re-completes.
+model MainEasterEggXpAwarded {
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  easterEggId  String
+  easterEgg    EasterEgg  @relation(fields: [easterEggId], references: [id], onDelete: Cascade)
+  awardedAt    DateTime   @default(now())
+  
+  @@unique([userId, easterEggId])
+  @@index([userId])
+  @@index([easterEggId])
+}
+
+enum EasterEggType {
+  MAIN_QUEST          // Primary Easter Egg (awards XP once when all steps checked)
+  SIDE_QUEST          // Optional side quests (no XP, tracking only)
+  MUSICAL             // Musical / song Easter Eggs (no XP, tracking only)
+  BUILDABLE           // Buildable items (parts + locations); no XP, reference only
+}
+
+// Shown as a tag on the EE card (e.g. "Solo only", "2+ players")
+enum PlayerCountRequirement {
+  SOLO    // Solo only
+  DUO     // 2 players minimum
+  TRIO    // 3 players minimum
+  SQUAD   // 4 players
+}
+
+// ============================================================================
+// USER PROGRESS LOGS
+// ============================================================================
+
+model ChallengeLog {
+  id            String      @id @default(cuid())
+  
+  // User relation
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Challenge relation
+  challengeId   String
+  challenge     Challenge   @relation(fields: [challengeId], references: [id])
+  
+  // Map relation (denormalized for query performance)
+  mapId         String
+  map           Map         @relation(fields: [mapId], references: [id])
+  
+  // Progress data
+  roundReached  Int
+  playerCount   PlayerCount
+  completedAt   DateTime    @default(now())
+  completionTimeSeconds Int?  // Optional run time (hours * 3600 + minutes * 60 + seconds)
+  
+  // Proof attachments
+  proofUrl      String?     // YouTube/Twitch VOD link
+  proofType     ProofType?
+  screenshotUrl String?     // Direct image URL
+  
+  // Notes
+  notes         String?
+  
+  // Verification status (for future moderation)
+  isVerified    Boolean     @default(false)
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  @@index([userId])
+  @@index([challengeId])
+  @@index([mapId])
+  @@index([userId, mapId])
+  @@index([roundReached(sort: Desc)])
+}
+
+model EasterEggLog {
+  id            String        @id @default(cuid())
+  
+  // User relation
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Easter Egg relation
+  easterEggId   String
+  easterEgg     EasterEgg     @relation(fields: [easterEggId], references: [id])
+  
+  // Map relation (denormalized for query performance)
+  mapId         String
+  map           Map           @relation(fields: [mapId], references: [id])
+  
+  // Completion data
+  completedAt   DateTime      @default(now())
+  roundCompleted Int?         // Round the EE was completed on
+  playerCount   PlayerCount
+  completionTimeSeconds Int?   // Optional run time (hours * 3600 + minutes * 60 + seconds)
+  
+  // Special completion flags
+  isSolo        Boolean       @default(false)
+  isNoGuide     Boolean       @default(false)  // Completed without guide
+  
+  // Proof attachments
+  proofUrl      String?
+  proofType     ProofType?
+  screenshotUrl String?
+  
+  // Notes
+  notes         String?
+  
+  // Verification
+  isVerified    Boolean       @default(false)
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  @@index([userId])
+  @@index([easterEggId])
+  @@index([mapId])
+  @@index([roundCompleted(sort: Asc)])
+}
+
+enum PlayerCount {
+  SOLO
+  DUO
+  TRIO
+  SQUAD
+}
+
+enum ProofType {
+  YOUTUBE
+  TWITCH
+  IMAGE
+  OTHER
+}
+
+// ============================================================================
+// ACHIEVEMENTS & XP SYSTEM
+// ============================================================================
+
+model Achievement {
+  id            String          @id @default(cuid())
+  name          String          // e.g. "Round 20", "No Perks Round 30"
+  slug          String          // e.g. "round-20", "no-perks-30" (unique per map when mapId set)
+  description   String?
+  iconUrl       String?
+  
+  // Map-specific (null = global achievement)
+  mapId         String?
+  map           Map?            @relation(fields: [mapId], references: [id], onDelete: Cascade)
+  
+  // Achievement criteria (data-driven)
+  type          AchievementType
+  criteria      Json            // e.g. { round: 20, challengeType: "HIGHEST_ROUND" }
+  
+  // Related challenge or easter egg (optional)
+  challengeId   String?
+  challenge     Challenge?      @relation(fields: [challengeId], references: [id])
+  
+  easterEggId   String?
+  easterEgg     EasterEgg?      @relation(fields: [easterEggId], references: [id])
+  
+  // XP reward (awarded once per user when unlocked)
+  xpReward      Int             @default(50)
+  
+  // Rarity tier
+  rarity        AchievementRarity @default(COMMON)
+  
+  isActive      Boolean         @default(true)
+  
+  // Relations
+  userAchievements UserAchievement[]
+  
+  @@unique([mapId, slug])
+  @@index([type])
+  @@index([mapId])
+  @@index([rarity])
+}
+
+enum AchievementType {
+  ROUND_MILESTONE     // Reach round X on any/specific map
+  CHALLENGE_COMPLETE  // Complete a specific challenge
+  EASTER_EGG_COMPLETE // Complete an Easter Egg
+  MAPS_PLAYED         // Play X different maps
+  TOTAL_ROUNDS        // Accumulate X total rounds
+  STREAK              // Complete challenges in a row
+  COLLECTOR           // Unlock X other achievements
+}
+
+enum AchievementRarity {
+  COMMON
+  UNCOMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
+model UserAchievement {
+  id            String      @id @default(cuid())
+  
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  
+  unlockedAt    DateTime    @default(now())
+  
+  @@unique([userId, achievementId])
+  @@index([userId])
+  @@index([achievementId])
+}
+
+// ============================================================================
+// UTILITY TABLES
+// ============================================================================
+
+// For tracking XP level thresholds
+model LevelThreshold {
+  level         Int         @id
+  xpRequired    Int
+  rankName      String      // "Fresh Meat", "Veteran", "Prestige Master"
+  rankBadgeUrl  String?
+  
+  @@index([xpRequired])
+}
+
+// ============================================================================
+// FIND GROUP – Listings & Chat
+// ============================================================================
+
+model GroupListing {
+  id                  String    @id @default(cuid())
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  expiresAt           DateTime  // Listing + messages auto-expire after 30 days
+
+  creatorId            String
+  creator              User      @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  mapId                String
+  map                  Map       @relation(fields: [mapId], references: [id], onDelete: Cascade)
+  easterEggId          String?
+  easterEgg            EasterEgg? @relation(fields: [easterEggId], references: [id], onDelete: SetNull)
+
+  desiredPlayerCount   Int       // e.g. 4 for squad
+  currentPlayerCount   Int       @default(1) // 1/4, 2/4, etc. – creator updates when someone joins
+  notes                String?   @db.Text
+  platform             String    // e.g. "PS5", "PC (Steam)", "Xbox Series X|S"
+  contactInfo          Json?     // { discord?: string, steam?: string, xbox?: string, etc. }
+
+  messages             GroupListingMessage[]
+
+  @@index([createdAt(sort: Desc)])
+  @@index([mapId])
+  @@index([creatorId])
+  @@index([expiresAt])
+}
+
+model GroupListingMessage {
+  id          String       @id @default(cuid())
+  createdAt   DateTime     @default(now())
+
+  listingId   String
+  listing     GroupListing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content     String       @db.Text
+
+  @@index([listingId])
+  @@index([createdAt])
+}

@@ -1,0 +1,46 @@
+{
+  "name": "cod-zombies-tracker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:seed:easter-eggs": "tsx prisma/seed-easter-eggs.ts",
+    "db:seed:easter-eggs:in-progress": "tsx prisma/seed-easter-eggs-in-progress-only.ts",
+    "db:update-verruckt-names": "tsx prisma/update-verruckt-names.ts",
+    "db:update-verruckt-image-url": "tsx prisma/update-verruckt-image-url.ts",
+    "db:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.9.1",
+    "@supabase/ssr": "^0.1.0",
+    "@supabase/supabase-js": "^2.39.3",
+    "clsx": "^2.1.0",
+    "framer-motion": "^11.0.3",
+    "lucide-react": "^0.323.0",
+    "next": "14.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwind-merge": "^2.2.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.16",
+    "@types/react": "^18.2.52",
+    "@types/react-dom": "^18.2.18",
+    "autoprefixer": "^10.4.17",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "14.1.0",
+    "postcss": "^8.4.33",
+    "prisma": "^5.9.1",
+    "tailwindcss": "^3.4.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,279 @@
+@import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Caveat:wght@400;500;600;700&family=Special+Elite&family=Nosifer&family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-inter: 'Inter', system-ui, sans-serif;
+  --font-special-elite: 'Special Elite', serif;
+  --font-nosifer: 'Nosifer', cursive;
+  --font-jetbrains-mono: 'JetBrains Mono', monospace;
+  --font-black-ops-one: 'Black Ops One', cursive;
+  --font-blood-smeared: 'Caveat', cursive;
+}
+
+/* Custom scrollbar - dark military themed */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: theme('colors.bunker.950');
+}
+
+::-webkit-scrollbar-thumb {
+  background: theme('colors.bunker.700');
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.blood.900');
+}
+
+/* Selection */
+::selection {
+  background: theme('colors.blood.600 / 0.4');
+  color: theme('colors.white');
+}
+
+/* Focus ring reset for buttons that have custom focus styles */
+button:focus {
+  outline: none;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Base styles - dark black/gray, no blue; readable white/red text */
+body {
+  @apply text-white antialiased;
+  background-color: #050505;
+  background-image:
+    /* Subtle overhead fill - neutral gray, no blue */
+    radial-gradient(ellipse 100% 70% at 50% -10%, rgba(38, 38, 38, 0.6) 0%, rgba(23, 23, 23, 0.3) 30%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 50% 10%, rgba(26, 26, 26, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom, rgba(10, 10, 10, 0.98) 0%, transparent 70%);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Blood gradient text utility - darker, more ominous */
+.text-gradient {
+  @apply bg-gradient-to-r from-blood-400 via-blood-500 to-blood-400 bg-clip-text text-transparent;
+}
+
+.text-gradient-element {
+  @apply bg-gradient-to-r from-element-500 via-element-400 to-element-500 bg-clip-text text-transparent;
+}
+
+/* Glow effects - subdued, dark */
+.glow-blood {
+  box-shadow: 0 0 15px theme('colors.blood.700 / 0.3'),
+    0 0 30px theme('colors.blood.800 / 0.15');
+}
+
+.glow-element {
+  box-shadow: 0 0 15px theme('colors.element.600 / 0.25'),
+    0 0 30px theme('colors.element.700 / 0.1');
+}
+
+.glow-military {
+  box-shadow: 0 0 15px theme('colors.military.700 / 0.25'),
+    0 0 30px theme('colors.military.800 / 0.1');
+}
+
+/* Grid pattern background - neutral dark */
+.bg-grid-pattern {
+  background-image: linear-gradient(
+      theme('colors.bunker.700 / 0.25') 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, theme('colors.bunker.700 / 0.25') 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Animated gradient background */
+.animated-gradient {
+  background: linear-gradient(
+    -45deg,
+    theme('colors.bunker.1000'),
+    theme('colors.bunker.950'),
+    theme('colors.bunker.925'),
+    theme('colors.bunker.1000')
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Zombies display font styling - military stencil */
+.font-zombies {
+  font-family: var(--font-special-elite), serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Round counter - CoD Zombies HUD style (Black Ops One font) */
+.round-counter {
+  font-family: var(--font-black-ops-one), var(--font-nosifer), cursive;
+  text-shadow: 0 0 8px theme('colors.blood.500'),
+    0 0 16px theme('colors.blood.600 / 0.4'),
+    0 0 24px theme('colors.blood.700 / 0.2');
+}
+
+/* Zombies HUD round box - classic bottom-left style */
+.round-counter-hud {
+  font-family: var(--font-black-ops-one), cursive;
+}
+
+/* Number input - remove spinners */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+/* Navbar: Black Ops Zombies rustic metallic, light spilling out from bottom over the page */
+.navbar-creative {
+  position: relative;
+  overflow: visible;
+  /* Dark worn metal: gunmetal with rust/burnt undertones */
+  background-color: #0f1012;
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, #1a1b1d 0%, #141618 30%, #0f1113 65%, #0c0d0f 100%);
+  border-bottom: 1px solid rgba(60, 52, 48, 0.7);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.04),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.4),
+    /* Warm edge at bottom: light source line */
+    0 1px 0 0 rgba(255, 248, 235, 0.12),
+    0 2px 8px -2px rgba(255, 245, 220, 0.08);
+}
+/* Grit overlay on the bar itself */
+.navbar-creative::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.15) 100%
+  );
+  border-radius: 0 0 2px 2px;
+}
+/* Light spilling out from bottom of navbar over the page */
+.navbar-creative::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 72px;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 248, 238, 0.14) 0%,
+    rgba(255, 245, 228, 0.06) 35%,
+    rgba(255, 240, 220, 0.02) 65%,
+    transparent 100%
+  );
+  z-index: 0;
+}
+.navbar-creative > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Film grain/noise overlay */
+.noise-overlay {
+  position: relative;
+}
+
+.noise-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+}
+
+/* Vignette effect */
+.vignette {
+  position: relative;
+}
+
+.vignette::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 0%, theme('colors.bunker.1000 / 0.4') 100%);
+  pointer-events: none;
+}
+
+/* Scan lines effect */
+.scan-lines {
+  position: relative;
+}
+
+.scan-lines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    theme('colors.bunker.950 / 0.03') 2px,
+    theme('colors.bunker.950 / 0.03') 4px
+  );
+  pointer-events: none;
+}
+
+/* Blood text effect for headings - dark and gritty */
+.blood-text {
+  color: theme('colors.blood.400');
+  text-shadow: 
+    0 0 8px theme('colors.blood.600 / 0.4'),
+    0 2px 4px theme('colors.bunker.950');
+}
+
+/* Bunker border style */
+.bunker-border {
+  border: 1px solid theme('colors.bunker.700');
+  box-shadow: 
+    inset 0 1px 0 theme('colors.bunker.600 / 0.1'),
+    0 2px 4px theme('colors.bunker.950 / 0.3');
+}
+
+/* Military tag style */
+.military-tag {
+  @apply font-stencil text-xs uppercase tracking-widest;
+  color: theme('colors.bunker.400');
+}
+
+/* Default text for sections - white for readability */
+.text-default {
+  @apply text-white;
+}

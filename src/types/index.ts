@@ -1,0 +1,143 @@
+import type {
+  User,
+  Game,
+  Map,
+  Challenge,
+  EasterEgg,
+  ChallengeLog,
+  EasterEggLog,
+  Achievement,
+  UserAchievement,
+  LevelThreshold,
+  PlayerCount,
+  ChallengeType,
+  EasterEggType,
+  AchievementType,
+  AchievementRarity,
+  ProofType,
+} from '@prisma/client';
+
+export type {
+  User,
+  Game,
+  Map,
+  Challenge,
+  EasterEgg,
+  ChallengeLog,
+  EasterEggLog,
+  Achievement,
+  UserAchievement,
+  LevelThreshold,
+  PlayerCount,
+  ChallengeType,
+  EasterEggType,
+  AchievementType,
+  AchievementRarity,
+  ProofType,
+};
+
+export type MapWithGame = Map & {
+  game: Game;
+};
+
+export type MapWithDetails = Map & {
+  game: Game;
+  challenges: Challenge[];
+  easterEggs: EasterEgg[];
+};
+
+export type ChallengeLogWithDetails = ChallengeLog & {
+  user: Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl'>;
+  challenge: Challenge;
+  map: Map;
+};
+
+export type EasterEggLogWithDetails = EasterEggLog & {
+  user: Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl'>;
+  easterEgg: EasterEgg;
+  map: Map;
+};
+
+export type UserWithStats = User & {
+  _count: {
+    challengeLogs: number;
+    easterEggLogs: number;
+    userAchievements: number;
+  };
+};
+
+export type UserProfile = User & {
+  challengeLogs: (ChallengeLog & {
+    map: Map;
+    challenge: Challenge;
+  })[];
+  easterEggLogs: (EasterEggLog & {
+    map: Map;
+    easterEgg: EasterEgg;
+  })[];
+  userAchievements: (UserAchievement & {
+    achievement: Achievement;
+  })[];
+};
+
+export type LeaderboardEntry = {
+  rank: number;
+  user: Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl' | 'level'>;
+  value: number;
+  playerCount: PlayerCount;
+  proofUrl?: string | null;
+  completedAt: Date;
+};
+
+export type UserMapStats = {
+  mapId: string;
+  mapSlug: string;
+  mapName: string;
+  mapImageUrl: string | null;
+  gameShortName: string;
+  highestRound: number;
+  hasCompletedMainEE: boolean;
+  challengesCompleted: number;
+};
+
+export type UserAchievementWithAchievement = UserAchievement & {
+  achievement: Achievement;
+};
+
+export type ApiResponse<T> = {
+  data?: T;
+  error?: string;
+};
+
+export type ChallengeLogFormData = {
+  challengeId: string;
+  mapId: string;
+  roundReached: number;
+  playerCount: PlayerCount;
+  proofUrl?: string;
+  screenshotUrl?: string;
+  notes?: string;
+};
+
+export type EasterEggLogFormData = {
+  easterEggId: string;
+  mapId: string;
+  roundCompleted?: number;
+  playerCount: PlayerCount;
+  isSolo: boolean;
+  isNoGuide: boolean;
+  proofUrl?: string;
+  screenshotUrl?: string;
+  notes?: string;
+};
+
+export type MapFilters = {
+  gameId?: string;
+  isDlc?: boolean;
+  search?: string;
+};
+
+export type LeaderboardFilters = {
+  playerCount?: PlayerCount;
+  challengeType?: ChallengeType;
+};
