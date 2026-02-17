@@ -80,7 +80,7 @@ export default function HomePage() {
             </h1>
 
             <p className="mt-4 sm:mt-6 text-base sm:text-lg md:text-xl text-bunker-300 max-w-2xl mx-auto px-4">
-              Step-by-step guides and progress tracking for every map. Main quests, musical eggs, side eggs—all in one place. Log completions, check off steps, and climb leaderboards.
+              Step-by-step Easter egg guides and progress tracking for every map. Main quests, musical eggs, side eggs—all in one place. Log completions, find teammates for Easter eggs, and climb leaderboards.
             </p>
 
             <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
@@ -148,7 +148,7 @@ export default function HomePage() {
               Guides & Tracking for Every Map
             </h2>
             <p className="mt-3 sm:mt-4 text-base sm:text-lg text-bunker-400 max-w-2xl mx-auto">
-              Full Easter egg guides—main quest, musical, and side—with step-by-step instructions and progress tracking on every Treyarch Zombies map.
+              Full Easter egg guides—main quest, musical, and side—with step-by-step instructions and progress tracking on every Treyarch Zombies map. Find teammates for Easter eggs on the Find Group page.
             </p>
           </div>
 

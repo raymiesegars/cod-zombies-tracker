@@ -105,6 +105,9 @@ export function MapsPageClient({ initialMaps, initialGames }: Props) {
             <p className="text-sm sm:text-base text-bunker-400">
               Explore every Treyarch Zombies map and track your progress
             </p>
+            <p className="text-sm text-bunker-500 mt-2 max-w-2xl">
+              Step-by-step Easter egg guides, buildables, and side eggs for every map. Track main quest and challenge progress, log high rounds and speedruns, and find groups—all in one place.
+            </p>
           </div>
         </div>
       </div>

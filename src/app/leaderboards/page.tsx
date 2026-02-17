@@ -141,8 +141,25 @@ export default function LeaderboardsPage() {
             <p className="text-sm sm:text-base text-bunker-400">
               Compete with players worldwide and climb to the top
             </p>
+            <p className="text-sm text-bunker-500 mt-3 max-w-2xl">
+              CoD Zombies high round and speedrun leaderboards for every Treyarch map. Filter by Solo, Duo, Trio, or Squad and by challenge type: Highest Round, No Downs, No Perks, No Pack-a-Punch, and more. Log your runs from any map page to appear on the board.
+            </p>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-2">
+        <details className="group rounded-lg border border-bunker-700/60 bg-bunker-900/50 overflow-hidden">
+          <summary className="list-none cursor-pointer px-4 py-3 text-sm font-medium text-bunker-300 hover:text-bunker-200 focus:outline-none focus:ring-2 focus:ring-blood-500/50 focus:ring-inset rounded-lg">
+            <span className="inline-flex items-center gap-2">
+              How leaderboards work
+              <span className="text-bunker-500 group-open:rotate-180 transition-transform inline-block">▼</span>
+            </span>
+          </summary>
+          <div className="px-4 pb-4 pt-1 border-t border-bunker-700/40">
+            <LeaderboardsHelpContent />
+          </div>
+        </details>
       </div>
 
       {/* Filters - sticky below navbar (h-14 sm:h-16) */}

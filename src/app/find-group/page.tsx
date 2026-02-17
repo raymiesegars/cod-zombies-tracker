@@ -226,6 +226,9 @@ export default function FindGroupPage() {
                 <p className="text-sm text-bunker-400 mt-0.5">
                   Squad up for main Easter eggs. Post a listing or browse below.
                 </p>
+                <p className="text-sm text-bunker-500 mt-3 max-w-2xl">
+                  Looking for people to do CoD Zombies Easter eggs? Find teammates for main quests and high rounds. Post a listing with your map, player count, and contact (Discord, Steam, Xbox)—or browse listings and message creators to squad up. Free, no ads.
+                </p>
               </div>
               <HelpTrigger
                 title="How Find Group works"
@@ -291,6 +294,20 @@ export default function FindGroupPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-2">
+        <details className="group rounded-lg border border-bunker-700/60 bg-bunker-900/50 overflow-hidden">
+          <summary className="list-none cursor-pointer px-4 py-3 text-sm font-medium text-bunker-300 hover:text-bunker-200 focus:outline-none focus:ring-2 focus:ring-blood-500/50 focus:ring-inset rounded-lg">
+            <span className="inline-flex items-center gap-2">
+              How Find Group works
+              <span className="text-bunker-500 group-open:rotate-180 transition-transform inline-block">▼</span>
+            </span>
+          </summary>
+          <div className="px-4 pb-4 pt-1 border-t border-bunker-700/40">
+            <FindGroupHelpContent />
+          </div>
+        </details>
       </div>
 
       {/* Listings */}
