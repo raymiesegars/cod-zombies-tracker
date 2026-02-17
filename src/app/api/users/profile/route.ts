@@ -41,12 +41,17 @@ export async function GET(request: NextRequest) {
 
 // Create or update profile after sign-in. Username from email, uniquified if taken.
 export async function POST(request: NextRequest) {
+  let supabaseId = '';
+  let email = '';
+  let displayName: string | null = null;
+  let avatarUrl: string | null = null;
+
   try {
     const body = await request.json();
-    const supabaseId = typeof body.supabaseId === 'string' ? body.supabaseId.trim() : '';
-    const email = typeof body.email === 'string' ? body.email.trim() : '';
-    const displayName = body.displayName != null ? String(body.displayName).trim() || null : null;
-    const avatarUrl = body.avatarUrl != null ? String(body.avatarUrl).trim() || null : null;
+    supabaseId = typeof body.supabaseId === 'string' ? body.supabaseId.trim() : '';
+    email = typeof body.email === 'string' ? body.email.trim() : '';
+    displayName = body.displayName != null ? String(body.displayName).trim() || null : null;
+    avatarUrl = body.avatarUrl != null ? String(body.avatarUrl).trim() || null : null;
 
     if (!supabaseId || !email) {
       return NextResponse.json(
@@ -91,7 +96,7 @@ export async function POST(request: NextRequest) {
     const prismaError = error as { code?: string; meta?: { target?: string[] } };
     if (prismaError?.code === 'P2002') {
       const target = prismaError.meta?.target as string[] | undefined;
-      if (target?.includes('email')) {
+      if (target?.includes('email') && email) {
         const existingByEmail = await prisma.user.findUnique({
           where: { email },
         });
