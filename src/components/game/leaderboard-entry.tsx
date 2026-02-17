@@ -15,6 +15,10 @@ interface LeaderboardEntryProps {
   isCurrentUser?: boolean;
   showRound?: boolean;
   invertRanking?: boolean; // For EE challenges where lower round is better
+  /** When 'xp', show entry.value as total XP instead of round */
+  valueKind?: 'round' | 'xp';
+  /** Hide the player count badge (e.g. for site Rank by XP leaderboard) */
+  hidePlayerCount?: boolean;
 }
 
 const rankColors = {
@@ -29,6 +33,8 @@ export function LeaderboardEntry({
   isCurrentUser = false,
   showRound = true,
   invertRanking = false,
+  valueKind = 'round',
+  hidePlayerCount = false,
 }: LeaderboardEntryProps) {
   const isTopThree = entry.rank <= 3;
 
@@ -82,19 +88,29 @@ export function LeaderboardEntry({
       </div>
 
       {/* Player count - fixed width so Solo/Duo/Trio/Squad align vertically */}
-      <div className="hidden sm:flex flex-shrink-0 w-14 items-center justify-start">
-        <Badge variant="default" size="sm">
-          {getPlayerCountLabel(entry.playerCount)}
-        </Badge>
-      </div>
+      {!hidePlayerCount && (
+        <div className="hidden sm:flex flex-shrink-0 w-14 items-center justify-start">
+          <Badge variant="default" size="sm">
+            {getPlayerCountLabel(entry.playerCount)}
+          </Badge>
+        </div>
+      )}
 
-      {/* Round - fixed min-width and right-align so numbers align vertically */}
-      {showRound && (
+      {/* Round or XP */}
+      {(showRound || valueKind === 'xp') && (
         <div className="flex items-center justify-end gap-1 sm:gap-2 flex-shrink-0 min-w-[3.5rem] sm:min-w-[4rem]">
-          <RoundCounter round={entry.value} size="xs" animated={false} className="sm:hidden" />
-          <RoundCounter round={entry.value} size="sm" animated={false} className="hidden sm:inline-flex" />
-          {invertRanking && (
-            <span className="text-xs text-bunker-400 hidden sm:inline">rounds</span>
+          {valueKind === 'xp' ? (
+            <span className="text-sm sm:text-base font-semibold text-military-400 tabular-nums">
+              {entry.value.toLocaleString()} XP
+            </span>
+          ) : (
+            <>
+              <RoundCounter round={entry.value} size="xs" animated={false} className="sm:hidden" />
+              <RoundCounter round={entry.value} size="sm" animated={false} className="hidden sm:inline-flex" />
+              {invertRanking && (
+                <span className="text-xs text-bunker-400 hidden sm:inline">rounds</span>
+              )}
+            </>
           )}
         </div>
       )}

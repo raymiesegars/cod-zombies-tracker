@@ -7,6 +7,8 @@ import type { LeaderboardEntry as LeaderboardEntryType, Game, MapWithGame, Playe
 import { Trophy, Medal, Filter } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 
+const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
+
 const challengeTypeLabels: Record<ChallengeType, string> = {
   HIGHEST_ROUND: 'Highest Round',
   NO_DOWNS: 'No Downs',
@@ -25,10 +27,12 @@ export default function LeaderboardsPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntryType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [selectedGame, setSelectedGame] = useState('');
+  const [selectedGame, setSelectedGame] = useState(RANK_VIEW);
   const [selectedMap, setSelectedMap] = useState('');
   const [selectedPlayerCount, setSelectedPlayerCount] = useState<PlayerCount | ''>('');
   const [selectedChallengeType, setSelectedChallengeType] = useState<ChallengeType | ''>('HIGHEST_ROUND');
+
+  const isRankView = selectedGame === RANK_VIEW;
 
   useEffect(() => {
     async function fetchData() {
@@ -46,8 +50,8 @@ export default function LeaderboardsPage() {
         if (mapsRes.ok) {
           const mapsData = await mapsRes.json();
           setMaps(mapsData);
-          // First map if we have any
-          if (mapsData.length > 0) {
+          // On initial load, only set first map when not on Rank view
+          if (mapsData.length > 0 && selectedGame !== RANK_VIEW) {
             setSelectedMap(mapsData[0].slug);
           }
         }
@@ -57,11 +61,29 @@ export default function LeaderboardsPage() {
     }
 
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on mount; selectedGame is intentionally read once for initial state
   }, []);
 
   useEffect(() => {
     async function fetchLeaderboard() {
+      if (isRankView) {
+        setIsLoading(true);
+        try {
+          const res = await fetch('/api/leaderboards/rank');
+          if (res.ok) {
+            const data = await res.json();
+            setLeaderboard(data);
+          }
+        } catch (error) {
+          console.error('Error fetching rank leaderboard:', error);
+        } finally {
+          setIsLoading(false);
+        }
+        return;
+      }
+
       if (!selectedMap) {
+        setLeaderboard([]);
         setIsLoading(false);
         return;
       }
@@ -85,13 +107,14 @@ export default function LeaderboardsPage() {
     }
 
     fetchLeaderboard();
-  }, [selectedMap, selectedPlayerCount, selectedChallengeType]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType]);
 
   const filteredMaps = selectedGame
     ? maps.filter((map) => map.gameId === selectedGame)
     : maps;
 
   const gameOptions = [
+    { value: RANK_VIEW, label: 'Rank (by XP)' },
     { value: '', label: 'All Games' },
     ...games.map((game) => ({ value: game.id, label: game.name })),
   ];
@@ -162,8 +185,8 @@ export default function LeaderboardsPage() {
         </details>
       </div>
 
-      {/* Filters - sticky below navbar (h-14 sm:h-16) */}
-      <div className="sticky top-14 sm:top-16 z-40 bg-bunker-950/95 backdrop-blur-xl border-b border-bunker-800/50">
+      {/* Filters */}
+      <div className="bg-bunker-950 border-b border-bunker-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2 text-bunker-400">
@@ -175,8 +198,14 @@ export default function LeaderboardsPage() {
                 options={gameOptions}
                 value={selectedGame}
                 onChange={(e) => {
-                  setSelectedGame(e.target.value);
-                  setSelectedMap('');
+                  const v = e.target.value;
+                  setSelectedGame(v);
+                  if (v === RANK_VIEW) {
+                    setSelectedMap('');
+                  } else {
+                    const nextMaps = v ? maps.filter((m) => m.gameId === v) : maps;
+                    setSelectedMap(nextMaps.length > 0 ? nextMaps[0].slug : '');
+                  }
                 }}
                 className="w-full"
               />
@@ -185,6 +214,7 @@ export default function LeaderboardsPage() {
                 value={selectedMap}
                 onChange={(e) => setSelectedMap(e.target.value)}
                 className="w-full col-span-2 sm:col-span-1"
+                disabled={isRankView}
               />
               <Select
                 options={challengeTypeOptions}
@@ -205,7 +235,55 @@ export default function LeaderboardsPage() {
 
       {/* Leaderboard Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {selectedMapData && (
+        {isRankView && (
+          <div className="mb-6">
+            <Card variant="glow">
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+                  <div>
+                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                      <Medal className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
+                      Rank (by XP)
+                    </CardTitle>
+                    <p className="text-xs sm:text-sm text-bunker-400 mt-1">
+                      All members ranked by total XP
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center px-3 py-1.5 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-sm font-semibold shadow-[0_0_1px_rgba(0,0,0,1),0_0_3px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.8)] [text-shadow:0_0_1px_rgba(0,0,0,1),0_0_2px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">
+                    {leaderboard.length} entries
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {isLoading ? (
+                  <div className="flex justify-center py-12">
+                    <PageLoader message="Loading leaderboard…" inline />
+                  </div>
+                ) : leaderboard.length > 0 ? (
+                  leaderboard.map((entry, index) => (
+                    <LeaderboardEntry
+                      key={entry.user.id}
+                      entry={entry}
+                      index={index}
+                      isCurrentUser={entry.user.id === profile?.id}
+                      valueKind="xp"
+                      hidePlayerCount
+                    />
+                  ))
+                ) : (
+                  <div className="text-center py-8 sm:py-12">
+                    <Trophy className="w-10 h-10 sm:w-12 sm:h-12 text-bunker-600 mx-auto mb-4" />
+                    <p className="text-sm sm:text-base text-bunker-400">
+                      No public profiles yet.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {selectedMapData && !isRankView && (
           <div className="mb-6">
             <Card variant="glow">
               <CardHeader>
@@ -254,7 +332,7 @@ export default function LeaderboardsPage() {
           </div>
         )}
 
-        {!selectedMap && (
+        {!selectedMap && !isRankView && (
           <div className="text-center py-16 sm:py-20">
             <Logo size="xl" animated={false} className="mx-auto mb-4 opacity-50" />
             <p className="text-sm sm:text-lg text-bunker-400">
