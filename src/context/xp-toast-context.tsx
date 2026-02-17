@@ -22,6 +22,18 @@ const XpToastContext = createContext<XpToastContextValue | null>(null);
 
 const TOAST_DURATION_MS = 4500;
 const BAR_FILL_DURATION_S = 1.2;
+const ACHIEVEMENT_SOUND_VOLUME = 0.35;
+
+function playAchievementSound() {
+  if (typeof window === 'undefined') return;
+  try {
+    const audio = new Audio('/audio/achievment.mp3');
+    audio.volume = ACHIEVEMENT_SOUND_VOLUME;
+    audio.play().catch(() => {});
+  } catch {
+    // ignore
+  }
+}
 
 export const XP_TOAST_EVENT = 'cod-tracker-xp-toast';
 
@@ -47,6 +59,7 @@ export function XpToastProvider({ children }: { children: React.ReactNode }) {
 
   const showXpToast = useCallback((amount: number, options?: XpToastOptions) => {
     if (amount <= 0) return;
+    playAchievementSound();
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setToastId((n) => n + 1);
     setToast({
@@ -106,11 +119,12 @@ function XpToastContent({ amount, totalXp }: ToastState) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 24 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className="fixed bottom-6 right-6 z-[100] pointer-events-none w-[280px] sm:w-[300px]"
+      className="fixed bottom-6 left-6 right-auto z-[100] pointer-events-none w-[280px] sm:w-[300px]"
+      style={{ left: '1.5rem', right: 'auto' }}
     >
       {/* Fully opaque card – no transparency */}
       <div className="rounded-xl border border-bunker-600 bg-bunker-900 shadow-xl overflow-hidden">
-        {/* +N XP row */}
+        {/* +N XP row – extra left padding so content isn’t flush */}
         <div className="px-4 py-3 border-b border-bunker-700">
           <p className="text-center">
             <span className="text-military-400 font-medium">+</span>
