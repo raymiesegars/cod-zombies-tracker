@@ -54,10 +54,6 @@ async function main() {
   });
   const mapBySlug = new Map(maps.map((m) => [m.slug, m]));
 
-  // Do NOT create placeholder "Main Quest" EEs (no steps). They duplicate the real main-quest
-  // achievements and show as redundant 2500 XP entries. Only create specific EEs from SPECIFIC_EASTER_EGGS.
-  // (Placeholder Main Quest creation removed — run db:delete-placeholder-main-quest-ees after seed if you have old data.)
-
   let specificCount = 0;
   for (const ee of SPECIFIC_EASTER_EGGS) {
     const map = maps.find(

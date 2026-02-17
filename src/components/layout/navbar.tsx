@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/auth-context';
 import { Button, Logo, MapIcon } from '@/components/ui';
 import { UserWithRank } from '@/components/game';
-import { Menu, X, LogOut, User, Settings, Trophy, LayoutDashboard, Users } from 'lucide-react';
+import { Menu, X, LogOut, User, Settings, Trophy, LayoutDashboard, Users, Wrench } from 'lucide-react';
 
 export function Navbar() {
   const { user, profile, isLoading, signInWithGoogle, signOut } = useAuth();
@@ -18,6 +18,7 @@ export function Navbar() {
     { href: '/maps', label: 'Maps', icon: MapIcon },
     { href: '/leaderboards', label: 'Leaderboards', icon: Trophy },
     { href: '/find-group', label: 'Find Group', icon: Users },
+    { href: '/tools', label: 'Tools', icon: Wrench },
   ];
   const dashboardHref = user && profile?.username ? `/users/${profile.username}` : null;
   const navLinks = dashboardHref
@@ -44,7 +45,7 @@ export function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop Navigation: Maps, Leaderboards, Find Group, Dashboard (when logged in) */}
+          {/* Desktop Navigation: Maps, Leaderboards, Find Group, Tools, Dashboard (when logged in) */}
           <div className="hidden md:flex items-center gap-1">
             <Link href="/maps" className={linkClass}>
               Maps
@@ -54,6 +55,9 @@ export function Navbar() {
             </Link>
             <Link href="/find-group" className={linkClass}>
               Find Group
+            </Link>
+            <Link href="/tools" className={linkClass}>
+              Tools
             </Link>
             {dashboardHref ? (
               <Link href={dashboardHref} className={linkClass}>

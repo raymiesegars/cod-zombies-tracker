@@ -2,9 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { PrismaClient } from '@prisma/client';
 import { RANKS, getRankIconPath } from '../src/lib/ranks';
-import { getMapAchievementDefinitions, getEasterEggAchievementDefinition } from '../src/lib/achievements/seed-achievements';
+import { getMapAchievementDefinitions } from '../src/lib/achievements/seed-achievements';
 import { getRoundCapForMap } from '../src/lib/achievements/map-round-config';
-import { MAIN_QUEST_MAP_SLUGS } from './main-quest-map-slugs';
 
 // Load .env then .env.local (same order as Next.js) so seed uses the SAME DB as the app
 function loadEnv() {
@@ -288,25 +287,7 @@ async function main() {
 
   console.log(`Created ${challengeCount} challenges`);
 
-  // Create Main Quest placeholders only for maps that have a real main EE (not for maps with only side/musical EEs like Kino)
   let eeCount = 0;
-  for (const map of createdMaps) {
-    if (MAIN_QUEST_MAP_SLUGS.has(map.slug)) {
-      await prisma.easterEgg.create({
-        data: {
-          name: 'Main Quest',
-          slug: 'main-quest',
-          type: 'MAIN_QUEST',
-          mapId: map.id,
-          xpReward: 1250,
-          description: `Complete the main Easter Egg quest on ${map.name}`,
-        },
-      });
-      eeCount++;
-    }
-  }
-
-  console.log(`Created ${eeCount} Easter Eggs`);
 
   // Create specific Easter Eggs (musical, side, etc.) with steps — by map slug
   const nachtWaw = await prisma.map.findFirst({ where: { slug: 'nacht-der-untoten', gameId: gameMap.get('WAW')!.id } });
@@ -332,12 +313,11 @@ async function main() {
     console.log('Created Music Radio (musical) Easter Egg for Nacht der Untoten (WAW)');
   }
 
-  // Per-map achievements (round milestones, challenge types, Easter Egg). Level thresholds from RANKS.
+  // Per-map achievements (round milestones, challenge types). No generic "Main Quest" achievement; EE achievements come from db:seed:easter-eggs.
   const allMaps = await prisma.map.findMany({
     include: {
       game: { select: { shortName: true } },
       challenges: { where: { isActive: true } },
-      easterEggs: { where: { isActive: true, slug: 'main-quest' } },
     },
   });
 
@@ -363,24 +343,6 @@ async function main() {
           xpReward: def.xpReward,
           criteria: def.criteria,
           challengeId: challengeId ?? undefined,
-        },
-      });
-      achievementCount++;
-    }
-
-    if (map.easterEggs.length > 0) {
-      const eeDef = getEasterEggAchievementDefinition();
-      const mainQuest = map.easterEggs[0]!;
-      await prisma.achievement.create({
-        data: {
-          mapId: map.id,
-          easterEggId: mainQuest.id,
-          name: eeDef.name,
-          slug: eeDef.slug,
-          type: eeDef.type as any,
-          rarity: eeDef.rarity as any,
-          xpReward: eeDef.xpReward,
-          criteria: eeDef.criteria,
         },
       });
       achievementCount++;

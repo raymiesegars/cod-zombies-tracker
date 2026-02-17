@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button, Card, CardContent, Logo, EasterEggIcon, MapIcon } from '@/components/ui';
 import { useAuth } from '@/context/auth-context';
-import { Trophy, Target, Users, ChevronRight } from 'lucide-react';
+import { Trophy, Target, Users, ChevronRight, Wrench, ExternalLink } from 'lucide-react';
 
 const features = [
   {
@@ -166,6 +166,72 @@ export default function HomePage() {
                 </Card>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* More Zombies Tools */}
+      <section className="py-14 sm:py-20 bg-bunker-900/80 px-4 border-t border-bunker-800/50">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-zombies text-white tracking-wide flex items-center gap-2">
+                <Wrench className="w-6 h-6 text-blood-500" />
+                More Zombies Tools
+              </h2>
+              <p className="mt-1 text-sm text-bunker-400">
+                Calculators, strategies, and verified records from the community.
+              </p>
+            </div>
+            <Link
+              href="/tools"
+              className="text-sm font-medium text-blood-400 hover:text-blood-300 transition-colors inline-flex items-center gap-1"
+            >
+              View all
+              <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <a
+              href="https://www.zombacus.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block"
+            >
+              <div className="p-4 sm:p-5 rounded-xl bg-bunker-800/60 border border-bunker-700/60 hover:border-element-700/50 transition-colors">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="font-semibold text-white group-hover:text-element-400 transition-colors">
+                      Zombacus
+                    </h3>
+                    <p className="mt-1 text-xs sm:text-sm text-bunker-400">
+                      Calculators, strategies & guides, drop cycle tracker, camo tracker, and more.
+                    </p>
+                  </div>
+                  <ExternalLink className="w-4 h-4 text-bunker-500 group-hover:text-element-400 flex-shrink-0 mt-0.5" />
+                </div>
+              </div>
+            </a>
+            <a
+              href="https://zwr.gg/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block"
+            >
+              <div className="p-4 sm:p-5 rounded-xl bg-bunker-800/60 border border-bunker-700/60 hover:border-blood-700/50 transition-colors">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="font-semibold text-white group-hover:text-blood-400 transition-colors">
+                      ZWR
+                    </h3>
+                    <p className="mt-1 text-xs sm:text-sm text-bunker-400">
+                      Official Zombies World Records—verified high scores and leaderboards.
+                    </p>
+                  </div>
+                  <ExternalLink className="w-4 h-4 text-bunker-500 group-hover:text-blood-400 flex-shrink-0 mt-0.5" />
+                </div>
+              </div>
+            </a>
           </div>
         </div>
       </section>
