@@ -23,6 +23,7 @@ import { RoundCounter, XpDisplay, RelockAchievementButton, RankHelpContent } fro
 import {
   ACHIEVEMENT_CATEGORY_LABELS,
   getAchievementCategory,
+  getAchievementCategoryFilterOptions,
   getSortedCategoryKeys,
   sortAchievementsByXp,
 } from '@/lib/achievements/categories';
@@ -55,6 +56,7 @@ type AchievementWithMap = {
     order?: number;
     game: { id: string; name: string; shortName: string; order: number };
   } | null;
+  easterEgg?: { id: string; name: string; slug: string } | null;
 };
 
 type MapForFilter = {
@@ -85,19 +87,25 @@ function AchievementsSection({
   totalAchievementsFallback,
   filterGame,
   filterMap,
+  filterCategory,
   onFilterGameChange,
   onFilterMapChange,
+  onFilterCategoryChange,
   isOwnProfile,
   onRelock,
+  isMapAchievementsLoading = false,
 }: {
   overview: AchievementsOverview | null;
   totalAchievementsFallback: number; // e.g. 2081 when overview is empty so we show 0/2081 not 0/0
   filterGame: string;
   filterMap: string;
+  filterCategory: string;
   onFilterGameChange: (v: string) => void;
   onFilterMapChange: (v: string) => void;
+  onFilterCategoryChange: (v: string) => void;
   isOwnProfile: boolean;
   onRelock?: () => void | Promise<void>;
+  isMapAchievementsLoading?: boolean;
 }) {
   const unlockedSet = useMemo(
     () => new Set(overview?.unlockedAchievementIds ?? []),
@@ -122,8 +130,10 @@ function AchievementsSection({
 
   const filteredAchievements = useMemo(() => {
     if (!overview?.achievements || !filterMap) return [];
-    return overview.achievements.filter((a) => a.map?.id === filterMap);
-  }, [overview?.achievements, filterMap]);
+    return overview.achievements
+      .filter((a) => a.map?.id === filterMap)
+      .filter((a) => !filterCategory || getAchievementCategory(a) === filterCategory);
+  }, [overview?.achievements, filterMap, filterCategory]);
 
   const groupedByMapThenCategory = useMemo(() => {
     const byMap = new Map<
@@ -191,7 +201,7 @@ function AchievementsSection({
         </div>
       </div>
 
-      {/* Filters: game then map required (lazy loads achievements when map selected) */}
+      {/* Filters: game, map, then achievement type (lazy loads achievements when map selected) */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <Filter className="w-4 h-4 text-bunker-500 flex-shrink-0" />
         <Select
@@ -200,6 +210,7 @@ function AchievementsSection({
           onChange={(e) => {
             onFilterGameChange(e.target.value);
             onFilterMapChange('');
+            onFilterCategoryChange('');
           }}
           className="w-full sm:w-44"
         />
@@ -209,9 +220,19 @@ function AchievementsSection({
             ...mapOptions,
           ]}
           value={filterMap}
-          onChange={(e) => onFilterMapChange(e.target.value)}
+          onChange={(e) => {
+            onFilterMapChange(e.target.value);
+            onFilterCategoryChange('');
+          }}
           className="w-full sm:w-56"
           disabled={!filterGame}
+        />
+        <Select
+          options={getAchievementCategoryFilterOptions()}
+          value={filterCategory}
+          onChange={(e) => onFilterCategoryChange(e.target.value)}
+          className="w-full sm:w-44"
+          disabled={!filterMap}
         />
       </div>
 
@@ -224,9 +245,18 @@ function AchievementsSection({
               Select a game and map above to view achievements.
             </p>
           </div>
-        ) : groupedByMapThenCategory.length === 0 ? (
+        ) : isMapAchievementsLoading ? (
           <div className="py-12 sm:py-16 text-center">
             <PageLoader message="Loading achievements…" inline />
+          </div>
+        ) : groupedByMapThenCategory.length === 0 ? (
+          <div className="py-12 sm:py-16 text-center">
+            <Award className="w-10 h-10 sm:w-12 sm:h-12 text-bunker-600 mx-auto mb-4" />
+            <p className="text-sm sm:text-base text-bunker-400">
+              {filterCategory
+                ? `No ${(ACHIEVEMENT_CATEGORY_LABELS[filterCategory] ?? filterCategory).toLowerCase()} achievements found for this map.`
+                : 'No achievements found for this map.'}
+            </p>
           </div>
         ) : (
           <div className="space-y-6 sm:space-y-8 p-4 sm:p-6">
@@ -260,6 +290,7 @@ function AchievementsSection({
                             const unlocked = unlockedSet.has(a.id);
                             const c = a.criteria;
                             const subLabel = c?.isCap ? 'Cap' : c?.round != null ? `Round ${c.round}` : null;
+                            const displayName = a.easterEgg?.name ?? a.name;
                             return (
                               <li
                                 key={a.id}
@@ -269,32 +300,36 @@ function AchievementsSection({
                                     : 'flex items-center justify-between gap-3 py-2 px-3 rounded-lg bg-bunker-800/30 border border-bunker-700/50'
                                 }
                               >
-                                <div className="flex items-center gap-3 min-w-0">
+                                <div className="flex items-center gap-3 min-w-0 min-h-[2.75rem]">
                                   {unlocked ? (
                                     <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-military-400" />
                                   ) : (
                                     <Lock className="w-5 h-5 flex-shrink-0 text-bunker-500" />
                                   )}
-                                  <div className="min-w-0">
-                                    <p className="font-medium text-sm text-white truncate">{a.name}</p>
+                                  <div className={`min-w-0 flex flex-col justify-center ${subLabel ? 'min-h-[2.25rem]' : ''}`}>
+                                    <p className="font-medium text-sm text-white truncate">{displayName}</p>
                                     {subLabel && (
                                       <p className="text-xs text-bunker-400">{subLabel}</p>
                                     )}
                                   </div>
                                 </div>
-                                <span className="flex items-center gap-2 flex-shrink-0">
-                                  <span className="text-sm font-medium text-blood-400">+{a.xpReward} XP</span>
-                                  {isOwnProfile && unlocked && onRelock && (
-                                    <RelockAchievementButton
-                                      achievementId={a.id}
-                                      achievementName={a.name}
-                                      xpReward={a.xpReward}
-                                      onRelocked={async () => {
-                                        await onRelock?.();
-                                      }}
-                                      className="p-1 rounded hover:bg-bunker-700"
-                                    />
-                                  )}
+                                <span className="flex items-center flex-shrink-0 min-w-[11rem] gap-2">
+                                  <span className="text-sm font-medium text-blood-400 min-w-[7.5rem] whitespace-nowrap text-left">+{a.xpReward.toLocaleString()} XP</span>
+                                  <span className="w-8 flex shrink-0 justify-center">
+                                    {isOwnProfile && unlocked && onRelock ? (
+                                      <RelockAchievementButton
+                                        achievementId={a.id}
+                                        achievementName={displayName}
+                                        xpReward={a.xpReward}
+                                        onRelocked={async () => {
+                                          await onRelock?.();
+                                        }}
+                                        className="p-1 rounded hover:bg-bunker-700"
+                                      />
+                                    ) : (
+                                      <span className="w-5 h-5 block" aria-hidden />
+                                    )}
+                                  </span>
                                 </span>
                               </li>
                             );
@@ -331,6 +366,8 @@ export default function UserProfilePage() {
 
   const [achievementFilterGame, setAchievementFilterGame] = useState('');
   const [achievementFilterMap, setAchievementFilterMap] = useState('');
+  const [achievementFilterCategory, setAchievementFilterCategory] = useState('');
+  const [achievementMapLoading, setAchievementMapLoading] = useState(false);
 
   const isOwnProfile = currentProfile?.username === username || currentProfile?.id === username;
 
@@ -389,6 +426,7 @@ export default function UserProfilePage() {
   // Load achievements when they pick a map; clear when they clear the filter
   useEffect(() => {
     if (!achievementFilterMap) {
+      setAchievementMapLoading(false);
       setAchievementsOverview((prev) =>
         prev ? { ...prev, achievements: [], unlockedAchievementIds: [] } : null
       );
@@ -396,6 +434,7 @@ export default function UserProfilePage() {
     }
     if (!username) return;
     let cancelled = false;
+    setAchievementMapLoading(true);
     async function fetchMapAchievements() {
       try {
         const res = await fetch(
@@ -409,6 +448,8 @@ export default function UserProfilePage() {
         );
       } catch (err) {
         if (!cancelled) console.error('Error fetching map achievements:', err);
+      } finally {
+        if (!cancelled) setAchievementMapLoading(false);
       }
     }
     fetchMapAchievements();
@@ -628,10 +669,13 @@ export default function UserProfilePage() {
           totalAchievementsFallback={statsTotals.totalAchievements}
           filterGame={achievementFilterGame}
           filterMap={achievementFilterMap}
+          filterCategory={achievementFilterCategory}
           onFilterGameChange={setAchievementFilterGame}
           onFilterMapChange={setAchievementFilterMap}
+          onFilterCategoryChange={setAchievementFilterCategory}
           isOwnProfile={isOwnProfile}
           onRelock={refetchAchievementsAfterRelock}
+          isMapAchievementsLoading={achievementMapLoading}
         />
       </div>
     </div>

@@ -94,7 +94,10 @@ export async function GET(
     // They picked a map – only that map’s achievements
     const [rawAchievements, unlocked] = await Promise.all([
       prisma.achievement.findMany({
-        where: { isActive: true, mapId },
+        where: {
+          isActive: true,
+          OR: [{ mapId }, { easterEgg: { mapId } }],
+        },
         include: {
           map: {
             select: {
@@ -105,16 +108,54 @@ export async function GET(
               game: { select: { id: true, name: true, shortName: true, order: true } },
             },
           },
+          easterEgg: { select: { id: true, name: true, slug: true } },
         },
-        orderBy: { slug: 'asc' },
+        orderBy: [{ type: 'asc' }, { slug: 'asc' }],
       }),
       prisma.userAchievement.findMany({
-        where: { userId: user.id, achievement: { mapId } },
+        where: {
+          userId: user.id,
+          achievement: {
+            OR: [{ mapId }, { easterEgg: { mapId } }],
+          },
+        },
         select: { achievementId: true },
       }),
     ]);
 
     const unlockedIds = unlocked.map((u) => u.achievementId);
+
+    // EE achievements may have mapId null (linked only via easterEgg); attach map so profile filter works
+    let achievements = rawAchievements;
+    const needMap = rawAchievements.some((a) => !a.map);
+    if (needMap && mapId) {
+      const mapInfo = await prisma.map.findUnique({
+        where: { id: mapId },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          order: true,
+          game: { select: { id: true, name: true, shortName: true, order: true } },
+        },
+      });
+      if (mapInfo) {
+        achievements = rawAchievements.map((a) => ({
+          ...a,
+          map: a.map ?? mapInfo,
+        }));
+      }
+    }
+
+    // Hide redundant generic "Main Quest" when this map has a specific-named main quest achievement
+    const hasSpecificEeAchievement = achievements.some(
+      (a) => a.type === 'EASTER_EGG_COMPLETE' && ((a.easterEgg as { name?: string } | null)?.name !== 'Main Quest' || a.slug !== 'main-quest')
+    );
+    if (hasSpecificEeAchievement) {
+      achievements = achievements.filter(
+        (a) => !(a.type === 'EASTER_EGG_COMPLETE' && a.name === 'Main Quest' && a.slug === 'main-quest')
+      );
+    }
 
     return NextResponse.json({
       completionByGame,
@@ -124,7 +165,7 @@ export async function GET(
           maps.map((m) => ({ id: m.id, name: m.name, slug: m.slug, order: m.order, game: m.game })),
         ])
       ),
-      achievements: rawAchievements,
+      achievements,
       unlockedAchievementIds: unlockedIds,
     });
   } catch (error) {

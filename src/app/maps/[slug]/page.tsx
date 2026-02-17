@@ -63,7 +63,10 @@ export default async function MapSlugPage({ params }: Props) {
       },
       achievements: {
         where: { isActive: true },
-        orderBy: { slug: 'asc' },
+        orderBy: [{ type: 'asc' }, { slug: 'asc' }],
+        include: {
+          easterEgg: { select: { id: true, name: true, slug: true } },
+        },
       },
     },
   });

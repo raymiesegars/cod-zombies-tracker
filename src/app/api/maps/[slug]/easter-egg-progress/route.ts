@@ -178,6 +178,20 @@ export async function POST(request: NextRequest, { params }: Params) {
             where: { id: user.id },
             data: { totalXp: { increment: ee.xpReward } },
           });
+          // Create UserAchievement so the achievement shows as unlocked in the UI (XP already added above)
+          const eeAchievement = await prisma.achievement.findFirst({
+            where: { easterEggId: ee.id, isActive: true },
+            select: { id: true },
+          });
+          if (eeAchievement) {
+            await prisma.userAchievement.upsert({
+              where: {
+                userId_achievementId: { userId: user.id, achievementId: eeAchievement.id },
+              },
+              create: { userId: user.id, achievementId: eeAchievement.id },
+              update: {},
+            });
+          }
           const updated = await prisma.user.findUnique({
             where: { id: user.id },
             select: { totalXp: true, level: true },

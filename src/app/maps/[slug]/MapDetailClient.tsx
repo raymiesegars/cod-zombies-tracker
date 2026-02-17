@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { dispatchXpToast } from '@/context/xp-toast-context';
 import {
@@ -187,7 +187,7 @@ function AchievementsTabContent({
   canRelock,
   onRelock,
 }: {
-  achievements?: { id: string; name: string; slug: string; type: string; criteria: { round?: number; challengeType?: string; isCap?: boolean }; xpReward: number; rarity: string; easterEggId?: string | null }[];
+  achievements?: { id: string; name: string; slug: string; type: string; criteria: { round?: number; challengeType?: string; isCap?: boolean }; xpReward: number; rarity: string; easterEggId?: string | null; easterEgg?: { id: string; name: string; slug: string } | null }[];
   unlockedIds?: string[];
   canRelock?: boolean;
   onRelock?: () => void | Promise<void>;
@@ -214,38 +214,34 @@ function AchievementsTabContent({
   const sortedCategories = getSortedCategoryKeys(byCategory as Record<string, unknown[]>);
   const visibleCategories = categoryFilter ? (sortedCategories.includes(categoryFilter) ? [categoryFilter] : sortedCategories) : sortedCategories;
 
+  const categoryOptions = [
+    { value: '', label: 'All types' },
+    ...sortedCategories.map((cat) => ({ value: cat, label: ACHIEVEMENT_CATEGORY_LABELS[cat] ?? cat })),
+  ];
+
+  const visibleCount = visibleCategories.reduce((sum, cat) => sum + (byCategory[cat]?.length ?? 0), 0);
+  const filterEmpty = categoryFilter && visibleCount === 0;
+
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Category filter  */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-medium text-bunker-400 mr-1">Filter:</span>
-        <button
-          type="button"
-          onClick={() => setCategoryFilter(null)}
-          className={`rounded-lg border px-2.5 py-1.5 text-sm font-medium transition-colors ${
-            categoryFilter === null
-              ? 'border-blood-500 bg-blood-950/80 text-white'
-              : 'border-bunker-600 bg-bunker-800/50 text-bunker-300 hover:border-bunker-500 hover:text-bunker-200'
-          }`}
-        >
-          All
-        </button>
-        {sortedCategories.map((cat) => (
-          <button
-            key={cat}
-            type="button"
-            onClick={() => setCategoryFilter(cat)}
-            className={`rounded-lg border px-2.5 py-1.5 text-sm font-medium transition-colors ${
-              categoryFilter === cat
-                ? 'border-blood-500 bg-blood-950/80 text-white'
-                : 'border-bunker-600 bg-bunker-800/50 text-bunker-300 hover:border-bunker-500 hover:text-bunker-200'
-            }`}
-          >
-            {ACHIEVEMENT_CATEGORY_LABELS[cat] ?? cat}
-          </button>
-        ))}
+        <span className="text-xs font-medium text-bunker-400">Filter by type:</span>
+        <Select
+          options={categoryOptions}
+          value={categoryFilter ?? ''}
+          onChange={(e) => setCategoryFilter(e.target.value || null)}
+          className="w-full sm:w-48"
+        />
       </div>
 
+      {filterEmpty ? (
+        <div className="text-center py-8 sm:py-12">
+          <Award className="w-10 h-10 sm:w-12 sm:h-12 text-bunker-600 mx-auto mb-4" />
+          <p className="text-bunker-400 text-sm sm:text-base">
+            No {(ACHIEVEMENT_CATEGORY_LABELS[categoryFilter] ?? categoryFilter).toLowerCase()} achievements on this map.
+          </p>
+        </div>
+      ) : (
       <div className="space-y-6 sm:space-y-8">
       {visibleCategories.map((cat) => (
         <Card key={cat} variant="bordered">
@@ -260,6 +256,7 @@ function AchievementsTabContent({
                 const unlocked = unlockedSet.has(a.id);
                 const c = a.criteria as { round?: number; isCap?: boolean };
                 const subLabel = c.isCap ? 'Cap' : c.round != null ? `Round ${c.round}` : null;
+                const displayName = (a as { easterEgg?: { name: string } | null }).easterEgg?.name ?? a.name;
                 return (
                   <li
                     key={a.id}
@@ -268,30 +265,36 @@ function AchievementsTabContent({
                       : 'flex items-center justify-between gap-3 py-2 px-3 rounded-lg bg-bunker-800/30 border border-bunker-700/50'
                     }
                   >
-                    <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex items-center gap-3 min-w-0 min-h-[2.75rem]">
                       {unlocked ? (
                         <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-military-400" />
                       ) : (
                         <Lock className="w-5 h-5 flex-shrink-0 text-bunker-500" />
                       )}
-                      <div className="min-w-0">
-                        <p className="font-medium text-sm text-white truncate">{a.name}</p>
-                        {subLabel && <p className="text-xs text-bunker-400">{subLabel}</p>}
+                      <div className={`min-w-0 flex flex-col justify-center ${subLabel ? 'min-h-[2.25rem]' : ''}`}>
+                        <p className="font-medium text-sm text-white truncate">{displayName}</p>
+                        {subLabel && (
+                          <p className="text-xs text-bunker-400">{subLabel}</p>
+                        )}
                       </div>
                     </div>
-                    <span className="flex items-center gap-2 flex-shrink-0">
-                      <span className="text-sm font-medium text-blood-400">+{a.xpReward} XP</span>
-                      {canRelock && unlocked && (
-                        <RelockAchievementButton
-                          achievementId={a.id}
-                          achievementName={a.name}
-                          xpReward={a.xpReward}
-                          onRelocked={async () => {
-                            await onRelock?.();
-                          }}
-                          className="p-1 rounded hover:bg-bunker-700"
-                        />
-                      )}
+                    <span className="flex items-center flex-shrink-0 min-w-[11rem] gap-2">
+                      <span className="text-sm font-medium text-blood-400 min-w-[7.5rem] whitespace-nowrap text-left">+{a.xpReward.toLocaleString()} XP</span>
+                      <span className="w-8 flex shrink-0 justify-center">
+                        {canRelock && unlocked ? (
+                          <RelockAchievementButton
+                            achievementId={a.id}
+                            achievementName={displayName}
+                            xpReward={a.xpReward}
+                            onRelocked={async () => {
+                              await onRelock?.();
+                            }}
+                            className="p-1 rounded hover:bg-bunker-700"
+                          />
+                        ) : (
+                          <span className="w-5 h-5 block" aria-hidden />
+                        )}
+                      </span>
                     </span>
                   </li>
                 );
@@ -301,6 +304,7 @@ function AchievementsTabContent({
         </Card>
       ))}
       </div>
+      )}
     </div>
   );
 }
@@ -377,6 +381,7 @@ type MapDetailPageProps = {
 export default function MapDetailClient({ initialMap = null, initialMapStats = null }: MapDetailPageProps) {
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const slug = params.slug as string;
   const { profile, refreshProfile } = useAuth();
   const tabParam = searchParams.get('tab');
@@ -430,6 +435,17 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
       setIsLoading(false);
     }
   }, [initialMap, initialMapStats]);
+
+  // After redirect from edit page (e.g. after logging EE), refetch map + profile so achievements update without manual refresh
+  useEffect(() => {
+    if (searchParams.get('achievementUpdated') !== '1') return;
+    setRefreshMapCounter((c) => c + 1);
+    refreshProfile?.();
+    const u = new URLSearchParams(searchParams.toString());
+    u.delete('achievementUpdated');
+    const next = u.toString() ? `?${u.toString()}` : window.location.pathname;
+    router.replace(next, { scroll: false });
+  }, [searchParams, router, refreshProfile]);
 
   // Refetch only when user triggers refresh (not on initial load when we have server data)
   useEffect(() => {
@@ -912,8 +928,8 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           {/* Achievements Tab */}
           <TabsContent value="achievements" forceMount>
             <AchievementsTabContent
-              achievements={(map as MapWithDetails & { achievements?: { id: string; name: string; slug: string; type: string; criteria: { round?: number; challengeType?: string; isCap?: boolean }; xpReward: number; rarity: string; easterEggId?: string | null }[]; unlockedAchievementIds?: string[] }).achievements}
-              unlockedIds={(map as MapWithDetails & { unlockedAchievementIds?: string[] }).unlockedAchievementIds}
+              achievements={(map as MapWithDetails & { achievements?: Array<{ id: string; name: string; slug: string; type: string; criteria: { round?: number; challengeType?: string; isCap?: boolean }; xpReward: number; rarity: string; easterEggId?: string | null; easterEgg?: { id: string; name: string; slug: string } | null }>; unlockedAchievementIds?: string[] } | null)?.achievements ?? []}
+              unlockedIds={(map as MapWithDetails & { unlockedAchievementIds?: string[] } | null)?.unlockedAchievementIds}
               canRelock={!!profile}
               onRelock={async () => {
                 setRefreshMapCounter((c) => c + 1);
@@ -1111,6 +1127,9 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                           console.log('[EE progress] calling dispatchXpToast', { xpAwarded, totalXp });
                           dispatchXpToast(xpAwarded, totalXp != null ? { totalXp } : undefined);
                         }, 0);
+                        // Refetch map + profile so achievements tab shows the new unlock without manual refresh
+                        setRefreshMapCounter((c) => c + 1);
+                        refreshProfile?.();
                       }
                     } else if (!res.ok || (data.action !== 'checked' && data.action !== 'unchecked')) {
                       const fresh = await fetch(`/api/maps/${slug}/easter-egg-progress`).then((r) => r.json());

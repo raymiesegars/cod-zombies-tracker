@@ -59,30 +59,8 @@ export async function POST(request: NextRequest) {
     });
 
     // Main quest = one-time XP; we track so we don’t double-award
-    const ee = await prisma.easterEgg.findUnique({
-      where: { id: easterEggId },
-      select: { type: true, xpReward: true },
-    });
-    let mainQuestXpGained = 0;
-    if (ee?.type === 'MAIN_QUEST' && (ee.xpReward ?? 0) > 0) {
-      const already = await prisma.mainEasterEggXpAwarded.findUnique({
-        where: { userId_easterEggId: { userId: user.id, easterEggId } },
-      });
-      if (!already) {
-        await prisma.mainEasterEggXpAwarded.create({
-          data: { userId: user.id, easterEggId },
-        });
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { totalXp: { increment: ee.xpReward! } },
-        });
-        mainQuestXpGained = ee.xpReward!;
-      }
-    }
-
     const newlyUnlocked = await processMapAchievements(user.id, mapId);
-    const achievementXp = newlyUnlocked.reduce((sum, a) => sum + a.xpReward, 0);
-    const xpGained = mainQuestXpGained + achievementXp;
+    const xpGained = newlyUnlocked.reduce((sum, a) => sum + a.xpReward, 0);
     const totalXp =
       xpGained > 0
         ? (await prisma.user.findUnique({ where: { id: user.id }, select: { totalXp: true } }))?.totalXp ?? undefined

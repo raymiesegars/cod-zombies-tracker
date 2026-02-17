@@ -26,13 +26,24 @@ const CATEGORY_ORDER = [
 ];
 
 export function getAchievementCategory(a: {
-  type: string;
+  type?: string;
   criteria?: { challengeType?: string };
+  easterEggId?: string | null;
+  easterEgg?: unknown;
 }): string {
-  if (a.type === 'EASTER_EGG_COMPLETE') return 'EASTER_EGG';
+  if (a.type === 'EASTER_EGG_COMPLETE' || a.easterEggId || a.easterEgg) return 'EASTER_EGG';
   if (a.type === 'ROUND_MILESTONE') return 'BASE_ROUNDS';
   const ct = a.criteria?.challengeType;
   return ct ?? 'OTHER';
+}
+
+/** Options for achievement type/category dropdown (All + each category) */
+export function getAchievementCategoryFilterOptions(): { value: string; label: string }[] {
+  const categories = CATEGORY_ORDER.filter((c) => c !== 'OTHER');
+  return [
+    { value: '', label: 'All types' },
+    ...categories.map((c) => ({ value: c, label: ACHIEVEMENT_CATEGORY_LABELS[c] ?? c })),
+  ];
 }
 
 export function getSortedCategoryKeys(categories: Record<string, unknown[]>): string[] {

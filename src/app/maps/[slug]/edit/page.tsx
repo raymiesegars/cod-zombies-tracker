@@ -237,7 +237,7 @@ export default function EditMapProgressPage() {
         showXpToast(data.xpGained, typeof data.totalXp === 'number' ? { totalXp: data.totalXp } : undefined);
       }
       setSaveStatus('success');
-      setTimeout(() => router.push(`/maps/${slug}`), 1500);
+      setTimeout(() => router.push(`/maps/${slug}?achievementUpdated=1`), 1500);
     } catch (error) {
       console.error('Error saving challenge log:', error);
       setSaveStatus('error');
@@ -279,7 +279,7 @@ export default function EditMapProgressPage() {
         showXpToast(data.xpGained, typeof data.totalXp === 'number' ? { totalXp: data.totalXp } : undefined);
       }
       setSaveStatus('success');
-      setTimeout(() => router.push(`/maps/${slug}`), 1500);
+      setTimeout(() => router.push(`/maps/${slug}?achievementUpdated=1`), 1500);
     } catch (error) {
       console.error('Error saving Easter Egg log:', error);
       setSaveStatus('error');

@@ -54,29 +54,9 @@ async function main() {
   });
   const mapBySlug = new Map(maps.map((m) => [m.slug, m]));
 
-  const hasSpecificMainQuest = new Set(
-    SPECIFIC_EASTER_EGGS.filter((ee) => ee.type === 'MAIN_QUEST').map(
-      (ee) => `${ee.gameShortName}:${ee.mapSlug}`
-    )
-  );
-  const mapKey = (m: { slug: string; game: { shortName: string } }) => `${m.game.shortName}:${m.slug}`;
-  let mainQuestCount = 0;
-  for (const map of maps) {
-    if (!MAIN_QUEST_MAP_SLUGS.has(map.slug)) continue;
-    if (hasSpecificMainQuest.has(mapKey(map))) continue;
-    await prisma.easterEgg.create({
-      data: {
-        name: 'Main Quest',
-        slug: 'main-quest',
-        type: 'MAIN_QUEST',
-        mapId: map.id,
-        xpReward: 1250,
-        description: `Complete the main Easter Egg quest on ${map.name}`,
-      },
-    });
-    mainQuestCount++;
-  }
-  console.log(`Created ${mainQuestCount} Main Quest placeholders.`);
+  // Do NOT create placeholder "Main Quest" EEs (no steps). They duplicate the real main-quest
+  // achievements and show as redundant 2500 XP entries. Only create specific EEs from SPECIFIC_EASTER_EGGS.
+  // (Placeholder Main Quest creation removed — run db:delete-placeholder-main-quest-ees after seed if you have old data.)
 
   let specificCount = 0;
   for (const ee of SPECIFIC_EASTER_EGGS) {
@@ -131,6 +111,50 @@ async function main() {
   }
   if (relinked > 0) {
     console.log(`Re-linked ${relinked} Main Quest achievements to Easter Eggs.`);
+  }
+
+  // Ensure every Easter egg that awards XP has an Achievement (so it shows in Achievements tab / dashboard)
+  const eesWithXp = await prisma.easterEgg.findMany({
+    where: { xpReward: { gt: 0 }, isActive: true },
+    select: { id: true, name: true, slug: true, mapId: true, xpReward: true },
+  });
+  let createdCount = 0;
+  for (const ee of eesWithXp) {
+    const existing = await prisma.achievement.findFirst({
+      where: { easterEggId: ee.id },
+    });
+    if (existing) continue;
+    const slugBase = (ee.slug || `ee-${ee.id.slice(-8)}`).replace(/[^a-z0-9-]/gi, '-').toLowerCase().replace(/-+/g, '-') || 'easter-egg';
+    let attempt = 0;
+    while (true) {
+      const slug = attempt === 0 ? slugBase : `${slugBase}-${attempt}`;
+      try {
+        await prisma.achievement.create({
+          data: {
+            mapId: ee.mapId,
+            easterEggId: ee.id,
+            name: ee.name,
+            slug,
+            type: 'EASTER_EGG_COMPLETE',
+            rarity: 'LEGENDARY',
+            xpReward: ee.xpReward,
+            criteria: {},
+          },
+        });
+        createdCount++;
+        break;
+      } catch (err: unknown) {
+        const isUniqueViolation = err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'P2002';
+        if (isUniqueViolation && attempt < 100) {
+          attempt++;
+        } else {
+          throw err;
+        }
+      }
+    }
+  }
+  if (createdCount > 0) {
+    console.log(`Created ${createdCount} achievements for Easter eggs with XP.`);
   }
 
   console.log('Easter Egg seed complete.');

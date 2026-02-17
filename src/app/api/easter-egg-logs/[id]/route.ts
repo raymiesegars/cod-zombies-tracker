@@ -82,7 +82,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   }
 }
 
-// Delete your log; revoke main-quest XP if we gave it, then revoke any achievements that depended on it
+// Delete your log; revoke any achievements that depended on it (and subtract their XP).
 export async function DELETE(_request: NextRequest, { params }: Params) {
   try {
     const { id } = await params;
@@ -90,32 +90,10 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
     if ('error' in result) return NextResponse.json({ error: result.error }, { status: result.status });
     const { log, user } = result;
     const mapId = log.mapId;
-    const easterEggId = log.easterEggId;
-
-    const ee = await prisma.easterEgg.findUnique({
-      where: { id: easterEggId },
-      select: { type: true, xpReward: true },
-    });
-    let mainQuestXpRemoved = 0;
-    if (ee?.type === 'MAIN_QUEST' && (ee.xpReward ?? 0) > 0) {
-      const awarded = await prisma.mainEasterEggXpAwarded.findUnique({
-        where: { userId_easterEggId: { userId: user.id, easterEggId } },
-      });
-      if (awarded) {
-        await prisma.mainEasterEggXpAwarded.delete({
-          where: { userId_easterEggId: { userId: user.id, easterEggId } },
-        });
-        mainQuestXpRemoved = ee.xpReward ?? 0;
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { totalXp: { decrement: mainQuestXpRemoved } },
-        });
-      }
-    }
 
     await prisma.easterEggLog.delete({ where: { id } });
     const { xpSubtracted } = await revokeAchievementsForMapAfterDelete(user.id, mapId);
-    const totalXpRemoved = mainQuestXpRemoved + xpSubtracted;
+    const totalXpRemoved = xpSubtracted;
 
     const updated = await prisma.user.findUnique({ where: { id: user.id }, select: { totalXp: true, level: true } });
     if (updated) {

@@ -5,7 +5,7 @@ import { getUser } from '@/lib/supabase/server';
 // Map detail: challenges, EEs, achievements. If logged in, we include which ones they’ve unlocked.
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ slug: string }> },
 ) {
   try {
     const { slug } = await params;
@@ -24,15 +24,39 @@ export async function GET(
             steps: { orderBy: { order: 'asc' } },
           },
         },
-        achievements: {
-          where: { isActive: true },
-          orderBy: { slug: 'asc' },
-        },
       },
     });
 
     if (!map) {
       return NextResponse.json({ error: 'Map not found' }, { status: 404 });
+    }
+
+    // Achievements: mapId = this map OR easterEgg belongs to this map
+    let achievements = await prisma.achievement.findMany({
+      where: {
+        isActive: true,
+        OR: [{ mapId: map.id }, { easterEgg: { mapId: map.id } }],
+      },
+      orderBy: [{ type: 'asc' }, { slug: 'asc' }],
+      include: {
+        easterEgg: { select: { id: true, name: true, slug: true } },
+      },
+    });
+
+    const hasSpecificEeAchievement = achievements.some(
+      (a) =>
+        a.type === 'EASTER_EGG_COMPLETE' &&
+        (a.easterEgg?.name !== 'Main Quest' || a.slug !== 'main-quest'),
+    );
+    if (hasSpecificEeAchievement) {
+      achievements = achievements.filter(
+        (a) =>
+          !(
+            a.type === 'EASTER_EGG_COMPLETE' &&
+            a.name === 'Main Quest' &&
+            a.slug === 'main-quest'
+          ),
+      );
     }
 
     const supabaseUser = await getUser();
@@ -46,7 +70,9 @@ export async function GET(
         const unlocked = await prisma.userAchievement.findMany({
           where: {
             userId: user.id,
-            achievement: { mapId: map.id },
+            achievement: {
+              OR: [{ mapId: map.id }, { easterEgg: { mapId: map.id } }],
+            },
           },
           select: { achievementId: true },
         });
@@ -56,10 +82,14 @@ export async function GET(
 
     return NextResponse.json({
       ...map,
+      achievements,
       unlockedAchievementIds,
     });
   } catch (error) {
     console.error('Error fetching map:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 },
+    );
   }
 }
