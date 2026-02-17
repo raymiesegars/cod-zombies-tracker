@@ -43,7 +43,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { supabaseId, email, displayName, avatarUrl } = body;
+    const supabaseId = typeof body.supabaseId === 'string' ? body.supabaseId.trim() : '';
+    const email = typeof body.email === 'string' ? body.email.trim() : '';
+    const displayName = body.displayName != null ? String(body.displayName).trim() || null : null;
+    const avatarUrl = body.avatarUrl != null ? String(body.avatarUrl).trim() || null : null;
 
     if (!supabaseId || !email) {
       return NextResponse.json(
@@ -52,14 +55,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const emailUsername = email.split('@')[0];
+    const emailUsername = email.split('@')[0] ?? '';
     let username = slugify(emailUsername);
+    if (!username) {
+      username = `user-${Date.now().toString(36)}`;
+    }
 
-    const existingUser = await prisma.user.findUnique({
+    const existingByUsername = await prisma.user.findUnique({
       where: { username },
     });
-
-    if (existingUser && existingUser.supabaseId !== supabaseId) {
+    if (existingByUsername && existingByUsername.supabaseId !== supabaseId) {
       username = `${username}-${Date.now().toString(36)}`;
     }
 
@@ -80,8 +85,47 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(user);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating/updating user profile:', error);
+
+    const prismaError = error as { code?: string; meta?: { target?: string[] } };
+    if (prismaError?.code === 'P2002') {
+      const target = prismaError.meta?.target as string[] | undefined;
+      if (target?.includes('email')) {
+        const existingByEmail = await prisma.user.findUnique({
+          where: { email },
+        });
+        if (existingByEmail) {
+          await prisma.user.update({
+            where: { id: existingByEmail.id },
+            data: { supabaseId, displayName, avatarUrl, updatedAt: new Date() },
+          });
+          const updated = await prisma.user.findUnique({
+            where: { id: existingByEmail.id },
+            include: {
+              _count: {
+                select: { challengeLogs: true, easterEggLogs: true, userAchievements: true },
+              },
+            },
+          });
+          if (updated) {
+            const level = getLevelFromXp(updated.totalXp ?? 0).level;
+            return NextResponse.json({ ...updated, level, totalXp: updated.totalXp ?? 0 });
+          }
+        }
+        return NextResponse.json(
+          { error: 'An account with this email already exists' },
+          { status: 409 }
+        );
+      }
+      if (target?.includes('username')) {
+        return NextResponse.json(
+          { error: 'Username conflict; please try again' },
+          { status: 409 }
+        );
+      }
+    }
+
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

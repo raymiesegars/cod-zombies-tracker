@@ -1,4 +1,4 @@
-# Aether Log
+# CoD Zombies Tracker
 
 Track Treyarch Zombies progress: rounds, challenges, Easter eggs, and leaderboards. Sign in with Google, log your runs, and see how you stack up.
 
