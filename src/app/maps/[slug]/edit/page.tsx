@@ -19,7 +19,7 @@ import {
   TabsContent,
   TimeInput,
 } from '@/components/ui';
-import { ProofEmbed, ProofUrlsInput } from '@/components/game';
+import { ProofEmbed, ProofUrlsInput, TeammatePicker } from '@/components/game';
 import { normalizeProofUrls } from '@/lib/utils';
 import { useXpToast } from '@/context/xp-toast-context';
 import { getXpForChallengeLog, getXpForEasterEggLog, type AchievementForPreview } from '@/lib/xp-preview';
@@ -98,7 +98,7 @@ export default function EditMapProgressPage() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   const [challengeForms, setChallengeForms] = useState<
-    Record<string, { roundReached: string; playerCount: PlayerCount; proofUrls: string[]; notes: string; completionTimeSeconds: number | null }>
+    Record<string, { roundReached: string; playerCount: PlayerCount; proofUrls: string[]; notes: string; completionTimeSeconds: number | null; teammateUserIds: string[]; teammateNonUserNames: string[] }>
   >({});
 
   const [easterEggForms, setEasterEggForms] = useState<
@@ -113,6 +113,8 @@ export default function EditMapProgressPage() {
         proofUrls: string[];
         notes: string;
         completionTimeSeconds: number | null;
+        teammateUserIds: string[];
+        teammateNonUserNames: string[];
       }
     >
   >({});
@@ -133,7 +135,7 @@ export default function EditMapProgressPage() {
 
           const mainQuestEasterEggs = (data.easterEggs ?? []).filter((ee: { type: string }) => ee.type === 'MAIN_QUEST');
 
-          const challengeInitial: Record<string, { roundReached: string; playerCount: PlayerCount; proofUrls: string[]; notes: string; completionTimeSeconds: number | null }> = {};
+          const challengeInitial: Record<string, { roundReached: string; playerCount: PlayerCount; proofUrls: string[]; notes: string; completionTimeSeconds: number | null; teammateUserIds: string[]; teammateNonUserNames: string[] }> = {};
           for (const challenge of data.challenges) {
             challengeInitial[challenge.id] = {
               roundReached: '',
@@ -141,6 +143,8 @@ export default function EditMapProgressPage() {
               proofUrls: [],
               notes: '',
               completionTimeSeconds: null,
+              teammateUserIds: [],
+              teammateNonUserNames: [],
             };
           }
           setChallengeForms(challengeInitial);
@@ -154,6 +158,8 @@ export default function EditMapProgressPage() {
             proofUrls: string[];
             notes: string;
             completionTimeSeconds: number | null;
+            teammateUserIds: string[];
+            teammateNonUserNames: string[];
           }> = {};
           for (const ee of mainQuestEasterEggs) {
             eeInitial[ee.id] = {
@@ -165,6 +171,8 @@ export default function EditMapProgressPage() {
               proofUrls: [],
               notes: '',
               completionTimeSeconds: null,
+              teammateUserIds: [],
+              teammateNonUserNames: [],
             };
           }
           setEasterEggForms(eeInitial);
@@ -228,6 +236,8 @@ export default function EditMapProgressPage() {
           proofUrls: normalizeProofUrls(form.proofUrls ?? []),
           notes: form.notes || null,
           completionTimeSeconds: form.completionTimeSeconds ?? null,
+          teammateUserIds: form.teammateUserIds ?? [],
+          teammateNonUserNames: form.teammateNonUserNames ?? [],
         }),
       });
       const data = await res.json();
@@ -270,6 +280,8 @@ export default function EditMapProgressPage() {
           proofUrls: normalizeProofUrls(form.proofUrls ?? []),
           notes: form.notes || null,
           completionTimeSeconds: form.completionTimeSeconds ?? null,
+          teammateUserIds: form.teammateUserIds ?? [],
+          teammateNonUserNames: form.teammateNonUserNames ?? [],
         }),
       });
       const data = await res.json();
@@ -435,6 +447,22 @@ export default function EditMapProgressPage() {
                     </div>
                   </div>
 
+                  {challengeForms[challenge.id]?.playerCount && challengeForms[challenge.id].playerCount !== 'SOLO' && (
+                    <div className="mt-3 sm:mt-4">
+                      <TeammatePicker
+                        value={{
+                          teammateUserIds: challengeForms[challenge.id]?.teammateUserIds ?? [],
+                          teammateNonUserNames: challengeForms[challenge.id]?.teammateNonUserNames ?? [],
+                        }}
+                        onChange={({ teammateUserIds, teammateNonUserNames }) => {
+                          handleChallengeChange(challenge.id, 'teammateUserIds', teammateUserIds);
+                          handleChallengeChange(challenge.id, 'teammateNonUserNames', teammateNonUserNames);
+                        }}
+                        currentUserId={profile?.id}
+                      />
+                    </div>
+                  )}
+
                   <div className="mt-3 sm:mt-4">
                     <TimeInput
                       label="Run time (optional)"
@@ -555,6 +583,22 @@ export default function EditMapProgressPage() {
                           />
                         </div>
                       </div>
+
+                      {easterEggForms[ee.id]?.playerCount && easterEggForms[ee.id].playerCount !== 'SOLO' && (
+                        <div className="mt-3 sm:mt-4">
+                          <TeammatePicker
+                            value={{
+                              teammateUserIds: easterEggForms[ee.id]?.teammateUserIds ?? [],
+                              teammateNonUserNames: easterEggForms[ee.id]?.teammateNonUserNames ?? [],
+                            }}
+                            onChange={({ teammateUserIds, teammateNonUserNames }) => {
+                              handleEasterEggChange(ee.id, 'teammateUserIds', teammateUserIds);
+                              handleEasterEggChange(ee.id, 'teammateNonUserNames', teammateNonUserNames);
+                            }}
+                            currentUserId={profile?.id}
+                          />
+                        </div>
+                      )}
 
                       <div className="mt-3 sm:mt-4">
                         <TimeInput

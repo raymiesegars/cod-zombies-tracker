@@ -44,6 +44,8 @@ model User {
   mainEasterEggXpAwards    MainEasterEggXpAwarded[]
   groupListingsCreated     GroupListing[]
   groupListingMessages    GroupListingMessage[]
+  coOpRunPendingsCreated  CoOpRunPending[]  @relation("CoOpCreator")
+  coOpRunPendingsAsTeammate CoOpRunPending[] @relation("CoOpTeammate")
 
   @@index([username])
   @@index([supabaseId])
@@ -281,11 +283,17 @@ model ChallengeLog {
   // Notes
   notes         String?
   
+  // Co-op: site users (user ids) and display names for non-users
+  teammateUserIds     String[]   @default([])
+  teammateNonUserNames String[]  @default([])
+  
   // Verification status (for future moderation)
   isVerified    Boolean     @default(false)
   
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+  
+  coOpRunPendings  CoOpRunPending[]
   
   @@index([userId])
   @@index([challengeId])
@@ -329,13 +337,40 @@ model EasterEggLog {
   // Verification
   isVerified    Boolean       @default(false)
   
+  // Co-op: site users (user ids) and display names for non-users
+  teammateUserIds      String[]   @default([])
+  teammateNonUserNames String[]   @default([])
+  
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+  
+  coOpRunPendings  CoOpRunPending[]
   
   @@index([userId])
   @@index([easterEggId])
   @@index([mapId])
   @@index([roundCompleted(sort: Asc)])
+}
+
+// Pending co-op run: creator logged a run and listed teammateUserId; teammate must confirm or deny.
+// When confirmed: we create a copy of the log for the teammate (no new pendings). When denied: remove teammate from original log.
+model CoOpRunPending {
+  id              String   @id @default(cuid())
+  creatorId       String
+  creator         User     @relation("CoOpCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  teammateUserId  String
+  teammate        User     @relation("CoOpTeammate", fields: [teammateUserId], references: [id], onDelete: Cascade)
+  status          String   @default("PENDING") // PENDING | CONFIRMED | DENIED
+  challengeLogId  String?
+  challengeLog    ChallengeLog? @relation(fields: [challengeLogId], references: [id], onDelete: Cascade)
+  easterEggLogId  String?
+  easterEggLog    EasterEggLog? @relation(fields: [easterEggLogId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([challengeLogId, teammateUserId])
+  @@unique([easterEggLogId, teammateUserId])
+  @@index([teammateUserId, status])
 }
 
 enum PlayerCount {

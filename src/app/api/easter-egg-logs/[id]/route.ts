@@ -4,6 +4,7 @@ import { getUser } from '@/lib/supabase/server';
 import { revokeAchievementsForMapAfterDelete } from '@/lib/achievements';
 import { getLevelFromXp } from '@/lib/ranks';
 import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
+import { createCoOpRunPendingsForEasterEggLog } from '@/lib/coop-pending';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -34,7 +35,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
       include: {
         easterEgg: true,
         map: { include: { game: true } },
-        user: { select: { id: true, isPublic: true, username: true, displayName: true } },
+        user: { select: { id: true, isPublic: true, username: true, displayName: true, avatarUrl: true, avatarPreset: true, totalXp: true } },
       },
     });
     if (!log) return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -49,11 +50,37 @@ export async function GET(_request: NextRequest, { params }: Params) {
     }
 
     const { user: u, ...logWithoutUser } = log;
+    const teammateUserIds = (logWithoutUser as { teammateUserIds?: string[] }).teammateUserIds ?? [];
+    let teammateUserDetails: { id: string; username: string; displayName: string | null; avatarUrl: string | null; avatarPreset: string | null; level: number }[] = [];
+    if (teammateUserIds.length > 0) {
+      const users = await prisma.user.findMany({
+        where: { id: { in: teammateUserIds } },
+        select: { id: true, username: true, displayName: true, avatarUrl: true, avatarPreset: true, totalXp: true },
+      });
+      teammateUserDetails = users.map((tu) => ({
+        id: tu.id,
+        username: tu.username,
+        displayName: tu.displayName,
+        avatarUrl: tu.avatarUrl,
+        avatarPreset: tu.avatarPreset,
+        level: getLevelFromXp(tu.totalXp ?? 0).level,
+      }));
+    }
+    const runOwner = {
+      id: u.id,
+      username: u.username,
+      displayName: u.displayName ?? u.username,
+      avatarUrl: u.avatarUrl,
+      avatarPreset: u.avatarPreset,
+      level: getLevelFromXp(u.totalXp ?? 0).level,
+    };
     return NextResponse.json({
       ...logWithoutUser,
       isOwner: isOwner ?? false,
       runOwnerUsername: u.username ?? undefined,
       runOwnerDisplayName: u.displayName ?? u.username ?? undefined,
+      runOwner,
+      teammateUserDetails,
     });
   } catch (error) {
     console.error('Error fetching Easter Egg log:', error);
@@ -67,6 +94,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     const { id } = await params;
     const result = await getLogAndUser(id);
     if ('error' in result) return NextResponse.json({ error: result.error }, { status: result.status });
+    const { user } = result;
 
     const body = await request.json();
     const roundCompleted = body.roundCompleted !== undefined
@@ -91,6 +119,12 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     const completionTimeSeconds = body.completionTimeSeconds !== undefined
       ? (body.completionTimeSeconds != null && Number.isFinite(Number(body.completionTimeSeconds)) ? Math.max(0, Math.floor(Number(body.completionTimeSeconds))) : null)
       : undefined;
+    const teammateUserIds = body.teammateUserIds !== undefined
+      ? (Array.isArray(body.teammateUserIds) ? body.teammateUserIds.filter((id: unknown) => typeof id === 'string').slice(0, 10) : [])
+      : undefined;
+    const teammateNonUserNames = body.teammateNonUserNames !== undefined
+      ? (Array.isArray(body.teammateNonUserNames) ? body.teammateNonUserNames.filter((n: unknown) => typeof n === 'string').slice(0, 10) : [])
+      : undefined;
 
     const updated = await prisma.easterEggLog.update({
       where: { id },
@@ -103,12 +137,17 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         ...(screenshotUrl !== undefined && { screenshotUrl }),
         ...(notes !== undefined && { notes }),
         ...(completionTimeSeconds !== undefined && { completionTimeSeconds }),
+        ...(teammateUserIds !== undefined && { teammateUserIds }),
+        ...(teammateNonUserNames !== undefined && { teammateNonUserNames }),
       },
       include: {
         easterEgg: true,
         map: { include: { game: true } },
       },
     });
+    if (teammateUserIds !== undefined && teammateUserIds.length > 0) {
+      await createCoOpRunPendingsForEasterEggLog(id, user.id, teammateUserIds);
+    }
     return NextResponse.json(updated);
   } catch (error) {
     console.error('Error updating Easter Egg log:', error);

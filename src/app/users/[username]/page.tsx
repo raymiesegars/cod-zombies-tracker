@@ -19,7 +19,7 @@ import {
   PageLoader,
   HelpTrigger,
 } from '@/components/ui';
-import { RoundCounter, XpDisplay, RelockAchievementButton, RankHelpContent } from '@/components/game';
+import { RoundCounter, XpDisplay, RelockAchievementButton, RankHelpContent, PendingCoOpSection } from '@/components/game';
 import {
   ACHIEVEMENT_CATEGORY_LABELS,
   getAchievementCategory,
@@ -369,9 +369,20 @@ export default function UserProfilePage() {
   const [achievementFilterMap, setAchievementFilterMap] = useState('');
   const [achievementFilterCategory, setAchievementFilterCategory] = useState('');
   const [achievementMapLoading, setAchievementMapLoading] = useState(false);
+  const [profileRefreshTrigger, setProfileRefreshTrigger] = useState(0);
 
-  // Use displayed profile vs current user so map links are correct (runs page for others, map page for self)
+  // so "Your runs" vs "Back to runs" and map links point the right place
   const isOwnProfile = Boolean(profile && currentProfile && profile.id === currentProfile.id);
+
+  // when they confirm a coop run we refetch so XP and map highs update without a full reload
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ username?: string }>).detail;
+      if (detail?.username === username) setProfileRefreshTrigger((t) => t + 1);
+    };
+    window.addEventListener('cod-tracker-profile-refresh-requested', handler);
+    return () => window.removeEventListener('cod-tracker-profile-refresh-requested', handler);
+  }, [username]);
 
   const refetchAchievementsAfterRelock = useCallback(async () => {
     await refreshProfile?.();
@@ -423,9 +434,9 @@ export default function UserProfilePage() {
     }
 
     fetchProfile();
-  }, [username]);
+  }, [username, profileRefreshTrigger]);
 
-  // Load achievements when they pick a map; clear when they clear the filter
+  // achievements load when they pick a map, clear when filter is cleared
   useEffect(() => {
     if (!achievementFilterMap) {
       setAchievementMapLoading(false);
@@ -484,7 +495,7 @@ export default function UserProfilePage() {
     );
   }
 
-  // Private profile and we're not the owner
+  // their profile is private and we're not them
   if (!profile.isPublic && !isOwnProfile) {
     return (
       <div className="min-h-screen bg-bunker-950 flex items-center justify-center px-4">
@@ -499,17 +510,17 @@ export default function UserProfilePage() {
     );
   }
 
-  // Counts and % for the dashboard
+  // dashboard counts and completion %
   const { totalMaps, totalMainEasterEggs, totalAchievements } = statsTotals;
   const totalMapsPlayed = mapStats.length;
   const totalEasterEggs = mapStats.filter((m) => m.hasCompletedMainEE).length;
-  // Average highest round across all maps (maps with no score count as 0)
+  // avg of each map's high round (no score = 0)
   const sumHighestRounds = mapStats.reduce((acc, m) => acc + m.highestRound, 0);
   const avgRound = totalMaps > 0 ? sumHighestRounds / totalMaps : 0;
   const avgRoundDisplay = avgRound.toFixed(2);
   const mapsPct = totalMaps > 0 ? Math.round((totalMapsPlayed / totalMaps) * 100) : 0;
   const easterEggsPct = totalMainEasterEggs > 0 ? Math.round((totalEasterEggs / totalMainEasterEggs) * 100) : 0;
-  // Use completionByGame sum (same as bottom achievements section); API only populates unlockedAchievementIds when a map is selected
+  // completion by game (same source as achievements section; overview only has unlocked ids when a map is selected)
   const achievementsUnlocked = achievementsOverview?.completionByGame
     ? achievementsOverview.completionByGame.reduce((s, g) => s + g.unlocked, 0)
     : (achievementsOverview?.unlockedAchievementIds?.length ?? 0);
@@ -572,6 +583,12 @@ export default function UserProfilePage() {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {isOwnProfile && (
+          <div className="mb-6 sm:mb-8">
+            <PendingCoOpSection />
+          </div>
+        )}
+
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <Card variant="bordered" className="text-center p-3 sm:p-4">

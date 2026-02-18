@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { processMapAchievements } from '@/lib/achievements';
 import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
+import { createCoOpRunPendingsForEasterEggLog } from '@/lib/coop-pending';
 
 // Log an EE completion (new run each time). Main-quest XP once per user per EE.
 export async function POST(request: NextRequest) {
@@ -46,6 +47,8 @@ export async function POST(request: NextRequest) {
     const completionTimeSeconds = body.completionTimeSeconds != null && Number.isFinite(Number(body.completionTimeSeconds))
       ? Math.max(0, Math.floor(Number(body.completionTimeSeconds)))
       : null;
+    const teammateUserIds = Array.isArray(body.teammateUserIds) ? body.teammateUserIds.filter((id: unknown) => typeof id === 'string').slice(0, 10) : [];
+    const teammateNonUserNames = Array.isArray(body.teammateNonUserNames) ? body.teammateNonUserNames.filter((n: unknown) => typeof n === 'string').slice(0, 10) : [];
 
     if (!easterEggId || !mapId || !playerCount) {
       return NextResponse.json(
@@ -67,8 +70,14 @@ export async function POST(request: NextRequest) {
         screenshotUrl,
         notes,
         completionTimeSeconds,
+        teammateUserIds,
+        teammateNonUserNames,
       },
     });
+
+    if (teammateUserIds.length > 0) {
+      await createCoOpRunPendingsForEasterEggLog(log.id, user.id, teammateUserIds);
+    }
 
     // Main quest = one-time XP; we track so we don’t double-award
     const newlyUnlocked = await processMapAchievements(user.id, mapId);

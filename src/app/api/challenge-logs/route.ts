@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { processMapAchievements } from '@/lib/achievements';
 import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
+import { createCoOpRunPendingsForChallengeLog } from '@/lib/coop-pending';
 
 // Log a new run. We run the achievement check when it’s a new best for that user+challenge+map+playerCount.
 export async function POST(request: NextRequest) {
@@ -40,6 +41,8 @@ export async function POST(request: NextRequest) {
     const completionTimeSeconds = body.completionTimeSeconds != null && Number.isFinite(Number(body.completionTimeSeconds))
       ? Math.max(0, Math.floor(Number(body.completionTimeSeconds)))
       : null;
+    const teammateUserIds = Array.isArray(body.teammateUserIds) ? body.teammateUserIds.filter((id: unknown) => typeof id === 'string').slice(0, 10) : [];
+    const teammateNonUserNames = Array.isArray(body.teammateNonUserNames) ? body.teammateNonUserNames.filter((n: unknown) => typeof n === 'string').slice(0, 10) : [];
 
     if (!challengeId || !mapId || Number.isNaN(roundReached) || roundReached < 1 || !playerCount) {
       return NextResponse.json(
@@ -81,8 +84,14 @@ export async function POST(request: NextRequest) {
         screenshotUrl,
         notes,
         completionTimeSeconds,
+        teammateUserIds,
+        teammateNonUserNames,
       },
     });
+
+    if (teammateUserIds.length > 0) {
+      await createCoOpRunPendingsForChallengeLog(log.id, user.id, teammateUserIds);
+    }
 
     let newlyUnlocked: Awaited<ReturnType<typeof processMapAchievements>> = [];
     if (isImprovement) {
