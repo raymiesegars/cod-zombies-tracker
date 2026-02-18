@@ -190,7 +190,7 @@ export default function SettingsPage() {
                   <button
                     key={id ?? 'google'}
                     type="button"
-                    onClick={() => setAvatarPreset(id)}
+                    onClick={() => setAvatarPreset(id as AvatarPreset | null)}
                     className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 p-3 transition-colors w-[108px] h-[120px] flex-shrink-0 ${
                       avatarPreset === id ? 'border-blood-500 bg-blood-950/50' : 'border-bunker-700 hover:border-bunker-600 bg-bunker-900/50'
                     }`}
