@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { slugify } from '@/lib/utils';
 import { getUser } from '@/lib/supabase/server';
+import { isAvatarPreset } from '@/lib/avatar';
 
 // Update display name, username, bio, or privacy. Session identifies the user.
 export async function PATCH(request: NextRequest) {
@@ -19,6 +20,7 @@ export async function PATCH(request: NextRequest) {
       username?: string;
       bio?: string | null;
       isPublic?: boolean;
+      avatarPreset?: string | null;
       updatedAt: Date;
     } = {
       updatedAt: new Date(),
@@ -27,6 +29,10 @@ export async function PATCH(request: NextRequest) {
     if (displayName !== undefined) data.displayName = displayName === '' ? null : String(displayName).trim();
     if (bio !== undefined) data.bio = bio === '' ? null : String(bio).trim();
     if (isPublic !== undefined) data.isPublic = Boolean(isPublic);
+    if (body.avatarPreset !== undefined) {
+      const v = body.avatarPreset === '' || body.avatarPreset == null ? null : String(body.avatarPreset).trim();
+      data.avatarPreset = v === '' ? null : isAvatarPreset(v) ? v : null;
+    }
 
     if (rawUsername !== undefined) {
       const username = slugify(String(rawUsername).trim());

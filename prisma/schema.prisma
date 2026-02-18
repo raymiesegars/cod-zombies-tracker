@@ -21,6 +21,7 @@ model User {
   username      String    @unique
   displayName   String?
   avatarUrl     String?
+  avatarPreset  String?   // "blood" | "element" | "military" | "bunker" – preset avatar; when set, overrides avatarUrl in UI
   bio           String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -273,10 +274,9 @@ model ChallengeLog {
   completedAt   DateTime    @default(now())
   completionTimeSeconds Int?  // Optional run time (hours * 3600 + minutes * 60 + seconds)
   
-  // Proof attachments
-  proofUrl      String?     // YouTube/Twitch VOD link
-  proofType     ProofType?
-  screenshotUrl String?     // Direct image URL
+  // Proof attachments (multiple URLs: YouTube, Twitch, image links)
+  proofUrls     String[]    @default([])
+  screenshotUrl String?     // Direct image URL (legacy; prefer adding image URL to proofUrls)
   
   // Notes
   notes         String?
@@ -319,9 +319,8 @@ model EasterEggLog {
   isSolo        Boolean       @default(false)
   isNoGuide     Boolean       @default(false)  // Completed without guide
   
-  // Proof attachments
-  proofUrl      String?
-  proofType     ProofType?
+  // Proof attachments (multiple URLs: YouTube, Twitch, image links)
+  proofUrls     String[]    @default([])
   screenshotUrl String?
   
   // Notes
@@ -344,13 +343,6 @@ enum PlayerCount {
   DUO
   TRIO
   SQUAD
-}
-
-enum ProofType {
-  YOUTUBE
-  TWITCH
-  IMAGE
-  OTHER
 }
 
 // ============================================================================

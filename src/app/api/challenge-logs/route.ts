@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { processMapAchievements } from '@/lib/achievements';
+import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
 
 // Log a new run. We run the achievement check when it’s a new best for that user+challenge+map+playerCount.
 export async function POST(request: NextRequest) {
@@ -24,7 +25,16 @@ export async function POST(request: NextRequest) {
     const mapId = body.mapId;
     const roundReached = typeof body.roundReached === 'number' ? body.roundReached : parseInt(String(body.roundReached), 10);
     const playerCount = body.playerCount;
-    const proofUrl = body.proofUrl ?? null;
+    const rawProofUrls = Array.isArray(body.proofUrls)
+      ? body.proofUrls
+      : body.proofUrl != null
+        ? [body.proofUrl]
+        : [];
+    for (const u of rawProofUrls) {
+      const err = validateProofUrl(String(u));
+      if (err) return NextResponse.json({ error: `Proof URL: ${err}` }, { status: 400 });
+    }
+    const proofUrls = normalizeProofUrls(rawProofUrls.map(String));
     const screenshotUrl = body.screenshotUrl ?? null;
     const notes = body.notes ?? null;
     const completionTimeSeconds = body.completionTimeSeconds != null && Number.isFinite(Number(body.completionTimeSeconds))
@@ -67,7 +77,7 @@ export async function POST(request: NextRequest) {
         mapId,
         roundReached,
         playerCount,
-        proofUrl,
+        proofUrls,
         screenshotUrl,
         notes,
         completionTimeSeconds,
@@ -119,6 +129,7 @@ export async function GET(request: NextRequest) {
             username: true,
             displayName: true,
             avatarUrl: true,
+            avatarPreset: true,
           },
         },
       },

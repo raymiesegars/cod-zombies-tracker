@@ -69,6 +69,7 @@ export async function GET(
         username: user.username,
         displayName: user.displayName,
         avatarUrl: user.avatarUrl,
+      avatarPreset: user.avatarPreset,
         level,
         totalXp,
         isPublic: false,

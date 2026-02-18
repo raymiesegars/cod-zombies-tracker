@@ -13,7 +13,8 @@ import {
   PageLoader,
   TimeInput,
 } from '@/components/ui';
-import { ProofEmbed } from '@/components/game';
+import { ProofEmbed, ProofUrlsInput } from '@/components/game';
+import { normalizeProofUrls } from '@/lib/utils';
 import { ChevronLeft, Save } from 'lucide-react';
 import type { PlayerCount } from '@/types';
 
@@ -29,7 +30,8 @@ type ChallengeLog = {
   id: string;
   roundReached: number;
   playerCount: string;
-  proofUrl: string | null;
+  proofUrls?: string[];
+  proofUrl?: string | null;
   notes: string | null;
   completionTimeSeconds: number | null;
   challenge: { id: string; name: string };
@@ -41,7 +43,8 @@ type EasterEggLog = {
   playerCount: string;
   isSolo: boolean;
   isNoGuide: boolean;
-  proofUrl: string | null;
+  proofUrls?: string[];
+  proofUrl?: string | null;
   notes: string | null;
   completionTimeSeconds: number | null;
   easterEgg: { id: string; name: string };
@@ -64,7 +67,7 @@ export default function EditRunPage() {
   const [roundReached, setRoundReached] = useState('');
   const [roundCompleted, setRoundCompleted] = useState('');
   const [playerCount, setPlayerCount] = useState<PlayerCount>('SOLO');
-  const [proofUrl, setProofUrl] = useState('');
+  const [proofUrls, setProofUrls] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
   const [completionTimeSeconds, setCompletionTimeSeconds] = useState<number | null>(null);
   const [isSolo, setIsSolo] = useState(false);
@@ -100,13 +103,13 @@ export default function EditRunPage() {
         if (data.roundReached != null) {
           setRoundReached(String(data.roundReached));
           setPlayerCount(data.playerCount || 'SOLO');
-          setProofUrl(data.proofUrl || '');
+          setProofUrls(Array.isArray(data.proofUrls) ? data.proofUrls : data.proofUrl ? [data.proofUrl] : []);
           setNotes(data.notes || '');
           setCompletionTimeSeconds(data.completionTimeSeconds ?? null);
         } else {
           setRoundCompleted(data.roundCompleted != null ? String(data.roundCompleted) : '');
           setPlayerCount(data.playerCount || 'SOLO');
-          setProofUrl(data.proofUrl || '');
+          setProofUrls(Array.isArray(data.proofUrls) ? data.proofUrls : data.proofUrl ? [data.proofUrl] : []);
           setNotes(data.notes || '');
           setCompletionTimeSeconds(data.completionTimeSeconds ?? null);
           setIsSolo(!!data.isSolo);
@@ -133,7 +136,7 @@ export default function EditRunPage() {
         body: JSON.stringify({
           roundReached: round,
           playerCount,
-          proofUrl: proofUrl || null,
+          proofUrls: normalizeProofUrls(proofUrls),
           notes: notes || null,
           completionTimeSeconds,
         }),
@@ -161,7 +164,7 @@ export default function EditRunPage() {
           playerCount,
           isSolo,
           isNoGuide,
-          proofUrl: proofUrl || null,
+          proofUrls: normalizeProofUrls(proofUrls),
           notes: notes || null,
           completionTimeSeconds,
         }),
@@ -244,11 +247,10 @@ export default function EditRunPage() {
                   value={playerCount}
                   onChange={(e) => setPlayerCount(e.target.value as PlayerCount)}
                 />
-                <Input
-                  label="Proof URL (optional)"
-                  type="url"
-                  value={proofUrl}
-                  onChange={(e) => setProofUrl(e.target.value)}
+                <ProofUrlsInput
+                  label="Proof URLs (optional)"
+                  value={proofUrls}
+                  onChange={setProofUrls}
                   placeholder="YouTube or Twitch link"
                 />
                 <TimeInput
@@ -263,7 +265,13 @@ export default function EditRunPage() {
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Any notes"
                 />
-                {proofUrl && <ProofEmbed url={proofUrl} />}
+                {proofUrls.filter(Boolean).length > 0 && (
+                  <div className="flex flex-col gap-4">
+                    {proofUrls.filter(Boolean).map((url, i) => (
+                      <ProofEmbed key={i} url={url} className="rounded-lg overflow-hidden" />
+                    ))}
+                  </div>
+                )}
                 <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
                   <Button type="submit" disabled={saving} leftIcon={<Save className="w-4 h-4" />} className="w-full sm:w-auto">
                     {saving ? 'Saving…' : 'Save changes'}
@@ -293,11 +301,10 @@ export default function EditRunPage() {
                   value={playerCount}
                   onChange={(e) => setPlayerCount(e.target.value as PlayerCount)}
                 />
-                <Input
-                  label="Proof URL (optional)"
-                  type="url"
-                  value={proofUrl}
-                  onChange={(e) => setProofUrl(e.target.value)}
+                <ProofUrlsInput
+                  label="Proof URLs (optional)"
+                  value={proofUrls}
+                  onChange={setProofUrls}
                   placeholder="YouTube or Twitch link"
                 />
                 <TimeInput
@@ -332,7 +339,13 @@ export default function EditRunPage() {
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Any notes"
                 />
-                {proofUrl && <ProofEmbed url={proofUrl} />}
+                {proofUrls.filter(Boolean).length > 0 && (
+                  <div className="flex flex-col gap-4">
+                    {proofUrls.filter(Boolean).map((url, i) => (
+                      <ProofEmbed key={i} url={url} className="rounded-lg overflow-hidden" />
+                    ))}
+                  </div>
+                )}
                 <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
                   <Button type="submit" disabled={saving} leftIcon={<Save className="w-4 h-4" />} className="w-full sm:w-auto">
                     {saving ? 'Saving…' : 'Save changes'}

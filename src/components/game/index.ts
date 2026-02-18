@@ -4,6 +4,7 @@ export * from './leaderboard-entry';
 export * from './achievement-badge';
 export * from './xp-display';
 export * from './proof-embed';
+export * from './proof-urls-input';
 export * from './user-with-rank';
 export * from './relock-achievement-button';
 export * from './challenge-type-icon';

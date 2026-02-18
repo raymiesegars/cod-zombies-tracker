@@ -104,7 +104,8 @@ type ChallengeLogDetail = {
   mapId: string;
   roundReached: number;
   playerCount: string;
-  proofUrl: string | null;
+  proofUrls?: string[];
+  proofUrl?: string | null;
   notes: string | null;
   completedAt: string;
   completionTimeSeconds: number | null;
@@ -117,7 +118,8 @@ type EasterEggLogDetail = {
   mapId: string;
   roundCompleted: number | null;
   playerCount: string;
-  proofUrl: string | null;
+  proofUrls?: string[];
+  proofUrl?: string | null;
   notes: string | null;
   isSolo: boolean;
   isNoGuide: boolean;
@@ -387,41 +389,58 @@ export default function RunDetailPage() {
 
           {/* Proof + Notes (span 2 cols on lg) */}
           <div className="lg:col-span-2 space-y-6">
-            {log.proofUrl && (
-              <Card variant="bordered">
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <ExternalLink className="w-4 h-4 text-blood-400" />
-                    Proof
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ProofEmbed url={log.proofUrl} className="rounded-lg overflow-hidden" />
-                </CardContent>
-              </Card>
-            )}
+            {(() => {
+              const proofUrls = Array.isArray((log as { proofUrls?: string[] }).proofUrls)
+                ? (log as { proofUrls: string[] }).proofUrls
+                : (log as { proofUrl?: string | null }).proofUrl
+                  ? [(log as { proofUrl: string }).proofUrl]
+                  : [];
+              const hasProof = proofUrls.length > 0;
+              const hasNotes = !!log.notes;
+              return (
+                <>
+                  {hasProof && (
+                    <Card variant="bordered">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <ExternalLink className="w-4 h-4 text-blood-400" />
+                          Proof {proofUrls.length > 1 ? `(${proofUrls.length})` : ''}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {proofUrls.map((url, i) => (
+                            <ProofEmbed key={i} url={url} className="rounded-lg overflow-hidden w-full min-w-0" />
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
 
-            {log.notes && (
-              <Card variant="bordered">
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-bunker-400" />
-                    Notes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-bunker-300 whitespace-pre-wrap">{log.notes}</p>
-                </CardContent>
-              </Card>
-            )}
+                  {hasNotes && (
+                    <Card variant="bordered">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-bunker-400" />
+                          Notes
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-bunker-300 whitespace-pre-wrap">{log.notes}</p>
+                      </CardContent>
+                    </Card>
+                  )}
 
-            {!log.proofUrl && !log.notes && (
-              <Card variant="bordered">
-                <CardContent className="py-8 text-center text-bunker-500 text-sm">
-                  No proof or notes for this run.
-                </CardContent>
-              </Card>
-            )}
+                  {!hasProof && !hasNotes && (
+                    <Card variant="bordered">
+                      <CardContent className="py-8 text-center text-bunker-500 text-sm">
+                        No proof or notes for this run.
+                      </CardContent>
+                    </Card>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       </div>

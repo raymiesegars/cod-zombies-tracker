@@ -5,7 +5,7 @@ const BASE = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://cod
 export const metadata: Metadata = {
   title: 'About',
   description:
-    'CoD Zombies Tracker is a free, open source project with no ads or paywalls. Donations help keep the site running. Rank icon disclaimer and contact.',
+    'CoD Zombies Tracker is a free, open source project with no ads or paywalls. Tips help keep the site running. Rank icon disclaimer and contact.',
   openGraph: {
     title: 'About | CoD Zombies Tracker',
     description:

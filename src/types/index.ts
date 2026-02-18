@@ -14,7 +14,6 @@ import type {
   EasterEggType,
   AchievementType,
   AchievementRarity,
-  ProofType,
 } from '@prisma/client';
 
 export type {
@@ -33,7 +32,6 @@ export type {
   EasterEggType,
   AchievementType,
   AchievementRarity,
-  ProofType,
 };
 
 export type MapWithGame = Map & {
@@ -82,9 +80,10 @@ export type UserProfile = User & {
 
 export type LeaderboardEntry = {
   rank: number;
-  user: Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl' | 'level'>;
+  user: Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl' | 'avatarPreset' | 'level'>;
   value: number;
   playerCount: PlayerCount;
+  proofUrls?: string[];
   proofUrl?: string | null;
   completedAt: Date;
 };
@@ -114,7 +113,7 @@ export type ChallengeLogFormData = {
   mapId: string;
   roundReached: number;
   playerCount: PlayerCount;
-  proofUrl?: string;
+  proofUrls?: string[];
   screenshotUrl?: string;
   notes?: string;
 };
@@ -126,7 +125,7 @@ export type EasterEggLogFormData = {
   playerCount: PlayerCount;
   isSolo: boolean;
   isNoGuide: boolean;
-  proofUrl?: string;
+  proofUrls?: string[];
   screenshotUrl?: string;
   notes?: string;
 };

@@ -28,6 +28,7 @@ import {
   sortAchievementsByXp,
 } from '@/lib/achievements/categories';
 import { getAssetUrl } from '@/lib/assets';
+import { getDisplayAvatarUrl } from '@/lib/avatar';
 import type { UserProfile, UserMapStats } from '@/types';
 import {
   Trophy,
@@ -522,7 +523,7 @@ export default function UserProfilePage() {
           <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
             {/* Avatar */}
             <Avatar
-              src={profile.avatarUrl}
+              src={getDisplayAvatarUrl(profile)}
               fallback={profile.displayName || profile.username}
               size="xl"
               className="mx-auto sm:mx-0"

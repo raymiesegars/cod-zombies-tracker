@@ -44,6 +44,7 @@ export async function GET(
             username: true,
             displayName: true,
             avatarUrl: true,
+            avatarPreset: true,
             level: true,
           },
         },
@@ -76,7 +77,8 @@ export async function GET(
       user: log.user,
       value: log.roundReached,
       playerCount: log.playerCount,
-      proofUrl: log.proofUrl,
+      proofUrls: log.proofUrls ?? [],
+      proofUrl: (log.proofUrls && log.proofUrls.length > 0) ? log.proofUrls[0] : null,
       completedAt: log.completedAt,
     }));
 

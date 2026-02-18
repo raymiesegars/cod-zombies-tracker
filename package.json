@@ -8,14 +8,15 @@
     "start": "next start",
     "lint": "next lint",
     "db:generate": "prisma generate",
-    "db:push": "prisma db push",
-    "db:migrate": "prisma migrate dev",
+    "db:push": "node scripts/run-prisma-with-env.js db push",
+    "db:migrate": "node scripts/run-prisma-with-env.js migrate dev",
+    "db:verify": "node scripts/run-prisma-with-env.js --verify",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:easter-eggs": "tsx prisma/seed-easter-eggs.ts",
     "db:seed:easter-eggs:in-progress": "tsx prisma/seed-easter-eggs-in-progress-only.ts",
     "db:update-verruckt-names": "tsx prisma/update-verruckt-names.ts",
     "db:update-verruckt-image-url": "tsx prisma/update-verruckt-image-url.ts",
-    "db:studio": "prisma studio"
+    "db:studio": "node scripts/run-prisma-with-env.js studio"
   },
   "dependencies": {
     "@prisma/client": "^5.9.1",

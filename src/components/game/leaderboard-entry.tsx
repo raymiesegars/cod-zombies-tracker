@@ -75,6 +75,7 @@ export function LeaderboardEntry({
             username: entry.user.username,
             displayName: entry.user.displayName,
             avatarUrl: entry.user.avatarUrl,
+            avatarPreset: entry.user.avatarPreset,
             level: entry.user.level,
           }}
           showAvatar={true}

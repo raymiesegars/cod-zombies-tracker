@@ -39,7 +39,12 @@ async function main() {
     console.error('Missing DIRECT_URL and DATABASE_URL. Seed needs the same env as the app (e.g. .env.local).');
     process.exit(1);
   }
-  console.log('Seeding database...');
+  try {
+    const u = new URL(dbUrl.replace(/^postgresql:/, 'postgres:'));
+    console.log('Seeding database at', u.hostname, '...');
+  } catch {
+    console.log('Seeding database...');
+  }
 
   // Clear existing data for fresh seed using raw SQL for better compatibility
   console.log('Clearing existing data...');

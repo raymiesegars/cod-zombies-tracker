@@ -5,12 +5,14 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Avatar } from '@/components/ui';
 import { getLevelFromXp, getRankForLevel, getRankIconPath } from '@/lib/ranks';
+import { getDisplayAvatarUrl } from '@/lib/avatar';
 
 export type UserWithRankUser = {
   id: string;
   username: string;
   displayName?: string | null;
   avatarUrl?: string | null;
+  avatarPreset?: string | null;
   level?: number;
   totalXp?: number;
 };
@@ -60,7 +62,7 @@ export function UserWithRank({
       )}
       {showAvatar && (
         <Avatar
-          src={user.avatarUrl}
+          src={getDisplayAvatarUrl(user)}
           fallback={displayName}
           size={size === 'sm' ? 'sm' : 'md'}
           className="flex-shrink-0"

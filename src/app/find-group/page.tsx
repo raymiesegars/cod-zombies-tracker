@@ -34,6 +34,7 @@ type Listing = {
     username: string;
     displayName: string | null;
     avatarUrl: string | null;
+    avatarPreset?: string | null;
     level: number;
     totalXp: number;
   };
@@ -361,6 +362,7 @@ export default function FindGroupPage() {
                               username: listing.creator.username,
                               displayName: listing.creator.displayName,
                               avatarUrl: listing.creator.avatarUrl,
+                              avatarPreset: listing.creator.avatarPreset,
                               level: listing.creator.level,
                               totalXp: listing.creator.totalXp,
                             }}
