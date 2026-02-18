@@ -18,8 +18,8 @@ import {
 } from '@/components/ui';
 import { formatCompletionTime } from '@/components/ui/time-input';
 import { getAssetUrl } from '@/lib/assets';
-import { RoundCounter, ProofEmbed, ChallengeTypeIcon } from '@/components/game';
-import { ChevronLeft, FileText, ExternalLink, Clock, Pencil, Trash2 } from 'lucide-react';
+import { RoundCounter, ProofEmbed, ChallengeTypeIcon, UserWithRank } from '@/components/game';
+import { ChevronLeft, FileText, ExternalLink, Clock, Pencil, Trash2, Users } from 'lucide-react';
 
 function DeleteRunButton({
   logId,
@@ -99,6 +99,24 @@ type MapInfo = {
   game: { shortName: string; name: string };
 };
 
+type RunOwner = {
+  id: string;
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  avatarPreset: string | null;
+  level: number;
+};
+
+type TeammateUserDetail = {
+  id: string;
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  avatarPreset: string | null;
+  level: number;
+};
+
 type ChallengeLogDetail = {
   id: string;
   mapId: string;
@@ -111,6 +129,9 @@ type ChallengeLogDetail = {
   completionTimeSeconds: number | null;
   challenge: { id: string; name: string; type: string };
   map: MapInfo;
+  runOwner?: RunOwner;
+  teammateUserDetails?: TeammateUserDetail[];
+  teammateNonUserNames?: string[];
 };
 
 type EasterEggLogDetail = {
@@ -127,6 +148,9 @@ type EasterEggLogDetail = {
   completionTimeSeconds: number | null;
   easterEgg: { id: string; name: string };
   map: MapInfo;
+  runOwner?: RunOwner;
+  teammateUserDetails?: TeammateUserDetail[];
+  teammateNonUserNames?: string[];
 };
 
 export default function RunDetailPage() {
@@ -369,6 +393,48 @@ export default function RunDetailPage() {
                   })}
                 </span>
               </div>
+              {(() => {
+                const runOwner = (log as ChallengeLogDetail & EasterEggLogDetail).runOwner;
+                const teammateUserDetails = (log as ChallengeLogDetail & EasterEggLogDetail).teammateUserDetails ?? [];
+                const teammateNonUserNames = (log as ChallengeLogDetail & EasterEggLogDetail).teammateNonUserNames ?? [];
+                const hasMembers = runOwner || teammateUserDetails.length > 0 || teammateNonUserNames.length > 0;
+                if (!hasMembers) return null;
+                return (
+                  <div className="pt-3 border-t border-bunker-700 mt-3">
+                    <p className="text-bunker-400 text-sm mb-2 flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5" />
+                      Members
+                    </p>
+                    <div className="flex flex-col gap-2">
+                      {runOwner && (
+                        <div className="flex items-center gap-2">
+                          <UserWithRank
+                            user={{ ...runOwner, displayName: runOwner.displayName ?? runOwner.username }}
+                            size="sm"
+                            linkToProfile={true}
+                          />
+                          <span className="text-xs text-bunker-500">(creator)</span>
+                        </div>
+                      )}
+                      {teammateUserDetails.map((u) => (
+                        <UserWithRank
+                          key={u.id}
+                          user={{ ...u, displayName: u.displayName ?? u.username }}
+                          size="sm"
+                          linkToProfile={true}
+                        />
+                      ))}
+                      {teammateNonUserNames.map((name, i) => (
+                        <span key={i} className="text-sm text-bunker-300 flex items-center gap-2">
+                          <span className="w-8 h-8 rounded-full bg-bunker-700 flex items-center justify-center text-bunker-400 text-xs">?</span>
+                          {name}
+                          <span className="text-xs text-bunker-500">(not on site)</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
               {isOwner && (
                 <div className="flex flex-wrap gap-2 pt-3 border-t border-bunker-700 mt-3">
                   <Link href={`/maps/${map.slug}/run/${type}/${logId}/edit`} className="flex-1 min-w-0">

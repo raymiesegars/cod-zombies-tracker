@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button, Card, CardContent, Logo, EasterEggIcon, MapIcon } from '@/components/ui';
+import { PendingCoOpSection } from '@/components/game';
 import { useAuth } from '@/context/auth-context';
 import { Trophy, Target, Users, ChevronRight, Wrench, ExternalLink } from 'lucide-react';
 
@@ -117,6 +118,12 @@ export default function HomePage() {
                 </>
               )}
             </div>
+
+            {user && (
+              <div className="mt-8 sm:mt-10 max-w-3xl mx-auto">
+                <PendingCoOpSection />
+              </div>
+            )}
           </div>
 
           {/* Stats - 3 only: Maps (actual count), Challenge Types, Achievements */}

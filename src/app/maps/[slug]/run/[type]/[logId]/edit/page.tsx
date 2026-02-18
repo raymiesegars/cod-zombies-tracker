@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { useAuth } from '@/context/auth-context';
 import {
   Button,
   Card,
@@ -13,7 +14,7 @@ import {
   PageLoader,
   TimeInput,
 } from '@/components/ui';
-import { ProofEmbed, ProofUrlsInput } from '@/components/game';
+import { ProofEmbed, ProofUrlsInput, TeammatePicker, type TeammateUser } from '@/components/game';
 import { normalizeProofUrls } from '@/lib/utils';
 import { ChevronLeft, Save } from 'lucide-react';
 import type { PlayerCount } from '@/types';
@@ -54,6 +55,7 @@ type EasterEggLog = {
 export default function EditRunPage() {
   const params = useParams();
   const router = useRouter();
+  const { profile } = useAuth();
   const slug = params.slug as string;
   const type = params.type as string;
   const logId = params.logId as string;
@@ -72,6 +74,9 @@ export default function EditRunPage() {
   const [completionTimeSeconds, setCompletionTimeSeconds] = useState<number | null>(null);
   const [isSolo, setIsSolo] = useState(false);
   const [isNoGuide, setIsNoGuide] = useState(false);
+  const [teammateUserIds, setTeammateUserIds] = useState<string[]>([]);
+  const [teammateNonUserNames, setTeammateNonUserNames] = useState<string[]>([]);
+  const [teammateUserDetails, setTeammateUserDetails] = useState<TeammateUser[]>([]);
 
   const isChallenge = type === 'challenge';
   const apiUrl = isChallenge ? `/api/challenge-logs/${logId}` : `/api/easter-egg-logs/${logId}`;
@@ -106,6 +111,9 @@ export default function EditRunPage() {
           setProofUrls(Array.isArray(data.proofUrls) ? data.proofUrls : data.proofUrl ? [data.proofUrl] : []);
           setNotes(data.notes || '');
           setCompletionTimeSeconds(data.completionTimeSeconds ?? null);
+          setTeammateUserIds(Array.isArray(data.teammateUserIds) ? data.teammateUserIds : []);
+          setTeammateNonUserNames(Array.isArray(data.teammateNonUserNames) ? data.teammateNonUserNames : []);
+          setTeammateUserDetails(Array.isArray(data.teammateUserDetails) ? data.teammateUserDetails : []);
         } else {
           setRoundCompleted(data.roundCompleted != null ? String(data.roundCompleted) : '');
           setPlayerCount(data.playerCount || 'SOLO');
@@ -114,6 +122,9 @@ export default function EditRunPage() {
           setCompletionTimeSeconds(data.completionTimeSeconds ?? null);
           setIsSolo(!!data.isSolo);
           setIsNoGuide(!!data.isNoGuide);
+          setTeammateUserIds(Array.isArray(data.teammateUserIds) ? data.teammateUserIds : []);
+          setTeammateNonUserNames(Array.isArray(data.teammateNonUserNames) ? data.teammateNonUserNames : []);
+          setTeammateUserDetails(Array.isArray(data.teammateUserDetails) ? data.teammateUserDetails : []);
         }
       })
       .catch(() => setError('Failed to load run.'))
@@ -139,6 +150,8 @@ export default function EditRunPage() {
           proofUrls: normalizeProofUrls(proofUrls),
           notes: notes || null,
           completionTimeSeconds,
+          teammateUserIds,
+          teammateNonUserNames,
         }),
         credentials: 'same-origin',
       });
@@ -167,6 +180,8 @@ export default function EditRunPage() {
           proofUrls: normalizeProofUrls(proofUrls),
           notes: notes || null,
           completionTimeSeconds,
+          teammateUserIds,
+          teammateNonUserNames,
         }),
         credentials: 'same-origin',
       });
@@ -253,6 +268,17 @@ export default function EditRunPage() {
                   onChange={setProofUrls}
                   placeholder="YouTube or Twitch link"
                 />
+                {playerCount !== 'SOLO' && (
+                  <TeammatePicker
+                    value={{ teammateUserIds, teammateNonUserNames }}
+                    onChange={({ teammateUserIds: u, teammateNonUserNames: n }) => {
+                      setTeammateUserIds(u);
+                      setTeammateNonUserNames(n);
+                    }}
+                    userDetails={teammateUserDetails}
+                    currentUserId={profile?.id}
+                  />
+                )}
                 <TimeInput
                   label="Run time (optional)"
                   valueSeconds={completionTimeSeconds}
@@ -307,6 +333,17 @@ export default function EditRunPage() {
                   onChange={setProofUrls}
                   placeholder="YouTube or Twitch link"
                 />
+                {playerCount !== 'SOLO' && (
+                  <TeammatePicker
+                    value={{ teammateUserIds, teammateNonUserNames }}
+                    onChange={({ teammateUserIds: u, teammateNonUserNames: n }) => {
+                      setTeammateUserIds(u);
+                      setTeammateNonUserNames(n);
+                    }}
+                    userDetails={teammateUserDetails}
+                    currentUserId={profile?.id}
+                  />
+                )}
                 <TimeInput
                   label="Run time (optional)"
                   valueSeconds={completionTimeSeconds}
