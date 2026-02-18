@@ -17,6 +17,7 @@ import {
 import { UserWithRank } from '@/components/game';
 import { Users, MessageSquare, ChevronLeft, Trash2 } from 'lucide-react';
 import { getLevelFromXp, getRankForLevel, getRankIconPath } from '@/lib/ranks';
+import { getDisplayAvatarUrl } from '@/lib/avatar';
 import Image from 'next/image';
 
 type Message = {
@@ -28,6 +29,7 @@ type Message = {
     username: string;
     displayName: string | null;
     avatarUrl: string | null;
+    avatarPreset?: string | null;
     level: number;
     totalXp: number;
   };
@@ -47,6 +49,7 @@ type ListingDetail = {
     username: string;
     displayName: string | null;
     avatarUrl: string | null;
+    avatarPreset?: string | null;
     level: number;
     totalXp: number;
   };
@@ -258,6 +261,7 @@ export default function FindGroupListingPage() {
                   username: listing.creator.username,
                   displayName: listing.creator.displayName,
                   avatarUrl: listing.creator.avatarUrl,
+                  avatarPreset: listing.creator.avatarPreset,
                   level: listing.creator.level,
                   totalXp: listing.creator.totalXp,
                 }}
@@ -351,7 +355,7 @@ export default function FindGroupListingPage() {
                 (listing.messages ?? []).map((msg) => (
                   <div key={msg.id} className="flex gap-3">
                     <Avatar
-                      src={msg.user.avatarUrl}
+                      src={getDisplayAvatarUrl(msg.user)}
                       fallback={msg.user.displayName || msg.user.username}
                       size="sm"
                       className="flex-shrink-0"

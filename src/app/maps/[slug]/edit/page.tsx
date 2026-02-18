@@ -19,7 +19,8 @@ import {
   TabsContent,
   TimeInput,
 } from '@/components/ui';
-import { ProofEmbed } from '@/components/game';
+import { ProofEmbed, ProofUrlsInput } from '@/components/game';
+import { normalizeProofUrls } from '@/lib/utils';
 import { useXpToast } from '@/context/xp-toast-context';
 import { getXpForChallengeLog, getXpForEasterEggLog, type AchievementForPreview } from '@/lib/xp-preview';
 import type { MapWithDetails, ChallengeType, PlayerCount } from '@/types';
@@ -97,7 +98,7 @@ export default function EditMapProgressPage() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   const [challengeForms, setChallengeForms] = useState<
-    Record<string, { roundReached: string; playerCount: PlayerCount; proofUrl: string; notes: string; completionTimeSeconds: number | null }>
+    Record<string, { roundReached: string; playerCount: PlayerCount; proofUrls: string[]; notes: string; completionTimeSeconds: number | null }>
   >({});
 
   const [easterEggForms, setEasterEggForms] = useState<
@@ -109,7 +110,7 @@ export default function EditMapProgressPage() {
         playerCount: PlayerCount;
         isSolo: boolean;
         isNoGuide: boolean;
-        proofUrl: string;
+        proofUrls: string[];
         notes: string;
         completionTimeSeconds: number | null;
       }
@@ -132,12 +133,12 @@ export default function EditMapProgressPage() {
 
           const mainQuestEasterEggs = (data.easterEggs ?? []).filter((ee: { type: string }) => ee.type === 'MAIN_QUEST');
 
-          const challengeInitial: Record<string, { roundReached: string; playerCount: PlayerCount; proofUrl: string; notes: string; completionTimeSeconds: number | null }> = {};
+          const challengeInitial: Record<string, { roundReached: string; playerCount: PlayerCount; proofUrls: string[]; notes: string; completionTimeSeconds: number | null }> = {};
           for (const challenge of data.challenges) {
             challengeInitial[challenge.id] = {
               roundReached: '',
               playerCount: 'SOLO',
-              proofUrl: '',
+              proofUrls: [],
               notes: '',
               completionTimeSeconds: null,
             };
@@ -150,7 +151,7 @@ export default function EditMapProgressPage() {
             playerCount: PlayerCount;
             isSolo: boolean;
             isNoGuide: boolean;
-            proofUrl: string;
+            proofUrls: string[];
             notes: string;
             completionTimeSeconds: number | null;
           }> = {};
@@ -161,7 +162,7 @@ export default function EditMapProgressPage() {
               playerCount: 'SOLO',
               isSolo: false,
               isNoGuide: false,
-              proofUrl: '',
+              proofUrls: [],
               notes: '',
               completionTimeSeconds: null,
             };
@@ -181,7 +182,7 @@ export default function EditMapProgressPage() {
   const handleChallengeChange = (
     challengeId: string,
     field: keyof (typeof challengeForms)[string],
-    value: string | number | null
+    value: string | number | string[] | null
   ) => {
     setChallengeForms((prev) => ({
       ...prev,
@@ -195,7 +196,7 @@ export default function EditMapProgressPage() {
   const handleEasterEggChange = (
     eeId: string,
     field: keyof (typeof easterEggForms)[string],
-    value: string | boolean | number | null
+    value: string | boolean | number | string[] | null
   ) => {
     setEasterEggForms((prev) => ({
       ...prev,
@@ -224,7 +225,7 @@ export default function EditMapProgressPage() {
           mapId: map.id,
           roundReached: parseInt(form.roundReached),
           playerCount: form.playerCount,
-          proofUrl: form.proofUrl || null,
+          proofUrls: normalizeProofUrls(form.proofUrls ?? []),
           notes: form.notes || null,
           completionTimeSeconds: form.completionTimeSeconds ?? null,
         }),
@@ -266,7 +267,7 @@ export default function EditMapProgressPage() {
           playerCount: form.playerCount,
           isSolo: form.isSolo,
           isNoGuide: form.isNoGuide,
-          proofUrl: form.proofUrl || null,
+          proofUrls: normalizeProofUrls(form.proofUrls ?? []),
           notes: form.notes || null,
           completionTimeSeconds: form.completionTimeSeconds ?? null,
         }),
@@ -425,15 +426,13 @@ export default function EditMapProgressPage() {
                         handleChallengeChange(challenge.id, 'playerCount', e.target.value)
                       }
                     />
-                    <Input
-                      label="Proof URL (optional)"
-                      type="url"
-                      placeholder="YouTube or Twitch link"
-                      value={challengeForms[challenge.id]?.proofUrl || ''}
-                      onChange={(e) =>
-                        handleChallengeChange(challenge.id, 'proofUrl', e.target.value)
-                      }
-                    />
+                    <div className="sm:col-span-3 mt-1">
+                      <ProofUrlsInput
+                        label="Proof URLs (optional)"
+                        value={challengeForms[challenge.id]?.proofUrls ?? []}
+                        onChange={(urls) => handleChallengeChange(challenge.id, 'proofUrls', urls)}
+                      />
+                    </div>
                   </div>
 
                   <div className="mt-3 sm:mt-4">
@@ -458,9 +457,11 @@ export default function EditMapProgressPage() {
                     />
                   </div>
 
-                  {challengeForms[challenge.id]?.proofUrl && (
-                    <div className="mt-3 sm:mt-4">
-                      <ProofEmbed url={challengeForms[challenge.id].proofUrl} />
+                  {(challengeForms[challenge.id]?.proofUrls?.filter(Boolean).length ?? 0) > 0 && (
+                    <div className="mt-3 sm:mt-4 flex flex-col gap-4">
+                      {(challengeForms[challenge.id].proofUrls ?? []).filter(Boolean).map((url, i) => (
+                        <ProofEmbed key={i} url={url} className="rounded-lg overflow-hidden" />
+                      ))}
                     </div>
                   )}
                 </CardContent>
@@ -546,15 +547,13 @@ export default function EditMapProgressPage() {
                             handleEasterEggChange(ee.id, 'playerCount', e.target.value)
                           }
                         />
-                        <Input
-                          label="Proof URL (optional)"
-                          type="url"
-                          placeholder="YouTube or Twitch link"
-                          value={easterEggForms[ee.id]?.proofUrl || ''}
-                          onChange={(e) =>
-                            handleEasterEggChange(ee.id, 'proofUrl', e.target.value)
-                          }
-                        />
+                        <div className="sm:col-span-3">
+                          <ProofUrlsInput
+                            label="Proof URLs (optional)"
+                            value={easterEggForms[ee.id]?.proofUrls ?? []}
+                            onChange={(urls) => handleEasterEggChange(ee.id, 'proofUrls', urls)}
+                          />
+                        </div>
                       </div>
 
                       <div className="mt-3 sm:mt-4">
@@ -592,8 +591,12 @@ export default function EditMapProgressPage() {
                         </label>
                       </div>
 
-                      {easterEggForms[ee.id]?.proofUrl && (
-                        <ProofEmbed url={easterEggForms[ee.id].proofUrl} />
+                      {(easterEggForms[ee.id]?.proofUrls?.filter(Boolean).length ?? 0) > 0 && (
+                        <div className="mt-3 sm:mt-4 flex flex-col gap-4">
+                          {(easterEggForms[ee.id].proofUrls ?? []).filter(Boolean).map((url, i) => (
+                            <ProofEmbed key={i} url={url} className="rounded-lg overflow-hidden" />
+                          ))}
+                        </div>
                       )}
                     </div>
                   )}

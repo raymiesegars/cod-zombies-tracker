@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { revokeAchievementsForMapAfterDelete } from '@/lib/achievements';
+import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -70,7 +71,17 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     const body = await request.json();
     const roundReached = body.roundReached != null ? (typeof body.roundReached === 'number' ? body.roundReached : parseInt(String(body.roundReached), 10)) : undefined;
     const playerCount = body.playerCount;
-    const proofUrl = body.proofUrl !== undefined ? body.proofUrl : undefined;
+    const proofUrlsRaw =
+      body.proofUrls !== undefined
+        ? (Array.isArray(body.proofUrls) ? body.proofUrls : [body.proofUrls])
+        : undefined;
+    if (proofUrlsRaw !== undefined) {
+      for (const u of proofUrlsRaw) {
+        const err = validateProofUrl(String(u));
+        if (err) return NextResponse.json({ error: `Proof URL: ${err}` }, { status: 400 });
+      }
+    }
+    const proofUrls = proofUrlsRaw !== undefined ? normalizeProofUrls(proofUrlsRaw.map(String)) : undefined;
     const screenshotUrl = body.screenshotUrl !== undefined ? body.screenshotUrl : undefined;
     const notes = body.notes !== undefined ? body.notes : undefined;
     const completionTimeSeconds = body.completionTimeSeconds !== undefined
@@ -86,7 +97,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       data: {
         ...(roundReached !== undefined && { roundReached }),
         ...(playerCount !== undefined && { playerCount }),
-        ...(proofUrl !== undefined && { proofUrl }),
+        ...(proofUrls !== undefined && { proofUrls }),
         ...(screenshotUrl !== undefined && { screenshotUrl }),
         ...(notes !== undefined && { notes }),
         ...(completionTimeSeconds !== undefined && { completionTimeSeconds }),

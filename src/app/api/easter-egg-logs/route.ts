@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { processMapAchievements } from '@/lib/achievements';
+import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
 
 // Log an EE completion (new run each time). Main-quest XP once per user per EE.
 export async function POST(request: NextRequest) {
@@ -28,9 +29,20 @@ export async function POST(request: NextRequest) {
       isSolo,
       isNoGuide,
       proofUrl,
+      proofUrls: bodyProofUrls,
       screenshotUrl,
       notes,
     } = body;
+    const rawProofUrls = Array.isArray(bodyProofUrls)
+      ? bodyProofUrls
+      : proofUrl != null
+        ? [proofUrl]
+        : [];
+    for (const u of rawProofUrls) {
+      const err = validateProofUrl(String(u));
+      if (err) return NextResponse.json({ error: `Proof URL: ${err}` }, { status: 400 });
+    }
+    const proofUrls = normalizeProofUrls(rawProofUrls.map(String));
     const completionTimeSeconds = body.completionTimeSeconds != null && Number.isFinite(Number(body.completionTimeSeconds))
       ? Math.max(0, Math.floor(Number(body.completionTimeSeconds)))
       : null;
@@ -51,7 +63,7 @@ export async function POST(request: NextRequest) {
         playerCount,
         isSolo,
         isNoGuide,
-        proofUrl,
+        proofUrls,
         screenshotUrl,
         notes,
         completionTimeSeconds,
@@ -111,6 +123,7 @@ export async function GET(request: NextRequest) {
             username: true,
             displayName: true,
             avatarUrl: true,
+            avatarPreset: true,
           },
         },
       },

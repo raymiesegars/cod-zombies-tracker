@@ -82,6 +82,7 @@ export function Navbar() {
                       username: profile.username,
                       displayName: profile.displayName,
                       avatarUrl: profile.avatarUrl,
+                      avatarPreset: (profile as { avatarPreset?: string | null }).avatarPreset,
                       level: profile.level,
                       totalXp: profile.totalXp,
                     }}

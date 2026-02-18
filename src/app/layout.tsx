@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     template: '%s | CoD Zombies Tracker',
   },
   description:
-    'Free, open source CoD Zombies tracker: Easter egg guides, high round and speedrun leaderboards, find group, log runs with proof, achievements and XP. No ads, no paywalls—donations help keep it running.',
+    'Free, open source CoD Zombies tracker: Easter egg guides, high round and speedrun leaderboards, find group, log runs with proof, achievements and XP. No ads, no paywalls—tips help keep it running.',
   keywords: [
     'Call of Duty Zombies',
     'CoD Zombies',
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     locale: 'en_US',
     siteName: 'CoD Zombies Tracker',
     title: 'CoD Zombies Tracker – Easter Egg Guides, Leaderboards, Find Group & Progress',
-    description: 'Free, open source. Easter egg guides, leaderboards, find group, log runs. No ads; donations help keep the site running.',
+    description: 'Free, open source. Easter egg guides, leaderboards, find group, log runs. No ads; tips help keep the site running.',
     url: BASE,
     images: [{ url: '/images/og-default.png', width: 1200, height: 630, alt: 'CoD Zombies Tracker' }],
   },

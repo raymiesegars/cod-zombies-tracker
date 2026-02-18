@@ -81,3 +81,39 @@ export function getProofEmbedUrl(url: string): { type: 'youtube' | 'twitch' | 'i
     embedUrl: null,
   };
 }
+
+/** Max number of proof URLs per run */
+export const PROOF_URLS_MAX = 20;
+
+/** Validate a single proof URL. Returns error message or null if valid. */
+export function validateProofUrl(url: string): string | null {
+  const trimmed = url.trim();
+  if (!trimmed) return null; // empty is allowed (will be filtered out)
+  try {
+    const u = new URL(trimmed);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') {
+      return 'URL must start with https:// (or http://).';
+    }
+    if (trimmed.length > 2048) return 'URL is too long.';
+    return null;
+  } catch {
+    return 'Enter a valid URL (e.g. YouTube, Twitch, or image link).';
+  }
+}
+
+/** Normalize and filter proof URLs for storage. */
+export function normalizeProofUrls(urls: string[]): string[] {
+  const seen = new Set<string>();
+  return urls
+    .map((u) => u.trim())
+    .filter((u) => u.length > 0)
+    .filter((u) => {
+      if (seen.has(u)) return false;
+      seen.add(u);
+      return true;
+    })
+    .slice(0, PROOF_URLS_MAX);
+}
+
+export const PROOF_URL_FORMAT_HELP =
+  'Add one URL per line. Supported: YouTube (youtube.com/watch or youtu.be/), Twitch (twitch.tv/videos/ or /clip/), or image links (.jpg, .png, .gif, .webp).';

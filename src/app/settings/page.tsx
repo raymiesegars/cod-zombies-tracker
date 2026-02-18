@@ -21,8 +21,11 @@ import {
   Save,
   CheckCircle,
   AlertCircle,
+  ImageIcon,
 } from 'lucide-react';
 import { PublicProfileHelpContent } from '@/components/game';
+import { Avatar } from '@/components/ui';
+import { AVATAR_PRESETS, AVATAR_PRESET_LABELS, getPresetAvatarUrl, isAvatarPreset, type AvatarPreset } from '@/lib/avatar';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -32,6 +35,7 @@ export default function SettingsPage() {
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [isPublic, setIsPublic] = useState(true);
+  const [avatarPreset, setAvatarPreset] = useState<AvatarPreset | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
@@ -47,6 +51,7 @@ export default function SettingsPage() {
       setUsername(profile.username || '');
       setBio(profile.bio || '');
       setIsPublic(profile.isPublic);
+      setAvatarPreset(profile.avatarPreset && isAvatarPreset(profile.avatarPreset) ? profile.avatarPreset : null);
     }
   }, [profile]);
 
@@ -65,6 +70,7 @@ export default function SettingsPage() {
           username,
           bio,
           isPublic,
+          avatarPreset: avatarPreset ?? '',
         }),
       });
 
@@ -152,6 +158,47 @@ export default function SettingsPage() {
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                 />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Profile picture */}
+        <div>
+          <Card variant="bordered">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blood-400" />
+                Profile picture
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-bunker-400">
+                Use your Google photo or pick a Treyarch Zombies–themed preset. The preset replaces your photo everywhere on the site until you switch back.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                {[
+                  { id: null as string | null, label: 'Google', render: () => (
+                    <Avatar src={profile.avatarUrl} fallback={displayName || username} size="lg" className="shrink-0 w-14 h-14" />
+                  ) },
+                  ...AVATAR_PRESETS.map((preset) => ({
+                    id: preset as string,
+                    label: AVATAR_PRESET_LABELS[preset],
+                    render: () => <Avatar src={getPresetAvatarUrl(preset)} alt="" size="lg" className="shrink-0 w-14 h-14" />,
+                  })),
+                ].map(({ id, label, render }) => (
+                  <button
+                    key={id ?? 'google'}
+                    type="button"
+                    onClick={() => setAvatarPreset(id)}
+                    className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 p-3 transition-colors w-[108px] h-[120px] flex-shrink-0 ${
+                      avatarPreset === id ? 'border-blood-500 bg-blood-950/50' : 'border-bunker-700 hover:border-bunker-600 bg-bunker-900/50'
+                    }`}
+                  >
+                    {render()}
+                    <span className="text-xs font-medium text-bunker-300 text-center leading-tight whitespace-nowrap w-full overflow-hidden text-ellipsis">{label}</span>
+                  </button>
+                ))}
               </div>
             </CardContent>
           </Card>

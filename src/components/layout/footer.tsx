@@ -21,13 +21,13 @@ export function Footer() {
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-[#ff5e5b] hover:bg-[#ff7875] text-white font-semibold text-sm sm:text-base shadow-lg hover:shadow-xl transition-all border border-[#e54d4a]/50 hover:scale-[1.02]"
-            aria-label="Support on Ko-fi — help keep the website running"
+            aria-label="Tip on Ko-fi — help keep the website running"
           >
             <Coffee className="w-5 h-5 flex-shrink-0" />
             Help keep the website running
           </a>
           <p className="text-xs text-bunker-500 mt-2 text-center max-w-md">
-            Free, open source, no ads—donations help pay for server and database costs.
+            Free, open source, no ads—tips help pay for server and database costs.
           </p>
         </div>
 
@@ -56,8 +56,8 @@ export function Footer() {
           <a href={PORTFOLIO_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-blood-400 transition-colors" aria-label="Creator portfolio and contact">
             <ExternalLink className="w-3.5 h-3.5" /> Contact / Portfolio
           </a>
-          <a href={KOFI_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-blood-400 transition-colors" aria-label="Support on Ko-fi">
-            <Coffee className="w-3.5 h-3.5" /> Donate
+          <a href={KOFI_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-blood-400 transition-colors" aria-label="Tip on Ko-fi">
+            <Coffee className="w-3.5 h-3.5" /> Tip
           </a>
         </nav>
 

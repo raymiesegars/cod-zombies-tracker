@@ -25,8 +25,8 @@ export default function AboutPage() {
               with a focus on reliability and secure handling of your data.
             </p>
             <p>
-              Server and database costs are paid out of pocket. I&apos;m not rich, so any support via the 
-              Ko-fi link in the footer is appreciated and goes directly toward keeping the site running. 
+              Server and database costs are paid out of pocket. I&apos;m not rich, so any support via a 
+              tip on Ko-fi in the footer is appreciated and goes directly toward keeping the site running. 
               No pressure—use the site either way.
             </p>
           </CardContent>
