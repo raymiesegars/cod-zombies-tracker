@@ -12,6 +12,7 @@ export async function GET(
   const playerCount = searchParams.get('playerCount') as PlayerCount | null;
   const challengeType = searchParams.get('challengeType') as ChallengeType | null;
   const difficulty = searchParams.get('difficulty') as Bo4Difficulty | null;
+  const searchQ = searchParams.get('search')?.trim() ?? '';
   const limitParam = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') || '25', 10) || 25));
   const offsetParam = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10) || 0);
   const mergeTake = 500;
@@ -35,6 +36,26 @@ export async function GET(
       mapId: map.id,
       roundCompleted: { not: null },
     };
+
+    // Restrict to users matching search (by username/displayName) when search is provided
+    if (searchQ.length > 0) {
+      const searchUsers = await prisma.user.findMany({
+        where: {
+          isPublic: true,
+          OR: [
+            { username: { contains: searchQ, mode: 'insensitive' } },
+            { displayName: { contains: searchQ, mode: 'insensitive' } },
+          ],
+        },
+        select: { id: true },
+      });
+      const searchUserIds = searchUsers.map((u) => u.id);
+      if (searchUserIds.length === 0) {
+        return NextResponse.json({ total: 0, entries: [] });
+      }
+      whereClause.userId = { in: searchUserIds };
+      eeWhereClause.userId = { in: searchUserIds };
+    }
 
     if (playerCount) {
       whereClause.playerCount = playerCount;
