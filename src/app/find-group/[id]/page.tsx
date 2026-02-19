@@ -352,10 +352,15 @@ export default function FindGroupListingPage() {
                   No messages yet. Say hi or ask to join.
                 </p>
               ) : (
-                (listing.messages ?? []).map((msg) => (
+                (listing.messages ?? []).map((msg) => {
+                  const isCurrentUser = profile && msg.user.id === profile.id;
+                  const userForAvatar = isCurrentUser && profile
+                    ? { ...msg.user, avatarUrl: profile.avatarUrl ?? msg.user.avatarUrl, avatarPreset: (profile as { avatarPreset?: string | null }).avatarPreset ?? msg.user.avatarPreset }
+                    : msg.user;
+                  return (
                   <div key={msg.id} className="flex gap-3">
                     <Avatar
-                      src={getDisplayAvatarUrl(msg.user)}
+                      src={getDisplayAvatarUrl(userForAvatar)}
                       fallback={msg.user.displayName || msg.user.username}
                       size="sm"
                       className="flex-shrink-0"
@@ -394,7 +399,8 @@ export default function FindGroupListingPage() {
                       </p>
                     </div>
                   </div>
-                ))
+                  );
+                })
               )}
             </div>
             {authUser && profile && (

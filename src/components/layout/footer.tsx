@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { ExternalLink, Coffee } from 'lucide-react';
 
-const DISCORD_URL = 'https://discord.gg/SPmNWHGXAr';
+const DISCORD_URL = 'https://discord.gg/Gc6Cnt7XxT';
 // const X_URL = 'https://x.com/yourhandle'; // TODO: replace and uncomment when ready
 const PORTFOLIO_URL = 'https://raymiesegars.com';
 const KOFI_URL = process.env.NEXT_PUBLIC_KOFI_URL || 'https://ko-fi.com/raymiesegars';
