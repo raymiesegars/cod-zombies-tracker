@@ -9,6 +9,7 @@ import { useAuth } from '@/context/auth-context';
 
 const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
 const PAGE_SIZE = 25;
+const SEARCH_DEBOUNCE_MS = 300;
 
 const challengeTypeLabels: Record<ChallengeType, string> = {
   HIGHEST_ROUND: 'Highest Round',
@@ -36,18 +37,22 @@ export default function LeaderboardsPage() {
   const [selectedPlayerCount, setSelectedPlayerCount] = useState<PlayerCount | ''>('');
   const [selectedChallengeType, setSelectedChallengeType] = useState<ChallengeType | ''>('HIGHEST_ROUND');
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchForFetch, setSearchForFetch] = useState(''); // Debounced; drives server-side search
 
   const isRankView = selectedGame === RANK_VIEW;
 
-  const filteredLeaderboard = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return leaderboard;
-    return leaderboard.filter(
-      (entry) =>
-        entry.user.username.toLowerCase().includes(q) ||
-        (entry.user.displayName?.toLowerCase().includes(q) ?? false)
-    );
-  }, [leaderboard, searchQuery]);
+  // Debounce search: clear immediately, type delay 300ms so we search all users on the server
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q === '') {
+      setSearchForFetch('');
+      return;
+    }
+    const t = setTimeout(() => setSearchForFetch(q), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+
+  const isSearchActive = searchForFetch.length > 0;
 
   useEffect(() => {
     async function fetchData() {
@@ -84,7 +89,11 @@ export default function LeaderboardsPage() {
       if (isRankView) {
         setIsLoading(true);
         try {
-          const res = await fetch(`/api/leaderboards/rank?offset=0&limit=${PAGE_SIZE}`, { cache: 'no-store' });
+          const params = new URLSearchParams();
+          params.set('offset', '0');
+          params.set('limit', String(PAGE_SIZE));
+          if (searchForFetch) params.set('search', searchForFetch);
+          const res = await fetch(`/api/leaderboards/rank?${params}`, { cache: 'no-store' });
           if (res.ok) {
             const data = await res.json();
             setTotal(data.total ?? 0);
@@ -109,9 +118,10 @@ export default function LeaderboardsPage() {
       try {
         const params = new URLSearchParams();
         params.set('offset', '0');
-        params.set('limit', String(PAGE_SIZE));
+        params.set('limit', String(searchForFetch ? 100 : PAGE_SIZE));
         if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
         if (selectedChallengeType) params.set('challengeType', selectedChallengeType);
+        if (searchForFetch) params.set('search', searchForFetch);
 
         const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
         if (res.ok) {
@@ -127,7 +137,7 @@ export default function LeaderboardsPage() {
     }
 
     fetchLeaderboard();
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, searchForFetch]);
 
   const loadMore = useCallback(async () => {
     if (leaderboard.length >= total || total === 0) return;
@@ -173,7 +183,6 @@ export default function LeaderboardsPage() {
   }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, leaderboard.length, total]);
 
   // Only observe sentinel when search is empty so list stays stable while filtering
-  const isSearchActive = searchQuery.trim().length > 0;
   useEffect(() => {
     if (isSearchActive || leaderboard.length === 0 || leaderboard.length >= total) return;
     const sentinel = loadMoreSentinelRef.current;
@@ -347,7 +356,7 @@ export default function LeaderboardsPage() {
                   </div>
                   <span className="inline-flex items-center px-3 py-1.5 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-sm font-semibold shadow-[0_0_1px_rgba(0,0,0,1),0_0_3px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.8)] [text-shadow:0_0_1px_rgba(0,0,0,1),0_0_2px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">
                     {searchQuery.trim()
-                      ? `Showing ${filteredLeaderboard.length} of ${total}`
+                      ? `Showing ${leaderboard.length} of ${total}`
                       : `${total} entries`}
                   </span>
                 </div>
@@ -359,29 +368,27 @@ export default function LeaderboardsPage() {
                   </div>
                 ) : leaderboard.length > 0 ? (
                   <>
-                    {filteredLeaderboard.length > 0 ? (
-                      filteredLeaderboard.map((entry, index) => (
-                        <LeaderboardEntry
-                          key={entry.user.id}
-                          entry={entry}
-                          index={index}
-                          isCurrentUser={entry.user.id === profile?.id}
-                          valueKind="xp"
-                          hidePlayerCount
-                        />
-                      ))
-                    ) : (
-                      <div className="text-center py-8 sm:py-12">
-                        <Search className="w-10 h-10 text-bunker-600 mx-auto mb-4" />
-                        <p className="text-sm sm:text-base text-bunker-400">
-                          No users match &quot;{searchQuery.trim()}&quot;
-                        </p>
-                      </div>
-                    )}
-                    {leaderboard.length < total && (
+                    {leaderboard.map((entry, index) => (
+                      <LeaderboardEntry
+                        key={entry.user.id}
+                        entry={entry}
+                        index={index}
+                        isCurrentUser={entry.user.id === profile?.id}
+                        valueKind="xp"
+                        hidePlayerCount
+                      />
+                    ))}
+                    {!isSearchActive && leaderboard.length < total && (
                       <div ref={loadMoreSentinelRef} className="h-px" aria-hidden />
                     )}
                   </>
+                ) : searchQuery.trim() ? (
+                  <div className="text-center py-8 sm:py-12">
+                    <Search className="w-10 h-10 text-bunker-600 mx-auto mb-4" />
+                    <p className="text-sm sm:text-base text-bunker-400">
+                      No users match &quot;{searchQuery.trim()}&quot;
+                    </p>
+                  </div>
                 ) : (
                   <div className="text-center py-8 sm:py-12">
                     <Trophy className="w-10 h-10 sm:w-12 sm:h-12 text-bunker-600 mx-auto mb-4" />
@@ -411,7 +418,7 @@ export default function LeaderboardsPage() {
                   </div>
                   <span className="inline-flex items-center px-3 py-1.5 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-sm font-semibold shadow-[0_0_1px_rgba(0,0,0,1),0_0_3px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.8)] [text-shadow:0_0_1px_rgba(0,0,0,1),0_0_2px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">
                     {searchQuery.trim()
-                      ? `Showing ${filteredLeaderboard.length} of ${total}`
+                      ? `Showing ${leaderboard.length} of ${total}`
                       : `${total} entries`}
                   </span>
                 </div>
@@ -423,27 +430,25 @@ export default function LeaderboardsPage() {
                   </div>
                 ) : leaderboard.length > 0 ? (
                   <>
-                    {filteredLeaderboard.length > 0 ? (
-                      filteredLeaderboard.map((entry, index) => (
-                        <LeaderboardEntry
-                          key={`${entry.user.id}-${entry.playerCount}`}
-                          entry={entry}
-                          index={index}
-                          isCurrentUser={entry.user.id === profile?.id}
-                        />
-                      ))
-                    ) : (
-                      <div className="text-center py-8 sm:py-12">
-                        <Search className="w-10 h-10 text-bunker-600 mx-auto mb-4" />
-                        <p className="text-sm sm:text-base text-bunker-400">
-                          No entries match &quot;{searchQuery.trim()}&quot;
-                        </p>
-                      </div>
-                    )}
-                    {leaderboard.length < total && (
+                    {leaderboard.map((entry, index) => (
+                      <LeaderboardEntry
+                        key={`${entry.user.id}-${entry.playerCount}`}
+                        entry={entry}
+                        index={index}
+                        isCurrentUser={entry.user.id === profile?.id}
+                      />
+                    ))}
+                    {!isSearchActive && leaderboard.length < total && (
                       <div ref={loadMoreSentinelRef} className="h-px" aria-hidden />
                     )}
                   </>
+                ) : searchQuery.trim() ? (
+                  <div className="text-center py-8 sm:py-12">
+                    <Search className="w-10 h-10 text-bunker-600 mx-auto mb-4" />
+                    <p className="text-sm sm:text-base text-bunker-400">
+                      No entries match &quot;{searchQuery.trim()}&quot;
+                    </p>
+                  </div>
                 ) : (
                   <div className="text-center py-8 sm:py-12">
                     <Trophy className="w-10 h-10 sm:w-12 sm:h-12 text-bunker-600 mx-auto mb-4" />
