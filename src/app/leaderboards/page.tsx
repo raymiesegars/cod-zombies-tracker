@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent, Select, Badge, Logo, PageLoader, HelpTrigger } from '@/components/ui';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Card, CardHeader, CardTitle, CardContent, Select, Input, Logo, PageLoader, HelpTrigger } from '@/components/ui';
 import { LeaderboardEntry, LeaderboardsHelpContent } from '@/components/game';
 import type { LeaderboardEntry as LeaderboardEntryType, Game, MapWithGame, PlayerCount, ChallengeType } from '@/types';
-import { Trophy, Medal, Filter } from 'lucide-react';
+import { Trophy, Medal, Filter, Search, X } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 
 const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
+const PAGE_SIZE = 25;
 
 const challengeTypeLabels: Record<ChallengeType, string> = {
   HIGHEST_ROUND: 'Highest Round',
@@ -25,14 +26,27 @@ export default function LeaderboardsPage() {
   const [games, setGames] = useState<Game[]>([]);
   const [maps, setMaps] = useState<MapWithGame[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntryType[]>([]);
+  const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const loadMoreSentinelRef = useRef<HTMLDivElement>(null);
 
   const [selectedGame, setSelectedGame] = useState(RANK_VIEW);
   const [selectedMap, setSelectedMap] = useState('');
   const [selectedPlayerCount, setSelectedPlayerCount] = useState<PlayerCount | ''>('');
   const [selectedChallengeType, setSelectedChallengeType] = useState<ChallengeType | ''>('HIGHEST_ROUND');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const isRankView = selectedGame === RANK_VIEW;
+
+  const filteredLeaderboard = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return leaderboard;
+    return leaderboard.filter(
+      (entry) =>
+        entry.user.username.toLowerCase().includes(q) ||
+        (entry.user.displayName?.toLowerCase().includes(q) ?? false)
+    );
+  }, [leaderboard, searchQuery]);
 
   useEffect(() => {
     async function fetchData() {
@@ -69,10 +83,11 @@ export default function LeaderboardsPage() {
       if (isRankView) {
         setIsLoading(true);
         try {
-          const res = await fetch('/api/leaderboards/rank', { cache: 'no-store' });
+          const res = await fetch(`/api/leaderboards/rank?offset=0&limit=${PAGE_SIZE}`, { cache: 'no-store' });
           if (res.ok) {
             const data = await res.json();
-            setLeaderboard(data);
+            setTotal(data.total ?? 0);
+            setLeaderboard(data.entries ?? []);
           }
         } catch (error) {
           console.error('Error fetching rank leaderboard:', error);
@@ -83,6 +98,7 @@ export default function LeaderboardsPage() {
       }
 
       if (!selectedMap) {
+        setTotal(0);
         setLeaderboard([]);
         setIsLoading(false);
         return;
@@ -91,13 +107,16 @@ export default function LeaderboardsPage() {
       setIsLoading(true);
       try {
         const params = new URLSearchParams();
+        params.set('offset', '0');
+        params.set('limit', String(PAGE_SIZE));
         if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
         if (selectedChallengeType) params.set('challengeType', selectedChallengeType);
 
         const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
         if (res.ok) {
           const data = await res.json();
-          setLeaderboard(data);
+          setTotal(data.total ?? 0);
+          setLeaderboard(data.entries ?? []);
         }
       } catch (error) {
         console.error('Error fetching leaderboard:', error);
@@ -108,6 +127,47 @@ export default function LeaderboardsPage() {
 
     fetchLeaderboard();
   }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType]);
+
+  const loadMore = useCallback(async () => {
+    if (leaderboard.length >= total || total === 0) return;
+    const offset = leaderboard.length;
+    try {
+      if (isRankView) {
+        const res = await fetch(`/api/leaderboards/rank?offset=${offset}&limit=${PAGE_SIZE}`, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          setLeaderboard((prev) => [...prev, ...(data.entries ?? [])]);
+        }
+      } else if (selectedMap) {
+        const params = new URLSearchParams();
+        params.set('offset', String(offset));
+        params.set('limit', String(PAGE_SIZE));
+        if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
+        if (selectedChallengeType) params.set('challengeType', selectedChallengeType);
+        const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
+        if (res.ok) {
+          const data = await res.json();
+          setLeaderboard((prev) => [...prev, ...(data.entries ?? [])]);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading more leaderboard entries:', error);
+    }
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, leaderboard.length, total]);
+
+  useEffect(() => {
+    if (leaderboard.length === 0 || leaderboard.length >= total) return;
+    const sentinel = loadMoreSentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      (observed) => {
+        if (observed[0]?.isIntersecting) loadMore();
+      },
+      { rootMargin: '0px 0px 400px 0px', threshold: 0 }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loadMore, isRankView, selectedMap, leaderboard.length, total]);
 
   const filteredMaps = selectedGame
     ? maps.filter((map) => map.gameId === selectedGame)
@@ -185,10 +245,27 @@ export default function LeaderboardsPage() {
         </details>
       </div>
 
-      {/* Filters */}
+      {/* Search and Filters – layout matches maps page */}
       <div className="bg-bunker-950 border-b border-bunker-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 sm:gap-4">
+            <div className="w-full">
+              <Input
+                type="search"
+                placeholder="Search users by name or username…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                leftIcon={<Search className="w-4 h-4 sm:w-5 sm:h-5" />}
+                rightIcon={
+                  searchQuery ? (
+                    <button type="button" onClick={() => setSearchQuery('')} aria-label="Clear search">
+                      <X className="w-4 h-4 sm:w-5 sm:h-5 hover:text-blood-400" />
+                    </button>
+                  ) : undefined
+                }
+                aria-label="Search users"
+              />
+            </div>
             <div className="flex items-center gap-2 text-bunker-400">
               <Filter className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
               <span className="text-xs sm:text-sm font-medium">Filters:</span>
@@ -250,7 +327,9 @@ export default function LeaderboardsPage() {
                     </p>
                   </div>
                   <span className="inline-flex items-center px-3 py-1.5 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-sm font-semibold shadow-[0_0_1px_rgba(0,0,0,1),0_0_3px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.8)] [text-shadow:0_0_1px_rgba(0,0,0,1),0_0_2px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">
-                    {leaderboard.length} entries
+                    {searchQuery.trim()
+                      ? `Showing ${filteredLeaderboard.length} of ${total}`
+                      : `${total} entries`}
                   </span>
                 </div>
               </CardHeader>
@@ -260,16 +339,30 @@ export default function LeaderboardsPage() {
                     <PageLoader message="Loading leaderboard…" inline />
                   </div>
                 ) : leaderboard.length > 0 ? (
-                  leaderboard.map((entry, index) => (
-                    <LeaderboardEntry
-                      key={entry.user.id}
-                      entry={entry}
-                      index={index}
-                      isCurrentUser={entry.user.id === profile?.id}
-                      valueKind="xp"
-                      hidePlayerCount
-                    />
-                  ))
+                  <>
+                    {filteredLeaderboard.length > 0 ? (
+                      filteredLeaderboard.map((entry, index) => (
+                        <LeaderboardEntry
+                          key={entry.user.id}
+                          entry={entry}
+                          index={index}
+                          isCurrentUser={entry.user.id === profile?.id}
+                          valueKind="xp"
+                          hidePlayerCount
+                        />
+                      ))
+                    ) : (
+                      <div className="text-center py-8 sm:py-12">
+                        <Search className="w-10 h-10 text-bunker-600 mx-auto mb-4" />
+                        <p className="text-sm sm:text-base text-bunker-400">
+                          No users match &quot;{searchQuery.trim()}&quot;
+                        </p>
+                      </div>
+                    )}
+                    {leaderboard.length < total && (
+                      <div ref={loadMoreSentinelRef} className="h-px" aria-hidden />
+                    )}
+                  </>
                 ) : (
                   <div className="text-center py-8 sm:py-12">
                     <Trophy className="w-10 h-10 sm:w-12 sm:h-12 text-bunker-600 mx-auto mb-4" />
@@ -298,7 +391,9 @@ export default function LeaderboardsPage() {
                     </p>
                   </div>
                   <span className="inline-flex items-center px-3 py-1.5 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-sm font-semibold shadow-[0_0_1px_rgba(0,0,0,1),0_0_3px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.8)] [text-shadow:0_0_1px_rgba(0,0,0,1),0_0_2px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">
-                    {leaderboard.length} entries
+                    {searchQuery.trim()
+                      ? `Showing ${filteredLeaderboard.length} of ${total}`
+                      : `${total} entries`}
                   </span>
                 </div>
               </CardHeader>
@@ -308,14 +403,28 @@ export default function LeaderboardsPage() {
                     <PageLoader message="Loading leaderboard…" inline />
                   </div>
                 ) : leaderboard.length > 0 ? (
-                  leaderboard.map((entry, index) => (
-                    <LeaderboardEntry
-                      key={`${entry.user.id}-${entry.playerCount}`}
-                      entry={entry}
-                      index={index}
-                      isCurrentUser={entry.user.id === profile?.id}
-                    />
-                  ))
+                  <>
+                    {filteredLeaderboard.length > 0 ? (
+                      filteredLeaderboard.map((entry, index) => (
+                        <LeaderboardEntry
+                          key={`${entry.user.id}-${entry.playerCount}`}
+                          entry={entry}
+                          index={index}
+                          isCurrentUser={entry.user.id === profile?.id}
+                        />
+                      ))
+                    ) : (
+                      <div className="text-center py-8 sm:py-12">
+                        <Search className="w-10 h-10 text-bunker-600 mx-auto mb-4" />
+                        <p className="text-sm sm:text-base text-bunker-400">
+                          No entries match &quot;{searchQuery.trim()}&quot;
+                        </p>
+                      </div>
+                    )}
+                    {leaderboard.length < total && (
+                      <div ref={loadMoreSentinelRef} className="h-px" aria-hidden />
+                    )}
+                  </>
                 ) : (
                   <div className="text-center py-8 sm:py-12">
                     <Trophy className="w-10 h-10 sm:w-12 sm:h-12 text-bunker-600 mx-auto mb-4" />
