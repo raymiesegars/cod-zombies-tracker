@@ -521,7 +521,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
         const res = await fetch(`/api/maps/${slug}/leaderboard?${params}`);
         if (res.ok) {
           const data = await res.json();
-          setLeaderboard(data);
+          setLeaderboard(data.entries ?? []);
         }
       } catch (error) {
         console.error('Error fetching leaderboard:', error);
