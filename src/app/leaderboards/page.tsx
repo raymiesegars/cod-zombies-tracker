@@ -29,6 +29,7 @@ export default function LeaderboardsPage() {
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const loadMoreSentinelRef = useRef<HTMLDivElement>(null);
+  const loadingMoreRef = useRef(false);
 
   const [selectedGame, setSelectedGame] = useState(RANK_VIEW);
   const [selectedMap, setSelectedMap] = useState('');
@@ -130,13 +131,20 @@ export default function LeaderboardsPage() {
 
   const loadMore = useCallback(async () => {
     if (leaderboard.length >= total || total === 0) return;
+    if (loadingMoreRef.current) return;
+    loadingMoreRef.current = true;
     const offset = leaderboard.length;
     try {
       if (isRankView) {
         const res = await fetch(`/api/leaderboards/rank?offset=${offset}&limit=${PAGE_SIZE}`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
-          setLeaderboard((prev) => [...prev, ...(data.entries ?? [])]);
+          const nextEntries = data.entries ?? [];
+          setLeaderboard((prev) => {
+            const seen = new Set(prev.map((e) => e.user.id));
+            const newEntries = nextEntries.filter((e: LeaderboardEntryType) => !seen.has(e.user.id));
+            return newEntries.length > 0 ? [...prev, ...newEntries] : prev;
+          });
         }
       } else if (selectedMap) {
         const params = new URLSearchParams();
@@ -147,16 +155,27 @@ export default function LeaderboardsPage() {
         const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
         if (res.ok) {
           const data = await res.json();
-          setLeaderboard((prev) => [...prev, ...(data.entries ?? [])]);
+          const nextEntries = data.entries ?? [];
+          setLeaderboard((prev) => {
+            const seen = new Set(prev.map((e) => e.user.id));
+            const key = (e: LeaderboardEntryType) => `${e.user.id}-${e.playerCount}`;
+            const seenKey = new Set(prev.map(key));
+            const newEntries = nextEntries.filter((e: LeaderboardEntryType) => !seenKey.has(key(e)));
+            return newEntries.length > 0 ? [...prev, ...newEntries] : prev;
+          });
         }
       }
     } catch (error) {
       console.error('Error loading more leaderboard entries:', error);
+    } finally {
+      loadingMoreRef.current = false;
     }
   }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, leaderboard.length, total]);
 
+  // Only observe sentinel when search is empty so list stays stable while filtering
+  const isSearchActive = searchQuery.trim().length > 0;
   useEffect(() => {
-    if (leaderboard.length === 0 || leaderboard.length >= total) return;
+    if (isSearchActive || leaderboard.length === 0 || leaderboard.length >= total) return;
     const sentinel = loadMoreSentinelRef.current;
     if (!sentinel) return;
     const observer = new IntersectionObserver(
@@ -167,7 +186,7 @@ export default function LeaderboardsPage() {
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [loadMore, isRankView, selectedMap, leaderboard.length, total]);
+  }, [isSearchActive, loadMore, leaderboard.length, total]);
 
   const filteredMaps = selectedGame
     ? maps.filter((map) => map.gameId === selectedGame)

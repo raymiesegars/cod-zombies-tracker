@@ -85,16 +85,48 @@ export function getProofEmbedUrl(url: string): { type: 'youtube' | 'twitch' | 'i
 /** Max number of proof URLs per run */
 export const PROOF_URLS_MAX = 20;
 
+/**
+ * Allowed hostname suffixes for proof URLs (domain or subdomain match).
+ * Only links from these trusted sites are accepted to reduce malicious links.
+ */
+const ALLOWED_PROOF_HOST_SUFFIXES = [
+  'youtube.com',
+  'youtu.be',
+  'twitch.tv',
+  'clips.twitch.tv',
+  'imgur.com',
+  'streamable.com',
+  'gyazo.com',
+  'imgbb.com',
+  'twitter.com',
+  'x.com',
+  'flic.kr',
+  'flickr.com',
+  'cdn.discordapp.com',
+  'media.discordapp.net',
+] as const;
+
+function isAllowedProofHost(hostname: string): boolean {
+  const lower = hostname.toLowerCase().replace(/^\.+|\.+$/g, '');
+  if (!lower) return false;
+  return ALLOWED_PROOF_HOST_SUFFIXES.some(
+    (suffix) => lower === suffix || lower.endsWith('.' + suffix)
+  );
+}
+
 /** Validate a single proof URL. Returns error message or null if valid. */
 export function validateProofUrl(url: string): string | null {
   const trimmed = url.trim();
   if (!trimmed) return null; // empty is allowed (will be filtered out)
   try {
     const u = new URL(trimmed);
-    if (u.protocol !== 'http:' && u.protocol !== 'https:') {
-      return 'URL must start with https:// (or http://).';
+    if (u.protocol !== 'https:') {
+      return 'Proof links must use https:// for security.';
     }
     if (trimmed.length > 2048) return 'URL is too long.';
+    if (!isAllowedProofHost(u.hostname)) {
+      return `Proof links must be from a trusted site (e.g. YouTube, Twitch, Imgur, Streamable, Gyazo, Twitter/X, Discord CDN). This domain is not allowed.`;
+    }
     return null;
   } catch {
     return 'Enter a valid URL (e.g. YouTube, Twitch, or image link).';
@@ -116,4 +148,4 @@ export function normalizeProofUrls(urls: string[]): string[] {
 }
 
 export const PROOF_URL_FORMAT_HELP =
-  'Add one URL per line. Supported: YouTube (youtube.com/watch or youtu.be/), Twitch (twitch.tv/videos/ or /clip/), or image links (.jpg, .png, .gif, .webp).';
+  'Add one URL per line. Only links from trusted sites are allowed (YouTube, Twitch, Imgur, Streamable, Gyazo, ImgBB, Twitter/X, Flickr, Discord CDN). Use https://.';
