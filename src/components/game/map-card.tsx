@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { getAssetUrl } from '@/lib/assets';
+import { getBo4DifficultyLabel } from '@/lib/bo4';
 import { Badge, Logo, EasterEggIcon } from '@/components/ui';
 import { RoundCounter } from './round-counter';
 import type { MapWithGame } from '@/types';
@@ -12,6 +13,8 @@ import type { MapWithGame } from '@/types';
 interface MapCardProps {
   map: MapWithGame;
   userHighestRound?: number;
+  /** BO4 only: difficulty at which the highest round was achieved */
+  userHighestRoundDifficulty?: string;
   hasCompletedEasterEgg?: boolean;
   className?: string;
 }
@@ -19,6 +22,7 @@ interface MapCardProps {
 export function MapCard({
   map,
   userHighestRound,
+  userHighestRoundDifficulty,
   hasCompletedEasterEgg,
   className,
 }: MapCardProps) {
@@ -77,11 +81,16 @@ export function MapCard({
             </div>
           )}
 
-          {/* Highest round: bottom-right */}
+          {/* Highest round: bottom-right (BO4: show difficulty tag) */}
           {userHighestRound !== undefined && (
-            <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 flex items-center gap-1.5 sm:gap-2">
-              <RoundCounter round={userHighestRound} size="xs" animated={false} className="sm:hidden" />
-              <RoundCounter round={userHighestRound} size="sm" animated={false} className="hidden sm:flex" />
+            <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 flex items-center gap-1.5 sm:gap-2 min-w-0 max-w-[85%] sm:max-w-none">
+              {map.game.shortName === 'BO4' && userHighestRoundDifficulty && (
+                <span className="text-[10px] sm:text-xs font-medium px-1.5 py-0.5 rounded border border-bunker-500/80 bg-bunker-900/90 text-bunker-300 shrink-0">
+                  {getBo4DifficultyLabel(userHighestRoundDifficulty)}
+                </span>
+              )}
+              <RoundCounter round={userHighestRound} size="xs" animated={false} className="sm:hidden shrink-0" />
+              <RoundCounter round={userHighestRound} size="sm" animated={false} className="hidden sm:flex shrink-0" />
             </div>
           )}
         </div>

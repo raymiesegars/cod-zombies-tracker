@@ -188,6 +188,7 @@ export function MapsPageClient({ initialMaps, initialGames }: Props) {
                   key={map.id}
                   map={map}
                   userHighestRound={stats?.highestRound}
+                  userHighestRoundDifficulty={stats?.highestRoundDifficulty}
                   hasCompletedEasterEgg={stats?.hasCompletedMainEE}
                 />
               );
@@ -215,6 +216,7 @@ export function MapsPageClient({ initialMaps, initialGames }: Props) {
                           key={map.id}
                           map={map}
                           userHighestRound={stats?.highestRound}
+                          userHighestRoundDifficulty={stats?.highestRoundDifficulty}
                           hasCompletedEasterEgg={stats?.hasCompletedMainEE}
                         />
                       );

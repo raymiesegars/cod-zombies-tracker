@@ -11,6 +11,7 @@ import {
   getRoundConfigForMap,
   getXpForRoundFromMilestones,
 } from './map-round-config';
+import { isBo4Game, BO4_DIFFICULTIES, BO4_DIFFICULTY_XP_MULTIPLIER, type Bo4DifficultyType } from '../bo4';
 
 const CHALLENGE_TYPES = [
   'HIGHEST_ROUND',
@@ -27,11 +28,13 @@ export type AchievementSeedRow = {
   slug: string;
   name: string;
   type: 'ROUND_MILESTONE' | 'CHALLENGE_COMPLETE' | 'EASTER_EGG_COMPLETE';
-  criteria: { round?: number; challengeType?: string; isCap?: boolean };
+  criteria: { round?: number; challengeType?: string; isCap?: boolean; difficulty?: Bo4DifficultyType };
   xpReward: number;
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
   challengeId?: string;
   easterEggId?: string;
+  /** BO4 only: which difficulty this achievement is for */
+  difficulty?: Bo4DifficultyType;
 };
 
 function rarityForRound(round: number, maxRound: number): AchievementSeedRow['rarity'] {
@@ -42,6 +45,17 @@ function rarityForRound(round: number, maxRound: number): AchievementSeedRow['ra
   if (ratio >= 0.35) return 'RARE';
   if (ratio >= 0.15) return 'UNCOMMON';
   return 'COMMON';
+}
+
+/** For BO4 maps: expand one row into four (one per difficulty) with scaled XP and criteria. */
+function expandBo4Difficulties(row: AchievementSeedRow): AchievementSeedRow[] {
+  return BO4_DIFFICULTIES.map((d) => ({
+    ...row,
+    name: `${row.name} (${d.charAt(0) + d.slice(1).toLowerCase()})`,
+    xpReward: Math.max(MIN_ACHIEVEMENT_XP, Math.floor(row.xpReward * BO4_DIFFICULTY_XP_MULTIPLIER[d])),
+    criteria: { ...row.criteria, difficulty: d },
+    difficulty: d,
+  }));
 }
 
 export function getMapAchievementDefinitions(
@@ -113,6 +127,9 @@ export function getMapAchievementDefinitions(
           rarity: rarityForRound(round, maxRound),
         });
       }
+    }
+    if (isBo4Game(gameShortName)) {
+      return rows.flatMap((r) => expandBo4Difficulties(r));
     }
     return rows;
   }
@@ -190,6 +207,9 @@ export function getMapAchievementDefinitions(
     }
   }
 
+  if (isBo4Game(gameShortName)) {
+    return rows.flatMap((r) => expandBo4Difficulties(r));
+  }
   return rows;
 }
 

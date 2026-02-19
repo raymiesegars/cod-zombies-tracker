@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
+import { isBo4Game } from '@/lib/bo4';
 import type { UserMapStats } from '@/types';
 
 // Per-map stats (highest round, main EE done) + totals for the profile dashboard.
@@ -47,14 +48,22 @@ export async function GET(
 
     const mapIds = new Set<string>();
     const highestByMap = new Map<string, number>();
+    const highestDifficultyByMap = new Map<string, string>();
     const challengesCompletedByMap = new Map<string, number>();
     const mainEEByMap = new Set<string>();
 
     for (const log of user.challengeLogs) {
       mapIds.add(log.mapId);
-      // Highest round on this map from any challenge type (matches achievement logic)
       const current = highestByMap.get(log.mapId) ?? 0;
-      highestByMap.set(log.mapId, Math.max(current, log.roundReached));
+      const round = log.roundReached;
+      if (round > current) {
+        highestByMap.set(log.mapId, round);
+        if (isBo4Game(log.map?.game?.shortName)) {
+          highestDifficultyByMap.set(log.mapId, (log as { difficulty?: string | null }).difficulty ?? 'NORMAL');
+        }
+      } else {
+        highestByMap.set(log.mapId, Math.max(current, round));
+      }
       const count = challengesCompletedByMap.get(log.mapId) ?? 0;
       challengesCompletedByMap.set(log.mapId, count + 1);
     }
@@ -66,6 +75,9 @@ export async function GET(
       }
       if (log.roundCompleted != null) {
         const current = highestByMap.get(log.mapId) ?? 0;
+        if (log.roundCompleted > current && isBo4Game(log.map?.game?.shortName)) {
+          highestDifficultyByMap.set(log.mapId, (log as { difficulty?: string | null }).difficulty ?? 'NORMAL');
+        }
         highestByMap.set(log.mapId, Math.max(current, log.roundCompleted));
       }
     }
@@ -82,6 +94,7 @@ export async function GET(
       mapImageUrl: map.imageUrl,
       gameShortName: map.game.shortName,
       highestRound: highestByMap.get(map.id) ?? 0,
+      ...(isBo4Game(map.game.shortName) && highestDifficultyByMap.has(map.id) && { highestRoundDifficulty: highestDifficultyByMap.get(map.id) }),
       hasCompletedMainEE: mainEEByMap.has(map.id),
       challengesCompleted: challengesCompletedByMap.get(map.id) ?? 0,
     }));

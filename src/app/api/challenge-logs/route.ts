@@ -4,6 +4,8 @@ import { getUser } from '@/lib/supabase/server';
 import { processMapAchievements } from '@/lib/achievements';
 import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
 import { createCoOpRunPendingsForChallengeLog } from '@/lib/coop-pending';
+import { isBo4Game, BO4_DIFFICULTIES } from '@/lib/bo4';
+import type { Bo4Difficulty } from '@prisma/client';
 
 // Log a new run. We run the achievement check when it’s a new best for that user+challenge+map+playerCount.
 export async function POST(request: NextRequest) {
@@ -51,23 +53,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const [challenge, map, previousBest] = await Promise.all([
+    const [challenge, mapWithGame, previousBest] = await Promise.all([
       prisma.challenge.findUnique({ where: { id: challengeId } }),
-      prisma.map.findUnique({ where: { id: mapId } }),
+      prisma.map.findUnique({ where: { id: mapId }, include: { game: { select: { shortName: true } } } }),
       prisma.challengeLog.findFirst({
         where: {
           userId: user.id,
           challengeId,
           mapId,
           playerCount,
+          ...(body.difficulty != null && { difficulty: body.difficulty as Bo4Difficulty }),
         },
         orderBy: { roundReached: 'desc' },
         select: { roundReached: true },
       }),
     ]);
 
+    const map = mapWithGame;
     if (!challenge || !map) {
       return NextResponse.json({ error: 'Challenge or map not found' }, { status: 404 });
+    }
+
+    const isBo4 = isBo4Game(map.game?.shortName);
+    let difficulty: Bo4Difficulty | undefined;
+    if (isBo4) {
+      const d = body.difficulty;
+      if (!d || !BO4_DIFFICULTIES.includes(d as any)) {
+        return NextResponse.json(
+          { error: 'BO4 maps require difficulty: CASUAL, NORMAL, HARDCORE, or REALISTIC' },
+          { status: 400 }
+        );
+      }
+      difficulty = d as Bo4Difficulty;
     }
 
     const previousRound = previousBest?.roundReached ?? 0;
@@ -86,6 +103,7 @@ export async function POST(request: NextRequest) {
         completionTimeSeconds,
         teammateUserIds,
         teammateNonUserNames,
+        ...(difficulty != null && { difficulty }),
       },
     });
 

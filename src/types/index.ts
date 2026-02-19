@@ -95,6 +95,7 @@ export type UserMapStats = {
   mapImageUrl: string | null;
   gameShortName: string;
   highestRound: number;
+  highestRoundDifficulty?: string;
   hasCompletedMainEE: boolean;
   challengesCompleted: number;
 };

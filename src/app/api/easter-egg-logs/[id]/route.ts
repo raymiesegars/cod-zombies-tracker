@@ -5,6 +5,8 @@ import { revokeAchievementsForMapAfterDelete } from '@/lib/achievements';
 import { getLevelFromXp } from '@/lib/ranks';
 import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
 import { createCoOpRunPendingsForEasterEggLog } from '@/lib/coop-pending';
+import { isBo4Game, BO4_DIFFICULTIES } from '@/lib/bo4';
+import type { Bo4Difficulty } from '@prisma/client';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -94,7 +96,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     const { id } = await params;
     const result = await getLogAndUser(id);
     if ('error' in result) return NextResponse.json({ error: result.error }, { status: result.status });
-    const { user } = result;
+    const { log, user } = result;
 
     const body = await request.json();
     const roundCompleted = body.roundCompleted !== undefined
@@ -126,6 +128,17 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       ? (Array.isArray(body.teammateNonUserNames) ? body.teammateNonUserNames.filter((n: unknown) => typeof n === 'string').slice(0, 10) : [])
       : undefined;
 
+    let difficulty: Bo4Difficulty | undefined;
+    if (body.difficulty !== undefined) {
+      const mapWithGame = log.map ?? await prisma.map.findUnique({ where: { id: log.mapId }, include: { game: { select: { shortName: true } } } });
+      if (isBo4Game((mapWithGame as { game?: { shortName?: string } })?.game?.shortName)) {
+        if (!body.difficulty || !BO4_DIFFICULTIES.includes(body.difficulty as any)) {
+          return NextResponse.json({ error: 'BO4 maps require difficulty: CASUAL, NORMAL, HARDCORE, or REALISTIC' }, { status: 400 });
+        }
+        difficulty = body.difficulty as Bo4Difficulty;
+      }
+    }
+
     const updated = await prisma.easterEggLog.update({
       where: { id },
       data: {
@@ -139,6 +152,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         ...(completionTimeSeconds !== undefined && { completionTimeSeconds }),
         ...(teammateUserIds !== undefined && { teammateUserIds }),
         ...(teammateNonUserNames !== undefined && { teammateNonUserNames }),
+        ...(difficulty !== undefined && { difficulty }),
       },
       include: {
         easterEgg: true,

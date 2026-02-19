@@ -16,6 +16,7 @@ import {
 } from '@/components/ui';
 import { ProofEmbed, ProofUrlsInput, TeammatePicker, type TeammateUser } from '@/components/game';
 import { normalizeProofUrls } from '@/lib/utils';
+import { BO4_DIFFICULTIES, getBo4DifficultyLabel } from '@/lib/bo4';
 import { ChevronLeft, Save } from 'lucide-react';
 import type { PlayerCount } from '@/types';
 
@@ -31,6 +32,7 @@ type ChallengeLog = {
   id: string;
   roundReached: number;
   playerCount: string;
+  difficulty?: string | null;
   proofUrls?: string[];
   proofUrl?: string | null;
   notes: string | null;
@@ -42,6 +44,7 @@ type EasterEggLog = {
   id: string;
   roundCompleted: number | null;
   playerCount: string;
+  difficulty?: string | null;
   isSolo: boolean;
   isNoGuide: boolean;
   proofUrls?: string[];
@@ -77,6 +80,7 @@ export default function EditRunPage() {
   const [teammateUserIds, setTeammateUserIds] = useState<string[]>([]);
   const [teammateNonUserNames, setTeammateNonUserNames] = useState<string[]>([]);
   const [teammateUserDetails, setTeammateUserDetails] = useState<TeammateUser[]>([]);
+  const [difficulty, setDifficulty] = useState<string>('NORMAL');
 
   const isChallenge = type === 'challenge';
   const apiUrl = isChallenge ? `/api/challenge-logs/${logId}` : `/api/easter-egg-logs/${logId}`;
@@ -108,6 +112,7 @@ export default function EditRunPage() {
         if (data.roundReached != null) {
           setRoundReached(String(data.roundReached));
           setPlayerCount(data.playerCount || 'SOLO');
+          setDifficulty(data.difficulty && BO4_DIFFICULTIES.includes(data.difficulty) ? data.difficulty : 'NORMAL');
           setProofUrls(Array.isArray(data.proofUrls) ? data.proofUrls : data.proofUrl ? [data.proofUrl] : []);
           setNotes(data.notes || '');
           setCompletionTimeSeconds(data.completionTimeSeconds ?? null);
@@ -117,6 +122,7 @@ export default function EditRunPage() {
         } else {
           setRoundCompleted(data.roundCompleted != null ? String(data.roundCompleted) : '');
           setPlayerCount(data.playerCount || 'SOLO');
+          setDifficulty(data.difficulty && BO4_DIFFICULTIES.includes(data.difficulty) ? data.difficulty : 'NORMAL');
           setProofUrls(Array.isArray(data.proofUrls) ? data.proofUrls : data.proofUrl ? [data.proofUrl] : []);
           setNotes(data.notes || '');
           setCompletionTimeSeconds(data.completionTimeSeconds ?? null);
@@ -147,6 +153,7 @@ export default function EditRunPage() {
         body: JSON.stringify({
           roundReached: round,
           playerCount,
+          ...(log?.map?.game?.shortName === 'BO4' && { difficulty }),
           proofUrls: normalizeProofUrls(proofUrls),
           notes: notes || null,
           completionTimeSeconds,
@@ -175,6 +182,7 @@ export default function EditRunPage() {
         body: JSON.stringify({
           roundCompleted: roundCompleted ? parseInt(roundCompleted, 10) : null,
           playerCount,
+          ...(log?.map?.game?.shortName === 'BO4' && { difficulty }),
           isSolo,
           isNoGuide,
           proofUrls: normalizeProofUrls(proofUrls),
@@ -262,6 +270,14 @@ export default function EditRunPage() {
                   value={playerCount}
                   onChange={(e) => setPlayerCount(e.target.value as PlayerCount)}
                 />
+                {log?.map?.game?.shortName === 'BO4' && (
+                  <Select
+                    label="Difficulty"
+                    options={BO4_DIFFICULTIES.map((d) => ({ value: d, label: getBo4DifficultyLabel(d) }))}
+                    value={difficulty}
+                    onChange={(e) => setDifficulty(e.target.value)}
+                  />
+                )}
                 <ProofUrlsInput
                   label="Proof URLs (optional)"
                   value={proofUrls}
@@ -327,6 +343,14 @@ export default function EditRunPage() {
                   value={playerCount}
                   onChange={(e) => setPlayerCount(e.target.value as PlayerCount)}
                 />
+                {log?.map?.game?.shortName === 'BO4' && (
+                  <Select
+                    label="Difficulty"
+                    options={BO4_DIFFICULTIES.map((d) => ({ value: d, label: getBo4DifficultyLabel(d) }))}
+                    value={difficulty}
+                    onChange={(e) => setDifficulty(e.target.value)}
+                  />
+                )}
                 <ProofUrlsInput
                   label="Proof URLs (optional)"
                   value={proofUrls}

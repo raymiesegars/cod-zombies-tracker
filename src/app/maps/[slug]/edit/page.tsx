@@ -23,6 +23,7 @@ import { ProofEmbed, ProofUrlsInput, TeammatePicker } from '@/components/game';
 import { normalizeProofUrls } from '@/lib/utils';
 import { useXpToast } from '@/context/xp-toast-context';
 import { getXpForChallengeLog, getXpForEasterEggLog, type AchievementForPreview } from '@/lib/xp-preview';
+import { isBo4Game, BO4_DIFFICULTIES, getBo4DifficultyLabel } from '@/lib/bo4';
 import type { MapWithDetails, ChallengeType, PlayerCount } from '@/types';
 import { ChevronLeft, Save, CheckCircle, AlertCircle } from 'lucide-react';
 
@@ -98,7 +99,7 @@ export default function EditMapProgressPage() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   const [challengeForms, setChallengeForms] = useState<
-    Record<string, { roundReached: string; playerCount: PlayerCount; proofUrls: string[]; notes: string; completionTimeSeconds: number | null; teammateUserIds: string[]; teammateNonUserNames: string[] }>
+    Record<string, { roundReached: string; playerCount: PlayerCount; difficulty?: string; proofUrls: string[]; notes: string; completionTimeSeconds: number | null; teammateUserIds: string[]; teammateNonUserNames: string[] }>
   >({});
 
   const [easterEggForms, setEasterEggForms] = useState<
@@ -108,6 +109,7 @@ export default function EditMapProgressPage() {
         completed: boolean;
         roundCompleted: string;
         playerCount: PlayerCount;
+        difficulty?: string;
         isSolo: boolean;
         isNoGuide: boolean;
         proofUrls: string[];
@@ -135,11 +137,13 @@ export default function EditMapProgressPage() {
 
           const mainQuestEasterEggs = (data.easterEggs ?? []).filter((ee: { type: string }) => ee.type === 'MAIN_QUEST');
 
-          const challengeInitial: Record<string, { roundReached: string; playerCount: PlayerCount; proofUrls: string[]; notes: string; completionTimeSeconds: number | null; teammateUserIds: string[]; teammateNonUserNames: string[] }> = {};
+          const isBo4 = (data.game?.shortName ?? '') === 'BO4';
+          const challengeInitial: Record<string, { roundReached: string; playerCount: PlayerCount; difficulty?: string; proofUrls: string[]; notes: string; completionTimeSeconds: number | null; teammateUserIds: string[]; teammateNonUserNames: string[] }> = {};
           for (const challenge of data.challenges) {
             challengeInitial[challenge.id] = {
               roundReached: '',
               playerCount: 'SOLO',
+              ...(isBo4 && { difficulty: 'NORMAL' }),
               proofUrls: [],
               notes: '',
               completionTimeSeconds: null,
@@ -166,6 +170,7 @@ export default function EditMapProgressPage() {
               completed: false,
               roundCompleted: '',
               playerCount: 'SOLO',
+              ...(isBo4 && { difficulty: 'NORMAL' }),
               isSolo: false,
               isNoGuide: false,
               proofUrls: [],
@@ -233,6 +238,7 @@ export default function EditMapProgressPage() {
           mapId: map.id,
           roundReached: parseInt(form.roundReached),
           playerCount: form.playerCount,
+          ...(map.game?.shortName === 'BO4' && form.difficulty && { difficulty: form.difficulty }),
           proofUrls: normalizeProofUrls(form.proofUrls ?? []),
           notes: form.notes || null,
           completionTimeSeconds: form.completionTimeSeconds ?? null,
@@ -275,6 +281,7 @@ export default function EditMapProgressPage() {
           mapId: map.id,
           roundCompleted: form.roundCompleted ? parseInt(form.roundCompleted) : null,
           playerCount: form.playerCount,
+          ...(map.game?.shortName === 'BO4' && form.difficulty && { difficulty: form.difficulty }),
           isSolo: form.isSolo,
           isNoGuide: form.isNoGuide,
           proofUrls: normalizeProofUrls(form.proofUrls ?? []),
@@ -396,9 +403,9 @@ export default function EditMapProgressPage() {
             <TabsContent key={challenge.id} value={`challenge-${challenge.id}`} className="space-y-4">
               <Card variant="bordered">
                 <CardContent className="py-4 sm:py-6">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4">
-                    <div>
-                      <h2 className="text-lg font-semibold text-white">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4 min-w-0">
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-lg font-semibold text-white truncate">
                         {challengeTypeLabels[challenge.type] || challenge.name}
                       </h2>
                       <p className="text-sm text-bunker-400 mt-1">
@@ -407,19 +414,20 @@ export default function EditMapProgressPage() {
                       </p>
                     </div>
                     {mapWithAchievements?.achievements && (
-                      <Badge variant="info" size="sm" className="self-start sm:flex-shrink-0">
+                      <Badge variant="info" size="sm" className="self-start sm:flex-shrink-0 shrink-0">
                         +{getXpForChallengeLog(
                           mapWithAchievements.achievements,
                           mapWithAchievements.unlockedAchievementIds ?? [],
                           challenge.type,
                           parseInt(challengeForms[challenge.id]?.roundReached || '0', 10) || 0,
-                          map.roundCap ?? null
+                          map.roundCap ?? null,
+                          map?.game?.shortName === 'BO4' ? (challengeForms[challenge.id]?.difficulty ?? 'NORMAL') : undefined
                         )} XP
                       </Badge>
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 min-w-0">
                     <Input
                       label="Round Reached"
                       type="number"
@@ -438,7 +446,17 @@ export default function EditMapProgressPage() {
                         handleChallengeChange(challenge.id, 'playerCount', e.target.value)
                       }
                     />
-                    <div className="sm:col-span-3 mt-1">
+                    {map?.game?.shortName === 'BO4' && (
+                      <Select
+                        label="Difficulty"
+                        options={BO4_DIFFICULTIES.map((d) => ({ value: d, label: getBo4DifficultyLabel(d) }))}
+                        value={challengeForms[challenge.id]?.difficulty || 'NORMAL'}
+                        onChange={(e) =>
+                          handleChallengeChange(challenge.id, 'difficulty', e.target.value)
+                        }
+                      />
+                    )}
+                    <div className="sm:col-span-3 mt-1 min-w-0">
                       <ProofUrlsInput
                         label="Proof URLs (optional)"
                         value={challengeForms[challenge.id]?.proofUrls ?? []}
@@ -525,18 +543,20 @@ export default function EditMapProgressPage() {
                     </Badge>
                   </div>
                   {mapWithAchievements?.achievements && (
-                    <div className="mb-4">
+                    <div className="mb-4 shrink-0">
                       <Badge variant="info" size="sm">
                         +{ee.type === 'MAIN_QUEST'
                           ? (ee.xpReward ?? getXpForEasterEggLog(
                               mapWithAchievements.achievements,
                               mapWithAchievements.unlockedAchievementIds ?? [],
-                              ee.id
+                              ee.id,
+                              map?.game?.shortName === 'BO4' ? (easterEggForms[ee.id]?.difficulty ?? 'NORMAL') : undefined
                             ))
                           : getXpForEasterEggLog(
                               mapWithAchievements.achievements,
                               mapWithAchievements.unlockedAchievementIds ?? [],
-                              ee.id
+                              ee.id,
+                              map?.game?.shortName === 'BO4' ? (easterEggForms[ee.id]?.difficulty ?? 'NORMAL') : undefined
                             )} XP
                       </Badge>
                     </div>
@@ -575,6 +595,16 @@ export default function EditMapProgressPage() {
                             handleEasterEggChange(ee.id, 'playerCount', e.target.value)
                           }
                         />
+                        {map?.game?.shortName === 'BO4' && (
+                          <Select
+                            label="Difficulty"
+                            options={BO4_DIFFICULTIES.map((d) => ({ value: d, label: getBo4DifficultyLabel(d) }))}
+                            value={easterEggForms[ee.id]?.difficulty || 'NORMAL'}
+                            onChange={(e) =>
+                              handleEasterEggChange(ee.id, 'difficulty', e.target.value)
+                            }
+                          />
+                        )}
                         <div className="sm:col-span-3">
                           <ProofUrlsInput
                             label="Proof URLs (optional)"
