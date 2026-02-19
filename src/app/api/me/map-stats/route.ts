@@ -17,12 +17,10 @@ export async function GET() {
       where: { supabaseId: supabaseUser.id },
       include: {
         challengeLogs: {
-          where: { challenge: { type: 'HIGHEST_ROUND' } },
-          include: { map: { include: { game: true } } },
+          include: { challenge: true, map: { include: { game: true } } },
         },
         easterEggLogs: {
-          where: { easterEgg: { type: 'MAIN_QUEST' } },
-          include: { map: { include: { game: true } } },
+          include: { easterEgg: true, map: { include: { game: true } } },
         },
       },
     });
@@ -34,12 +32,18 @@ export async function GET() {
     const highestByMap = new Map<string, number>();
     const mainEEByMap = new Set<string>();
 
+    // Highest round from any challenge type
     for (const log of user.challengeLogs) {
       const current = highestByMap.get(log.mapId) ?? 0;
       highestByMap.set(log.mapId, Math.max(current, log.roundReached));
     }
+    // Also include easter egg roundCompleted for highest round
     for (const log of user.easterEggLogs) {
-      mainEEByMap.add(log.mapId);
+      if (log.easterEgg.type === 'MAIN_QUEST') mainEEByMap.add(log.mapId);
+      if (log.roundCompleted != null) {
+        const current = highestByMap.get(log.mapId) ?? 0;
+        highestByMap.set(log.mapId, Math.max(current, log.roundCompleted));
+      }
     }
 
     const mapIds = new Set([

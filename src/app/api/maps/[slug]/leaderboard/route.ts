@@ -26,60 +26,116 @@ export async function GET(
       mapId: map.id,
     };
 
+    const eeWhereClause: Prisma.EasterEggLogWhereInput = {
+      mapId: map.id,
+      roundCompleted: { not: null },
+    };
+
     if (playerCount) {
       whereClause.playerCount = playerCount;
+      eeWhereClause.playerCount = playerCount;
     }
 
     if (challengeType) {
       whereClause.challenge = { type: challengeType };
     }
 
-    // Fetch extra then dedupe by user+playerCount so we keep one best per person
-    const logs = await prisma.challengeLog.findMany({
-      where: whereClause,
-      include: {
-        user: {
-          select: {
-            id: true,
-            username: true,
-            displayName: true,
-            avatarUrl: true,
-            avatarPreset: true,
-            level: true,
+    // Fetch challenge logs and easter egg logs (with round), merge by best round per user+playerCount
+    const [challengeLogs, eeLogs] = await Promise.all([
+      prisma.challengeLog.findMany({
+        where: whereClause,
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              displayName: true,
+              avatarUrl: true,
+              avatarPreset: true,
+              level: true,
+            },
+          },
+          challenge: true,
+        },
+        orderBy: { roundReached: 'desc' },
+        take: limit * 2,
+      }),
+      prisma.easterEggLog.findMany({
+        where: eeWhereClause,
+        include: {
+          user: {
+            select: {
+              id: true,
+              username: true,
+              displayName: true,
+              avatarUrl: true,
+              avatarPreset: true,
+              level: true,
+            },
           },
         },
-        challenge: true,
-      },
-      orderBy: {
-        roundReached: 'desc',
-      },
-      take: limit * 2,
-    });
+        orderBy: { roundCompleted: 'desc' },
+        take: limit * 2,
+      }),
+    ]);
 
-    // One entry per user per playerCount, keep highest round
-    const userBestMap = new Map<string, typeof logs[0]>();
-    
-    for (const log of logs) {
+    type LeaderboardEntry = {
+      userId: string;
+      playerCount: PlayerCount;
+      round: number;
+      user: { id: string; username: string; displayName: string | null; avatarUrl: string | null; avatarPreset: string | null; level: number };
+      proofUrls: string[];
+      proofUrl: string | null;
+      completedAt: Date;
+    };
+
+    const userBestMap = new Map<string, LeaderboardEntry>();
+
+    for (const log of challengeLogs) {
       const key = `${log.userId}-${log.playerCount}`;
       const existing = userBestMap.get(key);
-      
-      if (!existing || log.roundReached > existing.roundReached) {
-        userBestMap.set(key, log);
+      if (!existing || log.roundReached > existing.round) {
+        userBestMap.set(key, {
+          userId: log.userId,
+          playerCount: log.playerCount,
+          round: log.roundReached,
+          user: log.user,
+          proofUrls: log.proofUrls ?? [],
+          proofUrl: (log.proofUrls && log.proofUrls.length > 0) ? log.proofUrls[0]! : null,
+          completedAt: log.completedAt,
+        });
+      }
+    }
+
+    for (const log of eeLogs) {
+      const key = `${log.userId}-${log.playerCount}`;
+      const round = log.roundCompleted!;
+      const existing = userBestMap.get(key);
+      if (!existing || round > existing.round) {
+        userBestMap.set(key, {
+          userId: log.userId,
+          playerCount: log.playerCount,
+          round,
+          user: log.user,
+          proofUrls: log.proofUrls ?? [],
+          proofUrl: (log.proofUrls && log.proofUrls.length > 0) ? log.proofUrls[0]! : null,
+          completedAt: log.completedAt,
+        });
       }
     }
 
     const uniqueLogs = Array.from(userBestMap.values())
-      .sort((a, b) => b.roundReached - a.roundReached)
+      .sort((a, b) => b.round - a.round)
       .slice(0, limit);
 
-    const leaderboard = uniqueLogs.map((log, index) => ({
+    const leaderboard = uniqueLogs.map((entry, index) => ({
       rank: index + 1,
-      user: log.user,
-      value: log.roundReached,
-      playerCount: log.playerCount,
-      proofUrls: log.proofUrls ?? [],
-      proofUrl: (log.proofUrls && log.proofUrls.length > 0) ? log.proofUrls[0] : null,
-      completedAt: log.completedAt,
+      user: entry.user,
+      value: entry.round,
+      playerCount: entry.playerCount,
+      proofUrls: entry.proofUrls,
+      proofUrl: entry.proofUrl,
+      completedAt: entry.completedAt,
     }));
 
     return NextResponse.json(leaderboard);

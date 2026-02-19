@@ -36,22 +36,45 @@ export async function GET(
       easterEggCompletions[stat.easterEggId] = uniqueUsers.length;
     }
 
-    const uniquePlayers = await prisma.challengeLog.findMany({
-      where: { mapId: map.id },
-      distinct: ['userId'],
-      select: { userId: true },
-    });
+    const [challengeUsers, eeUsers] = await Promise.all([
+      prisma.challengeLog.findMany({
+        where: { mapId: map.id },
+        distinct: ['userId'],
+        select: { userId: true },
+      }),
+      prisma.easterEggLog.findMany({
+        where: { mapId: map.id, roundCompleted: { not: null } },
+        distinct: ['userId'],
+        select: { userId: true },
+      }),
+    ]);
+    const uniquePlayerIds = new Set([
+      ...challengeUsers.map((u) => u.userId),
+      ...eeUsers.map((u) => u.userId),
+    ]);
 
-    const highestRound = await prisma.challengeLog.findFirst({
-      where: { mapId: map.id },
-      orderBy: { roundReached: 'desc' },
-      select: { roundReached: true },
-    });
+    const [highestFromChallenges, highestFromEE] = await Promise.all([
+      prisma.challengeLog.findFirst({
+        where: { mapId: map.id },
+        orderBy: { roundReached: 'desc' },
+        select: { roundReached: true },
+      }),
+      prisma.easterEggLog.findFirst({
+        where: { mapId: map.id, roundCompleted: { not: null } },
+        orderBy: { roundCompleted: 'desc' },
+        select: { roundCompleted: true },
+      }),
+    ]);
+
+    const highestRound = Math.max(
+      highestFromChallenges?.roundReached ?? 0,
+      highestFromEE?.roundCompleted ?? 0
+    );
 
     return NextResponse.json({
       easterEggCompletions,
-      totalPlayers: uniquePlayers.length,
-      highestRound: highestRound?.roundReached || 0,
+      totalPlayers: uniquePlayerIds.size,
+      highestRound,
     });
   } catch (error) {
     console.error('Error fetching map stats:', error);
