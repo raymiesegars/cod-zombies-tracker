@@ -36,7 +36,8 @@ export async function GET(
       eeWhereClause.playerCount = playerCount;
     }
 
-    if (challengeType) {
+    // "Highest Round" = best round from any challenge or easter egg; other types filter challenge logs only
+    if (challengeType && challengeType !== 'HIGHEST_ROUND') {
       whereClause.challenge = { type: challengeType };
     }
 
