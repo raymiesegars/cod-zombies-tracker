@@ -317,7 +317,9 @@ export async function processMapAchievements(
     const orderExisting = existing != null ? BO4_DIFFICULTY_ORDER[existing as keyof typeof BO4_DIFFICULTY_ORDER] : -1;
     if (orderCur > orderExisting) cascadeByKey.set(key, d);
   }
-  for (const [key, maxDifficulty] of cascadeByKey) {
+  const cascadeEntries = Array.from(cascadeByKey.entries());
+  for (let i = 0; i < cascadeEntries.length; i++) {
+    const [key, maxDifficulty] = cascadeEntries[i]!;
     const [mapId, slug] = key.split(':');
     const below = getBo4DifficultiesBelow(maxDifficulty);
     if (below.length === 0) continue;

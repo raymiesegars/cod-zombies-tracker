@@ -31,9 +31,10 @@ for (const file of envFiles) {
 
 import prisma from '../src/lib/prisma';
 import { getMapAchievementDefinitions } from '../src/lib/achievements/seed-achievements';
-import { BO4_DIFFICULTIES } from '../src/lib/bo4';
+import { BO4_DIFFICULTIES, type Bo4DifficultyType } from '../src/lib/bo4';
 
-const DIFFICULTIES_TO_ADD = BO4_DIFFICULTIES.filter((d) => d !== 'NORMAL'); // NORMAL already backfilled
+// NORMAL already backfilled by migration; only create these three
+const DIFFICULTIES_TO_ADD: Bo4DifficultyType[] = BO4_DIFFICULTIES.filter((d) => d !== 'NORMAL') as Bo4DifficultyType[];
 
 async function main() {
   const dbUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
@@ -65,7 +66,7 @@ async function main() {
     const defs = getMapAchievementDefinitions(map.slug, map.roundCap, map.game?.shortName ?? 'BO4');
     const challengesByType = Object.fromEntries(map.challenges.map((c) => [c.type, c]));
 
-    const toCreate = defs.filter((d) => d.difficulty && DIFFICULTIES_TO_ADD.includes(d.difficulty));
+    const toCreate = defs.filter((d) => d.difficulty && DIFFICULTIES_TO_ADD.includes(d.difficulty as Bo4DifficultyType));
 
     for (const def of toCreate) {
       const criteria = def.criteria as { round?: number; challengeType?: string; isCap?: boolean };
