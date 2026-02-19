@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, Select, Input, Logo, PageLoader, HelpTrigger } from '@/components/ui';
 import { LeaderboardEntry, LeaderboardsHelpContent } from '@/components/game';
 import type { LeaderboardEntry as LeaderboardEntryType, Game, MapWithGame, PlayerCount, ChallengeType } from '@/types';
+import { getBo4DifficultyLabel, BO4_DIFFICULTIES } from '@/lib/bo4';
 import { Trophy, Medal, Filter, Search, X } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 
@@ -35,11 +36,14 @@ export default function LeaderboardsPage() {
   const [selectedGame, setSelectedGame] = useState(RANK_VIEW);
   const [selectedMap, setSelectedMap] = useState('');
   const [selectedPlayerCount, setSelectedPlayerCount] = useState<PlayerCount | ''>('');
-  const [selectedChallengeType, setSelectedChallengeType] = useState<ChallengeType | ''>('HIGHEST_ROUND');
+  const [selectedChallengeType, setSelectedChallengeType] = useState<string>('HIGHEST_ROUND');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('NORMAL');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchForFetch, setSearchForFetch] = useState(''); // Debounced; drives server-side search
 
   const isRankView = selectedGame === RANK_VIEW;
+  const selectedMapData = maps.find((m) => m.slug === selectedMap);
+  const isBo4Map = selectedMapData?.game?.shortName === 'BO4';
 
   // Debounce search: clear immediately, type delay 300ms so we search all users on the server
   useEffect(() => {
@@ -116,18 +120,38 @@ export default function LeaderboardsPage() {
 
       setIsLoading(true);
       try {
-        const params = new URLSearchParams();
-        params.set('offset', '0');
-        params.set('limit', String(searchForFetch ? 100 : PAGE_SIZE));
-        if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
-        if (selectedChallengeType) params.set('challengeType', selectedChallengeType);
-        if (searchForFetch) params.set('search', searchForFetch);
-
-        const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
-        if (res.ok) {
-          const data = await res.json();
-          setTotal(data.total ?? 0);
-          setLeaderboard(data.entries ?? []);
+        if (selectedChallengeType.startsWith('ee-time-')) {
+          const eeId = selectedChallengeType.replace(/^ee-time-/, '');
+          const params = new URLSearchParams();
+          params.set('easterEggId', eeId);
+          params.set('offset', '0');
+          params.set('limit', String(searchForFetch ? 100 : PAGE_SIZE));
+          if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
+          if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
+          if (searchForFetch) params.set('search', searchForFetch);
+          const res = await fetch(`/api/maps/${selectedMap}/easter-egg-leaderboard?${params}`);
+          if (res.ok) {
+            const data = await res.json();
+            setTotal(data.total ?? 0);
+            setLeaderboard(data.entries ?? []);
+          } else {
+            setTotal(0);
+            setLeaderboard([]);
+          }
+        } else {
+          const params = new URLSearchParams();
+          params.set('offset', '0');
+          params.set('limit', String(searchForFetch ? 100 : PAGE_SIZE));
+          if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
+          if (selectedChallengeType) params.set('challengeType', selectedChallengeType);
+          if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
+          if (searchForFetch) params.set('search', searchForFetch);
+          const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
+          if (res.ok) {
+            const data = await res.json();
+            setTotal(data.total ?? 0);
+            setLeaderboard(data.entries ?? []);
+          }
         }
       } catch (error) {
         console.error('Error fetching leaderboard:', error);
@@ -137,7 +161,7 @@ export default function LeaderboardsPage() {
     }
 
     fetchLeaderboard();
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, searchForFetch]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, searchForFetch]);
 
   const loadMore = useCallback(async () => {
     if (leaderboard.length >= total || total === 0) return;
@@ -157,22 +181,38 @@ export default function LeaderboardsPage() {
           });
         }
       } else if (selectedMap) {
-        const params = new URLSearchParams();
-        params.set('offset', String(offset));
-        params.set('limit', String(PAGE_SIZE));
-        if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
-        if (selectedChallengeType) params.set('challengeType', selectedChallengeType);
-        const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
-        if (res.ok) {
-          const data = await res.json();
-          const nextEntries = data.entries ?? [];
-          setLeaderboard((prev) => {
-            const seen = new Set(prev.map((e) => e.user.id));
-            const key = (e: LeaderboardEntryType) => `${e.user.id}-${e.playerCount}`;
-            const seenKey = new Set(prev.map(key));
-            const newEntries = nextEntries.filter((e: LeaderboardEntryType) => !seenKey.has(key(e)));
-            return newEntries.length > 0 ? [...prev, ...newEntries] : prev;
-          });
+        if (selectedChallengeType.startsWith('ee-time-')) {
+          const eeId = selectedChallengeType.replace(/^ee-time-/, '');
+          const params = new URLSearchParams();
+          params.set('easterEggId', eeId);
+          params.set('offset', String(offset));
+          params.set('limit', String(PAGE_SIZE));
+          if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
+          if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
+          const res = await fetch(`/api/maps/${selectedMap}/easter-egg-leaderboard?${params}`);
+          if (res.ok) {
+            const data = await res.json();
+            const nextEntries = data.entries ?? [];
+            setLeaderboard((prev) => [...prev, ...nextEntries]);
+          }
+        } else {
+          const params = new URLSearchParams();
+          params.set('offset', String(offset));
+          params.set('limit', String(PAGE_SIZE));
+          if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
+          if (selectedChallengeType) params.set('challengeType', selectedChallengeType);
+          if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
+          const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
+          if (res.ok) {
+            const data = await res.json();
+            const nextEntries = data.entries ?? [];
+            setLeaderboard((prev) => {
+              const key = (e: LeaderboardEntryType) => `${e.user.id}-${e.playerCount}`;
+              const seenKey = new Set(prev.map(key));
+              const newEntries = nextEntries.filter((e: LeaderboardEntryType) => !seenKey.has(key(e)));
+              return newEntries.length > 0 ? [...prev, ...newEntries] : prev;
+            });
+          }
         }
       }
     } catch (error) {
@@ -180,7 +220,7 @@ export default function LeaderboardsPage() {
     } finally {
       loadingMoreRef.current = false;
     }
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, leaderboard.length, total]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, leaderboard.length, total]);
 
   // Only observe sentinel when search is empty so list stays stable while filtering
   useEffect(() => {
@@ -220,15 +260,58 @@ export default function LeaderboardsPage() {
     { value: 'SQUAD', label: 'Squad' },
   ];
 
-  const challengeTypeOptions = [
-    { value: '', label: 'All Challenges' },
-    ...Object.entries(challengeTypeLabels).map(([value, label]) => ({
-      value,
-      label,
-    })),
-  ];
+  // Fetch selected map's challenges and main-quest EEs to build leaderboard filter options
+  const [mapChallenges, setMapChallenges] = useState<{ type: string }[]>([]);
+  const [mapEasterEggs, setMapEasterEggs] = useState<{ id: string; name: string }[]>([]);
+  useEffect(() => {
+    if (!selectedMap || isRankView) {
+      setMapChallenges([]);
+      setMapEasterEggs([]);
+      return;
+    }
+    let cancelled = false;
+    fetch(`/api/maps/${selectedMap}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!cancelled && data) {
+          const challenges = data.challenges ?? [];
+          setMapChallenges(challenges);
+          const mainQuest = (data.easterEggs ?? []).filter((ee: { type: string }) => ee.type === 'MAIN_QUEST');
+          setMapEasterEggs(mainQuest.map((ee: { id: string; name: string }) => ({ id: ee.id, name: ee.name })));
+        } else {
+          setMapChallenges([]);
+          setMapEasterEggs([]);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setMapChallenges([]);
+          setMapEasterEggs([]);
+        }
+      });
+    return () => { cancelled = true; };
+  }, [selectedMap, isRankView]);
 
-  const selectedMapData = maps.find((m) => m.slug === selectedMap);
+  // Build options: Highest Round, each challenge this map has, each loggable EE (Time)
+  const challengeTypeOptionsWithEe = useMemo(
+    () => [
+      { value: 'HIGHEST_ROUND', label: 'Highest Round' },
+      ...mapChallenges.map((c) => ({
+        value: c.type,
+        label: challengeTypeLabels[c.type as ChallengeType] ?? c.type,
+      })),
+      ...mapEasterEggs.map((ee) => ({ value: `ee-time-${ee.id}`, label: `${ee.name} (Time)` })),
+    ],
+    [mapChallenges, mapEasterEggs]
+  );
+
+  // When map changes, reset to Highest Round
+  useEffect(() => {
+    setSelectedChallengeType('HIGHEST_ROUND');
+  }, [selectedMap]);
+
+  const isEeTimeView = !isRankView && selectedChallengeType.startsWith('ee-time-');
+  const eeTimeEasterEggId = isEeTimeView ? selectedChallengeType.replace(/^ee-time-/, '') : null;
 
   return (
     <div className="min-h-screen bg-bunker-950">
@@ -322,17 +405,27 @@ export default function LeaderboardsPage() {
                 disabled={isRankView}
               />
               <Select
-                options={challengeTypeOptions}
+                options={challengeTypeOptionsWithEe}
                 value={selectedChallengeType}
-                onChange={(e) => setSelectedChallengeType(e.target.value as ChallengeType | '')}
+                onChange={(e) => setSelectedChallengeType(e.target.value)}
                 className="w-full"
+                disabled={isRankView}
               />
               <Select
                 options={playerCountOptions}
                 value={selectedPlayerCount}
                 onChange={(e) => setSelectedPlayerCount(e.target.value as PlayerCount | '')}
                 className="w-full"
+                disabled={isRankView}
               />
+              {isBo4Map && (
+                <Select
+                  options={BO4_DIFFICULTIES.map((d) => ({ value: d, label: getBo4DifficultyLabel(d) }))}
+                  value={selectedDifficulty || 'NORMAL'}
+                  onChange={(e) => setSelectedDifficulty(e.target.value)}
+                  className="w-full"
+                />
+              )}
             </div>
           </div>
         </div>
@@ -413,7 +506,10 @@ export default function LeaderboardsPage() {
                       {selectedMapData.name}
                     </CardTitle>
                     <p className="text-xs sm:text-sm text-bunker-400 mt-1">
-                      {selectedMapData.game.name} • {selectedChallengeType ? challengeTypeLabels[selectedChallengeType] : 'All Challenges'}
+                      {selectedMapData.game.name}
+                      {isEeTimeView && eeTimeEasterEggId
+                        ? ` • ${mapEasterEggs.find((ee) => ee.id === eeTimeEasterEggId)?.name ?? 'Easter Egg'} (Time)`
+                        : ` • ${selectedChallengeType ? challengeTypeLabels[selectedChallengeType as ChallengeType] ?? selectedChallengeType : 'All Challenges'}`}
                     </p>
                   </div>
                   <span className="inline-flex items-center px-3 py-1.5 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-sm font-semibold shadow-[0_0_1px_rgba(0,0,0,1),0_0_3px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.8)] [text-shadow:0_0_1px_rgba(0,0,0,1),0_0_2px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">
@@ -432,10 +528,12 @@ export default function LeaderboardsPage() {
                   <>
                     {leaderboard.map((entry, index) => (
                       <LeaderboardEntry
-                        key={`${entry.user.id}-${entry.playerCount}`}
+                        key={isEeTimeView ? `${entry.user.id}-${entry.playerCount}-${index}` : `${entry.user.id}-${entry.playerCount}`}
                         entry={entry}
                         index={index}
                         isCurrentUser={entry.user.id === profile?.id}
+                        valueKind={isEeTimeView ? 'time' : 'round'}
+                        mapSlug={selectedMap}
                       />
                     ))}
                     {!isSearchActive && leaderboard.length < total && (
@@ -453,7 +551,7 @@ export default function LeaderboardsPage() {
                   <div className="text-center py-8 sm:py-12">
                     <Trophy className="w-10 h-10 sm:w-12 sm:h-12 text-bunker-600 mx-auto mb-4" />
                     <p className="text-sm sm:text-base text-bunker-400">
-                      No entries yet for this category.
+                      No entries yet for this {isEeTimeView ? 'easter egg time' : 'category'}.
                     </p>
                     <p className="text-xs sm:text-sm text-bunker-500 mt-2">
                       Be the first to claim the top spot!

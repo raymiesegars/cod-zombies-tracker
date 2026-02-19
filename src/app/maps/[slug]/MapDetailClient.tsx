@@ -440,8 +440,9 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     useBuildablePartProgress(slug, selectedBuildableId ?? null);
 
   const [selectedPlayerCount, setSelectedPlayerCount] = useState<PlayerCount | ''>('');
-  const [selectedChallengeType, setSelectedChallengeType] = useState<ChallengeType | ''>('HIGHEST_ROUND');
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('NORMAL');
+  /** Same as Leaderboards page: 'HIGHEST_ROUND', challenge type, or 'ee-time-{easterEggId}' */
+  const [selectedLeaderboardCategory, setSelectedLeaderboardCategory] = useState<string>('HIGHEST_ROUND');
   const leaderboardSlugRef = useRef<string | null>(null);
 
   // Your runs for this map when logged in; URL ?tab=your-runs triggers fetch on load
@@ -498,30 +499,50 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     fetchMap();
   }, [slug, refreshMapCounter, initialMap]);
 
-  // Leaderboard – skeleton only when we have no data yet (avoids flicker on refetch)
+  // Leaderboard – round (high round) or EE completion time
   useEffect(() => {
-    async function fetchLeaderboard() {
-      if (!map) return;
+    if (!map) return;
 
-      const isNewMap = leaderboardSlugRef.current !== slug;
-      if (isNewMap) {
-        leaderboardSlugRef.current = slug;
-        setLeaderboard([]);
-        setLeaderboardFetchedOnce(false);
-        setIsLeaderboardLoading(true);
-      } else if (leaderboard.length === 0 && !leaderboardFetchedOnce) {
-        setIsLeaderboardLoading(true);
-      }
+    const isNewMap = leaderboardSlugRef.current !== slug;
+    if (isNewMap) {
+      leaderboardSlugRef.current = slug;
+      setSelectedLeaderboardCategory('HIGHEST_ROUND');
+      setLeaderboard([]);
+      setLeaderboardFetchedOnce(false);
+      setIsLeaderboardLoading(true);
+      return;
+    }
+
+    setLeaderboard([]);
+    setLeaderboardFetchedOnce(false);
+    setIsLeaderboardLoading(true);
+
+    const isEeTimeView = selectedLeaderboardCategory.startsWith('ee-time-');
+    const eeId = isEeTimeView ? selectedLeaderboardCategory.replace(/^ee-time-/, '') : null;
+
+    (async () => {
       try {
-        const params = new URLSearchParams();
-        if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
-        if (selectedChallengeType) params.set('challengeType', selectedChallengeType);
-        if (map.game?.shortName === 'BO4' && selectedDifficulty) params.set('difficulty', selectedDifficulty);
-
-        const res = await fetch(`/api/maps/${slug}/leaderboard?${params}`);
-        if (res.ok) {
-          const data = await res.json();
-          setLeaderboard(data.entries ?? []);
+        if (isEeTimeView && eeId) {
+          const params = new URLSearchParams();
+          params.set('easterEggId', eeId);
+          if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
+          if (map.game?.shortName === 'BO4' && selectedDifficulty) params.set('difficulty', selectedDifficulty);
+          const res = await fetch(`/api/maps/${slug}/easter-egg-leaderboard?${params}`);
+          if (res.ok) {
+            const data = await res.json();
+            setLeaderboard(data.entries ?? []);
+          }
+        } else {
+          const params = new URLSearchParams();
+          if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
+          const challengeType = selectedLeaderboardCategory === 'HIGHEST_ROUND' ? '' : selectedLeaderboardCategory;
+          if (challengeType) params.set('challengeType', challengeType);
+          if (map.game?.shortName === 'BO4' && selectedDifficulty) params.set('difficulty', selectedDifficulty);
+          const res = await fetch(`/api/maps/${slug}/leaderboard?${params}`);
+          if (res.ok) {
+            const data = await res.json();
+            setLeaderboard(data.entries ?? []);
+          }
         }
       } catch (error) {
         console.error('Error fetching leaderboard:', error);
@@ -529,12 +550,10 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
         setIsLeaderboardLoading(false);
         setLeaderboardFetchedOnce(true);
       }
-    }
-
-    fetchLeaderboard();
+    })();
     // Intentionally omit leaderboard.length / leaderboardFetchedOnce to avoid re-fetch loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, slug, selectedPlayerCount, selectedChallengeType, selectedDifficulty]);
+  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty]);
 
   // Sync activeTab with URL so switching to Your Runs triggers fetch
   useEffect(() => {
@@ -721,11 +740,23 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     { value: 'SQUAD', label: 'Squad' },
   ];
 
-  const challengeTypeOptions = [
-    { value: '', label: 'All Challenges' },
-    ...Object.entries(challengeTypeLabels).map(([value, label]) => ({
-      value,
-      label,
+  // Single category dropdown like Leaderboards page: Highest Round, all map challenges, all loggable EEs (Time)
+  const mapChallengeTypes = useMemo(
+    () => Array.from(new Set((map?.challenges ?? []).map((c) => c.type))),
+    [map?.challenges]
+  );
+  const mainQuestEasterEggs = (map?.easterEggs ?? []).filter((ee) => ee.type === 'MAIN_QUEST');
+  const leaderboardCategoryOptions = [
+    { value: 'HIGHEST_ROUND', label: 'Highest Round' },
+    ...mapChallengeTypes
+      .filter((type) => type !== 'HIGHEST_ROUND')
+      .map((type) => ({
+        value: type,
+        label: challengeTypeLabels[type as ChallengeType] ?? type,
+      })),
+    ...mainQuestEasterEggs.map((ee) => ({
+      value: `ee-time-${ee.id}`,
+      label: `${ee.name} (Time)` as string,
     })),
   ];
 
@@ -915,14 +946,18 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                     <div className="text-center p-3 sm:p-4 bg-bunker-800/50 rounded-lg border border-bunker-700">
                       <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400 mx-auto mb-1 sm:mb-2" />
                       <p className="text-xl sm:text-2xl font-zombies text-white">
-                        {mapStats?.highestRound || leaderboard[0]?.value || '—'}
+                        {!selectedLeaderboardCategory.startsWith('ee-time-')
+                          ? (mapStats?.highestRound || leaderboard[0]?.value || '—')
+                          : '—'}
                       </p>
                       <p className="text-xs text-bunker-400">Top Round</p>
                     </div>
                     <div className="text-center p-3 sm:p-4 bg-bunker-800/50 rounded-lg border border-bunker-700">
                       <Users className="w-5 h-5 sm:w-6 sm:h-6 text-blood-400 mx-auto mb-1 sm:mb-2" />
                       <p className="text-xl sm:text-2xl font-zombies text-white">
-                        {mapStats?.totalPlayers || leaderboard.length}
+                        {!selectedLeaderboardCategory.startsWith('ee-time-')
+                          ? (mapStats?.totalPlayers ?? leaderboard.length)
+                          : leaderboard.length}
                       </p>
                       <p className="text-xs text-bunker-400">Players</p>
                     </div>
@@ -963,7 +998,13 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                             {getPlayerCountLabel(entry.playerCount)}
                           </span>
                           <div className="flex-shrink-0 min-w-[3.5rem] flex justify-end">
-                            <RoundCounter round={entry.value} size="sm" animated={false} />
+                            {selectedLeaderboardCategory.startsWith('ee-time-') ? (
+                              <span className="text-xs sm:text-sm font-semibold text-military-400 tabular-nums">
+                                {formatCompletionTime(entry.value)}
+                              </span>
+                            ) : (
+                              <RoundCounter round={entry.value} size="sm" animated={false} />
+                            )}
                           </div>
                         </div>
                       ))}
@@ -1513,10 +1554,10 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                   </CardTitle>
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 flex-wrap">
                     <Select
-                      options={challengeTypeOptions}
-                      value={selectedChallengeType}
-                      onChange={(e) => setSelectedChallengeType(e.target.value as ChallengeType | '')}
-                      className="w-full min-w-0 sm:w-44 max-w-full"
+                      options={leaderboardCategoryOptions}
+                      value={selectedLeaderboardCategory}
+                      onChange={(e) => setSelectedLeaderboardCategory(e.target.value)}
+                      className="w-full min-w-0 sm:w-52 max-w-full"
                     />
                     <Select
                       options={playerCountOptions}
@@ -1526,11 +1567,8 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                     />
                     {map?.game?.shortName === 'BO4' && (
                       <Select
-                        options={[
-                          { value: '', label: 'All difficulties' },
-                          ...BO4_DIFFICULTIES.map((d) => ({ value: d, label: getBo4DifficultyLabel(d) })),
-                        ]}
-                        value={selectedDifficulty}
+                        options={BO4_DIFFICULTIES.map((d) => ({ value: d, label: getBo4DifficultyLabel(d) }))}
+                        value={selectedDifficulty || 'NORMAL'}
                         onChange={(e) => setSelectedDifficulty(e.target.value)}
                         className="w-full min-w-0 sm:w-36 max-w-full"
                       />
@@ -1547,10 +1585,12 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                   ) : leaderboard.length > 0 ? (
                     leaderboard.map((entry, index) => (
                       <LeaderboardEntry
-                        key={`${entry.user.id}-${entry.playerCount}`}
+                        key={selectedLeaderboardCategory.startsWith('ee-time-') ? `${entry.user.id}-${entry.playerCount}-${index}` : `${entry.user.id}-${entry.playerCount}`}
                         entry={entry}
                         index={index}
                         isCurrentUser={entry.user.id === profile?.id}
+                        valueKind={selectedLeaderboardCategory.startsWith('ee-time-') ? 'time' : 'round'}
+                        mapSlug={slug}
                       />
                     ))
                   ) : (

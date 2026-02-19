@@ -74,7 +74,7 @@ export function MapCard({
             </div>
           )}
 
-          {/* Bottom-left: Easter egg above, round below */}
+          {/* Bottom-left: Round at bottom, Easter egg above it */}
           {(hasCompletedEasterEgg || userHighestRound !== undefined) && (
             <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 flex flex-col items-start gap-1.5 sm:gap-2">
               {hasCompletedEasterEgg && (
@@ -83,16 +83,20 @@ export function MapCard({
                 </div>
               )}
               {userHighestRound !== undefined && (
-                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                  {map.game.shortName === 'BO4' && userHighestRoundDifficulty && (
-                    <span className="text-[10px] sm:text-xs font-medium px-1.5 py-0.5 rounded border border-bunker-500/80 bg-bunker-900/90 text-bunker-300 shrink-0">
-                      {getBo4DifficultyLabel(userHighestRoundDifficulty)}
-                    </span>
-                  )}
+                <div className="flex items-center min-w-0">
                   <RoundCounter round={userHighestRound} size="xs" animated={false} className="sm:hidden shrink-0" />
                   <RoundCounter round={userHighestRound} size="sm" animated={false} className="hidden sm:flex shrink-0" />
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Bottom-right: BO4 difficulty only */}
+          {map.game.shortName === 'BO4' && userHighestRoundDifficulty && (
+            <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3">
+              <span className="text-[10px] sm:text-xs font-medium px-1.5 py-0.5 rounded border border-bunker-500/80 bg-bunker-900/90 text-bunker-300">
+                {getBo4DifficultyLabel(userHighestRoundDifficulty)}
+              </span>
             </div>
           )}
         </div>

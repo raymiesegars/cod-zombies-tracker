@@ -67,49 +67,51 @@ export async function GET(
       eeWhereClause.difficulty = difficulty;
     }
 
-    // "Highest Round" = best round from any challenge or easter egg; other types filter challenge logs only
-    if (challengeType && challengeType !== 'HIGHEST_ROUND') {
+    // "Highest Round" (or no filter) = best round from any challenge OR easter egg; specific challenge = only that challenge's logs
+    const isSpecificChallenge = challengeType && challengeType !== 'HIGHEST_ROUND';
+    if (isSpecificChallenge) {
       whereClause.challenge = { type: challengeType };
     }
 
-    // Fetch challenge logs and easter egg logs (with round), merge by best round per user+playerCount
-    const [challengeLogs, eeLogs] = await Promise.all([
-      prisma.challengeLog.findMany({
-        where: whereClause,
-        include: {
-          user: {
-            select: {
-              id: true,
-              username: true,
-              displayName: true,
-              avatarUrl: true,
-              avatarPreset: true,
-              level: true,
-            },
-          },
-          challenge: true,
-        },
-        orderBy: { roundReached: 'desc' },
-        take: mergeTake * 2,
-      }),
-      prisma.easterEggLog.findMany({
-        where: eeWhereClause,
-        include: {
-          user: {
-            select: {
-              id: true,
-              username: true,
-              displayName: true,
-              avatarUrl: true,
-              avatarPreset: true,
-              level: true,
-            },
+    const challengeLogs = await prisma.challengeLog.findMany({
+      where: whereClause,
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            displayName: true,
+            avatarUrl: true,
+            avatarPreset: true,
+            level: true,
           },
         },
-        orderBy: { roundCompleted: 'desc' },
-        take: mergeTake * 2,
-      }),
-    ]);
+        challenge: true,
+      },
+      orderBy: { roundReached: 'desc' },
+      take: mergeTake * 2,
+    });
+
+    // Only include Easter Egg logs when showing "Highest Round" (merged view); never for Pistol Only, One Box, etc.
+    const eeLogs = isSpecificChallenge
+      ? []
+      : await prisma.easterEggLog.findMany({
+          where: eeWhereClause,
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                displayName: true,
+                avatarUrl: true,
+                avatarPreset: true,
+                level: true,
+              },
+            },
+          },
+          orderBy: { roundCompleted: 'desc' },
+          take: mergeTake * 2,
+        });
 
     type LeaderboardEntry = {
       userId: string;
@@ -119,6 +121,8 @@ export async function GET(
       proofUrls: string[];
       proofUrl: string | null;
       completedAt: Date;
+      logId: string;
+      runType: 'challenge' | 'easter-egg';
     };
 
     const userBestMap = new Map<string, LeaderboardEntry>();
@@ -135,6 +139,8 @@ export async function GET(
           proofUrls: log.proofUrls ?? [],
           proofUrl: (log.proofUrls && log.proofUrls.length > 0) ? log.proofUrls[0]! : null,
           completedAt: log.completedAt,
+          logId: log.id,
+          runType: 'challenge',
         });
       }
     }
@@ -152,6 +158,8 @@ export async function GET(
           proofUrls: log.proofUrls ?? [],
           proofUrl: (log.proofUrls && log.proofUrls.length > 0) ? log.proofUrls[0]! : null,
           completedAt: log.completedAt,
+          logId: log.id,
+          runType: 'easter-egg',
         });
       }
     }
@@ -170,6 +178,8 @@ export async function GET(
         proofUrls: entry.proofUrls,
         proofUrl: entry.proofUrl,
         completedAt: entry.completedAt,
+        logId: entry.logId,
+        runType: entry.runType,
       }));
 
     return NextResponse.json({ total, entries });
