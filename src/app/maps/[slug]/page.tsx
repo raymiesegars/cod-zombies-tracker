@@ -9,23 +9,34 @@ type Props = { params: Promise<{ slug: string }> };
 export const revalidate = 300;
 
 async function getMapStats(mapId: string) {
-  const [easterEggStats, uniquePlayers, highestRoundRecord] = await Promise.all([
-    prisma.easterEggLog.groupBy({
-      by: ['easterEggId'],
-      where: { mapId },
-      _count: { userId: true },
-    }),
-    prisma.challengeLog.findMany({
-      where: { mapId },
-      distinct: ['userId'],
-      select: { userId: true },
-    }),
-    prisma.challengeLog.findFirst({
-      where: { mapId },
-      orderBy: { roundReached: 'desc' },
-      select: { roundReached: true },
-    }),
-  ]);
+    const [easterEggStats, challengeUsers, eeUsers, highestFromChallenges, highestFromEE] =
+      await Promise.all([
+        prisma.easterEggLog.groupBy({
+          by: ['easterEggId'],
+          where: { mapId },
+          _count: { userId: true },
+        }),
+        prisma.challengeLog.findMany({
+          where: { mapId },
+          distinct: ['userId'],
+          select: { userId: true },
+        }),
+        prisma.easterEggLog.findMany({
+          where: { mapId, roundCompleted: { not: null } },
+          distinct: ['userId'],
+          select: { userId: true },
+        }),
+      prisma.challengeLog.findFirst({
+        where: { mapId },
+        orderBy: { roundReached: 'desc' },
+        select: { roundReached: true },
+      }),
+      prisma.easterEggLog.findFirst({
+        where: { mapId, roundCompleted: { not: null } },
+        orderBy: { roundCompleted: 'desc' },
+        select: { roundCompleted: true },
+      }),
+    ]);
 
   const easterEggCompletions: Record<string, number> = {};
   for (const stat of easterEggStats) {
@@ -37,10 +48,20 @@ async function getMapStats(mapId: string) {
     easterEggCompletions[stat.easterEggId] = uniqueUsers.length;
   }
 
+  const highestRound = Math.max(
+    highestFromChallenges?.roundReached ?? 0,
+    highestFromEE?.roundCompleted ?? 0
+  );
+
+  const uniquePlayerIds = new Set([
+    ...challengeUsers.map((u) => u.userId),
+    ...eeUsers.map((u) => u.userId),
+  ]);
+
   return {
     easterEggCompletions,
-    totalPlayers: uniquePlayers.length,
-    highestRound: highestRoundRecord?.roundReached ?? 0,
+    totalPlayers: uniquePlayerIds.size,
+    highestRound,
   };
 }
 

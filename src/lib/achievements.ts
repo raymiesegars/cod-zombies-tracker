@@ -7,6 +7,7 @@ export type MapAchievementContext = {
   map: { id: string; roundCap: number | null } | null;
   challengeLogs: { challengeType: string; roundReached: number }[];
   easterEggIds: Set<string>;
+  easterEggRoundsOnMap: number[]; // roundCompleted for this map (unlocks ROUND_MILESTONE)
 };
 
 type AchievementChecker = (userId: string, criteria: any, achievement: Achievement) => Promise<boolean>;
@@ -18,11 +19,20 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
     const targetRound = round as number | undefined;
     if (targetRound == null && !isCap) return false;
 
-    const maxResult = await prisma.challengeLog.aggregate({
-      where: { userId, mapId: achievement.mapId },
-      _max: { roundReached: true },
-    });
-    const maxRound = maxResult._max.roundReached ?? 0;
+    const [challengeMax, eeMax] = await Promise.all([
+      prisma.challengeLog.aggregate({
+        where: { userId, mapId: achievement.mapId },
+        _max: { roundReached: true },
+      }),
+      prisma.easterEggLog.aggregate({
+        where: { userId, mapId: achievement.mapId, roundCompleted: { not: null } },
+        _max: { roundCompleted: true },
+      }),
+    ]);
+    const maxRound = Math.max(
+      challengeMax._max.roundReached ?? 0,
+      eeMax._max.roundCompleted ?? 0
+    );
 
     if (isCap) {
       const map = await prisma.map.findUnique({
@@ -193,24 +203,25 @@ function checkWithContext(
   switch (achievement.type) {
     case 'ROUND_MILESTONE': {
       const { round, isCap } = criteria;
-      const targetRound = round as number | undefined;
+      const targetRound = round != null ? Number(round) : undefined;
       if (targetRound == null && !isCap) return false;
-      const cap = isCap && ctx.map?.roundCap != null ? ctx.map.roundCap : targetRound;
-      if (cap == null) return false;
-      const maxRound =
-        ctx.challengeLogs.length > 0
-          ? Math.max(...ctx.challengeLogs.map((l) => l.roundReached))
-          : 0;
+      const capRaw = isCap && ctx.map?.roundCap != null ? ctx.map.roundCap : targetRound;
+      const cap = capRaw != null ? Number(capRaw) : undefined;
+      if (cap == null || Number.isNaN(cap)) return false;
+      const challengeRounds = ctx.challengeLogs.map((l) => l.roundReached);
+      const allRounds = [...challengeRounds, ...ctx.easterEggRoundsOnMap];
+      const maxRound = allRounds.length > 0 ? Math.max(...allRounds) : 0;
       return maxRound >= cap;
     }
     case 'CHALLENGE_COMPLETE': {
       const { round, challengeType, isCap } = criteria;
-      const targetRound = round as number | undefined;
+      const targetRound = round != null ? Number(round) : undefined;
       const type = challengeType as string;
       if (!type) return false;
-      const cap = isCap && ctx.map?.roundCap != null ? ctx.map.roundCap : targetRound;
+      const capRaw = isCap && ctx.map?.roundCap != null ? ctx.map.roundCap : targetRound;
+      const cap = capRaw != null ? Number(capRaw) : undefined;
       return ctx.challengeLogs.some(
-        (l) => l.challengeType === type && (cap == null || l.roundReached >= cap)
+        (l) => l.challengeType === type && (cap == null || (!Number.isNaN(cap) && l.roundReached >= cap))
       );
     }
     case 'EASTER_EGG_COMPLETE': {
@@ -241,11 +252,14 @@ export async function processMapAchievements(
       }),
       prisma.easterEggLog.findMany({
         where: { userId },
-        select: { easterEggId: true },
+        select: { easterEggId: true, mapId: true, roundCompleted: true },
       }),
     ]);
 
   const unlockedIds = new Set(userAchievements.map((ua) => ua.achievementId));
+  const easterEggRoundsOnMap = easterEggLogs
+    .filter((e) => e.mapId === mapId && e.roundCompleted != null)
+    .map((e) => e.roundCompleted!);
   const ctx: MapAchievementContext = {
     map,
     challengeLogs: challengeLogs.map((l) => ({
@@ -253,6 +267,7 @@ export async function processMapAchievements(
       roundReached: l.roundReached,
     })),
     easterEggIds: new Set(easterEggLogs.map((e) => e.easterEggId)),
+    easterEggRoundsOnMap,
   };
 
   const toUnlock: Achievement[] = [];
@@ -305,13 +320,21 @@ export async function getAchievementProgress(
     case 'ROUND_MILESTONE': {
       const target = criteria.round ?? criteria.targetRound;
       if (target == null) return { current: 0, target: 1, percentage: 0 };
-      const maxResult = achievement.mapId
-        ? await prisma.challengeLog.aggregate({
-            where: { userId, mapId: achievement.mapId },
-            _max: { roundReached: true },
-          })
-        : { _max: { roundReached: null as number | null } };
-      const current = maxResult._max.roundReached ?? 0;
+      if (!achievement.mapId) return { current: 0, target: 1, percentage: 0 };
+      const [challengeMax, eeMax] = await Promise.all([
+        prisma.challengeLog.aggregate({
+          where: { userId, mapId: achievement.mapId },
+          _max: { roundReached: true },
+        }),
+        prisma.easterEggLog.aggregate({
+          where: { userId, mapId: achievement.mapId, roundCompleted: { not: null } },
+          _max: { roundCompleted: true },
+        }),
+      ]);
+      const current = Math.max(
+        challengeMax._max.roundReached ?? 0,
+        eeMax._max.roundCompleted ?? 0
+      );
       return {
         current,
         target,
@@ -385,10 +408,13 @@ export async function revokeAchievementsForMapAfterDelete(
       }),
       prisma.easterEggLog.findMany({
         where: { userId },
-        select: { easterEggId: true },
+        select: { easterEggId: true, mapId: true, roundCompleted: true },
       }),
     ]);
 
+  const easterEggRoundsOnMap = easterEggLogs
+    .filter((e) => e.mapId === mapId && e.roundCompleted != null)
+    .map((e) => e.roundCompleted!);
   const ctx: MapAchievementContext = {
     map,
     challengeLogs: challengeLogs.map((l) => ({
@@ -396,6 +422,7 @@ export async function revokeAchievementsForMapAfterDelete(
       roundReached: l.roundReached,
     })),
     easterEggIds: new Set(easterEggLogs.map((e) => e.easterEggId)),
+    easterEggRoundsOnMap,
   };
 
   const toRevoke: Achievement[] = [];

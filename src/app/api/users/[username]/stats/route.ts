@@ -52,10 +52,9 @@ export async function GET(
 
     for (const log of user.challengeLogs) {
       mapIds.add(log.mapId);
-      if (log.challenge.type === 'HIGHEST_ROUND') {
-        const current = highestByMap.get(log.mapId) ?? 0;
-        highestByMap.set(log.mapId, Math.max(current, log.roundReached));
-      }
+      // Highest round on this map from any challenge type (matches achievement logic)
+      const current = highestByMap.get(log.mapId) ?? 0;
+      highestByMap.set(log.mapId, Math.max(current, log.roundReached));
       const count = challengesCompletedByMap.get(log.mapId) ?? 0;
       challengesCompletedByMap.set(log.mapId, count + 1);
     }
@@ -64,6 +63,10 @@ export async function GET(
       mapIds.add(log.mapId);
       if (log.easterEgg.type === 'MAIN_QUEST') {
         mainEEByMap.add(log.mapId);
+      }
+      if (log.roundCompleted != null) {
+        const current = highestByMap.get(log.mapId) ?? 0;
+        highestByMap.set(log.mapId, Math.max(current, log.roundCompleted));
       }
     }
 
