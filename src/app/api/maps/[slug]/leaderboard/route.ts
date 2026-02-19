@@ -12,7 +12,9 @@ export async function GET(
   const playerCount = searchParams.get('playerCount') as PlayerCount | null;
   const challengeType = searchParams.get('challengeType') as ChallengeType | null;
   const difficulty = searchParams.get('difficulty') as Bo4Difficulty | null;
-  const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50', 10) || 50));
+  const limitParam = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') || '25', 10) || 25));
+  const offsetParam = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10) || 0);
+  const mergeTake = 500;
 
   try {
     const { slug } = await params;
@@ -67,7 +69,7 @@ export async function GET(
           challenge: true,
         },
         orderBy: { roundReached: 'desc' },
-        take: limit * 2,
+        take: mergeTake * 2,
       }),
       prisma.easterEggLog.findMany({
         where: eeWhereClause,
@@ -84,7 +86,7 @@ export async function GET(
           },
         },
         orderBy: { roundCompleted: 'desc' },
-        take: limit * 2,
+        take: mergeTake * 2,
       }),
     ]);
 
@@ -134,20 +136,22 @@ export async function GET(
     }
 
     const uniqueLogs = Array.from(userBestMap.values())
-      .sort((a, b) => b.round - a.round)
-      .slice(0, limit);
+      .sort((a, b) => b.round - a.round);
 
-    const leaderboard = uniqueLogs.map((entry, index) => ({
-      rank: index + 1,
-      user: entry.user,
-      value: entry.round,
-      playerCount: entry.playerCount,
-      proofUrls: entry.proofUrls,
-      proofUrl: entry.proofUrl,
-      completedAt: entry.completedAt,
-    }));
+    const total = uniqueLogs.length;
+    const entries = uniqueLogs
+      .slice(offsetParam, offsetParam + limitParam)
+      .map((entry, index) => ({
+        rank: offsetParam + index + 1,
+        user: entry.user,
+        value: entry.round,
+        playerCount: entry.playerCount,
+        proofUrls: entry.proofUrls,
+        proofUrl: entry.proofUrl,
+        completedAt: entry.completedAt,
+      }));
 
-    return NextResponse.json(leaderboard);
+    return NextResponse.json({ total, entries });
   } catch (error) {
     console.error('Error fetching leaderboard:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
