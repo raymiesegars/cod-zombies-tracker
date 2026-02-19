@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
+import { sortAchievementsForDisplay } from '@/lib/achievements/categories';
 
 // No mapId = completion by game + map list. mapId = achievements for that map + unlocked ids.
 export async function GET(
@@ -156,6 +157,8 @@ export async function GET(
         (a) => !(a.type === 'EASTER_EGG_COMPLETE' && a.name === 'Main Quest' && a.slug === 'main-quest')
       );
     }
+
+    achievements = sortAchievementsForDisplay(achievements);
 
     return NextResponse.json({
       completionByGame,

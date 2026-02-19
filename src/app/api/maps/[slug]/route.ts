@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
+import { sortAchievementsForDisplay } from '@/lib/achievements/categories';
 
 // Map detail: challenges, EEs, achievements. If logged in, we include which ones they’ve unlocked.
 export async function GET(
@@ -58,6 +59,8 @@ export async function GET(
           ),
       );
     }
+
+    achievements = sortAchievementsForDisplay(achievements);
 
     const supabaseUser = await getUser();
     let unlockedAchievementIds: string[] = [];

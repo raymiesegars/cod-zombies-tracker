@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
+import { sortAchievementsForDisplay } from '@/lib/achievements/categories';
 import MapDetailClient from './MapDetailClient';
 
 type Props = { params: Promise<{ slug: string }> };
@@ -73,6 +74,9 @@ export default async function MapSlugPage({ params }: Props) {
 
   if (!map) notFound();
 
+  // Sort achievements by round (numeric) so Round 5, 10, 15
+  const sortedAchievements = sortAchievementsForDisplay(map.achievements ?? []);
+
   const [stats, supabaseUser] = await Promise.all([
     getMapStats(map.id),
     getUser(),
@@ -95,6 +99,7 @@ export default async function MapSlugPage({ params }: Props) {
 
   const initialMap = {
     ...map,
+    achievements: sortedAchievements,
     unlockedAchievementIds,
   };
 

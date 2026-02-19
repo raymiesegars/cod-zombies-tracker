@@ -53,3 +53,22 @@ export function getSortedCategoryKeys(categories: Record<string, unknown[]>): st
 export function sortAchievementsByXp<T extends { xpReward: number }>(achievements: T[]): T[] {
   return [...achievements].sort((a, b) => a.xpReward - b.xpReward);
 }
+
+/** Sort achievements for display: by type, then by round (numeric) when criteria.round exists, then slug. */
+export function sortAchievementsForDisplay<T extends { type: string; slug: string; criteria?: unknown }>(
+  achievements: T[]
+): T[] {
+  return [...achievements].sort((a, b) => {
+    if (a.type !== b.type) return a.type.localeCompare(b.type);
+    const roundA =
+      typeof (a.criteria as { round?: number })?.round === 'number'
+        ? (a.criteria as { round: number }).round
+        : 999999;
+    const roundB =
+      typeof (b.criteria as { round?: number })?.round === 'number'
+        ? (b.criteria as { round: number }).round
+        : 999999;
+    if (roundA !== roundB) return roundA - roundB;
+    return a.slug.localeCompare(b.slug);
+  });
+}

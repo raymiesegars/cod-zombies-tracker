@@ -18,32 +18,21 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
     const targetRound = round as number | undefined;
     if (targetRound == null && !isCap) return false;
 
+    const maxResult = await prisma.challengeLog.aggregate({
+      where: { userId, mapId: achievement.mapId },
+      _max: { roundReached: true },
+    });
+    const maxRound = maxResult._max.roundReached ?? 0;
+
     if (isCap) {
       const map = await prisma.map.findUnique({
         where: { id: achievement.mapId },
         select: { roundCap: true },
       });
       if (map?.roundCap == null) return false;
-      const log = await prisma.challengeLog.findFirst({
-        where: {
-          userId,
-          mapId: achievement.mapId,
-          roundReached: { gte: map.roundCap },
-          challenge: { type: 'HIGHEST_ROUND' },
-        },
-      });
-      return !!log;
+      return maxRound >= map.roundCap;
     }
-
-    const log = await prisma.challengeLog.findFirst({
-      where: {
-        userId,
-        mapId: achievement.mapId,
-        roundReached: { gte: targetRound },
-        challenge: { type: 'HIGHEST_ROUND' },
-      },
-    });
-    return !!log;
+    return maxRound >= (targetRound as number);
   },
 
   CHALLENGE_COMPLETE: async (userId, criteria, achievement) => {
@@ -208,9 +197,11 @@ function checkWithContext(
       if (targetRound == null && !isCap) return false;
       const cap = isCap && ctx.map?.roundCap != null ? ctx.map.roundCap : targetRound;
       if (cap == null) return false;
-      return ctx.challengeLogs.some(
-        (l) => l.challengeType === 'HIGHEST_ROUND' && l.roundReached >= cap
-      );
+      const maxRound =
+        ctx.challengeLogs.length > 0
+          ? Math.max(...ctx.challengeLogs.map((l) => l.roundReached))
+          : 0;
+      return maxRound >= cap;
     }
     case 'CHALLENGE_COMPLETE': {
       const { round, challengeType, isCap } = criteria;
@@ -314,15 +305,13 @@ export async function getAchievementProgress(
     case 'ROUND_MILESTONE': {
       const target = criteria.round ?? criteria.targetRound;
       if (target == null) return { current: 0, target: 1, percentage: 0 };
-      const log = await prisma.challengeLog.findFirst({
-        where: {
-          userId,
-          mapId: achievement.mapId ?? undefined,
-          challenge: { type: 'HIGHEST_ROUND' },
-        },
-        orderBy: { roundReached: 'desc' },
-      });
-      const current = log?.roundReached || 0;
+      const maxResult = achievement.mapId
+        ? await prisma.challengeLog.aggregate({
+            where: { userId, mapId: achievement.mapId },
+            _max: { roundReached: true },
+          })
+        : { _max: { roundReached: null as number | null } };
+      const current = maxResult._max.roundReached ?? 0;
       return {
         current,
         target,
