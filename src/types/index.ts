@@ -86,6 +86,11 @@ export type LeaderboardEntry = {
   proofUrls?: string[];
   proofUrl?: string | null;
   completedAt: Date;
+  /** For EE time leaderboard: round the EE was completed on */
+  roundCompleted?: number;
+  /** Link to run detail: log id and type so card click can navigate to /maps/[slug]/run/[type]/[logId] */
+  logId?: string;
+  runType?: 'challenge' | 'easter-egg';
 };
 
 export type UserMapStats = {

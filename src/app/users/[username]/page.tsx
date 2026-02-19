@@ -648,10 +648,24 @@ export default function UserProfilePage() {
                             <Logo size="md" animated={false} className="opacity-30" />
                           </div>
                         )}
-                        {/* Easter Egg indicator */}
-                        {stats.hasCompletedMainEE && (
-                          <div className="absolute top-2 right-2 drop-shadow-md">
-                            <EasterEggIcon className="w-4 h-4 sm:w-5 sm:h-5 text-element-400" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-bunker-950/80 via-transparent to-transparent" />
+                        {/* Bottom-left: round at bottom, Easter egg above it */}
+                        {(stats.hasCompletedMainEE || stats.highestRound > 0) && (
+                          <div className="absolute bottom-2 left-2 flex flex-col items-start gap-1">
+                            {stats.hasCompletedMainEE && (
+                              <div className="flex items-center justify-center p-1.5 rounded-lg bg-bunker-950/90 border border-element-600/50 shadow-lg">
+                                <EasterEggIcon className="w-4 h-4 sm:w-5 sm:h-5 text-element-400" />
+                              </div>
+                            )}
+                            <RoundCounter round={stats.highestRound} size="xs" animated={false} />
+                          </div>
+                        )}
+                        {/* Bottom-right: BO4 difficulty */}
+                        {stats.gameShortName === 'BO4' && stats.highestRoundDifficulty && (
+                          <div className="absolute bottom-2 right-2">
+                            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded border border-bunker-500/80 bg-bunker-900/90 text-bunker-300">
+                              {getBo4DifficultyLabel(stats.highestRoundDifficulty)}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -659,12 +673,6 @@ export default function UserProfilePage() {
                         {stats.mapName}
                       </h3>
                       <div className="flex items-center justify-between mt-1 sm:mt-2">
-                        <span className="flex items-center gap-1.5">
-                          <RoundCounter round={stats.highestRound} size="xs" animated={false} />
-                          {stats.gameShortName === 'BO4' && stats.highestRoundDifficulty && (
-                            <span className="text-[10px] text-bunker-500">{getBo4DifficultyLabel(stats.highestRoundDifficulty)}</span>
-                          )}
-                        </span>
                         <Badge variant="default" size="sm">
                           {stats.gameShortName}
                         </Badge>
