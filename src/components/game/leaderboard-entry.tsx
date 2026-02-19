@@ -56,7 +56,7 @@ export function LeaderboardEntry({
           : 'bg-bunker-900/50 hover:bg-bunker-900',
         isTopThree && 'bg-bunker-800/80',
         hidePlayerCount
-          ? 'grid-cols-[2rem_2rem_1.75rem_minmax(0,1fr)_0_auto_minmax(0,3.5rem)] sm:grid-cols-[2.5rem_2.5rem_2.25rem_minmax(0,8rem)_5.5rem_auto_4.5rem]'
+          ? 'grid-cols-[2rem_2rem_1.75rem_minmax(0,1fr)_0_auto_minmax(5rem,6rem)] sm:grid-cols-[2.5rem_2.5rem_2.25rem_minmax(0,8rem)_5.5rem_auto_minmax(5.5rem,6.5rem)]'
           : 'grid-cols-[2rem_2rem_1.75rem_minmax(0,1fr)_0_auto_0_0_minmax(0,3.5rem)] sm:grid-cols-[2.5rem_2.5rem_2.25rem_minmax(0,8rem)_5.5rem_auto_2.25rem_3.5rem_4.5rem]'
       )}
     >
@@ -152,9 +152,9 @@ export function LeaderboardEntry({
 
       {/* Round or XP */}
       {(showRound || valueKind === 'xp') && (
-        <div className="flex items-center justify-end gap-1 sm:gap-2">
+        <div className="flex items-center justify-end gap-1 sm:gap-2 min-w-0 shrink-0">
           {valueKind === 'xp' ? (
-            <span className="text-sm sm:text-base font-semibold text-military-400 tabular-nums leading-none">
+            <span className="text-sm sm:text-base font-semibold text-military-400 tabular-nums leading-none whitespace-nowrap">
               {entry.value.toLocaleString()} XP
             </span>
           ) : (
