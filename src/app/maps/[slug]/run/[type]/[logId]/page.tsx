@@ -19,6 +19,7 @@ import {
 import { formatCompletionTime } from '@/components/ui/time-input';
 import { getAssetUrl } from '@/lib/assets';
 import { RoundCounter, ProofEmbed, ChallengeTypeIcon, UserWithRank } from '@/components/game';
+import { getBo4DifficultyLabel } from '@/lib/bo4';
 import { ChevronLeft, FileText, ExternalLink, Clock, Pencil, Trash2, Users } from 'lucide-react';
 
 function DeleteRunButton({
@@ -122,6 +123,7 @@ type ChallengeLogDetail = {
   mapId: string;
   roundReached: number;
   playerCount: string;
+  difficulty?: string | null;
   proofUrls?: string[];
   proofUrl?: string | null;
   notes: string | null;
@@ -139,6 +141,7 @@ type EasterEggLogDetail = {
   mapId: string;
   roundCompleted: number | null;
   playerCount: string;
+  difficulty?: string | null;
   proofUrls?: string[];
   proofUrl?: string | null;
   notes: string | null;
@@ -265,6 +268,11 @@ export default function RunDetailPage() {
               <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-xs font-semibold">
                 {map.game.shortName}
               </span>
+              {map.game.shortName === 'BO4' && (log as ChallengeLogDetail & EasterEggLogDetail).difficulty && (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-bunker-500 bg-bunker-800/95 text-bunker-200 text-xs font-medium">
+                  {getBo4DifficultyLabel((log as ChallengeLogDetail & EasterEggLogDetail).difficulty)}
+                </span>
+              )}
             </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-zombies text-white tracking-wide [text-shadow:0_0_2px_rgba(0,0,0,0.95),0_0_6px_rgba(0,0,0,0.9)]">
               {map.name}
@@ -326,6 +334,12 @@ export default function RunDetailPage() {
                     <span className="text-bunker-400 text-sm">Player count</span>
                     <span className="text-white font-medium">{(log as ChallengeLogDetail).playerCount}</span>
                   </div>
+                  {map.game.shortName === 'BO4' && (log as ChallengeLogDetail).difficulty && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">Difficulty</span>
+                      <span className="text-white font-medium">{getBo4DifficultyLabel((log as ChallengeLogDetail).difficulty)}</span>
+                    </div>
+                  )}
                   {(() => {
                     const sec = (log as ChallengeLogDetail).completionTimeSeconds;
                     return sec != null && sec > 0 ? (
@@ -357,6 +371,12 @@ export default function RunDetailPage() {
                     <span className="text-bunker-400 text-sm">Player count</span>
                     <span className="text-white font-medium">{(log as EasterEggLogDetail).playerCount}</span>
                   </div>
+                  {map.game.shortName === 'BO4' && (log as EasterEggLogDetail).difficulty && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">Difficulty</span>
+                      <span className="text-white font-medium">{getBo4DifficultyLabel((log as EasterEggLogDetail).difficulty)}</span>
+                    </div>
+                  )}
                   {(() => {
                     const sec = (log as EasterEggLogDetail).completionTimeSeconds;
                     return sec != null && sec > 0 ? (

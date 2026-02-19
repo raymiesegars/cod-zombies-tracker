@@ -275,6 +275,9 @@ model ChallengeLog {
   playerCount   PlayerCount
   completedAt   DateTime    @default(now())
   completionTimeSeconds Int?  // Optional run time (hours * 3600 + minutes * 60 + seconds)
+
+  // BO4 only: map difficulty (null = non-BO4 or legacy)
+  difficulty    Bo4Difficulty?
   
   // Proof attachments (multiple URLs: YouTube, Twitch, image links)
   proofUrls     String[]    @default([])
@@ -300,6 +303,7 @@ model ChallengeLog {
   @@index([mapId])
   @@index([userId, mapId])
   @@index([roundReached(sort: Desc)])
+  @@index([difficulty])
 }
 
 model EasterEggLog {
@@ -322,7 +326,10 @@ model EasterEggLog {
   roundCompleted Int?         // Round the EE was completed on
   playerCount   PlayerCount
   completionTimeSeconds Int?   // Optional run time (hours * 3600 + minutes * 60 + seconds)
-  
+
+  // BO4 only: map difficulty (null = non-BO4 or legacy)
+  difficulty    Bo4Difficulty?
+
   // Special completion flags
   isSolo        Boolean       @default(false)
   isNoGuide     Boolean       @default(false)  // Completed without guide
@@ -350,6 +357,7 @@ model EasterEggLog {
   @@index([easterEggId])
   @@index([mapId])
   @@index([roundCompleted(sort: Asc)])
+  @@index([difficulty])
 }
 
 // Pending co-op run: creator logged a run and listed teammateUserId; teammate must confirm or deny.
@@ -380,6 +388,14 @@ enum PlayerCount {
   SQUAD
 }
 
+// BO4 only: map difficulty affects XP scaling and has separate achievements/leaderboards
+enum Bo4Difficulty {
+  CASUAL
+  NORMAL
+  HARDCORE
+  REALISTIC
+}
+
 // ============================================================================
 // ACHIEVEMENTS & XP SYSTEM
 // ============================================================================
@@ -397,7 +413,7 @@ model Achievement {
   
   // Achievement criteria (data-driven)
   type          AchievementType
-  criteria      Json            // e.g. { round: 20, challengeType: "HIGHEST_ROUND" }
+  criteria      Json            // e.g. { round: 20, challengeType: "HIGHEST_ROUND", difficulty?: "NORMAL" }
   
   // Related challenge or easter egg (optional)
   challengeId   String?
@@ -414,13 +430,17 @@ model Achievement {
   
   isActive      Boolean         @default(true)
   
+  // BO4 only: difficulty for this achievement (null = non-BO4 or legacy; same slug can exist per difficulty)
+  difficulty    Bo4Difficulty?
+  
   // Relations
   userAchievements UserAchievement[]
   
-  @@unique([mapId, slug])
+  @@unique([mapId, slug, difficulty])
   @@index([type])
   @@index([mapId])
   @@index([rarity])
+  @@index([difficulty])
 }
 
 enum AchievementType {

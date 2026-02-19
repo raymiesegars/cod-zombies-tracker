@@ -333,7 +333,7 @@ async function main() {
     const challengesByType = Object.fromEntries(map.challenges.map((c) => [c.type, c]));
 
     for (const def of defs) {
-      const criteria = def.criteria as { round?: number; challengeType?: string; isCap?: boolean };
+      const criteria = def.criteria as { round?: number; challengeType?: string; isCap?: boolean; difficulty?: string };
       const challengeId = criteria.challengeType
         ? challengesByType[criteria.challengeType as keyof typeof challengesByType]?.id
         : null;
@@ -348,6 +348,7 @@ async function main() {
           xpReward: def.xpReward,
           criteria: def.criteria,
           challengeId: challengeId ?? undefined,
+          difficulty: def.difficulty ?? undefined,
         },
       });
       achievementCount++;

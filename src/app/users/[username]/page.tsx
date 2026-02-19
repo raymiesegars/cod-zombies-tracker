@@ -29,6 +29,7 @@ import {
 } from '@/lib/achievements/categories';
 import { getAssetUrl } from '@/lib/assets';
 import { getDisplayAvatarUrl } from '@/lib/avatar';
+import { getBo4DifficultyLabel } from '@/lib/bo4';
 import type { UserProfile, UserMapStats } from '@/types';
 import {
   Trophy,
@@ -658,7 +659,12 @@ export default function UserProfilePage() {
                         {stats.mapName}
                       </h3>
                       <div className="flex items-center justify-between mt-1 sm:mt-2">
-                        <RoundCounter round={stats.highestRound} size="xs" animated={false} />
+                        <span className="flex items-center gap-1.5">
+                          <RoundCounter round={stats.highestRound} size="xs" animated={false} />
+                          {stats.gameShortName === 'BO4' && stats.highestRoundDifficulty && (
+                            <span className="text-[10px] text-bunker-500">{getBo4DifficultyLabel(stats.highestRoundDifficulty)}</span>
+                          )}
+                        </span>
                         <Badge variant="default" size="sm">
                           {stats.gameShortName}
                         </Badge>

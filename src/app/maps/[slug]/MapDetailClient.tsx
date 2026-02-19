@@ -28,6 +28,7 @@ import {
 import { RoundCounter, LeaderboardEntry, RelockAchievementButton, ChallengeTypeIcon, MapChallengesEeHelpContent } from '@/components/game';
 import { getPlayerCountLabel } from '@/lib/utils';
 import { getAssetUrl } from '@/lib/assets';
+import { getBo4DifficultyLabel, BO4_DIFFICULTIES } from '@/lib/bo4';
 import { formatCompletionTime } from '@/components/ui/time-input';
 import type { MapWithDetails, LeaderboardEntry as LeaderboardEntryType, PlayerCount, ChallengeType } from '@/types';
 import {
@@ -185,13 +186,21 @@ function AchievementsTabContent({
   unlockedIds,
   canRelock,
   onRelock,
+  gameShortName,
 }: {
-  achievements?: { id: string; name: string; slug: string; type: string; criteria: { round?: number; challengeType?: string; isCap?: boolean }; xpReward: number; rarity: string; easterEggId?: string | null; easterEgg?: { id: string; name: string; slug: string } | null }[];
+  achievements?: { id: string; name: string; slug: string; type: string; difficulty?: string | null; criteria: { round?: number; challengeType?: string; isCap?: boolean }; xpReward: number; rarity: string; easterEggId?: string | null; easterEgg?: { id: string; name: string; slug: string } | null }[];
   unlockedIds?: string[];
   canRelock?: boolean;
   onRelock?: () => void | Promise<void>;
+  gameShortName?: string;
 }) {
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [difficultyFilter, setDifficultyFilter] = useState<string>('');
+
+  const isBo4 = gameShortName === 'BO4';
+  const achievementsFiltered = isBo4 && difficultyFilter
+    ? (achievements ?? []).filter((a) => (a as { difficulty?: string | null }).difficulty === difficultyFilter)
+    : (achievements ?? []);
 
   if (!achievements || achievements.length === 0) {
     return (
@@ -203,7 +212,7 @@ function AchievementsTabContent({
   }
 
   const unlockedSet = new Set(unlockedIds ?? []);
-  const byCategory = achievements.reduce<Record<string, typeof achievements>>((acc, a) => {
+  const byCategory = achievementsFiltered.reduce<Record<string, typeof achievementsFiltered>>((acc, a) => {
     const cat = getAchievementCategory(a);
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(a);
@@ -219,25 +228,41 @@ function AchievementsTabContent({
   ];
 
   const visibleCount = visibleCategories.reduce((sum, cat) => sum + (byCategory[cat]?.length ?? 0), 0);
-  const filterEmpty = categoryFilter && visibleCount === 0;
+  const filterEmpty = (categoryFilter && visibleCount === 0) || (isBo4 && difficultyFilter && achievementsFiltered.length === 0);
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-medium text-bunker-400">Filter by type:</span>
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        <span className="text-xs font-medium text-bunker-400 w-full sm:w-auto">Filter by type:</span>
         <Select
           options={categoryOptions}
           value={categoryFilter ?? ''}
           onChange={(e) => setCategoryFilter(e.target.value || null)}
-          className="w-full sm:w-48"
+          className="w-full min-w-0 sm:w-48 max-w-full"
         />
+        {isBo4 && (
+          <>
+            <span className="text-xs font-medium text-bunker-400 w-full sm:w-auto mt-2 sm:mt-0">Difficulty:</span>
+            <Select
+              options={[
+                { value: '', label: 'All' },
+                ...BO4_DIFFICULTIES.map((d) => ({ value: d, label: getBo4DifficultyLabel(d) })),
+              ]}
+              value={difficultyFilter}
+              onChange={(e) => setDifficultyFilter(e.target.value)}
+              className="w-full min-w-0 sm:w-40 max-w-full"
+            />
+          </>
+        )}
       </div>
 
       {filterEmpty ? (
         <div className="text-center py-8 sm:py-12">
           <Award className="w-10 h-10 sm:w-12 sm:h-12 text-bunker-600 mx-auto mb-4" />
           <p className="text-bunker-400 text-sm sm:text-base">
-            No {(ACHIEVEMENT_CATEGORY_LABELS[categoryFilter] ?? categoryFilter).toLowerCase()} achievements on this map.
+            {isBo4 && difficultyFilter && achievementsFiltered.length === 0
+              ? `No achievements for ${getBo4DifficultyLabel(difficultyFilter)} yet.`
+              : `No ${(ACHIEVEMENT_CATEGORY_LABELS[categoryFilter ?? ''] ?? categoryFilter ?? '').toLowerCase()} achievements on this map.`}
           </p>
         </div>
       ) : (
@@ -416,12 +441,13 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
 
   const [selectedPlayerCount, setSelectedPlayerCount] = useState<PlayerCount | ''>('');
   const [selectedChallengeType, setSelectedChallengeType] = useState<ChallengeType | ''>('HIGHEST_ROUND');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('');
   const leaderboardSlugRef = useRef<string | null>(null);
 
   // Your runs for this map when logged in; URL ?tab=your-runs triggers fetch on load
   const [myRunsData, setMyRunsData] = useState<{
-    challengeLogs: Array<{ id: string; mapId: string; roundReached: number; playerCount: string; completedAt: string; completionTimeSeconds: number | null; notes: string | null; challenge: { name: string; type: string }; map: { slug: string } }>;
-    easterEggLogs: Array<{ id: string; mapId: string; roundCompleted: number | null; playerCount: string; isSolo: boolean; completedAt: string; completionTimeSeconds: number | null; notes: string | null; easterEgg: { name: string }; map: { slug: string } }>;
+    challengeLogs: Array<{ id: string; mapId: string; roundReached: number; playerCount: string; difficulty?: string | null; completedAt: string; completionTimeSeconds: number | null; notes: string | null; challenge: { name: string; type: string }; map: { slug: string } }>;
+    easterEggLogs: Array<{ id: string; mapId: string; roundCompleted: number | null; playerCount: string; difficulty?: string | null; isSolo: boolean; completedAt: string; completionTimeSeconds: number | null; notes: string | null; easterEgg: { name: string }; map: { slug: string } }>;
   } | null>(null);
   const [myRunsLoading, setMyRunsLoading] = useState(false);
   const [myRunsFilterType, setMyRunsFilterType] = useState('');
@@ -490,6 +516,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
         const params = new URLSearchParams();
         if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
         if (selectedChallengeType) params.set('challengeType', selectedChallengeType);
+        if (map.game?.shortName === 'BO4' && selectedDifficulty) params.set('difficulty', selectedDifficulty);
 
         const res = await fetch(`/api/maps/${slug}/leaderboard?${params}`);
         if (res.ok) {
@@ -507,7 +534,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     fetchLeaderboard();
     // Intentionally omit leaderboard.length / leaderboardFetchedOnce to avoid re-fetch loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, slug, selectedPlayerCount, selectedChallengeType]);
+  }, [map, slug, selectedPlayerCount, selectedChallengeType, selectedDifficulty]);
 
   // Sync activeTab with URL so switching to Your Runs triggers fetch
   useEffect(() => {
@@ -956,13 +983,14 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           {/* Achievements Tab */}
           <TabsContent value="achievements" forceMount>
             <AchievementsTabContent
-              achievements={(map as MapWithDetails & { achievements?: Array<{ id: string; name: string; slug: string; type: string; criteria: { round?: number; challengeType?: string; isCap?: boolean }; xpReward: number; rarity: string; easterEggId?: string | null; easterEgg?: { id: string; name: string; slug: string } | null }>; unlockedAchievementIds?: string[] } | null)?.achievements ?? []}
+              achievements={(map as MapWithDetails & { achievements?: Array<{ id: string; name: string; slug: string; type: string; difficulty?: string | null; criteria: { round?: number; challengeType?: string; isCap?: boolean }; xpReward: number; rarity: string; easterEggId?: string | null; easterEgg?: { id: string; name: string; slug: string } | null }>; unlockedAchievementIds?: string[] } | null)?.achievements ?? []}
               unlockedIds={(map as MapWithDetails & { unlockedAchievementIds?: string[] } | null)?.unlockedAchievementIds}
               canRelock={!!profile}
               onRelock={async () => {
                 setRefreshMapCounter((c) => c + 1);
                 await refreshProfile?.();
               }}
+              gameShortName={map?.game?.shortName}
             />
           </TabsContent>
 
@@ -1483,19 +1511,30 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                     <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
                     Leaderboard
                   </CardTitle>
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 flex-wrap">
                     <Select
                       options={challengeTypeOptions}
                       value={selectedChallengeType}
                       onChange={(e) => setSelectedChallengeType(e.target.value as ChallengeType | '')}
-                      className="w-full sm:w-44"
+                      className="w-full min-w-0 sm:w-44 max-w-full"
                     />
                     <Select
                       options={playerCountOptions}
                       value={selectedPlayerCount}
                       onChange={(e) => setSelectedPlayerCount(e.target.value as PlayerCount | '')}
-                      className="w-full sm:w-36"
+                      className="w-full min-w-0 sm:w-36 max-w-full"
                     />
+                    {map?.game?.shortName === 'BO4' && (
+                      <Select
+                        options={[
+                          { value: '', label: 'All difficulties' },
+                          ...BO4_DIFFICULTIES.map((d) => ({ value: d, label: getBo4DifficultyLabel(d) })),
+                        ]}
+                        value={selectedDifficulty}
+                        onChange={(e) => setSelectedDifficulty(e.target.value)}
+                        className="w-full min-w-0 sm:w-36 max-w-full"
+                      />
+                    )}
                   </div>
                 </div>
               </CardHeader>
@@ -1588,6 +1627,9 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                             </span>
                             <span className="hidden sm:flex items-center gap-1.5 text-sm text-bunker-400 flex-shrink-0 col-start-4">
                               {item.log.playerCount}
+                              {map?.game?.shortName === 'BO4' && item.log.difficulty && (
+                                <span className="text-bunker-500">· {getBo4DifficultyLabel(item.log.difficulty)}</span>
+                              )}
                             </span>
                             <span className="hidden md:flex items-center gap-1.5 text-sm text-bunker-500 flex-shrink-0 col-start-5" title={item.log.completionTimeSeconds != null && item.log.completionTimeSeconds > 0 ? formatCompletionTime(item.log.completionTimeSeconds) : undefined}>
                               <Clock className="w-3.5 h-3.5 flex-shrink-0" />
@@ -1614,6 +1656,9 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                             </span>
                             <span className="hidden sm:flex items-center gap-2 flex-shrink-0 col-start-4">
                               <span className="text-sm text-bunker-400">{item.log.playerCount}</span>
+                              {map?.game?.shortName === 'BO4' && item.log.difficulty && (
+                                <span className="text-sm text-bunker-500">{getBo4DifficultyLabel(item.log.difficulty)}</span>
+                              )}
                               {item.log.isSolo && <Badge variant="default" size="sm">Solo</Badge>}
                             </span>
                             <span className="hidden md:flex items-center gap-1.5 text-sm text-bunker-500 flex-shrink-0 col-start-5" title={item.log.completionTimeSeconds != null && item.log.completionTimeSeconds > 0 ? formatCompletionTime(item.log.completionTimeSeconds) : undefined}>

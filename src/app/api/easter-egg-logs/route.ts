@@ -4,6 +4,8 @@ import { getUser } from '@/lib/supabase/server';
 import { processMapAchievements } from '@/lib/achievements';
 import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
 import { createCoOpRunPendingsForEasterEggLog } from '@/lib/coop-pending';
+import { isBo4Game, BO4_DIFFICULTIES } from '@/lib/bo4';
+import type { Bo4Difficulty } from '@prisma/client';
 
 // Log an EE completion (new run each time). Main-quest XP once per user per EE.
 export async function POST(request: NextRequest) {
@@ -57,6 +59,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const map = await prisma.map.findUnique({
+      where: { id: mapId },
+      include: { game: { select: { shortName: true } } },
+    });
+    if (!map) {
+      return NextResponse.json({ error: 'Map not found' }, { status: 404 });
+    }
+
+    let difficulty: Bo4Difficulty | undefined;
+    if (isBo4Game(map.game?.shortName)) {
+      const d = body.difficulty;
+      if (!d || !BO4_DIFFICULTIES.includes(d as any)) {
+        return NextResponse.json(
+          { error: 'BO4 maps require difficulty: CASUAL, NORMAL, HARDCORE, or REALISTIC' },
+          { status: 400 }
+        );
+      }
+      difficulty = d as Bo4Difficulty;
+    }
+
     const log = await prisma.easterEggLog.create({
       data: {
         userId: user.id,
@@ -72,6 +94,7 @@ export async function POST(request: NextRequest) {
         completionTimeSeconds,
         teammateUserIds,
         teammateNonUserNames,
+        ...(difficulty != null && { difficulty }),
       },
     });
 

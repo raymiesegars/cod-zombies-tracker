@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import type { PlayerCount, ChallengeType, Prisma } from '@prisma/client';
+import { isBo4Game } from '@/lib/bo4';
+import { BO4_DIFFICULTIES } from '@/lib/bo4';
+import type { PlayerCount, ChallengeType, Prisma, Bo4Difficulty } from '@prisma/client';
 
 export async function GET(
   request: NextRequest,
@@ -9,13 +11,14 @@ export async function GET(
   const { searchParams } = new URL(request.url);
   const playerCount = searchParams.get('playerCount') as PlayerCount | null;
   const challengeType = searchParams.get('challengeType') as ChallengeType | null;
+  const difficulty = searchParams.get('difficulty') as Bo4Difficulty | null;
   const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50', 10) || 50));
 
   try {
     const { slug } = await params;
     const map = await prisma.map.findUnique({
       where: { slug },
-      select: { id: true },
+      select: { id: true, game: { select: { shortName: true } } },
     });
 
     if (!map) {
@@ -34,6 +37,11 @@ export async function GET(
     if (playerCount) {
       whereClause.playerCount = playerCount;
       eeWhereClause.playerCount = playerCount;
+    }
+
+    if (isBo4Game(map.game?.shortName) && difficulty && BO4_DIFFICULTIES.includes(difficulty as any)) {
+      whereClause.difficulty = difficulty;
+      eeWhereClause.difficulty = difficulty;
     }
 
     // "Highest Round" = best round from any challenge or easter egg; other types filter challenge logs only

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
+import { isBo4Game } from '@/lib/bo4';
 import type { UserMapStats } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -30,18 +31,24 @@ export async function GET() {
     }
 
     const highestByMap = new Map<string, number>();
+    const highestDifficultyByMap = new Map<string, string>();
     const mainEEByMap = new Set<string>();
 
-    // Highest round from any challenge type
     for (const log of user.challengeLogs) {
+      const round = log.roundReached;
       const current = highestByMap.get(log.mapId) ?? 0;
-      highestByMap.set(log.mapId, Math.max(current, log.roundReached));
+      if (round > current && isBo4Game(log.map?.game?.shortName)) {
+        highestDifficultyByMap.set(log.mapId, (log as { difficulty?: string | null }).difficulty ?? 'NORMAL');
+      }
+      highestByMap.set(log.mapId, Math.max(current, round));
     }
-    // Also include easter egg roundCompleted for highest round
     for (const log of user.easterEggLogs) {
       if (log.easterEgg.type === 'MAIN_QUEST') mainEEByMap.add(log.mapId);
       if (log.roundCompleted != null) {
         const current = highestByMap.get(log.mapId) ?? 0;
+        if (log.roundCompleted > current && isBo4Game(log.map?.game?.shortName)) {
+          highestDifficultyByMap.set(log.mapId, (log as { difficulty?: string | null }).difficulty ?? 'NORMAL');
+        }
         highestByMap.set(log.mapId, Math.max(current, log.roundCompleted));
       }
     }
@@ -66,8 +73,9 @@ export async function GET() {
       mapImageUrl: map.imageUrl,
       gameShortName: map.game.shortName,
       highestRound: highestByMap.get(map.id) ?? 0,
+      ...(isBo4Game(map.game.shortName) && highestDifficultyByMap.has(map.id) && { highestRoundDifficulty: highestDifficultyByMap.get(map.id) }),
       hasCompletedMainEE: mainEEByMap.has(map.id),
-      challengesCompleted: 0, // not needed for maps page overlay
+      challengesCompleted: 0,
     }));
 
     return NextResponse.json({ mapStats });
