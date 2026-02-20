@@ -74,9 +74,10 @@ export const metadata: Metadata = {
   category: 'games',
   icons: {
     icon: [
+      { url: '/icon-48.png', sizes: '48x48', type: 'image/png' },
       { url: '/icon.svg', type: 'image/svg+xml' },
     ],
-    apple: [{ url: '/icon.svg', type: 'image/svg+xml' }],
+    apple: [{ url: '/icon-48.png', sizes: '48x48', type: 'image/png' }],
   },
 };
 
