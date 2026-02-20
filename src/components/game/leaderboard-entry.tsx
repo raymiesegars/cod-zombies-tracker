@@ -10,7 +10,7 @@ import { formatCompletionTime } from '@/components/ui/time-input';
 import { getRankForLevel, getRankIconPath } from '@/lib/ranks';
 import { getDisplayAvatarUrl } from '@/lib/avatar';
 import type { LeaderboardEntry as LeaderboardEntryType } from '@/types';
-import { Trophy, ExternalLink } from 'lucide-react';
+import { Trophy, ExternalLink, ShieldCheck } from 'lucide-react';
 
 interface LeaderboardEntryProps {
   entry: LeaderboardEntryType;
@@ -122,8 +122,8 @@ export function LeaderboardEntry({
         />
       </div>
 
-      {/* Display name – always truncate; link to profile */}
-      <div className="min-w-0 flex items-center">
+      {/* Display name – always truncate; link to profile; verified checkmark */}
+      <div className="min-w-0 flex items-center gap-1.5">
         <Link
           href={`/users/${entry.user.username}`}
           className="font-medium text-white truncate block hover:text-blood-400 transition-colors leading-none min-w-0"
@@ -131,6 +131,11 @@ export function LeaderboardEntry({
         >
           {displayName}
         </Link>
+        {(entry as LeaderboardEntryType & { isVerified?: boolean }).isVerified && (
+          <span className="flex-shrink-0 min-w-[1rem] w-4 h-4 inline-flex items-center justify-center rounded-full bg-blue-500/90 text-white" title="Verified run" aria-hidden>
+            <ShieldCheck className="w-2.5 h-2.5" strokeWidth={2.5} />
+          </span>
+        )}
       </div>
 
       {/* Proof – from lg, only when not hidePlayerCount and not using 4-slot (hasRightSlots has Proof inside value block) */}

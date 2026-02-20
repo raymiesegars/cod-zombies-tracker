@@ -49,6 +49,7 @@ model User {
   groupListingMessages    GroupListingMessage[]
   coOpRunPendingsCreated  CoOpRunPending[]  @relation("CoOpCreator")
   coOpRunPendingsAsTeammate CoOpRunPending[] @relation("CoOpTeammate")
+  notifications            Notification[]
 
   @@index([username])
   @@index([supabaseId])
@@ -293,13 +294,15 @@ model ChallengeLog {
   teammateUserIds     String[]   @default([])
   teammateNonUserNames String[]  @default([])
   
-  // Verification status (for future moderation)
-  isVerified    Boolean     @default(false)
+  // Verification: user can request; admin approves or denies (denial creates notification)
+  isVerified              Boolean     @default(false)
+  verificationRequestedAt DateTime?   // when set and !isVerified = pending verification
   
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   
   coOpRunPendings  CoOpRunPending[]
+  notifications    Notification[]
   
   @@index([userId])
   @@index([challengeId])
@@ -344,8 +347,9 @@ model EasterEggLog {
   // Notes
   notes         String?
   
-  // Verification
-  isVerified    Boolean       @default(false)
+  // Verification: user can request; admin approves or denies
+  isVerified              Boolean     @default(false)
+  verificationRequestedAt DateTime?
   
   // Co-op: site users (user ids) and display names for non-users
   teammateUserIds      String[]   @default([])
@@ -355,6 +359,7 @@ model EasterEggLog {
   updatedAt     DateTime      @updatedAt
   
   coOpRunPendings  CoOpRunPending[]
+  notifications    Notification[]
   
   @@index([userId])
   @@index([easterEggId])
@@ -537,4 +542,32 @@ model GroupListingMessage {
 
   @@index([listingId])
   @@index([createdAt])
+}
+
+// ============================================================================
+// NOTIFICATIONS (verification approved/denied, etc.)
+// ============================================================================
+
+enum NotificationType {
+  VERIFICATION_APPROVED
+  VERIFICATION_DENIED
+  VERIFICATION_REMOVED
+}
+
+model Notification {
+  id               String           @id @default(cuid())
+  userId           String
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type             NotificationType
+  challengeLogId   String?
+  challengeLog     ChallengeLog?    @relation(fields: [challengeLogId], references: [id], onDelete: Cascade)
+  easterEggLogId   String?
+  easterEggLog     EasterEggLog?    @relation(fields: [easterEggLogId], references: [id], onDelete: Cascade)
+  message          String?          @db.Text  // for VERIFICATION_DENIED: admin's reason
+  read             Boolean          @default(false)
+  createdAt        DateTime         @default(now())
+
+  @@index([userId])
+  @@index([userId, read])
+  @@index([createdAt(sort: Desc)])
 }

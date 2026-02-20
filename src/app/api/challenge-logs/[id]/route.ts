@@ -44,10 +44,11 @@ export async function GET(_request: NextRequest, { params }: Params) {
 
     const supabaseUser = await getUser();
     const currentUser = supabaseUser
-      ? await prisma.user.findUnique({ where: { supabaseId: supabaseUser.id }, select: { id: true } })
+      ? await prisma.user.findUnique({ where: { supabaseId: supabaseUser.id }, select: { id: true, isAdmin: true } })
       : null;
     const isOwner = currentUser && log.userId === currentUser.id;
-    if (!isOwner && !log.user.isPublic) {
+    const isAdmin = currentUser?.isAdmin === true;
+    if (!isOwner && !log.user.isPublic && !isAdmin) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
@@ -123,6 +124,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     const teammateNonUserNames = body.teammateNonUserNames !== undefined
       ? (Array.isArray(body.teammateNonUserNames) ? body.teammateNonUserNames.filter((n: unknown) => typeof n === 'string').slice(0, 10) : [])
       : undefined;
+    const requestVerification = body.requestVerification === undefined ? undefined : Boolean(body.requestVerification);
 
     let difficulty: Bo4Difficulty | undefined;
     if (body.difficulty !== undefined) {
@@ -139,6 +141,18 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       return NextResponse.json({ error: 'Invalid roundReached' }, { status: 400 });
     }
 
+    if (requestVerification === true) {
+      const effectiveProofUrls = proofUrls !== undefined ? proofUrls : (log.proofUrls ?? []);
+      const effectiveScreenshotUrl = screenshotUrl !== undefined ? screenshotUrl : log.screenshotUrl;
+      const hasProof = (Array.isArray(effectiveProofUrls) && effectiveProofUrls.filter(Boolean).length > 0) || !!effectiveScreenshotUrl;
+      if (!hasProof) {
+        return NextResponse.json(
+          { error: 'To request verification, add at least one proof (URL or screenshot) or uncheck "Request verification".' },
+          { status: 400 }
+        );
+      }
+    }
+
     const updated = await prisma.challengeLog.update({
       where: { id },
       data: {
@@ -151,6 +165,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         ...(teammateUserIds !== undefined && { teammateUserIds }),
         ...(teammateNonUserNames !== undefined && { teammateNonUserNames }),
         ...(difficulty !== undefined && { difficulty }),
+        ...(requestVerification !== undefined && {
+          verificationRequestedAt: requestVerification ? new Date() : null,
+        }),
       },
       include: {
         challenge: true,

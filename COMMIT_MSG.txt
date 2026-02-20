@@ -1,0 +1,10 @@
+feat: run verification system (request, approve, deny, remove) and notifications
+
+- Verification: run owners can request verification; admins approve/deny; super admin can add/remove verification on any run.
+- Deny flow: fix deny vs approve; denial notification includes admin display name; admins cannot verify or deny their own runs.
+- Pending verification: run detail shows "Pending verification" badge (amber); super admin sees "Add verification" with confirm modal; any admin can "Submit for verification" (with confirm) to add a run to the pending queue.
+- Remove verification: super admin sees "Remove verification" (white text) even on own runs; run owner gets VERIFICATION_REMOVED notification; API no longer returns 500 when notification create fails.
+- Notifications: VERIFICATION_REMOVED type; dropdown shows "Mark all read" and "Clear all" with success feedback; denial message shows "Denied by [name]: reason".
+- Leaderboards & your runs: verified blue checkmark on all leaderboard entries and Your Runs / user map runs; checkmark visible at all breakpoints.
+- Pending verification list: excludes current admin's own runs; run links open in new tab.
+- Edit page: add requestVerification to challengeForms type for build.

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -20,7 +20,7 @@ import { formatCompletionTime } from '@/components/ui/time-input';
 import { getAssetUrl } from '@/lib/assets';
 import { RoundCounter, ProofEmbed, ChallengeTypeIcon, UserWithRank } from '@/components/game';
 import { getBo4DifficultyLabel } from '@/lib/bo4';
-import { ChevronLeft, FileText, ExternalLink, Clock, Pencil, Trash2, Users } from 'lucide-react';
+import { ChevronLeft, FileText, ExternalLink, Clock, Pencil, Trash2, Users, ShieldCheck, ShieldOff, Loader2, Check } from 'lucide-react';
 
 function DeleteRunButton({
   logId,
@@ -134,6 +134,8 @@ type ChallengeLogDetail = {
   runOwner?: RunOwner;
   teammateUserDetails?: TeammateUserDetail[];
   teammateNonUserNames?: string[];
+  isVerified?: boolean;
+  verificationRequestedAt?: string | null;
 };
 
 type EasterEggLogDetail = {
@@ -154,6 +156,8 @@ type EasterEggLogDetail = {
   runOwner?: RunOwner;
   teammateUserDetails?: TeammateUserDetail[];
   teammateNonUserNames?: string[];
+  isVerified?: boolean;
+  verificationRequestedAt?: string | null;
 };
 
 export default function RunDetailPage() {
@@ -168,9 +172,19 @@ export default function RunDetailPage() {
   const [runOwnerDisplayName, setRunOwnerDisplayName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [adminMe, setAdminMe] = useState<{ isAdmin: boolean; isSuperAdmin: boolean } | null>(null);
+  const [denyModalOpen, setDenyModalOpen] = useState(false);
+  const [denyMessage, setDenyMessage] = useState('');
+  const [adminActionLoading, setAdminActionLoading] = useState(false);
+  const [adminActionSuccess, setAdminActionSuccess] = useState<'denied' | 'removed' | 'added' | 'submitted' | null>(null);
+  const [addVerificationModalOpen, setAddVerificationModalOpen] = useState(false);
+  const [submitForVerificationModalOpen, setSubmitForVerificationModalOpen] = useState(false);
 
   const isChallenge = type === 'challenge';
   const apiUrl = isChallenge ? `/api/challenge-logs/${logId}` : `/api/easter-egg-logs/${logId}`;
+  const logTypeForApi = isChallenge ? 'challenge' : 'easter_egg';
+  const isVerified = Boolean(log && (log as ChallengeLogDetail & EasterEggLogDetail).isVerified);
+  const isPendingVerification = Boolean(log && (log as ChallengeLogDetail & EasterEggLogDetail).verificationRequestedAt);
 
   useEffect(() => {
     setLoading(true);
@@ -203,6 +217,146 @@ export default function RunDetailPage() {
       .catch(() => setError('Failed to load run.'))
       .finally(() => setLoading(false));
   }, [apiUrl, slug]);
+
+  useEffect(() => {
+    if (!log) return;
+    fetch('/api/admin/me', { cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : { isAdmin: false, isSuperAdmin: false }))
+      .then(setAdminMe)
+      .catch(() => setAdminMe(null));
+  }, [log?.id]);
+
+  useEffect(() => {
+    if (!adminActionSuccess) return;
+    const t = setTimeout(() => setAdminActionSuccess(null), 4000);
+    return () => clearTimeout(t);
+  }, [adminActionSuccess]);
+
+  const refetchLog = useCallback(() => {
+    fetch(apiUrl, { credentials: 'same-origin' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) setLog(data);
+      });
+  }, [apiUrl]);
+
+  const handleApproveVerification = useCallback(async () => {
+    setAdminActionLoading(true);
+    try {
+      const res = await fetch('/api/admin/verify/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ logType: logTypeForApi, logId }),
+        credentials: 'same-origin',
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || 'Failed to approve');
+      }
+      refetchLog();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Something went wrong');
+    } finally {
+      setAdminActionLoading(false);
+    }
+  }, [logId, logTypeForApi, refetchLog]);
+
+  const handleDenyVerification = useCallback(async () => {
+    const msg = denyMessage.trim();
+    if (!msg) {
+      alert('Please enter a reason for not verifying this run.');
+      return;
+    }
+    setAdminActionLoading(true);
+    try {
+      const res = await fetch('/api/admin/verify/deny', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ logType: logTypeForApi, logId, message: msg }),
+        credentials: 'same-origin',
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || 'Failed to deny');
+      }
+      setDenyModalOpen(false);
+      setDenyMessage('');
+      refetchLog();
+      setAdminActionSuccess('denied');
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Something went wrong');
+    } finally {
+      setAdminActionLoading(false);
+    }
+  }, [logId, logTypeForApi, denyMessage, refetchLog]);
+
+  const handleAddVerification = useCallback(async () => {
+    setAdminActionLoading(true);
+    try {
+      const res = await fetch('/api/admin/verify/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ logType: logTypeForApi, logId }),
+        credentials: 'same-origin',
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || 'Failed to add verification');
+      }
+      setAddVerificationModalOpen(false);
+      refetchLog();
+      setAdminActionSuccess('added');
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Something went wrong');
+    } finally {
+      setAdminActionLoading(false);
+    }
+  }, [logId, logTypeForApi, refetchLog]);
+
+  const handleSubmitForVerification = useCallback(async () => {
+    setAdminActionLoading(true);
+    try {
+      const res = await fetch('/api/admin/verify/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ logType: logTypeForApi, logId }),
+        credentials: 'same-origin',
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || 'Failed to submit for verification');
+      }
+      setSubmitForVerificationModalOpen(false);
+      refetchLog();
+      setAdminActionSuccess('submitted');
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Something went wrong');
+    } finally {
+      setAdminActionLoading(false);
+    }
+  }, [logId, logTypeForApi, refetchLog]);
+
+  const handleRemoveVerification = useCallback(async () => {
+    setAdminActionLoading(true);
+    try {
+      const res = await fetch('/api/admin/verify/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ logType: logTypeForApi, logId }),
+        credentials: 'same-origin',
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || 'Failed to remove verification');
+      }
+      refetchLog();
+      setAdminActionSuccess('removed');
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Something went wrong');
+    } finally {
+      setAdminActionLoading(false);
+    }
+  }, [logId, logTypeForApi, refetchLog]);
 
   if (loading) {
     return (
@@ -277,10 +431,22 @@ export default function RunDetailPage() {
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-zombies text-white tracking-wide [text-shadow:0_0_2px_rgba(0,0,0,0.95),0_0_6px_rgba(0,0,0,0.9)]">
               {map.name}
             </h1>
-            <p className="mt-1 text-sm sm:text-base text-white/95">
+            <p className="mt-1 text-sm sm:text-base text-white/95 flex items-center gap-2 flex-wrap">
               {isChallenge
                 ? (log as ChallengeLogDetail).challenge.name
                 : (log as EasterEggLogDetail).easterEgg.name}
+              {isPendingVerification && !isVerified && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-600/90 text-white text-xs font-medium border border-amber-500/50">
+                  <Clock className="w-3.5 h-3.5" />
+                  Pending verification
+                </span>
+              )}
+              {isVerified && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-600/90 text-white text-xs font-medium border border-blue-500/50">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  Verified run
+                </span>
+              )}
             </p>
             {(runOwnerDisplayName || runOwnerUsername) && (
               <p className="mt-2 text-sm sm:text-base text-white/90 font-medium tracking-wide [text-shadow:0_0_2px_rgba(0,0,0,0.8)]">
@@ -314,7 +480,7 @@ export default function RunDetailPage() {
           {/* Run info card */}
           <Card variant="bordered" className="lg:col-span-1">
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="text-base flex items-center gap-2 flex-wrap">
                 {isChallenge ? (
                   <ChallengeTypeIcon type={(log as ChallengeLogDetail).challenge.type ?? 'HIGHEST_ROUND'} className="w-4 h-4 text-blood-400" size={16} />
                 ) : (
@@ -470,6 +636,88 @@ export default function RunDetailPage() {
                   />
                 </div>
               )}
+              {adminActionSuccess && (
+                <p className="text-military-400 text-sm pt-3 border-t border-bunker-700 mt-3" role="status">
+                  {adminActionSuccess === 'denied' && 'Verification denied. The run owner was notified.'}
+                  {adminActionSuccess === 'removed' && 'Verification removed. The run owner was notified.'}
+                  {adminActionSuccess === 'added' && 'Verification added. The run owner was notified.'}
+                  {adminActionSuccess === 'submitted' && 'Run submitted for verification. It will appear in the pending queue.'}
+                </p>
+              )}
+              {adminMe?.isAdmin && !isVerified && !isPendingVerification && (
+                <div className="flex flex-col gap-2 pt-3 border-t border-bunker-700 mt-3">
+                  <p className="text-bunker-400 text-xs">Admin: submit this run for verification</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => setSubmitForVerificationModalOpen(true)}
+                    disabled={adminActionLoading}
+                    leftIcon={<ShieldCheck className="w-3.5 h-3.5" />}
+                  >
+                    Submit for verification
+                  </Button>
+                </div>
+              )}
+              {!isOwner && adminMe?.isAdmin && isPendingVerification && (
+                <div className="flex flex-col gap-2 pt-3 border-t border-bunker-700 mt-3">
+                  <p className="text-bunker-400 text-xs">Admin: approve or deny verification</p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="primary"
+                      onClick={handleApproveVerification}
+                      disabled={adminActionLoading}
+                      leftIcon={adminActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />}
+                    >
+                      Approve Verification
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => setDenyModalOpen(true)}
+                      disabled={adminActionLoading}
+                      leftIcon={<ShieldOff className="w-3.5 h-3.5" />}
+                    >
+                      Deny Verification
+                    </Button>
+                  </div>
+                </div>
+              )}
+              {!isOwner && adminMe?.isSuperAdmin && !isVerified && (
+                <div className="flex flex-col gap-2 pt-3 border-t border-bunker-700 mt-3">
+                  <p className="text-bunker-400 text-xs">Super admin: add verification to this run</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="primary"
+                    onClick={() => setAddVerificationModalOpen(true)}
+                    disabled={adminActionLoading}
+                    leftIcon={adminActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                    className="border-military-600/50 text-white"
+                  >
+                    Add verification
+                  </Button>
+                </div>
+              )}
+              {adminMe?.isSuperAdmin && isVerified && (
+                <div className="flex flex-col gap-2 pt-3 border-t border-bunker-700 mt-3">
+                  <p className="text-bunker-400 text-xs">Super admin: remove verification</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    onClick={handleRemoveVerification}
+                    disabled={adminActionLoading}
+                    leftIcon={adminActionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldOff className="w-3.5 h-3.5" />}
+                    className="border-blood-800 text-white hover:bg-blood-950/50"
+                  >
+                    Remove verification
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -530,6 +778,90 @@ export default function RunDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Deny verification modal */}
+      <Modal
+        isOpen={denyModalOpen}
+        onClose={() => !adminActionLoading && setDenyModalOpen(false)}
+        title="Deny verification"
+        description="Provide a reason for not verifying this run. The player will see this message in their notifications."
+        size="md"
+      >
+        <div className="space-y-3">
+          <label className="block text-sm font-medium text-bunker-300">
+            Reason (required)
+          </label>
+          <textarea
+            value={denyMessage}
+            onChange={(e) => setDenyMessage(e.target.value)}
+            placeholder="e.g. Proof link is private or doesn't show the run clearly."
+            className="w-full px-3 py-2 rounded-lg border border-bunker-600 bg-bunker-800 text-white placeholder-bunker-500 text-sm min-h-[100px]"
+            rows={4}
+          />
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="secondary" onClick={() => setDenyModalOpen(false)} disabled={adminActionLoading}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              onClick={handleDenyVerification}
+              disabled={adminActionLoading || !denyMessage.trim()}
+              leftIcon={adminActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldOff className="w-4 h-4" />}
+            >
+              {adminActionLoading ? 'Submitting…' : 'Deny verification'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Add verification modal (super admin) */}
+      <Modal
+        isOpen={addVerificationModalOpen}
+        onClose={() => !adminActionLoading && setAddVerificationModalOpen(false)}
+        title="Add verification"
+        description="Add a verified checkmark to this run? The run owner will be notified."
+        size="md"
+      >
+        <div className="flex justify-end gap-2 pt-2">
+          <Button type="button" variant="secondary" onClick={() => setAddVerificationModalOpen(false)} disabled={adminActionLoading}>
+            No
+          </Button>
+          <Button
+            type="button"
+            variant="primary"
+            onClick={handleAddVerification}
+            disabled={adminActionLoading}
+            leftIcon={adminActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+          >
+            {adminActionLoading ? 'Adding…' : 'Yes, add verification'}
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Submit for verification modal (admin) */}
+      <Modal
+        isOpen={submitForVerificationModalOpen}
+        onClose={() => !adminActionLoading && setSubmitForVerificationModalOpen(false)}
+        title="Submit for verification"
+        description="Submit this run for verification? It will be added to the pending verification queue for admin review."
+        size="md"
+      >
+        <div className="flex justify-end gap-2 pt-2">
+          <Button type="button" variant="secondary" onClick={() => setSubmitForVerificationModalOpen(false)} disabled={adminActionLoading}>
+            No
+          </Button>
+          <Button
+            type="button"
+            variant="primary"
+            onClick={handleSubmitForVerification}
+            disabled={adminActionLoading}
+            leftIcon={adminActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
+          >
+            {adminActionLoading ? 'Submitting…' : 'Yes, submit for verification'}
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

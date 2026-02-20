@@ -26,7 +26,7 @@ import {
   HelpTrigger,
 } from '@/components/ui';
 import { RoundCounter, LeaderboardEntry, RelockAchievementButton, ChallengeTypeIcon, MapChallengesEeHelpContent } from '@/components/game';
-import { getPlayerCountLabel } from '@/lib/utils';
+import { getPlayerCountLabel, cn } from '@/lib/utils';
 import { getAssetUrl } from '@/lib/assets';
 import { getBo4DifficultyLabel, BO4_DIFFICULTIES } from '@/lib/bo4';
 import { formatCompletionTime } from '@/components/ui/time-input';
@@ -47,6 +47,7 @@ import {
   ListChecks,
   Filter,
   Clock,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   ACHIEVEMENT_CATEGORY_LABELS,
@@ -443,6 +444,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('NORMAL');
   /** Same as Leaderboards page: 'HIGHEST_ROUND', challenge type, or 'ee-time-{easterEggId}' */
   const [selectedLeaderboardCategory, setSelectedLeaderboardCategory] = useState<string>('HIGHEST_ROUND');
+  const [leaderboardVerifiedOnly, setLeaderboardVerifiedOnly] = useState(false);
   const leaderboardSlugRef = useRef<string | null>(null);
 
   // Your runs for this map when logged in; URL ?tab=your-runs triggers fetch on load
@@ -523,6 +525,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           params.set('easterEggId', eeId);
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
           if (map.game?.shortName === 'BO4' && selectedDifficulty) params.set('difficulty', selectedDifficulty);
+          if (leaderboardVerifiedOnly) params.set('verified', 'true');
           const res = await fetch(`/api/maps/${slug}/easter-egg-leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -534,6 +537,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           const challengeType = selectedLeaderboardCategory === 'HIGHEST_ROUND' ? '' : selectedLeaderboardCategory;
           if (challengeType) params.set('challengeType', challengeType);
           if (map.game?.shortName === 'BO4' && selectedDifficulty) params.set('difficulty', selectedDifficulty);
+          if (leaderboardVerifiedOnly) params.set('verified', 'true');
           const res = await fetch(`/api/maps/${slug}/leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -549,7 +553,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     })();
     // Intentionally omit leaderboard.length / leaderboardFetchedOnce to avoid re-fetch loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty]);
+  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly]);
 
   // Sync activeTab with URL so switching to Your Runs triggers fetch
   useEffect(() => {
@@ -1568,6 +1572,20 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                         className="w-full min-w-0 sm:w-36 max-w-full"
                       />
                     )}
+                    <button
+                      type="button"
+                      onClick={() => setLeaderboardVerifiedOnly((v) => !v)}
+                      className={cn(
+                        'flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors min-h-[40px]',
+                        leaderboardVerifiedOnly
+                          ? 'border-blue-500/60 bg-blue-950/80 text-blue-200 hover:bg-blue-900/60'
+                          : 'border-bunker-600 bg-bunker-800/80 text-bunker-300 hover:bg-bunker-700/80'
+                      )}
+                      aria-pressed={leaderboardVerifiedOnly}
+                    >
+                      <ShieldCheck className="w-4 h-4" />
+                      {leaderboardVerifiedOnly ? 'Verified' : 'Unverified'}
+                    </button>
                   </div>
                 </div>
               </CardHeader>
@@ -1660,7 +1678,14 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                             md:grid-cols-[auto_minmax(0,1fr)_4.5rem_auto_auto]
                             lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,8rem)_4.5rem_auto_auto_auto]">
                             <ChallengeTypeIcon type={item.log.challenge.type ?? 'HIGHEST_ROUND'} className="w-5 h-5 text-blood-400 flex-shrink-0" size={20} />
-                            <span className="font-medium text-white truncate min-w-0">{item.log.challenge.name}</span>
+                            <span className="font-medium text-white truncate min-w-0 flex items-center gap-1.5">
+                              {item.log.challenge.name}
+                              {(item.log as { isVerified?: boolean }).isVerified && (
+                                <span className="flex-shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500/90 text-white" title="Verified run">
+                                  <ShieldCheck className="w-2.5 h-2.5" strokeWidth={2.5} />
+                                </span>
+                              )}
+                            </span>
                             <span className="hidden lg:block text-sm text-bunker-500 truncate min-w-0" title={item.log.notes ?? undefined}>
                               {item.log.notes || null}
                             </span>
@@ -1691,7 +1716,14 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                             md:grid-cols-[auto_minmax(0,1fr)_4.5rem_auto_auto]
                             lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,8rem)_4.5rem_auto_auto_auto]">
                             <EasterEggIcon className="w-5 h-5 text-element-400 flex-shrink-0" />
-                            <span className="font-medium text-white truncate min-w-0">{item.log.easterEgg.name}</span>
+                            <span className="font-medium text-white truncate min-w-0 flex items-center gap-1.5">
+                              {item.log.easterEgg.name}
+                              {(item.log as { isVerified?: boolean }).isVerified && (
+                                <span className="flex-shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500/90 text-white" title="Verified run">
+                                  <ShieldCheck className="w-2.5 h-2.5" strokeWidth={2.5} />
+                                </span>
+                              )}
+                            </span>
                             <span className="hidden lg:block text-sm text-bunker-500 truncate min-w-0" title={item.log.notes ?? undefined}>
                               {item.log.notes || null}
                             </span>
