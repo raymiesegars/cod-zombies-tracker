@@ -507,10 +507,6 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     if (isNewMap) {
       leaderboardSlugRef.current = slug;
       setSelectedLeaderboardCategory('HIGHEST_ROUND');
-      setLeaderboard([]);
-      setLeaderboardFetchedOnce(false);
-      setIsLeaderboardLoading(true);
-      return;
     }
 
     setLeaderboard([]);
