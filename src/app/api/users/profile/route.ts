@@ -73,11 +73,10 @@ export async function POST(request: NextRequest) {
       username = `${username}-${Date.now().toString(36)}`;
     }
 
+    // Only set displayName/avatarUrl on create.
     const user = await prisma.user.upsert({
       where: { supabaseId },
       update: {
-        displayName,
-        avatarUrl,
         updatedAt: new Date(),
       },
       create: {
@@ -103,7 +102,7 @@ export async function POST(request: NextRequest) {
         if (existingByEmail) {
           await prisma.user.update({
             where: { id: existingByEmail.id },
-            data: { supabaseId, displayName, avatarUrl, updatedAt: new Date() },
+            data: { supabaseId, updatedAt: new Date() },
           });
           const updated = await prisma.user.findUnique({
             where: { id: existingByEmail.id },

@@ -72,6 +72,12 @@ export const metadata: Metadata = {
   },
   alternates: { canonical: BASE },
   category: 'games',
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [{ url: '/icon.svg', type: 'image/svg+xml' }],
+  },
 };
 
 const jsonLd = {
