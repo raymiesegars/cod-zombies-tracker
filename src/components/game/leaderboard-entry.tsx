@@ -50,6 +50,9 @@ export function LeaderboardEntry({
       : undefined;
 
   const hasRightSlots = !hidePlayerCount && (valueKind === 'time' || valueKind === 'round');
+  /** For time leaderboards, value is completion time in seconds; coerce so string from API still works */
+  const timeSeconds = valueKind === 'time' ? Number(entry.value) : null;
+  const showTime = valueKind === 'time' && timeSeconds != null && Number.isFinite(timeSeconds) && timeSeconds >= 0;
 
   // <400px: 4 cols. 400–768px: 5 cols with tighter icon/avatar (1.5rem 1.75rem). 768–770px: 5 cols with 2rem (md content size). 771px+: 6 cols. lg: +proof/players & full value. Tighter cols below md avoid double gap; 2rem at md+ prevents overlap.
   const gridClass = cn(
@@ -61,7 +64,7 @@ export function LeaderboardEntry({
     hidePlayerCount
       ? 'grid-cols-[2rem_1.5rem_minmax(0,1fr)_minmax(0,5rem)] min-[400px]:grid-cols-[2rem_1.5rem_1.75rem_minmax(0,1fr)_minmax(0,5rem)] md:grid-cols-[2rem_2rem_2rem_minmax(0,1fr)_minmax(0,5rem)] min-[771px]:grid-cols-[2rem_auto_2rem_2rem_minmax(0,1fr)_minmax(0,5rem)] lg:grid-cols-[2.5rem_auto_2.5rem_2.25rem_minmax(0,1fr)_minmax(0,6rem)]'
       : hasRightSlots
-        ? 'grid-cols-[2rem_1.5rem_minmax(0,1fr)_minmax(0,5rem)] min-[400px]:grid-cols-[2rem_1.5rem_1.75rem_minmax(0,1fr)_minmax(0,5rem)] md:grid-cols-[2rem_2rem_2rem_minmax(0,1fr)_minmax(0,5rem)] min-[771px]:grid-cols-[2rem_auto_2rem_2rem_minmax(0,1fr)_minmax(0,5rem)] lg:grid-cols-[2.5rem_auto_2.5rem_2.25rem_minmax(0,1fr)_auto_auto_auto_minmax(0,1fr)]'
+        ? 'grid-cols-[2rem_1.5rem_minmax(0,1fr)_minmax(0,5rem)] min-[400px]:grid-cols-[2rem_1.5rem_1.75rem_minmax(0,1fr)_minmax(0,5rem)] md:grid-cols-[2rem_2rem_2rem_minmax(0,1fr)_minmax(0,5rem)] min-[771px]:grid-cols-[2rem_auto_2rem_2rem_minmax(0,1fr)_minmax(0,5rem)] lg:grid-cols-[2.5rem_auto_2.5rem_2.25rem_minmax(0,1fr)_minmax(0,1fr)]'
         : 'grid-cols-[2rem_1.5rem_minmax(0,1fr)_minmax(0,5rem)] min-[400px]:grid-cols-[2rem_1.5rem_1.75rem_minmax(0,1fr)_minmax(0,5rem)] md:grid-cols-[2rem_2rem_2rem_minmax(0,1fr)_minmax(0,5rem)] min-[771px]:grid-cols-[2rem_auto_2rem_2rem_minmax(0,1fr)_minmax(0,5rem)] lg:grid-cols-[2.5rem_auto_2.5rem_2.25rem_minmax(0,1fr)_auto_minmax(0,5rem)]'
   );
 
@@ -130,8 +133,8 @@ export function LeaderboardEntry({
         </Link>
       </div>
 
-      {/* Proof – from lg, only when not hidePlayerCount */}
-      {!hidePlayerCount && (
+      {/* Proof – from lg, only when not hidePlayerCount and not using 4-slot (hasRightSlots has Proof inside value block) */}
+      {!hidePlayerCount && !hasRightSlots && (
         <div className="hidden lg:flex items-center justify-center flex-shrink-0 w-8">
           {entry.proofUrl ? (
             <a
@@ -150,8 +153,8 @@ export function LeaderboardEntry({
         </div>
       )}
 
-      {/* Players – from lg, only when not hidePlayerCount */}
-      {!hidePlayerCount && (
+      {/* Players – from lg, only when not hidePlayerCount and not using 4-slot */}
+      {!hidePlayerCount && !hasRightSlots && (
         <div className="hidden lg:flex items-center justify-center flex-shrink-0">
           <Badge variant="default" size="sm" className="shrink-0">
             {getPlayerCountLabel(entry.playerCount)}
@@ -159,9 +162,9 @@ export function LeaderboardEntry({
         </div>
       )}
 
-      {/* Value: compact on small (rank/name/value only), full on md+ */}
+      {/* Value: compact on small (rank/name/value only), full on md+; slight right padding at 640px and below */}
       {(showRound || valueKind === 'xp' || valueKind === 'time') && (
-        <div className="min-w-0 flex items-center justify-end flex-shrink-0">
+        <div className="min-w-0 flex items-center justify-end flex-shrink-0 pr-2 sm:pr-0">
           {valueKind === 'xp' ? (
             <>
               <span className="text-xs sm:text-sm font-semibold text-military-400 tabular-nums leading-none whitespace-nowrap lg:hidden">
@@ -176,25 +179,25 @@ export function LeaderboardEntry({
               {/* Single value below lg */}
               <div className="min-w-0 flex items-center justify-end lg:hidden">
                 {valueKind === 'time' ? (
-                  <span className="text-xs sm:text-sm font-bold text-military-400 tabular-nums leading-none truncate" title="Completion time">
-                    {formatCompletionTime(entry.value)}
-                  </span>
+                  showTime ? (
+                    <span className="text-xs sm:text-sm font-bold text-military-400 tabular-nums leading-none truncate" title="Completion time">
+                      {formatCompletionTime(timeSeconds)}
+                    </span>
+                  ) : null
                 ) : (
                   <RoundCounter round={entry.value} size="xs" animated={false} className="shrink-0" />
                 )}
               </div>
-              {/* Full: Time | Proof | Players | Round from lg */}
-              <div className="hidden lg:grid grid-cols-4 gap-1 sm:gap-2 pr-1 sm:pr-2 w-full min-w-0 max-w-[20rem] xl:max-w-none">
-                <div className="flex items-center justify-center min-w-0">
-                  {valueKind === 'time' ? (
+              {/* Full: Time | Proof | Players | Round from lg; tight consistent gap, content-sized columns */}
+              <div className="hidden lg:grid grid-cols-[minmax(0,1fr)_auto_auto_auto] gap-x-2 w-max max-w-full min-w-0 ml-auto">
+                <div className="flex items-center justify-start min-w-0">
+                  {valueKind === 'time' && showTime ? (
                     <span className="text-sm font-bold text-military-400 tabular-nums leading-none truncate" title="Completion time">
-                      {formatCompletionTime(entry.value)}
+                      {formatCompletionTime(timeSeconds)}
                     </span>
-                  ) : (
-                    <span className="text-bunker-600 text-sm leading-none" aria-hidden>—</span>
-                  )}
+                  ) : null}
                 </div>
-                <div className="flex items-center justify-center min-w-0 w-8">
+                <div className="flex items-center justify-center min-w-0 shrink-0">
                   {entry.proofUrl ? (
                     <a
                       href={entry.proofUrl}
@@ -206,16 +209,14 @@ export function LeaderboardEntry({
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
-                  ) : (
-                    <span className="text-bunker-600 text-xs leading-none" aria-hidden>—</span>
-                  )}
+                  ) : null}
                 </div>
-                <div className="flex items-center justify-center min-w-0">
+                <div className="flex items-center justify-center min-w-0 shrink-0">
                   <Badge variant="default" size="sm" className="shrink-0">
                     {getPlayerCountLabel(entry.playerCount)}
                   </Badge>
                 </div>
-                <div className="flex items-center justify-end min-w-0">
+                <div className="flex items-center justify-end min-w-0 shrink-0">
                   {valueKind === 'time' && entry.roundCompleted != null ? (
                     <RoundCounter round={entry.roundCompleted} size="sm" animated={false} className="shrink-0" />
                   ) : valueKind === 'round' ? (
