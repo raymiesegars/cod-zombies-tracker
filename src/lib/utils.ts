@@ -15,6 +15,13 @@ export function formatNumber(num: number): string {
   return num.toString();
 }
 
+/** Compact XP for small screens: 140840 → "140.8k", max ~3 digits before suffix */
+export function formatXpCompact(num: number): string {
+  if (num >= 1e6) return (num / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (num >= 1e3) return (num / 1e3).toFixed(1).replace(/\.0$/, '') + 'k';
+  return String(num);
+}
+
 export function formatRound(round: number): string {
   return round.toString().padStart(2, '0');
 }

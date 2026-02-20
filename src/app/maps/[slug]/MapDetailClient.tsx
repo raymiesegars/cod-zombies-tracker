@@ -825,7 +825,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
         </div>
 
         {/* Map info overlay */}
-        <div className="absolute bottom-0 left-0 right-0 pt-8 pb-4 px-4 sm:pt-10 sm:pb-6 sm:px-6 md:pt-12 md:pb-8 md:px-8">
+        <div className="absolute bottom-0 left-0 right-0 pt-12 sm:pt-10 pb-4 px-4 sm:pb-6 sm:px-6 md:pt-12 md:pb-8 md:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
@@ -862,9 +862,9 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
         >
           <div className="min-w-0">
         <Tabs key={initialTab} value={activeTab} defaultValue={initialTab} onChange={setActiveTab} className="space-y-4 sm:space-y-6">
-          {/* Mobile: help → Log Progress → tab selector. Desktop: single row. */}
-          <div className="overflow-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 min-w-0">
-            <div className="flex-shrink-0 order-first sm:order-none">
+          {/* Below 874px: vertical stack (? above Log Progress, then dropdown). At 874px+: row (? left of Log Progress, then tabs). */}
+          <div className="overflow-x-hidden -mx-4 px-4 sm:mx-0 sm:px-0 flex flex-col min-[874px]:flex-row min-[874px]:flex-wrap min-[874px]:items-center gap-3 min-w-0">
+            <div className="flex-shrink-0">
               <HelpTrigger
                 title="Challenges & Easter eggs on this map"
                 description="What counts as a challenge, main vs side EEs, and how to use these tabs."
@@ -874,15 +874,15 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
               </HelpTrigger>
             </div>
             {profile && !(activeTab === 'easter-eggs' && buildables.length > 0) && (
-              <Link href={`/maps/${slug}/edit`} className="flex-shrink-0 w-full sm:w-auto order-2 sm:order-none">
-                <Button leftIcon={<span className="mr-2 inline-flex shrink-0"><Edit className="w-4 h-4" /></span>} size="lg" className="!text-white w-full sm:w-auto justify-center sm:justify-start">
+              <Link href={`/maps/${slug}/edit`} className="flex-shrink-0 w-full min-[874px]:w-auto">
+                <Button leftIcon={<span className="mr-2 inline-flex shrink-0"><Edit className="w-4 h-4" /></span>} size="lg" className="!text-white w-full min-[874px]:w-auto justify-center min-[874px]:justify-start">
                   Log Progress
                 </Button>
               </Link>
             )}
-            <div className="w-full sm:w-auto sm:flex-1 min-w-0 order-3 sm:order-none">
-              {/* Mobile: dropdown to save space */}
-              <div className="sm:hidden w-full">
+            <div className="w-full min-[874px]:flex-1 min-w-0">
+              {/* Below 874px: dropdown; at 874px+: tab bar */}
+              <div className="min-[874px]:hidden w-full">
                 <Select
                   options={[
                     { value: 'overview', label: 'Overview' },
@@ -897,8 +897,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                   aria-label="Section"
                 />
               </div>
-              {/* Desktop: tab bar */}
-              <div className="hidden sm:block overflow-x-auto [scrollbar-width:thin] [-webkit-overflow-scrolling:touch]">
+              <div className="hidden min-[874px]:block overflow-x-auto [scrollbar-width:thin] [-webkit-overflow-scrolling:touch]">
                 <TabsList className="w-max inline-flex gap-1 p-1">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="achievements">Achievements</TabsTrigger>
@@ -1577,7 +1576,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2 min-h-[20rem] flex flex-col">
+                <div className="space-y-2 min-h-[20rem] flex flex-col min-w-0">
                   {(!leaderboardFetchedOnce || (isLeaderboardLoading && leaderboard.length === 0)) ? (
                     <div className="flex-1 flex items-center justify-center py-12 min-h-[18rem]">
                       <PageLoader inline />
