@@ -36,6 +36,9 @@ model User {
   // Privacy settings
   isPublic      Boolean   @default(true)
   
+  // Admin: only set via secure admin APIs; super admin (env) can demote, any admin can promote
+  isAdmin       Boolean   @default(false)
+  
   // Relations
   challengeLogs           ChallengeLog[]
   easterEggLogs            EasterEggLog[]

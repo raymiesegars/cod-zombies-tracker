@@ -18,6 +18,8 @@ import {
   Select,
   PageLoader,
   HelpTrigger,
+  Button,
+  Modal,
 } from '@/components/ui';
 import { RoundCounter, XpDisplay, RelockAchievementButton, RankHelpContent, PendingCoOpSection } from '@/components/game';
 import {
@@ -40,6 +42,9 @@ import {
   CheckCircle2,
   Award,
   Filter,
+  ShieldPlus,
+  ShieldOff,
+  Loader2,
 } from 'lucide-react';
 
 type AchievementWithMap = {
@@ -372,8 +377,14 @@ export default function UserProfilePage() {
   const [achievementMapLoading, setAchievementMapLoading] = useState(false);
   const [profileRefreshTrigger, setProfileRefreshTrigger] = useState(0);
 
+  const [adminMe, setAdminMe] = useState<{ isAdmin: boolean; isSuperAdmin: boolean } | null>(null);
+  const [promoteModalOpen, setPromoteModalOpen] = useState(false);
+  const [demoteModalOpen, setDemoteModalOpen] = useState(false);
+  const [adminActionLoading, setAdminActionLoading] = useState(false);
+
   // so "Your runs" vs "Back to runs" and map links point the right place
   const isOwnProfile = Boolean(profile && currentProfile && profile.id === currentProfile.id);
+  const viewedUserIsAdmin = Boolean(profile && 'isAdmin' in profile && (profile as { isAdmin?: boolean }).isAdmin);
 
   // when they confirm a coop run we refetch so XP and map highs update without a full reload
   useEffect(() => {
@@ -384,6 +395,24 @@ export default function UserProfilePage() {
     window.addEventListener('cod-tracker-profile-refresh-requested', handler);
     return () => window.removeEventListener('cod-tracker-profile-refresh-requested', handler);
   }, [username]);
+
+  // Admin: can current user promote/demote? Only fetch when logged in.
+  useEffect(() => {
+    if (!currentProfile) {
+      setAdminMe(null);
+      return;
+    }
+    let cancelled = false;
+    fetch('/api/admin/me', { cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : { isAdmin: false, isSuperAdmin: false }))
+      .then((data) => {
+        if (!cancelled) setAdminMe(data);
+      })
+      .catch(() => {
+        if (!cancelled) setAdminMe(null);
+      });
+    return () => { cancelled = true; };
+  }, [currentProfile?.id]);
 
   const refetchAchievementsAfterRelock = useCallback(async () => {
     await refreshProfile?.();
@@ -397,6 +426,50 @@ export default function UserProfilePage() {
       setAchievementsOverview((prev) => (prev ? { ...prev, ...data } : data));
     }
   }, [username, achievementFilterMap, refreshProfile]);
+
+  const handlePromoteToAdmin = useCallback(async () => {
+    if (!profile?.id) return;
+    setAdminActionLoading(true);
+    try {
+      const res = await fetch('/api/admin/promote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: profile.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? 'Failed to promote');
+      setPromoteModalOpen(false);
+      setProfileRefreshTrigger((t) => t + 1);
+      const meRes = await fetch('/api/admin/me', { cache: 'no-store' });
+      if (meRes.ok) setAdminMe(await meRes.json());
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Something went wrong');
+    } finally {
+      setAdminActionLoading(false);
+    }
+  }, [profile?.id]);
+
+  const handleRemoveAdmin = useCallback(async () => {
+    if (!profile?.id) return;
+    setAdminActionLoading(true);
+    try {
+      const res = await fetch('/api/admin/demote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: profile.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? 'Failed to remove admin');
+      setDemoteModalOpen(false);
+      setProfileRefreshTrigger((t) => t + 1);
+      const meRes = await fetch('/api/admin/me', { cache: 'no-store' });
+      if (meRes.ok) setAdminMe(await meRes.json());
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Something went wrong');
+    } finally {
+      setAdminActionLoading(false);
+    }
+  }, [profile?.id]);
 
   useEffect(() => {
     async function fetchProfile() {
@@ -547,11 +620,33 @@ export default function UserProfilePage() {
                 <h1 className="text-xl sm:text-2xl md:text-3xl font-zombies text-white tracking-wide">
                   {profile.displayName || profile.username}
                 </h1>
-                {isOwnProfile && (
-                  <Link href="/settings">
-                    <Settings className="w-5 h-5 text-bunker-400 hover:text-blood-400 mx-auto sm:mx-0" />
-                  </Link>
-                )}
+                <div className="flex items-center gap-2 justify-center sm:justify-start">
+                  {isOwnProfile && (
+                    <Link href="/settings" aria-label="Settings">
+                      <Settings className="w-5 h-5 text-bunker-400 hover:text-blood-400" />
+                    </Link>
+                  )}
+                  {!isOwnProfile && adminMe?.isSuperAdmin && !viewedUserIsAdmin && (
+                    <Button
+                      variant="primary"
+                      size="md"
+                      onClick={() => setPromoteModalOpen(true)}
+                      leftIcon={<ShieldPlus className="w-4 h-4" />}
+                    >
+                      Promote to admin
+                    </Button>
+                  )}
+                  {!isOwnProfile && adminMe?.isSuperAdmin && viewedUserIsAdmin && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setDemoteModalOpen(true)}
+                      leftIcon={<ShieldOff className="w-4 h-4" />}
+                    >
+                      Remove admin
+                    </Button>
+                  )}
+                </div>
               </div>
               <p className="text-bunker-400 text-sm sm:text-base">@{profile.username}</p>
               
@@ -718,6 +813,52 @@ export default function UserProfilePage() {
           isMapAchievementsLoading={achievementMapLoading}
         />
       </div>
+
+      {/* Promote to admin confirmation */}
+      <Modal
+        isOpen={promoteModalOpen}
+        onClose={() => !adminActionLoading && setPromoteModalOpen(false)}
+        title="Promote to admin?"
+        description={`${profile?.displayName || profile?.username || 'This user'} will be able to promote others to admin and see admin-only features.`}
+        size="sm"
+      >
+        <div className="flex justify-end gap-2 pt-2">
+          <Button variant="secondary" onClick={() => setPromoteModalOpen(false)} disabled={adminActionLoading}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handlePromoteToAdmin}
+            disabled={adminActionLoading}
+            leftIcon={adminActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldPlus className="w-4 h-4" />}
+          >
+            {adminActionLoading ? 'Promoting…' : 'Promote to admin'}
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Remove admin confirmation */}
+      <Modal
+        isOpen={demoteModalOpen}
+        onClose={() => !adminActionLoading && setDemoteModalOpen(false)}
+        title="Remove admin?"
+        description={`${profile?.displayName || profile?.username || 'This user'} will no longer have admin access. Only super admins can remove admin.`}
+        size="sm"
+      >
+        <div className="flex justify-end gap-2 pt-2">
+          <Button variant="secondary" onClick={() => setDemoteModalOpen(false)} disabled={adminActionLoading}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleRemoveAdmin}
+            disabled={adminActionLoading}
+            leftIcon={adminActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldOff className="w-4 h-4" />}
+          >
+            {adminActionLoading ? 'Removing…' : 'Remove admin'}
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }
