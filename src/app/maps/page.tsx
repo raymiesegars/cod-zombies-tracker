@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma';
 import { MapsPageClient } from './MapsPageClient';
 import type { MapWithGame, Game } from '@/types';
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 300;
 
 export default async function MapsPage() {

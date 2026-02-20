@@ -235,6 +235,7 @@ export function TeammatePicker({
               onFocus={() => searchQuery.length >= 2 && setSearchOpen(true)}
               placeholder="Search users..."
               className="w-full bg-bunker-800 border border-bunker-600 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder:text-bunker-500 focus:outline-none focus:ring-2 focus:ring-blood-500/50 focus:border-blood-600"
+              role="combobox"
               aria-expanded={searchOpen}
               aria-autocomplete="list"
               aria-controls="teammate-search-results"
@@ -260,6 +261,7 @@ export function TeammatePicker({
                         <li
                           key={u.id}
                           role="option"
+                          aria-selected={false}
                           className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 cursor-pointer hover:bg-bunker-800 text-left min-w-0"
                           onClick={() => addUser(u)}
                         >
