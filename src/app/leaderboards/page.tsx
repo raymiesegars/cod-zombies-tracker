@@ -454,7 +454,7 @@ export default function LeaderboardsPage() {
                   </span>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-2 min-w-0">
                 {isLoading ? (
                   <div className="flex justify-center py-12">
                     <PageLoader message="Loading leaderboard…" inline />
@@ -519,7 +519,7 @@ export default function LeaderboardsPage() {
                   </span>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-2 min-w-0">
                 {isLoading ? (
                   <div className="flex justify-center py-12">
                     <PageLoader message="Loading leaderboard…" inline />
