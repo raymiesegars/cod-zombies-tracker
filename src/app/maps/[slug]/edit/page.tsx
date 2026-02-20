@@ -18,14 +18,15 @@ import {
   TabsTrigger,
   TabsContent,
   TimeInput,
+  Modal,
 } from '@/components/ui';
 import { ProofEmbed, ProofUrlsInput, TeammatePicker } from '@/components/game';
-import { normalizeProofUrls } from '@/lib/utils';
+import { cn, normalizeProofUrls } from '@/lib/utils';
 import { useXpToast } from '@/context/xp-toast-context';
 import { getXpForChallengeLog, getXpForEasterEggLog, type AchievementForPreview } from '@/lib/xp-preview';
 import { isBo4Game, BO4_DIFFICULTIES, getBo4DifficultyLabel } from '@/lib/bo4';
 import type { MapWithDetails, ChallengeType, PlayerCount } from '@/types';
-import { ChevronLeft, Save, CheckCircle, AlertCircle } from 'lucide-react';
+import { ChevronLeft, Save, CheckCircle, AlertCircle, BookOpen } from 'lucide-react';
 
 const challengeTypeLabels: Record<ChallengeType, string> = {
   HIGHEST_ROUND: 'Highest Round',
@@ -102,6 +103,31 @@ export default function EditMapProgressPage() {
     Record<string, { roundReached: string; playerCount: PlayerCount; difficulty?: string; proofUrls: string[]; notes: string; completionTimeSeconds: number | null; teammateUserIds: string[]; teammateNonUserNames: string[] }>
   >({});
 
+  /** Multi-select: which challenges are toggled on. When user saves, one log is created per selected challenge with shared form data. */
+  const [selectedChallengeIds, setSelectedChallengeIds] = useState<Set<string>>(new Set());
+  /** Single shared form for all selected challenges (round, player count, proof, notes, etc.). */
+  const [sharedChallengeForm, setSharedChallengeForm] = useState<{
+    roundReached: string;
+    playerCount: PlayerCount;
+    difficulty?: string;
+    proofUrls: string[];
+    notes: string;
+    completionTimeSeconds: number | null;
+    teammateUserIds: string[];
+    teammateNonUserNames: string[];
+  }>({
+    roundReached: '',
+    playerCount: 'SOLO',
+    proofUrls: [],
+    notes: '',
+    completionTimeSeconds: null,
+    teammateUserIds: [],
+    teammateNonUserNames: [],
+  });
+  const [challengeRulesModalOpen, setChallengeRulesModalOpen] = useState(false);
+  /** Main Quest EE tab: 'ee-none' = none selected (default), 'ee-<id>' = that EE selected. Selecting an EE clears challenges. */
+  const [eeTabValue, setEeTabValue] = useState<string>('ee-none');
+
   const [easterEggForms, setEasterEggForms] = useState<
     Record<
       string,
@@ -152,6 +178,19 @@ export default function EditMapProgressPage() {
             };
           }
           setChallengeForms(challengeInitial);
+          setSharedChallengeForm({
+            roundReached: '',
+            playerCount: 'SOLO',
+            ...(isBo4 && { difficulty: 'NORMAL' }),
+            proofUrls: [],
+            notes: '',
+            completionTimeSeconds: null,
+            teammateUserIds: [],
+            teammateNonUserNames: [],
+          });
+
+          const highRoundChallenge = (data.challenges ?? []).find((c: { type: string }) => c.type === 'HIGHEST_ROUND');
+          setSelectedChallengeIds(highRoundChallenge ? new Set([highRoundChallenge.id]) : new Set());
 
           const eeInitial: Record<string, {
             completed: boolean;
@@ -204,6 +243,72 @@ export default function EditMapProgressPage() {
         [field]: value,
       },
     }));
+  };
+
+  const toggleChallenge = (challengeId: string) => {
+    const isAdding = !selectedChallengeIds.has(challengeId);
+    if (isAdding) setEeTabValue('ee-none');
+    setSelectedChallengeIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(challengeId)) next.delete(challengeId);
+      else next.add(challengeId);
+      return next;
+    });
+  };
+
+  const handleSharedChallengeChange = (
+    field: keyof typeof sharedChallengeForm,
+    value: string | number | string[] | null | undefined
+  ) => {
+    setSharedChallengeForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveSelectedChallenges = async () => {
+    if (!profile || !map || selectedChallengeIds.size === 0) return;
+    const form = sharedChallengeForm;
+    const round = parseInt(form.roundReached, 10);
+    if (!form.roundReached || Number.isNaN(round) || round <= 0) return;
+
+    setIsSaving(true);
+    setSaveStatus('idle');
+    let totalXpGained = 0;
+    let lastTotalXp: number | undefined;
+
+    try {
+      const ids = Array.from(selectedChallengeIds);
+      for (const challengeId of ids) {
+        const res = await fetch('/api/challenge-logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            challengeId,
+            mapId: map.id,
+            roundReached: round,
+            playerCount: form.playerCount,
+            ...(map.game?.shortName === 'BO4' && form.difficulty && { difficulty: form.difficulty }),
+            proofUrls: normalizeProofUrls(form.proofUrls ?? []),
+            notes: form.notes || null,
+            completionTimeSeconds: form.completionTimeSeconds ?? null,
+            teammateUserIds: form.teammateUserIds ?? [],
+            teammateNonUserNames: form.teammateNonUserNames ?? [],
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to save');
+        totalXpGained += typeof data.xpGained === 'number' ? data.xpGained : 0;
+        if (typeof data.totalXp === 'number') lastTotalXp = data.totalXp;
+      }
+      if (totalXpGained > 0) {
+        showXpToast(totalXpGained, lastTotalXp != null ? { totalXp: lastTotalXp } : undefined);
+      }
+      setSaveStatus('success');
+      setTimeout(() => router.push(`/maps/${slug}?achievementUpdated=1`), 1500);
+    } catch (error) {
+      console.error('Error saving challenge logs:', error);
+      setSaveStatus('error');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleEasterEggChange = (
@@ -335,14 +440,6 @@ export default function EditMapProgressPage() {
     );
   }
 
-  const firstChallengeId = map.challenges[0]?.id;
-  const firstEeId = mainQuestEasterEggs[0]?.id;
-  const defaultTab = firstChallengeId
-    ? `challenge-${firstChallengeId}`
-    : firstEeId
-      ? `ee-${firstEeId}`
-      : 'challenge-none';
-
   return (
     <div className="min-h-screen bg-bunker-950">
       {/* Header */}
@@ -364,29 +461,58 @@ export default function EditMapProgressPage() {
         </div>
       </div>
 
-      {/* One tab per challenge + one per Easter Egg — separate variant: grid, equal widths, uniform padding */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
-        <Tabs defaultValue={defaultTab} variant="separate" className="space-y-3 sm:space-y-4">
-          <div className="space-y-3">
-            {map.challenges.length > 0 && (
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-bunker-200 mb-1.5 pl-0.5">
-                  Challenges
-                </p>
-                <TabsList>
-                  {map.challenges.map((challenge) => (
-                    <TabsTrigger key={challenge.id} value={`challenge-${challenge.id}`}>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 space-y-6 sm:space-y-8 min-w-0">
+        {/* Challenges: same tab-style UI as Main Quest, multi-select toggles + one shared form */}
+        {map.challenges.length > 0 && (
+          <Tabs value="challenges-multi" variant="separate" className="space-y-4 min-w-0">
+            <div className="space-y-3 min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-bunker-200 mb-0 pl-0.5">
+                Challenges
+              </p>
+              <p className="text-sm text-bunker-400">
+                Toggle the challenges you completed in this run. One log will be created per selected challenge with the same details below.
+              </p>
+              <TabsList className="min-w-0 w-full">
+                {map.challenges.map((challenge) => {
+                  const isSelected = selectedChallengeIds.has(challenge.id);
+                  return (
+                    <button
+                      key={challenge.id}
+                      type="button"
+                      onClick={() => toggleChallenge(challenge.id)}
+                      className={cn(
+                        'w-full min-w-0 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all duration-200 text-center',
+                        'focus:outline-none focus-visible:ring-2 focus-visible:ring-blood-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bunker-900',
+                        isSelected
+                          ? 'border-blood-500/80 bg-blood-950/50 text-white shadow-sm'
+                          : 'border-bunker-600 bg-bunker-800 text-bunker-300 hover:border-bunker-500 hover:bg-bunker-700/70 hover:text-bunker-200'
+                      )}
+                    >
                       {challengeTypeLabels[challenge.type] || challenge.name}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </div>
-            )}
-            {mainQuestEasterEggs.length > 0 && (
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-bunker-200 mb-1.5 pl-0.5">
-                  Main Quest Easter Eggs
-                </p>
+                    </button>
+                  );
+                })}
+              </TabsList>
+            </div>
+          </Tabs>
+        )}
+
+        {/* Main Quest Easter Eggs (left 3/4) + Challenge Rules button (right 1/4) - between Challenges and logging */}
+        <Tabs
+          value={eeTabValue}
+          onChange={(value) => {
+            setEeTabValue(value);
+            if (value.startsWith('ee-') && value !== 'ee-none') setSelectedChallengeIds(new Set());
+          }}
+          variant="separate"
+          className="space-y-3 sm:space-y-4 min-w-0"
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 sm:gap-4 items-stretch min-w-0">
+            <div className="sm:col-span-3 space-y-3 min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-bunker-200 mb-0 pl-0.5">
+                Main Quest Easter Eggs
+              </p>
+              {mainQuestEasterEggs.length > 0 ? (
                 <TabsList>
                   {mainQuestEasterEggs.map((ee: { id: string; name: string }) => (
                     <TabsTrigger key={ee.id} value={`ee-${ee.id}`}>
@@ -394,35 +520,58 @@ export default function EditMapProgressPage() {
                     </TabsTrigger>
                   ))}
                 </TabsList>
-              </div>
-            )}
+              ) : (
+                <p className="text-sm text-bunker-500">No main quest Easter Eggs on this map.</p>
+              )}
+            </div>
+            <div className="sm:col-span-1 flex flex-col justify-center min-w-0 sm:items-end">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setChallengeRulesModalOpen(true)}
+                className="border-element-500/60 bg-element-950/40 text-element-200 hover:bg-element-900/50 hover:text-element-100 w-full sm:w-auto !px-3 !py-2.5 text-sm font-medium min-h-[2.75rem] rounded-lg"
+                leftIcon={<BookOpen className="w-4 h-4 shrink-0" />}
+              >
+                Challenge Rules
+              </Button>
+            </div>
           </div>
 
-          {/* Tab content: one per challenge */}
-          {map.challenges.map((challenge) => (
-            <TabsContent key={challenge.id} value={`challenge-${challenge.id}`} className="space-y-4">
+          <Modal
+            isOpen={challengeRulesModalOpen}
+            onClose={() => setChallengeRulesModalOpen(false)}
+            title="Challenge Rules"
+            description="Rules and requirements for each challenge type"
+            size="md"
+          >
+            <p className="text-bunker-300 text-sm">
+              Challenge rules are coming soon. Rules will vary by game, and we&apos;ll add them here so you can quickly check requirements for No Perks, No Power, Pistol Only, and other challenges.
+            </p>
+          </Modal>
+
+          {/* Challenge logging form (when one or more challenges selected) */}
+          {map.challenges.length > 0 && selectedChallengeIds.size > 0 && (
+            <>
               <Card variant="bordered">
                 <CardContent className="py-4 sm:py-6">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4 min-w-0">
-                    <div className="min-w-0 flex-1">
-                      <h2 className="text-lg font-semibold text-white truncate">
-                        {challengeTypeLabels[challenge.type] || challenge.name}
-                      </h2>
-                      <p className="text-sm text-bunker-400 mt-1">
-                        {challenge.description ||
-                          'Log your best round reached for this challenge. Enter the round you got to, player count, and optional proof link.'}
-                      </p>
-                    </div>
+                    <p className="text-sm text-bunker-400">
+                      Same run details will apply to all {selectedChallengeIds.size} selected challenge{selectedChallengeIds.size !== 1 ? 's' : ''}.
+                    </p>
                     {mapWithAchievements?.achievements && (
                       <Badge variant="info" size="sm" className="self-start sm:flex-shrink-0 shrink-0">
-                        +{getXpForChallengeLog(
-                          mapWithAchievements.achievements,
-                          mapWithAchievements.unlockedAchievementIds ?? [],
-                          challenge.type,
-                          parseInt(challengeForms[challenge.id]?.roundReached || '0', 10) || 0,
-                          map.roundCap ?? null,
-                          map?.game?.shortName === 'BO4' ? (challengeForms[challenge.id]?.difficulty ?? 'NORMAL') : undefined
-                        )} XP
+                        +{Array.from(selectedChallengeIds).reduce((sum, challengeId) => {
+                          const challenge = map.challenges.find((c) => c.id === challengeId);
+                          if (!challenge || !mapWithAchievements?.achievements) return sum;
+                          return sum + getXpForChallengeLog(
+                            mapWithAchievements.achievements,
+                            mapWithAchievements.unlockedAchievementIds ?? [],
+                            challenge.type,
+                            parseInt(sharedChallengeForm.roundReached || '0', 10) || 0,
+                            map.roundCap ?? null,
+                            map?.game?.shortName === 'BO4' ? (sharedChallengeForm.difficulty ?? 'NORMAL') : undefined
+                          );
+                        }, 0)} XP
                       </Badge>
                     )}
                   </div>
@@ -433,48 +582,42 @@ export default function EditMapProgressPage() {
                       type="number"
                       min="1"
                       placeholder="e.g. 50"
-                      value={challengeForms[challenge.id]?.roundReached || ''}
-                      onChange={(e) =>
-                        handleChallengeChange(challenge.id, 'roundReached', e.target.value)
-                      }
+                      value={sharedChallengeForm.roundReached}
+                      onChange={(e) => handleSharedChallengeChange('roundReached', e.target.value)}
                     />
                     <Select
                       label="Player Count"
                       options={playerCountOptions}
-                      value={challengeForms[challenge.id]?.playerCount || 'SOLO'}
-                      onChange={(e) =>
-                        handleChallengeChange(challenge.id, 'playerCount', e.target.value)
-                      }
+                      value={sharedChallengeForm.playerCount}
+                      onChange={(e) => handleSharedChallengeChange('playerCount', e.target.value)}
                     />
                     {map?.game?.shortName === 'BO4' && (
                       <Select
                         label="Difficulty"
                         options={BO4_DIFFICULTIES.map((d) => ({ value: d, label: getBo4DifficultyLabel(d) }))}
-                        value={challengeForms[challenge.id]?.difficulty || 'NORMAL'}
-                        onChange={(e) =>
-                          handleChallengeChange(challenge.id, 'difficulty', e.target.value)
-                        }
+                        value={sharedChallengeForm.difficulty || 'NORMAL'}
+                        onChange={(e) => handleSharedChallengeChange('difficulty', e.target.value)}
                       />
                     )}
                     <div className="sm:col-span-3 mt-1 min-w-0">
                       <ProofUrlsInput
                         label="Proof URLs (optional)"
-                        value={challengeForms[challenge.id]?.proofUrls ?? []}
-                        onChange={(urls) => handleChallengeChange(challenge.id, 'proofUrls', urls)}
+                        value={sharedChallengeForm.proofUrls}
+                        onChange={(urls) => handleSharedChallengeChange('proofUrls', urls)}
                       />
                     </div>
                   </div>
 
-                  {challengeForms[challenge.id]?.playerCount && challengeForms[challenge.id].playerCount !== 'SOLO' && (
+                  {sharedChallengeForm.playerCount !== 'SOLO' && (
                     <div className="mt-3 sm:mt-4">
                       <TeammatePicker
                         value={{
-                          teammateUserIds: challengeForms[challenge.id]?.teammateUserIds ?? [],
-                          teammateNonUserNames: challengeForms[challenge.id]?.teammateNonUserNames ?? [],
+                          teammateUserIds: sharedChallengeForm.teammateUserIds,
+                          teammateNonUserNames: sharedChallengeForm.teammateNonUserNames,
                         }}
                         onChange={({ teammateUserIds, teammateNonUserNames }) => {
-                          handleChallengeChange(challenge.id, 'teammateUserIds', teammateUserIds);
-                          handleChallengeChange(challenge.id, 'teammateNonUserNames', teammateNonUserNames);
+                          handleSharedChallengeChange('teammateUserIds', teammateUserIds);
+                          handleSharedChallengeChange('teammateNonUserNames', teammateNonUserNames);
                         }}
                         currentUserId={profile?.id}
                       />
@@ -484,10 +627,8 @@ export default function EditMapProgressPage() {
                   <div className="mt-3 sm:mt-4">
                     <TimeInput
                       label="Run time (optional)"
-                      valueSeconds={challengeForms[challenge.id]?.completionTimeSeconds ?? null}
-                      onChange={(seconds) =>
-                        handleChallengeChange(challenge.id, 'completionTimeSeconds', seconds)
-                      }
+                      valueSeconds={sharedChallengeForm.completionTimeSeconds}
+                      onChange={(seconds) => handleSharedChallengeChange('completionTimeSeconds', seconds)}
                     />
                   </div>
 
@@ -496,16 +637,14 @@ export default function EditMapProgressPage() {
                       label="Notes (optional)"
                       type="text"
                       placeholder="Any notes about this run"
-                      value={challengeForms[challenge.id]?.notes || ''}
-                      onChange={(e) =>
-                        handleChallengeChange(challenge.id, 'notes', e.target.value)
-                      }
+                      value={sharedChallengeForm.notes}
+                      onChange={(e) => handleSharedChallengeChange('notes', e.target.value)}
                     />
                   </div>
 
-                  {(challengeForms[challenge.id]?.proofUrls?.filter(Boolean).length ?? 0) > 0 && (
+                  {(sharedChallengeForm.proofUrls?.filter(Boolean).length ?? 0) > 0 && (
                     <div className="mt-3 sm:mt-4 flex flex-col gap-4">
-                      {(challengeForms[challenge.id].proofUrls ?? []).filter(Boolean).map((url, i) => (
+                      {(sharedChallengeForm.proofUrls ?? []).filter(Boolean).map((url, i) => (
                         <ProofEmbed key={i} url={url} className="rounded-lg overflow-hidden" />
                       ))}
                     </div>
@@ -514,12 +653,13 @@ export default function EditMapProgressPage() {
               </Card>
 
               <SaveProgressRow
-                onSave={() => handleSaveChallenge(challenge.id)}
+                onSave={handleSaveSelectedChallenges}
                 isSaving={isSaving}
                 saveStatus={saveStatus}
+                saveDisabled={!sharedChallengeForm.roundReached || parseInt(sharedChallengeForm.roundReached, 10) <= 0}
               />
-            </TabsContent>
-          ))}
+            </>
+          )}
 
           {/* Tab content: one per Main Quest Easter Egg */}
           {mainQuestEasterEggs.map((ee) => (

@@ -36,6 +36,7 @@ export async function POST(
       screenshotUrl: true,
       notes: true,
       completionTimeSeconds: true,
+      difficulty: true,
     } as const;
     const pending = await prisma.coOpRunPending.findUnique({
       where: { id: pendingId },
@@ -74,6 +75,7 @@ export async function POST(
             completionTimeSeconds: log.completionTimeSeconds,
             teammateUserIds: copyTeammateUserIds,
             teammateNonUserNames: copyTeammateNonUserNames,
+            ...(log.difficulty != null && { difficulty: log.difficulty }),
           },
         });
         await tx.coOpRunPending.update({
@@ -127,6 +129,7 @@ export async function POST(
             completionTimeSeconds: log.completionTimeSeconds,
             teammateUserIds: copyTeammateUserIds,
             teammateNonUserNames: copyTeammateNonUserNames,
+            ...(log.difficulty != null && { difficulty: log.difficulty }),
           },
         });
         await tx.coOpRunPending.update({
