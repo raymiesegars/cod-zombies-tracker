@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 
+export const dynamic = 'force-dynamic';
+
 // One listing + its chat for the detail page.
 export async function GET(
   _request: NextRequest,
