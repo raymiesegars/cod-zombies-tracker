@@ -20,8 +20,12 @@ import {
   HelpTrigger,
   Button,
   Modal,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
 } from '@/components/ui';
-import { RoundCounter, XpDisplay, RelockAchievementButton, RankHelpContent, PendingCoOpSection } from '@/components/game';
+import { RoundCounter, XpDisplay, RelockAchievementButton, RankHelpContent, PendingCoOpSection, PendingVerificationSection } from '@/components/game';
 import {
   ACHIEVEMENT_CATEGORY_LABELS,
   getAchievementCategory,
@@ -681,7 +685,22 @@ export default function UserProfilePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {isOwnProfile && (
           <div className="mb-6 sm:mb-8">
-            <PendingCoOpSection />
+            {adminMe?.isAdmin ? (
+              <Tabs defaultValue="coop" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 max-w-md mb-4">
+                  <TabsTrigger value="coop">Pending Co-Op Runs</TabsTrigger>
+                  <TabsTrigger value="verification">Pending Verification</TabsTrigger>
+                </TabsList>
+                <TabsContent value="coop">
+                  <PendingCoOpSection />
+                </TabsContent>
+                <TabsContent value="verification">
+                  <PendingVerificationSection />
+                </TabsContent>
+              </Tabs>
+            ) : (
+              <PendingCoOpSection />
+            )}
           </div>
         )}
 

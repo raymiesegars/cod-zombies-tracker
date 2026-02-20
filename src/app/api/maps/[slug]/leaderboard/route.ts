@@ -13,6 +13,7 @@ export async function GET(
   const challengeType = searchParams.get('challengeType') as ChallengeType | null;
   const difficulty = searchParams.get('difficulty') as Bo4Difficulty | null;
   const searchQ = searchParams.get('search')?.trim() ?? '';
+  const verifiedOnly = searchParams.get('verified') === 'true';
   const limitParam = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') || '25', 10) || 25));
   const offsetParam = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10) || 0);
   const mergeTake = 500;
@@ -30,11 +31,13 @@ export async function GET(
 
     const whereClause: Prisma.ChallengeLogWhereInput = {
       mapId: map.id,
+      ...(verifiedOnly && { isVerified: true }),
     };
 
     const eeWhereClause: Prisma.EasterEggLogWhereInput = {
       mapId: map.id,
       roundCompleted: { not: null },
+      ...(verifiedOnly && { isVerified: true }),
     };
 
     // Restrict to users matching search (by username/displayName) when search is provided
@@ -123,6 +126,7 @@ export async function GET(
       completedAt: Date;
       logId: string;
       runType: 'challenge' | 'easter-egg';
+      isVerified: boolean;
     };
 
     const userBestMap = new Map<string, LeaderboardEntry>();
@@ -141,6 +145,7 @@ export async function GET(
           completedAt: log.completedAt,
           logId: log.id,
           runType: 'challenge',
+          isVerified: log.isVerified ?? false,
         });
       }
     }
@@ -160,6 +165,7 @@ export async function GET(
           completedAt: log.completedAt,
           logId: log.id,
           runType: 'easter-egg',
+          isVerified: log.isVerified ?? false,
         });
       }
     }
@@ -180,6 +186,7 @@ export async function GET(
         completedAt: entry.completedAt,
         logId: entry.logId,
         runType: entry.runType,
+        isVerified: entry.isVerified,
       }));
 
     return NextResponse.json({ total, entries });

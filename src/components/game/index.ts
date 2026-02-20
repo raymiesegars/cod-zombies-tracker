@@ -15,3 +15,4 @@ export * from './find-group-help-content';
 export * from './map-challenges-ee-help-content';
 export * from './public-profile-help-content';
 export * from './pending-coop-section';
+export * from './pending-verification-section';

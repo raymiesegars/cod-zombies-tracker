@@ -51,11 +51,15 @@ function SaveProgressRow({
   isSaving,
   saveStatus,
   saveDisabled,
+  saveErrorMessage,
+  hideInlineError,
 }: {
   onSave: () => void;
   isSaving: boolean;
   saveStatus: 'idle' | 'success' | 'error';
   saveDisabled?: boolean;
+  saveErrorMessage?: string | null;
+  hideInlineError?: boolean;
 }) {
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 pt-6 border-t border-bunker-800 mt-6">
@@ -66,10 +70,10 @@ function SaveProgressRow({
             Progress saved successfully!
           </div>
         )}
-        {saveStatus === 'error' && (
+        {saveStatus === 'error' && !hideInlineError && (
           <div className="flex items-center gap-2 text-blood-400 text-sm">
-            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-            Error saving progress. Please try again.
+            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+            <span>{saveErrorMessage ?? 'Error saving progress. Please try again.'}</span>
           </div>
         )}
       </div>
@@ -98,9 +102,11 @@ export default function EditMapProgressPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [saveErrorMessage, setSaveErrorMessage] = useState<string | null>(null);
+  const [saveErrorModalMessage, setSaveErrorModalMessage] = useState<string | null>(null);
 
   const [challengeForms, setChallengeForms] = useState<
-    Record<string, { roundReached: string; playerCount: PlayerCount; difficulty?: string; proofUrls: string[]; notes: string; completionTimeSeconds: number | null; teammateUserIds: string[]; teammateNonUserNames: string[] }>
+    Record<string, { roundReached: string; playerCount: PlayerCount; difficulty?: string; proofUrls: string[]; notes: string; completionTimeSeconds: number | null; teammateUserIds: string[]; teammateNonUserNames: string[]; requestVerification: boolean }>
   >({});
 
   /** Multi-select: which challenges are toggled on. When user saves, one log is created per selected challenge with shared form data. */
@@ -115,6 +121,7 @@ export default function EditMapProgressPage() {
     completionTimeSeconds: number | null;
     teammateUserIds: string[];
     teammateNonUserNames: string[];
+    requestVerification: boolean;
   }>({
     roundReached: '',
     playerCount: 'SOLO',
@@ -123,6 +130,7 @@ export default function EditMapProgressPage() {
     completionTimeSeconds: null,
     teammateUserIds: [],
     teammateNonUserNames: [],
+    requestVerification: false,
   });
   const [challengeRulesModalOpen, setChallengeRulesModalOpen] = useState(false);
   /** Main Quest EE tab: 'ee-none' = none selected (default), 'ee-<id>' = that EE selected. Selecting an EE clears challenges. */
@@ -143,6 +151,7 @@ export default function EditMapProgressPage() {
         completionTimeSeconds: number | null;
         teammateUserIds: string[];
         teammateNonUserNames: string[];
+        requestVerification: boolean;
       }
     >
   >({});
@@ -164,7 +173,7 @@ export default function EditMapProgressPage() {
           const mainQuestEasterEggs = (data.easterEggs ?? []).filter((ee: { type: string }) => ee.type === 'MAIN_QUEST');
 
           const isBo4 = (data.game?.shortName ?? '') === 'BO4';
-          const challengeInitial: Record<string, { roundReached: string; playerCount: PlayerCount; difficulty?: string; proofUrls: string[]; notes: string; completionTimeSeconds: number | null; teammateUserIds: string[]; teammateNonUserNames: string[] }> = {};
+          const challengeInitial: Record<string, { roundReached: string; playerCount: PlayerCount; difficulty?: string; proofUrls: string[]; notes: string; completionTimeSeconds: number | null; teammateUserIds: string[]; teammateNonUserNames: string[]; requestVerification: boolean }> = {};
           for (const challenge of data.challenges) {
             challengeInitial[challenge.id] = {
               roundReached: '',
@@ -175,6 +184,7 @@ export default function EditMapProgressPage() {
               completionTimeSeconds: null,
               teammateUserIds: [],
               teammateNonUserNames: [],
+              requestVerification: false,
             };
           }
           setChallengeForms(challengeInitial);
@@ -187,6 +197,7 @@ export default function EditMapProgressPage() {
             completionTimeSeconds: null,
             teammateUserIds: [],
             teammateNonUserNames: [],
+            requestVerification: false,
           });
 
           const highRoundChallenge = (data.challenges ?? []).find((c: { type: string }) => c.type === 'HIGHEST_ROUND');
@@ -203,6 +214,7 @@ export default function EditMapProgressPage() {
             completionTimeSeconds: number | null;
             teammateUserIds: string[];
             teammateNonUserNames: string[];
+            requestVerification: boolean;
           }> = {};
           for (const ee of mainQuestEasterEggs) {
             eeInitial[ee.id] = {
@@ -217,6 +229,7 @@ export default function EditMapProgressPage() {
               completionTimeSeconds: null,
               teammateUserIds: [],
               teammateNonUserNames: [],
+              requestVerification: false,
             };
           }
           setEasterEggForms(eeInitial);
@@ -258,7 +271,7 @@ export default function EditMapProgressPage() {
 
   const handleSharedChallengeChange = (
     field: keyof typeof sharedChallengeForm,
-    value: string | number | string[] | null | undefined
+    value: string | number | boolean | string[] | null | undefined
   ) => {
     setSharedChallengeForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -268,9 +281,18 @@ export default function EditMapProgressPage() {
     const form = sharedChallengeForm;
     const round = parseInt(form.roundReached, 10);
     if (!form.roundReached || Number.isNaN(round) || round <= 0) return;
+    if (form.requestVerification) {
+      const hasProof = (form.proofUrls ?? []).filter(Boolean).length > 0;
+      if (!hasProof) {
+        setSaveErrorModalMessage('To request verification, add at least one proof (URL or screenshot) or uncheck "Request verification".');
+        return;
+      }
+    }
 
     setIsSaving(true);
     setSaveStatus('idle');
+    setSaveErrorMessage(null);
+    setSaveErrorModalMessage(null);
     let totalXpGained = 0;
     let lastTotalXp: number | undefined;
 
@@ -291,6 +313,7 @@ export default function EditMapProgressPage() {
             completionTimeSeconds: form.completionTimeSeconds ?? null,
             teammateUserIds: form.teammateUserIds ?? [],
             teammateNonUserNames: form.teammateNonUserNames ?? [],
+            requestVerification: form.requestVerification ?? false,
           }),
         });
         const data = await res.json();
@@ -305,6 +328,7 @@ export default function EditMapProgressPage() {
       setTimeout(() => router.push(`/maps/${slug}?achievementUpdated=1`), 1500);
     } catch (error) {
       console.error('Error saving challenge logs:', error);
+      setSaveErrorModalMessage(error instanceof Error ? error.message : 'Error saving progress. Please try again.');
       setSaveStatus('error');
     } finally {
       setIsSaving(false);
@@ -331,8 +355,18 @@ export default function EditMapProgressPage() {
     const form = challengeForms[challengeId];
     if (!form?.roundReached || parseInt(form.roundReached) <= 0) return;
 
+    if (form.requestVerification) {
+      const hasProof = (form.proofUrls ?? []).filter(Boolean).length > 0;
+      if (!hasProof) {
+        setSaveErrorModalMessage('To request verification, add at least one proof (URL or screenshot) or uncheck "Request verification".');
+        return;
+      }
+    }
+
     setIsSaving(true);
     setSaveStatus('idle');
+    setSaveErrorMessage(null);
+    setSaveErrorModalMessage(null);
 
     try {
       const res = await fetch('/api/challenge-logs', {
@@ -349,6 +383,7 @@ export default function EditMapProgressPage() {
           completionTimeSeconds: form.completionTimeSeconds ?? null,
           teammateUserIds: form.teammateUserIds ?? [],
           teammateNonUserNames: form.teammateNonUserNames ?? [],
+          requestVerification: form.requestVerification ?? false,
         }),
       });
       const data = await res.json();
@@ -362,6 +397,7 @@ export default function EditMapProgressPage() {
       setTimeout(() => router.push(`/maps/${slug}?achievementUpdated=1`), 1500);
     } catch (error) {
       console.error('Error saving challenge log:', error);
+      setSaveErrorModalMessage(error instanceof Error ? error.message : 'Error saving progress. Please try again.');
       setSaveStatus('error');
     } finally {
       setIsSaving(false);
@@ -374,8 +410,18 @@ export default function EditMapProgressPage() {
     const form = easterEggForms[eeId];
     if (!form?.completed) return;
 
+    if (form.requestVerification) {
+      const hasProof = (form.proofUrls ?? []).filter(Boolean).length > 0;
+      if (!hasProof) {
+        setSaveErrorModalMessage('To request verification, add at least one proof (URL or screenshot) or uncheck "Request verification".');
+        return;
+      }
+    }
+
     setIsSaving(true);
     setSaveStatus('idle');
+    setSaveErrorMessage(null);
+    setSaveErrorModalMessage(null);
 
     try {
       const res = await fetch('/api/easter-egg-logs', {
@@ -394,6 +440,7 @@ export default function EditMapProgressPage() {
           completionTimeSeconds: form.completionTimeSeconds ?? null,
           teammateUserIds: form.teammateUserIds ?? [],
           teammateNonUserNames: form.teammateNonUserNames ?? [],
+          requestVerification: form.requestVerification ?? false,
         }),
       });
       const data = await res.json();
@@ -407,6 +454,7 @@ export default function EditMapProgressPage() {
       setTimeout(() => router.push(`/maps/${slug}?achievementUpdated=1`), 1500);
     } catch (error) {
       console.error('Error saving Easter Egg log:', error);
+      setSaveErrorModalMessage(error instanceof Error ? error.message : 'Error saving progress. Please try again.');
       setSaveStatus('error');
     } finally {
       setIsSaving(false);
@@ -642,6 +690,16 @@ export default function EditMapProgressPage() {
                     />
                   </div>
 
+                  <label className="mt-3 sm:mt-4 flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={sharedChallengeForm.requestVerification ?? false}
+                      onChange={(e) => handleSharedChallengeChange('requestVerification', e.target.checked)}
+                      className="w-4 h-4 rounded border-bunker-600 bg-bunker-800 text-blood-500"
+                    />
+                    <span className="text-sm text-bunker-300">Request verification for this run</span>
+                  </label>
+
                   {(sharedChallengeForm.proofUrls?.filter(Boolean).length ?? 0) > 0 && (
                     <div className="mt-3 sm:mt-4 flex flex-col gap-4">
                       {(sharedChallengeForm.proofUrls ?? []).filter(Boolean).map((url, i) => (
@@ -657,6 +715,8 @@ export default function EditMapProgressPage() {
                 isSaving={isSaving}
                 saveStatus={saveStatus}
                 saveDisabled={!sharedChallengeForm.roundReached || parseInt(sharedChallengeForm.roundReached, 10) <= 0}
+                saveErrorMessage={saveErrorMessage}
+                hideInlineError={!!saveErrorModalMessage}
               />
             </>
           )}
@@ -803,6 +863,17 @@ export default function EditMapProgressPage() {
                           />
                           <span className="text-sm text-bunker-300">No guide used</span>
                         </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={easterEggForms[ee.id]?.requestVerification || false}
+                            onChange={(e) =>
+                              handleEasterEggChange(ee.id, 'requestVerification', e.target.checked)
+                            }
+                            className="w-4 h-4 rounded border-bunker-600 bg-bunker-800 text-blood-500 focus:ring-blood-500"
+                          />
+                          <span className="text-sm text-bunker-300">Request verification for this run</span>
+                        </label>
                       </div>
 
                       {(easterEggForms[ee.id]?.proofUrls?.filter(Boolean).length ?? 0) > 0 && (
@@ -822,11 +893,25 @@ export default function EditMapProgressPage() {
                 isSaving={isSaving}
                 saveStatus={saveStatus}
                 saveDisabled={!easterEggForms[ee.id]?.completed}
+                saveErrorMessage={saveErrorMessage}
+                hideInlineError={!!saveErrorModalMessage}
               />
             </TabsContent>
           ))}
         </Tabs>
       </div>
+
+      <Modal
+        isOpen={!!saveErrorModalMessage}
+        onClose={() => setSaveErrorModalMessage(null)}
+        title="Can't save"
+        description={saveErrorModalMessage ?? undefined}
+        size="sm"
+      >
+        <div className="flex justify-end pt-2">
+          <Button onClick={() => setSaveErrorModalMessage(null)}>OK</Button>
+        </div>
+      </Modal>
     </div>
   );
 }

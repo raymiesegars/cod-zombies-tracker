@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/auth-context';
 import { Button, Logo, MapIcon } from '@/components/ui';
 import { UserWithRank } from '@/components/game';
+import { NotificationsDropdown } from '@/components/layout/notifications-dropdown';
 import { Menu, X, LogOut, User, Settings, Trophy, LayoutDashboard, Users } from 'lucide-react';
 
 const DISCORD_URL = 'https://discord.gg/Gc6Cnt7XxT';
@@ -98,7 +99,9 @@ export function Navbar() {
             {isLoading ? (
               <div className="w-8 h-8 rounded-full bg-bunker-800 animate-pulse shrink-0" />
             ) : user && profile ? (
-              <div className="relative inline-flex flex-col items-end min-w-0">
+              <>
+                <NotificationsDropdown />
+                <div className="relative inline-flex flex-col items-end min-w-0">
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-bunker-800/50 transition-colors min-w-0"
@@ -168,7 +171,8 @@ export function Navbar() {
                     </>
                   )}
                 </AnimatePresence>
-              </div>
+                </div>
+              </>
             ) : (
               <Button size="sm" onClick={signInWithGoogle}>
                 Sign In
@@ -222,6 +226,9 @@ export function Navbar() {
               {user ? (
                 <>
                   <hr className="border-bunker-700 my-2" />
+                  <div className="px-4 py-2">
+                    <NotificationsDropdown />
+                  </div>
                   {profile?.username && (
                     <Link
                       href={`/users/${profile.username}`}

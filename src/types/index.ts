@@ -91,6 +91,8 @@ export type LeaderboardEntry = {
   /** Link to run detail: log id and type so card click can navigate to /maps/[slug]/run/[type]/[logId] */
   logId?: string;
   runType?: 'challenge' | 'easter-egg';
+  /** Run was verified by an admin */
+  isVerified?: boolean;
 };
 
 export type UserMapStats = {

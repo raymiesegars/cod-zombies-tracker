@@ -1,4 +1,5 @@
 export * from './navbar';
+export * from './notifications-dropdown';
 export * from './footer';
 export * from './back-to-top';
 export * from './tv-room-background';

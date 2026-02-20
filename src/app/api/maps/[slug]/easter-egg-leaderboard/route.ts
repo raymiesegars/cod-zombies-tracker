@@ -19,6 +19,7 @@ export async function GET(
   const playerCount = searchParams.get('playerCount') as PlayerCount | null;
   const difficulty = searchParams.get('difficulty') as Bo4Difficulty | null;
   const searchQ = searchParams.get('search')?.trim() ?? '';
+  const verifiedOnly = searchParams.get('verified') === 'true';
   const limitParam = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') || '25', 10) || 25));
   const offsetParam = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10) || 0);
 
@@ -49,6 +50,7 @@ export async function GET(
       mapId: map.id,
       easterEggId: ee.id,
       completionTimeSeconds: { not: null },
+      ...(verifiedOnly && { isVerified: true }),
     };
     if (playerCount) whereClause.playerCount = playerCount;
     if (isBo4Game(map.game?.shortName) && difficulty && BO4_DIFFICULTIES.includes(difficulty as any)) {
@@ -105,6 +107,7 @@ export async function GET(
       completedAt: log.completedAt,
       logId: log.id,
       runType: 'easter-egg' as const,
+      isVerified: log.isVerified ?? false,
     }));
 
     return NextResponse.json({ total, entries, easterEggName: ee.name });

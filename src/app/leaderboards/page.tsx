@@ -4,8 +4,9 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, Select, Input, Logo, PageLoader, HelpTrigger } from '@/components/ui';
 import { LeaderboardEntry, LeaderboardsHelpContent } from '@/components/game';
 import type { LeaderboardEntry as LeaderboardEntryType, Game, MapWithGame, PlayerCount, ChallengeType } from '@/types';
+import { cn } from '@/lib/utils';
 import { getBo4DifficultyLabel, BO4_DIFFICULTIES } from '@/lib/bo4';
-import { Trophy, Medal, Filter, Search, X } from 'lucide-react';
+import { Trophy, Medal, Filter, Search, X, ShieldCheck } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 
 const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
@@ -40,6 +41,7 @@ export default function LeaderboardsPage() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('NORMAL');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchForFetch, setSearchForFetch] = useState(''); // Debounced; drives server-side search
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
 
   const isRankView = selectedGame === RANK_VIEW;
   const selectedMapData = maps.find((m) => m.slug === selectedMap);
@@ -129,6 +131,7 @@ export default function LeaderboardsPage() {
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
           if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
           if (searchForFetch) params.set('search', searchForFetch);
+          if (verifiedOnly) params.set('verified', 'true');
           const res = await fetch(`/api/maps/${selectedMap}/easter-egg-leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -146,6 +149,7 @@ export default function LeaderboardsPage() {
           if (selectedChallengeType) params.set('challengeType', selectedChallengeType);
           if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
           if (searchForFetch) params.set('search', searchForFetch);
+          if (verifiedOnly) params.set('verified', 'true');
           const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -161,7 +165,7 @@ export default function LeaderboardsPage() {
     }
 
     fetchLeaderboard();
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, searchForFetch]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, searchForFetch, verifiedOnly]);
 
   const loadMore = useCallback(async () => {
     if (leaderboard.length >= total || total === 0) return;
@@ -189,6 +193,7 @@ export default function LeaderboardsPage() {
           params.set('limit', String(PAGE_SIZE));
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
           if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
+          if (verifiedOnly) params.set('verified', 'true');
           const res = await fetch(`/api/maps/${selectedMap}/easter-egg-leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -202,6 +207,7 @@ export default function LeaderboardsPage() {
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
           if (selectedChallengeType) params.set('challengeType', selectedChallengeType);
           if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
+          if (verifiedOnly) params.set('verified', 'true');
           const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -220,7 +226,7 @@ export default function LeaderboardsPage() {
     } finally {
       loadingMoreRef.current = false;
     }
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, leaderboard.length, total]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, verifiedOnly, leaderboard.length, total]);
 
   // Only observe sentinel when search is empty so list stays stable while filtering
   useEffect(() => {
@@ -425,6 +431,22 @@ export default function LeaderboardsPage() {
                   onChange={(e) => setSelectedDifficulty(e.target.value)}
                   className="w-full"
                 />
+              )}
+              {!isRankView && (
+                <button
+                  type="button"
+                  onClick={() => setVerifiedOnly((v) => !v)}
+                  className={cn(
+                    'flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors min-h-[40px]',
+                    verifiedOnly
+                      ? 'border-blue-500/60 bg-blue-950/80 text-blue-200 hover:bg-blue-900/60'
+                      : 'border-bunker-600 bg-bunker-800/80 text-bunker-300 hover:bg-bunker-700/80'
+                  )}
+                  aria-pressed={verifiedOnly}
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  {verifiedOnly ? 'Verified' : 'Unverified'}
+                </button>
               )}
             </div>
           </div>

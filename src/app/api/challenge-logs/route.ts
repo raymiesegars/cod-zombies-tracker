@@ -45,12 +45,23 @@ export async function POST(request: NextRequest) {
       : null;
     const teammateUserIds = Array.isArray(body.teammateUserIds) ? body.teammateUserIds.filter((id: unknown) => typeof id === 'string').slice(0, 10) : [];
     const teammateNonUserNames = Array.isArray(body.teammateNonUserNames) ? body.teammateNonUserNames.filter((n: unknown) => typeof n === 'string').slice(0, 10) : [];
+    const requestVerification = Boolean(body.requestVerification);
 
     if (!challengeId || !mapId || Number.isNaN(roundReached) || roundReached < 1 || !playerCount) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
+    }
+
+    if (requestVerification) {
+      const hasProof = (proofUrls?.filter(Boolean).length ?? 0) > 0 || !!screenshotUrl;
+      if (!hasProof) {
+        return NextResponse.json(
+          { error: 'To request verification, add at least one proof (URL or screenshot) or uncheck "Request verification".' },
+          { status: 400 }
+        );
+      }
     }
 
     const [challenge, mapWithGame, previousBest] = await Promise.all([
@@ -104,6 +115,7 @@ export async function POST(request: NextRequest) {
         teammateUserIds,
         teammateNonUserNames,
         ...(difficulty != null && { difficulty }),
+        ...(requestVerification && { verificationRequestedAt: new Date() }),
       },
     });
 

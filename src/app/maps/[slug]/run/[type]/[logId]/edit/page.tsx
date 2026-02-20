@@ -13,6 +13,7 @@ import {
   Logo,
   PageLoader,
   TimeInput,
+  Modal,
 } from '@/components/ui';
 import { ProofEmbed, ProofUrlsInput, TeammatePicker, type TeammateUser } from '@/components/game';
 import { normalizeProofUrls } from '@/lib/utils';
@@ -81,6 +82,8 @@ export default function EditRunPage() {
   const [teammateNonUserNames, setTeammateNonUserNames] = useState<string[]>([]);
   const [teammateUserDetails, setTeammateUserDetails] = useState<TeammateUser[]>([]);
   const [difficulty, setDifficulty] = useState<string>('NORMAL');
+  const [requestVerification, setRequestVerification] = useState(false);
+  const [errorModalMessage, setErrorModalMessage] = useState<string | null>(null);
 
   const isChallenge = type === 'challenge';
   const apiUrl = isChallenge ? `/api/challenge-logs/${logId}` : `/api/easter-egg-logs/${logId}`;
@@ -119,6 +122,7 @@ export default function EditRunPage() {
           setTeammateUserIds(Array.isArray(data.teammateUserIds) ? data.teammateUserIds : []);
           setTeammateNonUserNames(Array.isArray(data.teammateNonUserNames) ? data.teammateNonUserNames : []);
           setTeammateUserDetails(Array.isArray(data.teammateUserDetails) ? data.teammateUserDetails : []);
+          setRequestVerification(Boolean(data.verificationRequestedAt));
         } else {
           setRoundCompleted(data.roundCompleted != null ? String(data.roundCompleted) : '');
           setPlayerCount(data.playerCount || 'SOLO');
@@ -131,6 +135,7 @@ export default function EditRunPage() {
           setTeammateUserIds(Array.isArray(data.teammateUserIds) ? data.teammateUserIds : []);
           setTeammateNonUserNames(Array.isArray(data.teammateNonUserNames) ? data.teammateNonUserNames : []);
           setTeammateUserDetails(Array.isArray(data.teammateUserDetails) ? data.teammateUserDetails : []);
+          setRequestVerification(Boolean(data.verificationRequestedAt));
         }
       })
       .catch(() => setError('Failed to load run.'))
@@ -143,6 +148,13 @@ export default function EditRunPage() {
     if (Number.isNaN(round) || round < 1) {
       setError('Enter a valid round.');
       return;
+    }
+    if (requestVerification) {
+      const hasProof = proofUrls.filter(Boolean).length > 0;
+      if (!hasProof) {
+        setErrorModalMessage('To request verification, add at least one proof (URL or screenshot) or uncheck "Request verification".');
+        return;
+      }
     }
     setSaving(true);
     setError(null);
@@ -159,13 +171,14 @@ export default function EditRunPage() {
           completionTimeSeconds,
           teammateUserIds,
           teammateNonUserNames,
+          requestVerification,
         }),
         credentials: 'same-origin',
       });
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Failed to update');
       router.push(`/maps/${slug}/run/challenge/${logId}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update');
+      setErrorModalMessage(err instanceof Error ? err.message : 'Failed to update');
     } finally {
       setSaving(false);
     }
@@ -173,6 +186,13 @@ export default function EditRunPage() {
 
   const handleUpdateEasterEgg = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (requestVerification) {
+      const hasProof = proofUrls.filter(Boolean).length > 0;
+      if (!hasProof) {
+        setErrorModalMessage('To request verification, add at least one proof (URL or screenshot) or uncheck "Request verification".');
+        return;
+      }
+    }
     setSaving(true);
     setError(null);
     try {
@@ -190,13 +210,14 @@ export default function EditRunPage() {
           completionTimeSeconds,
           teammateUserIds,
           teammateNonUserNames,
+          requestVerification,
         }),
         credentials: 'same-origin',
       });
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Failed to update');
       router.push(`/maps/${slug}/run/easter-egg/${logId}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update');
+      setErrorModalMessage(err instanceof Error ? err.message : 'Failed to update');
     } finally {
       setSaving(false);
     }
@@ -307,6 +328,15 @@ export default function EditRunPage() {
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Any notes"
                 />
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={requestVerification}
+                    onChange={(e) => setRequestVerification(e.target.checked)}
+                    className="w-4 h-4 rounded border-bunker-600 bg-bunker-800 text-blood-500"
+                  />
+                  <span className="text-sm text-bunker-300">Request verification for this run</span>
+                </label>
                 {proofUrls.filter(Boolean).length > 0 && (
                   <div className="flex flex-col gap-4">
                     {proofUrls.filter(Boolean).map((url, i) => (
@@ -400,6 +430,15 @@ export default function EditRunPage() {
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Any notes"
                 />
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={requestVerification}
+                    onChange={(e) => setRequestVerification(e.target.checked)}
+                    className="w-4 h-4 rounded border-bunker-600 bg-bunker-800 text-blood-500"
+                  />
+                  <span className="text-sm text-bunker-300">Request verification for this run</span>
+                </label>
                 {proofUrls.filter(Boolean).length > 0 && (
                   <div className="flex flex-col gap-4">
                     {proofUrls.filter(Boolean).map((url, i) => (
@@ -420,6 +459,18 @@ export default function EditRunPage() {
           </Card>
         )}
       </div>
+
+      <Modal
+        isOpen={!!errorModalMessage}
+        onClose={() => setErrorModalMessage(null)}
+        title="Can't save"
+        description={errorModalMessage ?? undefined}
+        size="sm"
+      >
+        <div className="flex justify-end pt-2">
+          <Button onClick={() => setErrorModalMessage(null)}>OK</Button>
+        </div>
+      </Modal>
     </div>
   );
 }
