@@ -3,6 +3,8 @@ import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { getDisplayAvatarUrl } from '@/lib/avatar';
 
+export const dynamic = 'force-dynamic';
+
 /** List runs someone else logged that tag you as teammate (pending confirm/deny). */
 export async function GET() {
   try {
