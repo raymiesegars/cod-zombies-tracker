@@ -251,7 +251,7 @@ export default function RunDetailPage() {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-bunker-950 via-bunker-950/70 to-transparent" />
 
-        <div className="absolute top-3 sm:top-4 left-3 sm:left-4 z-10">
+        <div className="absolute top-3 sm:top-4 left-3 sm:left-4 right-3 sm:right-4 z-10 flex flex-wrap items-center justify-between gap-2">
           <Link
             href={isOwner ? '/maps' : runOwnerUsername ? `/users/${runOwnerUsername}/maps/${map.slug}/runs` : `/maps/${map.slug}`}
             className="inline-flex items-center gap-2 rounded-lg border border-bunker-500 bg-bunker-800/95 px-3.5 py-2.5 text-sm font-medium text-white shadow-lg backdrop-blur-sm transition-colors hover:border-bunker-400 hover:bg-bunker-700/95 hover:text-white"
@@ -260,20 +260,20 @@ export default function RunDetailPage() {
             <span className="hidden sm:inline">{isOwner ? 'All Maps' : runOwnerUsername ? "Back to runs" : 'Back to map'}</span>
             <span className="sm:hidden">Back</span>
           </Link>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-xs font-semibold">
+              {map.game.shortName}
+            </span>
+            {map.game.shortName === 'BO4' && (log as ChallengeLogDetail & EasterEggLogDetail).difficulty && (
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-bunker-500 bg-bunker-800/95 text-bunker-200 text-xs font-medium">
+                {getBo4DifficultyLabel((log as ChallengeLogDetail & EasterEggLogDetail).difficulty)}
+              </span>
+            )}
+          </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-8">
+        <div className="absolute bottom-0 left-0 right-0 pt-8 sm:pt-10 md:pt-12 px-4 sm:px-6 md:px-8 pb-6 sm:pb-8 md:pb-10">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-xs font-semibold">
-                {map.game.shortName}
-              </span>
-              {map.game.shortName === 'BO4' && (log as ChallengeLogDetail & EasterEggLogDetail).difficulty && (
-                <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-bunker-500 bg-bunker-800/95 text-bunker-200 text-xs font-medium">
-                  {getBo4DifficultyLabel((log as ChallengeLogDetail & EasterEggLogDetail).difficulty)}
-                </span>
-              )}
-            </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-zombies text-white tracking-wide [text-shadow:0_0_2px_rgba(0,0,0,0.95),0_0_6px_rgba(0,0,0,0.9)]">
               {map.name}
             </h1>
@@ -309,7 +309,7 @@ export default function RunDetailPage() {
       </div>
 
       {/* Run details + proof + notes */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 pb-10 sm:pb-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Run info card */}
           <Card variant="bordered" className="lg:col-span-1">

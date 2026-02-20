@@ -837,7 +837,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                 </h1>
                 <p className="mt-1 sm:mt-2 text-sm sm:text-base text-white/95 [text-shadow:0_0_2px_rgba(0,0,0,0.95),0_1px_4px_rgba(0,0,0,0.8)]">{map.game.name}</p>
                 {map.description && (
-                  <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-white/85 max-w-2xl [text-shadow:0_0_2px_rgba(0,0,0,0.9),0_1px_3px_rgba(0,0,0,0.7)]">
+                  <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-white/85 max-w-2xl [text-shadow:0_0_2px_rgba(0,0,0,0.9),0_1px_3px_rgba(0,0,0,0.7)] hidden min-[700px]:block">
                     {map.description}
                   </p>
                 )}
@@ -910,8 +910,8 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           {/* Overview Tab – forceMount so all tab content is in DOM for crawlers */}
           <TabsContent value="overview" forceMount>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-              {/* Map Description */}
-              <Card variant="bordered" className="lg:col-span-2 min-h-0 flex flex-col">
+              {/* Map Description – hidden below 700px to free space */}
+              <Card variant="bordered" className="lg:col-span-2 min-h-0 hidden min-[700px]:flex flex-col">
                 <CardHeader>
                   <CardTitle>About This Map</CardTitle>
                 </CardHeader>
@@ -1649,61 +1649,69 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                   </CardContent>
                 </Card>
               ) : (
-                <div className="flex flex-col gap-2 px-3 sm:px-4">
+                <div className="flex flex-col gap-2 px-2 sm:px-4 min-w-0">
                   {myRunsChronological.map((item) =>
                     item.kind === 'challenge' ? (
-                      <Link key={`c-${item.log.id}`} href={`/maps/${slug}/run/challenge/${item.log.id}`} className="block">
+                      <Link key={`c-${item.log.id}`} href={`/maps/${slug}/run/challenge/${item.log.id}`} className="block min-w-0">
                         <Card variant="bordered" interactive className="transition-opacity hover:opacity-95">
-                          <CardContent className="p-3 sm:p-4 grid grid-cols-[auto_minmax(0,1fr)_auto] sm:grid-cols-[auto_minmax(0,1fr)_auto_auto] md:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto] xl:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto_auto_minmax(0,1fr)] items-center gap-x-2 sm:gap-x-3 gap-y-1">
+                          <CardContent className="p-3 sm:p-4 grid items-center gap-x-2 gap-y-1 min-w-0
+                            grid-cols-[auto_minmax(0,1fr)_auto]
+                            sm:grid-cols-[auto_minmax(0,1fr)_auto_auto]
+                            md:grid-cols-[auto_minmax(0,1fr)_4.5rem_auto_auto]
+                            lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,8rem)_4.5rem_auto_auto_auto]">
                             <ChallengeTypeIcon type={item.log.challenge.type ?? 'HIGHEST_ROUND'} className="w-5 h-5 text-blood-400 flex-shrink-0" size={20} />
                             <span className="font-medium text-white truncate min-w-0">{item.log.challenge.name}</span>
-                            <span className="w-12 sm:w-14 flex justify-end flex-shrink-0">
-                              <RoundCounter round={item.log.roundReached} size="xs" animated={false} />
+                            <span className="hidden lg:block text-sm text-bunker-500 truncate min-w-0" title={item.log.notes ?? undefined}>
+                              {item.log.notes || null}
                             </span>
-                            <span className="hidden sm:flex items-center gap-1.5 text-sm text-bunker-400 flex-shrink-0 col-start-4">
+                            <span className="hidden md:flex items-center justify-end gap-1.5 text-sm text-bunker-500 flex-shrink-0 tabular-nums w-[4.5rem]" title={item.log.completionTimeSeconds != null && item.log.completionTimeSeconds > 0 ? formatCompletionTime(item.log.completionTimeSeconds) : undefined}>
+                              <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+                              {item.log.completionTimeSeconds != null && item.log.completionTimeSeconds > 0
+                                ? formatCompletionTime(item.log.completionTimeSeconds)
+                                : null}
+                            </span>
+                            <span className="hidden sm:flex items-center justify-end gap-1.5 text-sm text-bunker-400 flex-shrink-0">
                               {item.log.playerCount}
                               {map?.game?.shortName === 'BO4' && item.log.difficulty && (
                                 <span className="text-bunker-500">· {getBo4DifficultyLabel(item.log.difficulty)}</span>
                               )}
                             </span>
-                            <span className="hidden md:flex items-center gap-1.5 text-sm text-bunker-500 flex-shrink-0 col-start-5" title={item.log.completionTimeSeconds != null && item.log.completionTimeSeconds > 0 ? formatCompletionTime(item.log.completionTimeSeconds) : undefined}>
-                              <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-                              {item.log.completionTimeSeconds != null && item.log.completionTimeSeconds > 0
-                                ? formatCompletionTime(item.log.completionTimeSeconds)
-                                : '—'}
-                            </span>
-                            <span className="hidden xl:block text-sm text-bunker-500 truncate min-w-0 col-start-6" title={item.log.notes ?? undefined}>
-                              {item.log.notes ? item.log.notes : '—'}
+                            <span className="flex justify-end flex-shrink-0 min-w-[3rem]">
+                              <RoundCounter round={item.log.roundReached} size="xs" animated={false} />
                             </span>
                           </CardContent>
                         </Card>
                       </Link>
                     ) : (
-                      <Link key={`e-${item.log.id}`} href={`/maps/${slug}/run/easter-egg/${item.log.id}`} className="block">
+                      <Link key={`e-${item.log.id}`} href={`/maps/${slug}/run/easter-egg/${item.log.id}`} className="block min-w-0">
                         <Card variant="bordered" interactive className="transition-opacity hover:opacity-95">
-                          <CardContent className="p-3 sm:p-4 grid grid-cols-[auto_minmax(0,1fr)_auto] sm:grid-cols-[auto_minmax(0,1fr)_auto_auto] md:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto] xl:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto_auto_minmax(0,1fr)] items-center gap-x-2 sm:gap-x-3 gap-y-1">
+                          <CardContent className="p-3 sm:p-4 grid items-center gap-x-2 gap-y-1 min-w-0
+                            grid-cols-[auto_minmax(0,1fr)_auto]
+                            sm:grid-cols-[auto_minmax(0,1fr)_auto_auto]
+                            md:grid-cols-[auto_minmax(0,1fr)_4.5rem_auto_auto]
+                            lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,8rem)_4.5rem_auto_auto_auto]">
                             <EasterEggIcon className="w-5 h-5 text-element-400 flex-shrink-0" />
                             <span className="font-medium text-white truncate min-w-0">{item.log.easterEgg.name}</span>
-                            <span className="w-12 sm:w-14 flex justify-end flex-shrink-0">
-                              {item.log.roundCompleted != null ? (
-                                <RoundCounter round={item.log.roundCompleted} size="xs" animated={false} />
-                              ) : null}
+                            <span className="hidden lg:block text-sm text-bunker-500 truncate min-w-0" title={item.log.notes ?? undefined}>
+                              {item.log.notes || null}
                             </span>
-                            <span className="hidden sm:flex items-center gap-2 flex-shrink-0 col-start-4">
+                            <span className="hidden md:flex items-center justify-end gap-1.5 text-sm text-bunker-500 flex-shrink-0 tabular-nums w-[4.5rem]" title={item.log.completionTimeSeconds != null && item.log.completionTimeSeconds > 0 ? formatCompletionTime(item.log.completionTimeSeconds) : undefined}>
+                              <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+                              {item.log.completionTimeSeconds != null && item.log.completionTimeSeconds > 0
+                                ? formatCompletionTime(item.log.completionTimeSeconds)
+                                : null}
+                            </span>
+                            <span className="hidden sm:flex items-center justify-end gap-2 flex-shrink-0">
                               <span className="text-sm text-bunker-400">{item.log.playerCount}</span>
                               {map?.game?.shortName === 'BO4' && item.log.difficulty && (
                                 <span className="text-sm text-bunker-500">{getBo4DifficultyLabel(item.log.difficulty)}</span>
                               )}
                               {item.log.isSolo && <Badge variant="default" size="sm">Solo</Badge>}
                             </span>
-                            <span className="hidden md:flex items-center gap-1.5 text-sm text-bunker-500 flex-shrink-0 col-start-5" title={item.log.completionTimeSeconds != null && item.log.completionTimeSeconds > 0 ? formatCompletionTime(item.log.completionTimeSeconds) : undefined}>
-                              <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-                              {item.log.completionTimeSeconds != null && item.log.completionTimeSeconds > 0
-                                ? formatCompletionTime(item.log.completionTimeSeconds)
-                                : '—'}
-                            </span>
-                            <span className="hidden xl:block text-sm text-bunker-500 truncate min-w-0 col-start-6" title={item.log.notes ?? undefined}>
-                              {item.log.notes ? item.log.notes : '—'}
+                            <span className="flex justify-end flex-shrink-0 min-w-[3rem]">
+                              {item.log.roundCompleted != null ? (
+                                <RoundCounter round={item.log.roundCompleted} size="xs" animated={false} />
+                              ) : null}
                             </span>
                           </CardContent>
                         </Card>
