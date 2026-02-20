@@ -13,6 +13,7 @@ export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_ORDER = [
+  'EASTER_EGG',
   'BASE_ROUNDS',
   'NO_DOWNS',
   'NO_PERKS',
@@ -21,7 +22,6 @@ const CATEGORY_ORDER = [
   'ONE_BOX',
   'PISTOL_ONLY',
   'NO_POWER',
-  'EASTER_EGG',
   'OTHER',
 ];
 
