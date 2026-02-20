@@ -3,6 +3,8 @@ import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { getLevelFromXp } from '@/lib/ranks';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Search users by username or displayName for teammate picker.
  * GET /api/users/search?q=...&limit=20
