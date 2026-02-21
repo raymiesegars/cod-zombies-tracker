@@ -170,9 +170,9 @@ export function LeaderboardEntry({
         </div>
       )}
 
-      {/* Value: compact on small (rank/name/value only), full on md+; slight right padding at 640px and below */}
+      {/* Value: compact on small (rank/name/value only), full on md+; 1rem right padding on timed leaderboards */}
       {(showRound || valueKind === 'xp' || valueKind === 'time') && (
-        <div className="min-w-0 flex items-center justify-end flex-shrink-0 pr-2 sm:pr-0">
+        <div className={cn('min-w-0 flex items-center justify-end flex-shrink-0', valueKind === 'time' ? 'pr-4' : 'pr-2 sm:pr-0')}>
           {valueKind === 'xp' ? (
             <>
               <span className="text-xs sm:text-sm font-semibold text-military-400 tabular-nums leading-none whitespace-nowrap lg:hidden">

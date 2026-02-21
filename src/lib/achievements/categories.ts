@@ -94,15 +94,18 @@ export function getNonSpeedrunCategoryFilterOptions(
   ];
 }
 
-/** Second filter: Speedruns dropdown (All + each speedrun category present) */
+/** Second filter: Speedruns dropdown (All + each speedrun category in canonical order: 30/50/70/100, EE, G&S, bosses) */
 export function getSpeedrunCategoryFilterOptions(
   existingCategories?: string[]
 ): { value: string; label: string }[] {
   const list = existingCategories ?? SPEEDRUN_CATEGORIES;
   const speedrunCats = list.filter((c) => isSpeedrunCategory(c));
+  const ordered = [...speedrunCats].sort(
+    (a, b) => SPEEDRUN_CATEGORIES.indexOf(a) - SPEEDRUN_CATEGORIES.indexOf(b)
+  );
   return [
     { value: '', label: 'All' },
-    ...speedrunCats.map((c) => ({ value: c, label: ACHIEVEMENT_CATEGORY_LABELS[c] ?? c })),
+    ...ordered.map((c) => ({ value: c, label: ACHIEVEMENT_CATEGORY_LABELS[c] ?? c })),
   ];
 }
 
@@ -114,20 +117,20 @@ export function sortAchievementsByXp<T extends { xpReward: number }>(achievement
   return [...achievements].sort((a, b) => a.xpReward - b.xpReward);
 }
 
-/** Sort achievements for display: by type, then by round (numeric) when criteria.round exists, then slug. */
+/** Sort achievements for display: by type, then speedrun tiers by fastest first (maxTimeSeconds asc), then by round, then slug. */
 export function sortAchievementsForDisplay<T extends { type: string; slug: string; criteria?: unknown }>(
   achievements: T[]
 ): T[] {
   return [...achievements].sort((a, b) => {
     if (a.type !== b.type) return a.type.localeCompare(b.type);
-    const roundA =
-      typeof (a.criteria as { round?: number })?.round === 'number'
-        ? (a.criteria as { round: number }).round
-        : 999999;
-    const roundB =
-      typeof (b.criteria as { round?: number })?.round === 'number'
-        ? (b.criteria as { round: number }).round
-        : 999999;
+    const critA = a.criteria as { round?: number; maxTimeSeconds?: number } | undefined;
+    const critB = b.criteria as { round?: number; maxTimeSeconds?: number } | undefined;
+    // Speedrun tiers: fastest first (lowest maxTimeSeconds = hardest = show first)
+    const timeA = typeof critA?.maxTimeSeconds === 'number' ? critA.maxTimeSeconds : -1;
+    const timeB = typeof critB?.maxTimeSeconds === 'number' ? critB.maxTimeSeconds : -1;
+    if (timeA >= 0 && timeB >= 0 && timeA !== timeB) return timeA - timeB;
+    const roundA = typeof critA?.round === 'number' ? critA.round : 999999;
+    const roundB = typeof critB?.round === 'number' ? critB.round : 999999;
     if (roundA !== roundB) return roundA - roundB;
     return a.slug.localeCompare(b.slug);
   });
