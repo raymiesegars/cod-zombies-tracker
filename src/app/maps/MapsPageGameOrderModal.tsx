@@ -9,7 +9,8 @@ type ListItem = { gameId: string; visible: boolean };
 
 type Props = {
   isOpen: boolean;
-  onClose: () => void;
+  /** Called when modal closes. Pass true when user closed without saving (Cancel/X/backdrop), false when they clicked Save. */
+  onClose: (closedWithoutSave?: boolean) => void;
   games: Game[];
   initialGameOrder: string[];
   initialHasSeenSetupModal: boolean;
@@ -97,7 +98,7 @@ export function MapsPageGameOrderModal({
     setSaving(true);
     try {
       await onSave(gameOrder, isFirstTimePrompt && !initialHasSeenSetupModal);
-      onClose();
+      onClose(false); // closed by Save
     } finally {
       setSaving(false);
     }
@@ -108,7 +109,7 @@ export function MapsPageGameOrderModal({
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={() => onClose(true)}
       title={isFirstTimePrompt ? 'Set up your maps page' : 'Maps page order'}
       description={
         isFirstTimePrompt
@@ -165,7 +166,7 @@ export function MapsPageGameOrderModal({
         <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-bunker-700">
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => onClose(true)}
             className="px-4 py-2 rounded-lg border border-bunker-600 text-bunker-300 hover:bg-bunker-800 transition-colors"
           >
             Cancel
