@@ -121,6 +121,7 @@ export function Navbar() {
                     showLevel={true}
                     size="sm"
                     linkToProfile={false}
+                    maxNameLength={15}
                   />
                 </button>
 
