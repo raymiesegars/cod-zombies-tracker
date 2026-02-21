@@ -6,6 +6,10 @@ import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
 import { createCoOpRunPendingsForChallengeLog } from '@/lib/coop-pending';
 import { isBo4Game, BO4_DIFFICULTIES } from '@/lib/bo4';
 import { isIwGame, isIwSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType } from '@/lib/iw';
+import { isBo3Game, BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT } from '@/lib/bo3';
+import { isBocwGame, BOCW_SUPPORT_MODES, BOCW_SUPPORT_DEFAULT } from '@/lib/bocw';
+import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_GOBBLEGUM_DEFAULT, BO6_SUPPORT_MODES, BO6_SUPPORT_DEFAULT } from '@/lib/bo6';
+import { isBo7Game, BO7_SUPPORT_MODES, BO7_SUPPORT_DEFAULT, BO7_RELICS } from '@/lib/bo7';
 import type { Bo4Difficulty } from '@prisma/client';
 
 // Log a new run. We run the achievement check when it’s a new best for that user+challenge+map+playerCount.
@@ -127,7 +131,12 @@ export async function POST(request: NextRequest) {
       difficulty = d as Bo4Difficulty;
     }
 
-    const isIw = isIwGame(map.game?.shortName);
+    const gameShortName = map.game?.shortName;
+    const isIw = isIwGame(gameShortName);
+    const isBo3 = isBo3Game(gameShortName);
+    const isBocw = isBocwGame(gameShortName);
+    const isBo6 = isBo6Game(gameShortName);
+    const isBo7 = isBo7Game(gameShortName);
     const isSpeedrun = challenge && isIwSpeedrunChallengeType(challenge.type);
 
     if (isIw) {
@@ -146,8 +155,56 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    if (isBo3) {
+      const mode = body.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT;
+      if (!(BO3_GOBBLEGUM_MODES as readonly string[]).includes(mode)) {
+        return NextResponse.json({ error: 'Invalid bo3GobbleGumMode' }, { status: 400 });
+      }
+    }
+
+    if (isBocw) {
+      const mode = body.bocwSupportMode ?? BOCW_SUPPORT_DEFAULT;
+      if (!(BOCW_SUPPORT_MODES as readonly string[]).includes(mode)) {
+        return NextResponse.json({ error: 'Invalid bocwSupportMode' }, { status: 400 });
+      }
+    }
+
+    if (isBo6) {
+      const gg = body.bo6GobbleGumMode ?? BO6_GOBBLEGUM_DEFAULT;
+      const sup = body.bo6SupportMode ?? BO6_SUPPORT_DEFAULT;
+      if (!(BO6_GOBBLEGUM_MODES as readonly string[]).includes(gg)) {
+        return NextResponse.json({ error: 'Invalid bo6GobbleGumMode' }, { status: 400 });
+      }
+      if (!(BO6_SUPPORT_MODES as readonly string[]).includes(sup)) {
+        return NextResponse.json({ error: 'Invalid bo6SupportMode' }, { status: 400 });
+      }
+    }
+
+    if (isBo7) {
+      const sup = body.bo7SupportMode ?? BO7_SUPPORT_DEFAULT;
+      if (!(BO7_SUPPORT_MODES as readonly string[]).includes(sup)) {
+        return NextResponse.json({ error: 'Invalid bo7SupportMode' }, { status: 400 });
+      }
+      if (body.bo7IsCursedRun && Array.isArray(body.bo7RelicsUsed)) {
+        const invalid = (body.bo7RelicsUsed as unknown[]).find((r) => !(BO7_RELICS as readonly string[]).includes(r as string));
+        if (invalid) return NextResponse.json({ error: `Invalid relic: ${invalid}` }, { status: 400 });
+      }
+    }
+
     const useFortuneCards = isIw ? Boolean(body.useFortuneCards) : undefined;
     const useDirectorsCut = isIw ? Boolean(body.useDirectorsCut ?? false) : undefined;
+    const bo3GobbleGumMode = isBo3 ? (body.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT) : undefined;
+    const bo4ElixirMode = isBo4 ? (body.bo4ElixirMode ?? undefined) : undefined;
+    const bocwSupportMode = isBocw ? (body.bocwSupportMode ?? BOCW_SUPPORT_DEFAULT) : undefined;
+    const bo6GobbleGumMode = isBo6 ? (body.bo6GobbleGumMode ?? BO6_GOBBLEGUM_DEFAULT) : undefined;
+    const bo6SupportMode = isBo6 ? (body.bo6SupportMode ?? BO6_SUPPORT_DEFAULT) : undefined;
+    const bo7SupportMode = isBo7 ? (body.bo7SupportMode ?? BO7_SUPPORT_DEFAULT) : undefined;
+    const bo7IsCursedRun = isBo7 ? Boolean(body.bo7IsCursedRun ?? false) : undefined;
+    const bo7RelicsUsed = isBo7
+      ? bo7IsCursedRun && Array.isArray(body.bo7RelicsUsed)
+        ? (body.bo7RelicsUsed as string[]).filter((r) => (BO7_RELICS as readonly string[]).includes(r))
+        : []
+      : undefined;
 
     const isSpeedrunChal = challenge && isIwSpeedrunChallengeType(challenge.type);
     const previousRound = previousBest && 'roundReached' in previousBest ? previousBest.roundReached ?? 0 : 0;
@@ -173,6 +230,14 @@ export async function POST(request: NextRequest) {
         ...(requestVerification && { verificationRequestedAt: new Date() }),
         ...(useFortuneCards != null && { useFortuneCards }),
         ...(useDirectorsCut != null && { useDirectorsCut }),
+        ...(bo3GobbleGumMode != null && { bo3GobbleGumMode }),
+        ...(bo4ElixirMode != null && { bo4ElixirMode }),
+        ...(bocwSupportMode != null && { bocwSupportMode }),
+        ...(bo6GobbleGumMode != null && { bo6GobbleGumMode }),
+        ...(bo6SupportMode != null && { bo6SupportMode }),
+        ...(bo7SupportMode != null && { bo7SupportMode }),
+        ...(bo7IsCursedRun != null && { bo7IsCursedRun }),
+        ...(bo7RelicsUsed != null && { bo7RelicsUsed }),
       },
     });
 

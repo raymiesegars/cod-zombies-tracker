@@ -354,6 +354,27 @@ model ChallengeLog {
   // IW only: fortune cards (required for all IW maps); directors cut (optional)
   useFortuneCards         Boolean?    // true = fate + fortune cards; false = fate cards only
   useDirectorsCut         Boolean?    @default(false)  // directors cut mode
+
+  // BO3 only: GobbleGum mode — 'CLASSIC_ONLY' | 'MEGA' | 'NONE' (required, default CLASSIC_ONLY)
+  bo3GobbleGumMode        String?
+
+  // BO4 only: Elixir/Talisman mode — 'CLASSIC_ONLY' | 'ALL_ELIXIRS_TALISMANS' (required)
+  bo4ElixirMode           String?
+
+  // Cold War (BOCW) only: Support mode — 'WITH_SUPPORT' | 'WITHOUT_SUPPORT' (required)
+  bocwSupportMode         String?
+
+  // BO6 only: GobbleGum mode — 'WITH_GOBBLEGUMS' | 'NO_GOBBLEGUMS' (required)
+  bo6GobbleGumMode        String?
+  // BO6 only: Support mode — 'WITH_SUPPORT' | 'NO_SUPPORT' (required)
+  bo6SupportMode          String?
+
+  // BO7 only: Support mode — 'WITH_SUPPORT' | 'NO_SUPPORT' (required)
+  bo7SupportMode          String?
+  // BO7 only: Cursed Run toggle (optional, default false)
+  bo7IsCursedRun          Boolean?    @default(false)
+  // BO7 only: Relic names selected for a cursed run (empty = 0 relics or not a cursed run)
+  bo7RelicsUsed           String[]    @default([])
   
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt

@@ -9,6 +9,10 @@ import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
 import { createCoOpRunPendingsForChallengeLog } from '@/lib/coop-pending';
 import { isBo4Game, BO4_DIFFICULTIES } from '@/lib/bo4';
 import { isIwGame, isIwSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType } from '@/lib/iw';
+import { isBo3Game, BO3_GOBBLEGUM_MODES } from '@/lib/bo3';
+import { isBocwGame, BOCW_SUPPORT_MODES } from '@/lib/bocw';
+import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES } from '@/lib/bo6';
+import { isBo7Game, BO7_SUPPORT_MODES, BO7_RELICS } from '@/lib/bo7';
 import type { Bo4Difficulty } from '@prisma/client';
 
 type Params = { params: Promise<{ id: string }> };
@@ -137,6 +141,27 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       return NextResponse.json({ error: 'IW maps require useFortuneCards: true or false' }, { status: 400 });
     }
 
+    const bo3GobbleGumMode = body.bo3GobbleGumMode !== undefined
+      ? isBo3Game(gameShortName) && (BO3_GOBBLEGUM_MODES as readonly string[]).includes(body.bo3GobbleGumMode) ? body.bo3GobbleGumMode : undefined
+      : undefined;
+    const bo4ElixirMode = body.bo4ElixirMode !== undefined && isBo4Game(gameShortName) ? body.bo4ElixirMode : undefined;
+    const bocwSupportMode = body.bocwSupportMode !== undefined
+      ? isBocwGame(gameShortName) && (BOCW_SUPPORT_MODES as readonly string[]).includes(body.bocwSupportMode) ? body.bocwSupportMode : undefined
+      : undefined;
+    const bo6GobbleGumMode = body.bo6GobbleGumMode !== undefined
+      ? isBo6Game(gameShortName) && (BO6_GOBBLEGUM_MODES as readonly string[]).includes(body.bo6GobbleGumMode) ? body.bo6GobbleGumMode : undefined
+      : undefined;
+    const bo6SupportMode = body.bo6SupportMode !== undefined
+      ? isBo6Game(gameShortName) && (BO6_SUPPORT_MODES as readonly string[]).includes(body.bo6SupportMode) ? body.bo6SupportMode : undefined
+      : undefined;
+    const bo7SupportMode = body.bo7SupportMode !== undefined
+      ? isBo7Game(gameShortName) && (BO7_SUPPORT_MODES as readonly string[]).includes(body.bo7SupportMode) ? body.bo7SupportMode : undefined
+      : undefined;
+    const bo7IsCursedRun = body.bo7IsCursedRun !== undefined && isBo7Game(gameShortName) ? Boolean(body.bo7IsCursedRun) : undefined;
+    const bo7RelicsUsed = body.bo7RelicsUsed !== undefined && isBo7Game(gameShortName) && Array.isArray(body.bo7RelicsUsed)
+      ? (body.bo7RelicsUsed as unknown[]).filter((r): r is string => (BO7_RELICS as readonly string[]).includes(r as string))
+      : undefined;
+
     let difficulty: Bo4Difficulty | undefined;
     if (body.difficulty !== undefined) {
       if (isBo4Game(gameShortName)) {
@@ -190,6 +215,14 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         }),
         ...(useFortuneCards !== undefined && { useFortuneCards }),
         ...(useDirectorsCut !== undefined && { useDirectorsCut }),
+        ...(bo3GobbleGumMode !== undefined && { bo3GobbleGumMode }),
+        ...(bo4ElixirMode !== undefined && { bo4ElixirMode }),
+        ...(bocwSupportMode !== undefined && { bocwSupportMode }),
+        ...(bo6GobbleGumMode !== undefined && { bo6GobbleGumMode }),
+        ...(bo6SupportMode !== undefined && { bo6SupportMode }),
+        ...(bo7SupportMode !== undefined && { bo7SupportMode }),
+        ...(bo7IsCursedRun !== undefined && { bo7IsCursedRun }),
+        ...(bo7RelicsUsed !== undefined && { bo7RelicsUsed }),
       },
       include: {
         challenge: true,

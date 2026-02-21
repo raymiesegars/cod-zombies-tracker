@@ -154,7 +154,9 @@ input[type='number'] {
 
 /* Navbar: Black Ops Zombies rustic metallic, light spilling out from bottom over the page */
 .navbar-creative {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 50;
   overflow: visible;
   /* Dark worn metal: gunmetal with rust/burnt undertones */
   background-color: #0f1012;

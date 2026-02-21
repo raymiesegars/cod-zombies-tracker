@@ -2,11 +2,15 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, Select, Input, Logo, PageLoader, HelpTrigger } from '@/components/ui';
-import { LeaderboardEntry, LeaderboardsHelpContent } from '@/components/game';
+import { LeaderboardEntry, LeaderboardsHelpContent, Bo7RelicPicker } from '@/components/game';
 import type { LeaderboardEntry as LeaderboardEntryType, Game, MapWithGame, PlayerCount, ChallengeType } from '@/types';
 import { cn } from '@/lib/utils';
-import { getBo4DifficultyLabel, BO4_DIFFICULTIES } from '@/lib/bo4';
+import { getBo4DifficultyLabel, BO4_DIFFICULTIES, isBo4Game } from '@/lib/bo4';
 import { IW_CHALLENGE_TYPES_ORDER, isIwSpeedrunChallengeType } from '@/lib/iw';
+import { isBo3Game, BO3_GOBBLEGUM_MODES, getBo3GobbleGumLabel } from '@/lib/bo3';
+import { isBocwGame, BOCW_SUPPORT_MODES, getBocwSupportLabel } from '@/lib/bocw';
+import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
+import { isBo7Game, BO7_SUPPORT_MODES, getBo7SupportLabel } from '@/lib/bo7';
 import { Trophy, Medal, Filter, Search, X, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 
@@ -53,13 +57,30 @@ export default function LeaderboardsPage() {
   const [searchForFetch, setSearchForFetch] = useState(''); // Debounced; drives server-side search
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [rankVerifiedXpOnly, setRankVerifiedXpOnly] = useState(false);
-  const [fortuneCardsFilter, setFortuneCardsFilter] = useState<string>('false'); // 'false' = Fate only (default), 'true' = Fate & Fortune
+  const [fortuneCardsFilter, setFortuneCardsFilter] = useState<string>('false');
   const [directorsCutFilter, setDirectorsCutFilter] = useState(false);
+  // BO3
+  const [bo3GobbleGumFilter, setBo3GobbleGumFilter] = useState<string>('');
+  // BO4
+  const [bo4ElixirFilter, setBo4ElixirFilter] = useState<string>('');
+  // BOCW
+  const [bocwSupportFilter, setBocwSupportFilter] = useState<string>('');
+  // BO6
+  const [bo6GobbleGumFilter, setBo6GobbleGumFilter] = useState<string>('');
+  const [bo6SupportFilter, setBo6SupportFilter] = useState<string>('');
+  // BO7
+  const [bo7SupportFilter, setBo7SupportFilter] = useState<string>('');
+  const [bo7CursedFilter, setBo7CursedFilter] = useState<string>('');
+  const [bo7RelicsFilter, setBo7RelicsFilter] = useState<string[]>([]);
 
   const isRankView = selectedGame === RANK_VIEW;
   const selectedMapData = maps.find((m) => m.slug === selectedMap);
   const isBo4Map = selectedMapData?.game?.shortName === 'BO4';
   const isIwMap = selectedMapData?.game?.shortName === 'IW';
+  const isBo3Map = isBo3Game(selectedMapData?.game?.shortName);
+  const isBocwMap = isBocwGame(selectedMapData?.game?.shortName);
+  const isBo6Map = isBo6Game(selectedMapData?.game?.shortName);
+  const isBo7Map = isBo7Game(selectedMapData?.game?.shortName);
 
   // Debounce search: clear immediately, type delay 300ms so we search all users on the server
   useEffect(() => {
@@ -170,6 +191,18 @@ export default function LeaderboardsPage() {
             else if (fortuneCardsFilter === 'false') params.set('fortuneCards', 'false');
             if (directorsCutFilter) params.set('directorsCut', 'true');
           }
+          if (isBo3Map && bo3GobbleGumFilter) params.set('bo3GobbleGumMode', bo3GobbleGumFilter);
+          if (isBo4Map && bo4ElixirFilter) params.set('bo4ElixirMode', bo4ElixirFilter);
+          if (isBocwMap && bocwSupportFilter) params.set('bocwSupportMode', bocwSupportFilter);
+          if (isBo6Map) {
+            if (bo6GobbleGumFilter) params.set('bo6GobbleGumMode', bo6GobbleGumFilter);
+            if (bo6SupportFilter) params.set('bo6SupportMode', bo6SupportFilter);
+          }
+          if (isBo7Map) {
+            if (bo7SupportFilter) params.set('bo7SupportMode', bo7SupportFilter);
+            if (bo7CursedFilter === 'true' || bo7CursedFilter === 'false') params.set('bo7CursedRun', bo7CursedFilter);
+            if (bo7CursedFilter === 'true' && bo7RelicsFilter.length > 0) params.set('bo7Relics', bo7RelicsFilter.join(','));
+          }
           const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -185,7 +218,7 @@ export default function LeaderboardsPage() {
     }
 
     fetchLeaderboard();
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, searchForFetch, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, searchForFetch, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo4ElixirFilter, bocwSupportFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter]);
 
   const loadMore = useCallback(async () => {
     if (leaderboard.length >= total || total === 0) return;
@@ -237,6 +270,18 @@ export default function LeaderboardsPage() {
             else if (fortuneCardsFilter === 'false') params.set('fortuneCards', 'false');
             if (directorsCutFilter) params.set('directorsCut', 'true');
           }
+          if (isBo3Map && bo3GobbleGumFilter) params.set('bo3GobbleGumMode', bo3GobbleGumFilter);
+          if (isBo4Map && bo4ElixirFilter) params.set('bo4ElixirMode', bo4ElixirFilter);
+          if (isBocwMap && bocwSupportFilter) params.set('bocwSupportMode', bocwSupportFilter);
+          if (isBo6Map) {
+            if (bo6GobbleGumFilter) params.set('bo6GobbleGumMode', bo6GobbleGumFilter);
+            if (bo6SupportFilter) params.set('bo6SupportMode', bo6SupportFilter);
+          }
+          if (isBo7Map) {
+            if (bo7SupportFilter) params.set('bo7SupportMode', bo7SupportFilter);
+            if (bo7CursedFilter === 'true' || bo7CursedFilter === 'false') params.set('bo7CursedRun', bo7CursedFilter);
+            if (bo7CursedFilter === 'true' && bo7RelicsFilter.length > 0) params.set('bo7Relics', bo7RelicsFilter.join(','));
+          }
           const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -255,7 +300,7 @@ export default function LeaderboardsPage() {
     } finally {
       loadingMoreRef.current = false;
     }
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, leaderboard.length, total]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo4ElixirFilter, bocwSupportFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, leaderboard.length, total]);
 
   // Only observe sentinel when search is empty so list stays stable while filtering
   useEffect(() => {
@@ -540,6 +585,78 @@ export default function LeaderboardsPage() {
                         onChange={(e) => setFortuneCardsFilter(e.target.value)}
                         className="w-full min-w-0 sm:w-40 max-w-full"
                       />
+                    </>
+                  )}
+                  {isBo3Map && (
+                    <Select
+                      options={[{ value: '', label: 'All GobbleGums' }, ...BO3_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo3GobbleGumLabel(m) }))]}
+                      value={bo3GobbleGumFilter}
+                      onChange={(e) => setBo3GobbleGumFilter(e.target.value)}
+                      className="w-full min-w-0 sm:w-52 max-w-full"
+                    />
+                  )}
+                  {isBo4Map && (
+                    <Select
+                      options={[
+                        { value: '', label: 'All Elixirs' },
+                        { value: 'CLASSIC_ONLY', label: 'Classic Elixirs Only' },
+                        { value: 'ALL_ELIXIRS_TALISMANS', label: 'All Elixirs & Talismans' },
+                      ]}
+                      value={bo4ElixirFilter}
+                      onChange={(e) => setBo4ElixirFilter(e.target.value)}
+                      className="w-full min-w-0 sm:w-52 max-w-full"
+                    />
+                  )}
+                  {isBocwMap && (
+                    <Select
+                      options={[{ value: '', label: 'All Support' }, ...BOCW_SUPPORT_MODES.map((m) => ({ value: m, label: getBocwSupportLabel(m) }))]}
+                      value={bocwSupportFilter}
+                      onChange={(e) => setBocwSupportFilter(e.target.value)}
+                      className="w-full min-w-0 sm:w-48 max-w-full"
+                    />
+                  )}
+                  {isBo6Map && (
+                    <>
+                      <Select
+                        options={[{ value: '', label: 'All GobbleGums' }, ...BO6_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo6GobbleGumLabel(m) }))]}
+                        value={bo6GobbleGumFilter}
+                        onChange={(e) => setBo6GobbleGumFilter(e.target.value)}
+                        className="w-full min-w-0 sm:w-48 max-w-full"
+                      />
+                      <Select
+                        options={[{ value: '', label: 'All Support' }, ...BO6_SUPPORT_MODES.map((m) => ({ value: m, label: getBo6SupportLabel(m) }))]}
+                        value={bo6SupportFilter}
+                        onChange={(e) => setBo6SupportFilter(e.target.value)}
+                        className="w-full min-w-0 sm:w-40 max-w-full"
+                      />
+                    </>
+                  )}
+                  {isBo7Map && (
+                    <>
+                      <Select
+                        options={[{ value: '', label: 'All Support' }, ...BO7_SUPPORT_MODES.map((m) => ({ value: m, label: getBo7SupportLabel(m) }))]}
+                        value={bo7SupportFilter}
+                        onChange={(e) => setBo7SupportFilter(e.target.value)}
+                        className="w-full min-w-0 sm:w-40 max-w-full"
+                      />
+                      <Select
+                        options={[
+                          { value: '', label: 'All Runs' },
+                          { value: 'false', label: 'Normal Runs' },
+                          { value: 'true', label: 'Cursed Runs' },
+                        ]}
+                        value={bo7CursedFilter}
+                        onChange={(e) => { setBo7CursedFilter(e.target.value); if (e.target.value !== 'true') setBo7RelicsFilter([]); }}
+                        className="w-full min-w-0 sm:w-40 max-w-full"
+                      />
+                      {bo7CursedFilter === 'true' && (
+                        <Bo7RelicPicker
+                          value={bo7RelicsFilter}
+                          onChange={setBo7RelicsFilter}
+                          placeholder="Any relics"
+                          className="w-full min-w-0 sm:w-52 max-w-full"
+                        />
+                      )}
                     </>
                   )}
                 </div>

@@ -17,3 +17,4 @@ export * from './map-challenges-ee-help-content';
 export * from './public-profile-help-content';
 export * from './pending-coop-section';
 export * from './pending-verification-section';
+export * from './bo7-relic-picker';
