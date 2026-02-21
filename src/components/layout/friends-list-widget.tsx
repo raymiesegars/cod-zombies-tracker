@@ -72,8 +72,8 @@ export function FriendsListWidget({ variant = 'floating' }: Props) {
     <div className={isFloating ? '' : 'py-2'}>
       <button
         type="button"
-        onClick={() => isFloating && setExpanded(!expanded)}
-        className={`flex items-center justify-between gap-2 w-full ${isFloating ? 'px-3 py-2' : 'px-0'} text-left`}
+        onClick={() => setExpanded(!expanded)}
+        className={`flex items-center justify-between gap-2 w-full ${isFloating ? 'px-3 py-2' : 'px-4 py-3 min-h-[44px]'} text-left rounded-lg hover:bg-bunker-800/50 transition-colors`}
       >
         <div className="flex items-center gap-2 min-w-0">
           <Users className="w-5 h-5 text-blood-400 flex-shrink-0" />
@@ -82,11 +82,11 @@ export function FriendsListWidget({ variant = 'floating' }: Props) {
             {loading ? '…' : `${onlineCount}/${friends.length}`}
           </span>
         </div>
-        {isFloating && (expanded ? <ChevronDown className="w-4 h-4 text-bunker-400" /> : <ChevronUp className="w-4 h-4 text-bunker-400" />)}
+        {expanded ? <ChevronUp className="w-4 h-4 text-bunker-400 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 text-bunker-400 flex-shrink-0" />}
       </button>
 
       <AnimatePresence>
-        {(!isFloating || expanded) && (
+        {expanded && (
           <motion.div
             initial={isFloating ? { height: 0, opacity: 0 } : undefined}
             animate={isFloating ? { height: 'auto', opacity: 1 } : undefined}
@@ -103,8 +103,11 @@ export function FriendsListWidget({ variant = 'floating' }: Props) {
             ) : (
               <ul className={`space-y-0.5 ${isFloating ? 'max-h-48 overflow-y-auto py-1' : 'py-1'}`}>
                 {friends.map((f) => (
-                  <li key={f.id} className="group flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-bunker-800/50">
-                    <Link href={`/users/${f.username}`} className="flex items-center gap-2 min-w-0 flex-1">
+                  <li key={f.id} className="group relative">
+                    <Link
+                      href={`/users/${f.username}`}
+                      className="flex items-center gap-2 px-3 py-1.5 pr-10 rounded-lg hover:bg-bunker-800/50 min-h-[2.5rem]"
+                    >
                       <div className="relative flex-shrink-0">
                         <Avatar src={f.avatarUrl} fallback={f.displayName} size="sm" className="w-8 h-8" />
                         {f.isOnline && (
@@ -118,8 +121,12 @@ export function FriendsListWidget({ variant = 'floating' }: Props) {
                     </Link>
                     <button
                       type="button"
-                      onClick={() => setDeleteModal({ friend: f })}
-                      className="p-1.5 rounded text-bunker-400 hover:text-blood-400 hover:bg-bunker-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setDeleteModal({ friend: f });
+                      }}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 p-1.5 rounded text-bunker-400 hover:text-blood-400 hover:bg-bunker-700 opacity-0 group-hover:opacity-100 transition-opacity"
                       aria-label={`Remove ${f.displayName} from friends`}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
