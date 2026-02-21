@@ -101,6 +101,14 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     if ('error' in result) return NextResponse.json({ error: result.error }, { status: result.status });
     const { log, user } = result;
 
+    // Verified runs are immutable for everyone except super admins
+    if (log.isVerified && !isSuperAdmin(user.id)) {
+      return NextResponse.json(
+        { error: 'This run has been verified and can no longer be edited. Contact a super admin if changes are needed.' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const roundCompleted = body.roundCompleted !== undefined
       ? (body.roundCompleted == null ? null : (typeof body.roundCompleted === 'number' ? body.roundCompleted : parseInt(String(body.roundCompleted), 10)))
