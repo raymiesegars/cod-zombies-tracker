@@ -156,6 +156,109 @@ export const IW_SHAOLIN_SPEEDRUN_TIERS: SpeedrunTiersByType = {
   ],
 };
 
+/**
+ * Attack of the Radioactive Thing (IW) – WRs: R30 28:29, R50 1:06:23, R70 2:11:55, R100 5:31:58, EE (Soul-Less) 13:11, G&S 18:44, Boss (Radioactive Thing) 4:13.
+ */
+export const IW_AOTRT_SPEEDRUN_TIERS: SpeedrunTiersByType = {
+  ROUND_30_SPEEDRUN: [
+    { maxTimeSeconds: 2400, xpReward: 50 },
+    { maxTimeSeconds: 2100, xpReward: 125 },
+    { maxTimeSeconds: 1800, xpReward: 250 },
+    { maxTimeSeconds: 1730, xpReward: 500 },  // near WR 28:29
+  ],
+  ROUND_50_SPEEDRUN: [
+    { maxTimeSeconds: 4500, xpReward: 100 },
+    { maxTimeSeconds: 4200, xpReward: 250 },
+    { maxTimeSeconds: 4050, xpReward: 500 },
+    { maxTimeSeconds: 3990, xpReward: 1200 },  // near WR 1:06:23
+  ],
+  ROUND_70_SPEEDRUN: [
+    { maxTimeSeconds: 9000, xpReward: 150 },
+    { maxTimeSeconds: 8400, xpReward: 400 },
+    { maxTimeSeconds: 7980, xpReward: 800 },
+    { maxTimeSeconds: 7920, xpReward: 2000 },  // near WR 2:11:55
+  ],
+  ROUND_100_SPEEDRUN: [
+    { maxTimeSeconds: 22200, xpReward: 200 },
+    { maxTimeSeconds: 20400, xpReward: 500 },
+    { maxTimeSeconds: 20000, xpReward: 1200 },
+    { maxTimeSeconds: 19930, xpReward: 3000 },  // near WR 5:31:58
+  ],
+  EASTER_EGG_SPEEDRUN: [
+    { maxTimeSeconds: 1200, xpReward: 200 },
+    { maxTimeSeconds: 900, xpReward: 600 },
+    { maxTimeSeconds: 840, xpReward: 1500 },
+    { maxTimeSeconds: 800, xpReward: 3200 },   // near WR 13:11 (Soul-Less)
+  ],
+  GHOST_AND_SKULLS: [
+    { maxTimeSeconds: 2400, xpReward: 150 },
+    { maxTimeSeconds: 2100, xpReward: 500 },
+    { maxTimeSeconds: 1200, xpReward: 1200 },
+    { maxTimeSeconds: 1130, xpReward: 3000 },  // near WR 18:44
+  ],
+  ALIENS_BOSS_FIGHT: [
+    { maxTimeSeconds: 360, xpReward: 200 },   // 6 min (Radioactive Thing)
+    { maxTimeSeconds: 300, xpReward: 600 },
+    { maxTimeSeconds: 270, xpReward: 1400 },
+    { maxTimeSeconds: 260, xpReward: 3500 },  // near WR 4:13
+  ],
+};
+
+/**
+ * The Beast From Beyond (IW) – WRs: R30 30:08, R50 1:10:18, R70 3:14:17, R100 9:46:29, EE (The End?) 11:17, G&S 10:08, Cryptid Fight 6:15, Mephistopheles 9:47.
+ * No Starting Room on this map.
+ */
+export const IW_BEAST_SPEEDRUN_TIERS: SpeedrunTiersByType = {
+  ROUND_30_SPEEDRUN: [
+    { maxTimeSeconds: 2400, xpReward: 50 },
+    { maxTimeSeconds: 2100, xpReward: 125 },
+    { maxTimeSeconds: 1920, xpReward: 250 },
+    { maxTimeSeconds: 1810, xpReward: 500 },  // near WR 30:08
+  ],
+  ROUND_50_SPEEDRUN: [
+    { maxTimeSeconds: 4500, xpReward: 100 },
+    { maxTimeSeconds: 4320, xpReward: 250 },
+    { maxTimeSeconds: 4260, xpReward: 500 },
+    { maxTimeSeconds: 4220, xpReward: 1200 },  // near WR 1:10:18
+  ],
+  ROUND_70_SPEEDRUN: [
+    { maxTimeSeconds: 12000, xpReward: 150 },
+    { maxTimeSeconds: 11700, xpReward: 400 },
+    { maxTimeSeconds: 11680, xpReward: 800 },
+    { maxTimeSeconds: 11660, xpReward: 2000 },  // near WR 3:14:17
+  ],
+  ROUND_100_SPEEDRUN: [
+    { maxTimeSeconds: 36000, xpReward: 200 },
+    { maxTimeSeconds: 35400, xpReward: 500 },
+    { maxTimeSeconds: 35200, xpReward: 1200 },
+    { maxTimeSeconds: 35192, xpReward: 3000 },  // near WR 9:46:29
+  ],
+  EASTER_EGG_SPEEDRUN: [
+    { maxTimeSeconds: 900, xpReward: 200 },
+    { maxTimeSeconds: 750, xpReward: 600 },
+    { maxTimeSeconds: 700, xpReward: 1500 },
+    { maxTimeSeconds: 680, xpReward: 3200 },   // near WR 11:17 (The End?)
+  ],
+  GHOST_AND_SKULLS: [
+    { maxTimeSeconds: 900, xpReward: 150 },
+    { maxTimeSeconds: 700, xpReward: 500 },
+    { maxTimeSeconds: 630, xpReward: 1200 },
+    { maxTimeSeconds: 610, xpReward: 3000 },   // near WR 10:08
+  ],
+  CRYPTID_FIGHT: [
+    { maxTimeSeconds: 480, xpReward: 200 },   // 8 min
+    { maxTimeSeconds: 420, xpReward: 600 },
+    { maxTimeSeconds: 390, xpReward: 1400 },
+    { maxTimeSeconds: 376, xpReward: 3500 },   // near WR 6:15
+  ],
+  MEPHISTOPHELES: [
+    { maxTimeSeconds: 720, xpReward: 200 },   // 12 min
+    { maxTimeSeconds: 630, xpReward: 600 },
+    { maxTimeSeconds: 600, xpReward: 1400 },
+    { maxTimeSeconds: 588, xpReward: 3500 },   // near WR 9:47
+  ],
+};
+
 export function formatSpeedrunTime(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
   const m = Math.floor(seconds / 60);

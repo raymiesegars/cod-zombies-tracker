@@ -30,6 +30,8 @@ const CHALLENGE_TYPE_ICONS: Record<ChallengeType, LucideIcon> = {
   EASTER_EGG_SPEEDRUN: Timer,
   GHOST_AND_SKULLS: Timer,
   ALIENS_BOSS_FIGHT: Timer,
+  CRYPTID_FIGHT: Timer,
+  MEPHISTOPHELES: Timer,
 };
 
 const DEFAULT_ICON = Target;

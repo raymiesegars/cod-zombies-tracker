@@ -192,6 +192,8 @@ enum ChallengeType {
   EASTER_EGG_SPEEDRUN
   GHOST_AND_SKULLS
   ALIENS_BOSS_FIGHT
+  CRYPTID_FIGHT       // Beast From Beyond: Cryptid swarm boss
+  MEPHISTOPHELES      // Beast From Beyond: Mephistopheles boss
 }
 
 // ============================================================================

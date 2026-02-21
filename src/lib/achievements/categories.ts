@@ -16,6 +16,8 @@ export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
   EASTER_EGG_SPEEDRUN: 'Easter Egg Speedrun',
   GHOST_AND_SKULLS: 'Ghost and Skulls',
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
+  CRYPTID_FIGHT: 'Cryptid Fight',
+  MEPHISTOPHELES: 'Mephistopheles',
   EASTER_EGG: 'Easter Egg',
   OTHER: 'Other',
 };
@@ -29,6 +31,8 @@ export const SPEEDRUN_CATEGORIES: string[] = [
   'EASTER_EGG_SPEEDRUN',
   'GHOST_AND_SKULLS',
   'ALIENS_BOSS_FIGHT',
+  'CRYPTID_FIGHT',
+  'MEPHISTOPHELES',
 ];
 
 export function isSpeedrunCategory(cat: string): boolean {
@@ -52,6 +56,8 @@ const CATEGORY_ORDER = [
   'EASTER_EGG_SPEEDRUN',
   'GHOST_AND_SKULLS',
   'ALIENS_BOSS_FIGHT',
+  'CRYPTID_FIGHT',
+  'MEPHISTOPHELES',
   'OTHER',
 ];
 
