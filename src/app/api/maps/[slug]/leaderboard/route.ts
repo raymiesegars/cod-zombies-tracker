@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { isBo4Game } from '@/lib/bo4';
-import { BO4_DIFFICULTIES } from '@/lib/bo4';
+import { isBo4Game, BO4_DIFFICULTIES } from '@/lib/bo4';
 import { isIwGame, isIwSpeedrunChallengeType } from '@/lib/iw';
+import { isBo3Game } from '@/lib/bo3';
+import { isBocwGame } from '@/lib/bocw';
+import { isBo6Game } from '@/lib/bo6';
+import { isBo7Game } from '@/lib/bo7';
 import type { PlayerCount, ChallengeType, Prisma, Bo4Difficulty } from '@prisma/client';
 
 export async function GET(
@@ -17,6 +20,20 @@ export async function GET(
   const verifiedOnly = searchParams.get('verified') === 'true';
   const fortuneCards = searchParams.get('fortuneCards'); // 'true' | 'false' | null (no filter)
   const directorsCut = searchParams.get('directorsCut') === 'true';
+  // BO3
+  const bo3GobbleGumMode = searchParams.get('bo3GobbleGumMode'); // 'CLASSIC_ONLY' | 'MEGA' | 'NONE' | null
+  // BO4
+  const bo4ElixirMode = searchParams.get('bo4ElixirMode'); // 'CLASSIC_ONLY' | 'ALL_ELIXIRS_TALISMANS' | null
+  // BOCW
+  const bocwSupportMode = searchParams.get('bocwSupportMode'); // 'WITH_SUPPORT' | 'WITHOUT_SUPPORT' | null
+  // BO6
+  const bo6GobbleGumMode = searchParams.get('bo6GobbleGumMode'); // 'WITH_GOBBLEGUMS' | 'NO_GOBBLEGUMS' | null
+  const bo6SupportMode = searchParams.get('bo6SupportMode'); // 'WITH_SUPPORT' | 'NO_SUPPORT' | null
+  // BO7
+  const bo7SupportMode = searchParams.get('bo7SupportMode'); // 'WITH_SUPPORT' | 'NO_SUPPORT' | null
+  const bo7CursedFilter = searchParams.get('bo7CursedRun'); // 'true' | 'false' | null (no filter)
+  // Comma-separated relic names; only applied when bo7CursedRun=true
+  const bo7RelicsParam = searchParams.get('bo7Relics'); // e.g. 'Blood Vials,Bus' | null
   const limitParam = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') || '25', 10) || 25));
   const offsetParam = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10) || 0);
   const mergeTake = 500;
@@ -73,10 +90,45 @@ export async function GET(
       eeWhereClause.difficulty = difficulty;
     }
 
-    if (isIwGame(map.game?.shortName)) {
+    const gameShortName = map.game?.shortName;
+
+    if (isIwGame(gameShortName)) {
       if (fortuneCards === 'true') whereClause.useFortuneCards = true;
       else if (fortuneCards === 'false') whereClause.useFortuneCards = false;
       if (directorsCut) whereClause.useDirectorsCut = true;
+    }
+
+    if (isBo3Game(gameShortName) && bo3GobbleGumMode) {
+      (whereClause as Record<string, unknown>).bo3GobbleGumMode = bo3GobbleGumMode;
+    }
+
+    if (isBo4Game(gameShortName) && bo4ElixirMode) {
+      (whereClause as Record<string, unknown>).bo4ElixirMode = bo4ElixirMode;
+    }
+
+    if (isBocwGame(gameShortName) && bocwSupportMode) {
+      (whereClause as Record<string, unknown>).bocwSupportMode = bocwSupportMode;
+    }
+
+    if (isBo6Game(gameShortName)) {
+      if (bo6GobbleGumMode) (whereClause as Record<string, unknown>).bo6GobbleGumMode = bo6GobbleGumMode;
+      if (bo6SupportMode) (whereClause as Record<string, unknown>).bo6SupportMode = bo6SupportMode;
+    }
+
+    if (isBo7Game(gameShortName)) {
+      if (bo7SupportMode) (whereClause as Record<string, unknown>).bo7SupportMode = bo7SupportMode;
+      if (bo7CursedFilter === 'true') {
+        (whereClause as Record<string, unknown>).bo7IsCursedRun = true;
+        if (bo7RelicsParam) {
+          const relics = bo7RelicsParam.split(',').map((r) => r.trim()).filter(Boolean);
+          if (relics.length > 0) {
+            // Every selected relic must appear in the run's relics array
+            (whereClause as Record<string, unknown>).bo7RelicsUsed = { hasEvery: relics };
+          }
+        }
+      } else if (bo7CursedFilter === 'false') {
+        (whereClause as Record<string, unknown>).bo7IsCursedRun = false;
+      }
     }
 
     // "Highest Round" (or no filter) = best round from any challenge OR easter egg; specific challenge = only that challenge's logs

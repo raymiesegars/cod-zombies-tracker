@@ -26,15 +26,27 @@ const XpToastContext = createContext<XpToastContextValue | null>(null);
 
 export const XP_TOAST_VERIFIED_EVENT = 'cod-tracker-xp-toast-verified';
 
-const TOAST_DURATION_MS = 4500;
-const BAR_FILL_DURATION_S = 1.2;
+const TOAST_DURATION_MS = 4000;
+const BAR_FILL_DURATION_S = 2.2;
 const ACHIEVEMENT_SOUND_VOLUME = 0.35;
+const LEVEL_UP_SOUND_VOLUME = 0.55;
 
 function playAchievementSound() {
   if (typeof window === 'undefined') return;
   try {
     const audio = new Audio('/audio/achievment.mp3');
     audio.volume = ACHIEVEMENT_SOUND_VOLUME;
+    audio.play().catch(() => {});
+  } catch {
+    // ignore
+  }
+}
+
+function playLevelUpSound() {
+  if (typeof window === 'undefined') return;
+  try {
+    const audio = new Audio('/audio/level-up-sound.mp3');
+    audio.volume = LEVEL_UP_SOUND_VOLUME;
     audio.play().catch(() => {});
   } catch {
     // ignore
@@ -132,103 +144,114 @@ function XpToastContent({ amount, totalXp, verified }: ToastState) {
   const before = hasRankAndBar ? getLevelFromXp(totalXpBefore) : null;
   const leveledUp = Boolean(before && after && after.level > before.level);
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 24 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 24 }}
-      transition={{ duration: 0.2, ease: 'easeOut' }}
-      className="fixed bottom-4 right-16 z-[100] pointer-events-none w-[280px] sm:w-[300px]"
-    >
-      <div
-        className={cn(
-          'rounded-xl border shadow-xl overflow-hidden',
-          verified
-            ? 'border-blue-500/70 bg-bunker-900 ring-2 ring-blue-500/40'
-            : 'border-bunker-600 bg-bunker-900'
-        )}
-      >
-        {/* +N XP row – extra left padding so content isn’t flush */}
-        <div className={cn('px-4 py-3', verified ? 'border-b border-blue-900/50' : 'border-b border-bunker-700')}>
-          <p className="text-center flex items-center justify-center gap-2">
-            {verified && (
-              <CheckCircle2 className="w-5 h-5 text-blue-400 shrink-0" strokeWidth={2.5} aria-hidden />
-            )}
-            <span className={verified ? 'text-blue-400 font-medium' : 'text-military-400 font-medium'}>+</span>
-            <span className="tabular-nums text-lg font-bold text-white mx-0.5">
-              {amount.toLocaleString()}
-            </span>
-            <span className={verified ? 'text-blue-400/90 font-medium' : 'text-military-500 font-medium'}>
-              {verified ? ' Verified' : ''} XP
-            </span>
-          </p>
-        </div>
+  // Play level-up sound once on mount; component is re-keyed per toast
+  useEffect(() => {
+    if (leveledUp) playLevelUpSound();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-        {hasRankAndBar && after && before && (
-          <div className="px-4 py-3 space-y-3">
-            {/* Rank: icon (no container) + level + name + total, like dashboard */}
-            <div className="flex items-center gap-3">
-              <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
-                {verified && (
-                  <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center" aria-hidden>
-                    <CheckCircle2 className="w-4 h-4 text-blue-500" strokeWidth={2.5} />
-                  </span>
-                )}
-                <Image
-                  src={after.rankIcon}
-                  alt={after.rankName}
-                  width={40}
-                  height={40}
-                  className="object-contain"
-                  unoptimized
-                />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-white truncate flex items-center gap-1.5 flex-wrap">
-                  Level {after.level} · {after.rankName}
-                  {verified && (
-                    <span className="inline-flex items-center gap-0.5 text-blue-400 text-xs shrink-0">
-                      <CheckCircle2 className="w-3.5 h-3.5" aria-hidden />
-                      Verified
-                    </span>
-                  )}
-                </p>
-                <p className="text-xs text-bunker-400">
-                  {totalXp.toLocaleString()} {verified ? 'verified' : 'total'} XP
-                  {leveledUp && (
-                    <span className={verified ? 'text-blue-400 font-medium ml-1' : 'text-blood-400 font-medium ml-1'}>
-                      · {verified ? 'Verified rank up!' : 'Level up!'}
-                    </span>
-                  )}
-                </p>
-              </div>
-            </div>
-            {/* Bar: only animated element – from before to after */}
-            <div className="space-y-1">
-              <div className="w-full h-2 bg-bunker-800 rounded-full overflow-hidden border border-bunker-700">
-                <motion.div
-                  className={cn(
-                    'h-full rounded-full',
-                    verified ? 'bg-gradient-to-r from-blue-600 to-blue-500' : 'bg-gradient-to-r from-blood-600 to-blood-500'
-                  )}
-                  initial={{ width: `${before.progress}%` }}
-                  animate={{ width: `${after.progress}%` }}
-                  transition={{
-                    duration: BAR_FILL_DURATION_S,
-                    ease: [0.25, 0.46, 0.45, 0.94],
-                  }}
-                />
-              </div>
-              {after.level < 20 && (
-                <p className="text-[11px] text-bunker-500 text-right">
-                  {(after.nextLevelXp - totalXp).toLocaleString()} to next
-                </p>
+  return (
+    <div className="fixed bottom-6 left-0 right-0 z-[100] pointer-events-none flex justify-center px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 16 }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
+        className="w-full max-w-[300px]"
+      >
+        <div
+          className={cn(
+            'rounded-xl border shadow-xl overflow-hidden',
+            verified
+              ? 'border-blue-500/70 bg-bunker-900 ring-2 ring-blue-500/40'
+              : 'border-bunker-600 bg-bunker-900'
+          )}
+        >
+          {/* +N XP row */}
+          <div className={cn('px-4 py-3', verified ? 'border-b border-blue-900/50' : 'border-b border-bunker-700')}>
+            {leveledUp && (
+              <p className={cn(
+                'text-center text-xs font-black uppercase tracking-widest mb-2',
+                verified ? 'text-blue-400' : 'text-blood-400'
+              )}>
+                {verified ? '⬆ Verified Rank Up!' : '⬆ Level Up!'}
+              </p>
+            )}
+            <p className="text-center flex items-center justify-center gap-2">
+              {verified && (
+                <CheckCircle2 className="w-5 h-5 text-blue-400 shrink-0" strokeWidth={2.5} aria-hidden />
               )}
-            </div>
+              <span className={verified ? 'text-blue-400 font-medium' : 'text-military-400 font-medium'}>+</span>
+              <span className="tabular-nums text-lg font-bold text-white mx-0.5">
+                {amount.toLocaleString()}
+              </span>
+              <span className={verified ? 'text-blue-400/90 font-medium' : 'text-military-500 font-medium'}>
+                {verified ? ' Verified' : ''} XP
+              </span>
+            </p>
           </div>
-        )}
-      </div>
-    </motion.div>
+
+          {hasRankAndBar && after && before && (
+            <div className="px-4 py-3 space-y-3">
+              {/* Rank: icon + level + name + total */}
+              <div className="flex items-center gap-3">
+                <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
+                  {verified && (
+                    <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center" aria-hidden>
+                      <CheckCircle2 className="w-4 h-4 text-blue-500" strokeWidth={2.5} />
+                    </span>
+                  )}
+                  <Image
+                    src={after.rankIcon}
+                    alt={after.rankName}
+                    width={40}
+                    height={40}
+                    className="object-contain"
+                    unoptimized
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-white truncate flex items-center gap-1.5 flex-wrap">
+                    Level {after.level} · {after.rankName}
+                    {verified && (
+                      <span className="inline-flex items-center gap-0.5 text-blue-400 text-xs shrink-0">
+                        <CheckCircle2 className="w-3.5 h-3.5" aria-hidden />
+                        Verified
+                      </span>
+                    )}
+                  </p>
+                  <p className="text-xs text-bunker-400">
+                    {totalXp.toLocaleString()} {verified ? 'verified' : 'total'} XP
+                  </p>
+                </div>
+              </div>
+              {/* XP bar */}
+              <div className="space-y-1">
+                <div className="w-full h-2 bg-bunker-800 rounded-full overflow-hidden border border-bunker-700">
+                  <motion.div
+                    className={cn(
+                      'h-full rounded-full',
+                      verified ? 'bg-gradient-to-r from-blue-600 to-blue-500' : 'bg-gradient-to-r from-blood-600 to-blood-500'
+                    )}
+                    initial={{ width: `${before.progress}%` }}
+                    animate={{ width: `${after.progress}%` }}
+                    transition={{
+                      duration: BAR_FILL_DURATION_S,
+                      ease: [0.25, 0.46, 0.45, 0.94],
+                    }}
+                  />
+                </div>
+                {after.level < 20 && (
+                  <p className="text-[11px] text-bunker-500 text-right">
+                    {(after.nextLevelXp - totalXp).toLocaleString()} to next
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </div>
   );
 }
 

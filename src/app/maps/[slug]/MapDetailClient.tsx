@@ -25,11 +25,15 @@ import {
   PageLoader,
   HelpTrigger,
 } from '@/components/ui';
-import { RoundCounter, LeaderboardEntry, RelockAchievementButton, ChallengeTypeIcon, MapChallengesEeHelpContent } from '@/components/game';
+import { RoundCounter, LeaderboardEntry, RelockAchievementButton, ChallengeTypeIcon, MapChallengesEeHelpContent, Bo7RelicPicker } from '@/components/game';
 import { getPlayerCountLabel, cn } from '@/lib/utils';
 import { getAssetUrl } from '@/lib/assets';
-import { getBo4DifficultyLabel, BO4_DIFFICULTIES } from '@/lib/bo4';
+import { getBo4DifficultyLabel, BO4_DIFFICULTIES, isBo4Game } from '@/lib/bo4';
 import { isIwGame, isIwSpeedrunChallengeType, IW_CHALLENGE_TYPES_ORDER } from '@/lib/iw';
+import { isBo3Game, BO3_GOBBLEGUM_MODES, getBo3GobbleGumLabel } from '@/lib/bo3';
+import { isBocwGame, BOCW_SUPPORT_MODES, getBocwSupportLabel } from '@/lib/bocw';
+import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
+import { isBo7Game, BO7_SUPPORT_MODES, getBo7SupportLabel } from '@/lib/bo7';
 import { formatCompletionTime } from '@/components/ui/time-input';
 import type { MapWithDetails, LeaderboardEntry as LeaderboardEntryType, PlayerCount, ChallengeType } from '@/types';
 import {
@@ -503,8 +507,21 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   /** Same as Leaderboards page: 'HIGHEST_ROUND', challenge type, or 'ee-time-{easterEggId}' */
   const [selectedLeaderboardCategory, setSelectedLeaderboardCategory] = useState<string>('HIGHEST_ROUND');
   const [leaderboardVerifiedOnly, setLeaderboardVerifiedOnly] = useState(false);
-  const [leaderboardFortuneCards, setLeaderboardFortuneCards] = useState<string>('false'); // 'false' = Fate only (default), 'true' = Fate & Fortune
+  const [leaderboardFortuneCards, setLeaderboardFortuneCards] = useState<string>('false');
   const [leaderboardDirectorsCut, setLeaderboardDirectorsCut] = useState(false);
+  // BO3
+  const [lbBo3GobbleGumMode, setLbBo3GobbleGumMode] = useState<string>('');
+  // BO4
+  const [lbBo4ElixirMode, setLbBo4ElixirMode] = useState<string>('');
+  // BOCW
+  const [lbBocwSupportMode, setLbBocwSupportMode] = useState<string>('');
+  // BO6
+  const [lbBo6GobbleGumMode, setLbBo6GobbleGumMode] = useState<string>('');
+  const [lbBo6SupportMode, setLbBo6SupportMode] = useState<string>('');
+  // BO7
+  const [lbBo7SupportMode, setLbBo7SupportMode] = useState<string>('');
+  const [lbBo7CursedFilter, setLbBo7CursedFilter] = useState<string>(''); // '' | 'true' | 'false'
+  const [lbBo7SelectedRelics, setLbBo7SelectedRelics] = useState<string[]>([]);
   const leaderboardSlugRef = useRef<string | null>(null);
 
   // Your runs for this map when logged in; URL ?tab=your-runs triggers fetch on load
@@ -603,6 +620,18 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
             else if (leaderboardFortuneCards === 'false') params.set('fortuneCards', 'false');
             if (leaderboardDirectorsCut) params.set('directorsCut', 'true');
           }
+          if (isBo3Game(map.game?.shortName) && lbBo3GobbleGumMode) params.set('bo3GobbleGumMode', lbBo3GobbleGumMode);
+          if (isBo4Game(map.game?.shortName) && lbBo4ElixirMode) params.set('bo4ElixirMode', lbBo4ElixirMode);
+          if (isBocwGame(map.game?.shortName) && lbBocwSupportMode) params.set('bocwSupportMode', lbBocwSupportMode);
+          if (isBo6Game(map.game?.shortName)) {
+            if (lbBo6GobbleGumMode) params.set('bo6GobbleGumMode', lbBo6GobbleGumMode);
+            if (lbBo6SupportMode) params.set('bo6SupportMode', lbBo6SupportMode);
+          }
+          if (isBo7Game(map.game?.shortName)) {
+            if (lbBo7SupportMode) params.set('bo7SupportMode', lbBo7SupportMode);
+            if (lbBo7CursedFilter === 'true' || lbBo7CursedFilter === 'false') params.set('bo7CursedRun', lbBo7CursedFilter);
+            if (lbBo7CursedFilter === 'true' && lbBo7SelectedRelics.length > 0) params.set('bo7Relics', lbBo7SelectedRelics.join(','));
+          }
           const res = await fetch(`/api/maps/${slug}/leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -618,7 +647,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     })();
     // Intentionally omit leaderboard.length / leaderboardFetchedOnce to avoid re-fetch loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut]);
+  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut, lbBo3GobbleGumMode, lbBo4ElixirMode, lbBocwSupportMode, lbBo6GobbleGumMode, lbBo6SupportMode, lbBo7SupportMode, lbBo7CursedFilter, lbBo7SelectedRelics]);
 
   // Sync activeTab with URL so switching to Your Runs triggers fetch
   useEffect(() => {
@@ -1688,6 +1717,78 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                           onChange={(e) => setLeaderboardFortuneCards(e.target.value)}
                           className="w-full min-w-0 sm:w-40 max-w-full"
                         />
+                      </>
+                    )}
+                    {isBo3Game(map?.game?.shortName) && (
+                      <Select
+                        options={[{ value: '', label: 'All GobbleGums' }, ...BO3_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo3GobbleGumLabel(m) }))]}
+                        value={lbBo3GobbleGumMode}
+                        onChange={(e) => setLbBo3GobbleGumMode(e.target.value)}
+                        className="w-full min-w-0 sm:w-52 max-w-full"
+                      />
+                    )}
+                    {map?.game?.shortName === 'BO4' && (
+                      <Select
+                        options={[
+                          { value: '', label: 'All Elixirs' },
+                          { value: 'CLASSIC_ONLY', label: 'Classic Elixirs Only' },
+                          { value: 'ALL_ELIXIRS_TALISMANS', label: 'All Elixirs & Talismans' },
+                        ]}
+                        value={lbBo4ElixirMode}
+                        onChange={(e) => setLbBo4ElixirMode(e.target.value)}
+                        className="w-full min-w-0 sm:w-52 max-w-full"
+                      />
+                    )}
+                    {isBocwGame(map?.game?.shortName) && (
+                      <Select
+                        options={[{ value: '', label: 'All Support' }, ...BOCW_SUPPORT_MODES.map((m) => ({ value: m, label: getBocwSupportLabel(m) }))]}
+                        value={lbBocwSupportMode}
+                        onChange={(e) => setLbBocwSupportMode(e.target.value)}
+                        className="w-full min-w-0 sm:w-48 max-w-full"
+                      />
+                    )}
+                    {isBo6Game(map?.game?.shortName) && (
+                      <>
+                        <Select
+                          options={[{ value: '', label: 'All GobbleGums' }, ...BO6_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo6GobbleGumLabel(m) }))]}
+                          value={lbBo6GobbleGumMode}
+                          onChange={(e) => setLbBo6GobbleGumMode(e.target.value)}
+                          className="w-full min-w-0 sm:w-48 max-w-full"
+                        />
+                        <Select
+                          options={[{ value: '', label: 'All Support' }, ...BO6_SUPPORT_MODES.map((m) => ({ value: m, label: getBo6SupportLabel(m) }))]}
+                          value={lbBo6SupportMode}
+                          onChange={(e) => setLbBo6SupportMode(e.target.value)}
+                          className="w-full min-w-0 sm:w-40 max-w-full"
+                        />
+                      </>
+                    )}
+                    {isBo7Game(map?.game?.shortName) && (
+                      <>
+                        <Select
+                          options={[{ value: '', label: 'All Support' }, ...BO7_SUPPORT_MODES.map((m) => ({ value: m, label: getBo7SupportLabel(m) }))]}
+                          value={lbBo7SupportMode}
+                          onChange={(e) => setLbBo7SupportMode(e.target.value)}
+                          className="w-full min-w-0 sm:w-40 max-w-full"
+                        />
+                        <Select
+                          options={[
+                            { value: '', label: 'All Runs' },
+                            { value: 'false', label: 'Normal Runs' },
+                            { value: 'true', label: 'Cursed Runs' },
+                          ]}
+                          value={lbBo7CursedFilter}
+                          onChange={(e) => { setLbBo7CursedFilter(e.target.value); if (e.target.value !== 'true') setLbBo7SelectedRelics([]); }}
+                          className="w-full min-w-0 sm:w-40 max-w-full"
+                        />
+                        {lbBo7CursedFilter === 'true' && (
+                          <Bo7RelicPicker
+                            value={lbBo7SelectedRelics}
+                            onChange={setLbBo7SelectedRelics}
+                            placeholder="Any relics"
+                            className="w-full min-w-0 sm:w-52 max-w-full"
+                          />
+                        )}
                       </>
                     )}
                   </div>

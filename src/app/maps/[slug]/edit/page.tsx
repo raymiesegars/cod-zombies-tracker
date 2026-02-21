@@ -20,12 +20,16 @@ import {
   TimeInput,
   Modal,
 } from '@/components/ui';
-import { ProofEmbed, ProofUrlsInput, TeammatePicker } from '@/components/game';
+import { ProofEmbed, ProofUrlsInput, TeammatePicker, Bo7RelicPicker } from '@/components/game';
 import { cn, normalizeProofUrls } from '@/lib/utils';
 import { useXpToast } from '@/context/xp-toast-context';
 import { getXpForChallengeLog, getXpForEasterEggLog, type AchievementForPreview } from '@/lib/xp-preview';
 import { isBo4Game, BO4_DIFFICULTIES, getBo4DifficultyLabel } from '@/lib/bo4';
 import { isIwGame, isIwSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType } from '@/lib/iw';
+import { isBo3Game, BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT, getBo3GobbleGumLabel } from '@/lib/bo3';
+import { isBocwGame, BOCW_SUPPORT_MODES, BOCW_SUPPORT_DEFAULT, getBocwSupportLabel } from '@/lib/bocw';
+import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_GOBBLEGUM_DEFAULT, BO6_SUPPORT_MODES, BO6_SUPPORT_DEFAULT, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
+import { isBo7Game, BO7_SUPPORT_MODES, BO7_SUPPORT_DEFAULT, getBo7SupportLabel } from '@/lib/bo7';
 import type { MapWithDetails, ChallengeType, PlayerCount } from '@/types';
 import { ChevronLeft, Save, CheckCircle, AlertCircle, BookOpen } from 'lucide-react';
 
@@ -132,8 +136,16 @@ export default function EditMapProgressPage() {
     teammateUserIds: string[];
     teammateNonUserNames: string[];
     requestVerification: boolean;
-    useFortuneCards?: boolean | null; // IW: true = fate+fortune, false = fate only (required)
-    useDirectorsCut?: boolean; // IW: optional, default false
+    useFortuneCards?: boolean | null;
+    useDirectorsCut?: boolean;
+    bo3GobbleGumMode?: string;
+    bo4ElixirMode?: string;
+    bocwSupportMode?: string;
+    bo6GobbleGumMode?: string;
+    bo6SupportMode?: string;
+    bo7SupportMode?: string;
+    bo7IsCursedRun?: boolean;
+    bo7RelicsUsed?: string[];
   }>({
     roundReached: '',
     playerCount: 'SOLO',
@@ -201,11 +213,19 @@ export default function EditMapProgressPage() {
           }
           setChallengeForms(challengeInitial);
           const isIw = (data.game?.shortName ?? '') === 'IW';
+          const isBo3 = isBo3Game(data.game?.shortName);
+          const isBocw = isBocwGame(data.game?.shortName);
+          const isBo6 = isBo6Game(data.game?.shortName);
+          const isBo7 = isBo7Game(data.game?.shortName);
           setSharedChallengeForm({
             roundReached: '',
             playerCount: 'SOLO',
             ...(isBo4 && { difficulty: 'NORMAL' }),
             ...(isIw && { useFortuneCards: false, useDirectorsCut: false }),
+            ...(isBo3 && { bo3GobbleGumMode: BO3_GOBBLEGUM_DEFAULT }),
+            ...(isBocw && { bocwSupportMode: BOCW_SUPPORT_DEFAULT }),
+            ...(isBo6 && { bo6GobbleGumMode: BO6_GOBBLEGUM_DEFAULT, bo6SupportMode: BO6_SUPPORT_DEFAULT }),
+            ...(isBo7 && { bo7SupportMode: BO7_SUPPORT_DEFAULT, bo7IsCursedRun: false, bo7RelicsUsed: [] }),
             proofUrls: [],
             notes: '',
             completionTimeSeconds: null,
@@ -311,6 +331,10 @@ export default function EditMapProgressPage() {
       return;
     }
     const isIw = isIwGame(map.game?.shortName);
+    const isBo3 = isBo3Game(map.game?.shortName);
+    const isBocw = isBocwGame(map.game?.shortName);
+    const isBo6 = isBo6Game(map.game?.shortName);
+    const isBo7 = isBo7Game(map.game?.shortName);
     const anySpeedrun = Array.from(selectedChallengeIds).some((cid) => {
       const c = map.challenges.find((ch) => ch.id === cid);
       return c && isIwSpeedrunChallengeType(c.type);
@@ -353,6 +377,18 @@ export default function EditMapProgressPage() {
             ...(isIw && {
               useFortuneCards: form.useFortuneCards === true,
               useDirectorsCut: form.useDirectorsCut ?? false,
+            }),
+            ...(isBo3 && { bo3GobbleGumMode: form.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT }),
+            ...(isBo4Game(map.game?.shortName) && form.bo4ElixirMode && { bo4ElixirMode: form.bo4ElixirMode }),
+            ...(isBocw && { bocwSupportMode: form.bocwSupportMode ?? BOCW_SUPPORT_DEFAULT }),
+            ...(isBo6 && {
+              bo6GobbleGumMode: form.bo6GobbleGumMode ?? BO6_GOBBLEGUM_DEFAULT,
+              bo6SupportMode: form.bo6SupportMode ?? BO6_SUPPORT_DEFAULT,
+            }),
+            ...(isBo7 && {
+              bo7SupportMode: form.bo7SupportMode ?? BO7_SUPPORT_DEFAULT,
+              bo7IsCursedRun: form.bo7IsCursedRun ?? false,
+              bo7RelicsUsed: form.bo7IsCursedRun ? (form.bo7RelicsUsed ?? []) : [],
             }),
             proofUrls: normalizeProofUrls(form.proofUrls ?? []),
             notes: form.notes || null,
@@ -728,6 +764,83 @@ export default function EditMapProgressPage() {
                           />
                           <span className="text-sm text-bunker-300">Directors Cut</span>
                         </label>
+                      </>
+                    )}
+                    {isBo3Game(map?.game?.shortName) && (
+                      <Select
+                        label="GobbleGums"
+                        options={BO3_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo3GobbleGumLabel(m) }))}
+                        value={sharedChallengeForm.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT}
+                        onChange={(e) => handleSharedChallengeChange('bo3GobbleGumMode', e.target.value)}
+                      />
+                    )}
+                    {map?.game?.shortName === 'BO4' && (
+                      <Select
+                        label="Elixirs / Talismans"
+                        options={[
+                          { value: 'CLASSIC_ONLY', label: 'Classic Elixirs Only' },
+                          { value: 'ALL_ELIXIRS_TALISMANS', label: 'All Elixirs & Talismans' },
+                        ]}
+                        value={sharedChallengeForm.bo4ElixirMode ?? ''}
+                        onChange={(e) => handleSharedChallengeChange('bo4ElixirMode', e.target.value || undefined)}
+                        placeholder="Optional"
+                      />
+                    )}
+                    {isBocwGame(map?.game?.shortName) && (
+                      <Select
+                        label="Support"
+                        options={BOCW_SUPPORT_MODES.map((m) => ({ value: m, label: getBocwSupportLabel(m) }))}
+                        value={sharedChallengeForm.bocwSupportMode ?? BOCW_SUPPORT_DEFAULT}
+                        onChange={(e) => handleSharedChallengeChange('bocwSupportMode', e.target.value)}
+                      />
+                    )}
+                    {isBo6Game(map?.game?.shortName) && (
+                      <>
+                        <Select
+                          label="GobbleGums"
+                          options={BO6_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo6GobbleGumLabel(m) }))}
+                          value={sharedChallengeForm.bo6GobbleGumMode ?? BO6_GOBBLEGUM_DEFAULT}
+                          onChange={(e) => handleSharedChallengeChange('bo6GobbleGumMode', e.target.value)}
+                        />
+                        <Select
+                          label="Support"
+                          options={BO6_SUPPORT_MODES.map((m) => ({ value: m, label: getBo6SupportLabel(m) }))}
+                          value={sharedChallengeForm.bo6SupportMode ?? BO6_SUPPORT_DEFAULT}
+                          onChange={(e) => handleSharedChallengeChange('bo6SupportMode', e.target.value)}
+                        />
+                      </>
+                    )}
+                    {isBo7Game(map?.game?.shortName) && (
+                      <>
+                        <Select
+                          label="Support"
+                          options={BO7_SUPPORT_MODES.map((m) => ({ value: m, label: getBo7SupportLabel(m) }))}
+                          value={sharedChallengeForm.bo7SupportMode ?? BO7_SUPPORT_DEFAULT}
+                          onChange={(e) => handleSharedChallengeChange('bo7SupportMode', e.target.value)}
+                        />
+                        <label className="flex items-center gap-2 cursor-pointer self-end pb-2 sm:pb-0">
+                          <input
+                            type="checkbox"
+                            checked={sharedChallengeForm.bo7IsCursedRun ?? false}
+                            onChange={(e) => {
+                              handleSharedChallengeChange('bo7IsCursedRun', e.target.checked);
+                              if (!e.target.checked) handleSharedChallengeChange('bo7RelicsUsed', []);
+                            }}
+                            className="w-4 h-4 rounded border-bunker-600 bg-bunker-800 text-blood-500"
+                          />
+                          <span className="text-sm text-bunker-300">Cursed Run</span>
+                        </label>
+                        {sharedChallengeForm.bo7IsCursedRun && (
+                          <div className="flex flex-col gap-1 self-end">
+                            <span className="text-xs text-bunker-400">Relics used</span>
+                            <Bo7RelicPicker
+                              value={sharedChallengeForm.bo7RelicsUsed ?? []}
+                              onChange={(relics) => handleSharedChallengeChange('bo7RelicsUsed', relics)}
+                              placeholder="None (0 relics)"
+                              className="w-48"
+                            />
+                          </div>
+                        )}
                       </>
                     )}
                     <div className="sm:col-span-3 mt-1 min-w-0">
