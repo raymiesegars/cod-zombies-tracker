@@ -29,8 +29,10 @@ import { RoundCounter, XpRankDisplay, RelockAchievementButton, RankHelpContent, 
 import {
   ACHIEVEMENT_CATEGORY_LABELS,
   getAchievementCategory,
-  getAchievementCategoryFilterOptions,
+  getNonSpeedrunCategoryFilterOptions,
+  getSpeedrunCategoryFilterOptions,
   getSortedCategoryKeys,
+  isSpeedrunCategory,
   sortAchievementsByXp,
 } from '@/lib/achievements/categories';
 import { getAssetUrl } from '@/lib/assets';
@@ -102,9 +104,11 @@ function AchievementsSection({
   filterGame,
   filterMap,
   filterCategory,
+  filterSpeedrun,
   onFilterGameChange,
   onFilterMapChange,
   onFilterCategoryChange,
+  onFilterSpeedrunChange,
   isOwnProfile,
   onRelock,
   isMapAchievementsLoading = false,
@@ -114,9 +118,11 @@ function AchievementsSection({
   filterGame: string;
   filterMap: string;
   filterCategory: string;
+  filterSpeedrun: string;
   onFilterGameChange: (v: string) => void;
   onFilterMapChange: (v: string) => void;
   onFilterCategoryChange: (v: string) => void;
+  onFilterSpeedrunChange: (v: string) => void;
   isOwnProfile: boolean;
   onRelock?: () => void | Promise<void>;
   isMapAchievementsLoading?: boolean;
@@ -142,12 +148,27 @@ function AchievementsSection({
     [mapsForFilter]
   );
 
+  const mapAchievementsForFilterOptions = useMemo(() => {
+    if (!overview?.achievements || !filterMap) return [];
+    return overview.achievements.filter((a) => a.map?.id === filterMap);
+  }, [overview?.achievements, filterMap]);
+
+  const existingCategories = useMemo(
+    () => Array.from(new Set(mapAchievementsForFilterOptions.map(getAchievementCategory))),
+    [mapAchievementsForFilterOptions]
+  );
+  const nonSpeedrunCats = existingCategories.filter((c) => !isSpeedrunCategory(c));
+  const speedrunCats = existingCategories.filter((c) => isSpeedrunCategory(c));
+  const categoryOptions = getNonSpeedrunCategoryFilterOptions(nonSpeedrunCats.length ? nonSpeedrunCats : undefined);
+  const speedrunOptions = getSpeedrunCategoryFilterOptions(speedrunCats.length ? speedrunCats : undefined);
+
   const filteredAchievements = useMemo(() => {
     if (!overview?.achievements || !filterMap) return [];
     return overview.achievements
       .filter((a) => a.map?.id === filterMap)
-      .filter((a) => !filterCategory || getAchievementCategory(a) === filterCategory);
-  }, [overview?.achievements, filterMap, filterCategory]);
+      .filter((a) => !filterCategory || getAchievementCategory(a) === filterCategory)
+      .filter((a) => !filterSpeedrun || getAchievementCategory(a) === filterSpeedrun);
+  }, [overview?.achievements, filterMap, filterCategory, filterSpeedrun]);
 
   const groupedByMapThenCategory = useMemo(() => {
     const byMap = new Map<
@@ -225,6 +246,7 @@ function AchievementsSection({
             onFilterGameChange(e.target.value);
             onFilterMapChange('');
             onFilterCategoryChange('');
+            onFilterSpeedrunChange('');
           }}
           className="w-full sm:w-44"
         />
@@ -237,17 +259,36 @@ function AchievementsSection({
           onChange={(e) => {
             onFilterMapChange(e.target.value);
             onFilterCategoryChange('');
+            onFilterSpeedrunChange('');
           }}
           className="w-full sm:w-56"
           disabled={!filterGame}
         />
         <Select
-          options={getAchievementCategoryFilterOptions()}
+          options={categoryOptions}
           value={filterCategory}
-          onChange={(e) => onFilterCategoryChange(e.target.value)}
+          onChange={(e) => {
+            onFilterCategoryChange(e.target.value);
+            if (e.target.value) onFilterSpeedrunChange('');
+          }}
           className="w-full sm:w-44"
           disabled={!filterMap}
         />
+        {speedrunOptions.length > 1 && (
+          <>
+            <span className="text-xs font-medium text-bunker-400 w-full sm:w-auto">Speedruns:</span>
+            <Select
+              options={speedrunOptions}
+              value={filterSpeedrun}
+              onChange={(e) => {
+                onFilterSpeedrunChange(e.target.value);
+                if (e.target.value) onFilterCategoryChange('');
+              }}
+              className="w-full sm:w-44"
+              disabled={!filterMap}
+            />
+          </>
+        )}
       </div>
 
       {/* Scrollable list - only shown when map selected (achievements lazy-loaded) */}
@@ -267,8 +308,8 @@ function AchievementsSection({
           <div className="py-12 sm:py-16 text-center">
             <Award className="w-10 h-10 sm:w-12 sm:h-12 text-bunker-600 mx-auto mb-4" />
             <p className="text-sm sm:text-base text-bunker-400">
-              {filterCategory
-                ? `No ${(ACHIEVEMENT_CATEGORY_LABELS[filterCategory] ?? filterCategory).toLowerCase()} achievements found for this map.`
+              {(filterCategory || filterSpeedrun)
+                ? `No ${(ACHIEVEMENT_CATEGORY_LABELS[filterCategory || filterSpeedrun] ?? (filterCategory || filterSpeedrun)).toLowerCase()} achievements found for this map.`
                 : 'No achievements found for this map.'}
             </p>
           </div>
@@ -381,6 +422,7 @@ export default function UserProfilePage() {
   const [achievementFilterGame, setAchievementFilterGame] = useState('');
   const [achievementFilterMap, setAchievementFilterMap] = useState('');
   const [achievementFilterCategory, setAchievementFilterCategory] = useState('');
+  const [achievementFilterSpeedrun, setAchievementFilterSpeedrun] = useState('');
   const [achievementMapLoading, setAchievementMapLoading] = useState(false);
   const [profileRefreshTrigger, setProfileRefreshTrigger] = useState(0);
 
@@ -974,9 +1016,11 @@ export default function UserProfilePage() {
           filterGame={achievementFilterGame}
           filterMap={achievementFilterMap}
           filterCategory={achievementFilterCategory}
+          filterSpeedrun={achievementFilterSpeedrun}
           onFilterGameChange={setAchievementFilterGame}
           onFilterMapChange={setAchievementFilterMap}
           onFilterCategoryChange={setAchievementFilterCategory}
+          onFilterSpeedrunChange={setAchievementFilterSpeedrun}
           isOwnProfile={isOwnProfile}
           onRelock={refetchAchievementsAfterRelock}
           isMapAchievementsLoading={achievementMapLoading}

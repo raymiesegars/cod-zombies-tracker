@@ -9,6 +9,7 @@ import {
   PackageOpen,
   Crosshair,
   ZapOff,
+  Timer,
   type LucideIcon,
 } from 'lucide-react';
 import type { ChallengeType } from '@/types';
@@ -22,6 +23,13 @@ const CHALLENGE_TYPE_ICONS: Record<ChallengeType, LucideIcon> = {
   ONE_BOX: PackageOpen,
   PISTOL_ONLY: Crosshair,
   NO_POWER: ZapOff,
+  ROUND_30_SPEEDRUN: Timer,
+  ROUND_50_SPEEDRUN: Timer,
+  ROUND_70_SPEEDRUN: Timer,
+  ROUND_100_SPEEDRUN: Timer,
+  EASTER_EGG_SPEEDRUN: Timer,
+  GHOST_AND_SKULLS: Timer,
+  ALIENS_BOSS_FIGHT: Timer,
 };
 
 const DEFAULT_ICON = Target;

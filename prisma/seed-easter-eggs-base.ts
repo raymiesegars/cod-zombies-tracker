@@ -12117,4 +12117,39 @@ export const SPECIFIC_EASTER_EGGS_BASE: SpecificEasterEgg[] = [
       { order: 1, label: 'Reach round 100 and complete the round 100 Easter Egg steps.' },
     ],
   },
+  // ——— Infinite Warfare: Zombies in Spaceland ———
+  {
+    gameShortName: 'IW',
+    mapSlug: 'zombies-in-spaceland',
+    name: 'Sooooul Key',
+    slug: 'sooooul-key',
+    type: 'MAIN_QUEST',
+    xpReward: 2500,
+    videoEmbedUrl: 'https://www.youtube.com/embed/yOvdkLUxXLQ',
+    description:
+      'The Main Quest for Zombies in Spaceland. Recover the piece of the Soul Key by building the Seti-Com, defending it at three locations, then freeing the UFO and defeating the aliens. Achievable in solo or co-op. Log your completion time here—this is also the run used for the Easter Egg Speedrun challenge.',
+    rewardsDescription: 'Soul Key piece, achievement, 1000 XP per alien kill (nuke). Double Pack-a-Punch and Pack-a-Punch the four Weapons of Rock after placing Alien Fuses.',
+    steps: [
+      {
+        order: 1,
+        label:
+          '[Step 1: Building the Seti-Com] Activate all teleporters and the UFO discs in the Pack-a-Punch room. Collect the three Seti-Com parts (each can spawn in three locations). Boom Box: lower bridge from spawn to main teleporter (by Proto-Popcorn); Coffee Room underground (counter left of Racin\' Stripes); Moonlight Cafe (right of Kepler power switch). Umbrella: bench right of bottom of slides (bridge to Polar Peak); counter right of stairs from Gift Shop to Polar Peak power; right of Star Mission trap switch near Tuff \'Nuff (Journey into Space). Calculator: bench in front of main teleporter to PaP; yellow picnic table by Chromosphere trap (balcony); Astrocade second floor on trash bin between arcade machines. Bring all three to David Hasselhoff for the complete Seti-Com.',
+      },
+      {
+        order: 2,
+        label:
+          '[Step 2: Defend the Seti-Com] Take the Seti-Com to three different locations (seven possible; three are chosen at random each game). Locations: in front of Racin\' Stripes (underground); in front of main entrance to Polar Peak; center of Polar Peak gift shop; between purple and orange fountains (Fountain Area); right of fountain (Chromosphere toward Alligator head); path to left area of Journey into Space; left of Bumper Cars exit (curved path to Magic Wheel). At each spot a countdown appears (1 min, then 1:30, then 2 min). Defend from zombies; if the device is destroyed, get another from Hasselhoff. Only one defend per round. After all three, return the Seti-Com to Hasselhoff and wait about two rounds.',
+      },
+      {
+        order: 3,
+        label:
+          '[Step 3: The UFO] Return to Hasselhoff for the Speaker. Place the Speaker on the four golden circles around the main teleporter. In co-op, each player interacts with one speaker at the same time. When the UFO breaks free, interact with the speakers in the color order the UFO flashes (only when they glow white). Do this successfully three times (wrong order or too late spawns a Brute). After three successes, kill the clowns, then shoot the aliens (up to four, one per player) until they crouch—melee from behind for an Alien Fuse. Two fuses per alien; then finish the alien. Place both fuses in the Pack-a-Punch to double PaP and PaP the Weapons of Rock.',
+      },
+      {
+        order: 4,
+        label:
+          'With at least one Pack-a-Punched Weapon of Rock, shoot the five blue glowing lights around the main Spaceland sign. Shoot the last one when the UFO is directly above the teleporter. The beam destroys the UFO and drops the Soul Key piece. Pick it up to complete the Easter Egg and earn the achievement.',
+      },
+    ],
+  },
 ];

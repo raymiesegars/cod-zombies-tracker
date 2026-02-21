@@ -4,7 +4,7 @@ import { getBo4DifficultiesBelow } from './bo4';
 export type AchievementForPreview = {
   id: string;
   type: string;
-  criteria: { round?: number; challengeType?: string; isCap?: boolean };
+  criteria: { round?: number; challengeType?: string; isCap?: boolean; maxTimeSeconds?: number };
   xpReward: number;
   easterEggId?: string | null;
   difficulty?: string | null;
@@ -24,14 +24,23 @@ export function getXpForChallengeLog(
   round: number,
   roundCap: number | null,
   /** BO4 only: selected difficulty so preview includes cascade (this + all lower) */
-  difficulty?: string | null
+  difficulty?: string | null,
+  /** IW speedruns: completion time in seconds so preview includes speedrun tier XP */
+  completionTimeSeconds?: number | null
 ): number {
   const set = new Set(unlockedIds);
   let total = 0;
   for (const a of achievements) {
     if (set.has(a.id)) continue;
     if (!matchesDifficultyForPreview(a.difficulty, difficulty)) continue;
-    const c = a.criteria as { round?: number; challengeType?: string; isCap?: boolean };
+    const c = a.criteria as { round?: number; challengeType?: string; isCap?: boolean; maxTimeSeconds?: number };
+    // Speedrun tier: qualify if completionTimeSeconds <= maxTimeSeconds
+    if (c.maxTimeSeconds != null && c.challengeType === challengeType) {
+      if (completionTimeSeconds != null && completionTimeSeconds >= 0 && completionTimeSeconds <= c.maxTimeSeconds) {
+        total += a.xpReward;
+      }
+      continue;
+    }
     const matchesRound =
       c.isCap && roundCap != null
         ? round >= roundCap

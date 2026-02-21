@@ -12,6 +12,7 @@ import {
   getXpForRoundFromMilestones,
 } from './map-round-config';
 import { isBo4Game, BO4_DIFFICULTIES, BO4_DIFFICULTY_XP_MULTIPLIER, type Bo4DifficultyType } from '../bo4';
+import { IW_ZIS_SPEEDRUN_TIERS, formatSpeedrunTime } from './speedrun-tiers';
 
 const CHALLENGE_TYPES = [
   'HIGHEST_ROUND',
@@ -24,11 +25,27 @@ const CHALLENGE_TYPES = [
   'NO_POWER',
 ] as const;
 
+/** IW Zombies in Spaceland: custom rounds per challenge (WR-based). */
+const IW_ZIS_CHALLENGE_ROUNDS: Partial<Record<string, readonly number[]>> = {
+  NO_PERKS: [10, 20, 30, 40, 50, 70, 100], // WR 100
+  STARTING_ROOM: [10, 15, 20, 30, 40, 50, 54], // WR 54
+  ONE_BOX: [30], // WR 30
+  PISTOL_ONLY: [5, 10, 15, 20, 25, 30, 40, 50, 60], // WR 60
+  NO_POWER: [10, 15, 20, 30, 50, 75, 100, 125, 150], // WR 150
+};
+
 export type AchievementSeedRow = {
   slug: string;
   name: string;
   type: 'ROUND_MILESTONE' | 'CHALLENGE_COMPLETE' | 'EASTER_EGG_COMPLETE';
-  criteria: { round?: number; challengeType?: string; isCap?: boolean; difficulty?: Bo4DifficultyType };
+  criteria: {
+    round?: number;
+    challengeType?: string;
+    isCap?: boolean;
+    difficulty?: Bo4DifficultyType;
+    /** Speedrun tier: qualify if completionTimeSeconds <= this */
+    maxTimeSeconds?: number;
+  };
   xpReward: number;
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
   challengeId?: string;
@@ -101,15 +118,19 @@ export function getMapAchievementDefinitions(
       });
     }
     // Other types: rounds <= maxRound, XP from map milestones × multiplier
+    const isIwZis = mapSlug === 'zombies-in-spaceland' && gameShortName === 'IW';
     for (const cType of CHALLENGE_TYPES) {
       if (cType === 'HIGHEST_ROUND' || cType === 'NO_DOWNS') continue;
       const defaultConfig = getMilestonesForChallengeType(cType as any);
       if (!defaultConfig) continue;
       const slugPrefix = cType.toLowerCase().replace(/_/g, '-');
+      const overrideRounds = isIwZis ? IW_ZIS_CHALLENGE_ROUNDS[cType] : undefined;
+      const effectiveRounds = overrideRounds ?? (defaultConfig.rounds as number[]);
+      const effectiveMax = overrideRounds ? Math.max(...overrideRounds) : maxRound;
       const rounds =
         defaultConfig.flatXp != null
-          ? (defaultConfig.rounds[0]! <= maxRound ? [defaultConfig.rounds[0]!] : [])
-          : (defaultConfig.rounds as number[]).filter((r) => r <= maxRound);
+          ? (effectiveRounds[0]! <= effectiveMax ? [effectiveRounds[0]!] : [])
+          : effectiveRounds.filter((r) => r <= effectiveMax);
       for (const round of rounds) {
         let xp: number;
         if (defaultConfig.flatXp != null) {
@@ -209,6 +230,43 @@ export function getMapAchievementDefinitions(
 
   if (isBo4Game(gameShortName)) {
     return rows.flatMap((r) => expandBo4Difficulties(r));
+  }
+  return rows;
+}
+
+const SPEEDRUN_TYPE_LABELS: Record<string, string> = {
+  ROUND_30_SPEEDRUN: 'Round 30',
+  ROUND_50_SPEEDRUN: 'Round 50',
+  ROUND_70_SPEEDRUN: 'Round 70',
+  ROUND_100_SPEEDRUN: 'Round 100',
+  EASTER_EGG_SPEEDRUN: 'Easter Egg',
+  GHOST_AND_SKULLS: 'Ghost and Skulls',
+  ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
+};
+
+/** Speedrun tier achievements for IW Zombies in Spaceland (and future IW maps). Fastest = most XP. */
+export function getSpeedrunAchievementDefinitions(
+  mapSlug: string,
+  gameShortName: string
+): AchievementSeedRow[] {
+  if (gameShortName !== 'IW' || mapSlug !== 'zombies-in-spaceland') return [];
+  const rows: AchievementSeedRow[] = [];
+  for (const [challengeType, tiers] of Object.entries(IW_ZIS_SPEEDRUN_TIERS)) {
+    const label = SPEEDRUN_TYPE_LABELS[challengeType] ?? challengeType.replace(/_/g, ' ');
+    for (let i = 0; i < tiers.length; i++) {
+      const { maxTimeSeconds, xpReward } = tiers[i]!;
+      const timeStr = formatSpeedrunTime(maxTimeSeconds).replace(/:/g, '-');
+      const slug = `${challengeType.toLowerCase().replace(/_/g, '-')}-under-${timeStr}`.replace(/\s/g, '-');
+      const rarity = i === tiers.length - 1 ? 'LEGENDARY' : i >= tiers.length - 2 ? 'EPIC' : i >= tiers.length - 3 ? 'RARE' : 'UNCOMMON';
+      rows.push({
+        slug,
+        name: `${label} in under ${formatSpeedrunTime(maxTimeSeconds)}`,
+        type: 'CHALLENGE_COMPLETE',
+        criteria: { challengeType, maxTimeSeconds },
+        xpReward,
+        rarity,
+      });
+    }
   }
   return rows;
 }

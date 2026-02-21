@@ -181,6 +181,14 @@ enum ChallengeType {
   ONE_BOX             // Only use mystery box once
   PISTOL_ONLY         // Only use starting pistol
   NO_POWER            // Never turn on power
+  // IW speedruns (time-based; completionTimeSeconds required)
+  ROUND_30_SPEEDRUN
+  ROUND_50_SPEEDRUN
+  ROUND_70_SPEEDRUN
+  ROUND_100_SPEEDRUN
+  EASTER_EGG_SPEEDRUN
+  GHOST_AND_SKULLS
+  ALIENS_BOSS_FIGHT
 }
 
 // ============================================================================
@@ -334,6 +342,10 @@ model ChallengeLog {
   // Verification: user can request; admin approves or denies (denial creates notification)
   isVerified              Boolean     @default(false)
   verificationRequestedAt DateTime?   // when set and !isVerified = pending verification
+
+  // IW only: fortune cards (required for all IW maps); directors cut (optional)
+  useFortuneCards         Boolean?    // true = fate + fortune cards; false = fate cards only
+  useDirectorsCut         Boolean?    @default(false)  // directors cut mode
   
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt

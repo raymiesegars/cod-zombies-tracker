@@ -29,6 +29,7 @@ import { RoundCounter, LeaderboardEntry, RelockAchievementButton, ChallengeTypeI
 import { getPlayerCountLabel, cn } from '@/lib/utils';
 import { getAssetUrl } from '@/lib/assets';
 import { getBo4DifficultyLabel, BO4_DIFFICULTIES } from '@/lib/bo4';
+import { isIwGame, isIwSpeedrunChallengeType, IW_CHALLENGE_TYPES_ORDER } from '@/lib/iw';
 import { formatCompletionTime } from '@/components/ui/time-input';
 import type { MapWithDetails, LeaderboardEntry as LeaderboardEntryType, PlayerCount, ChallengeType } from '@/types';
 import {
@@ -53,6 +54,9 @@ import {
   ACHIEVEMENT_CATEGORY_LABELS,
   getAchievementCategory,
   getSortedCategoryKeys,
+  getNonSpeedrunCategoryFilterOptions,
+  getSpeedrunCategoryFilterOptions,
+  isSpeedrunCategory,
 } from '@/lib/achievements/categories';
 
 const BUILDABLE_PART_CACHE_KEY_PREFIX = 'buildable-parts';
@@ -196,12 +200,19 @@ function AchievementsTabContent({
   gameShortName?: string;
 }) {
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [speedrunFilter, setSpeedrunFilter] = useState<string>('');
   const [difficultyFilter, setDifficultyFilter] = useState<string>('');
 
   const isBo4 = gameShortName === 'BO4';
-  const achievementsFiltered = isBo4 && difficultyFilter
+  let achievementsFiltered = isBo4 && difficultyFilter
     ? (achievements ?? []).filter((a) => (a as { difficulty?: string | null }).difficulty === difficultyFilter)
     : (achievements ?? []);
+  if (categoryFilter) {
+    achievementsFiltered = achievementsFiltered.filter((a) => getAchievementCategory(a) === categoryFilter);
+  }
+  if (speedrunFilter) {
+    achievementsFiltered = achievementsFiltered.filter((a) => getAchievementCategory(a) === speedrunFilter);
+  }
 
   if (!achievements || achievements.length === 0) {
     return (
@@ -221,15 +232,21 @@ function AchievementsTabContent({
   }, {});
 
   const sortedCategories = getSortedCategoryKeys(byCategory as Record<string, unknown[]>);
-  const visibleCategories = categoryFilter ? (sortedCategories.includes(categoryFilter) ? [categoryFilter] : sortedCategories) : sortedCategories;
+  const nonSpeedrunCats = sortedCategories.filter((c) => !isSpeedrunCategory(c));
+  const speedrunCats = sortedCategories.filter((c) => isSpeedrunCategory(c));
+  const visibleCategories =
+    categoryFilter ? (sortedCategories.includes(categoryFilter) ? [categoryFilter] : sortedCategories)
+    : speedrunFilter ? (sortedCategories.includes(speedrunFilter) ? [speedrunFilter] : sortedCategories)
+    : sortedCategories;
 
-  const categoryOptions = [
-    { value: '', label: 'All types' },
-    ...sortedCategories.map((cat) => ({ value: cat, label: ACHIEVEMENT_CATEGORY_LABELS[cat] ?? cat })),
-  ];
+  const categoryOptions = getNonSpeedrunCategoryFilterOptions(nonSpeedrunCats.length ? nonSpeedrunCats : undefined);
+  const speedrunOptions = getSpeedrunCategoryFilterOptions(speedrunCats.length ? speedrunCats : undefined);
 
   const visibleCount = visibleCategories.reduce((sum, cat) => sum + (byCategory[cat]?.length ?? 0), 0);
-  const filterEmpty = (categoryFilter && visibleCount === 0) || (isBo4 && difficultyFilter && achievementsFiltered.length === 0);
+  const filterEmpty =
+    (categoryFilter && visibleCount === 0) ||
+    (speedrunFilter && visibleCount === 0) ||
+    (isBo4 && difficultyFilter && achievementsFiltered.length === 0);
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -238,9 +255,26 @@ function AchievementsTabContent({
         <Select
           options={categoryOptions}
           value={categoryFilter ?? ''}
-          onChange={(e) => setCategoryFilter(e.target.value || null)}
+          onChange={(e) => {
+            setCategoryFilter(e.target.value || null);
+            if (e.target.value) setSpeedrunFilter('');
+          }}
           className="w-full min-w-0 sm:w-48 max-w-full"
         />
+        {speedrunOptions.length > 1 && (
+          <>
+            <span className="text-xs font-medium text-bunker-400 w-full sm:w-auto">Speedruns:</span>
+            <Select
+              options={speedrunOptions}
+              value={speedrunFilter}
+              onChange={(e) => {
+                setSpeedrunFilter(e.target.value || '');
+                if (e.target.value) setCategoryFilter(null);
+              }}
+              className="w-full min-w-0 sm:w-44 max-w-full"
+            />
+          </>
+        )}
         {isBo4 && (
           <>
             <span className="text-xs font-medium text-bunker-400 w-full sm:w-auto mt-2 sm:mt-0">Difficulty:</span>
@@ -263,7 +297,7 @@ function AchievementsTabContent({
           <p className="text-bunker-400 text-sm sm:text-base">
             {isBo4 && difficultyFilter && achievementsFiltered.length === 0
               ? `No achievements for ${getBo4DifficultyLabel(difficultyFilter)} yet.`
-              : `No ${(ACHIEVEMENT_CATEGORY_LABELS[categoryFilter ?? ''] ?? categoryFilter ?? '').toLowerCase()} achievements on this map.`}
+              : `No ${(ACHIEVEMENT_CATEGORY_LABELS[categoryFilter || speedrunFilter || ''] ?? (categoryFilter || speedrunFilter || '')).toLowerCase()} achievements on this map.`}
           </p>
         </div>
       ) : (
@@ -334,7 +368,7 @@ function AchievementsTabContent({
   );
 }
 
-const challengeTypeLabels: Record<ChallengeType, string> = {
+const challengeTypeLabels: Record<string, string> = {
   HIGHEST_ROUND: 'Highest Round',
   NO_DOWNS: 'No Downs',
   NO_PERKS: 'No Perks',
@@ -343,6 +377,13 @@ const challengeTypeLabels: Record<ChallengeType, string> = {
   ONE_BOX: 'One Box Challenge',
   PISTOL_ONLY: 'Pistol Only',
   NO_POWER: 'No Power',
+  ROUND_30_SPEEDRUN: 'Round 30 Speedrun',
+  ROUND_50_SPEEDRUN: 'Round 50 Speedrun',
+  ROUND_70_SPEEDRUN: 'Round 70 Speedrun',
+  ROUND_100_SPEEDRUN: 'Round 100 Speedrun',
+  EASTER_EGG_SPEEDRUN: 'Easter Egg Speedrun',
+  GHOST_AND_SKULLS: 'Ghost and Skulls',
+  ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
 };
 
 type StepSection = { heading?: string; lines: string[] };
@@ -445,6 +486,8 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   /** Same as Leaderboards page: 'HIGHEST_ROUND', challenge type, or 'ee-time-{easterEggId}' */
   const [selectedLeaderboardCategory, setSelectedLeaderboardCategory] = useState<string>('HIGHEST_ROUND');
   const [leaderboardVerifiedOnly, setLeaderboardVerifiedOnly] = useState(false);
+  const [leaderboardFortuneCards, setLeaderboardFortuneCards] = useState<string>('false'); // 'false' = Fate only (default), 'true' = Fate & Fortune
+  const [leaderboardDirectorsCut, setLeaderboardDirectorsCut] = useState(false);
   const leaderboardSlugRef = useRef<string | null>(null);
 
   // Your runs for this map when logged in; URL ?tab=your-runs triggers fetch on load
@@ -538,6 +581,11 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           if (challengeType) params.set('challengeType', challengeType);
           if (map.game?.shortName === 'BO4' && selectedDifficulty) params.set('difficulty', selectedDifficulty);
           if (leaderboardVerifiedOnly) params.set('verified', 'true');
+          if (map.game?.shortName === 'IW') {
+            if (leaderboardFortuneCards === 'true') params.set('fortuneCards', 'true');
+            else if (leaderboardFortuneCards === 'false') params.set('fortuneCards', 'false');
+            if (leaderboardDirectorsCut) params.set('directorsCut', 'true');
+          }
           const res = await fetch(`/api/maps/${slug}/leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -553,7 +601,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     })();
     // Intentionally omit leaderboard.length / leaderboardFetchedOnce to avoid re-fetch loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly]);
+  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut]);
 
   // Sync activeTab with URL so switching to Your Runs triggers fetch
   useEffect(() => {
@@ -740,20 +788,21 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     { value: 'SQUAD', label: 'Squad' },
   ];
 
-  // Single category dropdown like Leaderboards page: Highest Round, all map challenges, all loggable EEs (Time)
-  const mapChallengeTypes = useMemo(
-    () => Array.from(new Set((map?.challenges ?? []).map((c) => c.type))),
-    [map?.challenges]
-  );
+  // Single category dropdown like Leaderboards page: Highest Round, all map challenges (IW in canonical order), all loggable EEs (Time)
+  const mapChallengeTypes = useMemo(() => {
+    const types = Array.from(new Set((map?.challenges ?? []).map((c) => c.type)));
+    if (map?.game?.shortName === 'IW' && types.length > 0) {
+      return IW_CHALLENGE_TYPES_ORDER.filter((t) => t !== 'HIGHEST_ROUND' && types.includes(t as ChallengeType));
+    }
+    return types.filter((t) => t !== 'HIGHEST_ROUND').sort((a, b) => a.localeCompare(b));
+  }, [map?.challenges, map?.game?.shortName]);
   const mainQuestEasterEggs = (map?.easterEggs ?? []).filter((ee) => ee.type === 'MAIN_QUEST');
   const leaderboardCategoryOptions = [
     { value: 'HIGHEST_ROUND', label: 'Highest Round' },
-    ...mapChallengeTypes
-      .filter((type) => type !== 'HIGHEST_ROUND')
-      .map((type) => ({
-        value: type,
-        label: challengeTypeLabels[type as ChallengeType] ?? type,
-      })),
+    ...mapChallengeTypes.map((type) => ({
+      value: type,
+      label: challengeTypeLabels[type] ?? type,
+    })),
     ...mainQuestEasterEggs.map((ee) => ({
       value: `ee-time-${ee.id}`,
       label: `${ee.name} (Time)` as string,
@@ -1037,6 +1086,14 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           {/* Easter Eggs Tab */}
           <TabsContent value="easter-eggs" forceMount>
             <div className="space-y-4">
+              {isIwGame(map?.game?.shortName) && sortedEasterEggs.length === 0 && (
+                <Card variant="bordered" className="border-bunker-700">
+                  <CardContent className="py-8 text-center">
+                    <p className="text-bunker-400 text-lg">Easter Eggs Coming Soon</p>
+                    <p className="text-bunker-500 text-sm mt-2">We&apos;re working on adding Easter Egg tracking for Infinite Warfare maps.</p>
+                  </CardContent>
+                </Card>
+              )}
               {/* Easter eggs list (on large screens buildables are in a separate column aligned with tabs) */}
               <div className="space-y-4 min-w-0">
                 {/* Category filter: on large screens no Buildables button (buildables are on the right) */}
@@ -1586,6 +1643,32 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                       <ShieldCheck className="w-4 h-4" />
                       {leaderboardVerifiedOnly ? 'Verified' : 'Unverified'}
                     </button>
+                    {isIwGame(map?.game?.shortName) && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setLeaderboardDirectorsCut((v) => !v)}
+                          className={cn(
+                            'flex items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors',
+                            leaderboardDirectorsCut
+                              ? 'border-blood-500/60 bg-blood-950/80 text-white hover:bg-blood-900/60'
+                              : 'border-bunker-600 bg-bunker-800/80 text-bunker-300 hover:bg-bunker-700/80'
+                          )}
+                          aria-pressed={leaderboardDirectorsCut}
+                        >
+                          Directors Cut
+                        </button>
+                        <Select
+                          options={[
+                            { value: 'false', label: 'Fate only' },
+                            { value: 'true', label: 'Fate & Fortune' },
+                          ]}
+                          value={leaderboardFortuneCards}
+                          onChange={(e) => setLeaderboardFortuneCards(e.target.value)}
+                          className="w-full min-w-0 sm:w-40 max-w-full"
+                        />
+                      </>
+                    )}
                   </div>
                 </div>
               </CardHeader>
@@ -1602,7 +1685,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                         entry={entry}
                         index={index}
                         isCurrentUser={entry.user.id === profile?.id}
-                        valueKind={selectedLeaderboardCategory.startsWith('ee-time-') ? 'time' : 'round'}
+                        valueKind={selectedLeaderboardCategory.startsWith('ee-time-') || isIwSpeedrunChallengeType(selectedLeaderboardCategory) ? 'time' : 'round'}
                         mapSlug={slug}
                       />
                     ))

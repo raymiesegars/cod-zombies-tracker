@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { PrismaClient } from '@prisma/client';
 import { RANKS, getRankIconPath } from '../src/lib/ranks';
-import { getMapAchievementDefinitions } from '../src/lib/achievements/seed-achievements';
+import { getMapAchievementDefinitions, getSpeedrunAchievementDefinitions } from '../src/lib/achievements/seed-achievements';
 import { getRoundCapForMap } from '../src/lib/achievements/map-round-config';
 
 // Load .env then .env.local (same order as Next.js) so seed uses the SAME DB as the app
@@ -106,10 +106,18 @@ async function main() {
     }),
     prisma.game.create({
       data: {
+        name: 'Infinite Warfare',
+        shortName: 'IW',
+        releaseYear: 2016,
+        order: 5,
+      },
+    }),
+    prisma.game.create({
+      data: {
         name: 'Black Ops 4',
         shortName: 'BO4',
         releaseYear: 2018,
-        order: 5,
+        order: 6,
       },
     }),
     prisma.game.create({
@@ -117,7 +125,7 @@ async function main() {
         name: 'Black Ops Cold War',
         shortName: 'BOCW',
         releaseYear: 2020,
-        order: 6,
+        order: 7,
       },
     }),
     prisma.game.create({
@@ -125,7 +133,7 @@ async function main() {
         name: 'Black Ops 6',
         shortName: 'BO6',
         releaseYear: 2024,
-        order: 7,
+        order: 8,
       },
     }),
     prisma.game.create({
@@ -133,7 +141,7 @@ async function main() {
         name: 'Black Ops 7',
         shortName: 'BO7',
         releaseYear: 2025,
-        order: 8,
+        order: 9,
       },
     }),
   ]);
@@ -180,6 +188,9 @@ async function main() {
       { name: 'Mob of the Dead', slug: 'mob-of-the-dead', isDlc: true, hasEasterEgg: true, order: 7, description: 'Uprising DLC. Alcatraz prison. Play as mobsters trying to escape purgatory.' },
       { name: 'Buried', slug: 'buried', isDlc: true, hasEasterEgg: true, order: 8, description: 'Vengeance DLC. An underground Wild West town. Features the friendly giant Leroy.' },
       { name: 'Origins', slug: 'origins', isDlc: true, hasEasterEgg: true, order: 9, description: 'Origins is the Apocalypse DLC finale for Black Ops II, set in WWI France where the Primis crew must build the four elemental staffs (Ice, Fire, Wind, Lightning) and free Samantha from the clutches of the Apothicons beneath the excavation site.' },
+    ],
+    IW: [
+      { name: 'Zombies in Spaceland', slug: 'zombies-in-spaceland', isDlc: false, hasEasterEgg: true, order: 1, imageUrl: '/images/maps/zombies-in-spaceland.webp', description: 'An 80s theme park overrun by zombies. Features arcade games, roller coasters, and David Hasselhoff.' },
     ],
     BO3: [
       { name: 'Shadows of Evil', slug: 'shadows-of-evil', isDlc: false, hasEasterEgg: true, order: 1, description: 'A noir 1940s city. Four strangers must stop the Shadowman.' },
@@ -261,7 +272,7 @@ async function main() {
   console.log(`Created ${createdMaps.length} maps`);
 
   // Create challenges for each map
-  const challengeTypes = [
+  const roundChallengeTypes = [
     { type: 'HIGHEST_ROUND', name: 'Highest Round', description: 'Reach the highest round possible' },
     { type: 'NO_DOWNS', name: 'No Downs', description: 'Survive without going down' },
     { type: 'NO_PERKS', name: 'No Perks', description: 'Survive without purchasing any perks' },
@@ -272,21 +283,50 @@ async function main() {
     { type: 'NO_POWER', name: 'No Power', description: 'Never turn on the power' },
   ];
 
+  const iwSpeedrunTypes = [
+    { type: 'ROUND_30_SPEEDRUN', name: 'Round 30 Speedrun', description: 'Reach round 30 as fast as possible' },
+    { type: 'ROUND_50_SPEEDRUN', name: 'Round 50 Speedrun', description: 'Reach round 50 as fast as possible' },
+    { type: 'ROUND_70_SPEEDRUN', name: 'Round 70 Speedrun', description: 'Reach round 70 as fast as possible' },
+    { type: 'ROUND_100_SPEEDRUN', name: 'Round 100 Speedrun', description: 'Reach round 100 as fast as possible' },
+    { type: 'EASTER_EGG_SPEEDRUN', name: 'Easter Egg Speedrun', description: 'Complete the main Easter egg as fast as possible' },
+    { type: 'GHOST_AND_SKULLS', name: 'Ghost and Skulls', description: 'Complete Ghost and Skulls as fast as possible' },
+    { type: 'ALIENS_BOSS_FIGHT', name: 'Aliens Boss Fight', description: 'Defeat the Aliens boss as fast as possible' },
+  ];
+
   let challengeCount = 0;
-  
+
   for (const map of createdMaps) {
-    for (const challengeInfo of challengeTypes) {
+    const gameShortName = games.find((g) => g.id === map.gameId)?.shortName ?? '';
+    const isIw = gameShortName === 'IW';
+
+    for (const challengeInfo of roundChallengeTypes) {
       await prisma.challenge.create({
         data: {
           name: challengeInfo.name,
           slug: challengeInfo.type.toLowerCase().replace(/_/g, '-'),
           type: challengeInfo.type as any,
           mapId: map.id,
-          xpReward: 0, // XP is now calculated dynamically
+          xpReward: 0,
           description: challengeInfo.description,
         },
       });
       challengeCount++;
+    }
+
+    if (isIw) {
+      for (const challengeInfo of iwSpeedrunTypes) {
+        await prisma.challenge.create({
+          data: {
+            name: challengeInfo.name,
+            slug: challengeInfo.type.toLowerCase().replace(/_/g, '-'),
+            type: challengeInfo.type as any,
+            mapId: map.id,
+            xpReward: 0,
+            description: challengeInfo.description,
+          },
+        });
+        challengeCount++;
+      }
     }
   }
 
@@ -329,7 +369,9 @@ async function main() {
   let achievementCount = 0;
   for (const map of allMaps) {
     const gameShortName = map.game?.shortName ?? '';
-    const defs = getMapAchievementDefinitions(map.slug, map.roundCap, gameShortName);
+    const mapDefs = getMapAchievementDefinitions(map.slug, map.roundCap, gameShortName);
+    const speedrunDefs = getSpeedrunAchievementDefinitions(map.slug, gameShortName);
+    const defs = [...mapDefs, ...speedrunDefs];
     const challengesByType = Object.fromEntries(map.challenges.map((c) => [c.type, c]));
 
     for (const def of defs) {

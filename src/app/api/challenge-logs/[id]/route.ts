@@ -8,6 +8,7 @@ import { revokeAchievementsForMapAfterDelete } from '@/lib/achievements';
 import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
 import { createCoOpRunPendingsForChallengeLog } from '@/lib/coop-pending';
 import { isBo4Game, BO4_DIFFICULTIES } from '@/lib/bo4';
+import { isIwGame, isIwSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType } from '@/lib/iw';
 import type { Bo4Difficulty } from '@prisma/client';
 
 type Params = { params: Promise<{ id: string }> };
@@ -127,11 +128,18 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       ? (Array.isArray(body.teammateNonUserNames) ? body.teammateNonUserNames.filter((n: unknown) => typeof n === 'string').slice(0, 10) : [])
       : undefined;
     const requestVerification = body.requestVerification === undefined ? undefined : Boolean(body.requestVerification);
+    const useFortuneCards = body.useFortuneCards !== undefined ? (body.useFortuneCards === true || body.useFortuneCards === false ? body.useFortuneCards : undefined) : undefined;
+    const useDirectorsCut = body.useDirectorsCut !== undefined ? Boolean(body.useDirectorsCut) : undefined;
+
+    const mapWithGame = log.map ?? await prisma.map.findUnique({ where: { id: log.mapId }, include: { game: { select: { shortName: true } } } });
+    const gameShortName = (mapWithGame as { game?: { shortName?: string } })?.game?.shortName;
+    if (isIwGame(gameShortName) && useFortuneCards !== undefined && useFortuneCards !== true && useFortuneCards !== false) {
+      return NextResponse.json({ error: 'IW maps require useFortuneCards: true or false' }, { status: 400 });
+    }
 
     let difficulty: Bo4Difficulty | undefined;
     if (body.difficulty !== undefined) {
-      const mapWithGame = log.map ?? await prisma.map.findUnique({ where: { id: log.mapId }, include: { game: { select: { shortName: true } } } });
-      if (isBo4Game((mapWithGame as { game?: { shortName?: string } })?.game?.shortName)) {
+      if (isBo4Game(gameShortName)) {
         if (!body.difficulty || !BO4_DIFFICULTIES.includes(body.difficulty as any)) {
           return NextResponse.json({ error: 'BO4 maps require difficulty: CASUAL, NORMAL, HARDCORE, or REALISTIC' }, { status: 400 });
         }
@@ -141,6 +149,16 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
     if (roundReached !== undefined && (Number.isNaN(roundReached) || roundReached < 1)) {
       return NextResponse.json({ error: 'Invalid roundReached' }, { status: 400 });
+    }
+    const challenge = log.challenge;
+    if (roundReached !== undefined && challenge && isIwSpeedrunChallengeType(challenge.type)) {
+      const minRound = getMinRoundForSpeedrunChallengeType(challenge.type);
+      if (roundReached < minRound) {
+        return NextResponse.json(
+          { error: `Round must be at least ${minRound} for this challenge (e.g. Round ${minRound} Speedrun requires round ${minRound}+).` },
+          { status: 400 }
+        );
+      }
     }
 
     if (requestVerification === true) {
@@ -170,6 +188,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         ...(requestVerification !== undefined && {
           verificationRequestedAt: requestVerification ? new Date() : null,
         }),
+        ...(useFortuneCards !== undefined && { useFortuneCards }),
+        ...(useDirectorsCut !== undefined && { useDirectorsCut }),
       },
       include: {
         challenge: true,

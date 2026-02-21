@@ -8,9 +8,32 @@ export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
   ONE_BOX: 'One Box Challenge',
   PISTOL_ONLY: 'Pistol Only',
   NO_POWER: 'No Power',
+  // IW speedrun categories
+  ROUND_30_SPEEDRUN: 'Round 30 Speedrun',
+  ROUND_50_SPEEDRUN: 'Round 50 Speedrun',
+  ROUND_70_SPEEDRUN: 'Round 70 Speedrun',
+  ROUND_100_SPEEDRUN: 'Round 100 Speedrun',
+  EASTER_EGG_SPEEDRUN: 'Easter Egg Speedrun',
+  GHOST_AND_SKULLS: 'Ghost and Skulls',
+  ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
   EASTER_EGG: 'Easter Egg',
   OTHER: 'Other',
 };
+
+/** Speedrun-only categories (IW and similar); used to split first filter = non-speedrun, second = Speedruns */
+export const SPEEDRUN_CATEGORIES: string[] = [
+  'ROUND_30_SPEEDRUN',
+  'ROUND_50_SPEEDRUN',
+  'ROUND_70_SPEEDRUN',
+  'ROUND_100_SPEEDRUN',
+  'EASTER_EGG_SPEEDRUN',
+  'GHOST_AND_SKULLS',
+  'ALIENS_BOSS_FIGHT',
+];
+
+export function isSpeedrunCategory(cat: string): boolean {
+  return SPEEDRUN_CATEGORIES.includes(cat);
+}
 
 const CATEGORY_ORDER = [
   'EASTER_EGG',
@@ -22,6 +45,13 @@ const CATEGORY_ORDER = [
   'ONE_BOX',
   'PISTOL_ONLY',
   'NO_POWER',
+  'ROUND_30_SPEEDRUN',
+  'ROUND_50_SPEEDRUN',
+  'ROUND_70_SPEEDRUN',
+  'ROUND_100_SPEEDRUN',
+  'EASTER_EGG_SPEEDRUN',
+  'GHOST_AND_SKULLS',
+  'ALIENS_BOSS_FIGHT',
   'OTHER',
 ];
 
@@ -43,6 +73,30 @@ export function getAchievementCategoryFilterOptions(): { value: string; label: s
   return [
     { value: '', label: 'All types' },
     ...categories.map((c) => ({ value: c, label: ACHIEVEMENT_CATEGORY_LABELS[c] ?? c })),
+  ];
+}
+
+/** First filter: non-speedrun categories only (All types + Base Rounds, No Downs, etc.). Pass existing categories to restrict to those present. */
+export function getNonSpeedrunCategoryFilterOptions(
+  existingCategories?: string[]
+): { value: string; label: string }[] {
+  const nonSpeedrun =
+    existingCategories ?? CATEGORY_ORDER.filter((c) => c !== 'OTHER' && !isSpeedrunCategory(c));
+  return [
+    { value: '', label: 'All types' },
+    ...nonSpeedrun.map((c) => ({ value: c, label: ACHIEVEMENT_CATEGORY_LABELS[c] ?? c })),
+  ];
+}
+
+/** Second filter: Speedruns dropdown (All + each speedrun category present) */
+export function getSpeedrunCategoryFilterOptions(
+  existingCategories?: string[]
+): { value: string; label: string }[] {
+  const list = existingCategories ?? SPEEDRUN_CATEGORIES;
+  const speedrunCats = list.filter((c) => isSpeedrunCategory(c));
+  return [
+    { value: '', label: 'All' },
+    ...speedrunCats.map((c) => ({ value: c, label: ACHIEVEMENT_CATEGORY_LABELS[c] ?? c })),
   ];
 }
 
