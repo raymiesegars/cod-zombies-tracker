@@ -191,6 +191,7 @@ async function main() {
     ],
     IW: [
       { name: 'Zombies in Spaceland', slug: 'zombies-in-spaceland', isDlc: false, hasEasterEgg: true, order: 1, imageUrl: '/images/maps/zombies-in-spaceland.webp', description: 'An 80s theme park overrun by zombies. Features arcade games, roller coasters, and David Hasselhoff.' },
+      { name: 'Rave in the Redwoods', slug: 'rave-in-the-redwoods', isDlc: false, hasEasterEgg: true, order: 2, imageUrl: '/images/maps/rave-in-the-redwoods.webp', description: 'A campground and rave in the redwoods. Obtain the second piece of the Soul Key in the Locksmith main quest.' },
     ],
     BO3: [
       { name: 'Shadows of Evil', slug: 'shadows-of-evil', isDlc: false, hasEasterEgg: true, order: 1, description: 'A noir 1940s city. Four strangers must stop the Shadowman.' },
