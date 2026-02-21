@@ -21,11 +21,21 @@ function parsePreferences(raw: unknown): MapsPagePreferences | null {
   };
 }
 
+function jsonResponse(data: { gameOrder: string[]; hasSeenSetupModal: boolean }, status = 200) {
+  return NextResponse.json(data, {
+    status,
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+      Pragma: 'no-cache',
+    },
+  });
+}
+
 export async function GET() {
   try {
     const supabaseUser = await getUser();
     if (!supabaseUser) {
-      return NextResponse.json({ gameOrder: [], hasSeenSetupModal: false });
+      return jsonResponse({ gameOrder: [], hasSeenSetupModal: false });
     }
 
     const user = await prisma.user.findUnique({
@@ -34,21 +44,21 @@ export async function GET() {
     });
 
     if (!user?.mapsPagePreferences) {
-      return NextResponse.json({ gameOrder: [], hasSeenSetupModal: false });
+      return jsonResponse({ gameOrder: [], hasSeenSetupModal: false });
     }
 
     const prefs = parsePreferences(user.mapsPagePreferences);
     if (!prefs) {
-      return NextResponse.json({ gameOrder: [], hasSeenSetupModal: false });
+      return jsonResponse({ gameOrder: [], hasSeenSetupModal: false });
     }
 
-    return NextResponse.json({
+    return jsonResponse({
       gameOrder: prefs.gameOrder ?? [],
       hasSeenSetupModal: prefs.hasSeenSetupModal ?? false,
     });
   } catch (error) {
     console.error('GET /api/me/maps-page-preferences', error);
-    return NextResponse.json({ gameOrder: [], hasSeenSetupModal: false });
+    return jsonResponse({ gameOrder: [], hasSeenSetupModal: false });
   }
 }
 
