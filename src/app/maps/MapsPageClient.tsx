@@ -10,6 +10,25 @@ import type { MapWithGame, Game } from '@/types';
 import type { UserMapStats } from '@/types';
 import { Search, Filter, X, Settings } from 'lucide-react';
 
+const MAPS_PAGE_SETUP_SEEN_KEY = 'maps-page-setup-seen';
+
+function getMapsPageSetupSeenFromStorage(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return localStorage.getItem(MAPS_PAGE_SETUP_SEEN_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function setMapsPageSetupSeenInStorage() {
+  try {
+    if (typeof window !== 'undefined') localStorage.setItem(MAPS_PAGE_SETUP_SEEN_KEY, '1');
+  } catch {
+    // ignore
+  }
+}
+
 type Props = {
   initialMaps: MapWithGame[];
   initialGames: Game[];
@@ -56,10 +75,15 @@ export function MapsPageClient({ initialMaps, initialGames }: Props) {
       if (res?.ok) {
         const data = await res.json();
         setMapsPageGameOrder(Array.isArray(data.gameOrder) ? data.gameOrder : []);
-        setMapsPageHasSeenSetup(Boolean(data.hasSeenSetupModal));
+        const fromServer = Boolean(data.hasSeenSetupModal);
+        const fromStorage = getMapsPageSetupSeenFromStorage();
+        const hasSeen = fromServer || fromStorage;
+        if (fromServer) setMapsPageSetupSeenInStorage();
+        setMapsPageHasSeenSetup(hasSeen);
       }
     } catch {
-      // keep defaults
+      // On fetch error (e.g. deployment auth issue), fall back to localStorage so modal doesn't show every time
+      setMapsPageHasSeenSetup(getMapsPageSetupSeenFromStorage());
     } finally {
       setMapsPagePrefsLoaded(true);
     }
@@ -71,7 +95,11 @@ export function MapsPageClient({ initialMaps, initialGames }: Props) {
 
   useEffect(() => {
     if (authUser) fetchMapsPagePrefs();
-    else setMapsPagePrefsLoaded(true);
+    else {
+      // Don't set mapsPagePrefsLoaded true here: on refresh auth loads after first paint,
+      // and we'd show the modal before the prefs fetch runs. Only set loaded when fetch finishes.
+      setMapsPagePrefsLoaded(false);
+    }
   }, [authUser, fetchMapsPagePrefs]);
 
   useEffect(() => {
@@ -95,7 +123,10 @@ export function MapsPageClient({ initialMaps, initialGames }: Props) {
       if (!res.ok) throw new Error('Failed to save');
       const data = await res.json();
       setMapsPageGameOrder(Array.isArray(data.gameOrder) ? data.gameOrder : []);
-      if (markSetupSeen) setMapsPageHasSeenSetup(true);
+      if (markSetupSeen) {
+        setMapsPageHasSeenSetup(true);
+        setMapsPageSetupSeenInStorage();
+      }
     },
     []
   );
@@ -320,6 +351,7 @@ export function MapsPageClient({ initialMaps, initialGames }: Props) {
           onClose={(closedWithoutSave) => {
             // When closing the first-time modal without saving (Cancel/X/backdrop), still mark setup as seen so it doesn't show on every visit
             if (closedWithoutSave !== false && showGameOrderFirstTime) {
+              setMapsPageSetupSeenInStorage();
               saveMapsPagePrefs(mapsPageGameOrder, true).then(
                 () => setMapsPageHasSeenSetup(true),
                 () => {}

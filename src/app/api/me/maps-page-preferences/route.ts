@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getSession, getUser } from '@/lib/supabase/server';
+import { getUser } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,9 +37,7 @@ function jsonResponse(data: { gameOrder: string[]; hasSeenSetupModal: boolean },
 
 export async function GET() {
   try {
-    // Prefer session from cookies first (avoids getUser() returning null when JWT check fails or is slow)
-    const session = await getSession();
-    const supabaseUser = session?.user ?? (await getUser());
+    const supabaseUser = await getUser();
     if (!supabaseUser) {
       return jsonResponse({ gameOrder: [], hasSeenSetupModal: false });
     }
