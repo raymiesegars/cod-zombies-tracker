@@ -353,8 +353,8 @@ function AchievementsSection({
                                 key={a.id}
                                 className={
                                   unlocked
-                                    ? 'flex items-center justify-between gap-3 py-2 px-3 rounded-lg bg-military-950/30 border border-military-800/50'
-                                    : 'flex items-center justify-between gap-3 py-2 px-3 rounded-lg bg-bunker-800/30 border border-bunker-700/50'
+                                    ? 'flex items-center justify-between gap-3 py-2 pl-3 pr-4 rounded-lg bg-military-950/30 border border-military-800/50'
+                                    : 'flex items-center justify-between gap-3 py-2 pl-3 pr-4 rounded-lg bg-bunker-800/30 border border-bunker-700/50'
                                 }
                               >
                                 <div className="flex items-center gap-3 min-w-0 min-h-[2.75rem]">

@@ -318,7 +318,7 @@ function AchievementsTabContent({
               {ACHIEVEMENT_CATEGORY_LABELS[cat] ?? cat}
             </CardTitle>
           </CardHeader>
-          <CardContent className="py-4 pl-6 pr-2">
+          <CardContent className="py-4 pl-6 pr-4">
             <ul className="space-y-2 min-w-0 w-full">
               {(byCategory[cat]!).map((a) => {
                 const unlocked = unlockedSet.has(a.id);
@@ -330,8 +330,8 @@ function AchievementsTabContent({
                   <li
                     key={a.id}
                     className={unlocked
-                      ? 'grid grid-cols-[1fr_auto] items-center gap-x-3 py-2 pl-3 pr-1 rounded-lg bg-military-950/30 border border-military-800/50 min-w-0'
-                      : 'grid grid-cols-[1fr_auto] items-center gap-x-3 py-2 pl-3 pr-1 rounded-lg bg-bunker-800/30 border border-bunker-700/50 min-w-0'
+                      ? 'grid grid-cols-[1fr_auto] items-center gap-x-3 py-2 pl-3 pr-4 rounded-lg bg-military-950/30 border border-military-800/50 min-w-0'
+                      : 'grid grid-cols-[1fr_auto] items-center gap-x-3 py-2 pl-3 pr-4 rounded-lg bg-bunker-800/30 border border-bunker-700/50 min-w-0'
                     }
                   >
                     <div className="flex items-center gap-3 min-w-0 min-h-[2.75rem] overflow-hidden">
