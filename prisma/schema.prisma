@@ -609,6 +609,9 @@ model Notification {
   message          String?          @db.Text  // for VERIFICATION_DENIED: admin's reason; for FRIEND_*: optional context
   read             Boolean          @default(false)
   createdAt        DateTime         @default(now())
+  // VERIFICATION_APPROVED only: XP gained from this verification (for verified XP toast)
+  verifiedXpGained Int?
+  verifiedTotalXp  Int?
 
   @@index([userId])
   @@index([userId, read])

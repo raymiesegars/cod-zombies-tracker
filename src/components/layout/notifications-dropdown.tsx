@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { dispatchXpToast } from '@/context/xp-toast-context';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, ShieldCheck, ShieldOff, Loader2, CheckCheck, Trash2, UserPlus, UserMinus, Check, X } from 'lucide-react';
@@ -16,6 +17,8 @@ type NotificationItem = {
   logType: string;
   logId: string | null;
   friendRequestId?: string;
+  verifiedXpGained?: number;
+  verifiedTotalXp?: number;
 };
 
 export function NotificationsDropdown() {
@@ -25,14 +28,31 @@ export function NotificationsDropdown() {
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<'read-all' | 'clear' | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const shownVerifiedToastIds = useRef<Set<string>>(new Set());
 
   const fetchNotifications = () => {
     setLoading(true);
     fetch('/api/me/notifications', { credentials: 'same-origin', cache: 'no-store' })
       .then((res) => (res.ok ? res.json() : { unreadCount: 0, notifications: [] }))
       .then((data) => {
+        const list = data.notifications ?? [];
         setUnreadCount(data.unreadCount ?? 0);
-        setNotifications(data.notifications ?? []);
+        setNotifications(list);
+        // When user is online and receives VERIFICATION_APPROVED with XP, show verified XP toast
+        const verified = list.find(
+          (n: NotificationItem) =>
+            n.type === 'VERIFICATION_APPROVED' &&
+            typeof n.verifiedXpGained === 'number' &&
+            n.verifiedXpGained > 0 &&
+            !shownVerifiedToastIds.current.has(n.id)
+        ) as NotificationItem | undefined;
+        if (verified) {
+          shownVerifiedToastIds.current.add(verified.id);
+          dispatchXpToast(verified.verifiedXpGained!, {
+            totalXp: verified.verifiedTotalXp,
+            verified: true,
+          });
+        }
       })
       .catch(() => {
         setUnreadCount(0);
@@ -51,6 +71,18 @@ export function NotificationsDropdown() {
       window.removeEventListener('cod-tracker-notifications-refresh', onRefresh);
     };
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (ref.current && !ref.current.contains(target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [open]);
 
   const markRead = (id: string) => {
     fetch(`/api/me/notifications/${id}/read`, { method: 'PATCH', credentials: 'same-origin' }).then(() => {
@@ -144,13 +176,13 @@ export function NotificationsDropdown() {
       <AnimatePresence>
         {open && (
           <>
-            <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} aria-hidden />
+            <div className="fixed inset-0 z-[90]" onClick={() => setOpen(false)} aria-hidden />
             <motion.div
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.15 }}
-              className="absolute top-full right-0 mt-1.5 w-80 max-w-[calc(100vw-2rem)] max-h-[70vh] overflow-hidden flex flex-col bg-bunker-900 border border-bunker-700 rounded-lg shadow-xl z-20"
+              className="absolute top-full right-0 mt-1.5 w-80 max-w-[calc(100vw-2rem)] max-h-[70vh] overflow-hidden flex flex-col bg-bunker-900 border border-bunker-700 rounded-lg shadow-xl z-[100]"
             >
               <div className="flex-shrink-0 px-3 py-2 border-b border-bunker-700 flex items-center justify-between">
                 <span className="text-sm font-semibold text-white">Notifications</span>

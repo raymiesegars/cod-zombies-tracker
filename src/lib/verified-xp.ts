@@ -3,9 +3,19 @@ import prisma from '@/lib/prisma';
 /**
  * When a run is verified, grant verified status to all map-specific achievements
  * the user has unlocked on that map, and recalculate their verifiedTotalXp.
+ * Returns the new verifiedTotalXp and the XP gained from this verification.
  */
-export async function grantVerifiedAchievementsForMap(userId: string, mapId: string) {
+export async function grantVerifiedAchievementsForMap(
+  userId: string,
+  mapId: string
+): Promise<{ verifiedTotalXp: number; xpGained: number }> {
   const now = new Date();
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { verifiedTotalXp: true },
+  });
+  const previousVerifiedTotalXp = user?.verifiedTotalXp ?? 0;
 
   // Get all map-specific achievements for this map
   const mapAchievementIds = await prisma.achievement.findMany({
@@ -13,7 +23,9 @@ export async function grantVerifiedAchievementsForMap(userId: string, mapId: str
     select: { id: true, xpReward: true },
   });
 
-  if (mapAchievementIds.length === 0) return;
+  if (mapAchievementIds.length === 0) {
+    return { verifiedTotalXp: previousVerifiedTotalXp, xpGained: 0 };
+  }
 
   // Update UserAchievement: set verifiedAt for any unlocked achievement on this map that isn't already verified
   await prisma.userAchievement.updateMany({
@@ -36,4 +48,7 @@ export async function grantVerifiedAchievementsForMap(userId: string, mapId: str
     where: { id: userId },
     data: { verifiedTotalXp },
   });
+
+  const xpGained = Math.max(0, verifiedTotalXp - previousVerifiedTotalXp);
+  return { verifiedTotalXp, xpGained };
 }

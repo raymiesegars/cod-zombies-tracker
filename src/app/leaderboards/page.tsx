@@ -439,20 +439,38 @@ export default function LeaderboardsPage() {
                 />
               )}
               {isRankView && (
-                <button
-                  type="button"
-                  onClick={() => setRankVerifiedXpOnly((v) => !v)}
-                  className={cn(
-                    'flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors min-h-[40px]',
-                    rankVerifiedXpOnly
-                      ? 'border-blue-500/60 bg-blue-950/80 text-blue-200 hover:bg-blue-900/60'
-                      : 'border-bunker-600 bg-bunker-800/80 text-bunker-300 hover:bg-bunker-700/80'
-                  )}
-                  aria-pressed={rankVerifiedXpOnly}
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  {rankVerifiedXpOnly ? 'Verified XP' : 'Total XP'}
-                </button>
+                <div className="flex flex-col gap-1.5 min-w-0">
+                  <span className="text-xs font-medium text-bunker-500">Rank by:</span>
+                  <div className="inline-flex rounded-lg border border-bunker-600 p-1 bg-bunker-800/80 w-fit">
+                    <button
+                      type="button"
+                      onClick={() => setRankVerifiedXpOnly(false)}
+                      className={cn(
+                        'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
+                        !rankVerifiedXpOnly
+                          ? 'bg-bunker-700 text-white shadow-sm'
+                          : 'text-bunker-400 hover:text-bunker-300'
+                      )}
+                      aria-pressed={!rankVerifiedXpOnly}
+                    >
+                      Total XP
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRankVerifiedXpOnly(true)}
+                      className={cn(
+                        'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
+                        rankVerifiedXpOnly
+                          ? 'bg-blue-600 text-white shadow-sm'
+                          : 'text-bunker-400 hover:text-bunker-300'
+                      )}
+                      aria-pressed={rankVerifiedXpOnly}
+                    >
+                      <CheckCircle2 className="w-4 h-4 shrink-0" aria-hidden />
+                      Verified XP
+                    </button>
+                  </div>
+                </div>
               )}
               {!isRankView && (
                 <button

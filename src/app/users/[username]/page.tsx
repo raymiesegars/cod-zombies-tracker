@@ -760,64 +760,71 @@ export default function UserProfilePage() {
                 </HelpTrigger>
               </div>
 
-              {/* Friend count and Add Friend / Request sent / Accept-Deny */}
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 mt-3 sm:mt-4">
-                <div className="flex items-center gap-2 text-xs sm:text-sm text-bunker-400">
-                  <UserPlus className="w-4 h-4" />
-                  <span>{friendCount} {friendCount === 1 ? 'friend' : 'friends'}</span>
-                </div>
-                {!isOwnProfile && currentProfile && (
-                  <>
-                    {friendshipStatus === null && (
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={handleAddFriend}
-                        disabled={friendActionLoading !== null}
-                        leftIcon={friendActionLoading === 'add' ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
-                      >
-                        {friendActionLoading === 'add' ? 'Sending…' : 'Add friend'}
-                      </Button>
-                    )}
-                    {friendshipStatus === 'pending_sent' && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-bunker-600 bg-bunker-800/50 text-sm text-bunker-300">
-                        Request sent
-                      </span>
-                    )}
-                    {friendshipStatus === 'pending_received' && (
-                      <div className="flex items-center gap-2">
+              {/* Friends, join date, and bio – responsive flex layout */}
+              <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-start gap-3 sm:gap-4 lg:gap-6 mt-3 sm:mt-4">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3">
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-bunker-400">
+                    <UserPlus className="w-4 h-4 shrink-0" />
+                    <span>{friendCount} {friendCount === 1 ? 'friend' : 'friends'}</span>
+                  </div>
+                  {!isOwnProfile && currentProfile && (
+                    <>
+                      {friendshipStatus === null && (
                         <Button
                           variant="primary"
                           size="sm"
-                          onClick={handleAcceptFriend}
+                          onClick={handleAddFriend}
                           disabled={friendActionLoading !== null}
-                          leftIcon={friendActionLoading === 'accept' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                          className="!bg-element-600 hover:!bg-element-500"
+                          leftIcon={friendActionLoading === 'add' ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
                         >
-                          {friendActionLoading === 'accept' ? 'Accepting…' : 'Accept'}
+                          {friendActionLoading === 'add' ? 'Sending…' : 'Add friend'}
                         </Button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={handleDenyFriend}
-                          disabled={friendActionLoading !== null}
-                          leftIcon={friendActionLoading === 'deny' ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
-                        >
-                          {friendActionLoading === 'deny' ? 'Denying…' : 'Deny'}
-                        </Button>
-                      </div>
-                    )}
-                  </>
+                      )}
+                      {friendshipStatus === 'pending_sent' && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-bunker-600 bg-bunker-800/50 text-sm text-bunker-300">
+                          Request sent
+                        </span>
+                      )}
+                      {friendshipStatus === 'pending_received' && (
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={handleAcceptFriend}
+                            disabled={friendActionLoading !== null}
+                            leftIcon={friendActionLoading === 'accept' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                            className="!bg-element-600 hover:!bg-element-500"
+                          >
+                            {friendActionLoading === 'accept' ? 'Accepting…' : 'Accept'}
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={handleDenyFriend}
+                            disabled={friendActionLoading !== null}
+                            leftIcon={friendActionLoading === 'deny' ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
+                          >
+                            {friendActionLoading === 'deny' ? 'Denying…' : 'Deny'}
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+                <div className="flex items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm text-bunker-400 shrink-0">
+                  <Calendar className="w-4 h-4 shrink-0" />
+                  Joined {new Date(profile.createdAt).toLocaleDateString('en-US', {
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </div>
+                {profile.bio && profile.bio.trim() && (
+                  <div className="w-full sm:max-w-xs lg:max-w-sm sm:flex-1 sm:min-w-0">
+                    <p className="text-xs sm:text-sm text-bunker-300 line-clamp-3 break-words">
+                      {profile.bio.trim()}
+                    </p>
+                  </div>
                 )}
-              </div>
-
-              {/* Join date */}
-              <div className="flex items-center justify-center sm:justify-start gap-2 text-xs sm:text-sm text-bunker-400 mt-3 sm:mt-4">
-                <Calendar className="w-4 h-4" />
-                Joined {new Date(profile.createdAt).toLocaleDateString('en-US', {
-                  month: 'long',
-                  year: 'numeric',
-                })}
               </div>
             </div>
           </div>

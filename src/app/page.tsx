@@ -32,7 +32,7 @@ const features = [
 const statsConfig: { label: string; value?: string; key?: 'maps' }[] = [
   { label: 'Maps', key: 'maps' },
   { label: 'Challenge Types', value: '10+' },
-  { label: 'Achievements', value: '100+' },
+  { label: 'Achievements', value: '4,000+' },
 ];
 
 export default function HomePage() {
@@ -133,7 +133,7 @@ export default function HomePage() {
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 hidden sm:block">
+        <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 hidden sm:block">
           <div className="w-6 h-10 border-2 border-blood-800/40 rounded-full flex justify-center pt-2">
             <div className="w-1.5 h-3 bg-blood-700 rounded-full" />
           </div>
