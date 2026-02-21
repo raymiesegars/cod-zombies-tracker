@@ -297,13 +297,6 @@ export default function EditMapProgressPage() {
     if (isAdding) setEeTabValue('ee-none');
     setSelectedChallengeIds((prev) => {
       const next = new Set(prev);
-      const challenge = map?.challenges.find((c) => c.id === challengeId);
-      const isSpeedrun = challenge && isIwSpeedrunChallengeType(challenge.type);
-      if (isAdding && isSpeedrun) {
-        (map?.challenges ?? []).forEach((c) => {
-          if (isIwSpeedrunChallengeType(c.type)) next.delete(c.id);
-        });
-      }
       if (next.has(challengeId)) next.delete(challengeId);
       else next.add(challengeId);
       return next;
