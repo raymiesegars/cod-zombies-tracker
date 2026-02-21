@@ -20,7 +20,11 @@ import { formatCompletionTime } from '@/components/ui/time-input';
 import { getAssetUrl } from '@/lib/assets';
 import { RoundCounter, ProofEmbed, ChallengeTypeIcon, UserWithRank } from '@/components/game';
 import { getBo4DifficultyLabel } from '@/lib/bo4';
-import { ChevronLeft, FileText, ExternalLink, Clock, Pencil, Trash2, Users, ShieldCheck, ShieldOff, Loader2, Check } from 'lucide-react';
+import { getBo3GobbleGumLabel } from '@/lib/bo3';
+import { getBocwSupportLabel } from '@/lib/bocw';
+import { getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
+import { getBo7SupportLabel } from '@/lib/bo7';
+import { ChevronLeft, FileText, ExternalLink, Clock, Pencil, Trash2, Users, ShieldCheck, ShieldOff, Loader2, Check, Lock } from 'lucide-react';
 
 function DeleteRunButton({
   logId,
@@ -142,6 +146,17 @@ type ChallengeLogDetail = {
   teammateNonUserNames?: string[];
   isVerified?: boolean;
   verificationRequestedAt?: string | null;
+  // Game-specific toggles
+  useFortuneCards?: boolean | null;
+  useDirectorsCut?: boolean | null;
+  bo3GobbleGumMode?: string | null;
+  bo4ElixirMode?: string | null;
+  bocwSupportMode?: string | null;
+  bo6GobbleGumMode?: string | null;
+  bo6SupportMode?: string | null;
+  bo7SupportMode?: string | null;
+  bo7IsCursedRun?: boolean | null;
+  bo7RelicsUsed?: string[];
 };
 
 type EasterEggLogDetail = {
@@ -512,6 +527,77 @@ export default function RunDetailPage() {
                       <span className="text-white font-medium">{getBo4DifficultyLabel((log as ChallengeLogDetail).difficulty)}</span>
                     </div>
                   )}
+                  {/* Game-specific metadata */}
+                  {map.game.shortName === 'IW' && (log as ChallengeLogDetail).useFortuneCards != null && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">Fortune Cards</span>
+                      <span className="text-white font-medium">
+                        {(log as ChallengeLogDetail).useFortuneCards ? 'Fate & Fortune' : 'Fate only'}
+                      </span>
+                    </div>
+                  )}
+                  {map.game.shortName === 'IW' && (log as ChallengeLogDetail).useDirectorsCut && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">Directors Cut</span>
+                      <span className="text-white font-medium">Yes</span>
+                    </div>
+                  )}
+                  {map.game.shortName === 'BO3' && (log as ChallengeLogDetail).bo3GobbleGumMode && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">GobbleGums</span>
+                      <span className="text-white font-medium">{getBo3GobbleGumLabel((log as ChallengeLogDetail).bo3GobbleGumMode!)}</span>
+                    </div>
+                  )}
+                  {map.game.shortName === 'BO4' && (log as ChallengeLogDetail).bo4ElixirMode && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">Elixirs</span>
+                      <span className="text-white font-medium">
+                        {(log as ChallengeLogDetail).bo4ElixirMode === 'CLASSIC_ONLY' ? 'Classic Only' : 'All Elixirs & Talismans'}
+                      </span>
+                    </div>
+                  )}
+                  {map.game.shortName === 'BOCW' && (log as ChallengeLogDetail).bocwSupportMode && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">Support</span>
+                      <span className="text-white font-medium">{getBocwSupportLabel((log as ChallengeLogDetail).bocwSupportMode!)}</span>
+                    </div>
+                  )}
+                  {map.game.shortName === 'BO6' && (log as ChallengeLogDetail).bo6GobbleGumMode && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">GobbleGums</span>
+                      <span className="text-white font-medium">{getBo6GobbleGumLabel((log as ChallengeLogDetail).bo6GobbleGumMode!)}</span>
+                    </div>
+                  )}
+                  {map.game.shortName === 'BO6' && (log as ChallengeLogDetail).bo6SupportMode && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">Support</span>
+                      <span className="text-white font-medium">{getBo6SupportLabel((log as ChallengeLogDetail).bo6SupportMode!)}</span>
+                    </div>
+                  )}
+                  {map.game.shortName === 'BO7' && (log as ChallengeLogDetail).bo7SupportMode && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">Support</span>
+                      <span className="text-white font-medium">{getBo7SupportLabel((log as ChallengeLogDetail).bo7SupportMode!)}</span>
+                    </div>
+                  )}
+                  {map.game.shortName === 'BO7' && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">Cursed Run</span>
+                      <span className="text-white font-medium">
+                        {(log as ChallengeLogDetail).bo7IsCursedRun ? 'Yes' : 'No'}
+                      </span>
+                    </div>
+                  )}
+                  {map.game.shortName === 'BO7' && (log as ChallengeLogDetail).bo7IsCursedRun && ((log as ChallengeLogDetail).bo7RelicsUsed ?? []).length > 0 && (
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-bunker-400 text-sm">Relics used</span>
+                      <div className="flex flex-wrap gap-1">
+                        {((log as ChallengeLogDetail).bo7RelicsUsed ?? []).map((r) => (
+                          <span key={r} className="px-2 py-0.5 rounded-md border border-blood-700/60 bg-blood-950/50 text-white text-xs">{r}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   {(() => {
                     const sec = (log as ChallengeLogDetail).completionTimeSeconds;
                     return sec != null && sec > 0 ? (
@@ -628,34 +714,44 @@ export default function RunDetailPage() {
                 );
               })()}
               {(isOwner || adminMe?.isSuperAdmin) && (
-                <div className="flex flex-wrap gap-2 pt-3 border-t border-bunker-700 mt-3">
-                  {isOwner && (
-                    <Link href={`/maps/${map.slug}/run/${type}/${logId}/edit`} className="flex-1 min-w-0">
-                      <Button variant="secondary" size="sm" className="w-full" leftIcon={<Pencil className="w-3.5 h-3.5" />}>
-                        Edit
-                      </Button>
-                    </Link>
+                <div className="flex flex-col gap-2 pt-3 border-t border-bunker-700 mt-3">
+                  {/* Verified lock notice for owners */}
+                  {isOwner && isVerified && !adminMe?.isSuperAdmin && (
+                    <p className="flex items-center gap-1.5 text-xs text-amber-400/80">
+                      <Lock className="w-3.5 h-3.5 shrink-0" />
+                      Verified runs cannot be edited.
+                    </p>
                   )}
-                  {isOwner && (
-                    <DeleteRunButton
-                      logId={logId}
-                      type={type}
-                      mapSlug={map.slug}
-                      label={isChallenge ? (log as ChallengeLogDetail).challenge.name : (log as EasterEggLogDetail).easterEgg.name}
-                    />
-                  )}
-                  {!isOwner && adminMe?.isSuperAdmin && (
-                    <>
-                      <p className="text-bunker-400 text-xs w-full">Super admin: delete this run</p>
+                  <div className="flex flex-wrap gap-2">
+                    {/* Edit: show for owner only when not verified; always show for super admins */}
+                    {((isOwner && !isVerified) || adminMe?.isSuperAdmin) && (
+                      <Link href={`/maps/${map.slug}/run/${type}/${logId}/edit`} className="flex-1 min-w-0">
+                        <Button variant="secondary" size="sm" className="w-full" leftIcon={<Pencil className="w-3.5 h-3.5" />}>
+                          Edit
+                        </Button>
+                      </Link>
+                    )}
+                    {isOwner && (
                       <DeleteRunButton
                         logId={logId}
                         type={type}
                         mapSlug={map.slug}
                         label={isChallenge ? (log as ChallengeLogDetail).challenge.name : (log as EasterEggLogDetail).easterEgg.name}
-                        asSuperAdmin
                       />
-                    </>
-                  )}
+                    )}
+                    {!isOwner && adminMe?.isSuperAdmin && (
+                      <>
+                        <p className="text-bunker-400 text-xs w-full">Super admin: delete this run</p>
+                        <DeleteRunButton
+                          logId={logId}
+                          type={type}
+                          mapSlug={map.slug}
+                          label={isChallenge ? (log as ChallengeLogDetail).challenge.name : (log as EasterEggLogDetail).easterEgg.name}
+                          asSuperAdmin
+                        />
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
               {adminActionSuccess && (

@@ -18,7 +18,12 @@ import {
 import { ProofEmbed, ProofUrlsInput, TeammatePicker, type TeammateUser } from '@/components/game';
 import { normalizeProofUrls } from '@/lib/utils';
 import { BO4_DIFFICULTIES, getBo4DifficultyLabel } from '@/lib/bo4';
-import { ChevronLeft, Save } from 'lucide-react';
+import { isBo3Game, BO3_GOBBLEGUM_MODES, getBo3GobbleGumLabel } from '@/lib/bo3';
+import { isBocwGame, BOCW_SUPPORT_MODES, getBocwSupportLabel } from '@/lib/bocw';
+import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
+import { isBo7Game, BO7_SUPPORT_MODES, getBo7SupportLabel } from '@/lib/bo7';
+import { Bo7RelicPicker } from '@/components/game';
+import { ChevronLeft, Save, Lock } from 'lucide-react';
 import type { PlayerCount } from '@/types';
 
 const playerCountOptions = [
@@ -40,6 +45,18 @@ type ChallengeLog = {
   completionTimeSeconds: number | null;
   challenge: { id: string; name: string };
   map: MapInfo;
+  isVerified?: boolean;
+  // Game-specific toggles
+  useFortuneCards?: boolean | null;
+  useDirectorsCut?: boolean | null;
+  bo3GobbleGumMode?: string | null;
+  bo4ElixirMode?: string | null;
+  bocwSupportMode?: string | null;
+  bo6GobbleGumMode?: string | null;
+  bo6SupportMode?: string | null;
+  bo7SupportMode?: string | null;
+  bo7IsCursedRun?: boolean | null;
+  bo7RelicsUsed?: string[];
 };
 type EasterEggLog = {
   id: string;
@@ -54,6 +71,7 @@ type EasterEggLog = {
   completionTimeSeconds: number | null;
   easterEgg: { id: string; name: string };
   map: MapInfo;
+  isVerified?: boolean;
 };
 
 export default function EditRunPage() {
@@ -84,9 +102,30 @@ export default function EditRunPage() {
   const [difficulty, setDifficulty] = useState<string>('NORMAL');
   const [requestVerification, setRequestVerification] = useState(false);
   const [errorModalMessage, setErrorModalMessage] = useState<string | null>(null);
+  // Game-specific state
+  const [useFortuneCards, setUseFortuneCards] = useState<boolean | null>(null);
+  const [useDirectorsCut, setUseDirectorsCut] = useState(false);
+  const [bo3GobbleGumMode, setBo3GobbleGumMode] = useState('CLASSIC_ONLY');
+  const [bo4ElixirMode, setBo4ElixirMode] = useState('');
+  const [bocwSupportMode, setBocwSupportMode] = useState('WITH_SUPPORT');
+  const [bo6GobbleGumMode, setBo6GobbleGumMode] = useState('WITH_GOBBLEGUMS');
+  const [bo6SupportMode, setBo6SupportMode] = useState('WITH_SUPPORT');
+  const [bo7SupportMode, setBo7SupportMode] = useState('WITH_SUPPORT');
+  const [bo7IsCursedRun, setBo7IsCursedRun] = useState(false);
+  const [bo7RelicsUsed, setBo7RelicsUsed] = useState<string[]>([]);
+  // Admin / verified status
+  const [isVerified, setIsVerified] = useState(false);
+  const [isSuperAdminUser, setIsSuperAdminUser] = useState(false);
 
   const isChallenge = type === 'challenge';
   const apiUrl = isChallenge ? `/api/challenge-logs/${logId}` : `/api/easter-egg-logs/${logId}`;
+
+  useEffect(() => {
+    fetch('/api/admin/me', { cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : { isAdmin: false, isSuperAdmin: false }))
+      .then((data) => setIsSuperAdminUser(data.isSuperAdmin === true))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -112,30 +151,33 @@ export default function EditRunPage() {
           return;
         }
         setLog(data);
+        setIsVerified(Boolean(data.isVerified));
+        setPlayerCount(data.playerCount || 'SOLO');
+        setDifficulty(data.difficulty && BO4_DIFFICULTIES.includes(data.difficulty) ? data.difficulty : 'NORMAL');
+        setProofUrls(Array.isArray(data.proofUrls) ? data.proofUrls : data.proofUrl ? [data.proofUrl] : []);
+        setNotes(data.notes || '');
+        setCompletionTimeSeconds(data.completionTimeSeconds ?? null);
+        setTeammateUserIds(Array.isArray(data.teammateUserIds) ? data.teammateUserIds : []);
+        setTeammateNonUserNames(Array.isArray(data.teammateNonUserNames) ? data.teammateNonUserNames : []);
+        setTeammateUserDetails(Array.isArray(data.teammateUserDetails) ? data.teammateUserDetails : []);
+        setRequestVerification(Boolean(data.verificationRequestedAt));
         if (data.roundReached != null) {
           setRoundReached(String(data.roundReached));
-          setPlayerCount(data.playerCount || 'SOLO');
-          setDifficulty(data.difficulty && BO4_DIFFICULTIES.includes(data.difficulty) ? data.difficulty : 'NORMAL');
-          setProofUrls(Array.isArray(data.proofUrls) ? data.proofUrls : data.proofUrl ? [data.proofUrl] : []);
-          setNotes(data.notes || '');
-          setCompletionTimeSeconds(data.completionTimeSeconds ?? null);
-          setTeammateUserIds(Array.isArray(data.teammateUserIds) ? data.teammateUserIds : []);
-          setTeammateNonUserNames(Array.isArray(data.teammateNonUserNames) ? data.teammateNonUserNames : []);
-          setTeammateUserDetails(Array.isArray(data.teammateUserDetails) ? data.teammateUserDetails : []);
-          setRequestVerification(Boolean(data.verificationRequestedAt));
+          // Game-specific toggles for challenge logs
+          if (data.useFortuneCards != null) setUseFortuneCards(data.useFortuneCards);
+          setUseDirectorsCut(Boolean(data.useDirectorsCut));
+          if (data.bo3GobbleGumMode) setBo3GobbleGumMode(data.bo3GobbleGumMode);
+          if (data.bo4ElixirMode) setBo4ElixirMode(data.bo4ElixirMode);
+          if (data.bocwSupportMode) setBocwSupportMode(data.bocwSupportMode);
+          if (data.bo6GobbleGumMode) setBo6GobbleGumMode(data.bo6GobbleGumMode);
+          if (data.bo6SupportMode) setBo6SupportMode(data.bo6SupportMode);
+          if (data.bo7SupportMode) setBo7SupportMode(data.bo7SupportMode);
+          setBo7IsCursedRun(Boolean(data.bo7IsCursedRun));
+          if (Array.isArray(data.bo7RelicsUsed)) setBo7RelicsUsed(data.bo7RelicsUsed);
         } else {
           setRoundCompleted(data.roundCompleted != null ? String(data.roundCompleted) : '');
-          setPlayerCount(data.playerCount || 'SOLO');
-          setDifficulty(data.difficulty && BO4_DIFFICULTIES.includes(data.difficulty) ? data.difficulty : 'NORMAL');
-          setProofUrls(Array.isArray(data.proofUrls) ? data.proofUrls : data.proofUrl ? [data.proofUrl] : []);
-          setNotes(data.notes || '');
-          setCompletionTimeSeconds(data.completionTimeSeconds ?? null);
           setIsSolo(!!data.isSolo);
           setIsNoGuide(!!data.isNoGuide);
-          setTeammateUserIds(Array.isArray(data.teammateUserIds) ? data.teammateUserIds : []);
-          setTeammateNonUserNames(Array.isArray(data.teammateNonUserNames) ? data.teammateNonUserNames : []);
-          setTeammateUserDetails(Array.isArray(data.teammateUserDetails) ? data.teammateUserDetails : []);
-          setRequestVerification(Boolean(data.verificationRequestedAt));
         }
       })
       .catch(() => setError('Failed to load run.'))
@@ -166,6 +208,12 @@ export default function EditRunPage() {
           roundReached: round,
           playerCount,
           ...(log?.map?.game?.shortName === 'BO4' && { difficulty }),
+          ...(log?.map?.game?.shortName === 'IW' && { useFortuneCards: useFortuneCards === true, useDirectorsCut }),
+          ...(isBo3Game(log?.map?.game?.shortName) && { bo3GobbleGumMode }),
+          ...(log?.map?.game?.shortName === 'BO4' && bo4ElixirMode && { bo4ElixirMode }),
+          ...(isBocwGame(log?.map?.game?.shortName) && { bocwSupportMode }),
+          ...(isBo6Game(log?.map?.game?.shortName) && { bo6GobbleGumMode, bo6SupportMode }),
+          ...(isBo7Game(log?.map?.game?.shortName) && { bo7SupportMode, bo7IsCursedRun, bo7RelicsUsed: bo7IsCursedRun ? bo7RelicsUsed : [] }),
           proofUrls: normalizeProofUrls(proofUrls),
           notes: notes || null,
           completionTimeSeconds,
@@ -223,6 +271,9 @@ export default function EditRunPage() {
     }
   };
 
+  // Verified run gate — shown once loading is done
+  const verifiedAndLocked = !loading && isVerified && !isSuperAdminUser;
+
   if (loading) {
     return (
       <div className="min-h-screen bg-bunker-950 flex items-center justify-center">
@@ -250,6 +301,7 @@ export default function EditRunPage() {
   }
 
   const map = log.map;
+  const gameShortName = map.game?.shortName;
 
   return (
     <div className="min-h-screen bg-bunker-950">
@@ -268,6 +320,18 @@ export default function EditRunPage() {
           {isChallenge ? (log as ChallengeLog).challenge.name : (log as EasterEggLog).easterEgg.name} · {map.name}
         </p>
 
+        {verifiedAndLocked && (
+          <div className="mb-6 flex items-start gap-3 p-4 rounded-xl border border-amber-600/40 bg-amber-950/30">
+            <Lock className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-amber-300 font-semibold text-sm">Verified run — editing locked</p>
+              <p className="text-amber-400/80 text-xs mt-1">
+                This run has been verified and can no longer be edited. Only a super admin can make changes.
+              </p>
+            </div>
+          </div>
+        )}
+
         {error && (
           <div className="mb-4 p-3 rounded-lg bg-blood-950/50 border border-blood-800 text-blood-300 text-sm">
             {error}
@@ -284,20 +348,111 @@ export default function EditRunPage() {
                   min={1}
                   value={roundReached}
                   onChange={(e) => setRoundReached(e.target.value)}
+                  disabled={verifiedAndLocked}
                 />
                 <Select
                   label="Player Count"
                   options={playerCountOptions}
                   value={playerCount}
                   onChange={(e) => setPlayerCount(e.target.value as PlayerCount)}
+                  disabled={verifiedAndLocked}
                 />
-                {log?.map?.game?.shortName === 'BO4' && (
+                {gameShortName === 'BO4' && (
                   <Select
                     label="Difficulty"
                     options={BO4_DIFFICULTIES.map((d) => ({ value: d, label: getBo4DifficultyLabel(d) }))}
                     value={difficulty}
                     onChange={(e) => setDifficulty(e.target.value)}
+                    disabled={verifiedAndLocked}
                   />
+                )}
+                {gameShortName === 'IW' && (
+                  <>
+                    <Select
+                      label="Fortune Cards"
+                      options={[
+                        { value: 'false', label: 'Fate cards only' },
+                        { value: 'true', label: 'Fate & Fortune cards' },
+                      ]}
+                      value={useFortuneCards === true ? 'true' : useFortuneCards === false ? 'false' : ''}
+                      onChange={(e) => setUseFortuneCards(e.target.value === 'true' ? true : e.target.value === 'false' ? false : null)}
+                      disabled={verifiedAndLocked}
+                    />
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={useDirectorsCut} onChange={(e) => setUseDirectorsCut(e.target.checked)} disabled={verifiedAndLocked} className="w-4 h-4 rounded border-bunker-600 bg-bunker-800 text-blood-500" />
+                      <span className="text-sm text-bunker-300">Directors Cut</span>
+                    </label>
+                  </>
+                )}
+                {isBo3Game(gameShortName) && (
+                  <Select
+                    label="GobbleGums"
+                    options={BO3_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo3GobbleGumLabel(m) }))}
+                    value={bo3GobbleGumMode}
+                    onChange={(e) => setBo3GobbleGumMode(e.target.value)}
+                    disabled={verifiedAndLocked}
+                  />
+                )}
+                {gameShortName === 'BO4' && (
+                  <Select
+                    label="Elixirs / Talismans"
+                    options={[
+                      { value: '', label: 'Not specified' },
+                      { value: 'CLASSIC_ONLY', label: 'Classic Elixirs Only' },
+                      { value: 'ALL_ELIXIRS_TALISMANS', label: 'All Elixirs & Talismans' },
+                    ]}
+                    value={bo4ElixirMode}
+                    onChange={(e) => setBo4ElixirMode(e.target.value)}
+                    disabled={verifiedAndLocked}
+                  />
+                )}
+                {isBocwGame(gameShortName) && (
+                  <Select
+                    label="Support"
+                    options={BOCW_SUPPORT_MODES.map((m) => ({ value: m, label: getBocwSupportLabel(m) }))}
+                    value={bocwSupportMode}
+                    onChange={(e) => setBocwSupportMode(e.target.value)}
+                    disabled={verifiedAndLocked}
+                  />
+                )}
+                {isBo6Game(gameShortName) && (
+                  <>
+                    <Select
+                      label="GobbleGums"
+                      options={BO6_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo6GobbleGumLabel(m) }))}
+                      value={bo6GobbleGumMode}
+                      onChange={(e) => setBo6GobbleGumMode(e.target.value)}
+                      disabled={verifiedAndLocked}
+                    />
+                    <Select
+                      label="Support"
+                      options={BO6_SUPPORT_MODES.map((m) => ({ value: m, label: getBo6SupportLabel(m) }))}
+                      value={bo6SupportMode}
+                      onChange={(e) => setBo6SupportMode(e.target.value)}
+                      disabled={verifiedAndLocked}
+                    />
+                  </>
+                )}
+                {isBo7Game(gameShortName) && (
+                  <>
+                    <Select
+                      label="Support"
+                      options={BO7_SUPPORT_MODES.map((m) => ({ value: m, label: getBo7SupportLabel(m) }))}
+                      value={bo7SupportMode}
+                      onChange={(e) => setBo7SupportMode(e.target.value)}
+                      disabled={verifiedAndLocked}
+                    />
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={bo7IsCursedRun} onChange={(e) => { setBo7IsCursedRun(e.target.checked); if (!e.target.checked) setBo7RelicsUsed([]); }} disabled={verifiedAndLocked} className="w-4 h-4 rounded border-bunker-600 bg-bunker-800 text-blood-500" />
+                      <span className="text-sm text-bunker-300">Cursed Run</span>
+                    </label>
+                    {bo7IsCursedRun && (
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs text-bunker-400">Relics used</span>
+                        <Bo7RelicPicker value={bo7RelicsUsed} onChange={setBo7RelicsUsed} placeholder="None (0 relics)" />
+                      </div>
+                    )}
+                  </>
                 )}
                 <ProofUrlsInput
                   label="Proof URLs (optional)"
@@ -345,7 +500,7 @@ export default function EditRunPage() {
                   </div>
                 )}
                 <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
-                  <Button type="submit" disabled={saving} leftIcon={<Save className="w-4 h-4" />} className="w-full sm:w-auto">
+                  <Button type="submit" disabled={saving || verifiedAndLocked} leftIcon={<Save className="w-4 h-4" />} className="w-full sm:w-auto">
                     {saving ? 'Saving…' : 'Save changes'}
                   </Button>
                   <Link href={`/maps/${slug}/run/challenge/${logId}`} className="w-full sm:w-auto">
@@ -447,7 +602,7 @@ export default function EditRunPage() {
                   </div>
                 )}
                 <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
-                  <Button type="submit" disabled={saving} leftIcon={<Save className="w-4 h-4" />} className="w-full sm:w-auto">
+                  <Button type="submit" disabled={saving || verifiedAndLocked} leftIcon={<Save className="w-4 h-4" />} className="w-full sm:w-auto">
                     {saving ? 'Saving…' : 'Save changes'}
                   </Button>
                   <Link href={`/maps/${slug}/run/easter-egg/${logId}`} className="w-full sm:w-auto">
