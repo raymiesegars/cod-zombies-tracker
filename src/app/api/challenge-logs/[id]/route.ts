@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
+import { isSuperAdmin } from '@/lib/admin';
+import { revokeVerifiedAchievementsForMapIfNeeded } from '@/lib/verified-xp';
 import { getLevelFromXp } from '@/lib/ranks';
 import { revokeAchievementsForMapAfterDelete } from '@/lib/achievements';
 import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
@@ -184,17 +186,34 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   }
 }
 
-// Delete your log; we revoke any achievements that depended on it and subtract XP
+// Delete your log; super admins can delete any log. We revoke achievements and subtract XP.
 export async function DELETE(_request: NextRequest, { params }: Params) {
   try {
     const { id } = await params;
-    const result = await getLogAndUser(id);
-    if ('error' in result) return NextResponse.json({ error: result.error }, { status: result.status });
-    const { log, user } = result;
+    const supabaseUser = await getUser();
+    if (!supabaseUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const currentUser = await prisma.user.findUnique({
+      where: { supabaseId: supabaseUser.id },
+      select: { id: true },
+    });
+    if (!currentUser) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+    const log = await prisma.challengeLog.findUnique({
+      where: { id },
+      include: { challenge: true, map: { include: { game: true } } },
+    });
+    if (!log) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+    const isOwner = log.userId === currentUser.id;
+    const canDelete = isOwner || isSuperAdmin(currentUser.id);
+    if (!canDelete) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
     const mapId = log.mapId;
+    const userId = log.userId;
 
     await prisma.challengeLog.delete({ where: { id } });
-    const { xpSubtracted } = await revokeAchievementsForMapAfterDelete(user.id, mapId);
+    const { xpSubtracted } = await revokeAchievementsForMapAfterDelete(userId, mapId);
+    await revokeVerifiedAchievementsForMapIfNeeded(userId, mapId);
 
     return NextResponse.json({
       deleted: true,
