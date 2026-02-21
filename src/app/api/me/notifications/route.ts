@@ -46,15 +46,20 @@ export async function GET() {
       }),
     ]);
 
+    const isFriendType = (t: string) =>
+      t === 'FRIEND_REQUEST_RECEIVED' || t === 'FRIEND_REQUEST_ACCEPTED' || t === 'FRIEND_REMOVED';
+
     const list = notifications.map((n) => {
       const logType = n.challengeLogId ? 'challenge' : 'easter_egg';
       const log = n.challengeLog ?? n.easterEggLog;
       const mapSlug = log?.map?.slug ?? null;
-      const runLabel = n.challengeLog
-        ? `${n.challengeLog.challenge.name} – Round ${n.challengeLog.roundReached}`
-        : n.easterEggLog
-          ? n.easterEggLog.easterEgg.name
-          : 'Run';
+      const runLabel = isFriendType(n.type)
+        ? (n.message ?? 'Friend')
+        : n.challengeLog
+          ? `${n.challengeLog.challenge.name} – Round ${n.challengeLog.roundReached}`
+          : n.easterEggLog
+            ? n.easterEggLog.easterEgg.name
+            : 'Run';
       const runPath =
         mapSlug && log
           ? `/maps/${mapSlug}/run/${logType === 'easter_egg' ? 'easter-egg' : 'challenge'}/${log.id}`
@@ -69,6 +74,7 @@ export async function GET() {
         runPath,
         logType,
         logId: n.challengeLogId ?? n.easterEggLogId,
+        friendRequestId: n.friendRequestId ?? undefined,
       };
     });
 

@@ -39,6 +39,9 @@ model User {
   // Admin: only set via secure admin APIs; super admin (env) can demote, any admin can promote
   isAdmin       Boolean   @default(false)
   
+  // Presence: updated on heartbeat; "online" = lastSeenAt within last ~5 min
+  lastSeenAt    DateTime?
+  
   // Relations
   challengeLogs           ChallengeLog[]
   easterEggLogs            EasterEggLog[]
@@ -50,9 +53,38 @@ model User {
   coOpRunPendingsCreated  CoOpRunPending[]  @relation("CoOpCreator")
   coOpRunPendingsAsTeammate CoOpRunPending[] @relation("CoOpTeammate")
   notifications            Notification[]
+  friendRequestsSent       FriendRequest[]  @relation("FriendRequestFrom")
+  friendRequestsReceived   FriendRequest[]  @relation("FriendRequestTo")
 
   @@index([username])
   @@index([supabaseId])
+}
+
+// ============================================================================
+// FRIENDS
+// ============================================================================
+
+model FriendRequest {
+  id          String             @id @default(cuid())
+  fromUserId  String
+  toUserId    String
+  status      FriendRequestStatus @default(PENDING)
+  createdAt   DateTime           @default(now())
+
+  fromUser    User               @relation("FriendRequestFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser      User               @relation("FriendRequestTo", fields: [toUserId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+
+  @@unique([fromUserId, toUserId])
+  @@index([fromUserId])
+  @@index([toUserId])
+  @@index([status])
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  DENIED
 }
 
 // ============================================================================
@@ -552,6 +584,9 @@ enum NotificationType {
   VERIFICATION_APPROVED
   VERIFICATION_DENIED
   VERIFICATION_REMOVED
+  FRIEND_REQUEST_RECEIVED
+  FRIEND_REQUEST_ACCEPTED
+  FRIEND_REMOVED
 }
 
 model Notification {
@@ -563,7 +598,9 @@ model Notification {
   challengeLog     ChallengeLog?    @relation(fields: [challengeLogId], references: [id], onDelete: Cascade)
   easterEggLogId   String?
   easterEggLog     EasterEggLog?    @relation(fields: [easterEggLogId], references: [id], onDelete: Cascade)
-  message          String?          @db.Text  // for VERIFICATION_DENIED: admin's reason
+  friendRequestId  String?
+  friendRequest    FriendRequest?   @relation(fields: [friendRequestId], references: [id], onDelete: Cascade)
+  message          String?          @db.Text  // for VERIFICATION_DENIED: admin's reason; for FRIEND_*: optional context
   read             Boolean          @default(false)
   createdAt        DateTime         @default(now())
 

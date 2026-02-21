@@ -49,6 +49,9 @@ import {
   ShieldPlus,
   ShieldOff,
   Loader2,
+  UserPlus,
+  Check,
+  X,
 } from 'lucide-react';
 
 type AchievementWithMap = {
@@ -385,6 +388,7 @@ export default function UserProfilePage() {
   const [promoteModalOpen, setPromoteModalOpen] = useState(false);
   const [demoteModalOpen, setDemoteModalOpen] = useState(false);
   const [adminActionLoading, setAdminActionLoading] = useState(false);
+  const [friendActionLoading, setFriendActionLoading] = useState<'add' | 'accept' | 'deny' | null>(null);
 
   // so "Your runs" vs "Back to runs" and map links point the right place
   const isOwnProfile = Boolean(profile && currentProfile && profile.id === currentProfile.id);
@@ -402,7 +406,8 @@ export default function UserProfilePage() {
 
   // Admin: can current user promote/demote? Only fetch when logged in.
   useEffect(() => {
-    if (!currentProfile) {
+    const profileId = currentProfile?.id;
+    if (!profileId) {
       setAdminMe(null);
       return;
     }
@@ -474,6 +479,69 @@ export default function UserProfilePage() {
       setAdminActionLoading(false);
     }
   }, [profile?.id]);
+
+  const friendshipStatus = (profile as { friendshipStatus?: 'friends' | 'pending_sent' | 'pending_received' | null })?.friendshipStatus ?? null;
+  const friendRequestId = (profile as { friendRequestId?: string })?.friendRequestId as string | undefined;
+  const friendCount = (profile as { friendCount?: number } | null)?.friendCount ?? 0;
+
+  const handleAddFriend = useCallback(async () => {
+    if (!profile?.id) return;
+    setFriendActionLoading('add');
+    try {
+      const res = await fetch('/api/me/friends/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ toUserId: profile.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setProfileRefreshTrigger((t) => t + 1);
+        window.dispatchEvent(new Event('cod-tracker-friends-updated'));
+      } else alert(data.error ?? 'Failed to send friend request');
+    } catch {
+      alert('Failed to send friend request');
+    } finally {
+      setFriendActionLoading(null);
+    }
+  }, [profile?.id]);
+
+  const handleAcceptFriend = useCallback(async () => {
+    if (!friendRequestId) return;
+    setFriendActionLoading('accept');
+    try {
+      const res = await fetch('/api/me/friends/accept', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ friendRequestId }),
+      });
+      if (res.ok) {
+        setProfileRefreshTrigger((t) => t + 1);
+        window.dispatchEvent(new Event('cod-tracker-friends-updated'));
+      } else alert('Failed to accept friend request');
+    } catch {
+      alert('Failed to accept friend request');
+    } finally {
+      setFriendActionLoading(null);
+    }
+  }, [friendRequestId]);
+
+  const handleDenyFriend = useCallback(async () => {
+    if (!friendRequestId) return;
+    setFriendActionLoading('deny');
+    try {
+      const res = await fetch('/api/me/friends/deny', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ friendRequestId }),
+      });
+      if (res.ok) setProfileRefreshTrigger((t) => t + 1);
+      else alert('Failed to deny friend request');
+    } catch {
+      alert('Failed to deny friend request');
+    } finally {
+      setFriendActionLoading(null);
+    }
+  }, [friendRequestId]);
 
   useEffect(() => {
     async function fetchProfile() {
@@ -666,6 +734,57 @@ export default function UserProfilePage() {
                 >
                   <RankHelpContent />
                 </HelpTrigger>
+              </div>
+
+              {/* Friend count and Add Friend / Request sent / Accept-Deny */}
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 mt-3 sm:mt-4">
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-bunker-400">
+                  <UserPlus className="w-4 h-4" />
+                  <span>{friendCount} {friendCount === 1 ? 'friend' : 'friends'}</span>
+                </div>
+                {!isOwnProfile && currentProfile && (
+                  <>
+                    {friendshipStatus === null && (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={handleAddFriend}
+                        disabled={friendActionLoading !== null}
+                        leftIcon={friendActionLoading === 'add' ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                      >
+                        {friendActionLoading === 'add' ? 'Sending…' : 'Add friend'}
+                      </Button>
+                    )}
+                    {friendshipStatus === 'pending_sent' && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-bunker-600 bg-bunker-800/50 text-sm text-bunker-300">
+                        Request sent
+                      </span>
+                    )}
+                    {friendshipStatus === 'pending_received' && (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={handleAcceptFriend}
+                          disabled={friendActionLoading !== null}
+                          leftIcon={friendActionLoading === 'accept' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                          className="!bg-element-600 hover:!bg-element-500"
+                        >
+                          {friendActionLoading === 'accept' ? 'Accepting…' : 'Accept'}
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={handleDenyFriend}
+                          disabled={friendActionLoading !== null}
+                          leftIcon={friendActionLoading === 'deny' ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
+                        >
+                          {friendActionLoading === 'deny' ? 'Denying…' : 'Deny'}
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
 
               {/* Join date */}

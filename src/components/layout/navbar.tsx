@@ -7,6 +7,7 @@ import { useAuth } from '@/context/auth-context';
 import { Button, Logo, MapIcon } from '@/components/ui';
 import { UserWithRank } from '@/components/game';
 import { NotificationsDropdown } from '@/components/layout/notifications-dropdown';
+import { FriendsListWidget } from '@/components/layout/friends-list-widget';
 import { Menu, X, LogOut, User, Settings, Trophy, LayoutDashboard, Users } from 'lucide-react';
 
 const DISCORD_URL = 'https://discord.gg/Gc6Cnt7XxT';
@@ -226,6 +227,9 @@ export function Navbar() {
               {user ? (
                 <>
                   <hr className="border-bunker-700 my-2" />
+                  <div className="px-4 py-2 border-b border-bunker-800/50 pb-4">
+                    <FriendsListWidget variant="inline" />
+                  </div>
                   <div className="px-4 py-2">
                     <NotificationsDropdown />
                   </div>

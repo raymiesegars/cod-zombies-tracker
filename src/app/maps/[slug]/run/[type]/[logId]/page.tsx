@@ -219,7 +219,7 @@ export default function RunDetailPage() {
   }, [apiUrl, slug]);
 
   useEffect(() => {
-    if (!log) return;
+    if (!log?.id) return;
     fetch('/api/admin/me', { cache: 'no-store' })
       .then((res) => (res.ok ? res.json() : { isAdmin: false, isSuperAdmin: false }))
       .then(setAdminMe)
