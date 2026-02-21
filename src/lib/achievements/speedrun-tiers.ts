@@ -60,6 +60,54 @@ export const IW_ZIS_SPEEDRUN_TIERS: SpeedrunTiersByType = {
   ],
 };
 
+/**
+ * Rave in the Redwoods (IW) – WRs: R30 25:57, R50 56:35, R70 1:52:19, R100 4:21:30, EE (Locksmith) 17:16, G&S 14:20, Boss (Slasher) 7:14.
+ */
+export const IW_RAVE_SPEEDRUN_TIERS: SpeedrunTiersByType = {
+  ROUND_30_SPEEDRUN: [
+    { maxTimeSeconds: 2100, xpReward: 50 },   // 35 min
+    { maxTimeSeconds: 1800, xpReward: 125 },  // 30 min
+    { maxTimeSeconds: 1650, xpReward: 250 },  // 27:30
+    { maxTimeSeconds: 1580, xpReward: 500 },  // near WR 25:57
+  ],
+  ROUND_50_SPEEDRUN: [
+    { maxTimeSeconds: 3900, xpReward: 100 },   // 1:05
+    { maxTimeSeconds: 3600, xpReward: 250 },  // 1:00
+    { maxTimeSeconds: 3480, xpReward: 500 },  // 58 min
+    { maxTimeSeconds: 3420, xpReward: 1200 }, // near WR 56:35
+  ],
+  ROUND_70_SPEEDRUN: [
+    { maxTimeSeconds: 7200, xpReward: 150 },   // 2:00
+    { maxTimeSeconds: 6900, xpReward: 400 },   // 1:55
+    { maxTimeSeconds: 6800, xpReward: 800 },  // 1:53:20
+    { maxTimeSeconds: 6760, xpReward: 2000 }, // near WR 1:52:19
+  ],
+  ROUND_100_SPEEDRUN: [
+    { maxTimeSeconds: 16200, xpReward: 200 },  // 4:30
+    { maxTimeSeconds: 15800, xpReward: 500 },  // 4:23
+    { maxTimeSeconds: 15720, xpReward: 1200 }, // 4:22
+    { maxTimeSeconds: 15690, xpReward: 3000 }, // WR 4:21:30
+  ],
+  EASTER_EGG_SPEEDRUN: [
+    { maxTimeSeconds: 1200, xpReward: 200 },   // 20 min
+    { maxTimeSeconds: 1080, xpReward: 600 },   // 18 min
+    { maxTimeSeconds: 1050, xpReward: 1500 }, // 17:30
+    { maxTimeSeconds: 1040, xpReward: 3200 }, // near WR 17:16 (Locksmith)
+  ],
+  GHOST_AND_SKULLS: [
+    { maxTimeSeconds: 1200, xpReward: 150 },   // 20 min
+    { maxTimeSeconds: 900, xpReward: 500 },   // 15 min
+    { maxTimeSeconds: 870, xpReward: 1200 },  // 14:30
+    { maxTimeSeconds: 861, xpReward: 3000 },  // near WR 14:20
+  ],
+  ALIENS_BOSS_FIGHT: [
+    { maxTimeSeconds: 600, xpReward: 200 },   // 10 min (Slasher boss)
+    { maxTimeSeconds: 540, xpReward: 600 },   // 9 min
+    { maxTimeSeconds: 480, xpReward: 1400 },  // 8 min
+    { maxTimeSeconds: 440, xpReward: 3500 },  // near WR 7:14
+  ],
+};
+
 export function formatSpeedrunTime(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
   const m = Math.floor(seconds / 60);

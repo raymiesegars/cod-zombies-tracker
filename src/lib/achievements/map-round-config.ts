@@ -171,11 +171,13 @@ const BO7: Record<string, MapRoundConfig> = {
   'zarya-cosmodrome': config(999, BO6_BO7_999),
 };
 
-// IW: WR 207, cap ~190 (8% below). Milestones: 20, 30, 50, 75, 100, 125, 150, 175, 190
+// IW: ZIS WR 207, cap ~190. Rave WR 255, cap 255.
 const IW_190: RoundMilestone[] = buildRoundMilestones(190, 2500);
+const IW_255: RoundMilestone[] = buildRoundMilestones(255, 2500);
 
 const IW: Record<string, MapRoundConfig> = {
   'zombies-in-spaceland': config(190, IW_190),
+  'rave-in-the-redwoods': config(255, IW_255),
 };
 
 const BY_GAME: Record<string, Record<string, MapRoundConfig>> = {

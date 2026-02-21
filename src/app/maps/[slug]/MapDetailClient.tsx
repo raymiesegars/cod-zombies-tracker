@@ -309,8 +309,8 @@ function AchievementsTabContent({
               {ACHIEVEMENT_CATEGORY_LABELS[cat] ?? cat}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
+          <CardContent className="py-4 pl-6 pr-2">
+            <ul className="space-y-2 min-w-0 w-full">
               {(byCategory[cat]!).map((a) => {
                 const unlocked = unlockedSet.has(a.id);
                 const c = a.criteria as { round?: number; isCap?: boolean };
@@ -320,25 +320,25 @@ function AchievementsTabContent({
                   <li
                     key={a.id}
                     className={unlocked
-                      ? 'flex items-center justify-between gap-3 py-2 px-3 rounded-lg bg-military-950/30 border border-military-800/50'
-                      : 'flex items-center justify-between gap-3 py-2 px-3 rounded-lg bg-bunker-800/30 border border-bunker-700/50'
+                      ? 'grid grid-cols-[1fr_auto] items-center gap-x-3 py-2 pl-3 pr-1 rounded-lg bg-military-950/30 border border-military-800/50 min-w-0'
+                      : 'grid grid-cols-[1fr_auto] items-center gap-x-3 py-2 pl-3 pr-1 rounded-lg bg-bunker-800/30 border border-bunker-700/50 min-w-0'
                     }
                   >
-                    <div className="flex items-center gap-3 min-w-0 min-h-[2.75rem]">
+                    <div className="flex items-center gap-3 min-w-0 min-h-[2.75rem] overflow-hidden">
                       {unlocked ? (
                         <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-military-400" />
                       ) : (
                         <Lock className="w-5 h-5 flex-shrink-0 text-bunker-500" />
                       )}
-                      <div className={`min-w-0 flex flex-col justify-center ${subLabel ? 'min-h-[2.25rem]' : ''}`}>
+                      <div className={`min-w-0 flex flex-col justify-center overflow-hidden ${subLabel ? 'min-h-[2.25rem]' : ''}`}>
                         <p className="font-medium text-sm text-white truncate">{displayName}</p>
                         {subLabel && (
                           <p className="text-xs text-bunker-400">{subLabel}</p>
                         )}
                       </div>
                     </div>
-                    <span className="flex items-center flex-shrink-0 min-w-[11rem] gap-2">
-                      <span className="text-sm font-medium text-blood-400 min-w-[7.5rem] whitespace-nowrap text-left">+{a.xpReward.toLocaleString()} XP</span>
+                    <div className="flex items-center justify-end gap-2 w-max min-w-0 shrink-0">
+                      <span className="text-sm font-medium text-blood-400 whitespace-nowrap">+{a.xpReward.toLocaleString()} XP</span>
                       <span className="w-8 flex shrink-0 justify-center">
                         {canRelock && unlocked ? (
                           <RelockAchievementButton
@@ -354,7 +354,7 @@ function AchievementsTabContent({
                           <span className="w-5 h-5 block" aria-hidden />
                         )}
                       </span>
-                    </span>
+                    </div>
                   </li>
                 );
               })}

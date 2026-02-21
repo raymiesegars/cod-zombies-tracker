@@ -272,6 +272,183 @@ async function main() {
     console.log('Created Sooooul Key achievement');
   }
 
+  // ——— Rave in the Redwoods ———
+  const raveRoundCap = getRoundCapForMap('rave-in-the-redwoods', 'IW') ?? null;
+  let raveMap = await prisma.map.findFirst({
+    where: { slug: 'rave-in-the-redwoods', gameId: iwGame.id },
+  });
+  if (!raveMap) {
+    raveMap = await prisma.map.create({
+      data: {
+        name: 'Rave in the Redwoods',
+        slug: 'rave-in-the-redwoods',
+        gameId: iwGame.id,
+        isDlc: false,
+        order: 2,
+        imageUrl: '/images/maps/rave-in-the-redwoods.webp',
+        roundCap: raveRoundCap,
+        description: 'A campground and rave in the redwoods. Obtain the second piece of the Soul Key in the Locksmith main quest.',
+      },
+    });
+    console.log('Created Rave in the Redwoods map');
+  } else {
+    console.log('Rave in the Redwoods map already exists');
+  }
+
+  let raveChallengesCreated = 0;
+  for (const info of allChallengeInfos) {
+    const exists = await prisma.challenge.findFirst({
+      where: { mapId: raveMap.id, slug: info.slug },
+    });
+    if (!exists) {
+      await prisma.challenge.create({
+        data: {
+          name: info.name,
+          slug: info.slug,
+          type: info.type,
+          mapId: raveMap.id,
+          xpReward: 0,
+          description: info.description,
+        },
+      });
+      raveChallengesCreated++;
+    }
+  }
+  if (raveChallengesCreated > 0) console.log(`Created ${raveChallengesCreated} challenges for Rave in the Redwoods`);
+
+  const LOCKSMITH_STEPS = [
+    { order: 1, label: 'Turn on power, build the boat engine (parts: Bear Lodge mess hall, Recreation Area keg stall, Bear Lodge bunk room after power), fix projector on Turtle Island.' },
+    { order: 2, label: 'Take boat to Turtle Island; meet Kevin Smith. Pick up first torn photo part in Recreation Area (behind zombie effigy).' },
+    { order: 3, label: 'Place photo in Thunderbird Amphitheater (between damaged tree and tents). In Rave mode, shoot off 10 zombie arms near the picture; kill Slasher and take photo (Jason Mewes).' },
+    { order: 4, label: 'Second photo part in Bunk Room (near Tuff \'Nuff). Place in Recreation Area rave; kill 10 crawlers near picture, kill Slasher, take photo (Kevin). Take to Kevin.' },
+    { order: 5, label: 'Interact with crumpled skeleton in Bear Cabin basement (near Old Marvin Mine exit); take skull to White Tail Beach. Get headshot kills near skull; kill Slasher, take skull; Kevin leaves. Press button in Bear Cabin basement.' },
+    { order: 6, label: 'Ride boat to Turtle Island; Kevin reveals he killed Jason and becomes the Slasher. In Rave mode fill orbs, lure Slasher into circle and shoot glowing spots; enter green circles to survive (x3). Defeat Slasher and collect the second Soul Key piece.' },
+  ];
+  let locksmithEe = await prisma.easterEgg.findFirst({
+    where: { mapId: raveMap.id, slug: 'locksmith' },
+  });
+  if (!locksmithEe) {
+    locksmithEe = await prisma.easterEgg.create({
+      data: {
+        name: 'Locksmith',
+        slug: 'locksmith',
+        type: 'MAIN_QUEST',
+        mapId: raveMap.id,
+        xpReward: 2500,
+        description: 'Main quest of Rave in the Redwoods. Obtain the second piece of the Soul Key. Requires power, boat engine, and projector on Turtle Island.',
+      },
+    });
+    await prisma.easterEggStep.createMany({
+      data: LOCKSMITH_STEPS.map((s) => ({
+        easterEggId: locksmithEe!.id,
+        order: s.order,
+        label: s.label,
+        imageUrl: null,
+        buildableReferenceSlug: null,
+      })),
+    });
+    console.log(`Created Locksmith Easter Egg (${LOCKSMITH_STEPS.length} steps)`);
+  } else {
+    console.log('Locksmith Easter Egg already exists');
+  }
+
+  const raveWithChallenges = await prisma.map.findUnique({
+    where: { id: raveMap.id },
+    include: { game: { select: { shortName: true } }, challenges: { where: { isActive: true } } },
+  });
+  if (raveWithChallenges) {
+    const defs = getMapAchievementDefinitions(
+      raveWithChallenges.slug,
+      raveWithChallenges.roundCap,
+      raveWithChallenges.game?.shortName ?? 'IW'
+    );
+    const raveChallengesByType = Object.fromEntries(raveWithChallenges.challenges.map((c) => [c.type, c]));
+    let raveAchievementsCreated = 0;
+    for (const def of defs) {
+      const criteria = def.criteria as { round?: number; challengeType?: string };
+      const challengeId = criteria.challengeType
+        ? raveChallengesByType[criteria.challengeType as keyof typeof raveChallengesByType]?.id
+        : null;
+      const existing = await prisma.achievement.findFirst({
+        where: { mapId: raveMap.id, slug: def.slug },
+      });
+      if (!existing) {
+        await prisma.achievement.create({
+          data: {
+            mapId: raveMap.id,
+            name: def.name,
+            slug: def.slug,
+            type: def.type as 'ROUND_MILESTONE' | 'CHALLENGE_COMPLETE' | 'EASTER_EGG_COMPLETE',
+            rarity: def.rarity as 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY',
+            xpReward: def.xpReward,
+            criteria: def.criteria,
+            challengeId: challengeId ?? undefined,
+          },
+        });
+        raveAchievementsCreated++;
+      }
+    }
+    if (raveAchievementsCreated > 0) console.log(`Created ${raveAchievementsCreated} map achievements for Rave in the Redwoods`);
+  }
+
+  const raveSpeedrunDefs = getSpeedrunAchievementDefinitions('rave-in-the-redwoods', 'IW');
+  if (raveSpeedrunDefs.length > 0 && raveWithChallenges) {
+    const raveChallengesByType = Object.fromEntries(raveWithChallenges.challenges.map((c) => [c.type, c]));
+    let raveSpeedrunCreated = 0;
+    for (const def of raveSpeedrunDefs) {
+      const criteria = def.criteria as { challengeType?: string };
+      const challengeId = criteria.challengeType
+        ? (raveChallengesByType as Record<string, { id: string }>)[criteria.challengeType]?.id
+        : null;
+      const existing = await prisma.achievement.findFirst({
+        where: { mapId: raveMap.id, slug: def.slug },
+      });
+      if (!existing) {
+        await prisma.achievement.create({
+          data: {
+            mapId: raveMap.id,
+            name: def.name,
+            slug: def.slug,
+            type: def.type as 'CHALLENGE_COMPLETE',
+            rarity: def.rarity as 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY',
+            xpReward: def.xpReward,
+            criteria: def.criteria,
+            challengeId: challengeId ?? undefined,
+          },
+        });
+        raveSpeedrunCreated++;
+      } else if (existing.xpReward !== def.xpReward) {
+        await prisma.achievement.update({
+          where: { id: existing.id },
+          data: { xpReward: def.xpReward },
+        });
+      }
+    }
+    if (raveSpeedrunCreated > 0) console.log(`Created ${raveSpeedrunCreated} speedrun achievements for Rave in the Redwoods`);
+  }
+
+  const locksmithEeForAchievement = await prisma.easterEgg.findFirst({
+    where: { mapId: raveMap.id, slug: 'locksmith' },
+  });
+  const locksmithAchievementExists = locksmithEeForAchievement
+    ? await prisma.achievement.findFirst({ where: { easterEggId: locksmithEeForAchievement.id } })
+    : null;
+  if (!locksmithAchievementExists && locksmithEeForAchievement && (locksmithEeForAchievement.xpReward ?? 0) > 0) {
+    await prisma.achievement.create({
+      data: {
+        mapId: raveMap.id,
+        easterEggId: locksmithEeForAchievement.id,
+        name: locksmithEeForAchievement.name,
+        slug: 'locksmith',
+        type: 'EASTER_EGG_COMPLETE',
+        rarity: 'LEGENDARY',
+        xpReward: locksmithEeForAchievement.xpReward ?? 2500,
+        criteria: {},
+      },
+    });
+    console.log('Created Locksmith achievement');
+  }
+
   console.log('Add IW content complete.');
 }
 

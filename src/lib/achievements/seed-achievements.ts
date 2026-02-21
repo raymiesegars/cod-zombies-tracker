@@ -12,7 +12,7 @@ import {
   getXpForRoundFromMilestones,
 } from './map-round-config';
 import { isBo4Game, BO4_DIFFICULTIES, BO4_DIFFICULTY_XP_MULTIPLIER, type Bo4DifficultyType } from '../bo4';
-import { IW_ZIS_SPEEDRUN_TIERS, formatSpeedrunTime } from './speedrun-tiers';
+import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
 
 const CHALLENGE_TYPES = [
   'HIGHEST_ROUND',
@@ -32,6 +32,16 @@ const IW_ZIS_CHALLENGE_ROUNDS: Partial<Record<string, readonly number[]>> = {
   ONE_BOX: [30], // WR 30
   PISTOL_ONLY: [5, 10, 15, 20, 25, 30, 40, 50, 60], // WR 60
   NO_POWER: [10, 15, 20, 30, 50, 75, 100, 125, 150], // WR 150
+};
+
+/** IW Rave in the Redwoods: custom rounds per challenge (WR-based). */
+const IW_RAVE_CHALLENGE_ROUNDS: Partial<Record<string, readonly number[]>> = {
+  NO_PERKS: [10, 20, 30, 50, 70, 100, 150, 190], // WR 190
+  NO_PACK: [10, 20, 30, 40, 50], // WR 50
+  STARTING_ROOM: [10, 15, 20, 25, 30, 37], // WR 37
+  ONE_BOX: [10, 20, 30], // WR 30
+  PISTOL_ONLY: [10, 20, 30, 40, 50, 60, 70], // WR 70
+  NO_POWER: [10, 20, 30, 50, 75, 100, 125, 170], // WR 170
 };
 
 export type AchievementSeedRow = {
@@ -119,12 +129,14 @@ export function getMapAchievementDefinitions(
     }
     // Other types: rounds <= maxRound, XP from map milestones × multiplier
     const isIwZis = mapSlug === 'zombies-in-spaceland' && gameShortName === 'IW';
+    const isIwRave = mapSlug === 'rave-in-the-redwoods' && gameShortName === 'IW';
+    const iwOverrideRounds = isIwZis ? IW_ZIS_CHALLENGE_ROUNDS : isIwRave ? IW_RAVE_CHALLENGE_ROUNDS : undefined;
     for (const cType of CHALLENGE_TYPES) {
       if (cType === 'HIGHEST_ROUND' || cType === 'NO_DOWNS') continue;
       const defaultConfig = getMilestonesForChallengeType(cType as any);
       if (!defaultConfig) continue;
       const slugPrefix = cType.toLowerCase().replace(/_/g, '-');
-      const overrideRounds = isIwZis ? IW_ZIS_CHALLENGE_ROUNDS[cType] : undefined;
+      const overrideRounds = iwOverrideRounds?.[cType];
       const effectiveRounds = overrideRounds ?? (defaultConfig.rounds as number[]);
       const effectiveMax = overrideRounds ? Math.max(...overrideRounds) : maxRound;
       const rounds =
@@ -244,14 +256,20 @@ const SPEEDRUN_TYPE_LABELS: Record<string, string> = {
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
 };
 
-/** Speedrun tier achievements for IW Zombies in Spaceland (and future IW maps). Fastest = most XP. */
+const IW_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
+  'zombies-in-spaceland': IW_ZIS_SPEEDRUN_TIERS,
+  'rave-in-the-redwoods': IW_RAVE_SPEEDRUN_TIERS,
+};
+
+/** Speedrun tier achievements for IW maps (ZIS, Rave, etc.). Fastest = most XP. */
 export function getSpeedrunAchievementDefinitions(
   mapSlug: string,
   gameShortName: string
 ): AchievementSeedRow[] {
-  if (gameShortName !== 'IW' || mapSlug !== 'zombies-in-spaceland') return [];
+  const tiersByType = gameShortName === 'IW' ? IW_SPEEDRUN_TIERS_BY_MAP[mapSlug] : undefined;
+  if (!tiersByType) return [];
   const rows: AchievementSeedRow[] = [];
-  for (const [challengeType, tiers] of Object.entries(IW_ZIS_SPEEDRUN_TIERS)) {
+  for (const [challengeType, tiers] of Object.entries(tiersByType)) {
     const label = SPEEDRUN_TYPE_LABELS[challengeType] ?? challengeType.replace(/_/g, ' ');
     for (let i = 0; i < tiers.length; i++) {
       const { maxTimeSeconds, xpReward } = tiers[i]!;

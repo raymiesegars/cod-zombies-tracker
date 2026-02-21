@@ -368,8 +368,8 @@ function AchievementsSection({
                                     )}
                                   </div>
                                 </div>
-                                <span className="flex items-center flex-shrink-0 min-w-[11rem] gap-2">
-                                  <span className="text-sm font-medium text-blood-400 min-w-[7.5rem] whitespace-nowrap text-left">+{a.xpReward.toLocaleString()} XP</span>
+                                <span className="flex items-center flex-shrink-0 justify-end gap-2 min-w-0 sm:min-w-[11rem]">
+                                  <span className="text-sm font-medium text-blood-400 whitespace-nowrap text-right">+{a.xpReward.toLocaleString()} XP</span>
                                   <span className="w-8 flex shrink-0 justify-center">
                                     {isOwnProfile && unlocked && onRelock ? (
                                       <RelockAchievementButton
