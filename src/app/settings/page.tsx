@@ -138,13 +138,17 @@ export default function SettingsPage() {
                   label="Display Name"
                   placeholder="Your display name"
                   value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
+                  onChange={(e) => setDisplayName(e.target.value.slice(0, 20))}
+                  maxLength={20}
+                  helperText={`${displayName.length}/20 characters`}
                 />
                 <Input
                   label="Username"
                   placeholder="Your username"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, '-'))}
+                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, '-').slice(0, 20))}
+                  maxLength={20}
+                  helperText={`${username.length}/20 characters`}
                 />
               </div>
               <div>

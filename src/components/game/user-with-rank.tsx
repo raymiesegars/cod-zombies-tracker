@@ -24,6 +24,8 @@ interface UserWithRankProps {
   size?: 'sm' | 'md';
   linkToProfile?: boolean;
   className?: string;
+  /** Max chars for name in navbar; truncates with ellipsis beyond this */
+  maxNameLength?: number;
 }
 
 // Rank icon a bit bigger than avatar so it’s easy to see
@@ -39,13 +41,17 @@ export function UserWithRank({
   size = 'md',
   linkToProfile = true,
   className,
+  maxNameLength,
 }: UserWithRankProps) {
   // Use totalXp when we have it so rank and level stay in sync
   const level =
     user.totalXp != null ? getLevelFromXp(user.totalXp).level : (user.level ?? 1);
   const rank = getRankForLevel(level);
   const rankIcon = rank ? getRankIconPath(rank.icon) : null;
-  const displayName = user.displayName || user.username;
+  const rawName = user.displayName || user.username;
+  const displayName = maxNameLength != null && rawName.length > maxNameLength
+    ? `${rawName.slice(0, maxNameLength)}…`
+    : rawName;
 
   const content = (
     <span className={cn('inline-flex items-center gap-1.5 sm:gap-2 min-w-0 leading-none', className)}>

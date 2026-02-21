@@ -26,7 +26,13 @@ export async function PATCH(request: NextRequest) {
       updatedAt: new Date(),
     };
 
-    if (displayName !== undefined) data.displayName = displayName === '' ? null : String(displayName).trim();
+    if (displayName !== undefined) {
+      const trimmed = String(displayName).trim();
+      if (trimmed.length > 20) {
+        return NextResponse.json({ error: 'Display name must be 20 characters or less' }, { status: 400 });
+      }
+      data.displayName = trimmed === '' ? null : trimmed;
+    }
     if (bio !== undefined) data.bio = bio === '' ? null : String(bio).trim();
     if (isPublic !== undefined) data.isPublic = Boolean(isPublic);
     if (body.avatarPreset !== undefined) {
@@ -38,6 +44,9 @@ export async function PATCH(request: NextRequest) {
       const username = slugify(String(rawUsername).trim());
       if (!username) {
         return NextResponse.json({ error: 'Username is required and must contain at least one letter or number' }, { status: 400 });
+      }
+      if (username.length > 20) {
+        return NextResponse.json({ error: 'Username must be 20 characters or less' }, { status: 400 });
       }
       const existing = await prisma.user.findUnique({
         where: { username },
