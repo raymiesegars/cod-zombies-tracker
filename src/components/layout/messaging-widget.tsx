@@ -92,7 +92,7 @@ function UserRow({
         </Link>
         {meta}
       </div>
-      <div className={cn('flex items-center gap-1 transition-opacity', requestSent ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')}>
+      <div className="flex items-center gap-1">
         {onChat && (
           <button type="button" onClick={onChat} className="p-1.5 rounded-lg text-bunker-400 hover:text-white hover:bg-bunker-700 transition-colors" title="Message">
             <MessageCircle className="w-3.5 h-3.5" />
