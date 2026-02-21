@@ -45,6 +45,10 @@ export async function POST(request: NextRequest) {
       data: { status: 'DENIED' },
     });
 
+    await prisma.notification.deleteMany({
+      where: { userId: me.id, type: 'FRIEND_REQUEST_RECEIVED', friendRequestId },
+    });
+
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error('Error denying friend request:', error);

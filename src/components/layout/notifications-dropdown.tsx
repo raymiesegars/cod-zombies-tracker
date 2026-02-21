@@ -44,7 +44,12 @@ export function NotificationsDropdown() {
   useEffect(() => {
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 60 * 1000);
-    return () => clearInterval(interval);
+    const onRefresh = () => fetchNotifications();
+    window.addEventListener('cod-tracker-notifications-refresh', onRefresh);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('cod-tracker-notifications-refresh', onRefresh);
+    };
   }, []);
 
   const markRead = (id: string) => {
