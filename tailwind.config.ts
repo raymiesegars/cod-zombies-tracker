@@ -8,6 +8,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        // When to switch navbar to burger (name hits bell ~876px; use 951 so burger shows earlier)
+        navbar: '951px',
+      },
       colors: {
         // Black Ops 1/2 Zombies inspired color palette
         // Dark, gritty, military bunker aesthetic

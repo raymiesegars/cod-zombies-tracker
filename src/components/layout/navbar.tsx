@@ -61,8 +61,8 @@ export function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop Navigation: icon-only below 1440px to avoid cramping; labels show at 1440px+ */}
-          <div className="hidden md:flex items-center gap-0.5 min-w-0 shrink">
+          {/* Desktop Navigation: switch to burger at 951px (950 and below) to avoid cramping/overlap */}
+          <div className="hidden navbar:flex items-center gap-0.5 min-w-0 shrink">
             {navLinks.map((link) => {
               const Icon = link.icon;
               if (link.iconOnly) {
@@ -96,13 +96,13 @@ export function Navbar() {
           </div>
 
           {/* Desktop User Menu: min-w-0 so username truncates only when needed; ml-4 spacing from Discord */}
-          <div className="hidden md:flex items-center gap-2 min-w-0 ml-4">
+          <div className="hidden navbar:flex items-center gap-2 min-w-0 ml-4">
             {isLoading ? (
               <div className="w-8 h-8 rounded-full bg-bunker-800 animate-pulse shrink-0" />
             ) : user && profile ? (
               <>
                 <NotificationsDropdown />
-                <div className="relative inline-flex flex-col items-end min-w-0">
+                <div className="relative inline-flex flex-col items-end min-w-0 max-w-[29rem]">
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-bunker-800/50 transition-colors min-w-0"
@@ -181,10 +181,10 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Mobile menu button: shrink-0 so it's never cut off; touch target preserved */}
+          {/* Mobile menu button: show at 950px and below to avoid nav cramping */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden shrink-0 p-2.5 -mr-1 text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors touch-manipulation"
+            className="navbar:hidden shrink-0 p-2.5 -mr-1 text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors touch-manipulation"
             aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -199,7 +199,7 @@ export function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-bunker-900/95 border-b border-bunker-800/50"
+            className="navbar:hidden bg-bunker-900/95 border-b border-bunker-800/50"
           >
             <div className="px-4 py-4 space-y-2">
               {navLinks.map((link) => (
