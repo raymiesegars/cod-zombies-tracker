@@ -21,6 +21,8 @@ interface LeaderboardEntryProps {
   valueKind?: 'round' | 'xp' | 'time';
   hidePlayerCount?: boolean;
   mapSlug?: string;
+  /** When true (e.g. verified XP rank leaderboard), show blue verified checkmark on every entry */
+  showVerifiedBadge?: boolean;
 }
 
 const rankColors = {
@@ -38,6 +40,7 @@ export function LeaderboardEntry({
   valueKind = 'round',
   hidePlayerCount = false,
   mapSlug,
+  showVerifiedBadge = false,
 }: LeaderboardEntryProps) {
   const isTopThree = entry.rank <= 3;
   const level = entry.user.level ?? 1;
@@ -131,8 +134,8 @@ export function LeaderboardEntry({
         >
           {displayName}
         </Link>
-        {(entry as LeaderboardEntryType & { isVerified?: boolean }).isVerified && (
-          <span className="flex-shrink-0 min-w-[1rem] w-4 h-4 inline-flex items-center justify-center rounded-full bg-blue-500/90 text-white" title="Verified run" aria-hidden>
+        {(showVerifiedBadge || (entry as LeaderboardEntryType & { isVerified?: boolean }).isVerified) && (
+          <span className="flex-shrink-0 min-w-[1rem] w-4 h-4 inline-flex items-center justify-center rounded-full bg-blue-500/90 text-white" title={showVerifiedBadge ? 'Verified XP' : 'Verified run'} aria-hidden>
             <ShieldCheck className="w-2.5 h-2.5" strokeWidth={2.5} />
           </span>
         )}

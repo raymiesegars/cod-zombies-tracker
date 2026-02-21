@@ -32,6 +32,11 @@ model User {
   // XP & Leveling
   totalXp       Int       @default(0)
   level         Int       @default(1)
+  verifiedTotalXp Int     @default(0)  // XP from verified achievements only; drives verified rank
+
+  // Profile display preferences (for XP rank on dashboards)
+  showBothXpRanks   Boolean @default(false)  // If true, show both XP bars on dashboards; if false, single bar with toggle
+  preferredRankView String? // 'total' | 'verified' – last selected when showing single bar
   
   // Privacy settings
   isPublic      Boolean   @default(true)
@@ -511,7 +516,8 @@ model UserAchievement {
   achievement   Achievement @relation(fields: [achievementId], references: [id])
   
   unlockedAt    DateTime    @default(now())
-  
+  verifiedAt    DateTime?   // When set, this counts toward verified XP (user had a verified run on the map)
+
   @@unique([userId, achievementId])
   @@index([userId])
   @@index([achievementId])

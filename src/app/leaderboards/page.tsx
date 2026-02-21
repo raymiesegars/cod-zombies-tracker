@@ -6,7 +6,7 @@ import { LeaderboardEntry, LeaderboardsHelpContent } from '@/components/game';
 import type { LeaderboardEntry as LeaderboardEntryType, Game, MapWithGame, PlayerCount, ChallengeType } from '@/types';
 import { cn } from '@/lib/utils';
 import { getBo4DifficultyLabel, BO4_DIFFICULTIES } from '@/lib/bo4';
-import { Trophy, Medal, Filter, Search, X, ShieldCheck } from 'lucide-react';
+import { Trophy, Medal, Filter, Search, X, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 
 const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
@@ -42,6 +42,7 @@ export default function LeaderboardsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchForFetch, setSearchForFetch] = useState(''); // Debounced; drives server-side search
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [rankVerifiedXpOnly, setRankVerifiedXpOnly] = useState(false);
 
   const isRankView = selectedGame === RANK_VIEW;
   const selectedMapData = maps.find((m) => m.slug === selectedMap);
@@ -99,6 +100,7 @@ export default function LeaderboardsPage() {
           params.set('offset', '0');
           params.set('limit', String(PAGE_SIZE));
           if (searchForFetch) params.set('search', searchForFetch);
+          if (rankVerifiedXpOnly) params.set('verified', '1');
           const res = await fetch(`/api/leaderboards/rank?${params}`, { cache: 'no-store' });
           if (res.ok) {
             const data = await res.json();
@@ -165,7 +167,7 @@ export default function LeaderboardsPage() {
     }
 
     fetchLeaderboard();
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, searchForFetch, verifiedOnly]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, searchForFetch, verifiedOnly, rankVerifiedXpOnly]);
 
   const loadMore = useCallback(async () => {
     if (leaderboard.length >= total || total === 0) return;
@@ -174,7 +176,11 @@ export default function LeaderboardsPage() {
     const offset = leaderboard.length;
     try {
       if (isRankView) {
-        const res = await fetch(`/api/leaderboards/rank?offset=${offset}&limit=${PAGE_SIZE}`, { cache: 'no-store' });
+        const params = new URLSearchParams();
+        params.set('offset', String(offset));
+        params.set('limit', String(PAGE_SIZE));
+        if (rankVerifiedXpOnly) params.set('verified', '1');
+        const res = await fetch(`/api/leaderboards/rank?${params}`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           const nextEntries = data.entries ?? [];
@@ -226,7 +232,7 @@ export default function LeaderboardsPage() {
     } finally {
       loadingMoreRef.current = false;
     }
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, verifiedOnly, leaderboard.length, total]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, verifiedOnly, rankVerifiedXpOnly, leaderboard.length, total]);
 
   // Only observe sentinel when search is empty so list stays stable while filtering
   useEffect(() => {
@@ -432,6 +438,22 @@ export default function LeaderboardsPage() {
                   className="w-full"
                 />
               )}
+              {isRankView && (
+                <button
+                  type="button"
+                  onClick={() => setRankVerifiedXpOnly((v) => !v)}
+                  className={cn(
+                    'flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors min-h-[40px]',
+                    rankVerifiedXpOnly
+                      ? 'border-blue-500/60 bg-blue-950/80 text-blue-200 hover:bg-blue-900/60'
+                      : 'border-bunker-600 bg-bunker-800/80 text-bunker-300 hover:bg-bunker-700/80'
+                  )}
+                  aria-pressed={rankVerifiedXpOnly}
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  {rankVerifiedXpOnly ? 'Verified XP' : 'Total XP'}
+                </button>
+              )}
               {!isRankView && (
                 <button
                   type="button"
@@ -463,10 +485,12 @@ export default function LeaderboardsPage() {
                   <div>
                     <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                       <Medal className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
-                      Rank (by XP)
+                      {rankVerifiedXpOnly ? 'Rank (by Verified XP)' : 'Rank (by XP)'}
                     </CardTitle>
                     <p className="text-xs sm:text-sm text-bunker-400 mt-1">
-                      All members ranked by total XP
+                      {rankVerifiedXpOnly
+                        ? 'All members ranked by verified XP only'
+                        : 'All members ranked by total XP'}
                     </p>
                   </div>
                   <span className="inline-flex items-center px-3 py-1.5 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-sm font-semibold shadow-[0_0_1px_rgba(0,0,0,1),0_0_3px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.8)] [text-shadow:0_0_1px_rgba(0,0,0,1),0_0_2px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">
@@ -491,6 +515,7 @@ export default function LeaderboardsPage() {
                         isCurrentUser={entry.user.id === profile?.id}
                         valueKind="xp"
                         hidePlayerCount
+                        showVerifiedBadge={rankVerifiedXpOnly}
                       />
                     ))}
                     {!isSearchActive && leaderboard.length < total && (

@@ -7,7 +7,7 @@ interface ProgressBarProps {
   value: number;
   max?: number;
   size?: 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'success' | 'warning' | 'danger' | 'xp';
+  variant?: 'default' | 'success' | 'warning' | 'danger' | 'xp' | 'verified';
   showLabel?: boolean;
   label?: string;
   className?: string;
@@ -26,6 +26,7 @@ const variantStyles = {
   warning: 'bg-gradient-to-r from-rust-600 to-rust-500',
   danger: 'bg-gradient-to-r from-blood-600 to-blood-500',
   xp: 'bg-gradient-to-r from-blood-700 via-blood-500 to-blood-700',
+  verified: 'bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400',
 };
 
 export function ProgressBar({

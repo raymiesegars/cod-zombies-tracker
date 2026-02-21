@@ -25,7 +25,7 @@ import {
   TabsTrigger,
   TabsContent,
 } from '@/components/ui';
-import { RoundCounter, XpDisplay, RelockAchievementButton, RankHelpContent, PendingCoOpSection, PendingVerificationSection } from '@/components/game';
+import { RoundCounter, XpRankDisplay, RelockAchievementButton, RankHelpContent, PendingCoOpSection, PendingVerificationSection } from '@/components/game';
 import {
   ACHIEVEMENT_CATEGORY_LABELS,
   getAchievementCategory,
@@ -728,7 +728,28 @@ export default function UserProfilePage() {
               {/* XP Display + rank help */}
               <div className="mt-3 sm:mt-4 flex items-start gap-2">
                 <div className="flex-1 min-w-0">
-                  <XpDisplay totalXp={profile.totalXp} />
+                  <XpRankDisplay
+                    totalXp={profile.totalXp}
+                    verifiedTotalXp={(profile as { verifiedTotalXp?: number }).verifiedTotalXp ?? 0}
+                    showBothXpRanks={(currentProfile as { showBothXpRanks?: boolean })?.showBothXpRanks ?? false}
+                    preferredRankView={(currentProfile as { preferredRankView?: 'total' | 'verified' | null })?.preferredRankView ?? 'total'}
+                    onPreferredRankViewChange={
+                      currentProfile
+                        ? async (view) => {
+                            try {
+                              const res = await fetch('/api/users/profile/update', {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ preferredRankView: view }),
+                              });
+                              if (res.ok) refreshProfile?.();
+                            } catch {
+                              // ignore
+                            }
+                          }
+                        : undefined
+                    }
+                  />
                 </div>
                 <HelpTrigger
                   title="How leveling and ranks work"

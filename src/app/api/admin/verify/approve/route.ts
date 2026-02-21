@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
+import { grantVerifiedAchievementsForMap } from '@/lib/verified-xp';
 import { NotificationType } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
     if (logType === 'challenge') {
       const log = await prisma.challengeLog.findUnique({
         where: { id: logId },
-        select: { id: true, userId: true, verificationRequestedAt: true, isVerified: true },
+        select: { id: true, userId: true, mapId: true, verificationRequestedAt: true, isVerified: true },
       });
       if (!log || !log.verificationRequestedAt || log.isVerified) {
         return NextResponse.json({ error: 'Run not found or not pending verification' }, { status: 400 });
@@ -53,10 +54,11 @@ export async function POST(request: NextRequest) {
           },
         }),
       ]);
+      await grantVerifiedAchievementsForMap(log.userId, log.mapId);
     } else {
       const log = await prisma.easterEggLog.findUnique({
         where: { id: logId },
-        select: { id: true, userId: true, verificationRequestedAt: true, isVerified: true },
+        select: { id: true, userId: true, mapId: true, verificationRequestedAt: true, isVerified: true },
       });
       if (!log || !log.verificationRequestedAt || log.isVerified) {
         return NextResponse.json({ error: 'Run not found or not pending verification' }, { status: 400 });
@@ -78,6 +80,7 @@ export async function POST(request: NextRequest) {
           },
         }),
       ]);
+      await grantVerifiedAchievementsForMap(log.userId, log.mapId);
     }
 
     return NextResponse.json({ ok: true });
