@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { AuthProvider } from '@/context/auth-context';
 import { XpToastProvider } from '@/context/xp-toast-context';
-import { Navbar, Footer, BackToTop, TVRoomBackground, MusicPlayer, AuthLayoutWrapper, FriendsListWidget } from '@/components/layout';
+import { Navbar, Footer, BackToTop, TVRoomBackground, MusicPlayer, AuthLayoutWrapper, MessagingWidget } from '@/components/layout';
 import './globals.css';
 
 export const viewport: Viewport = {
@@ -131,7 +131,7 @@ export default function RootLayout({
                 <main className="flex-1">{children}</main>
                 <Footer />
                 <BackToTop />
-                <FriendsListWidget variant="floating" />
+                <MessagingWidget />
               </AuthLayoutWrapper>
             </XpToastProvider>
           </AuthProvider>
