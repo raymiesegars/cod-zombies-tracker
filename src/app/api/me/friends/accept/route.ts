@@ -46,6 +46,10 @@ export async function POST(request: NextRequest) {
       data: { status: 'ACCEPTED' },
     });
 
+    await prisma.notification.deleteMany({
+      where: { userId: me.id, type: 'FRIEND_REQUEST_RECEIVED', friendRequestId },
+    });
+
     const myLabel = (me.displayName && me.displayName.trim()) || me.username || 'Someone';
     await prisma.notification.create({
       data: {

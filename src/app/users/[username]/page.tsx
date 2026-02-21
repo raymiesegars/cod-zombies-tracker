@@ -517,6 +517,7 @@ export default function UserProfilePage() {
       if (res.ok) {
         setProfileRefreshTrigger((t) => t + 1);
         window.dispatchEvent(new Event('cod-tracker-friends-updated'));
+        window.dispatchEvent(new Event('cod-tracker-notifications-refresh'));
       } else alert('Failed to accept friend request');
     } catch {
       alert('Failed to accept friend request');
@@ -534,8 +535,10 @@ export default function UserProfilePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ friendRequestId }),
       });
-      if (res.ok) setProfileRefreshTrigger((t) => t + 1);
-      else alert('Failed to deny friend request');
+      if (res.ok) {
+        setProfileRefreshTrigger((t) => t + 1);
+        window.dispatchEvent(new Event('cod-tracker-notifications-refresh'));
+      } else alert('Failed to deny friend request');
     } catch {
       alert('Failed to deny friend request');
     } finally {

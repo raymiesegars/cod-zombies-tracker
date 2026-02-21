@@ -119,8 +119,7 @@ function XpToastContent({ amount, totalXp }: ToastState) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 24 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className="fixed bottom-6 left-6 right-auto z-[100] pointer-events-none w-[280px] sm:w-[300px]"
-      style={{ left: '1.5rem', right: 'auto' }}
+      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] pointer-events-none w-[280px] sm:w-[300px]"
     >
       {/* Fully opaque card – no transparency */}
       <div className="rounded-xl border border-bunker-600 bg-bunker-900 shadow-xl overflow-hidden">
