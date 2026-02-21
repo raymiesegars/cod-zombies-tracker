@@ -13,7 +13,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { displayName, username: rawUsername, bio, isPublic } = body;
+    const { displayName, username: rawUsername, bio, isPublic, showBothXpRanks, preferredRankView } = body;
 
     const data: {
       displayName?: string | null;
@@ -21,6 +21,8 @@ export async function PATCH(request: NextRequest) {
       bio?: string | null;
       isPublic?: boolean;
       avatarPreset?: string | null;
+      showBothXpRanks?: boolean;
+      preferredRankView?: string | null;
       updatedAt: Date;
     } = {
       updatedAt: new Date(),
@@ -38,6 +40,11 @@ export async function PATCH(request: NextRequest) {
     if (body.avatarPreset !== undefined) {
       const v = body.avatarPreset === '' || body.avatarPreset == null ? null : String(body.avatarPreset).trim();
       data.avatarPreset = v === '' ? null : isAvatarPreset(v) ? v : null;
+    }
+    if (showBothXpRanks !== undefined) data.showBothXpRanks = Boolean(showBothXpRanks);
+    if (preferredRankView !== undefined) {
+      const v = preferredRankView === '' || preferredRankView == null ? null : String(preferredRankView).trim();
+      data.preferredRankView = v === 'total' || v === 'verified' ? v : null;
     }
 
     if (rawUsername !== undefined) {

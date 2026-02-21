@@ -3,6 +3,7 @@ export * from './map-card';
 export * from './leaderboard-entry';
 export * from './achievement-badge';
 export * from './xp-display';
+export * from './xp-rank-display';
 export * from './proof-embed';
 export * from './proof-urls-input';
 export * from './teammate-picker';

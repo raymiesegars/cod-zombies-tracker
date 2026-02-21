@@ -22,6 +22,7 @@ import {
   CheckCircle,
   AlertCircle,
   ImageIcon,
+  Trophy,
 } from 'lucide-react';
 import { PublicProfileHelpContent } from '@/components/game';
 import { Avatar } from '@/components/ui';
@@ -35,6 +36,7 @@ export default function SettingsPage() {
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [isPublic, setIsPublic] = useState(true);
+  const [showBothXpRanks, setShowBothXpRanks] = useState(false);
   const [avatarPreset, setAvatarPreset] = useState<AvatarPreset | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -51,6 +53,7 @@ export default function SettingsPage() {
       setUsername(profile.username || '');
       setBio(profile.bio || '');
       setIsPublic(profile.isPublic);
+      setShowBothXpRanks((profile as { showBothXpRanks?: boolean }).showBothXpRanks ?? false);
       setAvatarPreset(profile.avatarPreset && isAvatarPreset(profile.avatarPreset) ? profile.avatarPreset : null);
     }
   }, [profile]);
@@ -71,6 +74,7 @@ export default function SettingsPage() {
           bio,
           isPublic,
           avatarPreset: avatarPreset ?? '',
+          showBothXpRanks,
         }),
       });
 
@@ -203,6 +207,40 @@ export default function SettingsPage() {
                     <span className="text-xs font-medium text-bunker-300 text-center leading-tight whitespace-nowrap w-full overflow-hidden text-ellipsis">{label}</span>
                   </button>
                 ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* XP Display Section */}
+        <div>
+          <Card variant="bordered">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-blood-400" />
+                XP Display
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex flex-col gap-1">
+                  <p className="font-medium text-sm sm:text-base text-white">Show both XP ranks on dashboards</p>
+                  <p className="text-xs sm:text-sm text-bunker-400">
+                    When on, you&apos;ll see verified and total XP bars on your profile and others&apos;. When off, a toggle switches between them.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowBothXpRanks(!showBothXpRanks)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blood-500 focus:ring-offset-2 focus:ring-offset-bunker-900 ${
+                    showBothXpRanks ? 'bg-blood-600' : 'bg-bunker-700'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      showBothXpRanks ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
               </div>
             </CardContent>
           </Card>

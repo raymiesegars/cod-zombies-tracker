@@ -75,7 +75,9 @@ export async function GET(
     }
 
     const totalXp = user.totalXp ?? 0;
+    const verifiedTotalXp = user.verifiedTotalXp ?? 0;
     const level = getLevelFromXp(totalXp).level;
+    const verifiedLevel = getLevelFromXp(verifiedTotalXp).level;
 
     if (!user.isPublic) {
       const privatePayload = {
@@ -86,13 +88,15 @@ export async function GET(
         avatarPreset: user.avatarPreset,
         level,
         totalXp,
+        verifiedLevel,
+        verifiedTotalXp,
         isPublic: false,
         ...(viewerIsAdmin && { isAdmin: user.isAdmin }),
       };
       return NextResponse.json(privatePayload);
     }
 
-    const payload = { ...user, level, totalXp } as Record<string, unknown>;
+    const payload = { ...user, level, totalXp, verifiedLevel, verifiedTotalXp } as Record<string, unknown>;
     if (!viewerIsAdmin) {
       delete payload.isAdmin;
     }

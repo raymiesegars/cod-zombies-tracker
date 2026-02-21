@@ -31,8 +31,10 @@ export async function GET(request: NextRequest) {
     }
 
     const totalXp = user.totalXp ?? 0;
+    const verifiedTotalXp = user.verifiedTotalXp ?? 0;
     const level = getLevelFromXp(totalXp).level;
-    return NextResponse.json({ ...user, level, totalXp });
+    const verifiedLevel = getLevelFromXp(verifiedTotalXp).level;
+    return NextResponse.json({ ...user, level, totalXp, verifiedLevel, verifiedTotalXp });
   } catch (error) {
     console.error('Error fetching user profile:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
