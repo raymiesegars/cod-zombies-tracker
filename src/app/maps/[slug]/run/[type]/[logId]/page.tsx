@@ -27,11 +27,13 @@ function DeleteRunButton({
   type,
   mapSlug,
   label,
+  asSuperAdmin,
 }: {
   logId: string;
   type: string;
   mapSlug: string;
   label: string;
+  asSuperAdmin?: boolean;
 }) {
   const router = useRouter();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -48,13 +50,17 @@ function DeleteRunButton({
         return;
       }
       setConfirmOpen(false);
-      router.push(`/maps/${mapSlug}?tab=your-runs`);
+      router.push(asSuperAdmin ? `/maps/${mapSlug}` : `/maps/${mapSlug}?tab=your-runs`);
     } catch {
       alert('Failed to delete run.');
     } finally {
       setDeleting(false);
     }
   };
+
+  const description = asSuperAdmin
+    ? `This will permanently delete the "${label}" run. The owner's achievements and XP will be updated accordingly. This cannot be undone.`
+    : `This will permanently delete your "${label}" entry. Any achievements unlocked by this run will be re-locked and the XP will be removed from your account.`;
 
   return (
     <>
@@ -71,7 +77,7 @@ function DeleteRunButton({
         isOpen={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         title="Delete this run?"
-        description={`This will permanently delete your "${label}" entry. Any achievements unlocked by this run will be re-locked and the XP will be removed from your account.`}
+        description={description}
         size="md"
       >
         <div className="flex justify-end gap-2 pt-2">
@@ -621,19 +627,35 @@ export default function RunDetailPage() {
                   </div>
                 );
               })()}
-              {isOwner && (
+              {(isOwner || adminMe?.isSuperAdmin) && (
                 <div className="flex flex-wrap gap-2 pt-3 border-t border-bunker-700 mt-3">
-                  <Link href={`/maps/${map.slug}/run/${type}/${logId}/edit`} className="flex-1 min-w-0">
-                    <Button variant="secondary" size="sm" className="w-full" leftIcon={<Pencil className="w-3.5 h-3.5" />}>
-                      Edit
-                    </Button>
-                  </Link>
-                  <DeleteRunButton
-                    logId={logId}
-                    type={type}
-                    mapSlug={map.slug}
-                    label={isChallenge ? (log as ChallengeLogDetail).challenge.name : (log as EasterEggLogDetail).easterEgg.name}
-                  />
+                  {isOwner && (
+                    <Link href={`/maps/${map.slug}/run/${type}/${logId}/edit`} className="flex-1 min-w-0">
+                      <Button variant="secondary" size="sm" className="w-full" leftIcon={<Pencil className="w-3.5 h-3.5" />}>
+                        Edit
+                      </Button>
+                    </Link>
+                  )}
+                  {isOwner && (
+                    <DeleteRunButton
+                      logId={logId}
+                      type={type}
+                      mapSlug={map.slug}
+                      label={isChallenge ? (log as ChallengeLogDetail).challenge.name : (log as EasterEggLogDetail).easterEgg.name}
+                    />
+                  )}
+                  {!isOwner && adminMe?.isSuperAdmin && (
+                    <>
+                      <p className="text-bunker-400 text-xs w-full">Super admin: delete this run</p>
+                      <DeleteRunButton
+                        logId={logId}
+                        type={type}
+                        mapSlug={map.slug}
+                        label={isChallenge ? (log as ChallengeLogDetail).challenge.name : (log as EasterEggLogDetail).easterEgg.name}
+                        asSuperAdmin
+                      />
+                    </>
+                  )}
                 </div>
               )}
               {adminActionSuccess && (
