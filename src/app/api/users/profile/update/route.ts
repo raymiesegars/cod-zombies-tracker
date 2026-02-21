@@ -35,7 +35,7 @@ export async function PATCH(request: NextRequest) {
       }
       data.displayName = trimmed === '' ? null : trimmed;
     }
-    if (bio !== undefined) data.bio = bio === '' ? null : String(bio).trim();
+    if (bio !== undefined) data.bio = bio === '' ? null : String(bio).trim().slice(0, 150);
     if (isPublic !== undefined) data.isPublic = Boolean(isPublic);
     if (body.avatarPreset !== undefined) {
       const v = body.avatarPreset === '' || body.avatarPreset == null ? null : String(body.avatarPreset).trim();

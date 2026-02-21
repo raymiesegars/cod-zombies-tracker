@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { isSuperAdmin } from '@/lib/admin';
+import { grantVerifiedAchievementsForMap } from '@/lib/verified-xp';
 import { NotificationType } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
     if (logType === 'challenge') {
       const log = await prisma.challengeLog.findUnique({
         where: { id: logId },
-        select: { id: true, userId: true, isVerified: true },
+        select: { id: true, userId: true, mapId: true, isVerified: true },
       });
       if (!log) {
         return NextResponse.json({ error: 'Run not found' }, { status: 400 });
@@ -43,24 +44,25 @@ export async function POST(request: NextRequest) {
       if (log.userId === me.id) {
         return NextResponse.json({ error: 'You cannot verify your own run' }, { status: 400 });
       }
-      await prisma.$transaction([
-        prisma.challengeLog.update({
-          where: { id: logId },
-          data: { isVerified: true, verificationRequestedAt: null },
-        }),
-        prisma.notification.create({
-          data: {
-            userId: log.userId,
-            type: NotificationType.VERIFICATION_APPROVED,
-            challengeLogId: log.id,
-            read: false,
-          },
-        }),
-      ]);
+      await prisma.challengeLog.update({
+        where: { id: logId },
+        data: { isVerified: true, verificationRequestedAt: null },
+      });
+      const { verifiedTotalXp, xpGained } = await grantVerifiedAchievementsForMap(log.userId, log.mapId);
+      await prisma.notification.create({
+        data: {
+          userId: log.userId,
+          type: NotificationType.VERIFICATION_APPROVED,
+          challengeLogId: log.id,
+          read: false,
+          verifiedXpGained: xpGained > 0 ? xpGained : null,
+          verifiedTotalXp: xpGained > 0 ? verifiedTotalXp : null,
+        },
+      });
     } else {
       const log = await prisma.easterEggLog.findUnique({
         where: { id: logId },
-        select: { id: true, userId: true, isVerified: true },
+        select: { id: true, userId: true, mapId: true, isVerified: true },
       });
       if (!log) {
         return NextResponse.json({ error: 'Run not found' }, { status: 400 });
@@ -71,20 +73,21 @@ export async function POST(request: NextRequest) {
       if (log.userId === me.id) {
         return NextResponse.json({ error: 'You cannot verify your own run' }, { status: 400 });
       }
-      await prisma.$transaction([
-        prisma.easterEggLog.update({
-          where: { id: logId },
-          data: { isVerified: true, verificationRequestedAt: null },
-        }),
-        prisma.notification.create({
-          data: {
-            userId: log.userId,
-            type: NotificationType.VERIFICATION_APPROVED,
-            easterEggLogId: log.id,
-            read: false,
-          },
-        }),
-      ]);
+      await prisma.easterEggLog.update({
+        where: { id: logId },
+        data: { isVerified: true, verificationRequestedAt: null },
+      });
+      const { verifiedTotalXp, xpGained } = await grantVerifiedAchievementsForMap(log.userId, log.mapId);
+      await prisma.notification.create({
+        data: {
+          userId: log.userId,
+          type: NotificationType.VERIFICATION_APPROVED,
+          easterEggLogId: log.id,
+          read: false,
+          verifiedXpGained: xpGained > 0 ? xpGained : null,
+          verifiedTotalXp: xpGained > 0 ? verifiedTotalXp : null,
+        },
+      });
     }
 
     return NextResponse.json({ ok: true });

@@ -40,21 +40,21 @@ export async function POST(request: NextRequest) {
       if (log.userId === me.id) {
         return NextResponse.json({ error: 'You cannot verify your own run' }, { status: 400 });
       }
-      await prisma.$transaction([
-        prisma.challengeLog.update({
-          where: { id: logId },
-          data: { isVerified: true, verificationRequestedAt: null },
-        }),
-        prisma.notification.create({
-          data: {
-            userId: log.userId,
-            type: NotificationType.VERIFICATION_APPROVED,
-            challengeLogId: log.id,
-            read: false,
-          },
-        }),
-      ]);
-      await grantVerifiedAchievementsForMap(log.userId, log.mapId);
+      await prisma.challengeLog.update({
+        where: { id: logId },
+        data: { isVerified: true, verificationRequestedAt: null },
+      });
+      const { verifiedTotalXp, xpGained } = await grantVerifiedAchievementsForMap(log.userId, log.mapId);
+      await prisma.notification.create({
+        data: {
+          userId: log.userId,
+          type: NotificationType.VERIFICATION_APPROVED,
+          challengeLogId: log.id,
+          read: false,
+          verifiedXpGained: xpGained > 0 ? xpGained : null,
+          verifiedTotalXp: xpGained > 0 ? verifiedTotalXp : null,
+        },
+      });
     } else {
       const log = await prisma.easterEggLog.findUnique({
         where: { id: logId },
@@ -66,21 +66,21 @@ export async function POST(request: NextRequest) {
       if (log.userId === me.id) {
         return NextResponse.json({ error: 'You cannot verify your own run' }, { status: 400 });
       }
-      await prisma.$transaction([
-        prisma.easterEggLog.update({
-          where: { id: logId },
-          data: { isVerified: true, verificationRequestedAt: null },
-        }),
-        prisma.notification.create({
-          data: {
-            userId: log.userId,
-            type: NotificationType.VERIFICATION_APPROVED,
-            easterEggLogId: log.id,
-            read: false,
-          },
-        }),
-      ]);
-      await grantVerifiedAchievementsForMap(log.userId, log.mapId);
+      await prisma.easterEggLog.update({
+        where: { id: logId },
+        data: { isVerified: true, verificationRequestedAt: null },
+      });
+      const { verifiedTotalXp, xpGained } = await grantVerifiedAchievementsForMap(log.userId, log.mapId);
+      await prisma.notification.create({
+        data: {
+          userId: log.userId,
+          type: NotificationType.VERIFICATION_APPROVED,
+          easterEggLogId: log.id,
+          read: false,
+          verifiedXpGained: xpGained > 0 ? xpGained : null,
+          verifiedTotalXp: xpGained > 0 ? verifiedTotalXp : null,
+        },
+      });
     }
 
     return NextResponse.json({ ok: true });

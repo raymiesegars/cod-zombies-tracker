@@ -75,6 +75,8 @@ export async function GET() {
         logType,
         logId: n.challengeLogId ?? n.easterEggLogId,
         friendRequestId: n.friendRequestId ?? undefined,
+        verifiedXpGained: n.verifiedXpGained ?? undefined,
+        verifiedTotalXp: n.verifiedTotalXp ?? undefined,
       };
     });
 

@@ -162,10 +162,12 @@ export default function SettingsPage() {
                 <textarea
                   className="w-full px-3 sm:px-4 py-2 bg-bunker-900 border border-bunker-700 rounded-lg text-sm text-white placeholder-bunker-500 focus:outline-none focus:ring-2 focus:ring-blood-500 focus:border-transparent resize-none"
                   rows={3}
+                  maxLength={150}
                   placeholder="Tell us about yourself..."
                   value={bio}
-                  onChange={(e) => setBio(e.target.value)}
+                  onChange={(e) => setBio(e.target.value.slice(0, 150))}
                 />
+                <p className="text-xs text-bunker-500 mt-1">{bio.length}/150 characters</p>
               </div>
             </CardContent>
           </Card>

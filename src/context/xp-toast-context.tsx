@@ -3,15 +3,19 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 import { getLevelFromXp } from '@/lib/ranks';
+import { CheckCircle2 } from 'lucide-react';
 
 export type XpToastOptions = {
   totalXp?: number; // So we can show rank + bar
+  verified?: boolean; // Verified XP variant: blue outline, checkmark
 };
 
 type ToastState = {
   amount: number;
   totalXp: number | null;
+  verified: boolean;
 };
 
 type XpToastContextValue = {
@@ -19,6 +23,8 @@ type XpToastContextValue = {
 };
 
 const XpToastContext = createContext<XpToastContextValue | null>(null);
+
+export const XP_TOAST_VERIFIED_EVENT = 'cod-tracker-xp-toast-verified';
 
 const TOAST_DURATION_MS = 4500;
 const BAR_FILL_DURATION_S = 1.2;
@@ -45,9 +51,10 @@ export function dispatchXpToast(amount: number, options?: XpToastOptions) {
     xpToastShowRef(amount, options);
     return;
   }
+  const eventName = options?.verified ? XP_TOAST_VERIFIED_EVENT : XP_TOAST_EVENT;
   if (typeof window !== 'undefined') {
     window.dispatchEvent(
-      new CustomEvent(XP_TOAST_EVENT, { detail: { amount, totalXp: options?.totalXp } })
+      new CustomEvent(eventName, { detail: { amount, totalXp: options?.totalXp } })
     );
   }
 }
@@ -65,6 +72,7 @@ export function XpToastProvider({ children }: { children: React.ReactNode }) {
     setToast({
       amount,
       totalXp: options?.totalXp ?? null,
+      verified: options?.verified ?? false,
     });
     timeoutRef.current = setTimeout(() => {
       setToast(null);
@@ -86,8 +94,18 @@ export function XpToastProvider({ children }: { children: React.ReactNode }) {
         showXpToast(amount, totalXp != null ? { totalXp } : undefined);
       }
     };
+    const verifiedHandler = (e: Event) => {
+      const { amount, totalXp } = (e as CustomEvent<{ amount: number; totalXp?: number }>).detail ?? {};
+      if (typeof amount === 'number' && amount > 0) {
+        showXpToast(amount, { totalXp: totalXp ?? undefined, verified: true });
+      }
+    };
     window.addEventListener(XP_TOAST_EVENT, handler);
-    return () => window.removeEventListener(XP_TOAST_EVENT, handler);
+    window.addEventListener(XP_TOAST_VERIFIED_EVENT, verifiedHandler);
+    return () => {
+      window.removeEventListener(XP_TOAST_EVENT, handler);
+      window.removeEventListener(XP_TOAST_VERIFIED_EVENT, verifiedHandler);
+    };
   }, [showXpToast]);
 
   return (
@@ -99,6 +117,7 @@ export function XpToastProvider({ children }: { children: React.ReactNode }) {
             key={`xp-toast-${toastId}`}
             amount={toast.amount}
             totalXp={toast.totalXp}
+            verified={toast.verified}
           />
         )}
       </AnimatePresence>
@@ -106,7 +125,7 @@ export function XpToastProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-function XpToastContent({ amount, totalXp }: ToastState) {
+function XpToastContent({ amount, totalXp, verified }: ToastState) {
   const hasRankAndBar = totalXp != null && totalXp >= 0;
   const totalXpBefore = hasRankAndBar ? Math.max(0, totalXp - amount) : 0;
   const after = hasRankAndBar ? getLevelFromXp(totalXp) : null;
@@ -121,16 +140,27 @@ function XpToastContent({ amount, totalXp }: ToastState) {
       transition={{ duration: 0.2, ease: 'easeOut' }}
       className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] pointer-events-none w-[280px] sm:w-[300px]"
     >
-      {/* Fully opaque card – no transparency */}
-      <div className="rounded-xl border border-bunker-600 bg-bunker-900 shadow-xl overflow-hidden">
+      <div
+        className={cn(
+          'rounded-xl border shadow-xl overflow-hidden',
+          verified
+            ? 'border-blue-500/70 bg-bunker-900 ring-2 ring-blue-500/40'
+            : 'border-bunker-600 bg-bunker-900'
+        )}
+      >
         {/* +N XP row – extra left padding so content isn’t flush */}
-        <div className="px-4 py-3 border-b border-bunker-700">
-          <p className="text-center">
-            <span className="text-military-400 font-medium">+</span>
+        <div className={cn('px-4 py-3', verified ? 'border-b border-blue-900/50' : 'border-b border-bunker-700')}>
+          <p className="text-center flex items-center justify-center gap-2">
+            {verified && (
+              <CheckCircle2 className="w-5 h-5 text-blue-400 shrink-0" strokeWidth={2.5} aria-hidden />
+            )}
+            <span className={verified ? 'text-blue-400 font-medium' : 'text-military-400 font-medium'}>+</span>
             <span className="tabular-nums text-lg font-bold text-white mx-0.5">
               {amount.toLocaleString()}
             </span>
-            <span className="text-military-500 font-medium"> XP</span>
+            <span className={verified ? 'text-blue-400/90 font-medium' : 'text-military-500 font-medium'}>
+              {verified ? ' Verified' : ''} XP
+            </span>
           </p>
         </div>
 
@@ -138,7 +168,12 @@ function XpToastContent({ amount, totalXp }: ToastState) {
           <div className="px-4 py-3 space-y-3">
             {/* Rank: icon (no container) + level + name + total, like dashboard */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center">
+              <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
+                {verified && (
+                  <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center" aria-hidden>
+                    <CheckCircle2 className="w-4 h-4 text-blue-500" strokeWidth={2.5} />
+                  </span>
+                )}
                 <Image
                   src={after.rankIcon}
                   alt={after.rankName}
@@ -149,13 +184,21 @@ function XpToastContent({ amount, totalXp }: ToastState) {
                 />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-white truncate">
+                <p className="text-sm font-semibold text-white truncate flex items-center gap-1.5 flex-wrap">
                   Level {after.level} · {after.rankName}
+                  {verified && (
+                    <span className="inline-flex items-center gap-0.5 text-blue-400 text-xs shrink-0">
+                      <CheckCircle2 className="w-3.5 h-3.5" aria-hidden />
+                      Verified
+                    </span>
+                  )}
                 </p>
                 <p className="text-xs text-bunker-400">
-                  {totalXp.toLocaleString()} total XP
+                  {totalXp.toLocaleString()} {verified ? 'verified' : 'total'} XP
                   {leveledUp && (
-                    <span className="text-blood-400 font-medium ml-1">· Level up!</span>
+                    <span className={verified ? 'text-blue-400 font-medium ml-1' : 'text-blood-400 font-medium ml-1'}>
+                      · {verified ? 'Verified rank up!' : 'Level up!'}
+                    </span>
                   )}
                 </p>
               </div>
@@ -164,7 +207,10 @@ function XpToastContent({ amount, totalXp }: ToastState) {
             <div className="space-y-1">
               <div className="w-full h-2 bg-bunker-800 rounded-full overflow-hidden border border-bunker-700">
                 <motion.div
-                  className="h-full rounded-full bg-gradient-to-r from-blood-600 to-blood-500"
+                  className={cn(
+                    'h-full rounded-full',
+                    verified ? 'bg-gradient-to-r from-blue-600 to-blue-500' : 'bg-gradient-to-r from-blood-600 to-blood-500'
+                  )}
                   initial={{ width: `${before.progress}%` }}
                   animate={{ width: `${after.progress}%` }}
                   transition={{
