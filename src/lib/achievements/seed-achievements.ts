@@ -12,7 +12,7 @@ import {
   getXpForRoundFromMilestones,
 } from './map-round-config';
 import { isBo4Game, BO4_DIFFICULTIES, BO4_DIFFICULTY_XP_MULTIPLIER, type Bo4DifficultyType } from '../bo4';
-import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
+import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, IW_AOTRT_SPEEDRUN_TIERS, IW_BEAST_SPEEDRUN_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
 
 const CHALLENGE_TYPES = [
   'HIGHEST_ROUND',
@@ -52,6 +52,25 @@ const IW_SHAOLIN_CHALLENGE_ROUNDS: Partial<Record<string, readonly number[]>> = 
   ONE_BOX: [10, 20, 30], // WR 30
   PISTOL_ONLY: [10, 20, 30, 40, 50, 70], // WR 70
   NO_POWER: [10, 20, 30, 50, 71], // WR 71
+};
+
+/** IW Attack of the Radioactive Thing: custom rounds per challenge (WR-based). */
+const IW_AOTRT_CHALLENGE_ROUNDS: Partial<Record<string, readonly number[]>> = {
+  NO_PERKS: [10, 20, 30, 50, 70, 90], // WR 90
+  NO_PACK: [10, 20, 30, 40, 50, 70], // WR 70
+  STARTING_ROOM: [10, 15, 20, 24], // WR 24
+  ONE_BOX: [10, 20, 30], // WR 30
+  PISTOL_ONLY: [10, 20, 30, 40, 50, 70], // WR 70
+  NO_POWER: [10, 20, 30, 50, 75, 100, 125, 170], // WR 170
+};
+
+/** IW The Beast From Beyond: no Starting Room on this map. */
+const IW_BEAST_CHALLENGE_ROUNDS: Partial<Record<string, readonly number[]>> = {
+  NO_PERKS: [10, 20, 30, 50, 52], // WR 52
+  NO_PACK: [10, 20, 30, 40, 50, 70], // WR 70
+  ONE_BOX: [10, 20, 30], // WR 30
+  PISTOL_ONLY: [10, 20, 30, 40, 50, 70], // WR 70
+  NO_POWER: [10, 20, 30, 40], // WR 40
 };
 
 export type AchievementSeedRow = {
@@ -141,9 +160,12 @@ export function getMapAchievementDefinitions(
     const isIwZis = mapSlug === 'zombies-in-spaceland' && gameShortName === 'IW';
     const isIwRave = mapSlug === 'rave-in-the-redwoods' && gameShortName === 'IW';
     const isIwShaolin = mapSlug === 'shaolin-shuffle' && gameShortName === 'IW';
-    const iwOverrideRounds = isIwZis ? IW_ZIS_CHALLENGE_ROUNDS : isIwRave ? IW_RAVE_CHALLENGE_ROUNDS : isIwShaolin ? IW_SHAOLIN_CHALLENGE_ROUNDS : undefined;
+    const isIwAotrt = mapSlug === 'attack-of-the-radioactive-thing' && gameShortName === 'IW';
+    const isIwBeast = mapSlug === 'the-beast-from-beyond' && gameShortName === 'IW';
+    const iwOverrideRounds = isIwZis ? IW_ZIS_CHALLENGE_ROUNDS : isIwRave ? IW_RAVE_CHALLENGE_ROUNDS : isIwShaolin ? IW_SHAOLIN_CHALLENGE_ROUNDS : isIwAotrt ? IW_AOTRT_CHALLENGE_ROUNDS : isIwBeast ? IW_BEAST_CHALLENGE_ROUNDS : undefined;
     for (const cType of CHALLENGE_TYPES) {
       if (cType === 'HIGHEST_ROUND' || cType === 'NO_DOWNS') continue;
+      if (cType === 'STARTING_ROOM' && isIwBeast) continue; // Beast From Beyond has no starting room challenge
       const defaultConfig = getMilestonesForChallengeType(cType as any);
       if (!defaultConfig) continue;
       const slugPrefix = cType.toLowerCase().replace(/_/g, '-');
@@ -265,12 +287,16 @@ const SPEEDRUN_TYPE_LABELS: Record<string, string> = {
   EASTER_EGG_SPEEDRUN: 'Easter Egg',
   GHOST_AND_SKULLS: 'Ghost and Skulls',
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
+  CRYPTID_FIGHT: 'Cryptid Fight',
+  MEPHISTOPHELES: 'Mephistopheles',
 };
 
 const IW_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
   'zombies-in-spaceland': IW_ZIS_SPEEDRUN_TIERS,
   'rave-in-the-redwoods': IW_RAVE_SPEEDRUN_TIERS,
   'shaolin-shuffle': IW_SHAOLIN_SPEEDRUN_TIERS,
+  'attack-of-the-radioactive-thing': IW_AOTRT_SPEEDRUN_TIERS,
+  'the-beast-from-beyond': IW_BEAST_SPEEDRUN_TIERS,
 };
 
 /** Speedrun tier achievements for IW maps (ZIS, Rave, etc.). Fastest = most XP. */

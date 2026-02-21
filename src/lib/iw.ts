@@ -14,6 +14,8 @@ const IW_SPEEDRUN_TYPES = [
   'EASTER_EGG_SPEEDRUN',
   'GHOST_AND_SKULLS',
   'ALIENS_BOSS_FIGHT',
+  'CRYPTID_FIGHT',
+  'MEPHISTOPHELES',
 ] as const;
 
 export function isIwGame(shortName: string | null | undefined): boolean {
@@ -52,4 +54,6 @@ export const IW_CHALLENGE_TYPES_ORDER: string[] = [
   'EASTER_EGG_SPEEDRUN',
   'GHOST_AND_SKULLS',
   'ALIENS_BOSS_FIGHT',
+  'CRYPTID_FIGHT',
+  'MEPHISTOPHELES',
 ];
