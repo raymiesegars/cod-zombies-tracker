@@ -317,7 +317,14 @@ export function MapsPageClient({ initialMaps, initialGames }: Props) {
       {authUser && (
         <MapsPageGameOrderModal
           isOpen={showGameOrderModal}
-          onClose={() => {
+          onClose={(closedWithoutSave) => {
+            // When closing the first-time modal without saving (Cancel/X/backdrop), still mark setup as seen so it doesn't show on every visit
+            if (closedWithoutSave !== false && showGameOrderFirstTime) {
+              saveMapsPagePrefs(mapsPageGameOrder, true).then(
+                () => setMapsPageHasSeenSetup(true),
+                () => {}
+              );
+            }
             setShowGameOrderModal(false);
             setShowGameOrderFirstTime(false);
           }}
