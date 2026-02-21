@@ -5,6 +5,7 @@ import { processMapAchievements } from '@/lib/achievements';
 import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
 import { createCoOpRunPendingsForChallengeLog } from '@/lib/coop-pending';
 import { isBo4Game, BO4_DIFFICULTIES } from '@/lib/bo4';
+import { isIwGame, isIwSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType } from '@/lib/iw';
 import type { Bo4Difficulty } from '@prisma/client';
 
 // Log a new run. We run the achievement check when it’s a new best for that user+challenge+map+playerCount.
@@ -65,24 +66,52 @@ export async function POST(request: NextRequest) {
     }
 
     const [challenge, mapWithGame, previousBest] = await Promise.all([
-      prisma.challenge.findUnique({ where: { id: challengeId } }),
+      prisma.challenge.findUnique({ where: { id: challengeId }, select: { id: true, type: true } }),
       prisma.map.findUnique({ where: { id: mapId }, include: { game: { select: { shortName: true } } } }),
-      prisma.challengeLog.findFirst({
-        where: {
-          userId: user.id,
-          challengeId,
-          mapId,
-          playerCount,
-          ...(body.difficulty != null && { difficulty: body.difficulty as Bo4Difficulty }),
-        },
-        orderBy: { roundReached: 'desc' },
-        select: { roundReached: true },
-      }),
+      (async () => {
+        const isSpeedrunType = challengeId
+          ? await prisma.challenge.findUnique({ where: { id: challengeId }, select: { type: true } }).then((c) => c && isIwSpeedrunChallengeType(c.type))
+          : false;
+        if (isSpeedrunType) {
+          const best = await prisma.challengeLog.findFirst({
+            where: {
+              userId: user.id,
+              challengeId,
+              mapId,
+              playerCount,
+              completionTimeSeconds: { not: null },
+              ...(body.difficulty != null && { difficulty: body.difficulty as Bo4Difficulty }),
+            },
+            orderBy: { completionTimeSeconds: 'asc' },
+            select: { completionTimeSeconds: true },
+          });
+          return best ? { completionTimeSeconds: best.completionTimeSeconds } : null;
+        }
+        return prisma.challengeLog.findFirst({
+          where: {
+            userId: user.id,
+            challengeId,
+            mapId,
+            playerCount,
+            ...(body.difficulty != null && { difficulty: body.difficulty as Bo4Difficulty }),
+          },
+          orderBy: { roundReached: 'desc' },
+          select: { roundReached: true },
+        });
+      })(),
     ]);
 
     const map = mapWithGame;
     if (!challenge || !map) {
       return NextResponse.json({ error: 'Challenge or map not found' }, { status: 404 });
+    }
+
+    const minRound = isIwSpeedrunChallengeType(challenge.type) ? getMinRoundForSpeedrunChallengeType(challenge.type) : 1;
+    if (roundReached < minRound) {
+      return NextResponse.json(
+        { error: `Round must be at least ${minRound} for this challenge (e.g. Round ${minRound} Speedrun requires round ${minRound}+).` },
+        { status: 400 }
+      );
     }
 
     const isBo4 = isBo4Game(map.game?.shortName);
@@ -98,8 +127,34 @@ export async function POST(request: NextRequest) {
       difficulty = d as Bo4Difficulty;
     }
 
-    const previousRound = previousBest?.roundReached ?? 0;
-    const isImprovement = roundReached > previousRound;
+    const isIw = isIwGame(map.game?.shortName);
+    const isSpeedrun = challenge && isIwSpeedrunChallengeType(challenge.type);
+
+    if (isIw) {
+      const useFortuneCards = body.useFortuneCards;
+      if (useFortuneCards !== true && useFortuneCards !== false) {
+        return NextResponse.json(
+          { error: 'IW maps require useFortuneCards: true (Fate & Fortune cards) or false (Fate cards only)' },
+          { status: 400 }
+        );
+      }
+      if (isSpeedrun && (completionTimeSeconds == null || completionTimeSeconds < 0)) {
+        return NextResponse.json(
+          { error: 'Speedrun challenges require completion time' },
+          { status: 400 }
+        );
+      }
+    }
+
+    const useFortuneCards = isIw ? Boolean(body.useFortuneCards) : undefined;
+    const useDirectorsCut = isIw ? Boolean(body.useDirectorsCut ?? false) : undefined;
+
+    const isSpeedrunChal = challenge && isIwSpeedrunChallengeType(challenge.type);
+    const previousRound = previousBest && 'roundReached' in previousBest ? previousBest.roundReached ?? 0 : 0;
+    const previousTime = previousBest && 'completionTimeSeconds' in previousBest ? previousBest.completionTimeSeconds : null;
+    const isImprovement = isSpeedrunChal
+      ? (completionTimeSeconds != null && (previousTime == null || completionTimeSeconds < previousTime))
+      : roundReached > previousRound;
 
     const log = await prisma.challengeLog.create({
       data: {
@@ -116,6 +171,8 @@ export async function POST(request: NextRequest) {
         teammateNonUserNames,
         ...(difficulty != null && { difficulty }),
         ...(requestVerification && { verificationRequestedAt: new Date() }),
+        ...(useFortuneCards != null && { useFortuneCards }),
+        ...(useDirectorsCut != null && { useDirectorsCut }),
       },
     });
 

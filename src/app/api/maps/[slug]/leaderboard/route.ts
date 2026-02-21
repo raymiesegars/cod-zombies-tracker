@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { isBo4Game } from '@/lib/bo4';
 import { BO4_DIFFICULTIES } from '@/lib/bo4';
+import { isIwGame, isIwSpeedrunChallengeType } from '@/lib/iw';
 import type { PlayerCount, ChallengeType, Prisma, Bo4Difficulty } from '@prisma/client';
 
 export async function GET(
@@ -14,6 +15,8 @@ export async function GET(
   const difficulty = searchParams.get('difficulty') as Bo4Difficulty | null;
   const searchQ = searchParams.get('search')?.trim() ?? '';
   const verifiedOnly = searchParams.get('verified') === 'true';
+  const fortuneCards = searchParams.get('fortuneCards'); // 'true' | 'false' | null (no filter)
+  const directorsCut = searchParams.get('directorsCut') === 'true';
   const limitParam = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') || '25', 10) || 25));
   const offsetParam = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10) || 0);
   const mergeTake = 500;
@@ -70,10 +73,20 @@ export async function GET(
       eeWhereClause.difficulty = difficulty;
     }
 
+    if (isIwGame(map.game?.shortName)) {
+      if (fortuneCards === 'true') whereClause.useFortuneCards = true;
+      else if (fortuneCards === 'false') whereClause.useFortuneCards = false;
+      if (directorsCut) whereClause.useDirectorsCut = true;
+    }
+
     // "Highest Round" (or no filter) = best round from any challenge OR easter egg; specific challenge = only that challenge's logs
     const isSpecificChallenge = challengeType && challengeType !== 'HIGHEST_ROUND';
+    const isSpeedrun = isSpecificChallenge && isIwSpeedrunChallengeType(challengeType!);
     if (isSpecificChallenge) {
       whereClause.challenge = { type: challengeType };
+    }
+    if (isSpeedrun) {
+      whereClause.completionTimeSeconds = { not: null };
     }
 
     const challengeLogs = await prisma.challengeLog.findMany({
@@ -91,7 +104,7 @@ export async function GET(
         },
         challenge: true,
       },
-      orderBy: { roundReached: 'desc' },
+      orderBy: isSpeedrun ? { completionTimeSeconds: 'asc' } : { roundReached: 'desc' },
       take: mergeTake * 2,
     });
 
@@ -120,6 +133,7 @@ export async function GET(
       userId: string;
       playerCount: PlayerCount;
       round: number;
+      completionTimeSeconds?: number | null;
       user: { id: string; username: string; displayName: string | null; avatarUrl: string | null; avatarPreset: string | null; level: number };
       proofUrls: string[];
       proofUrl: string | null;
@@ -134,19 +148,40 @@ export async function GET(
     for (const log of challengeLogs) {
       const key = `${log.userId}-${log.playerCount}`;
       const existing = userBestMap.get(key);
-      if (!existing || log.roundReached > existing.round) {
-        userBestMap.set(key, {
-          userId: log.userId,
-          playerCount: log.playerCount,
-          round: log.roundReached,
-          user: log.user,
-          proofUrls: log.proofUrls ?? [],
-          proofUrl: (log.proofUrls && log.proofUrls.length > 0) ? log.proofUrls[0]! : null,
-          completedAt: log.completedAt,
-          logId: log.id,
-          runType: 'challenge',
-          isVerified: log.isVerified ?? false,
-        });
+      const logTime = log.completionTimeSeconds ?? null;
+      if (isSpeedrun) {
+        if (logTime == null) continue;
+        if (!existing || existing.completionTimeSeconds == null || logTime < existing.completionTimeSeconds) {
+          userBestMap.set(key, {
+            userId: log.userId,
+            playerCount: log.playerCount,
+            round: log.roundReached,
+            completionTimeSeconds: logTime,
+            user: log.user,
+            proofUrls: log.proofUrls ?? [],
+            proofUrl: (log.proofUrls && log.proofUrls.length > 0) ? log.proofUrls[0]! : null,
+            completedAt: log.completedAt,
+            logId: log.id,
+            runType: 'challenge',
+            isVerified: log.isVerified ?? false,
+          });
+        }
+      } else {
+        if (!existing || log.roundReached > existing.round) {
+          userBestMap.set(key, {
+            userId: log.userId,
+            playerCount: log.playerCount,
+            round: log.roundReached,
+            completionTimeSeconds: log.completionTimeSeconds,
+            user: log.user,
+            proofUrls: log.proofUrls ?? [],
+            proofUrl: (log.proofUrls && log.proofUrls.length > 0) ? log.proofUrls[0]! : null,
+            completedAt: log.completedAt,
+            logId: log.id,
+            runType: 'challenge',
+            isVerified: log.isVerified ?? false,
+          });
+        }
       }
     }
 
@@ -170,8 +205,14 @@ export async function GET(
       }
     }
 
-    const uniqueLogs = Array.from(userBestMap.values())
-      .sort((a, b) => b.round - a.round);
+    const uniqueLogs = Array.from(userBestMap.values()).sort((a, b) => {
+      if (isSpeedrun) {
+        const at = a.completionTimeSeconds ?? Infinity;
+        const bt = b.completionTimeSeconds ?? Infinity;
+        return at - bt;
+      }
+      return b.round - a.round;
+    });
 
     const total = uniqueLogs.length;
     const entries = uniqueLogs
@@ -179,7 +220,8 @@ export async function GET(
       .map((entry, index) => ({
         rank: offsetParam + index + 1,
         user: entry.user,
-        value: entry.round,
+        value: isSpeedrun && entry.completionTimeSeconds != null ? entry.completionTimeSeconds : entry.round,
+        invertRanking: isSpeedrun,
         playerCount: entry.playerCount,
         proofUrls: entry.proofUrls,
         proofUrl: entry.proofUrl,

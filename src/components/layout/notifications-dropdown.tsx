@@ -6,6 +6,34 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, ShieldCheck, ShieldOff, Loader2, CheckCheck, Trash2, UserPlus, UserMinus, Check, X } from 'lucide-react';
 
+/** Persists across remounts/navigation so we only show verified XP toast once per notification. */
+const VERIFIED_TOAST_SHOWN_KEY = 'cod-tracker-verified-xp-toast-shown';
+
+function hasShownVerifiedToastFor(notificationId: string): boolean {
+  if (typeof window === 'undefined') return true;
+  try {
+    const raw = sessionStorage.getItem(VERIFIED_TOAST_SHOWN_KEY);
+    const ids: string[] = raw ? JSON.parse(raw) : [];
+    return ids.includes(notificationId);
+  } catch {
+    return false;
+  }
+}
+
+function markVerifiedToastShown(notificationId: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = sessionStorage.getItem(VERIFIED_TOAST_SHOWN_KEY);
+    const ids: string[] = raw ? JSON.parse(raw) : [];
+    if (!ids.includes(notificationId)) {
+      ids.push(notificationId);
+      sessionStorage.setItem(VERIFIED_TOAST_SHOWN_KEY, JSON.stringify(ids.slice(-100)));
+    }
+  } catch {
+    // ignore
+  }
+}
+
 type NotificationItem = {
   id: string;
   type: string;
@@ -28,7 +56,6 @@ export function NotificationsDropdown() {
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<'read-all' | 'clear' | null>(null);
   const ref = useRef<HTMLDivElement>(null);
-  const shownVerifiedToastIds = useRef<Set<string>>(new Set());
 
   const fetchNotifications = () => {
     setLoading(true);
@@ -38,16 +65,16 @@ export function NotificationsDropdown() {
         const list = data.notifications ?? [];
         setUnreadCount(data.unreadCount ?? 0);
         setNotifications(list);
-        // When user is online and receives VERIFICATION_APPROVED with XP, show verified XP toast
+        // Show verified XP toast only once per notification (persisted in sessionStorage so it survives remounts/navigation)
         const verified = list.find(
           (n: NotificationItem) =>
             n.type === 'VERIFICATION_APPROVED' &&
             typeof n.verifiedXpGained === 'number' &&
             n.verifiedXpGained > 0 &&
-            !shownVerifiedToastIds.current.has(n.id)
+            !hasShownVerifiedToastFor(n.id)
         ) as NotificationItem | undefined;
         if (verified) {
-          shownVerifiedToastIds.current.add(verified.id);
+          markVerifiedToastShown(verified.id);
           dispatchXpToast(verified.verifiedXpGained!, {
             totalXp: verified.verifiedTotalXp,
             verified: true,

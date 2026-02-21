@@ -25,6 +25,7 @@ import { cn, normalizeProofUrls } from '@/lib/utils';
 import { useXpToast } from '@/context/xp-toast-context';
 import { getXpForChallengeLog, getXpForEasterEggLog, type AchievementForPreview } from '@/lib/xp-preview';
 import { isBo4Game, BO4_DIFFICULTIES, getBo4DifficultyLabel } from '@/lib/bo4';
+import { isIwGame, isIwSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType } from '@/lib/iw';
 import type { MapWithDetails, ChallengeType, PlayerCount } from '@/types';
 import { ChevronLeft, Save, CheckCircle, AlertCircle, BookOpen } from 'lucide-react';
 
@@ -37,6 +38,13 @@ const challengeTypeLabels: Record<ChallengeType, string> = {
   ONE_BOX: 'One Box Challenge',
   PISTOL_ONLY: 'Pistol Only',
   NO_POWER: 'No Power',
+  ROUND_30_SPEEDRUN: 'Round 30 Speedrun',
+  ROUND_50_SPEEDRUN: 'Round 50 Speedrun',
+  ROUND_70_SPEEDRUN: 'Round 70 Speedrun',
+  ROUND_100_SPEEDRUN: 'Round 100 Speedrun',
+  EASTER_EGG_SPEEDRUN: 'Easter Egg Speedrun',
+  GHOST_AND_SKULLS: 'Ghost and Skulls',
+  ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
 };
 
 const playerCountOptions = [
@@ -122,6 +130,8 @@ export default function EditMapProgressPage() {
     teammateUserIds: string[];
     teammateNonUserNames: string[];
     requestVerification: boolean;
+    useFortuneCards?: boolean | null; // IW: true = fate+fortune, false = fate only (required)
+    useDirectorsCut?: boolean; // IW: optional, default false
   }>({
     roundReached: '',
     playerCount: 'SOLO',
@@ -188,10 +198,12 @@ export default function EditMapProgressPage() {
             };
           }
           setChallengeForms(challengeInitial);
+          const isIw = (data.game?.shortName ?? '') === 'IW';
           setSharedChallengeForm({
             roundReached: '',
             playerCount: 'SOLO',
             ...(isBo4 && { difficulty: 'NORMAL' }),
+            ...(isIw && { useFortuneCards: false, useDirectorsCut: false }),
             proofUrls: [],
             notes: '',
             completionTimeSeconds: null,
@@ -263,6 +275,13 @@ export default function EditMapProgressPage() {
     if (isAdding) setEeTabValue('ee-none');
     setSelectedChallengeIds((prev) => {
       const next = new Set(prev);
+      const challenge = map?.challenges.find((c) => c.id === challengeId);
+      const isSpeedrun = challenge && isIwSpeedrunChallengeType(challenge.type);
+      if (isAdding && isSpeedrun) {
+        (map?.challenges ?? []).forEach((c) => {
+          if (isIwSpeedrunChallengeType(c.type)) next.delete(c.id);
+        });
+      }
       if (next.has(challengeId)) next.delete(challengeId);
       else next.add(challengeId);
       return next;
@@ -281,6 +300,27 @@ export default function EditMapProgressPage() {
     const form = sharedChallengeForm;
     const round = parseInt(form.roundReached, 10);
     if (!form.roundReached || Number.isNaN(round) || round <= 0) return;
+    const minRound = Math.max(...Array.from(selectedChallengeIds).map((cid) => {
+      const c = map.challenges.find((ch) => ch.id === cid);
+      return c && isIwSpeedrunChallengeType(c.type) ? getMinRoundForSpeedrunChallengeType(c.type) : 1;
+    }));
+    if (round < minRound) {
+      setSaveErrorModalMessage(`Round must be at least ${minRound} for the selected speedrun challenge(s) (e.g. Round ${minRound} Speedrun requires round ${minRound}+).`);
+      return;
+    }
+    const isIw = isIwGame(map.game?.shortName);
+    const anySpeedrun = Array.from(selectedChallengeIds).some((cid) => {
+      const c = map.challenges.find((ch) => ch.id === cid);
+      return c && isIwSpeedrunChallengeType(c.type);
+    });
+    if (isIw && (form.useFortuneCards !== true && form.useFortuneCards !== false)) {
+      setSaveErrorModalMessage('IW maps require Fortune Cards selection: Fate & Fortune cards or Fate cards only.');
+      return;
+    }
+    if (anySpeedrun && (form.completionTimeSeconds == null || form.completionTimeSeconds < 0)) {
+      setSaveErrorModalMessage('Speedrun challenges require completion time.');
+      return;
+    }
     if (form.requestVerification) {
       const hasProof = (form.proofUrls ?? []).filter(Boolean).length > 0;
       if (!hasProof) {
@@ -308,6 +348,10 @@ export default function EditMapProgressPage() {
             roundReached: round,
             playerCount: form.playerCount,
             ...(map.game?.shortName === 'BO4' && form.difficulty && { difficulty: form.difficulty }),
+            ...(isIw && {
+              useFortuneCards: form.useFortuneCards === true,
+              useDirectorsCut: form.useDirectorsCut ?? false,
+            }),
             proofUrls: normalizeProofUrls(form.proofUrls ?? []),
             notes: form.notes || null,
             completionTimeSeconds: form.completionTimeSeconds ?? null,
@@ -523,6 +567,7 @@ export default function EditMapProgressPage() {
               <TabsList className="min-w-0 w-full">
                 {map.challenges.map((challenge) => {
                   const isSelected = selectedChallengeIds.has(challenge.id);
+                  const isSpeedrun = isIwSpeedrunChallengeType(challenge.type);
                   return (
                     <button
                       key={challenge.id}
@@ -531,9 +576,11 @@ export default function EditMapProgressPage() {
                       className={cn(
                         'w-full min-w-0 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all duration-200 text-center',
                         'focus:outline-none focus-visible:ring-2 focus-visible:ring-blood-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bunker-900',
-                        isSelected
-                          ? 'border-blood-500/80 bg-blood-950/50 text-white shadow-sm'
-                          : 'border-bunker-600 bg-bunker-800 text-bunker-300 hover:border-bunker-500 hover:bg-bunker-700/70 hover:text-bunker-200'
+                        isSelected && isSpeedrun
+                          ? 'border-amber-500/80 bg-amber-950/50 text-amber-100 shadow-sm'
+                          : isSelected
+                            ? 'border-blood-500/80 bg-blood-950/50 text-white shadow-sm'
+                            : 'border-bunker-600 bg-bunker-800 text-bunker-300 hover:border-bunker-500 hover:bg-bunker-700/70 hover:text-bunker-200'
                       )}
                     >
                       {challengeTypeLabels[challenge.type] || challenge.name}
@@ -617,7 +664,8 @@ export default function EditMapProgressPage() {
                             challenge.type,
                             parseInt(sharedChallengeForm.roundReached || '0', 10) || 0,
                             map.roundCap ?? null,
-                            map?.game?.shortName === 'BO4' ? (sharedChallengeForm.difficulty ?? 'NORMAL') : undefined
+                            map?.game?.shortName === 'BO4' ? (sharedChallengeForm.difficulty ?? 'NORMAL') : undefined,
+                            sharedChallengeForm.completionTimeSeconds ?? undefined
                           );
                         }, 0)} XP
                       </Badge>
@@ -625,14 +673,24 @@ export default function EditMapProgressPage() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 min-w-0">
-                    <Input
-                      label="Round Reached"
-                      type="number"
-                      min="1"
-                      placeholder="e.g. 50"
-                      value={sharedChallengeForm.roundReached}
-                      onChange={(e) => handleSharedChallengeChange('roundReached', e.target.value)}
-                    />
+                    {(() => {
+                      const minRound = selectedChallengeIds.size > 0
+                        ? Math.max(...Array.from(selectedChallengeIds).map((cid) => {
+                            const c = map.challenges.find((ch) => ch.id === cid);
+                            return c && isIwSpeedrunChallengeType(c.type) ? getMinRoundForSpeedrunChallengeType(c.type) : 1;
+                          }))
+                        : 1;
+                      return (
+                        <Input
+                          label="Round Reached"
+                          type="number"
+                          min={minRound}
+                          placeholder={minRound > 1 ? `e.g. ${minRound}+` : 'e.g. 50'}
+                          value={sharedChallengeForm.roundReached}
+                          onChange={(e) => handleSharedChallengeChange('roundReached', e.target.value)}
+                        />
+                      );
+                    })()}
                     <Select
                       label="Player Count"
                       options={playerCountOptions}
@@ -646,6 +704,29 @@ export default function EditMapProgressPage() {
                         value={sharedChallengeForm.difficulty || 'NORMAL'}
                         onChange={(e) => handleSharedChallengeChange('difficulty', e.target.value)}
                       />
+                    )}
+                    {map?.game?.shortName === 'IW' && (
+                      <>
+                        <Select
+                          label="Fortune Cards"
+                          options={[
+                            { value: 'false', label: 'Fate cards only' },
+                            { value: 'true', label: 'Fate & Fortune cards' },
+                          ]}
+                          value={sharedChallengeForm.useFortuneCards === true ? 'true' : sharedChallengeForm.useFortuneCards === false ? 'false' : ''}
+                          onChange={(e) => handleSharedChallengeChange('useFortuneCards', e.target.value === 'true' ? true : e.target.value === 'false' ? false : null)}
+                          placeholder="Required"
+                        />
+                        <label className="flex items-center gap-2 cursor-pointer self-end pb-2 sm:pb-0">
+                          <input
+                            type="checkbox"
+                            checked={sharedChallengeForm.useDirectorsCut ?? false}
+                            onChange={(e) => handleSharedChallengeChange('useDirectorsCut', e.target.checked)}
+                            className="w-4 h-4 rounded border-bunker-600 bg-bunker-800 text-blood-500"
+                          />
+                          <span className="text-sm text-bunker-300">Directors Cut</span>
+                        </label>
+                      </>
                     )}
                     <div className="sm:col-span-3 mt-1 min-w-0">
                       <ProofUrlsInput
@@ -674,7 +755,10 @@ export default function EditMapProgressPage() {
 
                   <div className="mt-3 sm:mt-4">
                     <TimeInput
-                      label="Run time (optional)"
+                      label={Array.from(selectedChallengeIds).some((cid) => {
+                        const c = map.challenges.find((ch) => ch.id === cid);
+                        return c && isIwSpeedrunChallengeType(c.type);
+                      }) ? 'Run time (required for speedruns)' : 'Run time (optional)'}
                       valueSeconds={sharedChallengeForm.completionTimeSeconds}
                       onChange={(seconds) => handleSharedChallengeChange('completionTimeSeconds', seconds)}
                     />
@@ -714,7 +798,22 @@ export default function EditMapProgressPage() {
                 onSave={handleSaveSelectedChallenges}
                 isSaving={isSaving}
                 saveStatus={saveStatus}
-                saveDisabled={!sharedChallengeForm.roundReached || parseInt(sharedChallengeForm.roundReached, 10) <= 0}
+                saveDisabled={
+                  !sharedChallengeForm.roundReached ||
+                  parseInt(sharedChallengeForm.roundReached, 10) <= 0 ||
+                  (selectedChallengeIds.size > 0 && (() => {
+                    const minR = Math.max(...Array.from(selectedChallengeIds).map((cid) => {
+                      const c = map?.challenges.find((ch) => ch.id === cid);
+                      return c && isIwSpeedrunChallengeType(c.type) ? getMinRoundForSpeedrunChallengeType(c.type) : 1;
+                    }));
+                    return parseInt(sharedChallengeForm.roundReached || '0', 10) < minR;
+                  })()) ||
+                  (isIwGame(map?.game?.shortName) && sharedChallengeForm.useFortuneCards !== true && sharedChallengeForm.useFortuneCards !== false) ||
+                  (Array.from(selectedChallengeIds).some((cid) => {
+                    const c = map?.challenges.find((ch) => ch.id === cid);
+                    return c && isIwSpeedrunChallengeType(c.type);
+                  }) && (sharedChallengeForm.completionTimeSeconds == null || sharedChallengeForm.completionTimeSeconds < 0))
+                }
                 saveErrorMessage={saveErrorMessage}
                 hideInlineError={!!saveErrorModalMessage}
               />

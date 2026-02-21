@@ -6,7 +6,12 @@ import { getBo4DifficultiesBelow, BO4_DIFFICULTY_ORDER } from './bo4';
 // Pre-fetched so we avoid N+1 when checking a bunch of achievements
 export type MapAchievementContext = {
   map: { id: string; roundCap: number | null } | null;
-  challengeLogs: { challengeType: string; roundReached: number; difficulty?: Bo4Difficulty | null }[];
+  challengeLogs: {
+    challengeType: string;
+    roundReached: number;
+    difficulty?: Bo4Difficulty | null;
+    completionTimeSeconds?: number | null;
+  }[];
   easterEggIds: Set<string>;
   easterEggRoundsOnMap: { round: number; difficulty: Bo4Difficulty | null }[]; // roundCompleted + difficulty for this map
 };
@@ -56,7 +61,12 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
 
   CHALLENGE_COMPLETE: async (userId, criteria, achievement) => {
     if (!achievement.mapId) return false;
-    const { round, challengeType, isCap } = criteria as { round?: number; challengeType?: string; isCap?: boolean };
+    const { round, challengeType, isCap, maxTimeSeconds } = criteria as {
+      round?: number;
+      challengeType?: string;
+      isCap?: boolean;
+      maxTimeSeconds?: number;
+    };
     const targetRound = round as number | undefined;
 
     const baseWhere: any = {
@@ -65,6 +75,17 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
       challenge: { type: challengeType as ChallengeType },
     };
     if (achievement.difficulty != null) baseWhere.difficulty = achievement.difficulty;
+
+    // Speedrun tier: qualify if user has a run with completionTimeSeconds <= maxTimeSeconds
+    if (maxTimeSeconds != null && typeof maxTimeSeconds === 'number' && challengeType) {
+      const log = await prisma.challengeLog.findFirst({
+        where: {
+          ...baseWhere,
+          completionTimeSeconds: { not: null, lte: maxTimeSeconds },
+        },
+      });
+      return !!log;
+    }
 
     if (isCap) {
       const map = await prisma.map.findUnique({
@@ -230,16 +251,26 @@ function checkWithContext(
       return maxRound >= cap;
     }
     case 'CHALLENGE_COMPLETE': {
-      const { round, challengeType, isCap } = criteria;
+      const { round, challengeType, isCap, maxTimeSeconds } = criteria;
       const targetRound = round != null ? Number(round) : undefined;
       const type = challengeType as string;
       if (!type) return false;
-      const capRaw = isCap && ctx.map?.roundCap != null ? ctx.map.roundCap : targetRound;
-      const cap = capRaw != null ? Number(capRaw) : undefined;
       const logs =
         achDifficulty != null
           ? ctx.challengeLogs.filter((l) => l.difficulty === achDifficulty)
           : ctx.challengeLogs;
+      // Speedrun tier: qualify if any log has completionTimeSeconds <= maxTimeSeconds
+      const maxTime = maxTimeSeconds != null ? Number(maxTimeSeconds) : undefined;
+      if (maxTime != null && !Number.isNaN(maxTime)) {
+        return logs.some(
+          (l) =>
+            l.challengeType === type &&
+            l.completionTimeSeconds != null &&
+            l.completionTimeSeconds <= maxTime
+        );
+      }
+      const capRaw = isCap && ctx.map?.roundCap != null ? ctx.map.roundCap : targetRound;
+      const cap = capRaw != null ? Number(capRaw) : undefined;
       return logs.some(
         (l) => l.challengeType === type && (cap == null || (!Number.isNaN(cap) && l.roundReached >= cap))
       );
@@ -268,7 +299,12 @@ export async function processMapAchievements(
       prisma.map.findUnique({ where: { id: mapId }, select: { id: true, roundCap: true } }),
       prisma.challengeLog.findMany({
         where: { userId, mapId },
-        select: { challenge: { select: { type: true } }, roundReached: true, difficulty: true },
+        select: {
+          challenge: { select: { type: true } },
+          roundReached: true,
+          difficulty: true,
+          completionTimeSeconds: true,
+        },
       }),
       prisma.easterEggLog.findMany({
         where: { userId },
@@ -286,6 +322,7 @@ export async function processMapAchievements(
       challengeType: l.challenge.type,
       roundReached: l.roundReached,
       difficulty: l.difficulty ?? undefined,
+      completionTimeSeconds: l.completionTimeSeconds ?? undefined,
     })),
     easterEggIds: new Set(easterEggLogs.map((e) => e.easterEggId)),
     easterEggRoundsOnMap,
@@ -459,7 +496,12 @@ export async function revokeAchievementsForMapAfterDelete(
       prisma.map.findUnique({ where: { id: mapId }, select: { id: true, roundCap: true } }),
       prisma.challengeLog.findMany({
         where: { userId, mapId },
-        select: { challenge: { select: { type: true } }, roundReached: true, difficulty: true },
+        select: {
+          challenge: { select: { type: true } },
+          roundReached: true,
+          difficulty: true,
+          completionTimeSeconds: true,
+        },
       }),
       prisma.easterEggLog.findMany({
         where: { userId },
@@ -476,6 +518,7 @@ export async function revokeAchievementsForMapAfterDelete(
       challengeType: l.challenge.type,
       roundReached: l.roundReached,
       difficulty: l.difficulty ?? undefined,
+      completionTimeSeconds: l.completionTimeSeconds ?? undefined,
     })),
     easterEggIds: new Set(easterEggLogs.map((e) => e.easterEggId)),
     easterEggRoundsOnMap,
