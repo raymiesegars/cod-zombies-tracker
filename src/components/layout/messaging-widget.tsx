@@ -262,6 +262,8 @@ export function MessagingWidget() {
     fetchThread(chatWith.id);
     pollRef.current = setInterval(() => fetchThread(chatWith.id), 5000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  // chatWith object ref is stable enough via .id; full object intentionally excluded to avoid re-triggering
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatWith?.id, fetchThread]);
 
   // Scroll to bottom on new messages
@@ -502,11 +504,11 @@ export function MessagingWidget() {
                     {theyBlockedMe ? (
                       <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blood-950/50 border border-blood-800/50">
                         <AlertTriangle className="w-4 h-4 text-blood-400 flex-shrink-0" />
-                        <p className="text-xs text-blood-300">You've been blocked by this user.</p>
+                        <p className="text-xs text-blood-300">You&apos;ve been blocked by this user.</p>
                       </div>
                     ) : iBlockedThem ? (
                       <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-bunker-800 border border-bunker-700">
-                        <p className="text-xs text-bunker-400">You've blocked this user.</p>
+                        <p className="text-xs text-bunker-400">You&apos;ve blocked this user.</p>
                         <button onClick={() => handleUnblock(chatWith.id)} className="text-xs text-element-400 hover:text-element-300">Unblock</button>
                       </div>
                     ) : (

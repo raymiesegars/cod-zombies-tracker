@@ -2,12 +2,15 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const db = prisma as any;
+// Temporary until `prisma migrate deploy && prisma generate` adds DirectMessage to the client
+type RawMsg = { id: string; fromUserId: string; toUserId: string; content: string; readAt: string | null; createdAt: Date };
+const dm = (prisma as unknown as Record<string, unknown>).directMessage as {
+  findMany: (a: object) => Promise<RawMsg[]>;
+  count: (a: object) => Promise<number>;
+};
 
 export const dynamic = 'force-dynamic';
 
-// GET /api/me/messages – list all conversations + total unread count
 export async function GET() {
   try {
     const supabaseUser = await getUser();
@@ -18,49 +21,36 @@ export async function GET() {
 
     const userId = user.id;
 
-    // Grab recent messages to derive distinct conversation partners
-    const allMessages: Array<{ id: string; fromUserId: string; toUserId: string; content: string; readAt: string | null; createdAt: Date }> =
-      await db.directMessage.findMany({
-        where: { OR: [{ fromUserId: userId }, { toUserId: userId }] },
-        orderBy: { createdAt: 'desc' },
-        select: { id: true, fromUserId: true, toUserId: true, content: true, readAt: true, createdAt: true },
-        take: 1000,
-      });
+    const allMessages = await dm.findMany({
+      where: { OR: [{ fromUserId: userId }, { toUserId: userId }] },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, fromUserId: true, toUserId: true, content: true, readAt: true, createdAt: true },
+      take: 1000,
+    });
 
-    // Derive unique conversation partners (preserving recency order)
     const seenPartners = new Set<string>();
     const partnerIds: string[] = [];
     for (const msg of allMessages) {
       const partnerId = msg.fromUserId === userId ? msg.toUserId : msg.fromUserId;
-      if (!seenPartners.has(partnerId)) {
-        seenPartners.add(partnerId);
-        partnerIds.push(partnerId);
-      }
+      if (!seenPartners.has(partnerId)) { seenPartners.add(partnerId); partnerIds.push(partnerId); }
     }
 
-    // Total unread (messages sent TO me that I haven't read)
-    const totalUnread: number = await db.directMessage.count({
-      where: { toUserId: userId, readAt: null },
-    });
+    const totalUnread = await dm.count({ where: { toUserId: userId, readAt: null } });
 
-    if (partnerIds.length === 0) {
-      return NextResponse.json({ conversations: [], totalUnread: 0 });
-    }
+    if (partnerIds.length === 0) return NextResponse.json({ conversations: [], totalUnread: 0 });
 
-    // Fetch user info for all partners
     const partnerUsers = await prisma.user.findMany({
       where: { id: { in: partnerIds } },
       select: { id: true, username: true, displayName: true, avatarUrl: true, avatarPreset: true, lastSeenAt: true },
     });
     const partnerMap = Object.fromEntries(partnerUsers.map((u) => [u.id, u]));
 
-    // Build conversations
     const conversations = partnerIds.map((partnerId) => {
-      const messagesWithPartner = allMessages.filter(
+      const msgs = allMessages.filter(
         (m) => (m.fromUserId === partnerId && m.toUserId === userId) || (m.fromUserId === userId && m.toUserId === partnerId)
       );
-      const lastMessage = messagesWithPartner[0] ?? null;
-      const unreadCount = messagesWithPartner.filter((m) => m.fromUserId === partnerId && m.readAt == null).length;
+      const lastMessage = msgs[0] ?? null;
+      const unreadCount = msgs.filter((m) => m.fromUserId === partnerId && m.readAt == null).length;
       const partnerUser = partnerMap[partnerId];
       if (!partnerUser) return null;
       const isOnline = partnerUser.lastSeenAt != null && Date.now() - new Date(partnerUser.lastSeenAt).getTime() < 5 * 60 * 1000;

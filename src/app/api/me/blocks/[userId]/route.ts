@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const db = prisma as any;
+// Temporary until `prisma migrate deploy && prisma generate` adds UserBlock to the client
+const ub = (prisma as unknown as Record<string, unknown>).userBlock as {
+  deleteMany: (a: object) => Promise<void>;
+};
 
 type Params = { params: Promise<{ userId: string }> };
 
-// DELETE /api/me/blocks/[userId] – unblock a user
 export async function DELETE(_req: NextRequest, { params }: Params) {
   try {
     const supabaseUser = await getUser();
@@ -17,10 +18,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     if (!me) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
     const { userId: blockedId } = await params;
-
-    await db.userBlock.deleteMany({
-      where: { blockerId: me.id, blockedId },
-    });
+    await ub.deleteMany({ where: { blockerId: me.id, blockedId } });
 
     return NextResponse.json({ ok: true });
   } catch (error) {
