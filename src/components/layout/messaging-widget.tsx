@@ -9,7 +9,7 @@ import { getDisplayAvatarUrl } from '@/lib/avatar';
 import { cn } from '@/lib/utils';
 import {
   MessageSquare, X, ChevronLeft, Search, Users, MessageCircle,
-  Ban, Send, UserPlus, UserMinus, Loader2, ShieldOff, AlertTriangle,
+  Ban, Send, UserPlus, UserMinus, Loader2, ShieldOff, AlertTriangle, Check,
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -68,6 +68,7 @@ function UserRow({
   onRemoveFriend,
   onBlock,
   isFriend,
+  requestSent,
   meta,
 }: {
   user: UserInfo;
@@ -76,6 +77,7 @@ function UserRow({
   onRemoveFriend?: () => void;
   onBlock?: () => void;
   isFriend?: boolean;
+  requestSent?: boolean;
   meta?: React.ReactNode;
 }) {
   return (
@@ -90,17 +92,22 @@ function UserRow({
         </Link>
         {meta}
       </div>
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className={cn('flex items-center gap-1 transition-opacity', requestSent ? 'opacity-100' : 'opacity-0 group-hover:opacity-100')}>
         {onChat && (
           <button type="button" onClick={onChat} className="p-1.5 rounded-lg text-bunker-400 hover:text-white hover:bg-bunker-700 transition-colors" title="Message">
             <MessageCircle className="w-3.5 h-3.5" />
           </button>
         )}
-        {onAddFriend && !isFriend && (
+        {requestSent ? (
+          <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-element-900/50 text-element-400 text-[10px] font-semibold">
+            <Check className="w-3 h-3" />
+            Sent
+          </span>
+        ) : onAddFriend && !isFriend ? (
           <button type="button" onClick={onAddFriend} className="p-1.5 rounded-lg text-bunker-400 hover:text-element-400 hover:bg-bunker-700 transition-colors" title="Add friend">
             <UserPlus className="w-3.5 h-3.5" />
           </button>
-        )}
+        ) : null}
         {onRemoveFriend && isFriend && (
           <button type="button" onClick={onRemoveFriend} className="p-1.5 rounded-lg text-bunker-400 hover:text-blood-400 hover:bg-bunker-700 transition-colors" title="Remove friend">
             <UserMinus className="w-3.5 h-3.5" />
@@ -132,6 +139,7 @@ export function MessagingWidget() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<UserInfo[]>([]);
   const [friendIds, setFriendIds] = useState<Set<string>>(new Set());
+  const [pendingFriendIds, setPendingFriendIds] = useState<Set<string>>(new Set());
 
   // Chat state
   const [iBlockedThem, setIBlockedThem] = useState(false);
@@ -320,12 +328,16 @@ export function MessagingWidget() {
   }, [chatWith, messageInput, sending]);
 
   const handleAddFriend = useCallback(async (userId: string) => {
-    await fetch('/api/me/friends/request', {
+    const res = await fetch('/api/me/friends/request', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ toUserId: userId }),
       credentials: 'same-origin',
-    }).catch(() => {});
+    }).catch(() => null);
+    if (res?.ok || res?.status === 409) {
+      // 409 = already sent/friends — still show as sent
+      setPendingFriendIds((prev) => { const next = new Set(prev); next.add(userId); return next; });
+    }
   }, []);
 
   const handleRemoveFriend = useCallback(async (userId: string) => {
@@ -399,7 +411,7 @@ export function MessagingWidget() {
             exit={{ opacity: 0, y: 12, scale: 0.97 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
             className="fixed bottom-20 left-2 right-2 sm:left-4 sm:right-auto sm:w-96 z-[60] flex flex-col rounded-xl border border-bunker-700 bg-bunker-900 shadow-2xl overflow-hidden"
-            style={{ maxHeight: 'calc(100vh - 6rem)' }}
+            style={{ height: 'min(520px, calc(100vh - 6rem))' }}
           >
             {/* Header */}
             <div className="flex items-center gap-2 px-4 py-3 border-b border-bunker-800 flex-shrink-0 bg-bunker-900">
@@ -643,6 +655,7 @@ export function MessagingWidget() {
                         onAddFriend={() => handleAddFriend(user.id)}
                         onBlock={() => setConfirmBlock(user)}
                         isFriend={friendIds.has(user.id)}
+                        requestSent={pendingFriendIds.has(user.id)}
                         meta={<span className="text-xs text-bunker-500 truncate block">@{user.username}</span>}
                       />
                     ))}

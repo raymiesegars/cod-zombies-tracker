@@ -39,12 +39,20 @@ export function PendingVerificationSection() {
   const [runs, setRuns] = useState<PendingVerificationRun[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchRuns = () => {
     fetch('/api/admin/pending-verification', { credentials: 'same-origin' })
       .then((res) => (res.ok ? res.json() : { runs: [] }))
       .then((data) => setRuns(data.runs ?? []))
       .catch(() => setRuns([]))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchRuns();
+    // Refresh when the tab is re-focused (run detail opens in a new tab)
+    const handleVisibility = () => { if (document.visibilityState === 'visible') fetchRuns(); };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, []);
 
   if (loading) {

@@ -26,7 +26,9 @@ async function getLogAndUser(id: string) {
       map: { include: { game: true } },
     },
   });
-  if (!log || log.userId !== user.id) return { error: 'Not found' as const, status: 404 as const };
+  if (!log) return { error: 'Not found' as const, status: 404 as const };
+  // Super admins can edit any log; regular users can only edit their own
+  if (log.userId !== user.id && !isSuperAdmin(user.id)) return { error: 'Not found' as const, status: 404 as const };
   return { log, user };
 }
 
