@@ -10,6 +10,7 @@
     "db:generate": "prisma generate",
     "db:push": "node scripts/run-prisma-with-env.js db push",
     "db:migrate": "node scripts/run-prisma-with-env.js migrate dev",
+    "db:migrate:deploy": "node scripts/run-prisma-with-env.js migrate deploy",
     "db:verify": "node scripts/run-prisma-with-env.js --verify",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:easter-eggs": "tsx prisma/seed-easter-eggs.ts",

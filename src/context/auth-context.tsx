@@ -175,6 +175,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     profileFetchedRef.current = false;
   };
 
+  // Heartbeat for online presence (lastSeenAt)
+  useEffect(() => {
+    if (!profile?.id) return;
+    const beat = () => {
+      fetch('/api/me/heartbeat', { method: 'PATCH', credentials: 'same-origin' }).catch(() => {});
+    };
+    beat();
+    const interval = setInterval(beat, 2 * 60 * 1000); // every 2 min
+    return () => clearInterval(interval);
+  }, [profile?.id]);
+
   return (
     <AuthContext.Provider
       value={{
