@@ -45,6 +45,8 @@ const challengeTypeLabels: Record<ChallengeType, string> = {
   EASTER_EGG_SPEEDRUN: 'Easter Egg Speedrun',
   GHOST_AND_SKULLS: 'Ghost and Skulls',
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
+  CRYPTID_FIGHT: 'Cryptid Fight',
+  MEPHISTOPHELES: 'Mephistopheles',
 };
 
 const playerCountOptions = [
