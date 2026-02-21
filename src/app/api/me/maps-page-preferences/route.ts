@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getUser } from '@/lib/supabase/server';
+import { getSession, getUser } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,9 +15,13 @@ function parsePreferences(raw: unknown): MapsPagePreferences | null {
   const gameOrder = o.gameOrder;
   if (!Array.isArray(gameOrder) || !gameOrder.every((x) => typeof x === 'string')) return null;
   const hasSeenSetupModal = o.hasSeenSetupModal;
+  // Accept boolean true or string "true" (Postgres/Prisma can sometimes return string)
+  const seen =
+    hasSeenSetupModal === true ||
+    (typeof hasSeenSetupModal === 'string' && hasSeenSetupModal.toLowerCase() === 'true');
   return {
     gameOrder,
-    hasSeenSetupModal: typeof hasSeenSetupModal === 'boolean' ? hasSeenSetupModal : undefined,
+    hasSeenSetupModal: seen ? true : undefined,
   };
 }
 
@@ -33,7 +37,9 @@ function jsonResponse(data: { gameOrder: string[]; hasSeenSetupModal: boolean },
 
 export async function GET() {
   try {
-    const supabaseUser = await getUser();
+    // Prefer session from cookies first (avoids getUser() returning null when JWT check fails or is slow)
+    const session = await getSession();
+    const supabaseUser = session?.user ?? (await getUser());
     if (!supabaseUser) {
       return jsonResponse({ gameOrder: [], hasSeenSetupModal: false });
     }

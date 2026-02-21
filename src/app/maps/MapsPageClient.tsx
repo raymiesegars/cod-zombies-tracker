@@ -52,7 +52,7 @@ export function MapsPageClient({ initialMaps, initialGames }: Props) {
     if (!authUser) return;
     try {
       const base = typeof window !== 'undefined' ? window.location.origin : '';
-      const res = await fetch(`${base}/api/me/maps-page-preferences`, { credentials: 'same-origin', cache: 'no-store' });
+      const res = await fetch(`${base}/api/me/maps-page-preferences?_=${Date.now()}`, { credentials: 'same-origin', cache: 'no-store' });
       if (res?.ok) {
         const data = await res.json();
         setMapsPageGameOrder(Array.isArray(data.gameOrder) ? data.gameOrder : []);
