@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -55,7 +56,19 @@ import {
   UserPlus,
   Check,
   X,
+  Crown,
+  ShieldCheck,
+  ListOrdered,
+  BadgeCheck,
+  TrendingUp,
+  Timer,
+  LayoutGrid,
 } from 'lucide-react';
+import {
+  PROFILE_STAT_BLOCK_IDS,
+  DEFAULT_PROFILE_STAT_BLOCK_IDS,
+  type ProfileStatBlockId,
+} from '@/lib/profile-stat-blocks';
 
 type AchievementWithMap = {
   id: string;
@@ -422,7 +435,26 @@ export default function UserProfilePage() {
     totalMainEasterEggs: number;
     totalChallenges: number;
     totalAchievements: number;
-  }>({ totalMaps: 0, totalMainEasterEggs: 0, totalChallenges: 0, totalAchievements: 0 });
+    easterEggAchievementsUnlocked?: number;
+    totalRuns?: number;
+    verifiedRuns?: number;
+    highestRound?: number;
+    avgRoundLoggedRuns?: number;
+    speedrunCompletions?: number;
+    xpRank?: number;
+    verifiedXpRank?: number;
+    worldRecords?: number;
+    verifiedWorldRecords?: number;
+  }>({
+    totalMaps: 0,
+    totalMainEasterEggs: 0,
+    totalChallenges: 0,
+    totalAchievements: 0,
+  });
+  const [profileStatBlockSelection, setProfileStatBlockSelection] = useState<ProfileStatBlockId[]>([]);
+  const [profileStatBlocksSaving, setProfileStatBlocksSaving] = useState(false);
+  const [profileStatBlocksEditOpen, setProfileStatBlocksEditOpen] = useState(false);
+  const [modalBlockTooltip, setModalBlockTooltip] = useState<{ text: string; x: number; y: number } | null>(null);
   const [achievementsOverview, setAchievementsOverview] = useState<AchievementsOverview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -595,6 +627,32 @@ export default function UserProfilePage() {
     }
   }, [friendRequestId]);
 
+  const handleSaveProfileStatBlocks = useCallback(async () => {
+    setProfileStatBlocksSaving(true);
+    try {
+      const res = await fetch('/api/users/profile/update', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          profileStatBlocks: {
+            selectedBlockIds: profileStatBlockSelection.length === 4 ? profileStatBlockSelection : DEFAULT_PROFILE_STAT_BLOCK_IDS,
+          },
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? 'Failed to save');
+      }
+      setProfileStatBlocksEditOpen(false);
+      refreshProfile?.();
+      setProfileRefreshTrigger((t) => t + 1);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Failed to save');
+    } finally {
+      setProfileStatBlocksSaving(false);
+    }
+  }, [profileStatBlockSelection, refreshProfile]);
+
   useEffect(() => {
     async function fetchProfile() {
       try {
@@ -607,6 +665,11 @@ export default function UserProfilePage() {
         if (profileRes.ok) {
           const profileData = await profileRes.json();
           setProfile(profileData);
+          const raw = (profileData as { profileStatBlocks?: { selectedBlockIds?: unknown[] } })?.profileStatBlocks?.selectedBlockIds;
+          const ids = Array.isArray(raw) && raw.length === 4 && raw.every((x) => typeof x === 'string' && PROFILE_STAT_BLOCK_IDS.includes(x as ProfileStatBlockId))
+            ? (raw as ProfileStatBlockId[])
+            : DEFAULT_PROFILE_STAT_BLOCK_IDS;
+          setProfileStatBlockSelection(ids);
         }
 
         if (statsRes.ok) {
@@ -617,6 +680,16 @@ export default function UserProfilePage() {
             totalMainEasterEggs: statsData.totalMainEasterEggs ?? 0,
             totalChallenges: statsData.totalChallenges ?? 0,
             totalAchievements: statsData.totalAchievements ?? 0,
+            easterEggAchievementsUnlocked: statsData.easterEggAchievementsUnlocked ?? 0,
+            totalRuns: statsData.totalRuns ?? 0,
+            verifiedRuns: statsData.verifiedRuns ?? 0,
+            highestRound: statsData.highestRound ?? 0,
+            avgRoundLoggedRuns: statsData.avgRoundLoggedRuns ?? 0,
+            speedrunCompletions: statsData.speedrunCompletions ?? 0,
+            xpRank: statsData.xpRank ?? undefined,
+            verifiedXpRank: statsData.verifiedXpRank ?? undefined,
+            worldRecords: statsData.worldRecords ?? 0,
+            verifiedWorldRecords: statsData.verifiedWorldRecords ?? 0,
           });
         }
 
@@ -711,7 +784,7 @@ export default function UserProfilePage() {
   // dashboard counts and completion %
   const { totalMaps, totalMainEasterEggs, totalAchievements } = statsTotals;
   const totalMapsPlayed = mapStats.length;
-  const totalEasterEggs = mapStats.filter((m) => m.hasCompletedMainEE).length;
+  const totalEasterEggs = statsTotals.easterEggAchievementsUnlocked ?? mapStats.filter((m) => m.hasCompletedMainEE).length;
   // avg of each map's high round (no score = 0)
   const sumHighestRounds = mapStats.reduce((acc, m) => acc + m.highestRound, 0);
   const avgRound = totalMaps > 0 ? sumHighestRounds / totalMaps : 0;
@@ -723,6 +796,63 @@ export default function UserProfilePage() {
     ? achievementsOverview.completionByGame.reduce((s, g) => s + g.unlocked, 0)
     : (achievementsOverview?.unlockedAchievementIds?.length ?? 0);
   const achievementsPct = totalAchievements > 0 ? Math.round((achievementsUnlocked / totalAchievements) * 100) : 0;
+
+  const selectedBlockIds = profileStatBlockSelection.length === 4 ? profileStatBlockSelection : DEFAULT_PROFILE_STAT_BLOCK_IDS;
+
+  // Verified-related blocks use element (verified blue) consistently
+  const verifiedIconClass = 'text-element-400';
+
+  const getBlockDisplay = (blockId: ProfileStatBlockId) => {
+    const tooltips: Record<ProfileStatBlockId, string> = {
+      'maps-played': 'Maps you’ve played at least one run on, out of all maps in the tracker.',
+      'easter-eggs': 'Main-quest Easter eggs you’ve completed (unlocked the achievement), out of all main-quest EEs.',
+      'avg-round': 'Average of your best round on each map you’ve played (one number per map).',
+      achievements: 'Map achievements you’ve unlocked, out of all available achievements.',
+      'world-records': 'Leaderboards across the site where you’re currently ranked #1.',
+      'verified-world-records': 'Verified leaderboards where you’re currently ranked #1.',
+      'total-runs': 'Total challenge and Easter egg runs you’ve logged.',
+      'verified-runs': 'Runs that have been verified by an admin.',
+      'verified-rank': 'Your position on the global verified XP leaderboard.',
+      rank: 'Your position on the global XP leaderboard (all XP).',
+      'highest-round': 'Average round across every run you’ve logged (each run counts once).',
+      speedruns: 'Speedrun challenge runs you’ve completed (time-based).',
+    };
+    switch (blockId) {
+      case 'maps-played':
+        return { label: 'Maps Played', value: `${totalMapsPlayed}/${totalMaps}`, suffix: `(${mapsPct}%)`, icon: MapIcon, iconClass: 'text-blood-400', tooltip: tooltips['maps-played'] };
+      case 'easter-eggs':
+        return { label: 'Easter Eggs', value: `${totalEasterEggs}/${totalMainEasterEggs}`, suffix: `(${easterEggsPct}%)`, icon: EasterEggIcon, iconClass: 'text-element-400', tooltip: tooltips['easter-eggs'] };
+      case 'avg-round':
+        return { label: 'Map avg', value: avgRoundDisplay, suffix: null, icon: Trophy, iconClass: 'text-yellow-400', tooltip: tooltips['avg-round'] };
+      case 'achievements':
+        return { label: 'Achievements', value: `${achievementsUnlocked}/${totalAchievements}`, suffix: `(${achievementsPct}%)`, icon: Award, iconClass: 'text-yellow-400', tooltip: tooltips.achievements };
+      case 'world-records':
+        return { label: 'World Records', value: String(statsTotals.worldRecords ?? 0), suffix: null, icon: Crown, iconClass: 'text-yellow-400', tooltip: tooltips['world-records'] };
+      case 'verified-world-records':
+        return { label: 'Verified WRs', value: String(statsTotals.verifiedWorldRecords ?? 0), suffix: null, icon: ShieldCheck, iconClass: verifiedIconClass, tooltip: tooltips['verified-world-records'] };
+      case 'total-runs':
+        return { label: 'Total Runs', value: String(statsTotals.totalRuns ?? 0), suffix: null, icon: ListOrdered, iconClass: 'text-blood-400', tooltip: tooltips['total-runs'] };
+      case 'verified-runs':
+        return { label: 'Verified Runs', value: String(statsTotals.verifiedRuns ?? 0), suffix: null, icon: BadgeCheck, iconClass: verifiedIconClass, tooltip: tooltips['verified-runs'] };
+      case 'verified-rank':
+        return { label: 'Verified Rank', value: statsTotals.verifiedXpRank != null ? `#${statsTotals.verifiedXpRank}` : '—', suffix: null, icon: TrendingUp, iconClass: verifiedIconClass, tooltip: tooltips['verified-rank'] };
+      case 'rank':
+        return { label: 'XP Rank', value: statsTotals.xpRank != null ? `#${statsTotals.xpRank}` : '—', suffix: null, icon: TrendingUp, iconClass: 'text-blood-400', tooltip: tooltips.rank };
+      case 'highest-round':
+        return {
+          label: 'Run avg',
+          value: (statsTotals.avgRoundLoggedRuns ?? 0) > 0 ? (statsTotals.avgRoundLoggedRuns ?? 0).toFixed(2) : '—',
+          suffix: null,
+          icon: Target,
+          iconClass: 'text-blood-400',
+          tooltip: tooltips['highest-round'],
+        };
+      case 'speedruns':
+        return { label: 'Speedruns', value: String(statsTotals.speedrunCompletions ?? 0), suffix: null, icon: Timer, iconClass: 'text-yellow-400', tooltip: tooltips.speedruns };
+      default:
+        return { label: blockId, value: '—', suffix: null, icon: Award, iconClass: 'text-bunker-400', tooltip: 'Stat block.' };
+    }
+  };
 
   return (
     <div className="min-h-screen bg-bunker-950">
@@ -904,34 +1034,125 @@ export default function UserProfilePage() {
         )}
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-          <Card variant="bordered" className="text-center p-3 sm:p-4">
-            <MapIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blood-400 mx-auto mb-2" />
-            <p className="text-xl sm:text-2xl font-zombies text-white">
-              {totalMapsPlayed}/{totalMaps} <span className="text-blood-400/80">({mapsPct}%)</span>
-            </p>
-            <p className="text-xs text-bunker-400">Maps Played</p>
-          </Card>
-          <Card variant="bordered" className="text-center p-3 sm:p-4">
-            <EasterEggIcon className="w-5 h-5 sm:w-6 sm:h-6 text-element-400 mx-auto mb-2" />
-            <p className="text-xl sm:text-2xl font-zombies text-white">
-              {totalEasterEggs}/{totalMainEasterEggs} <span className="text-element-400/80">({easterEggsPct}%)</span>
-            </p>
-            <p className="text-xs text-bunker-400">Easter Eggs</p>
-          </Card>
-          <Card variant="bordered" className="text-center p-3 sm:p-4">
-            <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400 mx-auto mb-2" />
-            <p className="text-xl sm:text-2xl font-zombies text-white">{avgRoundDisplay}</p>
-            <p className="text-xs text-bunker-400">Avg Round</p>
-          </Card>
-          <Card variant="bordered" className="text-center p-3 sm:p-4">
-            <Award className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400 mx-auto mb-2" />
-            <p className="text-xl sm:text-2xl font-zombies text-white">
-              {achievementsUnlocked}/{totalAchievements} <span className="text-yellow-400/80">({achievementsPct}%)</span>
-            </p>
-            <p className="text-xs text-bunker-400">Achievements</p>
-          </Card>
+        <div className="mb-6 sm:mb-8">
+          {isOwnProfile && (
+            <div className="flex justify-end mb-3">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setProfileStatBlocksEditOpen(true)}
+                leftIcon={<LayoutGrid className="w-4 h-4" />}
+              >
+                Customize blocks
+              </Button>
+            </div>
+          )}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+            {selectedBlockIds.map((blockId) => {
+              const { label, value, suffix, icon: Icon, iconClass, tooltip } = getBlockDisplay(blockId);
+              return (
+                <div key={blockId} className="group relative">
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-bunker-800 rounded-lg shadow-xl border border-bunker-700 opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10 w-56 text-center">
+                    <p className="text-xs text-bunker-300">{tooltip}</p>
+                  </div>
+                  <Card variant="bordered" className="text-center p-3 sm:p-4">
+                    <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${iconClass} mx-auto mb-2`} />
+                    <p className="text-xl sm:text-2xl font-zombies text-white">
+                      {value}
+                      {suffix != null && <span className={`${iconClass}/80`}> {suffix}</span>}
+                    </p>
+                    <p className="text-xs text-bunker-400">{label}</p>
+                  </Card>
+                </div>
+              );
+            })}
+          </div>
         </div>
+
+        {/* Modal: pick 4 stat blocks (own profile only) */}
+        {isOwnProfile && (
+          <Modal
+            isOpen={profileStatBlocksEditOpen}
+            onClose={() => {
+              setModalBlockTooltip(null);
+              const raw = (profile as { profileStatBlocks?: { selectedBlockIds?: unknown[] } })?.profileStatBlocks?.selectedBlockIds;
+              const saved =
+                Array.isArray(raw) && raw.length === 4 && raw.every((x) => typeof x === 'string' && PROFILE_STAT_BLOCK_IDS.includes(x as ProfileStatBlockId))
+                  ? (raw as ProfileStatBlockId[])
+                  : DEFAULT_PROFILE_STAT_BLOCK_IDS;
+              setProfileStatBlockSelection(saved);
+              setProfileStatBlocksEditOpen(false);
+            }}
+            title="Choose 4 dashboard blocks"
+            description="Select exactly 4 stats to show on your profile. These will be visible to you and anyone who visits your profile."
+          >
+            <div className="space-y-4">
+              <p className="text-sm text-bunker-400">
+                Selected: {profileStatBlockSelection.length}/4
+                {profileStatBlockSelection.length !== 4 && ' — pick 4 to save.'}
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[50vh] overflow-y-auto">
+                {PROFILE_STAT_BLOCK_IDS.map((id) => {
+                  const { label, tooltip } = getBlockDisplay(id);
+                  const checked = profileStatBlockSelection.includes(id);
+                  return (
+                    <label
+                      key={id}
+                      className={`flex items-center gap-2 min-h-[2.75rem] py-2 px-3 rounded-lg border cursor-pointer transition-colors ${
+                        checked ? 'border-blood-500 bg-blood-500/10' : 'border-bunker-600 bg-bunker-800/50 hover:border-bunker-500'
+                      }`}
+                      onMouseEnter={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setModalBlockTooltip({ text: tooltip, x: rect.left + rect.width / 2, y: rect.bottom + 6 });
+                      }}
+                      onMouseLeave={() => setModalBlockTooltip(null)}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => {
+                          setProfileStatBlockSelection((prev) => {
+                            if (checked) return prev.filter((x) => x !== id);
+                            if (prev.length >= 4) return prev;
+                            return [...prev, id];
+                          });
+                        }}
+                        className="sr-only"
+                      />
+                      <span className="text-sm font-medium text-white flex-1 break-words">{label}</span>
+                      {checked && <Check className="w-4 h-4 text-blood-400 shrink-0" />}
+                    </label>
+                  );
+                })}
+              </div>
+              {typeof document !== 'undefined' &&
+                modalBlockTooltip &&
+                createPortal(
+                  <div
+                    className="fixed z-[10000] w-56 -translate-x-1/2 px-3 py-2 bg-bunker-800 rounded-lg shadow-xl border border-bunker-700 text-center"
+                    style={{ left: modalBlockTooltip.x, top: modalBlockTooltip.y }}
+                  >
+                    <p className="text-xs text-bunker-300">{modalBlockTooltip.text}</p>
+                  </div>,
+                  document.body
+                )}
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="secondary" size="sm" onClick={() => setProfileStatBlocksEditOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  disabled={profileStatBlockSelection.length !== 4 || profileStatBlocksSaving}
+                  onClick={handleSaveProfileStatBlocks}
+                  leftIcon={profileStatBlocksSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}
+                >
+                  {profileStatBlocksSaving ? 'Saving…' : 'Save'}
+                </Button>
+              </div>
+            </div>
+          </Modal>
+        )}
 
         {/* Maps Played Section */}
         <section className="mb-6 sm:mb-8">

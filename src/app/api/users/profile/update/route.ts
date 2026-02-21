@@ -3,8 +3,9 @@ import prisma from '@/lib/prisma';
 import { slugify } from '@/lib/utils';
 import { getUser } from '@/lib/supabase/server';
 import { isAvatarPreset } from '@/lib/avatar';
+import { parseProfileStatBlocks } from '@/lib/profile-stat-blocks';
 
-// Update display name, username, bio, or privacy. Session identifies the user.
+// Update display name, username, bio, privacy, or profile stat blocks. Session identifies the user.
 export async function PATCH(request: NextRequest) {
   try {
     const supabaseUser = await getUser();
@@ -13,7 +14,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { displayName, username: rawUsername, bio, isPublic, showBothXpRanks, preferredRankView } = body;
+    const { displayName, username: rawUsername, bio, isPublic, showBothXpRanks, preferredRankView, profileStatBlocks: rawBlocks } = body;
 
     const data: {
       displayName?: string | null;
@@ -23,6 +24,7 @@ export async function PATCH(request: NextRequest) {
       avatarPreset?: string | null;
       showBothXpRanks?: boolean;
       preferredRankView?: string | null;
+      profileStatBlocks?: { selectedBlockIds: string[] };
       updatedAt: Date;
     } = {
       updatedAt: new Date(),
@@ -45,6 +47,17 @@ export async function PATCH(request: NextRequest) {
     if (preferredRankView !== undefined) {
       const v = preferredRankView === '' || preferredRankView == null ? null : String(preferredRankView).trim();
       data.preferredRankView = v === 'total' || v === 'verified' ? v : null;
+    }
+    if (rawBlocks !== undefined) {
+      const ids = Array.isArray(rawBlocks?.selectedBlockIds) ? rawBlocks.selectedBlockIds : null;
+      const parsed = parseProfileStatBlocks(ids);
+      if (parsed === null) {
+        return NextResponse.json(
+          { error: 'profileStatBlocks must have exactly 4 unique selectedBlockIds from the allowed set' },
+          { status: 400 }
+        );
+      }
+      data.profileStatBlocks = { selectedBlockIds: parsed };
     }
 
     if (rawUsername !== undefined) {

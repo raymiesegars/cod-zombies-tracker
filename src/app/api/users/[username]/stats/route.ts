@@ -99,12 +99,34 @@ export async function GET(
       challengesCompleted: challengesCompletedByMap.get(map.id) ?? 0,
     }));
 
-    const [totalMaps, totalMainEasterEggs, totalChallenges, totalAchievements] = await Promise.all([
-      prisma.map.count(),
-      prisma.easterEgg.count({ where: { type: 'MAIN_QUEST', isActive: true } }),
-      prisma.challenge.count({ where: { isActive: true } }),
-      prisma.achievement.count({ where: { isActive: true, mapId: { not: null } } }),
-    ]);
+    const totalRuns = user.challengeLogs.length + user.easterEggLogs.length;
+    const verifiedRuns =
+      user.challengeLogs.filter((l) => l.isVerified).length +
+      user.easterEggLogs.filter((l) => l.isVerified).length;
+    const highestRound = highestByMap.size > 0 ? Math.max(...Array.from(highestByMap.values())) : 0;
+    const speedrunCompletions = user.challengeLogs.filter((l) => l.completionTimeSeconds != null).length;
+
+    const allRounds: number[] = [];
+    for (const log of user.challengeLogs) allRounds.push(log.roundReached);
+    for (const log of user.easterEggLogs) if (log.roundCompleted != null) allRounds.push(log.roundCompleted);
+    const avgRoundLoggedRuns =
+      allRounds.length > 0 ? allRounds.reduce((a, b) => a + b, 0) / allRounds.length : 0;
+
+    const [totalMaps, totalMainEasterEggs, totalChallenges, totalAchievements, easterEggAchievementsUnlocked, xpRank, verifiedXpRank] =
+      await Promise.all([
+        prisma.map.count(),
+        prisma.easterEgg.count({ where: { type: 'MAIN_QUEST', isActive: true } }),
+        prisma.challenge.count({ where: { isActive: true } }),
+        prisma.achievement.count({ where: { isActive: true, mapId: { not: null } } }),
+        prisma.userAchievement.count({
+          where: {
+            userId: user.id,
+            achievement: { type: 'EASTER_EGG_COMPLETE', isActive: true },
+          },
+        }),
+        prisma.user.count({ where: { isPublic: true, totalXp: { gt: user.totalXp ?? 0 } } }),
+        prisma.user.count({ where: { isPublic: true, verifiedTotalXp: { gt: user.verifiedTotalXp ?? 0 } } }),
+      ]);
 
     return NextResponse.json({
       mapStats,
@@ -112,6 +134,16 @@ export async function GET(
       totalMainEasterEggs,
       totalChallenges,
       totalAchievements,
+      easterEggAchievementsUnlocked,
+      totalRuns,
+      verifiedRuns,
+      highestRound,
+      avgRoundLoggedRuns,
+      speedrunCompletions,
+      xpRank: xpRank + 1,
+      verifiedXpRank: verifiedXpRank + 1,
+      worldRecords: 0,
+      verifiedWorldRecords: 0,
     });
   } catch (error) {
     console.error('Error fetching user stats:', error);

@@ -44,6 +44,9 @@ model User {
   // Maps page: game order and visibility. Json: { gameOrder: string[], hasSeenSetupModal?: boolean }. gameOrder = game ids in display order; games not in list are hidden.
   mapsPagePreferences Json?
   
+  // Profile dashboard: which 4 stat blocks to show. Json: { selectedBlockIds: string[] } — exactly 4 ids from PROFILE_STAT_BLOCK_IDS.
+  profileStatBlocks Json?
+  
   // Admin: only set via secure admin APIs; super admin (env) can demote, any admin can promote
   isAdmin       Boolean   @default(false)
   
