@@ -38,6 +38,7 @@ import {
 import { getAssetUrl } from '@/lib/assets';
 import { getDisplayAvatarUrl } from '@/lib/avatar';
 import { getBo4DifficultyLabel } from '@/lib/bo4';
+import { formatCompletionTime } from '@/components/ui/time-input';
 import type { UserProfile, UserMapStats } from '@/types';
 import {
   Trophy,
@@ -343,8 +344,9 @@ function AchievementsSection({
                         <ul className="space-y-2">
                           {sortAchievementsByXp(byCategory[cat]).map((a) => {
                             const unlocked = unlockedSet.has(a.id);
-                            const c = a.criteria;
+                            const c = a.criteria as { round?: number; isCap?: boolean; maxTimeSeconds?: number } | undefined;
                             const subLabel = c?.isCap ? 'Cap' : c?.round != null ? `Round ${c.round}` : null;
+                            const maxTime = c?.maxTimeSeconds != null ? formatCompletionTime(c.maxTimeSeconds) : null;
                             const displayName = a.easterEgg?.name ?? a.name;
                             return (
                               <li
@@ -385,6 +387,11 @@ function AchievementsSection({
                                       <span className="w-5 h-5 block" aria-hidden />
                                     )}
                                   </span>
+                                  {maxTime != null && (
+                                    <span className="text-sm font-zombies text-element-400 tabular-nums whitespace-nowrap flex-shrink-0" aria-label={`Time: ${maxTime}`}>
+                                      {maxTime}
+                                    </span>
+                                  )}
                                 </span>
                               </li>
                             );

@@ -108,6 +108,54 @@ export const IW_RAVE_SPEEDRUN_TIERS: SpeedrunTiersByType = {
   ],
 };
 
+/**
+ * Shaolin Shuffle (IW) – WRs: R30 26:54, R50 1:04:13, R70 2:14:19, R100 5:43:57, EE (Pest Control) 20:37, G&S 7:16, Boss (Rat King) 2:47.
+ */
+export const IW_SHAOLIN_SPEEDRUN_TIERS: SpeedrunTiersByType = {
+  ROUND_30_SPEEDRUN: [
+    { maxTimeSeconds: 2100, xpReward: 50 },
+    { maxTimeSeconds: 1800, xpReward: 125 },
+    { maxTimeSeconds: 1680, xpReward: 250 },
+    { maxTimeSeconds: 1640, xpReward: 500 },  // near WR 26:54
+  ],
+  ROUND_50_SPEEDRUN: [
+    { maxTimeSeconds: 4200, xpReward: 100 },
+    { maxTimeSeconds: 3960, xpReward: 250 },
+    { maxTimeSeconds: 3900, xpReward: 500 },
+    { maxTimeSeconds: 3870, xpReward: 1200 }, // near WR 1:04:13
+  ],
+  ROUND_70_SPEEDRUN: [
+    { maxTimeSeconds: 8400, xpReward: 150 },
+    { maxTimeSeconds: 8160, xpReward: 400 },
+    { maxTimeSeconds: 8100, xpReward: 800 },
+    { maxTimeSeconds: 8070, xpReward: 2000 }, // near WR 2:14:19
+  ],
+  ROUND_100_SPEEDRUN: [
+    { maxTimeSeconds: 21000, xpReward: 200 },
+    { maxTimeSeconds: 20700, xpReward: 500 },
+    { maxTimeSeconds: 20680, xpReward: 1200 },
+    { maxTimeSeconds: 20637, xpReward: 3000 }, // WR 5:43:57
+  ],
+  EASTER_EGG_SPEEDRUN: [
+    { maxTimeSeconds: 1500, xpReward: 200 },
+    { maxTimeSeconds: 1320, xpReward: 600 },
+    { maxTimeSeconds: 1260, xpReward: 1500 },
+    { maxTimeSeconds: 1250, xpReward: 3200 }, // near WR 20:37 (Pest Control)
+  ],
+  GHOST_AND_SKULLS: [
+    { maxTimeSeconds: 600, xpReward: 150 },
+    { maxTimeSeconds: 480, xpReward: 500 },
+    { maxTimeSeconds: 450, xpReward: 1200 },
+    { maxTimeSeconds: 440, xpReward: 3000 },  // near WR 7:16
+  ],
+  ALIENS_BOSS_FIGHT: [
+    { maxTimeSeconds: 240, xpReward: 200 },   // 4 min (Rat King)
+    { maxTimeSeconds: 200, xpReward: 600 },
+    { maxTimeSeconds: 180, xpReward: 1400 },
+    { maxTimeSeconds: 170, xpReward: 3500 }, // near WR 2:47
+  ],
+};
+
 export function formatSpeedrunTime(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
   const m = Math.floor(seconds / 60);
