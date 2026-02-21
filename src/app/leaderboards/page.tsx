@@ -6,7 +6,7 @@ import { LeaderboardEntry, LeaderboardsHelpContent } from '@/components/game';
 import type { LeaderboardEntry as LeaderboardEntryType, Game, MapWithGame, PlayerCount, ChallengeType } from '@/types';
 import { cn } from '@/lib/utils';
 import { getBo4DifficultyLabel, BO4_DIFFICULTIES } from '@/lib/bo4';
-import { IW_CHALLENGE_TYPES_ORDER } from '@/lib/iw';
+import { IW_CHALLENGE_TYPES_ORDER, isIwSpeedrunChallengeType } from '@/lib/iw';
 import { Trophy, Medal, Filter, Search, X, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 
@@ -647,11 +647,11 @@ export default function LeaderboardsPage() {
                   <>
                     {leaderboard.map((entry, index) => (
                       <LeaderboardEntry
-                        key={isEeTimeView ? `${entry.user.id}-${entry.playerCount}-${index}` : `${entry.user.id}-${entry.playerCount}`}
+                        key={isEeTimeView || (isIwMap && isIwSpeedrunChallengeType(selectedChallengeType)) ? `${entry.user.id}-${entry.playerCount}-${index}` : `${entry.user.id}-${entry.playerCount}`}
                         entry={entry}
                         index={index}
                         isCurrentUser={entry.user.id === profile?.id}
-                        valueKind={isEeTimeView ? 'time' : 'round'}
+                        valueKind={isEeTimeView || (isIwMap && isIwSpeedrunChallengeType(selectedChallengeType)) ? 'time' : 'round'}
                         mapSlug={selectedMap}
                       />
                     ))}

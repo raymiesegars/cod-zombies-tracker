@@ -327,6 +327,7 @@ async function main() {
   let locksmithEe = await prisma.easterEgg.findFirst({
     where: { mapId: raveMap.id, slug: 'locksmith' },
   });
+  const LOCKSMITH_VIDEO = 'https://www.youtube.com/embed/NjxUwLRwKSs';
   if (!locksmithEe) {
     locksmithEe = await prisma.easterEgg.create({
       data: {
@@ -336,6 +337,7 @@ async function main() {
         mapId: raveMap.id,
         xpReward: 2500,
         description: 'Main quest of Rave in the Redwoods. Obtain the second piece of the Soul Key. Requires power, boat engine, and projector on Turtle Island.',
+        videoEmbedUrl: LOCKSMITH_VIDEO,
       },
     });
     await prisma.easterEggStep.createMany({
@@ -349,6 +351,13 @@ async function main() {
     });
     console.log(`Created Locksmith Easter Egg (${LOCKSMITH_STEPS.length} steps)`);
   } else {
+    if (!locksmithEe.videoEmbedUrl) {
+      await prisma.easterEgg.update({
+        where: { id: locksmithEe.id },
+        data: { videoEmbedUrl: LOCKSMITH_VIDEO },
+      });
+      console.log('Updated Locksmith Easter Egg with video');
+    }
     console.log('Locksmith Easter Egg already exists');
   }
 
@@ -447,6 +456,198 @@ async function main() {
       },
     });
     console.log('Created Locksmith achievement');
+  }
+
+  // ——— Shaolin Shuffle ———
+  const shaolinRoundCap = getRoundCapForMap('shaolin-shuffle', 'IW') ?? null;
+  let shaolinMap = await prisma.map.findFirst({
+    where: { slug: 'shaolin-shuffle', gameId: iwGame.id },
+  });
+  if (!shaolinMap) {
+    shaolinMap = await prisma.map.create({
+      data: {
+        name: 'Shaolin Shuffle',
+        slug: 'shaolin-shuffle',
+        gameId: iwGame.id,
+        isDlc: false,
+        order: 3,
+        imageUrl: '/images/maps/shaolin-shuffle.webp',
+        roundCap: shaolinRoundCap,
+        description: '1970s New York kung fu and disco. Recover the third piece of the Soul Key and clear the rat infestation in the Pest Control main quest.',
+      },
+    });
+    console.log('Created Shaolin Shuffle map');
+  } else {
+    console.log('Shaolin Shuffle map already exists');
+  }
+
+  let shaolinChallengesCreated = 0;
+  for (const info of allChallengeInfos) {
+    const exists = await prisma.challenge.findFirst({
+      where: { mapId: shaolinMap.id, slug: info.slug },
+    });
+    if (!exists) {
+      await prisma.challenge.create({
+        data: {
+          name: info.name,
+          slug: info.slug,
+          type: info.type,
+          mapId: shaolinMap.id,
+          xpReward: 0,
+          description: info.description,
+        },
+      });
+      shaolinChallengesCreated++;
+    }
+  }
+  if (shaolinChallengesCreated > 0) console.log(`Created ${shaolinChallengesCreated} challenges for Shaolin Shuffle`);
+
+  const PEST_CONTROL_VIDEO = 'https://www.youtube.com/embed/6ipByM44x28';
+  const PEST_CONTROL_STEPS = [
+    { order: 1, label: 'To Prove Worthy: Complete first Skating Diva wave, speak to Pam Grier. Use the four sake gourds in Black Cat Dojo; complete first level to unlock Shuriken.' },
+    { order: 2, label: 'Rat Cages: Use shuriken to smash rat crates around the map, follow the rat to each cage and smash it. Yellow ring spawns; kill 5–10 zombies (with a zombie in ring). Kill Ninja Zombies, pick up key.' },
+    { order: 3, label: 'Chinese Symbols: Open the locker with symbols in the second subway. Shoot the left symbol on the brick building (Dojo), then the symbol in Inferno Club bathroom, then the first two symbols by the Volk.' },
+    { order: 4, label: 'First Rat King: Interact with orange Rat King symbol in front of Black Cat Dojo. Shoot Rat King until he drops the green eyeball; take it to Pam.' },
+    { order: 5, label: 'Dragon Symbols & Morse: Use the eye (Vision Pulse style) to find orange dragon symbols (13 locations); shoot 6. Answer the gray ringing phone in the subway for Morse code; translate to a 3-digit number and find the Nightmare Summer poster with that film number.' },
+    { order: 6, label: 'Rooftop Cipher: Place poster on spotlight on Inferno roof. Destroy the window with the X. Kill Ninja Zombies; use the six rooftop symbols to spell a word (gong when correct).' },
+    { order: 7, label: 'Second Rat King: Interact with symbol by RPR Evo on roof. Shoot Rat King for the brain; bring to Pam.' },
+    { order: 8, label: 'Missing Reel: Three rounds after talking to Pam, film burns and you spawn at Dojo with zombies and fire blocking exits. Kill all zombies; pick up turnstile part and insert it in the first subway.' },
+    { order: 9, label: 'Yellow Rings: From scaffolding by Karma-45, shoot the symbol in the window above Heebie Jeebies to spawn a ring. Kill zombies in the ring (you and a zombie inside) five more times at the spawned ring locations.' },
+    { order: 10, label: 'Disco Zombie: Interact with turntable in DJ booth (Inferno). Kill the disco zombie while another zombie is on the dance floor; keep passing the ball until gong.' },
+    { order: 11, label: 'Third Rat King: Interact with symbol by Pink Cat. Shoot Rat King for the heart (lethal grenade).' },
+    { order: 12, label: 'Final Rat King: Talk to Pam, enter Rat King\'s lair in the sewers. Shoot him until he retreats. Complete three stages in any order (heart = clear acid; brain = blue zombies destroy it; eyeball = shoot revealed symbols). Fight Rat King between each; then kill him and collect the third Soul Key piece.' },
+  ];
+  let pestControlEe = await prisma.easterEgg.findFirst({
+    where: { mapId: shaolinMap.id, slug: 'pest-control' },
+  });
+  if (!pestControlEe) {
+    pestControlEe = await prisma.easterEgg.create({
+      data: {
+        name: 'Pest Control',
+        slug: 'pest-control',
+        type: 'MAIN_QUEST',
+        mapId: shaolinMap.id,
+        xpReward: 2500,
+        description: 'Main quest of Shaolin Shuffle. Recover the third piece of the Soul Key and clear the rat infestation. Requires Shuriken and Pam Grier\'s tasks.',
+        videoEmbedUrl: PEST_CONTROL_VIDEO,
+      },
+    });
+    await prisma.easterEggStep.createMany({
+      data: PEST_CONTROL_STEPS.map((s) => ({
+        easterEggId: pestControlEe!.id,
+        order: s.order,
+        label: s.label,
+        imageUrl: null,
+        buildableReferenceSlug: null,
+      })),
+    });
+    console.log(`Created Pest Control Easter Egg (${PEST_CONTROL_STEPS.length} steps)`);
+  } else {
+    if (!pestControlEe.videoEmbedUrl) {
+      await prisma.easterEgg.update({
+        where: { id: pestControlEe.id },
+        data: { videoEmbedUrl: PEST_CONTROL_VIDEO },
+      });
+      console.log('Updated Pest Control Easter Egg with video');
+    }
+    console.log('Pest Control Easter Egg already exists');
+  }
+
+  const shaolinWithChallenges = await prisma.map.findUnique({
+    where: { id: shaolinMap.id },
+    include: { game: { select: { shortName: true } }, challenges: { where: { isActive: true } } },
+  });
+  if (shaolinWithChallenges) {
+    const defs = getMapAchievementDefinitions(
+      shaolinWithChallenges.slug,
+      shaolinWithChallenges.roundCap,
+      shaolinWithChallenges.game?.shortName ?? 'IW'
+    );
+    const shaolinChallengesByType = Object.fromEntries(shaolinWithChallenges.challenges.map((c) => [c.type, c]));
+    let shaolinAchievementsCreated = 0;
+    for (const def of defs) {
+      const criteria = def.criteria as { round?: number; challengeType?: string };
+      const challengeId = criteria.challengeType
+        ? shaolinChallengesByType[criteria.challengeType as keyof typeof shaolinChallengesByType]?.id
+        : null;
+      const existing = await prisma.achievement.findFirst({
+        where: { mapId: shaolinMap.id, slug: def.slug },
+      });
+      if (!existing) {
+        await prisma.achievement.create({
+          data: {
+            mapId: shaolinMap.id,
+            name: def.name,
+            slug: def.slug,
+            type: def.type as 'ROUND_MILESTONE' | 'CHALLENGE_COMPLETE' | 'EASTER_EGG_COMPLETE',
+            rarity: def.rarity as 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY',
+            xpReward: def.xpReward,
+            criteria: def.criteria,
+            challengeId: challengeId ?? undefined,
+          },
+        });
+        shaolinAchievementsCreated++;
+      }
+    }
+    if (shaolinAchievementsCreated > 0) console.log(`Created ${shaolinAchievementsCreated} map achievements for Shaolin Shuffle`);
+  }
+
+  const shaolinSpeedrunDefs = getSpeedrunAchievementDefinitions('shaolin-shuffle', 'IW');
+  if (shaolinSpeedrunDefs.length > 0 && shaolinWithChallenges) {
+    const shaolinChallengesByType = Object.fromEntries(shaolinWithChallenges.challenges.map((c) => [c.type, c]));
+    let shaolinSpeedrunCreated = 0;
+    for (const def of shaolinSpeedrunDefs) {
+      const criteria = def.criteria as { challengeType?: string };
+      const challengeId = criteria.challengeType
+        ? (shaolinChallengesByType as Record<string, { id: string }>)[criteria.challengeType]?.id
+        : null;
+      const existing = await prisma.achievement.findFirst({
+        where: { mapId: shaolinMap.id, slug: def.slug },
+      });
+      if (!existing) {
+        await prisma.achievement.create({
+          data: {
+            mapId: shaolinMap.id,
+            name: def.name,
+            slug: def.slug,
+            type: def.type as 'CHALLENGE_COMPLETE',
+            rarity: def.rarity as 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY',
+            xpReward: def.xpReward,
+            criteria: def.criteria,
+            challengeId: challengeId ?? undefined,
+          },
+        });
+        shaolinSpeedrunCreated++;
+      } else if (existing.xpReward !== def.xpReward) {
+        await prisma.achievement.update({
+          where: { id: existing.id },
+          data: { xpReward: def.xpReward },
+        });
+      }
+    }
+    if (shaolinSpeedrunCreated > 0) console.log(`Created ${shaolinSpeedrunCreated} speedrun achievements for Shaolin Shuffle`);
+  }
+
+  const pestControlEeForAchievement = await prisma.easterEgg.findFirst({
+    where: { mapId: shaolinMap.id, slug: 'pest-control' },
+  });
+  const pestControlAchievementExists = pestControlEeForAchievement
+    ? await prisma.achievement.findFirst({ where: { easterEggId: pestControlEeForAchievement.id } })
+    : null;
+  if (!pestControlAchievementExists && pestControlEeForAchievement && (pestControlEeForAchievement.xpReward ?? 0) > 0) {
+    await prisma.achievement.create({
+      data: {
+        mapId: shaolinMap.id,
+        easterEggId: pestControlEeForAchievement.id,
+        name: pestControlEeForAchievement.name,
+        slug: 'pest-control',
+        type: 'EASTER_EGG_COMPLETE',
+        rarity: 'LEGENDARY',
+        xpReward: pestControlEeForAchievement.xpReward ?? 2500,
+        criteria: {},
+      },
+    });
+    console.log('Created Pest Control achievement');
   }
 
   console.log('Add IW content complete.');

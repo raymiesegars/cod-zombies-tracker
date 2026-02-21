@@ -5,9 +5,10 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { Input, Select, Badge, Logo, MapIcon } from '@/components/ui';
 import { MapCard } from '@/components/game';
+import { MapsPageGameOrderModal } from './MapsPageGameOrderModal';
 import type { MapWithGame, Game } from '@/types';
 import type { UserMapStats } from '@/types';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, Filter, X, Settings } from 'lucide-react';
 
 type Props = {
   initialMaps: MapWithGame[];
@@ -20,6 +21,12 @@ export function MapsPageClient({ initialMaps, initialGames }: Props) {
   const [maps, setMaps] = useState<MapWithGame[]>(initialMaps);
   const [games, setGames] = useState<Game[]>(initialGames);
   const [userMapStats, setUserMapStats] = useState<UserMapStats[]>([]);
+
+  const [mapsPageGameOrder, setMapsPageGameOrder] = useState<string[]>([]);
+  const [mapsPageHasSeenSetup, setMapsPageHasSeenSetup] = useState(false);
+  const [mapsPagePrefsLoaded, setMapsPagePrefsLoaded] = useState(false);
+  const [showGameOrderModal, setShowGameOrderModal] = useState(false);
+  const [showGameOrderFirstTime, setShowGameOrderFirstTime] = useState(false);
 
   const [search, setSearch] = useState('');
   const [selectedGame, setSelectedGame] = useState('');
@@ -41,9 +48,69 @@ export function MapsPageClient({ initialMaps, initialGames }: Props) {
     }
   }, [authUser]);
 
+  const fetchMapsPagePrefs = useCallback(async () => {
+    if (!authUser) return;
+    try {
+      const base = typeof window !== 'undefined' ? window.location.origin : '';
+      const res = await fetch(`${base}/api/me/maps-page-preferences`, { credentials: 'same-origin' });
+      if (res?.ok) {
+        const data = await res.json();
+        setMapsPageGameOrder(Array.isArray(data.gameOrder) ? data.gameOrder : []);
+        setMapsPageHasSeenSetup(Boolean(data.hasSeenSetupModal));
+      }
+    } catch {
+      // keep defaults
+    } finally {
+      setMapsPagePrefsLoaded(true);
+    }
+  }, [authUser]);
+
   useEffect(() => {
     if (pathname === '/maps' && authUser) fetchUserStats();
   }, [pathname, authUser, fetchUserStats]);
+
+  useEffect(() => {
+    if (authUser) fetchMapsPagePrefs();
+    else setMapsPagePrefsLoaded(true);
+  }, [authUser, fetchMapsPagePrefs]);
+
+  useEffect(() => {
+    if (!authUser || !mapsPagePrefsLoaded || mapsPageHasSeenSetup) return;
+    setShowGameOrderModal(true);
+    setShowGameOrderFirstTime(true);
+  }, [authUser, mapsPagePrefsLoaded, mapsPageHasSeenSetup]);
+
+  const saveMapsPagePrefs = useCallback(
+    async (gameOrder: string[], markSetupSeen: boolean) => {
+      const base = typeof window !== 'undefined' ? window.location.origin : '';
+      const res = await fetch(`${base}/api/me/maps-page-preferences`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+          gameOrder,
+          ...(markSetupSeen ? { hasSeenSetupModal: true } : {}),
+        }),
+      });
+      if (!res.ok) throw new Error('Failed to save');
+      const data = await res.json();
+      setMapsPageGameOrder(Array.isArray(data.gameOrder) ? data.gameOrder : []);
+      if (markSetupSeen) setMapsPageHasSeenSetup(true);
+    },
+    []
+  );
+
+  const orderedGames = useMemo(() => {
+    if (games.length === 0) return [];
+    if (mapsPageGameOrder.length === 0) return [...games].sort((a, b) => a.order - b.order);
+    const orderIds = mapsPageGameOrder.filter((id) => games.some((g) => g.id === id));
+    const ordered: Game[] = [];
+    for (const id of orderIds) {
+      const g = games.find((game) => game.id === id);
+      if (g) ordered.push(g);
+    }
+    return ordered;
+  }, [games, mapsPageGameOrder]);
 
   const filteredMaps = useMemo(() => {
     return maps.filter((map) => {
@@ -88,19 +155,40 @@ export function MapsPageClient({ initialMaps, initialGames }: Props) {
     ...games.map((game) => ({ value: game.id, label: game.name })),
   ];
 
+  const visibleOrderedGames = useMemo(
+    () => orderedGames.filter((game) => mapsByGame[game.id]?.length > 0),
+    [orderedGames, mapsByGame]
+  );
+
   return (
     <div className="min-h-screen bg-bunker-950">
       {/* Header */}
       <div className="bg-bunker-900 border-b border-bunker-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <span className="flex flex-shrink-0 items-center justify-center text-[#b91c1c]" aria-hidden>
-                <MapIcon size={40} className="sm:w-10 sm:h-10 w-9 h-9" />
-              </span>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-zombies text-white tracking-wide">
-                All Maps
-              </h1>
+            <div className="flex items-center justify-between gap-3 sm:gap-4">
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                <span className="flex flex-shrink-0 items-center justify-center text-[#b91c1c]" aria-hidden>
+                  <MapIcon size={40} className="sm:w-10 sm:h-10 w-9 h-9" />
+                </span>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-zombies text-white tracking-wide">
+                  All Maps
+                </h1>
+              </div>
+              {authUser && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowGameOrderFirstTime(false);
+                    setShowGameOrderModal(true);
+                  }}
+                  className="flex-shrink-0 p-2.5 rounded-lg border border-bunker-600 bg-bunker-800/80 text-bunker-300 hover:border-blood-800/50 hover:text-blood-400 transition-colors"
+                  title="Customize which games appear and in what order"
+                  aria-label="Maps page settings"
+                >
+                  <Settings className="w-5 h-5 sm:w-6 sm:h-6" />
+                </button>
+              )}
             </div>
             <p className="text-sm sm:text-base text-bunker-400">
               Explore every Treyarch Zombies map and track your progress
@@ -196,9 +284,7 @@ export function MapsPageClient({ initialMaps, initialGames }: Props) {
           </div>
         ) : (
           <div className="space-y-8 sm:space-y-12">
-            {games
-              .filter((game) => mapsByGame[game.id]?.length > 0)
-              .map((game) => (
+            {visibleOrderedGames.map((game) => (
                 <section key={game.id}>
                   <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                     <h2 className="text-lg sm:text-xl font-zombies text-white tracking-wide [text-shadow:0_0_2px_rgba(0,0,0,0.95),0_0_4px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.85)]">
@@ -223,10 +309,25 @@ export function MapsPageClient({ initialMaps, initialGames }: Props) {
                     })}
                   </div>
                 </section>
-              ))}
+            ))}
           </div>
         )}
       </div>
+
+      {authUser && (
+        <MapsPageGameOrderModal
+          isOpen={showGameOrderModal}
+          onClose={() => {
+            setShowGameOrderModal(false);
+            setShowGameOrderFirstTime(false);
+          }}
+          games={games}
+          initialGameOrder={mapsPageGameOrder}
+          initialHasSeenSetupModal={mapsPageHasSeenSetup}
+          onSave={saveMapsPagePrefs}
+          isFirstTimePrompt={showGameOrderFirstTime}
+        />
+      )}
     </div>
   );
 }

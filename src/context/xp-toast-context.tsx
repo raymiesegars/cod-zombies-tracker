@@ -138,7 +138,7 @@ function XpToastContent({ amount, totalXp, verified }: ToastState) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 24 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] pointer-events-none w-[280px] sm:w-[300px]"
+      className="fixed bottom-4 right-16 z-[100] pointer-events-none w-[280px] sm:w-[300px]"
     >
       <div
         className={cn(

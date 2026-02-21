@@ -171,13 +171,15 @@ const BO7: Record<string, MapRoundConfig> = {
   'zarya-cosmodrome': config(999, BO6_BO7_999),
 };
 
-// IW: ZIS WR 207, cap ~190. Rave WR 255, cap 255.
+// IW: ZIS WR 207 cap 190, Rave 255, Shaolin 182.
 const IW_190: RoundMilestone[] = buildRoundMilestones(190, 2500);
 const IW_255: RoundMilestone[] = buildRoundMilestones(255, 2500);
+const IW_182: RoundMilestone[] = buildRoundMilestones(182, 2500);
 
 const IW: Record<string, MapRoundConfig> = {
   'zombies-in-spaceland': config(190, IW_190),
   'rave-in-the-redwoods': config(255, IW_255),
+  'shaolin-shuffle': config(182, IW_182),
 };
 
 const BY_GAME: Record<string, Record<string, MapRoundConfig>> = {

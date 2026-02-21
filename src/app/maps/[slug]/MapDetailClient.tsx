@@ -204,9 +204,11 @@ function AchievementsTabContent({
   const [difficultyFilter, setDifficultyFilter] = useState<string>('');
 
   const isBo4 = gameShortName === 'BO4';
-  let achievementsFiltered = isBo4 && difficultyFilter
+  const achievementsBeforeTypeFilter = isBo4 && difficultyFilter
     ? (achievements ?? []).filter((a) => (a as { difficulty?: string | null }).difficulty === difficultyFilter)
     : (achievements ?? []);
+
+  let achievementsFiltered = achievementsBeforeTypeFilter;
   if (categoryFilter) {
     achievementsFiltered = achievementsFiltered.filter((a) => getAchievementCategory(a) === categoryFilter);
   }
@@ -232,15 +234,22 @@ function AchievementsTabContent({
   }, {});
 
   const sortedCategories = getSortedCategoryKeys(byCategory as Record<string, unknown[]>);
-  const nonSpeedrunCats = sortedCategories.filter((c) => !isSpeedrunCategory(c));
-  const speedrunCats = sortedCategories.filter((c) => isSpeedrunCategory(c));
   const visibleCategories =
     categoryFilter ? (sortedCategories.includes(categoryFilter) ? [categoryFilter] : sortedCategories)
     : speedrunFilter ? (sortedCategories.includes(speedrunFilter) ? [speedrunFilter] : sortedCategories)
     : sortedCategories;
 
-  const categoryOptions = getNonSpeedrunCategoryFilterOptions(nonSpeedrunCats.length ? nonSpeedrunCats : undefined);
-  const speedrunOptions = getSpeedrunCategoryFilterOptions(speedrunCats.length ? speedrunCats : undefined);
+  const byCategoryForOptions = achievementsBeforeTypeFilter.reduce<Record<string, typeof achievementsBeforeTypeFilter>>((acc, a) => {
+    const cat = getAchievementCategory(a);
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(a);
+    return acc;
+  }, {});
+  const sortedCategoriesForOptions = getSortedCategoryKeys(byCategoryForOptions as Record<string, unknown[]>);
+  const nonSpeedrunCatsForOptions = sortedCategoriesForOptions.filter((c) => !isSpeedrunCategory(c));
+  const speedrunCatsForOptions = sortedCategoriesForOptions.filter((c) => isSpeedrunCategory(c));
+  const categoryOptions = getNonSpeedrunCategoryFilterOptions(nonSpeedrunCatsForOptions.length ? nonSpeedrunCatsForOptions : undefined);
+  const speedrunOptions = getSpeedrunCategoryFilterOptions(speedrunCatsForOptions.length ? speedrunCatsForOptions : undefined);
 
   const visibleCount = visibleCategories.reduce((sum, cat) => sum + (byCategory[cat]?.length ?? 0), 0);
   const filterEmpty =
@@ -313,8 +322,9 @@ function AchievementsTabContent({
             <ul className="space-y-2 min-w-0 w-full">
               {(byCategory[cat]!).map((a) => {
                 const unlocked = unlockedSet.has(a.id);
-                const c = a.criteria as { round?: number; isCap?: boolean };
+                const c = a.criteria as { round?: number; isCap?: boolean; maxTimeSeconds?: number };
                 const subLabel = c.isCap ? 'Cap' : c.round != null ? `Round ${c.round}` : null;
+                const maxTime = c.maxTimeSeconds != null ? formatCompletionTime(c.maxTimeSeconds) : null;
                 const displayName = (a as { easterEgg?: { name: string } | null }).easterEgg?.name ?? a.name;
                 return (
                   <li
@@ -354,6 +364,11 @@ function AchievementsTabContent({
                           <span className="w-5 h-5 block" aria-hidden />
                         )}
                       </span>
+                      {maxTime != null && (
+                        <span className="text-sm font-zombies text-element-400 tabular-nums whitespace-nowrap flex-shrink-0" aria-label={`Time: ${maxTime}`}>
+                          {maxTime}
+                        </span>
+                      )}
                     </div>
                   </li>
                 );
@@ -993,12 +1008,16 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                     </div>
                     <div className="text-center p-3 sm:p-4 bg-bunker-800/50 rounded-lg border border-bunker-700">
                       <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400 mx-auto mb-1 sm:mb-2" />
-                      <p className="text-xl sm:text-2xl font-zombies text-white">
-                        {!selectedLeaderboardCategory.startsWith('ee-time-')
-                          ? (mapStats?.highestRound || leaderboard[0]?.value || '—')
-                          : '—'}
+                      <p className={`text-xl sm:text-2xl font-zombies ${(selectedLeaderboardCategory.startsWith('ee-time-') || isIwSpeedrunChallengeType(selectedLeaderboardCategory)) ? 'text-element-400' : 'text-white'}`}>
+                        {(selectedLeaderboardCategory.startsWith('ee-time-') || isIwSpeedrunChallengeType(selectedLeaderboardCategory))
+                          ? (leaderboard[0]?.value != null && Number.isFinite(Number(leaderboard[0].value))
+                              ? formatCompletionTime(Number(leaderboard[0].value))
+                              : '—')
+                          : (mapStats?.highestRound || leaderboard[0]?.value || '—')}
                       </p>
-                      <p className="text-xs text-bunker-400">Top Round</p>
+                      <p className="text-xs text-bunker-400">
+                        {(selectedLeaderboardCategory.startsWith('ee-time-') || isIwSpeedrunChallengeType(selectedLeaderboardCategory)) ? 'Top Time' : 'Top Round'}
+                      </p>
                     </div>
                     <div className="text-center p-3 sm:p-4 bg-bunker-800/50 rounded-lg border border-bunker-700">
                       <Users className="w-5 h-5 sm:w-6 sm:h-6 text-blood-400 mx-auto mb-1 sm:mb-2" />
@@ -1046,8 +1065,8 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                             {getPlayerCountLabel(entry.playerCount)}
                           </span>
                           <div className="flex-shrink-0 min-w-[3.5rem] flex justify-end">
-                            {selectedLeaderboardCategory.startsWith('ee-time-') ? (
-                              <span className="text-xs sm:text-sm font-semibold text-military-400 tabular-nums">
+                            {(selectedLeaderboardCategory.startsWith('ee-time-') || isIwSpeedrunChallengeType(selectedLeaderboardCategory)) ? (
+                              <span className="text-xs sm:text-sm font-zombies font-semibold text-element-400 tabular-nums">
                                 {formatCompletionTime(entry.value)}
                               </span>
                             ) : (

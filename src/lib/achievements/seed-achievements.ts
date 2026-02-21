@@ -12,7 +12,7 @@ import {
   getXpForRoundFromMilestones,
 } from './map-round-config';
 import { isBo4Game, BO4_DIFFICULTIES, BO4_DIFFICULTY_XP_MULTIPLIER, type Bo4DifficultyType } from '../bo4';
-import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
+import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
 
 const CHALLENGE_TYPES = [
   'HIGHEST_ROUND',
@@ -42,6 +42,16 @@ const IW_RAVE_CHALLENGE_ROUNDS: Partial<Record<string, readonly number[]>> = {
   ONE_BOX: [10, 20, 30], // WR 30
   PISTOL_ONLY: [10, 20, 30, 40, 50, 60, 70], // WR 70
   NO_POWER: [10, 20, 30, 50, 75, 100, 125, 170], // WR 170
+};
+
+/** IW Shaolin Shuffle: custom rounds per challenge (WR-based). */
+const IW_SHAOLIN_CHALLENGE_ROUNDS: Partial<Record<string, readonly number[]>> = {
+  NO_PERKS: [10, 20, 30, 50, 83], // WR 83
+  NO_PACK: [10, 20, 30, 40, 50, 70], // WR 70
+  STARTING_ROOM: [10, 15, 20, 30, 40, 51], // WR 51
+  ONE_BOX: [10, 20, 30], // WR 30
+  PISTOL_ONLY: [10, 20, 30, 40, 50, 70], // WR 70
+  NO_POWER: [10, 20, 30, 50, 71], // WR 71
 };
 
 export type AchievementSeedRow = {
@@ -130,7 +140,8 @@ export function getMapAchievementDefinitions(
     // Other types: rounds <= maxRound, XP from map milestones × multiplier
     const isIwZis = mapSlug === 'zombies-in-spaceland' && gameShortName === 'IW';
     const isIwRave = mapSlug === 'rave-in-the-redwoods' && gameShortName === 'IW';
-    const iwOverrideRounds = isIwZis ? IW_ZIS_CHALLENGE_ROUNDS : isIwRave ? IW_RAVE_CHALLENGE_ROUNDS : undefined;
+    const isIwShaolin = mapSlug === 'shaolin-shuffle' && gameShortName === 'IW';
+    const iwOverrideRounds = isIwZis ? IW_ZIS_CHALLENGE_ROUNDS : isIwRave ? IW_RAVE_CHALLENGE_ROUNDS : isIwShaolin ? IW_SHAOLIN_CHALLENGE_ROUNDS : undefined;
     for (const cType of CHALLENGE_TYPES) {
       if (cType === 'HIGHEST_ROUND' || cType === 'NO_DOWNS') continue;
       const defaultConfig = getMilestonesForChallengeType(cType as any);
@@ -259,6 +270,7 @@ const SPEEDRUN_TYPE_LABELS: Record<string, string> = {
 const IW_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
   'zombies-in-spaceland': IW_ZIS_SPEEDRUN_TIERS,
   'rave-in-the-redwoods': IW_RAVE_SPEEDRUN_TIERS,
+  'shaolin-shuffle': IW_SHAOLIN_SPEEDRUN_TIERS,
 };
 
 /** Speedrun tier achievements for IW maps (ZIS, Rave, etc.). Fastest = most XP. */

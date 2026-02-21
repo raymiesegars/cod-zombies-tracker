@@ -188,7 +188,7 @@ export function LeaderboardEntry({
               <div className="min-w-0 flex items-center justify-end lg:hidden">
                 {valueKind === 'time' ? (
                   showTime ? (
-                    <span className="text-xs sm:text-sm font-bold text-military-400 tabular-nums leading-none truncate" title="Completion time">
+                    <span className="text-xs sm:text-sm font-zombies font-semibold text-element-400 tabular-nums leading-none truncate" title="Completion time">
                       {formatCompletionTime(timeSeconds)}
                     </span>
                   ) : null
@@ -200,7 +200,7 @@ export function LeaderboardEntry({
               <div className="hidden lg:grid grid-cols-[minmax(0,4.5rem)_2rem_4.5rem_5rem] gap-x-3 w-max max-w-full min-w-0 ml-auto">
                 <div className="flex items-center justify-start min-w-0 tabular-nums">
                   {valueKind === 'time' && showTime ? (
-                    <span className="text-sm font-bold text-military-400 tabular-nums leading-none truncate" title="Completion time">
+                    <span className="text-sm font-zombies font-semibold text-element-400 tabular-nums leading-none truncate" title="Completion time">
                       {formatCompletionTime(timeSeconds)}
                     </span>
                   ) : null}
