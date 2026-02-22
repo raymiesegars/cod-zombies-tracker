@@ -305,6 +305,92 @@ function buildWaWSpeedrunTiers(r30: number, r50: number, r70: number, r100: numb
   };
 }
 
+/** BO1 speedrun tiers per map — WR-based, 4 tiers each. Includes R200 when applicable. */
+function buildBo1SpeedrunTiers(
+  r30: number,
+  r50: number,
+  r70: number,
+  r100: number,
+  r200?: number
+): SpeedrunTiersByType {
+  const buf = 1.2;
+  const base: SpeedrunTiersByType = {
+    ROUND_30_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(r30 * buf * 1.5), xpReward: 80 },
+      { maxTimeSeconds: Math.round(r30 * buf * 1.2), xpReward: 200 },
+      { maxTimeSeconds: Math.round(r30 * buf), xpReward: 500 },
+      { maxTimeSeconds: Math.round(r30 * 1.05), xpReward: 1200 },
+    ],
+    ROUND_50_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(r50 * buf * 1.5), xpReward: 120 },
+      { maxTimeSeconds: Math.round(r50 * buf * 1.2), xpReward: 300 },
+      { maxTimeSeconds: Math.round(r50 * buf), xpReward: 700 },
+      { maxTimeSeconds: Math.round(r50 * 1.05), xpReward: 1500 },
+    ],
+    ROUND_70_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(r70 * buf * 1.5), xpReward: 150 },
+      { maxTimeSeconds: Math.round(r70 * buf * 1.2), xpReward: 400 },
+      { maxTimeSeconds: Math.round(r70 * buf), xpReward: 900 },
+      { maxTimeSeconds: Math.round(r70 * 1.05), xpReward: 2000 },
+    ],
+    ROUND_100_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(r100 * buf * 1.5), xpReward: 200 },
+      { maxTimeSeconds: Math.round(r100 * buf * 1.2), xpReward: 500 },
+      { maxTimeSeconds: Math.round(r100 * buf), xpReward: 1200 },
+      { maxTimeSeconds: Math.round(r100 * 1.05), xpReward: 2500 },
+    ],
+  };
+  if (r200 != null) {
+    base.ROUND_200_SPEEDRUN = [
+      { maxTimeSeconds: Math.round(r200 * buf * 1.5), xpReward: 300 },
+      { maxTimeSeconds: Math.round(r200 * buf * 1.2), xpReward: 800 },
+      { maxTimeSeconds: Math.round(r200 * buf), xpReward: 1800 },
+      { maxTimeSeconds: Math.round(r200 * 1.05), xpReward: 3500 },
+    ];
+  }
+  return base;
+}
+
+function addEeTiers(base: SpeedrunTiersByType, wrSeconds: number): SpeedrunTiersByType {
+  const buf = 1.2;
+  return {
+    ...base,
+    EASTER_EGG_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(wrSeconds * buf * 1.5), xpReward: 200 },
+      { maxTimeSeconds: Math.round(wrSeconds * buf * 1.2), xpReward: 600 },
+      { maxTimeSeconds: Math.round(wrSeconds * buf), xpReward: 1500 },
+      { maxTimeSeconds: Math.round(wrSeconds * 1.05), xpReward: 2500 },
+    ],
+  };
+}
+
+export const BO1_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
+  'kino-der-toten': buildBo1SpeedrunTiers(28 * 60 + 52, 65 * 60 + 57, 143 * 60 + 8, 6 * 3600 + 33 * 60 + 16, 45 * 3600 + 51 * 60 + 31),
+  five: buildBo1SpeedrunTiers(28 * 60 + 52, 66 * 60 + 49, 149 * 60 + 12, 6 * 3600 + 19 * 60 + 48, 46 * 3600 + 38 * 60 + 46),
+  ascension: addEeTiers(buildBo1SpeedrunTiers(28 * 60 + 22, 60 * 60 + 43, 121 * 60 + 15, 5 * 3600 + 46 * 60 + 22, 43 * 3600 + 21 * 60 + 52), 13 * 60 + 37),
+  'call-of-the-dead': buildBo1SpeedrunTiers(33 * 60 + 48, 81 * 60 + 57, 6 * 3600 + 13 * 60 + 40, 24 * 3600 + 55 * 60 + 40),
+  'shangri-la': addEeTiers(buildBo1SpeedrunTiers(32 * 60 + 42, 70 * 60 + 40, 150 * 60 + 40, 6 * 3600 + 48 * 60 + 40, 50 * 3600), 9 * 60 + 38),
+  moon: addEeTiers(buildBo1SpeedrunTiers(30 * 60 + 25, 65 * 60 + 55, 132 * 60, 5 * 3600 + 26 * 60, 39 * 3600 + 54 * 60), 8 * 60 + 59),
+  'bo1-nacht-der-untoten': buildBo1SpeedrunTiers(40 * 60 + 54, 136 * 60, 486 * 60, 20 * 3600),
+  'bo1-verruckt': buildBo1SpeedrunTiers(30 * 60 + 30, 77 * 60 + 40, 208 * 60 + 40, 590 * 60 + 40, 75 * 3600),
+  'bo1-shi-no-numa': buildBo1SpeedrunTiers(31 * 60 + 18, 75 * 60 + 30, 180 * 60, 480 * 60, 64 * 3600),
+  'bo1-der-riese': addEeTiers(buildBo1SpeedrunTiers(28 * 60, 58 * 60, 120 * 60, 5 * 3600 + 28 * 60 + 40, 42 * 3600), 3 * 60 + 6),
+};
+
+/** Call of the Dead: EE speedrun tiers per EE. Stand-in (Solo) WR 4:27, Ensemble Cast (2+) WR 6:10. */
+export const BO1_COTD_STAND_IN_EE_TIERS: SpeedrunTier[] = [
+  { maxTimeSeconds: 360, xpReward: 200 },
+  { maxTimeSeconds: 300, xpReward: 600 },
+  { maxTimeSeconds: 280, xpReward: 1500 },
+  { maxTimeSeconds: 267, xpReward: 2500 }, // WR 4:27
+];
+export const BO1_COTD_ENSEMBLE_CAST_EE_TIERS: SpeedrunTier[] = [
+  { maxTimeSeconds: 450, xpReward: 200 },
+  { maxTimeSeconds: 400, xpReward: 600 },
+  { maxTimeSeconds: 380, xpReward: 1500 },
+  { maxTimeSeconds: 370, xpReward: 2500 }, // WR 6:10
+];
+
 export function formatSpeedrunTime(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
   const m = Math.floor(seconds / 60);

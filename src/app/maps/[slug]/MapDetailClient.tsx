@@ -403,6 +403,7 @@ const challengeTypeLabels: Record<string, string> = {
   ROUND_50_SPEEDRUN: 'Round 50 Speedrun',
   ROUND_70_SPEEDRUN: 'Round 70 Speedrun',
   ROUND_100_SPEEDRUN: 'Round 100 Speedrun',
+  ROUND_200_SPEEDRUN: 'Round 200 Speedrun',
   EASTER_EGG_SPEEDRUN: 'Easter Egg Speedrun',
   GHOST_AND_SKULLS: 'Ghost and Skulls',
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',

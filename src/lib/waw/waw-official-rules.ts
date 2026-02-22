@@ -1,3 +1,5 @@
+import type { RuleItem } from '@/lib/rules/types';
+
 /**
  * Official rules for World at War Zombies leaderboard submissions.
  * Displayed in the Official Rules modal on map edit pages.
@@ -9,9 +11,9 @@ export const WAW_OFFICIAL_RULES = {
       title: 'Patches & Platform',
       items: [
         'Verified Patches ARE ALLOWED',
-        'A community patch for Plutonium can be found here.',
+        { text: 'A community patch for Plutonium can be found here.', href: 'https://gitlab.com/EvelynYuki/WAW-Community-Patch/' },
         'Please ensure you are on v2.0+ as this version will auto-enable the required commands "cg_flashScriptHashes 1" and "cg_drawIdentifier 1"',
-        'A community patch for EE Speedruns can be found here.',
+        { text: 'A community patch for EE Speedruns can be found here.', href: 'https://gitlab.com/EvelynYuki/WAW-EE-Timer' },
         'Playing on Plutonium is ALLOWED',
         'Submissions must show the following:',
         'For solo, "cg_flashScriptHashes 1" must be set at least at the start of each match. For co-op, only the host must do this.',
@@ -30,7 +32,7 @@ export const WAW_OFFICIAL_RULES = {
       items: [
         'An automatic indicator for insta-kill rounds is ALLOWED only for Nacht der Untoten and Verruckt.',
         'Automatic timers are ALLOWED.',
-        'Bypassing the 25-day freeze/error is ALLOWED only via the BIOS. Any other method is NOT ALLOWED.',
+        { text: 'Bypassing the 25-day freeze/error is ALLOWED only via the BIOS. Any other method is NOT ALLOWED.', href: 'https://zwr.gg/wiki/how-to-bypass-the-25-day-freeze-black-screen' },
         'Camos and Textures are ALLOWED.',
         'Co-op Split Screen is ALLOWED.',
         'Disconnecting and reconnecting in co-op is ALLOWED.',

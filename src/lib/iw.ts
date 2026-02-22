@@ -11,6 +11,7 @@ const IW_SPEEDRUN_TYPES = [
   'ROUND_50_SPEEDRUN',
   'ROUND_70_SPEEDRUN',
   'ROUND_100_SPEEDRUN',
+  'ROUND_200_SPEEDRUN',
   'EASTER_EGG_SPEEDRUN',
   'GHOST_AND_SKULLS',
   'ALIENS_BOSS_FIGHT',
@@ -33,6 +34,7 @@ export function getMinRoundForSpeedrunChallengeType(type: string): number {
     case 'ROUND_50_SPEEDRUN': return 50;
     case 'ROUND_70_SPEEDRUN': return 70;
     case 'ROUND_100_SPEEDRUN': return 100;
+    case 'ROUND_200_SPEEDRUN': return 200;
     default: return 1; // EASTER_EGG_SPEEDRUN, GHOST_AND_SKULLS, ALIENS_BOSS_FIGHT
   }
 }
@@ -51,6 +53,7 @@ export const IW_CHALLENGE_TYPES_ORDER: string[] = [
   'ROUND_50_SPEEDRUN',
   'ROUND_70_SPEEDRUN',
   'ROUND_100_SPEEDRUN',
+  'ROUND_200_SPEEDRUN',
   'EASTER_EGG_SPEEDRUN',
   'GHOST_AND_SKULLS',
   'ALIENS_BOSS_FIGHT',
