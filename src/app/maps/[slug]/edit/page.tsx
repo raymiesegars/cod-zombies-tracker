@@ -125,6 +125,8 @@ export default function EditMapProgressPage() {
 
   /** Multi-select: which challenges are toggled on. When user saves, one log is created per selected challenge with shared form data. */
   const [selectedChallengeIds, setSelectedChallengeIds] = useState<Set<string>>(new Set());
+  /** Per-speedrun completion times: challengeId → seconds. Only used for speedrun challenge types. */
+  const [speedrunTimes, setSpeedrunTimes] = useState<Record<string, number | null>>({});
   /** Single shared form for all selected challenges (round, player count, proof, notes, etc.). */
   const [sharedChallengeForm, setSharedChallengeForm] = useState<{
     roundReached: string;
@@ -301,6 +303,13 @@ export default function EditMapProgressPage() {
       else next.add(challengeId);
       return next;
     });
+    // Init speedrun time slot when adding a speedrun
+    const challenge = map?.challenges.find((c) => c.id === challengeId);
+    if (isAdding && challenge && isIwSpeedrunChallengeType(challenge.type)) {
+      setSpeedrunTimes((prev) => ({ ...prev, [challengeId]: null }));
+    } else if (!isAdding) {
+      setSpeedrunTimes((prev) => { const next = { ...prev }; delete next[challengeId]; return next; });
+    }
   };
 
   const handleSharedChallengeChange = (
@@ -336,9 +345,16 @@ export default function EditMapProgressPage() {
       setSaveErrorModalMessage('IW maps require Fortune Cards selection: Fate & Fortune cards or Fate cards only.');
       return;
     }
-    if (anySpeedrun && (form.completionTimeSeconds == null || form.completionTimeSeconds < 0)) {
-      setSaveErrorModalMessage('Speedrun challenges require completion time.');
-      return;
+    if (anySpeedrun) {
+      const selectedSpeedruns = Array.from(selectedChallengeIds).filter((cid) => {
+        const c = map.challenges.find((ch) => ch.id === cid);
+        return c && isIwSpeedrunChallengeType(c.type);
+      });
+      const missingTime = selectedSpeedruns.some((cid) => speedrunTimes[cid] == null || (speedrunTimes[cid] ?? 0) < 0);
+      if (missingTime) {
+        setSaveErrorModalMessage('All selected speedrun challenges require a completion time.');
+        return;
+      }
     }
     if (form.requestVerification) {
       const hasProof = (form.proofUrls ?? []).filter(Boolean).length > 0;
@@ -385,7 +401,12 @@ export default function EditMapProgressPage() {
             }),
             proofUrls: normalizeProofUrls(form.proofUrls ?? []),
             notes: form.notes || null,
-            completionTimeSeconds: form.completionTimeSeconds ?? null,
+            completionTimeSeconds: (() => {
+              const c = map.challenges.find((ch) => ch.id === challengeId);
+              return c && isIwSpeedrunChallengeType(c.type)
+                ? (speedrunTimes[challengeId] ?? null)
+                : (form.completionTimeSeconds ?? null);
+            })(),
             teammateUserIds: form.teammateUserIds ?? [],
             teammateNonUserNames: form.teammateNonUserNames ?? [],
             requestVerification: form.requestVerification ?? false,
@@ -711,15 +732,24 @@ export default function EditMapProgressPage() {
                             return c && isIwSpeedrunChallengeType(c.type) ? getMinRoundForSpeedrunChallengeType(c.type) : 1;
                           }))
                         : 1;
+                      const enteredRound = parseInt(sharedChallengeForm.roundReached || '0', 10);
+                      const roundTooLow = minRound > 1 && enteredRound > 0 && enteredRound < minRound;
                       return (
-                        <Input
-                          label="Round Reached"
-                          type="number"
-                          min={minRound}
-                          placeholder={minRound > 1 ? `e.g. ${minRound}+` : 'e.g. 50'}
-                          value={sharedChallengeForm.roundReached}
-                          onChange={(e) => handleSharedChallengeChange('roundReached', e.target.value)}
-                        />
+                        <div>
+                          <Input
+                            label="Round Reached"
+                            type="number"
+                            min={minRound}
+                            placeholder={minRound > 1 ? `e.g. ${minRound}+` : 'e.g. 50'}
+                            value={sharedChallengeForm.roundReached}
+                            onChange={(e) => handleSharedChallengeChange('roundReached', e.target.value)}
+                          />
+                          {minRound > 1 && (
+                            <p className={`text-xs mt-1 ${roundTooLow ? 'text-blood-400' : 'text-bunker-500'}`}>
+                              Min. round {minRound} required
+                            </p>
+                          )}
+                        </div>
                       );
                     })()}
                     <Select
@@ -861,16 +891,38 @@ export default function EditMapProgressPage() {
                     </div>
                   )}
 
-                  <div className="mt-3 sm:mt-4">
-                    <TimeInput
-                      label={Array.from(selectedChallengeIds).some((cid) => {
-                        const c = map.challenges.find((ch) => ch.id === cid);
-                        return c && isIwSpeedrunChallengeType(c.type);
-                      }) ? 'Run time (required for speedruns)' : 'Run time (optional)'}
-                      valueSeconds={sharedChallengeForm.completionTimeSeconds}
-                      onChange={(seconds) => handleSharedChallengeChange('completionTimeSeconds', seconds)}
-                    />
-                  </div>
+                  {/* Per-speedrun time inputs (one per selected speedrun) */}
+                  {(() => {
+                    const selectedSpeedrunChallenges = Array.from(selectedChallengeIds)
+                      .map((cid) => map.challenges.find((c) => c.id === cid))
+                      .filter((c): c is NonNullable<typeof c> => !!c && isIwSpeedrunChallengeType(c.type));
+                    const hasNonSpeedrun = Array.from(selectedChallengeIds).some((cid) => {
+                      const c = map.challenges.find((ch) => ch.id === cid);
+                      return c && !isIwSpeedrunChallengeType(c.type);
+                    });
+                    return (
+                      <>
+                        {selectedSpeedrunChallenges.map((c) => (
+                          <div key={c.id} className="mt-3 sm:mt-4">
+                            <TimeInput
+                              label={`${challengeTypeLabels[c.type as keyof typeof challengeTypeLabels] ?? c.name} — Time (required)`}
+                              valueSeconds={speedrunTimes[c.id] ?? null}
+                              onChange={(seconds) => setSpeedrunTimes((prev) => ({ ...prev, [c.id]: seconds }))}
+                            />
+                          </div>
+                        ))}
+                        {(hasNonSpeedrun || selectedSpeedrunChallenges.length === 0) && (
+                          <div className="mt-3 sm:mt-4">
+                            <TimeInput
+                              label={selectedSpeedrunChallenges.length === 0 ? 'Run time (optional)' : 'Non-speedrun run time (optional)'}
+                              valueSeconds={sharedChallengeForm.completionTimeSeconds}
+                              onChange={(seconds) => handleSharedChallengeChange('completionTimeSeconds', seconds)}
+                            />
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
 
                   <div className="mt-3 sm:mt-4">
                     <Input
@@ -909,18 +961,11 @@ export default function EditMapProgressPage() {
                 saveDisabled={
                   !sharedChallengeForm.roundReached ||
                   parseInt(sharedChallengeForm.roundReached, 10) <= 0 ||
-                  (selectedChallengeIds.size > 0 && (() => {
-                    const minR = Math.max(...Array.from(selectedChallengeIds).map((cid) => {
-                      const c = map?.challenges.find((ch) => ch.id === cid);
-                      return c && isIwSpeedrunChallengeType(c.type) ? getMinRoundForSpeedrunChallengeType(c.type) : 1;
-                    }));
-                    return parseInt(sharedChallengeForm.roundReached || '0', 10) < minR;
-                  })()) ||
                   (isIwGame(map?.game?.shortName) && sharedChallengeForm.useFortuneCards !== true && sharedChallengeForm.useFortuneCards !== false) ||
-                  (Array.from(selectedChallengeIds).some((cid) => {
+                  Array.from(selectedChallengeIds).some((cid) => {
                     const c = map?.challenges.find((ch) => ch.id === cid);
-                    return c && isIwSpeedrunChallengeType(c.type);
-                  }) && (sharedChallengeForm.completionTimeSeconds == null || sharedChallengeForm.completionTimeSeconds < 0))
+                    return c && isIwSpeedrunChallengeType(c.type) && !(speedrunTimes[cid] != null && (speedrunTimes[cid] as number) > 0);
+                  })
                 }
                 saveErrorMessage={saveErrorMessage}
                 hideInlineError={!!saveErrorModalMessage}
