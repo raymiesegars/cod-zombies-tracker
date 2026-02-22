@@ -34,8 +34,10 @@ import type { MapWithDetails, ChallengeType, PlayerCount } from '@/types';
 import { ChevronLeft, Save, CheckCircle, AlertCircle, BookOpen } from 'lucide-react';
 import { WAW_OFFICIAL_RULES } from '@/lib/waw/waw-official-rules';
 import { BO1_OFFICIAL_RULES } from '@/lib/bo1/bo1-official-rules';
-import { isRuleLink } from '@/lib/rules/types';
+import { BO2_OFFICIAL_RULES } from '@/lib/bo2/bo2-official-rules';
+import { isRuleLink, isRuleInlineLinks } from '@/lib/rules/types';
 import { getWaWMapConfig } from '@/lib/waw/waw-map-config';
+import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 
 const challengeTypeLabels: Record<ChallengeType, string> = {
   HIGHEST_ROUND: 'Highest Round',
@@ -48,6 +50,7 @@ const challengeTypeLabels: Record<ChallengeType, string> = {
   ONE_BOX: 'One Box Challenge',
   PISTOL_ONLY: 'Pistol Only',
   NO_POWER: 'No Power',
+  NO_MAGIC: 'No Magic',
   ROUND_30_SPEEDRUN: 'Round 30 Speedrun',
   ROUND_50_SPEEDRUN: 'Round 50 Speedrun',
   ROUND_70_SPEEDRUN: 'Round 70 Speedrun',
@@ -78,15 +81,16 @@ function OfficialRulesModal({
 }) {
   const isWaw = gameShortName === 'WAW';
   const isBo1 = gameShortName === 'BO1';
-  const hasRules = isWaw || isBo1;
-  const rules = isWaw ? WAW_OFFICIAL_RULES : isBo1 ? BO1_OFFICIAL_RULES : null;
+  const isBo2 = gameShortName === 'BO2';
+  const hasRules = isWaw || isBo1 || isBo2;
+  const rules = isWaw ? WAW_OFFICIAL_RULES : isBo1 ? BO1_OFFICIAL_RULES : isBo2 ? BO2_OFFICIAL_RULES : null;
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title="Official Rules"
-      description={hasRules ? `Rules and requirements for ${isWaw ? 'World at War' : 'Black Ops 1'} submissions` : 'Rules and requirements for challenge submissions'}
+      description={hasRules ? `Rules and requirements for ${isWaw ? 'World at War' : isBo1 ? 'Black Ops 1' : 'Black Ops 2'} submissions` : 'Rules and requirements for challenge submissions'}
       size="lg"
     >
       {rules ? (
@@ -103,13 +107,23 @@ function OfficialRulesModal({
                   <ul className="list-disc list-inside space-y-1 text-sm text-bunker-300">
                     {section.items.map((item, i) => (
                       <li key={i}>
-                        {isRuleLink(item) ? (
-                          <a href={item.href} target="_blank" rel="noopener noreferrer" className="text-military-400 hover:underline">
-                            {item.text}
-                          </a>
-                        ) : (
-                          item
-                        )}
+                        {isRuleInlineLinks(item)
+                          ? item.parts.map((part, j) =>
+                              typeof part === 'string' ? (
+                                part
+                              ) : (
+                                <a key={j} href={part.href} target="_blank" rel="noopener noreferrer" className="text-military-400 hover:underline">
+                                  {part.text}
+                                </a>
+                              )
+                            )
+                          : isRuleLink(item) ? (
+                              <a href={item.href} target="_blank" rel="noopener noreferrer" className="text-military-400 hover:underline">
+                                {item.text}
+                              </a>
+                            ) : (
+                              item
+                            )}
                       </li>
                     ))}
                   </ul>
@@ -225,6 +239,7 @@ export default function EditMapProgressPage() {
     bo7RelicsUsed?: string[];
     wawNoJug?: boolean;
     wawFixedWunderwaffe?: boolean;
+    bo2BankUsed?: boolean | null;
   }>({
     roundReached: '',
     playerCount: 'SOLO',
@@ -305,6 +320,7 @@ export default function EditMapProgressPage() {
             ...(isBocw && { bocwSupportMode: BOCW_SUPPORT_DEFAULT }),
             ...(isBo6 && { bo6GobbleGumMode: BO6_GOBBLEGUM_DEFAULT, bo6SupportMode: BO6_SUPPORT_DEFAULT }),
             ...(isBo7 && { bo7SupportMode: BO7_SUPPORT_DEFAULT, bo7IsCursedRun: false, bo7RelicsUsed: [] }),
+            ...((data.game?.shortName ?? '') === 'BO2' && getBo2MapConfig(data.slug)?.hasBank && { bo2BankUsed: true }),
             proofUrls: [],
             notes: '',
             completionTimeSeconds: null,
@@ -490,6 +506,7 @@ export default function EditMapProgressPage() {
               wawNoJug: form.wawNoJug ?? false,
               wawFixedWunderwaffe: form.wawFixedWunderwaffe ?? false,
             }),
+            ...(map?.game?.shortName === 'BO2' && getBo2MapConfig(map.slug)?.hasBank && { bo2BankUsed: form.bo2BankUsed ?? true }),
             proofUrls: normalizeProofUrls(form.proofUrls ?? []),
             notes: form.notes || null,
             completionTimeSeconds: (() => {
@@ -569,6 +586,7 @@ export default function EditMapProgressPage() {
             wawNoJug: sharedChallengeForm.wawNoJug ?? false,
             wawFixedWunderwaffe: sharedChallengeForm.wawFixedWunderwaffe ?? false,
           }),
+          ...(map.game?.shortName === 'BO2' && getBo2MapConfig(map.slug)?.hasBank && { bo2BankUsed: sharedChallengeForm.bo2BankUsed ?? true }),
           proofUrls: normalizeProofUrls(form.proofUrls ?? []),
           notes: form.notes || null,
           completionTimeSeconds: form.completionTimeSeconds ?? null,
@@ -915,6 +933,18 @@ export default function EditMapProgressPage() {
                           />
                         )}
                       </>
+                    )}
+                    {map?.game?.shortName === 'BO2' && getBo2MapConfig(map.slug)?.hasBank && (
+                      <Select
+                        label={getBo2MapConfig(map.slug)?.bankIncludesStorage ? 'Bank & Storage' : 'Bank'}
+                        options={[
+                          { value: 'true', label: getBo2MapConfig(map.slug)?.bankIncludesStorage ? 'Bank+Storage (default)' : 'Bank Used (default)' },
+                          { value: 'false', label: getBo2MapConfig(map.slug)?.bankIncludesStorage ? 'No Bank No Storage' : 'No Bank' },
+                        ]}
+                        value={sharedChallengeForm.bo2BankUsed === true ? 'true' : sharedChallengeForm.bo2BankUsed === false ? 'false' : 'true'}
+                        onChange={(e) => handleSharedChallengeChange('bo2BankUsed', e.target.value === 'true')}
+                        className="w-full"
+                      />
                     )}
                     {isBo3Game(map?.game?.shortName) && (
                       <Select

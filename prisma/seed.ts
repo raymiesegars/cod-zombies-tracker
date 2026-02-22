@@ -5,6 +5,7 @@ import { RANKS, getRankIconPath } from '../src/lib/ranks';
 import { getMapAchievementDefinitions, getSpeedrunAchievementDefinitions } from '../src/lib/achievements/seed-achievements';
 import { getRoundCapForMap } from '../src/lib/achievements/map-round-config';
 import { getWaWMapConfig } from '../src/lib/waw/waw-map-config';
+import { getBo2MapConfig } from '../src/lib/bo2/bo2-map-config';
 
 // Load .env then .env.local (same order as Next.js) so seed uses the SAME DB as the app
 function loadEnv() {
@@ -286,6 +287,7 @@ async function main() {
     ONE_BOX: { type: 'ONE_BOX', name: 'One Box Challenge', description: 'Only hit the mystery box once' },
     PISTOL_ONLY: { type: 'PISTOL_ONLY', name: 'Pistol Only', description: 'Only use your starting pistol' },
     NO_POWER: { type: 'NO_POWER', name: 'No Power', description: 'Never turn on the power' },
+    NO_MAGIC: { type: 'NO_MAGIC', name: 'No Magic', description: 'BO2 Custom Game: Magic disabled' },
   };
 
   const iwSpeedrunTypes = [
@@ -303,6 +305,15 @@ async function main() {
     { type: 'ROUND_50_SPEEDRUN', name: 'Round 50 Speedrun', description: 'Reach round 50 as fast as possible' },
     { type: 'ROUND_70_SPEEDRUN', name: 'Round 70 Speedrun', description: 'Reach round 70 as fast as possible' },
     { type: 'ROUND_100_SPEEDRUN', name: 'Round 100 Speedrun', description: 'Reach round 100 as fast as possible' },
+    { type: 'EASTER_EGG_SPEEDRUN', name: 'Easter Egg Speedrun', description: 'Complete the main Easter egg as fast as possible' },
+  ];
+
+  const bo2SpeedrunTypes = [
+    { type: 'ROUND_30_SPEEDRUN', name: 'Round 30 Speedrun', description: 'Reach round 30 as fast as possible' },
+    { type: 'ROUND_50_SPEEDRUN', name: 'Round 50 Speedrun', description: 'Reach round 50 as fast as possible' },
+    { type: 'ROUND_70_SPEEDRUN', name: 'Round 70 Speedrun', description: 'Reach round 70 as fast as possible' },
+    { type: 'ROUND_100_SPEEDRUN', name: 'Round 100 Speedrun', description: 'Reach round 100 as fast as possible' },
+    { type: 'ROUND_200_SPEEDRUN', name: 'Round 200 Speedrun', description: 'Reach round 200 as fast as possible' },
     { type: 'EASTER_EGG_SPEEDRUN', name: 'Easter Egg Speedrun', description: 'Complete the main Easter egg as fast as possible' },
   ];
 
@@ -343,6 +354,42 @@ async function main() {
           },
         });
         challengeCount++;
+      }
+    } else if (gameShortName === 'BO2') {
+      const bo2Cfg = getBo2MapConfig(map.slug);
+      if (bo2Cfg) {
+        for (const cType of bo2Cfg.challengeTypes) {
+          const info = roundChallengeTypes[cType];
+          if (!info) continue; // Speedruns handled in next loop
+          await prisma.challenge.create({
+            data: {
+              name: info.name,
+              slug: info.type.toLowerCase().replace(/_/g, '-'),
+              type: info.type as any,
+              mapId: map.id,
+              xpReward: 0,
+              description: info.description,
+            },
+          });
+          challengeCount++;
+        }
+        for (const speedrun of bo2SpeedrunTypes) {
+          if (speedrun.type === 'ROUND_200_SPEEDRUN' && !bo2Cfg.speedrunWRs?.r200) continue;
+          if (speedrun.type === 'ROUND_100_SPEEDRUN' && !bo2Cfg.speedrunWRs?.r100) continue;
+          if (speedrun.type === 'EASTER_EGG_SPEEDRUN' && !bo2Cfg.challengeTypes.includes('EASTER_EGG_SPEEDRUN' as any)) continue;
+          if (!bo2Cfg.challengeTypes.includes(speedrun.type as any)) continue;
+          await prisma.challenge.create({
+            data: {
+              name: speedrun.name,
+              slug: speedrun.type.toLowerCase().replace(/_/g, '-'),
+              type: speedrun.type as any,
+              mapId: map.id,
+              xpReward: 0,
+              description: speedrun.description,
+            },
+          });
+          challengeCount++;
+        }
       }
     } else {
       for (const cType of standardChallengeTypes) {

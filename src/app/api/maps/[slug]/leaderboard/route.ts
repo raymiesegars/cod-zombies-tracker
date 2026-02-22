@@ -6,6 +6,7 @@ import { isBo3Game } from '@/lib/bo3';
 import { isBocwGame } from '@/lib/bocw';
 import { isBo6Game } from '@/lib/bo6';
 import { isBo7Game } from '@/lib/bo7';
+import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 import type { PlayerCount, ChallengeType, Prisma, Bo4Difficulty } from '@prisma/client';
 
 export async function GET(
@@ -37,6 +38,7 @@ export async function GET(
   // WaW run modifiers
   const wawNoJug = searchParams.get('wawNoJug'); // 'true' | 'false' | null
   const wawFixedWunderwaffe = searchParams.get('wawFixedWunderwaffe'); // 'true' | 'false' | null
+  const bo2BankUsed = searchParams.get('bo2BankUsed'); // 'true' | 'false' | null
   const limitParam = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') || '25', 10) || 25));
   const offsetParam = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10) || 0);
   const mergeTake = 500;
@@ -139,6 +141,11 @@ export async function GET(
       else if (wawNoJug === 'false') (whereClause as Record<string, unknown>).wawNoJug = false;
       if (wawFixedWunderwaffe === 'true') (whereClause as Record<string, unknown>).wawFixedWunderwaffe = true;
       else if (wawFixedWunderwaffe === 'false') (whereClause as Record<string, unknown>).wawFixedWunderwaffe = false;
+    }
+
+    if (gameShortName === 'BO2' && getBo2MapConfig(slug)?.hasBank) {
+      if (bo2BankUsed === 'true') (whereClause as Record<string, unknown>).bo2BankUsed = true;
+      else if (bo2BankUsed === 'false') (whereClause as Record<string, unknown>).bo2BankUsed = false;
     }
 
     // "Highest Round" (or no filter) = best round from any challenge OR easter egg; specific challenge = only that challenge's logs

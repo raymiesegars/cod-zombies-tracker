@@ -10,6 +10,7 @@ export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
   ONE_BOX: 'One Box Challenge',
   PISTOL_ONLY: 'Pistol Only',
   NO_POWER: 'No Power',
+  NO_MAGIC: 'No Magic',
   // IW speedrun categories
   ROUND_30_SPEEDRUN: 'Round 30 Speedrun',
   ROUND_50_SPEEDRUN: 'Round 50 Speedrun',
@@ -53,6 +54,7 @@ const CATEGORY_ORDER = [
   'ONE_BOX',
   'PISTOL_ONLY',
   'NO_POWER',
+  'NO_MAGIC',
   'ROUND_30_SPEEDRUN',
   'ROUND_50_SPEEDRUN',
   'ROUND_70_SPEEDRUN',

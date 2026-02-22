@@ -22,6 +22,8 @@
     "db:add-iw": "tsx scripts/add-iw-content.ts",
     "db:backfill-bo4-difficulty-achievements": "tsx scripts/backfill-bo4-difficulty-achievements.ts",
     "db:waw-balance-patch": "tsx scripts/waw-balance-patch.ts",
+    "db:bo1-balance-patch": "tsx scripts/bo1-balance-patch.ts",
+    "db:bo2-balance-patch": "tsx scripts/bo2-balance-patch.ts",
     "db:update-der-riese-fly-trap": "tsx scripts/update-der-riese-fly-trap.ts"
   },
   "dependencies": {

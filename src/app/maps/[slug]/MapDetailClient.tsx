@@ -63,6 +63,7 @@ import {
   isSpeedrunCategory,
 } from '@/lib/achievements/categories';
 import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-config';
+import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 
 const BUILDABLE_PART_CACHE_KEY_PREFIX = 'buildable-parts';
 const BUILDABLE_PART_CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
@@ -399,6 +400,7 @@ const challengeTypeLabels: Record<string, string> = {
   ONE_BOX: 'One Box Challenge',
   PISTOL_ONLY: 'Pistol Only',
   NO_POWER: 'No Power',
+  NO_MAGIC: 'No Magic',
   ROUND_30_SPEEDRUN: 'Round 30 Speedrun',
   ROUND_50_SPEEDRUN: 'Round 50 Speedrun',
   ROUND_70_SPEEDRUN: 'Round 70 Speedrun',
@@ -529,6 +531,8 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   // WaW
   const [lbWawNoJug, setLbWawNoJug] = useState<string>('');
   const [lbWawFixedWunderwaffe, setLbWawFixedWunderwaffe] = useState<string>('');
+  // BO2 (bank/storage filter for Tranzit, Die Rise, Buried)
+  const [lbBo2BankUsed, setLbBo2BankUsed] = useState<string>('');
   const leaderboardSlugRef = useRef<string | null>(null);
 
   // Your runs for this map when logged in; URL ?tab=your-runs triggers fetch on load
@@ -643,6 +647,9 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
             if (lbWawNoJug === 'true' || lbWawNoJug === 'false') params.set('wawNoJug', lbWawNoJug);
             if (lbWawFixedWunderwaffe === 'true' || lbWawFixedWunderwaffe === 'false') params.set('wawFixedWunderwaffe', lbWawFixedWunderwaffe);
           }
+          if (map.game?.shortName === 'BO2' && getBo2MapConfig(map.slug)?.hasBank) {
+            if (lbBo2BankUsed === 'true' || lbBo2BankUsed === 'false') params.set('bo2BankUsed', lbBo2BankUsed);
+          }
           const res = await fetch(`/api/maps/${slug}/leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -658,7 +665,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     })();
     // Intentionally omit leaderboard.length / leaderboardFetchedOnce to avoid re-fetch loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut, lbBo3GobbleGumMode, lbBo4ElixirMode, lbBocwSupportMode, lbBo6GobbleGumMode, lbBo6SupportMode, lbBo7SupportMode, lbBo7CursedFilter, lbBo7SelectedRelics, lbWawNoJug, lbWawFixedWunderwaffe]);
+  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut, lbBo3GobbleGumMode, lbBo4ElixirMode, lbBocwSupportMode, lbBo6GobbleGumMode, lbBo6SupportMode, lbBo7SupportMode, lbBo7CursedFilter, lbBo7SelectedRelics, lbWawNoJug, lbWawFixedWunderwaffe, lbBo2BankUsed]);
 
   // Sync activeTab with URL so switching to Your Runs triggers fetch
   useEffect(() => {
@@ -1834,6 +1841,18 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                           />
                         )}
                       </>
+                    )}
+                    {map?.game?.shortName === 'BO2' && getBo2MapConfig(map.slug)?.hasBank && (
+                      <Select
+                        options={[
+                          { value: '', label: getBo2MapConfig(map.slug)?.bankIncludesStorage ? 'All (Bank+Storage)' : 'All (Bank)' },
+                          { value: 'true', label: getBo2MapConfig(map.slug)?.bankIncludesStorage ? 'Bank+Storage' : 'Bank Used' },
+                          { value: 'false', label: getBo2MapConfig(map.slug)?.bankIncludesStorage ? 'No Bank No Storage' : 'No Bank' },
+                        ]}
+                        value={lbBo2BankUsed}
+                        onChange={(e) => setLbBo2BankUsed(e.target.value)}
+                        className="w-full min-w-0 sm:w-40 max-w-full"
+                      />
                     )}
                 </div>
               </div>

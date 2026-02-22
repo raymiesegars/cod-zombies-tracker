@@ -13,8 +13,9 @@ import {
 } from './map-round-config';
 import { getWaWMapConfig, getWaWRoundMilestones, getWaWChallengeTypeLabel } from '@/lib/waw/waw-map-config';
 import { getBo1MapConfig, getBo1RoundMilestones, getBo1ChallengeTypeLabel } from '@/lib/bo1/bo1-map-config';
+import { getBo2MapConfig, getBo2RoundMilestones, getBo2ChallengeTypeLabel } from '@/lib/bo2/bo2-map-config';
 import { isBo4Game, BO4_DIFFICULTIES, BO4_DIFFICULTY_XP_MULTIPLIER, type Bo4DifficultyType } from '../bo4';
-import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, IW_AOTRT_SPEEDRUN_TIERS, IW_BEAST_SPEEDRUN_TIERS, WAW_SPEEDRUN_TIERS_BY_MAP, BO1_SPEEDRUN_TIERS_BY_MAP, BO1_COTD_STAND_IN_EE_TIERS, BO1_COTD_ENSEMBLE_CAST_EE_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
+import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, IW_AOTRT_SPEEDRUN_TIERS, IW_BEAST_SPEEDRUN_TIERS, WAW_SPEEDRUN_TIERS_BY_MAP, BO1_SPEEDRUN_TIERS_BY_MAP, BO2_SPEEDRUN_TIERS_BY_MAP, BO1_COTD_STAND_IN_EE_TIERS, BO1_COTD_ENSEMBLE_CAST_EE_TIERS, BO2_TRANZIT_RICHTOFEN_EE_TIERS, BO2_TRANZIT_MAXIS_EE_TIERS, BO2_DIE_RISE_RICHTOFEN_EE_TIERS, BO2_DIE_RISE_MAXIS_EE_TIERS, BO2_BURIED_RICHTOFEN_EE_TIERS, BO2_BURIED_MAXIS_EE_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
 
 const CHALLENGE_TYPES = [
   'HIGHEST_ROUND',
@@ -283,6 +284,84 @@ export function getMapAchievementDefinitions(
     }
   }
 
+  // BO2: per-map config with WR-based achievements, NO_MAGIC, bank, EE variants
+  if (gameShortName === 'BO2') {
+    const bo2Cfg = getBo2MapConfig(mapSlug);
+    if (bo2Cfg) {
+      const milestones = getBo2RoundMilestones(bo2Cfg.highRoundWR);
+      const maxRound = bo2Cfg.highRoundWR;
+      for (const { round, xp } of milestones) {
+        rows.push({
+          slug: `round-${round}`,
+          name: `Round ${round}`,
+          type: 'ROUND_MILESTONE',
+          criteria: { round, challengeType: 'HIGHEST_ROUND' },
+          xpReward: xp,
+          rarity: rarityForRound(round, maxRound),
+        });
+      }
+      if (bo2Cfg.noDownsAvailable) {
+        for (const { round, xp } of milestones) {
+          rows.push({
+            slug: `no-downs-${round}`,
+            name: `No Downs Round ${round}`,
+            type: 'CHALLENGE_COMPLETE',
+            criteria: { round, challengeType: 'NO_DOWNS' },
+            xpReward: xp,
+            rarity: rarityForRound(round, maxRound),
+          });
+        }
+      }
+      for (const cType of bo2Cfg.challengeTypes) {
+        if (cType === 'HIGHEST_ROUND' || cType === 'NO_DOWNS') continue;
+        const wr = (cType as string) === 'STARTING_ROOM' ? bo2Cfg.firstRoomWR
+          : (cType as string) === 'NO_POWER' ? bo2Cfg.noPowerWR
+          : (cType as string) === 'NO_PERKS' ? bo2Cfg.noPerksWR
+          : (cType as string) === 'NO_MAGIC' ? bo2Cfg.noMagicWR
+          : undefined;
+        if (wr == null) continue;
+        const cMilestones = getBo2RoundMilestones(wr);
+        const slugPrefix = cType.toLowerCase().replace(/_/g, '-');
+        for (const { round, xp } of cMilestones) {
+          if (round > wr) continue;
+          rows.push({
+            slug: `${slugPrefix}-${round}`,
+            name: `${getBo2ChallengeTypeLabel(cType)} Round ${round}`,
+            type: 'CHALLENGE_COMPLETE',
+            criteria: { round, challengeType: cType },
+            xpReward: Math.max(MIN_ACHIEVEMENT_XP, xp),
+            rarity: rarityForRound(round, wr),
+          });
+        }
+      }
+      if (bo2Cfg.challengeTypes.includes('ONE_BOX')) {
+        rows.push({
+          slug: 'one-box-30',
+          name: 'One Box Round 30',
+          type: 'CHALLENGE_COMPLETE',
+          criteria: { round: 30, challengeType: 'ONE_BOX' },
+          xpReward: 600,
+          rarity: 'RARE',
+        });
+      }
+      if (bo2Cfg.challengeTypes.includes('PISTOL_ONLY')) {
+        const pistolWR = maxRound;
+        const pistolMilestones = getBo2RoundMilestones(Math.min(pistolWR, 100), 5);
+        for (const { round, xp } of pistolMilestones) {
+          rows.push({
+            slug: `pistol-only-${round}`,
+            name: `Pistol Only Round ${round}`,
+            type: 'CHALLENGE_COMPLETE',
+            criteria: { round, challengeType: 'PISTOL_ONLY' },
+            xpReward: Math.max(MIN_ACHIEVEMENT_XP, Math.floor(xp * 3)),
+            rarity: rarityForRound(round, pistolWR),
+          });
+        }
+      }
+      return rows;
+    }
+  }
+
   const mapConfig = gameShortName ? getRoundConfigForMap(mapSlug, gameShortName) : null;
   const maxRound =
     mapConfig?.roundCap ??
@@ -471,6 +550,7 @@ export function getSpeedrunAchievementDefinitions(
   const tiersByType = gameShortName === 'IW' ? IW_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : gameShortName === 'WAW' ? WAW_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : gameShortName === 'BO1' ? BO1_SPEEDRUN_TIERS_BY_MAP[mapSlug]
+    : gameShortName === 'BO2' ? BO2_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : undefined;
   if (!tiersByType) return [];
   const rows: AchievementSeedRow[] = [];
@@ -495,6 +575,35 @@ export function getSpeedrunAchievementDefinitions(
 }
 
 /** Call of the Dead: two EE speedruns (Stand-in Solo, Ensemble Cast 2+). Balance patch resolves easterEggSlug to easterEggId. */
+/** BO2 EE speedruns: Tranzit, Die Rise, Buried have Richtofen vs Maxis variants. Balance patch resolves easterEggSlug. */
+export function getBo2EeSpeedrunDefinitions(mapSlug: string): AchievementSeedRow[] {
+  const rows: AchievementSeedRow[] = [];
+  const variants: [string, string, import('./speedrun-tiers').SpeedrunTier[]][] = (() => {
+    if (mapSlug === 'tranzit') return [['tower-of-babble-richtofen', 'Richtofen', BO2_TRANZIT_RICHTOFEN_EE_TIERS], ['tower-of-babble-maxis', 'Maxis', BO2_TRANZIT_MAXIS_EE_TIERS]];
+    if (mapSlug === 'die-rise') return [['high-maintenance-richtofen', 'Richtofen', BO2_DIE_RISE_RICHTOFEN_EE_TIERS], ['high-maintenance-maxis', 'Maxis', BO2_DIE_RISE_MAXIS_EE_TIERS]];
+    if (mapSlug === 'buried') return [['mined-games-richtofen', 'Richtofen', BO2_BURIED_RICHTOFEN_EE_TIERS], ['mined-games-maxis', 'Maxis', BO2_BURIED_MAXIS_EE_TIERS]];
+    return [];
+  })();
+  for (const [eeSlug, variantLabel, tiers] of variants) {
+    for (let i = 0; i < tiers.length; i++) {
+      const { maxTimeSeconds, xpReward } = tiers[i]!;
+      const timeStr = formatSpeedrunTime(maxTimeSeconds).replace(/:/g, '-');
+      const slug = `easter-egg-speedrun-${eeSlug}-under-${timeStr}`.replace(/\s/g, '-');
+      const rarity = i === tiers.length - 1 ? 'LEGENDARY' : i >= tiers.length - 2 ? 'EPIC' : i >= tiers.length - 3 ? 'RARE' : 'UNCOMMON';
+      rows.push({
+        slug,
+        name: `${variantLabel} EE in under ${formatSpeedrunTime(maxTimeSeconds)}`,
+        type: 'CHALLENGE_COMPLETE',
+        criteria: { challengeType: 'EASTER_EGG_SPEEDRUN', maxTimeSeconds },
+        xpReward,
+        rarity,
+        easterEggSlug: eeSlug,
+      });
+    }
+  }
+  return rows;
+}
+
 export function getBo1CallOfTheDeadEeSpeedrunDefinitions(): AchievementSeedRow[] {
   const rows: AchievementSeedRow[] = [];
   for (const [eeSlug, eeLabel, tiers] of [
