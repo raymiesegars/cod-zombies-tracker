@@ -35,6 +35,8 @@ export function getMilestonesForChallengeType(
     case 'NO_PACK':
       return { rounds: NO_PACK_ROUNDS, multiplier: NO_PERKS_NO_PACK_MULTIPLIER };
     case 'STARTING_ROOM':
+    case 'STARTING_ROOM_JUG_SIDE':
+    case 'STARTING_ROOM_QUICK_SIDE':
       return { rounds: STARTING_ROOM_ROUNDS, multiplier: STARTING_ROOM_MULTIPLIER };
     case 'ONE_BOX':
       return { rounds: [ONE_BOX_ROUND], multiplier: 0, flatXp: ONE_BOX_XP };

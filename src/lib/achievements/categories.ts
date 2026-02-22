@@ -5,6 +5,8 @@ export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
   NO_PERKS: 'No Perks',
   NO_PACK: 'No Pack-a-Punch',
   STARTING_ROOM: 'Starting Room Only',
+  STARTING_ROOM_JUG_SIDE: 'First Room (Jug Side)',
+  STARTING_ROOM_QUICK_SIDE: 'First Room (Quick Side)',
   ONE_BOX: 'One Box Challenge',
   PISTOL_ONLY: 'Pistol Only',
   NO_POWER: 'No Power',

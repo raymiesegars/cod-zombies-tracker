@@ -62,6 +62,7 @@ import {
   getSpeedrunCategoryFilterOptions,
   isSpeedrunCategory,
 } from '@/lib/achievements/categories';
+import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-config';
 
 const BUILDABLE_PART_CACHE_KEY_PREFIX = 'buildable-parts';
 const BUILDABLE_PART_CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
@@ -393,6 +394,8 @@ const challengeTypeLabels: Record<string, string> = {
   NO_PERKS: 'No Perks',
   NO_PACK: 'No Pack-a-Punch',
   STARTING_ROOM: 'Starting Room Only',
+  STARTING_ROOM_JUG_SIDE: 'First Room (Jug Side)',
+  STARTING_ROOM_QUICK_SIDE: 'First Room (Quick Side)',
   ONE_BOX: 'One Box Challenge',
   PISTOL_ONLY: 'Pistol Only',
   NO_POWER: 'No Power',
@@ -522,6 +525,9 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   const [lbBo7SupportMode, setLbBo7SupportMode] = useState<string>('');
   const [lbBo7CursedFilter, setLbBo7CursedFilter] = useState<string>(''); // '' | 'true' | 'false'
   const [lbBo7SelectedRelics, setLbBo7SelectedRelics] = useState<string[]>([]);
+  // WaW
+  const [lbWawNoJug, setLbWawNoJug] = useState<string>('');
+  const [lbWawFixedWunderwaffe, setLbWawFixedWunderwaffe] = useState<string>('');
   const leaderboardSlugRef = useRef<string | null>(null);
 
   // Your runs for this map when logged in; URL ?tab=your-runs triggers fetch on load
@@ -632,6 +638,10 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
             if (lbBo7CursedFilter === 'true' || lbBo7CursedFilter === 'false') params.set('bo7CursedRun', lbBo7CursedFilter);
             if (lbBo7CursedFilter === 'true' && lbBo7SelectedRelics.length > 0) params.set('bo7Relics', lbBo7SelectedRelics.join(','));
           }
+          if (map.game?.shortName === 'WAW') {
+            if (lbWawNoJug === 'true' || lbWawNoJug === 'false') params.set('wawNoJug', lbWawNoJug);
+            if (lbWawFixedWunderwaffe === 'true' || lbWawFixedWunderwaffe === 'false') params.set('wawFixedWunderwaffe', lbWawFixedWunderwaffe);
+          }
           const res = await fetch(`/api/maps/${slug}/leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -647,7 +657,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     })();
     // Intentionally omit leaderboard.length / leaderboardFetchedOnce to avoid re-fetch loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut, lbBo3GobbleGumMode, lbBo4ElixirMode, lbBocwSupportMode, lbBo6GobbleGumMode, lbBo6SupportMode, lbBo7SupportMode, lbBo7CursedFilter, lbBo7SelectedRelics]);
+  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut, lbBo3GobbleGumMode, lbBo4ElixirMode, lbBocwSupportMode, lbBo6GobbleGumMode, lbBo6SupportMode, lbBo7SupportMode, lbBo7CursedFilter, lbBo7SelectedRelics, lbWawNoJug, lbWawFixedWunderwaffe]);
 
   // Sync activeTab with URL so switching to Your Runs triggers fetch
   useEffect(() => {
@@ -835,20 +845,27 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   ];
 
   // Single category dropdown like Leaderboards page: Highest Round, all map challenges (IW in canonical order), all loggable EEs (Time)
-  const mapChallengeTypes = useMemo(() => {
-    const types = Array.from(new Set((map?.challenges ?? []).map((c) => c.type)));
-    if (map?.game?.shortName === 'IW' && types.length > 0) {
-      return IW_CHALLENGE_TYPES_ORDER.filter((t) => t !== 'HIGHEST_ROUND' && types.includes(t as ChallengeType));
+  const mapChallengeOptions = useMemo(() => {
+    const challenges = (map?.challenges ?? []).filter((c) => c.type !== 'HIGHEST_ROUND');
+    const getLabel = (type: string, fallbackName?: string | null) =>
+      map?.game?.shortName === 'WAW'
+        ? (fallbackName || getWaWChallengeTypeLabel(type))
+        : (fallbackName ?? challengeTypeLabels[type] ?? type);
+    if (map?.game?.shortName === 'IW' && challenges.length > 0) {
+      const ordered = IW_CHALLENGE_TYPES_ORDER.filter((t) => challenges.some((c) => c.type === t));
+      return ordered.map((t) => {
+        const c = challenges.find((ch) => ch.type === t);
+        return { value: t, label: c?.name ?? challengeTypeLabels[t] ?? t };
+      });
     }
-    return types.filter((t) => t !== 'HIGHEST_ROUND').sort((a, b) => a.localeCompare(b));
+    return challenges
+      .sort((a, b) => (a.name || a.type).localeCompare(b.name || b.type))
+      .map((c) => ({ value: c.type, label: getLabel(c.type, c.name) }));
   }, [map?.challenges, map?.game?.shortName]);
   const mainQuestEasterEggs = (map?.easterEggs ?? []).filter((ee) => ee.type === 'MAIN_QUEST');
   const leaderboardCategoryOptions = [
     { value: 'HIGHEST_ROUND', label: 'Highest Round' },
-    ...mapChallengeTypes.map((type) => ({
-      value: type,
-      label: challengeTypeLabels[type] ?? type,
-    })),
+    ...mapChallengeOptions,
     ...mainQuestEasterEggs.map((ee) => ({
       value: `ee-time-${ee.id}`,
       label: `${ee.name} (Time)` as string,
@@ -1782,18 +1799,44 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                           className="w-full min-w-0 sm:w-40 max-w-full"
                         />
                         {lbBo7CursedFilter === 'true' && (
-                          <Bo7RelicPicker
-                            value={lbBo7SelectedRelics}
-                            onChange={setLbBo7SelectedRelics}
-                            placeholder="Any relics"
-                            className="w-full min-w-0 sm:w-52 max-w-full"
+                        <Bo7RelicPicker
+                          value={lbBo7SelectedRelics}
+                          onChange={setLbBo7SelectedRelics}
+                          placeholder="Any relics"
+                          className="w-full min-w-0 sm:w-52 max-w-full"
+                        />
+                      )}
+                    </>
+                  )}
+                    {map?.game?.shortName === 'WAW' && (
+                      <>
+                        {getWaWMapConfig(map.slug)?.noJugWR != null && (
+                          <Select
+                            options={[
+                              { value: '', label: 'Jug Allowed' },
+                              { value: 'true', label: 'No Jug' },
+                            ]}
+                            value={lbWawNoJug}
+                            onChange={(e) => setLbWawNoJug(e.target.value)}
+                            className="w-full min-w-0 sm:w-40 max-w-full"
+                          />
+                        )}
+                        {map?.slug === 'der-riese' && (
+                          <Select
+                            options={[
+                              { value: '', label: 'Standard' },
+                              { value: 'true', label: 'Fixed Wunderwaffe' },
+                            ]}
+                            value={lbWawFixedWunderwaffe}
+                            onChange={(e) => setLbWawFixedWunderwaffe(e.target.value)}
+                            className="w-full min-w-0 sm:w-40 max-w-full"
                           />
                         )}
                       </>
                     )}
-                  </div>
                 </div>
-              </CardHeader>
+              </div>
+            </CardHeader>
               <CardContent>
                 <div className="space-y-2 min-h-[20rem] flex flex-col min-w-0">
                   {(!leaderboardFetchedOnce || (isLeaderboardLoading && leaderboard.length === 0)) ? (

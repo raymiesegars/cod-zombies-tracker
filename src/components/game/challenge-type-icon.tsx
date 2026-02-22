@@ -20,6 +20,8 @@ const CHALLENGE_TYPE_ICONS: Record<ChallengeType, LucideIcon> = {
   NO_PERKS: CircleOff,
   NO_PACK: Package,
   STARTING_ROOM: Home,
+  STARTING_ROOM_JUG_SIDE: Home,
+  STARTING_ROOM_QUICK_SIDE: Home,
   ONE_BOX: PackageOpen,
   PISTOL_ONLY: Crosshair,
   NO_POWER: ZapOff,

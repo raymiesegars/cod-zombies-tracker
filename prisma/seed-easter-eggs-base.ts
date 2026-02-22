@@ -292,8 +292,8 @@ export const SPECIFIC_EASTER_EGGS_BASE: SpecificEasterEgg[] = [
     mapSlug: 'der-riese',
     name: 'Fly Trap',
     slug: 'fly-trap',
-    type: 'SIDE_QUEST',
-    xpReward: 0,
+    type: 'MAIN_QUEST',
+    xpReward: 500,
     description: 'Samantha challenges players to find and shoot three hidden items. Requires a Pack-a-Punched weapon to start.',
     steps: [
       {
