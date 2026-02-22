@@ -10,6 +10,7 @@ import {
   Crosshair,
   ZapOff,
   Timer,
+  Sparkles,
   type LucideIcon,
 } from 'lucide-react';
 import type { ChallengeType } from '@/types';
@@ -25,6 +26,7 @@ const CHALLENGE_TYPE_ICONS: Record<ChallengeType, LucideIcon> = {
   ONE_BOX: PackageOpen,
   PISTOL_ONLY: Crosshair,
   NO_POWER: ZapOff,
+  NO_MAGIC: Sparkles,
   ROUND_30_SPEEDRUN: Timer,
   ROUND_50_SPEEDRUN: Timer,
   ROUND_70_SPEEDRUN: Timer,

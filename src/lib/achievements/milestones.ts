@@ -44,6 +44,8 @@ export function getMilestonesForChallengeType(
       return { rounds: PISTOL_ONLY_ROUNDS, multiplier: PISTOL_ONLY_MULTIPLIER };
     case 'NO_POWER':
       return { rounds: NO_POWER_ROUNDS, multiplier: NO_POWER_MULTIPLIER };
+    case 'NO_MAGIC':
+      return { rounds: [10, 15, 20, 30, 40, 50], multiplier: NO_POWER_MULTIPLIER };
     default:
       return null;
   }

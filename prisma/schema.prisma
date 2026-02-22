@@ -227,6 +227,7 @@ enum ChallengeType {
   ONE_BOX             // Only use mystery box once
   PISTOL_ONLY         // Only use starting pistol
   NO_POWER            // Never turn on power
+  NO_MAGIC            // BO2 Custom Game: Magic disabled (some maps only)
   // IW speedruns (time-based; completionTimeSeconds required)
   ROUND_30_SPEEDRUN
   ROUND_50_SPEEDRUN
@@ -420,6 +421,9 @@ model ChallengeLog {
   // WaW (and future titles): run modifiers — tags that can be combined with any challenge
   wawNoJug                Boolean?    // No Jug — no achievements; leaderboard filter
   wawFixedWunderwaffe     Boolean?    // Der Riese: Fixed Wunderwaffe variant; leaderboard filter
+
+  // BO2 only: Bank/Storage used (maps with bank: Tranzit, Die Rise, Buried). true = Bank+Storage (default), false = No Bank No Storage
+  bo2BankUsed             Boolean?
   
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt

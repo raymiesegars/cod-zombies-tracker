@@ -14,6 +14,7 @@ import { isBo7Game, BO7_SUPPORT_MODES, getBo7SupportLabel } from '@/lib/bo7';
 import { Trophy, Medal, Filter, Search, X, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-config';
+import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 
 const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
 const PAGE_SIZE = 25;
@@ -30,6 +31,7 @@ const challengeTypeLabels: Record<string, string> = {
   ONE_BOX: 'One Box Challenge',
   PISTOL_ONLY: 'Pistol Only',
   NO_POWER: 'No Power',
+  NO_MAGIC: 'No Magic',
   ROUND_30_SPEEDRUN: 'Round 30 Speedrun',
   ROUND_50_SPEEDRUN: 'Round 50 Speedrun',
   ROUND_70_SPEEDRUN: 'Round 70 Speedrun',
@@ -86,9 +88,11 @@ export default function LeaderboardsPage() {
   const isBo6Map = isBo6Game(selectedMapData?.game?.shortName);
   const isBo7Map = isBo7Game(selectedMapData?.game?.shortName);
   const isWawMap = selectedMapData?.game?.shortName === 'WAW';
+  const isBo2Map = selectedMapData?.game?.shortName === 'BO2';
 
   const [wawNoJugFilter, setWawNoJugFilter] = useState<string>('');
   const [wawFixedWunderwaffeFilter, setWawFixedWunderwaffeFilter] = useState<string>('');
+  const [bo2BankUsedFilter, setBo2BankUsedFilter] = useState<string>('');
 
   // Debounce search: clear immediately, type delay 300ms so we search all users on the server
   useEffect(() => {
@@ -230,7 +234,7 @@ export default function LeaderboardsPage() {
     }
 
     fetchLeaderboard();
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, searchForFetch, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo4ElixirFilter, bocwSupportFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, searchForFetch, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo4ElixirFilter, bocwSupportFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter]);
 
   const loadMore = useCallback(async () => {
     if (leaderboard.length >= total || total === 0) return;
@@ -298,6 +302,9 @@ export default function LeaderboardsPage() {
             if (wawNoJugFilter === 'true' || wawNoJugFilter === 'false') params.set('wawNoJug', wawNoJugFilter);
             if (wawFixedWunderwaffeFilter === 'true' || wawFixedWunderwaffeFilter === 'false') params.set('wawFixedWunderwaffe', wawFixedWunderwaffeFilter);
           }
+          if (isBo2Map && selectedMap && getBo2MapConfig(selectedMap)?.hasBank) {
+            if (bo2BankUsedFilter === 'true' || bo2BankUsedFilter === 'false') params.set('bo2BankUsed', bo2BankUsedFilter);
+          }
           const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -316,7 +323,7 @@ export default function LeaderboardsPage() {
     } finally {
       loadingMoreRef.current = false;
     }
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo4ElixirFilter, bocwSupportFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, leaderboard.length, total]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo4ElixirFilter, bocwSupportFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, leaderboard.length, total]);
 
   // Only observe sentinel when search is empty so list stays stable while filtering
   useEffect(() => {
@@ -702,6 +709,18 @@ export default function LeaderboardsPage() {
                       />
                       )}
                     </>
+                  )}
+                  {isBo2Map && selectedMap && getBo2MapConfig(selectedMap)?.hasBank && (
+                    <Select
+                      options={[
+                        { value: '', label: getBo2MapConfig(selectedMap)?.bankIncludesStorage ? 'All (Bank+Storage)' : 'All (Bank)' },
+                        { value: 'true', label: getBo2MapConfig(selectedMap)?.bankIncludesStorage ? 'Bank+Storage' : 'Bank Used' },
+                        { value: 'false', label: getBo2MapConfig(selectedMap)?.bankIncludesStorage ? 'No Bank No Storage' : 'No Bank' },
+                      ]}
+                      value={bo2BankUsedFilter}
+                      onChange={(e) => setBo2BankUsedFilter(e.target.value)}
+                      className="w-full min-w-0 sm:w-40 max-w-full"
+                    />
                   )}
                 </div>
               )}

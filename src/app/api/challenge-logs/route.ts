@@ -10,6 +10,7 @@ import { isBo3Game, BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT } from '@/lib/bo3
 import { isBocwGame, BOCW_SUPPORT_MODES, BOCW_SUPPORT_DEFAULT } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_GOBBLEGUM_DEFAULT, BO6_SUPPORT_MODES, BO6_SUPPORT_DEFAULT } from '@/lib/bo6';
 import { isBo7Game, BO7_SUPPORT_MODES, BO7_SUPPORT_DEFAULT, BO7_RELICS } from '@/lib/bo7';
+import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 import type { Bo4Difficulty } from '@prisma/client';
 
 // Log a new run. We run the achievement check when it’s a new best for that user+challenge+map+playerCount.
@@ -217,6 +218,10 @@ export async function POST(request: NextRequest) {
     const wawNoJug = isWaw ? Boolean(body.wawNoJug ?? false) : undefined;
     const wawFixedWunderwaffe = isWaw ? Boolean(body.wawFixedWunderwaffe ?? false) : undefined;
 
+    const isBo2 = map?.game?.shortName === 'BO2';
+    const bo2HasBank = isBo2 && map ? getBo2MapConfig(map.slug)?.hasBank : false;
+    const bo2BankUsed = bo2HasBank && body.bo2BankUsed !== undefined ? Boolean(body.bo2BankUsed) : undefined;
+
     const isSpeedrunChal = challenge && isIwSpeedrunChallengeType(challenge.type);
     const previousRound = previousBest && 'roundReached' in previousBest ? previousBest.roundReached ?? 0 : 0;
     const previousTime = previousBest && 'completionTimeSeconds' in previousBest ? previousBest.completionTimeSeconds : null;
@@ -251,6 +256,7 @@ export async function POST(request: NextRequest) {
         ...(bo7RelicsUsed != null && { bo7RelicsUsed }),
         ...(wawNoJug != null && { wawNoJug }),
         ...(wawFixedWunderwaffe != null && { wawFixedWunderwaffe }),
+        ...(bo2BankUsed != null && { bo2BankUsed }),
       },
     });
 

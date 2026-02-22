@@ -377,6 +377,117 @@ export const BO1_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
   'bo1-der-riese': addEeTiers(buildBo1SpeedrunTiers(28 * 60, 58 * 60, 120 * 60, 5 * 3600 + 28 * 60 + 40, 42 * 3600), 3 * 60 + 6),
 };
 
+/** BO2 round speedrun tiers — WR-based. EE speedruns handled via getBo2EeSpeedrunDefinitions (per Easter Egg). */
+function buildBo2SpeedrunTiers(
+  r30: number,
+  r50: number,
+  r70: number,
+  r100?: number,
+  r200?: number
+): SpeedrunTiersByType {
+  const buf = 1.2;
+  const base: SpeedrunTiersByType = {
+    ROUND_30_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(r30 * buf * 1.5), xpReward: 80 },
+      { maxTimeSeconds: Math.round(r30 * buf * 1.2), xpReward: 200 },
+      { maxTimeSeconds: Math.round(r30 * buf), xpReward: 500 },
+      { maxTimeSeconds: Math.round(r30 * 1.05), xpReward: 1200 },
+    ],
+    ROUND_50_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(r50 * buf * 1.5), xpReward: 120 },
+      { maxTimeSeconds: Math.round(r50 * buf * 1.2), xpReward: 300 },
+      { maxTimeSeconds: Math.round(r50 * buf), xpReward: 700 },
+      { maxTimeSeconds: Math.round(r50 * 1.05), xpReward: 1500 },
+    ],
+    ROUND_70_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(r70 * buf * 1.5), xpReward: 150 },
+      { maxTimeSeconds: Math.round(r70 * buf * 1.2), xpReward: 400 },
+      { maxTimeSeconds: Math.round(r70 * buf), xpReward: 900 },
+      { maxTimeSeconds: Math.round(r70 * 1.05), xpReward: 2000 },
+    ],
+  };
+  if (r100 != null) {
+    base.ROUND_100_SPEEDRUN = [
+      { maxTimeSeconds: Math.round(r100 * buf * 1.5), xpReward: 200 },
+      { maxTimeSeconds: Math.round(r100 * buf * 1.2), xpReward: 500 },
+      { maxTimeSeconds: Math.round(r100 * buf), xpReward: 1200 },
+      { maxTimeSeconds: Math.round(r100 * 1.05), xpReward: 2500 },
+    ];
+  }
+  if (r200 != null) {
+    base.ROUND_200_SPEEDRUN = [
+      { maxTimeSeconds: Math.round(r200 * buf * 1.5), xpReward: 300 },
+      { maxTimeSeconds: Math.round(r200 * buf * 1.2), xpReward: 800 },
+      { maxTimeSeconds: Math.round(r200 * buf), xpReward: 1800 },
+      { maxTimeSeconds: Math.round(r200 * 1.05), xpReward: 3500 },
+    ];
+  }
+  return base;
+}
+
+function addBo2EeTiers(base: SpeedrunTiersByType, wrSeconds: number): SpeedrunTiersByType {
+  const buf = 1.2;
+  return {
+    ...base,
+    EASTER_EGG_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(wrSeconds * buf * 1.5), xpReward: 200 },
+      { maxTimeSeconds: Math.round(wrSeconds * buf * 1.2), xpReward: 600 },
+      { maxTimeSeconds: Math.round(wrSeconds * buf), xpReward: 1500 },
+      { maxTimeSeconds: Math.round(wrSeconds * 1.05), xpReward: 2500 },
+    ],
+  };
+}
+
+export const BO2_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
+  tranzit: buildBo2SpeedrunTiers(31 * 60 + 7, 67 * 60 + 40, 142 * 60 + 40, 6 * 3600 + 30 * 60 + 40, 80 * 3600),
+  'bus-depot': buildBo2SpeedrunTiers(35 * 60 + 6, 95 * 60 + 40, 11 * 3600),
+  town: buildBo2SpeedrunTiers(29 * 60 + 14, 67 * 60 + 40, 230 * 60 + 40, 135 * 3600),
+  farm: buildBo2SpeedrunTiers(31 * 60, 80 * 60, 28 * 3600),
+  'nuketown-zombies': buildBo2SpeedrunTiers(35 * 60, 97 * 60, 50 * 3600),
+  'die-rise': buildBo2SpeedrunTiers(25 * 60 + 55, 50 * 60, 80 * 60, 152 * 60, 84 * 3600),
+  'mob-of-the-dead': addBo2EeTiers(buildBo2SpeedrunTiers(30 * 60, 70 * 60 + 40, 160 * 60, 7 * 3600, 60 * 3600), 19 * 60),
+  buried: buildBo2SpeedrunTiers(28 * 60 + 49, 64 * 60, 140 * 60 + 40, 350 * 60 + 40, 43 * 3600),
+  origins: addBo2EeTiers(buildBo2SpeedrunTiers(30 * 60 + 38, 58 * 60 + 31, 92 * 60 + 8, 190 * 60 + 40), 36 * 60),
+};
+
+/** BO2 EE speedrun tiers per Easter Egg (Richtofen / Maxis variants). WRs in seconds. */
+export const BO2_TRANZIT_RICHTOFEN_EE_TIERS: SpeedrunTier[] = [
+  { maxTimeSeconds: 780, xpReward: 200 },
+  { maxTimeSeconds: 700, xpReward: 600 },
+  { maxTimeSeconds: 670, xpReward: 1500 },
+  { maxTimeSeconds: 656, xpReward: 2500 },  // WR 10:56
+];
+export const BO2_TRANZIT_MAXIS_EE_TIERS: SpeedrunTier[] = [
+  { maxTimeSeconds: 420, xpReward: 200 },
+  { maxTimeSeconds: 380, xpReward: 600 },
+  { maxTimeSeconds: 370, xpReward: 1500 },
+  { maxTimeSeconds: 366, xpReward: 2500 },  // WR 6:06
+];
+export const BO2_DIE_RISE_RICHTOFEN_EE_TIERS: SpeedrunTier[] = [
+  { maxTimeSeconds: 360, xpReward: 200 },
+  { maxTimeSeconds: 300, xpReward: 600 },
+  { maxTimeSeconds: 290, xpReward: 1500 },
+  { maxTimeSeconds: 280, xpReward: 2500 },  // WR 4:40
+];
+export const BO2_DIE_RISE_MAXIS_EE_TIERS: SpeedrunTier[] = [
+  { maxTimeSeconds: 420, xpReward: 200 },
+  { maxTimeSeconds: 380, xpReward: 600 },
+  { maxTimeSeconds: 372, xpReward: 1500 },
+  { maxTimeSeconds: 368, xpReward: 2500 },  // WR 6:08
+];
+export const BO2_BURIED_RICHTOFEN_EE_TIERS: SpeedrunTier[] = [
+  { maxTimeSeconds: 600, xpReward: 200 },
+  { maxTimeSeconds: 520, xpReward: 600 },
+  { maxTimeSeconds: 510, xpReward: 1500 },
+  { maxTimeSeconds: 500, xpReward: 2500 },  // WR 8:20
+];
+export const BO2_BURIED_MAXIS_EE_TIERS: SpeedrunTier[] = [
+  { maxTimeSeconds: 900, xpReward: 200 },
+  { maxTimeSeconds: 800, xpReward: 600 },
+  { maxTimeSeconds: 760, xpReward: 1500 },
+  { maxTimeSeconds: 750, xpReward: 2500 },  // WR 12:30
+];
+
 /** Call of the Dead: EE speedrun tiers per EE. Stand-in (Solo) WR 4:27, Ensemble Cast (2+) WR 6:10. */
 export const BO1_COTD_STAND_IN_EE_TIERS: SpeedrunTier[] = [
   { maxTimeSeconds: 360, xpReward: 200 },
