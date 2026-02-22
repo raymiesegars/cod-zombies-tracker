@@ -29,6 +29,7 @@ const CHALLENGE_TYPE_ICONS: Record<ChallengeType, LucideIcon> = {
   ROUND_50_SPEEDRUN: Timer,
   ROUND_70_SPEEDRUN: Timer,
   ROUND_100_SPEEDRUN: Timer,
+  ROUND_200_SPEEDRUN: Timer,
   EASTER_EGG_SPEEDRUN: Timer,
   GHOST_AND_SKULLS: Timer,
   ALIENS_BOSS_FIGHT: Timer,

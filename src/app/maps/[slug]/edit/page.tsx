@@ -33,6 +33,8 @@ import { isBo7Game, BO7_SUPPORT_MODES, BO7_SUPPORT_DEFAULT, getBo7SupportLabel }
 import type { MapWithDetails, ChallengeType, PlayerCount } from '@/types';
 import { ChevronLeft, Save, CheckCircle, AlertCircle, BookOpen } from 'lucide-react';
 import { WAW_OFFICIAL_RULES } from '@/lib/waw/waw-official-rules';
+import { BO1_OFFICIAL_RULES } from '@/lib/bo1/bo1-official-rules';
+import { isRuleLink } from '@/lib/rules/types';
 import { getWaWMapConfig } from '@/lib/waw/waw-map-config';
 
 const challengeTypeLabels: Record<ChallengeType, string> = {
@@ -50,6 +52,7 @@ const challengeTypeLabels: Record<ChallengeType, string> = {
   ROUND_50_SPEEDRUN: 'Round 50 Speedrun',
   ROUND_70_SPEEDRUN: 'Round 70 Speedrun',
   ROUND_100_SPEEDRUN: 'Round 100 Speedrun',
+  ROUND_200_SPEEDRUN: 'Round 200 Speedrun',
   EASTER_EGG_SPEEDRUN: 'Easter Egg Speedrun',
   GHOST_AND_SKULLS: 'Ghost and Skulls',
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
@@ -74,42 +77,53 @@ function OfficialRulesModal({
   gameShortName?: string | null;
 }) {
   const isWaw = gameShortName === 'WAW';
+  const isBo1 = gameShortName === 'BO1';
+  const hasRules = isWaw || isBo1;
+  const rules = isWaw ? WAW_OFFICIAL_RULES : isBo1 ? BO1_OFFICIAL_RULES : null;
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title="Official Rules"
-      description={isWaw ? 'Rules and requirements for World at War submissions' : 'Rules and requirements for challenge submissions'}
+      description={hasRules ? `Rules and requirements for ${isWaw ? 'World at War' : 'Black Ops 1'} submissions` : 'Rules and requirements for challenge submissions'}
       size="lg"
     >
-      {isWaw ? (
+      {rules ? (
         <Tabs defaultValue="general" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="general">General Rules</TabsTrigger>
             <TabsTrigger value="challenges">Challenge Rules</TabsTrigger>
           </TabsList>
           <div className="max-h-[60vh] min-h-[12rem] overflow-y-auto overflow-x-hidden pr-2">
-              <TabsContent value="general" className="mt-0 space-y-4">
-                {WAW_OFFICIAL_RULES.generalRules.map((section) => (
-                  <div key={section.title}>
-                    <h4 className="text-sm font-semibold text-bunker-100 mb-2">{section.title}</h4>
-                    <ul className="list-disc list-inside space-y-1 text-sm text-bunker-300">
-                      {section.items.map((item, i) => (
-                        <li key={i}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </TabsContent>
-              <TabsContent value="challenges" className="mt-0 space-y-4">
-                {WAW_OFFICIAL_RULES.challengeRules.map((cr) => (
-                  <div key={cr.name}>
-                    <h4 className="text-sm font-semibold text-bunker-100 mb-1">{cr.name}</h4>
-                    <p className="text-sm text-bunker-300">{cr.desc}</p>
-                  </div>
-                ))}
-              </TabsContent>
+            <TabsContent value="general" className="mt-0 space-y-4">
+              {rules.generalRules.map((section) => (
+                <div key={section.title}>
+                  <h4 className="text-sm font-semibold text-bunker-100 mb-2">{section.title}</h4>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-bunker-300">
+                    {section.items.map((item, i) => (
+                      <li key={i}>
+                        {isRuleLink(item) ? (
+                          <a href={item.href} target="_blank" rel="noopener noreferrer" className="text-military-400 hover:underline">
+                            {item.text}
+                          </a>
+                        ) : (
+                          item
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </TabsContent>
+            <TabsContent value="challenges" className="mt-0 space-y-4">
+              {rules.challengeRules.map((cr) => (
+                <div key={cr.name}>
+                  <h4 className="text-sm font-semibold text-bunker-100 mb-1">{cr.name}</h4>
+                  <p className="text-sm text-bunker-300">{cr.desc}</p>
+                </div>
+              ))}
+            </TabsContent>
           </div>
         </Tabs>
       ) : (

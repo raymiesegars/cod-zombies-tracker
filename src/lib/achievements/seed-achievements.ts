@@ -12,8 +12,9 @@ import {
   getXpForRoundFromMilestones,
 } from './map-round-config';
 import { getWaWMapConfig, getWaWRoundMilestones, getWaWChallengeTypeLabel } from '@/lib/waw/waw-map-config';
+import { getBo1MapConfig, getBo1RoundMilestones, getBo1ChallengeTypeLabel } from '@/lib/bo1/bo1-map-config';
 import { isBo4Game, BO4_DIFFICULTIES, BO4_DIFFICULTY_XP_MULTIPLIER, type Bo4DifficultyType } from '../bo4';
-import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, IW_AOTRT_SPEEDRUN_TIERS, IW_BEAST_SPEEDRUN_TIERS, WAW_SPEEDRUN_TIERS_BY_MAP, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
+import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, IW_AOTRT_SPEEDRUN_TIERS, IW_BEAST_SPEEDRUN_TIERS, WAW_SPEEDRUN_TIERS_BY_MAP, BO1_SPEEDRUN_TIERS_BY_MAP, BO1_COTD_STAND_IN_EE_TIERS, BO1_COTD_ENSEMBLE_CAST_EE_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
 
 const CHALLENGE_TYPES = [
   'HIGHEST_ROUND',
@@ -90,6 +91,8 @@ export type AchievementSeedRow = {
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
   challengeId?: string;
   easterEggId?: string;
+  /** For EE speedrun achievements: resolve slug to easterEggId when creating (e.g. Call of the Dead Stand-in vs Ensemble Cast) */
+  easterEggSlug?: string;
   /** BO4 only: which difficulty this achievement is for */
   difficulty?: Bo4DifficultyType;
 };
@@ -152,11 +155,11 @@ export function getMapAchievementDefinitions(
       }
       for (const cType of wawCfg.challengeTypes) {
         if (cType === 'HIGHEST_ROUND' || cType === 'NO_DOWNS') continue;
-        const wr = cType === 'STARTING_ROOM' ? wawCfg.firstRoomWR
-          : cType === 'STARTING_ROOM_JUG_SIDE' ? wawCfg.firstRoomJugWR
-          : cType === 'STARTING_ROOM_QUICK_SIDE' ? wawCfg.firstRoomQuickWR
-          : cType === 'NO_POWER' ? wawCfg.noPowerWR
-          : cType === 'NO_PERKS' ? wawCfg.noPerksWR
+        const wr = (cType as string) === 'STARTING_ROOM' ? wawCfg.firstRoomWR
+          : (cType as string) === 'STARTING_ROOM_JUG_SIDE' ? wawCfg.firstRoomJugWR
+          : (cType as string) === 'STARTING_ROOM_QUICK_SIDE' ? wawCfg.firstRoomQuickWR
+          : (cType as string) === 'NO_POWER' ? wawCfg.noPowerWR
+          : (cType as string) === 'NO_PERKS' ? wawCfg.noPerksWR
           : undefined;
         if (wr == null) continue;
         const cMilestones = getWaWRoundMilestones(wr);
@@ -186,6 +189,85 @@ export function getMapAchievementDefinitions(
       if (wawCfg.challengeTypes.includes('PISTOL_ONLY')) {
         const pistolWR = maxRound;
         const pistolMilestones = getWaWRoundMilestones(Math.min(pistolWR, 100), 5);
+        for (const { round, xp } of pistolMilestones) {
+          rows.push({
+            slug: `pistol-only-${round}`,
+            name: `Pistol Only Round ${round}`,
+            type: 'CHALLENGE_COMPLETE',
+            criteria: { round, challengeType: 'PISTOL_ONLY' },
+            xpReward: Math.max(MIN_ACHIEVEMENT_XP, Math.floor(xp * 3)),
+            rarity: rarityForRound(round, pistolWR),
+          });
+        }
+      }
+      return rows;
+    }
+  }
+
+  // BO1: per-map config with WR-based achievements
+  if (gameShortName === 'BO1') {
+    const bo1Cfg = getBo1MapConfig(mapSlug);
+    if (bo1Cfg) {
+      const milestones = getBo1RoundMilestones(bo1Cfg.highRoundWR);
+      const maxRound = bo1Cfg.highRoundWR;
+      for (const { round, xp } of milestones) {
+        rows.push({
+          slug: `round-${round}`,
+          name: `Round ${round}`,
+          type: 'ROUND_MILESTONE',
+          criteria: { round, challengeType: 'HIGHEST_ROUND' },
+          xpReward: xp,
+          rarity: rarityForRound(round, maxRound),
+        });
+      }
+      if (bo1Cfg.noDownsAvailable) {
+        for (const { round, xp } of milestones) {
+          rows.push({
+            slug: `no-downs-${round}`,
+            name: `No Downs Round ${round}`,
+            type: 'CHALLENGE_COMPLETE',
+            criteria: { round, challengeType: 'NO_DOWNS' },
+            xpReward: xp,
+            rarity: rarityForRound(round, maxRound),
+          });
+        }
+      }
+      for (const cType of bo1Cfg.challengeTypes) {
+        if (cType === 'HIGHEST_ROUND' || cType === 'NO_DOWNS') continue;
+        const wr = (cType as string) === 'STARTING_ROOM' ? bo1Cfg.firstRoomWR
+          : (cType as string) === 'STARTING_ROOM_JUG_SIDE' ? bo1Cfg.firstRoomJugWR
+          : (cType as string) === 'STARTING_ROOM_QUICK_SIDE' ? bo1Cfg.firstRoomQuickWR
+          : (cType as string) === 'NO_POWER' ? bo1Cfg.noPowerWR
+          : (cType as string) === 'NO_PERKS' ? bo1Cfg.noPerksWR
+          : undefined;
+        if (wr == null) continue;
+        const cMilestones = getBo1RoundMilestones(wr);
+        const slugPrefix = cType.toLowerCase().replace(/_/g, '-');
+        for (const { round, xp } of cMilestones) {
+          if (round > wr) continue;
+          rows.push({
+            slug: `${slugPrefix}-${round}`,
+            name: `${getBo1ChallengeTypeLabel(cType)} Round ${round}`,
+            type: 'CHALLENGE_COMPLETE',
+            criteria: { round, challengeType: cType },
+            xpReward: Math.max(MIN_ACHIEVEMENT_XP, xp),
+            rarity: rarityForRound(round, wr),
+          });
+        }
+      }
+      if (bo1Cfg.challengeTypes.includes('ONE_BOX')) {
+        rows.push({
+          slug: 'one-box-30',
+          name: 'One Box Round 30',
+          type: 'CHALLENGE_COMPLETE',
+          criteria: { round: 30, challengeType: 'ONE_BOX' },
+          xpReward: 600,
+          rarity: 'RARE',
+        });
+      }
+      if (bo1Cfg.challengeTypes.includes('PISTOL_ONLY')) {
+        const pistolWR = maxRound;
+        const pistolMilestones = getBo1RoundMilestones(Math.min(pistolWR, 100), 5);
         for (const { round, xp } of pistolMilestones) {
           rows.push({
             slug: `pistol-only-${round}`,
@@ -365,6 +447,7 @@ const SPEEDRUN_TYPE_LABELS: Record<string, string> = {
   ROUND_50_SPEEDRUN: 'Round 50',
   ROUND_70_SPEEDRUN: 'Round 70',
   ROUND_100_SPEEDRUN: 'Round 100',
+  ROUND_200_SPEEDRUN: 'Round 200',
   EASTER_EGG_SPEEDRUN: 'Easter Egg',
   GHOST_AND_SKULLS: 'Ghost and Skulls',
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
@@ -380,13 +463,14 @@ const IW_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
   'the-beast-from-beyond': IW_BEAST_SPEEDRUN_TIERS,
 };
 
-/** Speedrun tier achievements for IW and WAW maps. Fastest = most XP. */
+/** Speedrun tier achievements for IW, WAW, and BO1 maps. Fastest = most XP. */
 export function getSpeedrunAchievementDefinitions(
   mapSlug: string,
   gameShortName: string
 ): AchievementSeedRow[] {
   const tiersByType = gameShortName === 'IW' ? IW_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : gameShortName === 'WAW' ? WAW_SPEEDRUN_TIERS_BY_MAP[mapSlug]
+    : gameShortName === 'BO1' ? BO1_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : undefined;
   if (!tiersByType) return [];
   const rows: AchievementSeedRow[] = [];
@@ -404,6 +488,32 @@ export function getSpeedrunAchievementDefinitions(
         criteria: { challengeType, maxTimeSeconds },
         xpReward,
         rarity,
+      });
+    }
+  }
+  return rows;
+}
+
+/** Call of the Dead: two EE speedruns (Stand-in Solo, Ensemble Cast 2+). Balance patch resolves easterEggSlug to easterEggId. */
+export function getBo1CallOfTheDeadEeSpeedrunDefinitions(): AchievementSeedRow[] {
+  const rows: AchievementSeedRow[] = [];
+  for (const [eeSlug, eeLabel, tiers] of [
+    ['stand-in', 'Stand-in (Solo)', BO1_COTD_STAND_IN_EE_TIERS],
+    ['ensemble-cast', 'Ensemble Cast (2+)', BO1_COTD_ENSEMBLE_CAST_EE_TIERS],
+  ] as const) {
+    for (let i = 0; i < tiers.length; i++) {
+      const { maxTimeSeconds, xpReward } = tiers[i]!;
+      const timeStr = formatSpeedrunTime(maxTimeSeconds).replace(/:/g, '-');
+      const slug = `easter-egg-speedrun-${eeSlug}-under-${timeStr}`.replace(/\s/g, '-');
+      const rarity = i === tiers.length - 1 ? 'LEGENDARY' : i >= tiers.length - 2 ? 'EPIC' : i >= tiers.length - 3 ? 'RARE' : 'UNCOMMON';
+      rows.push({
+        slug,
+        name: `${eeLabel} EE in under ${formatSpeedrunTime(maxTimeSeconds)}`,
+        type: 'CHALLENGE_COMPLETE',
+        criteria: { challengeType: 'EASTER_EGG_SPEEDRUN', maxTimeSeconds },
+        xpReward,
+        rarity,
+        easterEggSlug: eeSlug,
       });
     }
   }

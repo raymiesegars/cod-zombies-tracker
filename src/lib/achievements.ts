@@ -13,6 +13,8 @@ export type MapAchievementContext = {
     completionTimeSeconds?: number | null;
   }[];
   easterEggIds: Set<string>;
+  /** EE completions with time (for EE speedrun tier achievements) */
+  easterEggLogsWithTime: { easterEggId: string; completionTimeSeconds: number }[];
   easterEggRoundsOnMap: { round: number; difficulty: Bo4Difficulty | null }[]; // roundCompleted + difficulty for this map
 };
 
@@ -68,6 +70,23 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
       maxTimeSeconds?: number;
     };
     const targetRound = round as number | undefined;
+
+    // EE speedrun tier (e.g. Call of the Dead Stand-in vs Ensemble Cast): check EasterEggLog by easterEggId
+    if (
+      achievement.easterEggId &&
+      maxTimeSeconds != null &&
+      typeof maxTimeSeconds === 'number' &&
+      challengeType === 'EASTER_EGG_SPEEDRUN'
+    ) {
+      const log = await prisma.easterEggLog.findFirst({
+        where: {
+          userId,
+          easterEggId: achievement.easterEggId,
+          completionTimeSeconds: { not: null, lte: maxTimeSeconds },
+        },
+      });
+      return !!log;
+    }
 
     const baseWhere: any = {
       userId,
@@ -259,8 +278,20 @@ function checkWithContext(
         achDifficulty != null
           ? ctx.challengeLogs.filter((l) => l.difficulty === achDifficulty)
           : ctx.challengeLogs;
-      // Speedrun tier: qualify if any log has completionTimeSeconds <= maxTimeSeconds
       const maxTime = maxTimeSeconds != null ? Number(maxTimeSeconds) : undefined;
+      // EE speedrun tier (e.g. Call of the Dead Stand-in vs Ensemble Cast): check EasterEggLog
+      if (
+        achievement.easterEggId &&
+        maxTime != null &&
+        !Number.isNaN(maxTime) &&
+        type === 'EASTER_EGG_SPEEDRUN'
+      ) {
+        return ctx.easterEggLogsWithTime.some(
+          (e) =>
+            e.easterEggId === achievement.easterEggId && e.completionTimeSeconds <= maxTime
+        );
+      }
+      // Speedrun tier: qualify if any log has completionTimeSeconds <= maxTimeSeconds
       if (maxTime != null && !Number.isNaN(maxTime)) {
         return logs.some(
           (l) =>
@@ -308,7 +339,7 @@ export async function processMapAchievements(
       }),
       prisma.easterEggLog.findMany({
         where: { userId },
-        select: { easterEggId: true, mapId: true, roundCompleted: true, difficulty: true },
+        select: { easterEggId: true, mapId: true, roundCompleted: true, difficulty: true, completionTimeSeconds: true },
       }),
     ]);
 
@@ -316,6 +347,9 @@ export async function processMapAchievements(
   const easterEggRoundsOnMap = easterEggLogs
     .filter((e) => e.mapId === mapId && e.roundCompleted != null)
     .map((e) => ({ round: e.roundCompleted!, difficulty: e.difficulty ?? null }));
+  const easterEggLogsWithTime = easterEggLogs
+    .filter((e) => e.completionTimeSeconds != null)
+    .map((e) => ({ easterEggId: e.easterEggId, completionTimeSeconds: e.completionTimeSeconds! }));
   const ctx: MapAchievementContext = {
     map,
     challengeLogs: challengeLogs.map((l) => ({
@@ -325,6 +359,7 @@ export async function processMapAchievements(
       completionTimeSeconds: l.completionTimeSeconds ?? undefined,
     })),
     easterEggIds: new Set(easterEggLogs.map((e) => e.easterEggId)),
+    easterEggLogsWithTime,
     easterEggRoundsOnMap,
   };
 
@@ -505,13 +540,16 @@ export async function revokeAchievementsForMapAfterDelete(
       }),
       prisma.easterEggLog.findMany({
         where: { userId },
-        select: { easterEggId: true, mapId: true, roundCompleted: true, difficulty: true },
+        select: { easterEggId: true, mapId: true, roundCompleted: true, difficulty: true, completionTimeSeconds: true },
       }),
     ]);
 
   const easterEggRoundsOnMap = easterEggLogs
     .filter((e) => e.mapId === mapId && e.roundCompleted != null)
     .map((e) => ({ round: e.roundCompleted!, difficulty: e.difficulty ?? null }));
+  const easterEggLogsWithTime = easterEggLogs
+    .filter((e) => e.completionTimeSeconds != null)
+    .map((e) => ({ easterEggId: e.easterEggId, completionTimeSeconds: e.completionTimeSeconds! }));
   const ctx: MapAchievementContext = {
     map,
     challengeLogs: challengeLogs.map((l) => ({
@@ -521,6 +559,7 @@ export async function revokeAchievementsForMapAfterDelete(
       completionTimeSeconds: l.completionTimeSeconds ?? undefined,
     })),
     easterEggIds: new Set(easterEggLogs.map((e) => e.easterEggId)),
+    easterEggLogsWithTime,
     easterEggRoundsOnMap,
   };
 
