@@ -32,6 +32,8 @@ import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_GOBBLEGUM_DEFAULT, BO6_SUPPORT_MODE
 import { isBo7Game, BO7_SUPPORT_MODES, BO7_SUPPORT_DEFAULT, getBo7SupportLabel } from '@/lib/bo7';
 import type { MapWithDetails, ChallengeType, PlayerCount } from '@/types';
 import { ChevronLeft, Save, CheckCircle, AlertCircle, BookOpen } from 'lucide-react';
+import { WAW_OFFICIAL_RULES } from '@/lib/waw/waw-official-rules';
+import { getWaWMapConfig } from '@/lib/waw/waw-map-config';
 
 const challengeTypeLabels: Record<ChallengeType, string> = {
   HIGHEST_ROUND: 'Highest Round',
@@ -39,6 +41,8 @@ const challengeTypeLabels: Record<ChallengeType, string> = {
   NO_PERKS: 'No Perks',
   NO_PACK: 'No Pack-a-Punch',
   STARTING_ROOM: 'Starting Room Only',
+  STARTING_ROOM_JUG_SIDE: 'First Room (Jug Side)',
+  STARTING_ROOM_QUICK_SIDE: 'First Room (Quick Side)',
   ONE_BOX: 'One Box Challenge',
   PISTOL_ONLY: 'Pistol Only',
   NO_POWER: 'No Power',
@@ -59,6 +63,63 @@ const playerCountOptions = [
   { value: 'TRIO', label: 'Trio' },
   { value: 'SQUAD', label: 'Squad' },
 ];
+
+function OfficialRulesModal({
+  isOpen,
+  onClose,
+  gameShortName,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  gameShortName?: string | null;
+}) {
+  const isWaw = gameShortName === 'WAW';
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Official Rules"
+      description={isWaw ? 'Rules and requirements for World at War submissions' : 'Rules and requirements for challenge submissions'}
+      size="lg"
+    >
+      {isWaw ? (
+        <Tabs defaultValue="general" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="general">General Rules</TabsTrigger>
+            <TabsTrigger value="challenges">Challenge Rules</TabsTrigger>
+          </TabsList>
+          <div className="max-h-[60vh] min-h-[12rem] overflow-y-auto overflow-x-hidden pr-2">
+              <TabsContent value="general" className="mt-0 space-y-4">
+                {WAW_OFFICIAL_RULES.generalRules.map((section) => (
+                  <div key={section.title}>
+                    <h4 className="text-sm font-semibold text-bunker-100 mb-2">{section.title}</h4>
+                    <ul className="list-disc list-inside space-y-1 text-sm text-bunker-300">
+                      {section.items.map((item, i) => (
+                        <li key={i}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </TabsContent>
+              <TabsContent value="challenges" className="mt-0 space-y-4">
+                {WAW_OFFICIAL_RULES.challengeRules.map((cr) => (
+                  <div key={cr.name}>
+                    <h4 className="text-sm font-semibold text-bunker-100 mb-1">{cr.name}</h4>
+                    <p className="text-sm text-bunker-300">{cr.desc}</p>
+                  </div>
+                ))}
+              </TabsContent>
+          </div>
+        </Tabs>
+      ) : (
+        <p className="text-bunker-300 text-sm">
+          Official rules for this game are coming soon. Rules will vary by game, and we&apos;ll add them here so you can quickly check requirements for challenges.
+        </p>
+      )}
+    </Modal>
+  );
+}
 
 function SaveProgressRow({
   onSave,
@@ -148,6 +209,8 @@ export default function EditMapProgressPage() {
     bo7SupportMode?: string;
     bo7IsCursedRun?: boolean;
     bo7RelicsUsed?: string[];
+    wawNoJug?: boolean;
+    wawFixedWunderwaffe?: boolean;
   }>({
     roundReached: '',
     playerCount: 'SOLO',
@@ -280,6 +343,16 @@ export default function EditMapProgressPage() {
     fetchMap();
   }, [slug]);
 
+  useEffect(() => {
+    const wawCfg = map?.game?.shortName === 'WAW' ? getWaWMapConfig(map?.slug ?? '') : null;
+    const hasNoDowns = map && Array.from(selectedChallengeIds).some((cid) =>
+      map.challenges.find((ch) => ch.id === cid)?.type === 'NO_DOWNS'
+    );
+    if (wawCfg && !wawCfg.noDownsSoloAllowed && hasNoDowns && sharedChallengeForm.playerCount === 'SOLO') {
+      setSharedChallengeForm((prev) => ({ ...prev, playerCount: 'DUO' }));
+    }
+  }, [map, selectedChallengeIds, sharedChallengeForm.playerCount]);
+
   const handleChallengeChange = (
     challengeId: string,
     field: keyof (typeof challengeForms)[string],
@@ -399,6 +472,10 @@ export default function EditMapProgressPage() {
               bo7IsCursedRun: form.bo7IsCursedRun ?? false,
               bo7RelicsUsed: form.bo7IsCursedRun ? (form.bo7RelicsUsed ?? []) : [],
             }),
+            ...(map?.game?.shortName === 'WAW' && {
+              wawNoJug: form.wawNoJug ?? false,
+              wawFixedWunderwaffe: form.wawFixedWunderwaffe ?? false,
+            }),
             proofUrls: normalizeProofUrls(form.proofUrls ?? []),
             notes: form.notes || null,
             completionTimeSeconds: (() => {
@@ -474,6 +551,10 @@ export default function EditMapProgressPage() {
           roundReached: parseInt(form.roundReached),
           playerCount: form.playerCount,
           ...(map.game?.shortName === 'BO4' && form.difficulty && { difficulty: form.difficulty }),
+          ...(map.game?.shortName === 'WAW' && {
+            wawNoJug: sharedChallengeForm.wawNoJug ?? false,
+            wawFixedWunderwaffe: sharedChallengeForm.wawFixedWunderwaffe ?? false,
+          }),
           proofUrls: normalizeProofUrls(form.proofUrls ?? []),
           notes: form.notes || null,
           completionTimeSeconds: form.completionTimeSeconds ?? null,
@@ -671,30 +752,24 @@ export default function EditMapProgressPage() {
                 <p className="text-sm text-bunker-500">No main quest Easter Eggs on this map.</p>
               )}
             </div>
-            <div className="sm:col-span-1 flex flex-col justify-center min-w-0 sm:items-end">
+            <div className="sm:col-span-1 flex flex-col min-w-0 overflow-hidden self-stretch">
               <Button
                 type="button"
                 variant="secondary"
                 onClick={() => setChallengeRulesModalOpen(true)}
-                className="border-element-500/60 bg-element-950/40 text-element-200 hover:bg-element-900/50 hover:text-element-100 w-full sm:w-auto !px-3 !py-2.5 text-sm font-medium min-h-[2.75rem] rounded-lg"
-                leftIcon={<BookOpen className="w-4 h-4 shrink-0" />}
+                className="border-element-500/60 bg-element-950/40 text-element-200 hover:bg-element-900/50 hover:text-element-100 hover:border-element-400/70 w-full h-full min-h-[4rem] sm:min-h-[5.5rem] md:min-h-[6rem] !px-4 !py-4 sm:!px-5 sm:!py-5 md:!px-6 md:!py-6 text-base sm:text-lg font-semibold rounded-xl shadow-lg shadow-element-950/30 border-2 flex items-center justify-center gap-3"
+                leftIcon={<BookOpen className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />}
               >
-                Challenge Rules
+                Official Rules
               </Button>
             </div>
           </div>
 
-          <Modal
+          <OfficialRulesModal
             isOpen={challengeRulesModalOpen}
             onClose={() => setChallengeRulesModalOpen(false)}
-            title="Challenge Rules"
-            description="Rules and requirements for each challenge type"
-            size="md"
-          >
-            <p className="text-bunker-300 text-sm">
-              Challenge rules are coming soon. Rules will vary by game, and we&apos;ll add them here so you can quickly check requirements for No Perks, No Power, Pistol Only, and other challenges.
-            </p>
-          </Modal>
+            gameShortName={map?.game?.shortName}
+          />
 
           {/* Challenge logging form (when one or more challenges selected) */}
           {map.challenges.length > 0 && selectedChallengeIds.size > 0 && (
@@ -754,7 +829,17 @@ export default function EditMapProgressPage() {
                     })()}
                     <Select
                       label="Player Count"
-                      options={playerCountOptions}
+                      options={(() => {
+                        const wawCfg = map?.game?.shortName === 'WAW' ? getWaWMapConfig(map.slug) : null;
+                        const hasNoDownsSelected = Array.from(selectedChallengeIds).some((cid) => {
+                          const c = map.challenges.find((ch) => ch.id === cid);
+                          return c?.type === 'NO_DOWNS';
+                        });
+                        if (wawCfg && !wawCfg.noDownsSoloAllowed && hasNoDownsSelected) {
+                          return playerCountOptions.filter((o) => o.value !== 'SOLO');
+                        }
+                        return playerCountOptions;
+                      })()}
                       value={sharedChallengeForm.playerCount}
                       onChange={(e) => handleSharedChallengeChange('playerCount', e.target.value)}
                     />
@@ -787,6 +872,34 @@ export default function EditMapProgressPage() {
                           />
                           <span className="text-sm text-bunker-300">Directors Cut</span>
                         </label>
+                      </>
+                    )}
+                    {map?.game?.shortName === 'WAW' && (
+                      <>
+                        {getWaWMapConfig(map.slug)?.noJugWR != null && (
+                          <Select
+                            label="No Jug"
+                            options={[
+                              { value: 'false', label: 'Standard (Jug allowed)' },
+                              { value: 'true', label: 'No Jug' },
+                            ]}
+                            value={sharedChallengeForm.wawNoJug === true ? 'true' : 'false'}
+                            onChange={(e) => handleSharedChallengeChange('wawNoJug', e.target.value === 'true')}
+                            className="w-full"
+                          />
+                        )}
+                        {map?.slug === 'der-riese' && (
+                          <Select
+                            label="Fixed Wunderwaffe"
+                            options={[
+                              { value: 'false', label: 'Standard' },
+                              { value: 'true', label: 'Fixed Wunderwaffe' },
+                            ]}
+                            value={sharedChallengeForm.wawFixedWunderwaffe === true ? 'true' : 'false'}
+                            onChange={(e) => handleSharedChallengeChange('wawFixedWunderwaffe', e.target.value === 'true')}
+                            className="w-full"
+                          />
+                        )}
                       </>
                     )}
                     {isBo3Game(map?.game?.shortName) && (

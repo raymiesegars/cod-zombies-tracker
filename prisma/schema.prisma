@@ -222,6 +222,8 @@ enum ChallengeType {
   NO_PERKS            // Complete X rounds without buying perks
   NO_PACK             // Complete X rounds without Pack-a-Punch
   STARTING_ROOM       // Stay in starting room only
+  STARTING_ROOM_JUG_SIDE   // Verruckt: First room, Jug side spawn
+  STARTING_ROOM_QUICK_SIDE // Verruckt: First room, Quick Revive side spawn
   ONE_BOX             // Only use mystery box once
   PISTOL_ONLY         // Only use starting pistol
   NO_POWER            // Never turn on power
@@ -413,6 +415,10 @@ model ChallengeLog {
   bo7IsCursedRun          Boolean?    @default(false)
   // BO7 only: Relic names selected for a cursed run (empty = 0 relics or not a cursed run)
   bo7RelicsUsed           String[]    @default([])
+
+  // WaW (and future titles): run modifiers — tags that can be combined with any challenge
+  wawNoJug                Boolean?    // No Jug — no achievements; leaderboard filter
+  wawFixedWunderwaffe     Boolean?    // Der Riese: Fixed Wunderwaffe variant; leaderboard filter
   
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt

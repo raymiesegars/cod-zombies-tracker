@@ -34,6 +34,9 @@ export async function GET(
   const bo7CursedFilter = searchParams.get('bo7CursedRun'); // 'true' | 'false' | null (no filter)
   // Comma-separated relic names; only applied when bo7CursedRun=true
   const bo7RelicsParam = searchParams.get('bo7Relics'); // e.g. 'Blood Vials,Bus' | null
+  // WaW run modifiers
+  const wawNoJug = searchParams.get('wawNoJug'); // 'true' | 'false' | null
+  const wawFixedWunderwaffe = searchParams.get('wawFixedWunderwaffe'); // 'true' | 'false' | null
   const limitParam = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') || '25', 10) || 25));
   const offsetParam = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10) || 0);
   const mergeTake = 500;
@@ -129,6 +132,13 @@ export async function GET(
       } else if (bo7CursedFilter === 'false') {
         (whereClause as Record<string, unknown>).bo7IsCursedRun = false;
       }
+    }
+
+    if (gameShortName === 'WAW') {
+      if (wawNoJug === 'true') (whereClause as Record<string, unknown>).wawNoJug = true;
+      else if (wawNoJug === 'false') (whereClause as Record<string, unknown>).wawNoJug = false;
+      if (wawFixedWunderwaffe === 'true') (whereClause as Record<string, unknown>).wawFixedWunderwaffe = true;
+      else if (wawFixedWunderwaffe === 'false') (whereClause as Record<string, unknown>).wawFixedWunderwaffe = false;
     }
 
     // "Highest Round" (or no filter) = best round from any challenge OR easter egg; specific challenge = only that challenge's logs

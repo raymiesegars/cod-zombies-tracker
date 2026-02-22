@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { RANKS, getRankIconPath } from '../src/lib/ranks';
 import { getMapAchievementDefinitions, getSpeedrunAchievementDefinitions } from '../src/lib/achievements/seed-achievements';
 import { getRoundCapForMap } from '../src/lib/achievements/map-round-config';
+import { getWaWMapConfig } from '../src/lib/waw/waw-map-config';
 
 // Load .env then .env.local (same order as Next.js) so seed uses the SAME DB as the app
 function loadEnv() {
@@ -274,16 +275,18 @@ async function main() {
   console.log(`Created ${createdMaps.length} maps`);
 
   // Create challenges for each map
-  const roundChallengeTypes = [
-    { type: 'HIGHEST_ROUND', name: 'Highest Round', description: 'Reach the highest round possible' },
-    { type: 'NO_DOWNS', name: 'No Downs', description: 'Survive without going down' },
-    { type: 'NO_PERKS', name: 'No Perks', description: 'Survive without purchasing any perks' },
-    { type: 'NO_PACK', name: 'No Pack-a-Punch', description: 'Survive without using Pack-a-Punch' },
-    { type: 'STARTING_ROOM', name: 'Starting Room Only', description: 'Never leave the starting room' },
-    { type: 'ONE_BOX', name: 'One Box Challenge', description: 'Only hit the mystery box once' },
-    { type: 'PISTOL_ONLY', name: 'Pistol Only', description: 'Only use your starting pistol' },
-    { type: 'NO_POWER', name: 'No Power', description: 'Never turn on the power' },
-  ];
+  const roundChallengeTypes: Record<string, { type: string; name: string; description: string }> = {
+    HIGHEST_ROUND: { type: 'HIGHEST_ROUND', name: 'Highest Round', description: 'Reach the highest round possible' },
+    NO_DOWNS: { type: 'NO_DOWNS', name: 'No Downs', description: 'Survive without going down' },
+    NO_PERKS: { type: 'NO_PERKS', name: 'No Perks', description: 'Survive without purchasing any perks' },
+    NO_PACK: { type: 'NO_PACK', name: 'No Pack-a-Punch', description: 'Survive without using Pack-a-Punch' },
+    STARTING_ROOM: { type: 'STARTING_ROOM', name: 'Starting Room Only', description: 'Never leave the starting room' },
+    STARTING_ROOM_JUG_SIDE: { type: 'STARTING_ROOM_JUG_SIDE', name: 'First Room (Jug Side)', description: 'First room challenge, Jug side spawn (Verruckt)' },
+    STARTING_ROOM_QUICK_SIDE: { type: 'STARTING_ROOM_QUICK_SIDE', name: 'First Room (Quick Side)', description: 'First room challenge, Quick Revive side spawn (Verruckt)' },
+    ONE_BOX: { type: 'ONE_BOX', name: 'One Box Challenge', description: 'Only hit the mystery box once' },
+    PISTOL_ONLY: { type: 'PISTOL_ONLY', name: 'Pistol Only', description: 'Only use your starting pistol' },
+    NO_POWER: { type: 'NO_POWER', name: 'No Power', description: 'Never turn on the power' },
+  };
 
   const iwSpeedrunTypes = [
     { type: 'ROUND_30_SPEEDRUN', name: 'Round 30 Speedrun', description: 'Reach round 30 as fast as possible' },
@@ -295,24 +298,68 @@ async function main() {
     { type: 'ALIENS_BOSS_FIGHT', name: 'Aliens Boss Fight', description: 'Defeat the Aliens boss as fast as possible' },
   ];
 
+  const wawSpeedrunTypes = [
+    { type: 'ROUND_30_SPEEDRUN', name: 'Round 30 Speedrun', description: 'Reach round 30 as fast as possible' },
+    { type: 'ROUND_50_SPEEDRUN', name: 'Round 50 Speedrun', description: 'Reach round 50 as fast as possible' },
+    { type: 'ROUND_70_SPEEDRUN', name: 'Round 70 Speedrun', description: 'Reach round 70 as fast as possible' },
+    { type: 'ROUND_100_SPEEDRUN', name: 'Round 100 Speedrun', description: 'Reach round 100 as fast as possible' },
+    { type: 'EASTER_EGG_SPEEDRUN', name: 'Easter Egg Speedrun', description: 'Complete the main Easter egg as fast as possible' },
+  ];
+
+  const standardChallengeTypes = ['HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER'];
   let challengeCount = 0;
 
   for (const map of createdMaps) {
     const gameShortName = games.find((g) => g.id === map.gameId)?.shortName ?? '';
     const isIw = gameShortName === 'IW';
+    const isWaw = gameShortName === 'WAW';
+    const wawCfg = isWaw ? getWaWMapConfig(map.slug) : null;
 
-    for (const challengeInfo of roundChallengeTypes) {
-      await prisma.challenge.create({
-        data: {
-          name: challengeInfo.name,
-          slug: challengeInfo.type.toLowerCase().replace(/_/g, '-'),
-          type: challengeInfo.type as any,
-          mapId: map.id,
-          xpReward: 0,
-          description: challengeInfo.description,
-        },
-      });
-      challengeCount++;
+    if (isWaw && wawCfg) {
+      for (const cType of wawCfg.challengeTypes) {
+        const info = roundChallengeTypes[cType];
+        if (!info) continue;
+        await prisma.challenge.create({
+          data: {
+            name: info.name,
+            slug: info.type.toLowerCase().replace(/_/g, '-'),
+            type: info.type as any,
+            mapId: map.id,
+            xpReward: 0,
+            description: info.description,
+          },
+        });
+        challengeCount++;
+      }
+      for (const speedrun of (map.slug === 'der-riese' ? wawSpeedrunTypes : wawSpeedrunTypes.slice(0, 4))) {
+        await prisma.challenge.create({
+          data: {
+            name: speedrun.name,
+            slug: speedrun.type.toLowerCase().replace(/_/g, '-'),
+            type: speedrun.type as any,
+            mapId: map.id,
+            xpReward: 0,
+            description: speedrun.description,
+          },
+        });
+        challengeCount++;
+      }
+    } else {
+      for (const cType of standardChallengeTypes) {
+        const info = roundChallengeTypes[cType];
+        if (!info) continue;
+        await prisma.challenge.create({
+          data: {
+            name: info.name,
+            slug: info.type.toLowerCase().replace(/_/g, '-'),
+            type: info.type as any,
+            mapId: map.id,
+            xpReward: 0,
+            description: info.description,
+          },
+        });
+        challengeCount++;
+      }
     }
 
     if (isIw) {

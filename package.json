@@ -20,7 +20,8 @@
     "db:studio": "node scripts/run-prisma-with-env.js studio",
     "db:backfill-round-milestone-achievements": "tsx scripts/backfill-round-milestone-achievements.ts",
     "db:add-iw": "tsx scripts/add-iw-content.ts",
-    "db:backfill-bo4-difficulty-achievements": "tsx scripts/backfill-bo4-difficulty-achievements.ts"
+    "db:backfill-bo4-difficulty-achievements": "tsx scripts/backfill-bo4-difficulty-achievements.ts",
+    "db:waw-balance-patch": "tsx scripts/waw-balance-patch.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.9.1",

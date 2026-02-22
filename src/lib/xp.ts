@@ -59,6 +59,8 @@ export function calculateChallengeXp(challengeType: string, round: number): numb
     NO_PERKS: 75,
     NO_PACK: 60,
     STARTING_ROOM: 100,
+    STARTING_ROOM_JUG_SIDE: 100,
+    STARTING_ROOM_QUICK_SIDE: 100,
     ONE_BOX: 40,
     PISTOL_ONLY: 150,
     NO_POWER: 80,

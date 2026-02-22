@@ -48,20 +48,15 @@ function config(
   return { roundCap, roundMilestones };
 }
 
-const WAW_LOW: RoundMilestone[] = buildRoundMilestones(1000, 2000);
-const WAW_MILESTONES: RoundMilestone[] = [
-  ...WAW_LOW,
-  { round: 2000, xp: 5000 },
-  { round: 5000, xp: 10000 },
-  { round: 10000, xp: 20000 },
-].sort((a, b) => a.round - b.round);
+import { getWaWMapConfig, getWaWRoundMilestones } from '@/lib/waw/waw-map-config';
 
-const WAW: Record<string, MapRoundConfig> = {
-  'nacht-der-untoten': config(null, WAW_MILESTONES),
-  verruckt: config(null, WAW_MILESTONES),
-  'shi-no-numa': config(null, WAW_MILESTONES),
-  'der-riese': config(null, WAW_MILESTONES),
-};
+const WAW: Record<string, MapRoundConfig> = {};
+for (const slug of ['nacht-der-untoten', 'verruckt', 'shi-no-numa', 'der-riese'] as const) {
+  const cfg = getWaWMapConfig(slug);
+  if (cfg) {
+    WAW[slug] = config(null, getWaWRoundMilestones(cfg.highRoundWR));
+  }
+}
 
 const BO1_220: RoundMilestone[] = buildRoundMilestones(220, 2500);
 const BO1_200: RoundMilestone[] = buildRoundMilestones(200, 2000);

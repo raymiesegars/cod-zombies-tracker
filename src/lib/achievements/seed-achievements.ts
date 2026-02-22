@@ -11,8 +11,9 @@ import {
   getRoundConfigForMap,
   getXpForRoundFromMilestones,
 } from './map-round-config';
+import { getWaWMapConfig, getWaWRoundMilestones, getWaWChallengeTypeLabel } from '@/lib/waw/waw-map-config';
 import { isBo4Game, BO4_DIFFICULTIES, BO4_DIFFICULTY_XP_MULTIPLIER, type Bo4DifficultyType } from '../bo4';
-import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, IW_AOTRT_SPEEDRUN_TIERS, IW_BEAST_SPEEDRUN_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
+import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, IW_AOTRT_SPEEDRUN_TIERS, IW_BEAST_SPEEDRUN_TIERS, WAW_SPEEDRUN_TIERS_BY_MAP, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
 
 const CHALLENGE_TYPES = [
   'HIGHEST_ROUND',
@@ -120,6 +121,86 @@ export function getMapAchievementDefinitions(
   gameShortName?: string
 ): AchievementSeedRow[] {
   const rows: AchievementSeedRow[] = [];
+
+  // WAW: per-map config with WR-based achievements, speedruns, and challenge availability
+  if (gameShortName === 'WAW') {
+    const wawCfg = getWaWMapConfig(mapSlug);
+    if (wawCfg) {
+      const milestones = getWaWRoundMilestones(wawCfg.highRoundWR);
+      const maxRound = wawCfg.highRoundWR;
+      for (const { round, xp } of milestones) {
+        rows.push({
+          slug: `round-${round}`,
+          name: `Round ${round}`,
+          type: 'ROUND_MILESTONE',
+          criteria: { round, challengeType: 'HIGHEST_ROUND' },
+          xpReward: xp,
+          rarity: rarityForRound(round, maxRound),
+        });
+      }
+      if (wawCfg.noDownsAvailable) {
+        for (const { round, xp } of milestones) {
+          rows.push({
+            slug: `no-downs-${round}`,
+            name: `No Downs Round ${round}`,
+            type: 'CHALLENGE_COMPLETE',
+            criteria: { round, challengeType: 'NO_DOWNS' },
+            xpReward: xp,
+            rarity: rarityForRound(round, maxRound),
+          });
+        }
+      }
+      for (const cType of wawCfg.challengeTypes) {
+        if (cType === 'HIGHEST_ROUND' || cType === 'NO_DOWNS') continue;
+        const wr = cType === 'STARTING_ROOM' ? wawCfg.firstRoomWR
+          : cType === 'STARTING_ROOM_JUG_SIDE' ? wawCfg.firstRoomJugWR
+          : cType === 'STARTING_ROOM_QUICK_SIDE' ? wawCfg.firstRoomQuickWR
+          : cType === 'NO_POWER' ? wawCfg.noPowerWR
+          : cType === 'NO_PERKS' ? wawCfg.noPerksWR
+          : undefined;
+        if (wr == null) continue;
+        const cMilestones = getWaWRoundMilestones(wr);
+        const slugPrefix = cType.toLowerCase().replace(/_/g, '-');
+        for (const { round, xp } of cMilestones) {
+          if (round > wr) continue;
+          rows.push({
+            slug: `${slugPrefix}-${round}`,
+            name: `${getWaWChallengeTypeLabel(cType)} Round ${round}`,
+            type: 'CHALLENGE_COMPLETE',
+            criteria: { round, challengeType: cType },
+            xpReward: Math.max(MIN_ACHIEVEMENT_XP, xp),
+            rarity: rarityForRound(round, wr),
+          });
+        }
+      }
+      if (wawCfg.challengeTypes.includes('ONE_BOX')) {
+        rows.push({
+          slug: 'one-box-30',
+          name: 'One Box Round 30',
+          type: 'CHALLENGE_COMPLETE',
+          criteria: { round: 30, challengeType: 'ONE_BOX' },
+          xpReward: 600,
+          rarity: 'RARE',
+        });
+      }
+      if (wawCfg.challengeTypes.includes('PISTOL_ONLY')) {
+        const pistolWR = maxRound;
+        const pistolMilestones = getWaWRoundMilestones(Math.min(pistolWR, 100), 5);
+        for (const { round, xp } of pistolMilestones) {
+          rows.push({
+            slug: `pistol-only-${round}`,
+            name: `Pistol Only Round ${round}`,
+            type: 'CHALLENGE_COMPLETE',
+            criteria: { round, challengeType: 'PISTOL_ONLY' },
+            xpReward: Math.max(MIN_ACHIEVEMENT_XP, Math.floor(xp * 3)),
+            rarity: rarityForRound(round, pistolWR),
+          });
+        }
+      }
+      return rows;
+    }
+  }
+
   const mapConfig = gameShortName ? getRoundConfigForMap(mapSlug, gameShortName) : null;
   const maxRound =
     mapConfig?.roundCap ??
@@ -299,12 +380,14 @@ const IW_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
   'the-beast-from-beyond': IW_BEAST_SPEEDRUN_TIERS,
 };
 
-/** Speedrun tier achievements for IW maps (ZIS, Rave, etc.). Fastest = most XP. */
+/** Speedrun tier achievements for IW and WAW maps. Fastest = most XP. */
 export function getSpeedrunAchievementDefinitions(
   mapSlug: string,
   gameShortName: string
 ): AchievementSeedRow[] {
-  const tiersByType = gameShortName === 'IW' ? IW_SPEEDRUN_TIERS_BY_MAP[mapSlug] : undefined;
+  const tiersByType = gameShortName === 'IW' ? IW_SPEEDRUN_TIERS_BY_MAP[mapSlug]
+    : gameShortName === 'WAW' ? WAW_SPEEDRUN_TIERS_BY_MAP[mapSlug]
+    : undefined;
   if (!tiersByType) return [];
   const rows: AchievementSeedRow[] = [];
   for (const [challengeType, tiers] of Object.entries(tiersByType)) {

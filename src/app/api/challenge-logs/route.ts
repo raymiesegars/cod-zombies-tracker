@@ -155,6 +155,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const isWaw = gameShortName === 'WAW';
+    if (isWaw && isSpeedrun && (completionTimeSeconds == null || completionTimeSeconds < 0)) {
+      return NextResponse.json(
+        { error: 'Speedrun challenges require completion time' },
+        { status: 400 }
+      );
+    }
+
     if (isBo3) {
       const mode = body.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT;
       if (!(BO3_GOBBLEGUM_MODES as readonly string[]).includes(mode)) {
@@ -206,6 +214,9 @@ export async function POST(request: NextRequest) {
         : []
       : undefined;
 
+    const wawNoJug = isWaw ? Boolean(body.wawNoJug ?? false) : undefined;
+    const wawFixedWunderwaffe = isWaw ? Boolean(body.wawFixedWunderwaffe ?? false) : undefined;
+
     const isSpeedrunChal = challenge && isIwSpeedrunChallengeType(challenge.type);
     const previousRound = previousBest && 'roundReached' in previousBest ? previousBest.roundReached ?? 0 : 0;
     const previousTime = previousBest && 'completionTimeSeconds' in previousBest ? previousBest.completionTimeSeconds : null;
@@ -238,6 +249,8 @@ export async function POST(request: NextRequest) {
         ...(bo7SupportMode != null && { bo7SupportMode }),
         ...(bo7IsCursedRun != null && { bo7IsCursedRun }),
         ...(bo7RelicsUsed != null && { bo7RelicsUsed }),
+        ...(wawNoJug != null && { wawNoJug }),
+        ...(wawFixedWunderwaffe != null && { wawFixedWunderwaffe }),
       },
     });
 

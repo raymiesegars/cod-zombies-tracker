@@ -259,6 +259,52 @@ export const IW_BEAST_SPEEDRUN_TIERS: SpeedrunTiersByType = {
   ],
 };
 
+/** WAW speedrun tiers per map — WR-based, 4 tiers each */
+export const WAW_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
+  'nacht-der-untoten': buildWaWSpeedrunTiers(28 * 60 + 38, 46 * 60 + 12, 70 * 60 + 11, 110 * 60 + 3),
+  verruckt: buildWaWSpeedrunTiers(26 * 60 + 34, 43 * 60 + 6, 61 * 60 + 44, 87 * 60 + 55),
+  'shi-no-numa': buildWaWSpeedrunTiers(23 * 60 + 38, 34 * 60 + 52, 44 * 60 + 59, 59 * 60 + 27),
+  'der-riese': {
+    ...buildWaWSpeedrunTiers(27 * 60 + 57, 59 * 60 + 41, 138 * 60 + 1, 465 * 60),
+    EASTER_EGG_SPEEDRUN: [
+      { maxTimeSeconds: 600, xpReward: 150 },
+      { maxTimeSeconds: 480, xpReward: 400 },
+      { maxTimeSeconds: 440, xpReward: 1000 },
+      { maxTimeSeconds: 415, xpReward: 2000 }, // WR 6:50 = 410s
+    ],
+  },
+};
+
+function buildWaWSpeedrunTiers(r30: number, r50: number, r70: number, r100: number): SpeedrunTiersByType {
+  const buf = 1.2;
+  return {
+    ROUND_30_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(r30 * buf * 1.5), xpReward: 80 },
+      { maxTimeSeconds: Math.round(r30 * buf * 1.2), xpReward: 200 },
+      { maxTimeSeconds: Math.round(r30 * buf), xpReward: 500 },
+      { maxTimeSeconds: Math.round(r30 * 1.05), xpReward: 1200 },
+    ],
+    ROUND_50_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(r50 * buf * 1.5), xpReward: 120 },
+      { maxTimeSeconds: Math.round(r50 * buf * 1.2), xpReward: 300 },
+      { maxTimeSeconds: Math.round(r50 * buf), xpReward: 700 },
+      { maxTimeSeconds: Math.round(r50 * 1.05), xpReward: 1500 },
+    ],
+    ROUND_70_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(r70 * buf * 1.5), xpReward: 150 },
+      { maxTimeSeconds: Math.round(r70 * buf * 1.2), xpReward: 400 },
+      { maxTimeSeconds: Math.round(r70 * buf), xpReward: 900 },
+      { maxTimeSeconds: Math.round(r70 * 1.05), xpReward: 2000 },
+    ],
+    ROUND_100_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(r100 * buf * 1.5), xpReward: 200 },
+      { maxTimeSeconds: Math.round(r100 * buf * 1.2), xpReward: 500 },
+      { maxTimeSeconds: Math.round(r100 * buf), xpReward: 1200 },
+      { maxTimeSeconds: Math.round(r100 * 1.05), xpReward: 2500 },
+    ],
+  };
+}
+
 export function formatSpeedrunTime(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
   const m = Math.floor(seconds / 60);

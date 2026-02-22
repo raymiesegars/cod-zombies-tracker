@@ -14,6 +14,8 @@ interface ModalProps {
   children: React.ReactNode;
   className?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  /** When false, content area does not scroll (child handles its own overflow) */
+  contentScroll?: boolean;
 }
 
 const sizeStyles = {
@@ -32,6 +34,7 @@ export function Modal({
   children,
   className,
   size = 'md',
+  contentScroll = true,
 }: ModalProps) {
   const handleEscape = useCallback(
     (e: KeyboardEvent) => {
@@ -114,8 +117,15 @@ export function Modal({
               </button>
             )}
 
-            {/* Content - scrollable when tall (e.g. Create listing form on small screens) */}
-            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 sm:p-6">{children}</div>
+            {/* Content - scrollable when tall unless contentScroll=false (child handles overflow) */}
+            <div
+              className={cn(
+                'flex-1 min-h-0 p-4 sm:p-6',
+                contentScroll ? 'overflow-y-auto overflow-x-hidden' : 'overflow-hidden'
+              )}
+            >
+              {children}
+            </div>
           </motion.div>
         </div>
       )}

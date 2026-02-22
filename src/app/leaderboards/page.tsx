@@ -13,6 +13,7 @@ import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES, getBo6GobbleGumLabel
 import { isBo7Game, BO7_SUPPORT_MODES, getBo7SupportLabel } from '@/lib/bo7';
 import { Trophy, Medal, Filter, Search, X, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
+import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-config';
 
 const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
 const PAGE_SIZE = 25;
@@ -24,6 +25,8 @@ const challengeTypeLabels: Record<string, string> = {
   NO_PERKS: 'No Perks',
   NO_PACK: 'No Pack-a-Punch',
   STARTING_ROOM: 'Starting Room Only',
+  STARTING_ROOM_JUG_SIDE: 'First Room (Jug Side)',
+  STARTING_ROOM_QUICK_SIDE: 'First Room (Quick Side)',
   ONE_BOX: 'One Box Challenge',
   PISTOL_ONLY: 'Pistol Only',
   NO_POWER: 'No Power',
@@ -81,6 +84,10 @@ export default function LeaderboardsPage() {
   const isBocwMap = isBocwGame(selectedMapData?.game?.shortName);
   const isBo6Map = isBo6Game(selectedMapData?.game?.shortName);
   const isBo7Map = isBo7Game(selectedMapData?.game?.shortName);
+  const isWawMap = selectedMapData?.game?.shortName === 'WAW';
+
+  const [wawNoJugFilter, setWawNoJugFilter] = useState<string>('');
+  const [wawFixedWunderwaffeFilter, setWawFixedWunderwaffeFilter] = useState<string>('');
 
   // Debounce search: clear immediately, type delay 300ms so we search all users on the server
   useEffect(() => {
@@ -203,6 +210,10 @@ export default function LeaderboardsPage() {
             if (bo7CursedFilter === 'true' || bo7CursedFilter === 'false') params.set('bo7CursedRun', bo7CursedFilter);
             if (bo7CursedFilter === 'true' && bo7RelicsFilter.length > 0) params.set('bo7Relics', bo7RelicsFilter.join(','));
           }
+          if (isWawMap) {
+            if (wawNoJugFilter === 'true' || wawNoJugFilter === 'false') params.set('wawNoJug', wawNoJugFilter);
+            if (wawFixedWunderwaffeFilter === 'true' || wawFixedWunderwaffeFilter === 'false') params.set('wawFixedWunderwaffe', wawFixedWunderwaffeFilter);
+          }
           const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -218,7 +229,7 @@ export default function LeaderboardsPage() {
     }
 
     fetchLeaderboard();
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, searchForFetch, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo4ElixirFilter, bocwSupportFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, searchForFetch, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo4ElixirFilter, bocwSupportFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter]);
 
   const loadMore = useCallback(async () => {
     if (leaderboard.length >= total || total === 0) return;
@@ -282,6 +293,10 @@ export default function LeaderboardsPage() {
             if (bo7CursedFilter === 'true' || bo7CursedFilter === 'false') params.set('bo7CursedRun', bo7CursedFilter);
             if (bo7CursedFilter === 'true' && bo7RelicsFilter.length > 0) params.set('bo7Relics', bo7RelicsFilter.join(','));
           }
+          if (isWawMap) {
+            if (wawNoJugFilter === 'true' || wawNoJugFilter === 'false') params.set('wawNoJug', wawNoJugFilter);
+            if (wawFixedWunderwaffeFilter === 'true' || wawFixedWunderwaffeFilter === 'false') params.set('wawFixedWunderwaffe', wawFixedWunderwaffeFilter);
+          }
           const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -300,7 +315,7 @@ export default function LeaderboardsPage() {
     } finally {
       loadingMoreRef.current = false;
     }
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo4ElixirFilter, bocwSupportFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, leaderboard.length, total]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo4ElixirFilter, bocwSupportFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, leaderboard.length, total]);
 
   // Only observe sentinel when search is empty so list stays stable while filtering
   useEffect(() => {
@@ -341,7 +356,7 @@ export default function LeaderboardsPage() {
   ];
 
   // Fetch selected map's challenges and main-quest EEs to build leaderboard filter options
-  const [mapChallenges, setMapChallenges] = useState<{ type: string }[]>([]);
+  const [mapChallenges, setMapChallenges] = useState<{ type: string; name?: string }[]>([]);
   const [mapEasterEggs, setMapEasterEggs] = useState<{ id: string; name: string }[]>([]);
   useEffect(() => {
     if (!selectedMap || isRankView) {
@@ -374,14 +389,18 @@ export default function LeaderboardsPage() {
 
   // Build options: Highest Round, each challenge this map has (IW in canonical order), each loggable EE (Time)
   const challengeTypeOptionsWithEe = useMemo(() => {
+    const getLabel = (type: string, fallbackName?: string | null) =>
+      selectedMapData?.game?.shortName === 'WAW'
+        ? (fallbackName || getWaWChallengeTypeLabel(type))
+        : (fallbackName ?? challengeTypeLabels[type] ?? type);
     const challengeOptions = mapChallenges.length > 0 && selectedMapData?.game?.shortName === 'IW'
-      ? IW_CHALLENGE_TYPES_ORDER.filter((t) => mapChallenges.some((c) => c.type === t)).map((t) => ({
-          value: t,
-          label: challengeTypeLabels[t] ?? t,
-        }))
+      ? IW_CHALLENGE_TYPES_ORDER.filter((t) => mapChallenges.some((c) => c.type === t)).map((t) => {
+          const c = mapChallenges.find((ch) => ch.type === t);
+          return { value: t, label: c?.name ?? challengeTypeLabels[t] ?? t };
+        })
       : mapChallenges.map((c) => ({
           value: c.type,
-          label: challengeTypeLabels[c.type] ?? c.type,
+          label: getLabel(c.type, c.name),
         }));
     return [
       { value: 'HIGHEST_ROUND', label: 'Highest Round' },
@@ -656,6 +675,30 @@ export default function LeaderboardsPage() {
                           placeholder="Any relics"
                           className="w-full min-w-0 sm:w-52 max-w-full"
                         />
+                      )}
+                    </>
+                  )}
+                  {isWawMap && getWaWMapConfig(selectedMap)?.noJugWR != null && (
+                    <>
+                      <Select
+                        options={[
+                          { value: '', label: 'Jug Allowed' },
+                          { value: 'true', label: 'No Jug' },
+                        ]}
+                        value={wawNoJugFilter}
+                        onChange={(e) => setWawNoJugFilter(e.target.value)}
+                        className="w-full min-w-0 sm:w-40 max-w-full"
+                      />
+                      {selectedMapData?.slug === 'der-riese' && (
+                      <Select
+                        options={[
+                          { value: '', label: 'Standard' },
+                          { value: 'true', label: 'Fixed Wunderwaffe' },
+                        ]}
+                        value={wawFixedWunderwaffeFilter}
+                        onChange={(e) => setWawFixedWunderwaffeFilter(e.target.value)}
+                        className="w-full min-w-0 sm:w-40 max-w-full"
+                      />
                       )}
                     </>
                   )}
