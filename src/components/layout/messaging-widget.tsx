@@ -150,6 +150,8 @@ export function MessagingWidget() {
 
   // UI state
   const [unreadTotal, setUnreadTotal] = useState(0);
+  const [friendsOnline, setFriendsOnline] = useState(0);
+  const [friendsTotal, setFriendsTotal] = useState(0);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [confirmRemoveFriend, setConfirmRemoveFriend] = useState<UserInfo | null>(null);
   const [confirmBlock, setConfirmBlock] = useState<UserInfo | null>(null);
@@ -158,6 +160,26 @@ export function MessagingWidget() {
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // ── Background friends count (always, for button badge) ───────────────────
+  useEffect(() => {
+    if (!profile?.id) return;
+    const doFetch = () => {
+      fetch('/api/me/friends', { credentials: 'same-origin', cache: 'no-store' })
+        .then((r) => r.ok ? r.json() : { friends: [] })
+        .then((d) => {
+          const list = d.friends ?? [];
+          setFriendsTotal(list.length);
+          setFriendsOnline(list.filter((f: { isOnline?: boolean }) => f.isOnline).length);
+        })
+        .catch(() => {});
+    };
+    doFetch();
+    const t = setInterval(doFetch, 60 * 1000);
+    const onUpdate = () => doFetch();
+    window.addEventListener('cod-tracker-friends-updated', onUpdate);
+    return () => { clearInterval(t); window.removeEventListener('cod-tracker-friends-updated', onUpdate); };
+  }, [profile?.id]);
 
   // ── Unread count polling (always) ──────────────────────────────────────────
   const fetchUnreadCount = useCallback(() => {
@@ -386,16 +408,32 @@ export function MessagingWidget() {
             if (!isOpen) { setActiveTab('messages'); setChatWith(null); }
           }}
           className={cn(
-            'relative flex items-center justify-center w-12 h-12 rounded-full shadow-lg transition-colors',
+            'relative flex items-center gap-2.5 pl-3 pr-4 h-11 rounded-full shadow-xl border transition-all duration-150 select-none',
             isOpen
-              ? 'bg-blood-600 hover:bg-blood-500 text-white'
-              : 'bg-bunker-800 hover:bg-bunker-700 border border-bunker-600 text-bunker-200 hover:text-white'
+              ? 'bg-blood-600 hover:bg-blood-500 border-blood-500 text-white'
+              : 'bg-bunker-800 hover:bg-bunker-700 border-bunker-600 hover:border-bunker-500 text-white'
           )}
-          aria-label={isOpen ? 'Close messages' : 'Open messages'}
+          aria-label={isOpen ? 'Close messages' : 'Open chat & friends'}
         >
-          {isOpen ? <X className="w-5 h-5" /> : <MessageSquare className="w-5 h-5" />}
+          {isOpen
+            ? <X className="w-4 h-4 flex-shrink-0" />
+            : <MessageSquare className="w-4 h-4 flex-shrink-0 text-blood-400" />
+          }
+          {!isOpen && (
+            <span className="flex flex-col leading-none">
+              <span className="text-xs font-semibold text-white">Chat & Friends</span>
+              <span className="text-[10px] text-bunker-300 mt-0.5 tabular-nums whitespace-nowrap">
+                <span className={friendsOnline > 0 ? 'text-element-400 font-semibold' : 'text-bunker-300'}>
+                  {friendsOnline}
+                </span>
+                <span className="text-bunker-400">/{friendsTotal}</span>
+                <span className="text-bunker-400">{' online'}</span>
+              </span>
+            </span>
+          )}
+          {isOpen && <span className="text-sm font-semibold">Close</span>}
           {!isOpen && unreadTotal > 0 && (
-            <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-blood-500 text-white text-[10px] font-bold border border-bunker-900">
+            <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-blood-500 text-white text-[10px] font-bold border-2 border-bunker-900">
               {unreadTotal > 99 ? '99+' : unreadTotal}
             </span>
           )}
