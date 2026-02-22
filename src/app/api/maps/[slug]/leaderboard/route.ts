@@ -23,6 +23,7 @@ export async function GET(
   const directorsCut = searchParams.get('directorsCut') === 'true';
   // BO3
   const bo3GobbleGumMode = searchParams.get('bo3GobbleGumMode'); // 'CLASSIC_ONLY' | 'MEGA' | 'NONE' | null
+  const bo3AatUsed = searchParams.get('bo3AatUsed'); // 'true' | 'false' | null (AATs used / No AATs)
   // BO4
   const bo4ElixirMode = searchParams.get('bo4ElixirMode'); // 'CLASSIC_ONLY' | 'ALL_ELIXIRS_TALISMANS' | null
   // BOCW
@@ -103,8 +104,10 @@ export async function GET(
       if (directorsCut) whereClause.useDirectorsCut = true;
     }
 
-    if (isBo3Game(gameShortName) && bo3GobbleGumMode) {
-      (whereClause as Record<string, unknown>).bo3GobbleGumMode = bo3GobbleGumMode;
+    if (isBo3Game(gameShortName)) {
+      if (bo3GobbleGumMode) (whereClause as Record<string, unknown>).bo3GobbleGumMode = bo3GobbleGumMode;
+      if (bo3AatUsed === 'true') (whereClause as Record<string, unknown>).bo3AatUsed = true;
+      else if (bo3AatUsed === 'false') (whereClause as Record<string, unknown>).bo3AatUsed = false;
     }
 
     if (isBo4Game(gameShortName) && bo4ElixirMode) {
@@ -150,13 +153,26 @@ export async function GET(
 
     // "Highest Round" (or no filter) = best round from any challenge OR easter egg; specific challenge = only that challenge's logs
     const isSpecificChallenge = challengeType && challengeType !== 'HIGHEST_ROUND';
-    const isSpeedrun = isSpecificChallenge && isIwSpeedrunChallengeType(challengeType!);
+    const isSpeedrun =
+      isSpecificChallenge &&
+      (isIwSpeedrunChallengeType(challengeType!) || challengeType === 'ROUND_255_SPEEDRUN');
+    const isNoMansLand = isSpecificChallenge && challengeType === 'NO_MANS_LAND';
     if (isSpecificChallenge) {
       whereClause.challenge = { type: challengeType };
     }
     if (isSpeedrun) {
       whereClause.completionTimeSeconds = { not: null };
     }
+    if (isNoMansLand) {
+      (whereClause as Record<string, unknown>).killsReached = { not: null };
+    }
+
+    const orderBy =
+      isSpeedrun
+        ? { completionTimeSeconds: 'asc' as const }
+        : isNoMansLand
+          ? { killsReached: 'desc' as const }
+          : { roundReached: 'desc' as const };
 
     const challengeLogs = await prisma.challengeLog.findMany({
       where: whereClause,
@@ -173,7 +189,7 @@ export async function GET(
         },
         challenge: true,
       },
-      orderBy: isSpeedrun ? { completionTimeSeconds: 'asc' } : { roundReached: 'desc' },
+      orderBy,
       take: mergeTake * 2,
     });
 
@@ -218,14 +234,32 @@ export async function GET(
       const key = `${log.userId}-${log.playerCount}`;
       const existing = userBestMap.get(key);
       const logTime = log.completionTimeSeconds ?? null;
+      const logKills = (log as { killsReached?: number | null }).killsReached ?? null;
       if (isSpeedrun) {
         if (logTime == null) continue;
         if (!existing || existing.completionTimeSeconds == null || logTime < existing.completionTimeSeconds) {
           userBestMap.set(key, {
             userId: log.userId,
             playerCount: log.playerCount,
-            round: log.roundReached,
+            round: isNoMansLand && logKills != null ? logKills : log.roundReached,
             completionTimeSeconds: logTime,
+            user: log.user,
+            proofUrls: log.proofUrls ?? [],
+            proofUrl: (log.proofUrls && log.proofUrls.length > 0) ? log.proofUrls[0]! : null,
+            completedAt: log.completedAt,
+            logId: log.id,
+            runType: 'challenge',
+            isVerified: log.isVerified ?? false,
+          });
+        }
+      } else if (isNoMansLand) {
+        if (logKills == null) continue;
+        if (!existing || logKills > existing.round) {
+          userBestMap.set(key, {
+            userId: log.userId,
+            playerCount: log.playerCount,
+            round: logKills,
+            completionTimeSeconds: log.completionTimeSeconds,
             user: log.user,
             proofUrls: log.proofUrls ?? [],
             proofUrl: (log.proofUrls && log.proofUrls.length > 0) ? log.proofUrls[0]! : null,

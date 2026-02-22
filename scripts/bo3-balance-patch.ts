@@ -1,20 +1,20 @@
 /**
- * BO2 Balance Patch Migration
+ * BO3 Balance Patch Migration
  *
- * SAFE: Only affects BO2 game maps. No truncation, no deletion of user logs.
+ * SAFE: Only affects BO3 game maps. No truncation, no deletion of user logs.
  * - Deactivates challenges that don't exist per map (isActive=false)
- * - Creates new challenges (NO_MAGIC, round speedruns, EE speedruns)
- * - Replaces BO2 achievements with WR-based definitions; recalculates user XP
- * - Tranzit, Die Rise, Buried: separate EE speedrun achievements for Richtofen vs Maxis
+ * - Creates new challenges (NO_JUG, NO_ATS, ROUND_255_SPEEDRUN, NO_MANS_LAND, STARTING_ROOM_JUG_SIDE, STARTING_ROOM_QUICK_SIDE)
+ * - Replaces BO3 achievements with WR-based definitions; recalculates user XP
+ * - EE speedrun achievements use map's main-quest Easter Egg
  *
  * IMPORTANT: NEVER deactivate EASTER_EGG_COMPLETE achievements (main quest completion).
- * They are created by seed-easter-eggs, not getMapAchievementDefinitions. See ACHIEVEMENT_TYPES_NEVER_DEACTIVATE.
+ * They are created by seed-easter-eggs, not getMapAchievementDefinitions.
  *
- * Run AFTER schema migration (20260230000000_add_no_magic_and_bo2_bank).
+ * Run AFTER schema migration (20260231000000_add_bo3_aat_no_jug_round255_no_mans_land).
  *
  * Usage:
- *   pnpm exec tsx scripts/bo2-balance-patch.ts           # Run against .env.local (dev)
- *   pnpm exec tsx scripts/bo2-balance-patch.ts --dry-run  # Preview without writing
+ *   pnpm exec tsx scripts/bo3-balance-patch.ts           # Run against .env.local (dev)
+ *   pnpm exec tsx scripts/bo3-balance-patch.ts --dry-run  # Preview without writing
  */
 
 import * as fs from 'fs';
@@ -39,19 +39,18 @@ import prisma from '../src/lib/prisma';
 import {
   getMapAchievementDefinitions,
   getSpeedrunAchievementDefinitions,
-  getBo2EeSpeedrunDefinitions,
 } from '../src/lib/achievements/seed-achievements';
-import { BO2_MAP_CONFIG, type Bo2MapSlug } from '../src/lib/bo2/bo2-map-config';
+import { BO3_MAP_CONFIG, getBo3ChallengeTypeLabel, type Bo3MapSlug } from '../src/lib/bo3/bo3-map-config';
 import type { ChallengeType } from '@prisma/client';
 
 const DRY_RUN = process.argv.includes('--dry-run');
 
-const BO2_SPEEDRUN_TYPES: { type: ChallengeType; name: string }[] = [
+const BO3_SPEEDRUN_TYPES: { type: ChallengeType; name: string }[] = [
   { type: 'ROUND_30_SPEEDRUN', name: 'Round 30 Speedrun' },
   { type: 'ROUND_50_SPEEDRUN', name: 'Round 50 Speedrun' },
   { type: 'ROUND_70_SPEEDRUN', name: 'Round 70 Speedrun' },
   { type: 'ROUND_100_SPEEDRUN', name: 'Round 100 Speedrun' },
-  { type: 'ROUND_200_SPEEDRUN', name: 'Round 200 Speedrun' },
+  { type: 'ROUND_255_SPEEDRUN', name: 'Round 255 Speedrun' },
   { type: 'EASTER_EGG_SPEEDRUN', name: 'Easter Egg Speedrun' },
 ];
 
@@ -66,9 +65,9 @@ async function main() {
     console.log('*** DRY RUN – no changes will be written ***\n');
   }
 
-  const game = await prisma.game.findFirst({ where: { shortName: 'BO2' } });
+  const game = await prisma.game.findFirst({ where: { shortName: 'BO3' } });
   if (!game) {
-    console.log('BO2 game not found. Exiting.');
+    console.log('BO3 game not found. Exiting.');
     return;
   }
 
@@ -78,7 +77,7 @@ async function main() {
   });
 
   if (maps.length === 0) {
-    console.log('No BO2 maps found. Exiting.');
+    console.log('No BO3 maps found. Exiting.');
     return;
   }
 
@@ -88,7 +87,7 @@ async function main() {
   let challengesCreated = 0;
 
   for (const map of maps) {
-    const cfg = BO2_MAP_CONFIG[map.slug as Bo2MapSlug];
+    const cfg = BO3_MAP_CONFIG[map.slug as Bo3MapSlug];
     if (!cfg) continue;
 
     const allowedTypes = new Set(cfg.challengeTypes);
@@ -107,13 +106,13 @@ async function main() {
     }
 
     const existingTypes = new Set(map.challenges.map((c) => c.type));
-    const speedrunTypeSet = new Set(BO2_SPEEDRUN_TYPES.map((s) => s.type));
+    const speedrunTypeSet = new Set(BO3_SPEEDRUN_TYPES.map((s) => s.type));
 
-    // Create non-speedrun challenges (NO_MAGIC, etc.)
+    // Create non-speedrun challenges (NO_JUG, NO_ATS, NO_MANS_LAND, STARTING_ROOM_JUG_SIDE, STARTING_ROOM_QUICK_SIDE, etc.)
     for (const t of Array.from(allowedTypes)) {
-      if (speedrunTypeSet.has(t)) continue; // speedruns handled below
+      if (speedrunTypeSet.has(t)) continue;
       if (existingTypes.has(t)) continue;
-      const name = t === 'NO_MAGIC' ? 'No Magic' : t.replace(/_/g, ' ');
+      const name = getBo3ChallengeTypeLabel(t);
       if (!DRY_RUN) {
         await prisma.challenge.create({
           data: {
@@ -130,11 +129,11 @@ async function main() {
       challengesCreated++;
     }
 
-    // Create speedrun challenges (round speedruns; EE speedruns use EasterEggLog)
-    const speedrunToCreate = BO2_SPEEDRUN_TYPES.filter(({ type }) => {
-      if (type === 'ROUND_200_SPEEDRUN' && !cfg.speedrunWRs?.r200) return false;
+    // Create speedrun challenges
+    const speedrunToCreate = BO3_SPEEDRUN_TYPES.filter(({ type }) => {
+      if (type === 'ROUND_255_SPEEDRUN' && !cfg.speedrunWRs?.r255) return false;
       if (type === 'ROUND_100_SPEEDRUN' && !cfg.speedrunWRs?.r100) return false;
-      if (type === 'EASTER_EGG_SPEEDRUN') return allowedTypes.has(type); // Mob, Origins have single EE
+      if (type === 'EASTER_EGG_SPEEDRUN') return allowedTypes.has(type);
       return allowedTypes.has(type);
     });
 
@@ -158,8 +157,8 @@ async function main() {
 
   console.log(`   Deactivated: ${challengesDeactivated}, Created: ${challengesCreated}`);
 
-  // 2. Replace BO2 achievements
-  console.log('2. Updating BO2 achievements...');
+  // 2. Replace BO3 achievements
+  console.log('2. Updating BO3 achievements...');
 
   const mapsWithChallenges = await prisma.map.findMany({
     where: { gameId: game.id },
@@ -183,24 +182,27 @@ async function main() {
   let achievementsUpdated = 0;
 
   for (const map of mapsWithChallenges) {
-    const mapDefs = getMapAchievementDefinitions(map.slug, 0, map.game?.shortName ?? 'BO2');
-    let speedrunDefs = getSpeedrunAchievementDefinitions(map.slug, map.game?.shortName ?? 'BO2');
+    const mapDefs = getMapAchievementDefinitions(map.slug, 0, map.game?.shortName ?? 'BO3');
+    let speedrunDefs = getSpeedrunAchievementDefinitions(map.slug, map.game?.shortName ?? 'BO3');
 
-    // Tranzit, Die Rise, Buried: add EE speedrun definitions for Richtofen and Maxis
-    const bo2EeDefs = getBo2EeSpeedrunDefinitions(map.slug);
-    for (const def of bo2EeDefs) {
-      const eeSlug = def.easterEggSlug;
-      if (!eeSlug) continue;
-      const ee = map.easterEggs.find((e) => e.slug === eeSlug);
-      if (!ee) continue;
-      speedrunDefs = [...speedrunDefs, { ...def, easterEggId: ee.id, easterEggSlug: undefined }];
+    // Resolve easterEggId for EE speedrun achievements (main-quest or first MAIN_QUEST type, e.g. The Giant uses paradoxical-prologue)
+    const mainEe = map.easterEggs.find((e) => e.slug === 'main-quest')
+      ?? map.easterEggs.find((e) => e.type === 'MAIN_QUEST');
+    if (mainEe) {
+      speedrunDefs = speedrunDefs.map((def) => {
+        const criteria = def.criteria as { challengeType?: string };
+        if (criteria.challengeType === 'EASTER_EGG_SPEEDRUN') {
+          return { ...def, easterEggId: mainEe.id };
+        }
+        return def;
+      });
     }
 
     const defs = [...mapDefs, ...speedrunDefs];
     const challengesByType = Object.fromEntries(map.challenges.map((c) => [c.type, c]));
 
     for (const def of defs) {
-      const criteria = def.criteria as { round?: number; challengeType?: string; isCap?: boolean; maxTimeSeconds?: number };
+      const criteria = def.criteria as { round?: number; kills?: number; challengeType?: string; isCap?: boolean; maxTimeSeconds?: number };
       const challengeType = criteria.challengeType;
       const challengeId = challengeType
         ? challengesByType[challengeType as keyof typeof challengesByType]?.id ?? null
@@ -243,7 +245,6 @@ async function main() {
   let achievementsDeactivated = 0;
   for (const entry of Array.from(existingBySlug.values())) {
     const { id, isActive, type } = entry;
-    // NEVER deactivate main easter egg completion achievements (EASTER_EGG_COMPLETE)
     if (type === 'EASTER_EGG_COMPLETE') continue;
     if (isActive && !DRY_RUN) {
       await prisma.achievement.update({
@@ -308,7 +309,7 @@ async function main() {
   if (DRY_RUN) {
     console.log('\n*** Dry run complete. Run without --dry-run to apply. ***');
   } else {
-    console.log('\nBO2 balance patch applied successfully.');
+    console.log('\nBO3 balance patch applied successfully.');
   }
 
   await prisma.$disconnect();

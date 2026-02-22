@@ -228,13 +228,17 @@ enum ChallengeType {
   PISTOL_ONLY         // Only use starting pistol
   NO_POWER            // Never turn on power
   NO_MAGIC            // BO2 Custom Game: Magic disabled (some maps only)
+  NO_JUG              // BO3+: No Juggernog
+  NO_ATS              // BO3+: No Alternate Ammo Types (AATs)
   // IW speedruns (time-based; completionTimeSeconds required)
   ROUND_30_SPEEDRUN
   ROUND_50_SPEEDRUN
   ROUND_70_SPEEDRUN
   ROUND_100_SPEEDRUN
   ROUND_200_SPEEDRUN
+  ROUND_255_SPEEDRUN   // BO3+: Round 255 speedrun
   EASTER_EGG_SPEEDRUN
+  NO_MANS_LAND         // Moon: kills not rounds (killsReached used)
   GHOST_AND_SKULLS
   ALIENS_BOSS_FIGHT
   CRYPTID_FIGHT       // Beast From Beyond: Cryptid swarm boss
@@ -399,6 +403,10 @@ model ChallengeLog {
 
   // BO3 only: GobbleGum mode — 'CLASSIC_ONLY' | 'MEGA' | 'NONE' (required, default CLASSIC_ONLY)
   bo3GobbleGumMode        String?
+  // BO3 only: AATs used — true = used AATs, false = No AATs run. Null = legacy/unknown.
+  bo3AatUsed              Boolean?
+  // For NO_MANS_LAND challenge: kills achieved (roundReached ignored)
+  killsReached            Int?
 
   // BO4 only: Elixir/Talisman mode — 'CLASSIC_ONLY' | 'ALL_ELIXIRS_TALISMANS' (required)
   bo4ElixirMode           String?

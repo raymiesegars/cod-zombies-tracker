@@ -27,6 +27,11 @@ export function isIwSpeedrunChallengeType(type: string): boolean {
   return (IW_SPEEDRUN_TYPES as readonly string[]).includes(type);
 }
 
+/** All speedrun types across games (IW + BO3 ROUND_255, etc.). Used for form/validation. */
+export function isSpeedrunChallengeType(type: string): boolean {
+  return isIwSpeedrunChallengeType(type) || type === 'ROUND_255_SPEEDRUN';
+}
+
 /** Minimum round required when logging this speedrun type (e.g. Round 30 Speedrun = 30). Non-round speedruns (EE, G&S, Aliens) return 1. */
 export function getMinRoundForSpeedrunChallengeType(type: string): number {
   switch (type) {
@@ -35,6 +40,7 @@ export function getMinRoundForSpeedrunChallengeType(type: string): number {
     case 'ROUND_70_SPEEDRUN': return 70;
     case 'ROUND_100_SPEEDRUN': return 100;
     case 'ROUND_200_SPEEDRUN': return 200;
+    case 'ROUND_255_SPEEDRUN': return 255;
     default: return 1; // EASTER_EGG_SPEEDRUN, GHOST_AND_SKULLS, ALIENS_BOSS_FIGHT
   }
 }

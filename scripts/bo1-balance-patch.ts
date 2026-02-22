@@ -7,6 +7,8 @@
  * - Replaces BO1 achievements with WR-based definitions; recalculates user XP
  * - Call of the Dead: separate EE speedrun achievements for Stand-in (Solo) and Ensemble Cast (2+)
  *
+ * IMPORTANT: NEVER deactivate EASTER_EGG_COMPLETE achievements (main quest completion).
+ *
  * Run AFTER schema migration (20260229000000_add_round_200_speedrun).
  *
  * Usage:
@@ -185,11 +187,11 @@ async function main() {
     },
   });
 
-  const existingBySlug = new Map<string, { id: string; xpReward: number; isActive: boolean }>();
+  const existingBySlug = new Map<string, { id: string; xpReward: number; isActive: boolean; type: string }>();
   for (const map of mapsWithChallenges) {
     for (const a of map.achievements) {
       const key = `${map.id}:${a.slug}:${a.difficulty ?? ''}`;
-      existingBySlug.set(key, { id: a.id, xpReward: a.xpReward, isActive: a.isActive });
+      existingBySlug.set(key, { id: a.id, xpReward: a.xpReward, isActive: a.isActive, type: a.type });
     }
   }
 
@@ -257,7 +259,10 @@ async function main() {
   }
 
   let achievementsDeactivated = 0;
-  for (const { id, isActive } of Array.from(existingBySlug.values())) {
+  for (const entry of Array.from(existingBySlug.values())) {
+    const { id, isActive, type } = entry;
+    // NEVER deactivate main easter egg completion achievements (EASTER_EGG_COMPLETE)
+    if (type === 'EASTER_EGG_COMPLETE') continue;
     if (isActive && !DRY_RUN) {
       await prisma.achievement.update({
         where: { id },

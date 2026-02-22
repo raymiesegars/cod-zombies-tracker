@@ -32,9 +32,11 @@ import {
   getAchievementCategory,
   getNonSpeedrunCategoryFilterOptions,
   getSpeedrunCategoryFilterOptions,
+  getAllowedSpeedrunCategoriesForMap,
+  getAllowedNonSpeedrunCategoriesForMap,
   getSortedCategoryKeys,
+  sortAchievementsInCategory,
   isSpeedrunCategory,
-  sortAchievementsByXp,
 } from '@/lib/achievements/categories';
 import { getAssetUrl } from '@/lib/assets';
 import { getDisplayAvatarUrl } from '@/lib/avatar';
@@ -173,8 +175,23 @@ function AchievementsSection({
   );
   const nonSpeedrunCats = existingCategories.filter((c) => !isSpeedrunCategory(c));
   const speedrunCats = existingCategories.filter((c) => isSpeedrunCategory(c));
-  const categoryOptions = getNonSpeedrunCategoryFilterOptions(nonSpeedrunCats.length ? nonSpeedrunCats : undefined);
-  const speedrunOptions = getSpeedrunCategoryFilterOptions(speedrunCats.length ? speedrunCats : undefined);
+  const selectedMapData = mapAchievementsForFilterOptions[0]?.map;
+  const allowedSpeedrunCats = getAllowedSpeedrunCategoriesForMap(
+    selectedMapData?.game?.shortName,
+    selectedMapData?.slug
+  );
+  const allowedNonSpeedrunCats = getAllowedNonSpeedrunCategoriesForMap(
+    selectedMapData?.game?.shortName,
+    selectedMapData?.slug
+  );
+  const categoryOptions = getNonSpeedrunCategoryFilterOptions(
+    nonSpeedrunCats.length ? nonSpeedrunCats : undefined,
+    allowedNonSpeedrunCats
+  );
+  const speedrunOptions = getSpeedrunCategoryFilterOptions(
+    speedrunCats.length ? speedrunCats : undefined,
+    allowedSpeedrunCats
+  );
 
   const filteredAchievements = useMemo(() => {
     if (!overview?.achievements || !filterMap) return [];
@@ -355,7 +372,7 @@ function AchievementsSection({
                           {ACHIEVEMENT_CATEGORY_LABELS[cat] ?? cat}
                         </p>
                         <ul className="space-y-2">
-                          {sortAchievementsByXp(byCategory[cat]).map((a) => {
+                          {sortAchievementsInCategory(byCategory[cat]).map((a) => {
                             const unlocked = unlockedSet.has(a.id);
                             const c = a.criteria as { round?: number; isCap?: boolean; maxTimeSeconds?: number } | undefined;
                             const subLabel = c?.isCap ? 'Cap' : c?.round != null ? `Round ${c.round}` : null;

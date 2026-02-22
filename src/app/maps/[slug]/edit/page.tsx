@@ -25,7 +25,7 @@ import { cn, normalizeProofUrls } from '@/lib/utils';
 import { useXpToast } from '@/context/xp-toast-context';
 import { getXpForChallengeLog, getXpForEasterEggLog, type AchievementForPreview } from '@/lib/xp-preview';
 import { isBo4Game, BO4_DIFFICULTIES, getBo4DifficultyLabel } from '@/lib/bo4';
-import { isIwGame, isIwSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType } from '@/lib/iw';
+import { isIwGame, isIwSpeedrunChallengeType, isSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType } from '@/lib/iw';
 import { isBo3Game, BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT, getBo3GobbleGumLabel } from '@/lib/bo3';
 import { isBocwGame, BOCW_SUPPORT_MODES, BOCW_SUPPORT_DEFAULT, getBocwSupportLabel } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_GOBBLEGUM_DEFAULT, BO6_SUPPORT_MODES, BO6_SUPPORT_DEFAULT, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
@@ -35,6 +35,7 @@ import { ChevronLeft, Save, CheckCircle, AlertCircle, BookOpen } from 'lucide-re
 import { WAW_OFFICIAL_RULES } from '@/lib/waw/waw-official-rules';
 import { BO1_OFFICIAL_RULES } from '@/lib/bo1/bo1-official-rules';
 import { BO2_OFFICIAL_RULES } from '@/lib/bo2/bo2-official-rules';
+import { BO3_OFFICIAL_RULES } from '@/lib/bo3/bo3-official-rules';
 import { isRuleLink, isRuleInlineLinks } from '@/lib/rules/types';
 import { getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
@@ -56,6 +57,10 @@ const challengeTypeLabels: Record<ChallengeType, string> = {
   ROUND_70_SPEEDRUN: 'Round 70 Speedrun',
   ROUND_100_SPEEDRUN: 'Round 100 Speedrun',
   ROUND_200_SPEEDRUN: 'Round 200 Speedrun',
+  ROUND_255_SPEEDRUN: 'Round 255 Speedrun',
+  NO_JUG: 'No Jug',
+  NO_ATS: 'No AATs',
+  NO_MANS_LAND: "No Man's Land",
   EASTER_EGG_SPEEDRUN: 'Easter Egg Speedrun',
   GHOST_AND_SKULLS: 'Ghost and Skulls',
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
@@ -82,15 +87,16 @@ function OfficialRulesModal({
   const isWaw = gameShortName === 'WAW';
   const isBo1 = gameShortName === 'BO1';
   const isBo2 = gameShortName === 'BO2';
-  const hasRules = isWaw || isBo1 || isBo2;
-  const rules = isWaw ? WAW_OFFICIAL_RULES : isBo1 ? BO1_OFFICIAL_RULES : isBo2 ? BO2_OFFICIAL_RULES : null;
+  const isBo3 = gameShortName === 'BO3';
+  const hasRules = isWaw || isBo1 || isBo2 || isBo3;
+  const rules = isWaw ? WAW_OFFICIAL_RULES : isBo1 ? BO1_OFFICIAL_RULES : isBo2 ? BO2_OFFICIAL_RULES : isBo3 ? BO3_OFFICIAL_RULES : null;
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title="Official Rules"
-      description={hasRules ? `Rules and requirements for ${isWaw ? 'World at War' : isBo1 ? 'Black Ops 1' : 'Black Ops 2'} submissions` : 'Rules and requirements for challenge submissions'}
+      description={hasRules ? `Rules and requirements for ${isWaw ? 'World at War' : isBo1 ? 'Black Ops 1' : isBo2 ? 'Black Ops 2' : 'Black Ops 3'} submissions` : 'Rules and requirements for challenge submissions'}
       size="lg"
     >
       {rules ? (
@@ -240,6 +246,8 @@ export default function EditMapProgressPage() {
     wawNoJug?: boolean;
     wawFixedWunderwaffe?: boolean;
     bo2BankUsed?: boolean | null;
+    bo3AatUsed?: boolean | null;
+    killsReached?: string;
   }>({
     roundReached: '',
     playerCount: 'SOLO',
@@ -399,16 +407,22 @@ export default function EditMapProgressPage() {
 
   const toggleChallenge = (challengeId: string) => {
     const isAdding = !selectedChallengeIds.has(challengeId);
+    const challenge = map?.challenges.find((c) => c.id === challengeId);
+    const isNoMansLand = challenge?.type === 'NO_MANS_LAND';
     if (isAdding) setEeTabValue('ee-none');
     setSelectedChallengeIds((prev) => {
       const next = new Set(prev);
       if (next.has(challengeId)) next.delete(challengeId);
-      else next.add(challengeId);
+      else {
+        next.add(challengeId);
+        if (isNoMansLand) return new Set([challengeId]);
+        const noMansLandId = map?.challenges.find((c) => c.type === 'NO_MANS_LAND')?.id;
+        if (noMansLandId) next.delete(noMansLandId);
+      }
       return next;
     });
     // Init speedrun time slot when adding a speedrun
-    const challenge = map?.challenges.find((c) => c.id === challengeId);
-    if (isAdding && challenge && isIwSpeedrunChallengeType(challenge.type)) {
+    if (isAdding && challenge && isSpeedrunChallengeType(challenge.type)) {
       setSpeedrunTimes((prev) => ({ ...prev, [challengeId]: null }));
     } else if (!isAdding) {
       setSpeedrunTimes((prev) => { const next = { ...prev }; delete next[challengeId]; return next; });
@@ -425,15 +439,26 @@ export default function EditMapProgressPage() {
   const handleSaveSelectedChallenges = async () => {
     if (!profile || !map || selectedChallengeIds.size === 0) return;
     const form = sharedChallengeForm;
-    const round = parseInt(form.roundReached, 10);
-    if (!form.roundReached || Number.isNaN(round) || round <= 0) return;
-    const minRound = Math.max(...Array.from(selectedChallengeIds).map((cid) => {
-      const c = map.challenges.find((ch) => ch.id === cid);
-      return c && isIwSpeedrunChallengeType(c.type) ? getMinRoundForSpeedrunChallengeType(c.type) : 1;
-    }));
-    if (round < minRound) {
-      setSaveErrorModalMessage(`Round must be at least ${minRound} for the selected speedrun challenge(s) (e.g. Round ${minRound} Speedrun requires round ${minRound}+).`);
-      return;
+    const isNoMansLandOnly =
+      selectedChallengeIds.size === 1 &&
+      map.challenges.find((c) => c.id === Array.from(selectedChallengeIds)[0])?.type === 'NO_MANS_LAND';
+    if (isNoMansLandOnly) {
+      const kills = parseInt(form.killsReached ?? '', 10);
+      if (!form.killsReached || Number.isNaN(kills) || kills <= 0) {
+        setSaveErrorModalMessage("No Man's Land requires a valid kills count (1+).");
+        return;
+      }
+    } else {
+      const round = parseInt(form.roundReached, 10);
+      if (!form.roundReached || Number.isNaN(round) || round <= 0) return;
+      const minRound = Math.max(...Array.from(selectedChallengeIds).map((cid) => {
+        const c = map.challenges.find((ch) => ch.id === cid);
+        return c && isSpeedrunChallengeType(c.type) ? getMinRoundForSpeedrunChallengeType(c.type) : 1;
+      }));
+      if (round < minRound) {
+        setSaveErrorModalMessage(`Round must be at least ${minRound} for the selected speedrun challenge(s) (e.g. Round ${minRound} Speedrun requires round ${minRound}+).`);
+        return;
+      }
     }
     const isIw = isIwGame(map.game?.shortName);
     const isBo3 = isBo3Game(map.game?.shortName);
@@ -442,7 +467,7 @@ export default function EditMapProgressPage() {
     const isBo7 = isBo7Game(map.game?.shortName);
     const anySpeedrun = Array.from(selectedChallengeIds).some((cid) => {
       const c = map.challenges.find((ch) => ch.id === cid);
-      return c && isIwSpeedrunChallengeType(c.type);
+      return c && isSpeedrunChallengeType(c.type);
     });
     if (isIw && (form.useFortuneCards !== true && form.useFortuneCards !== false)) {
       setSaveErrorModalMessage('IW maps require Fortune Cards selection: Fate & Fortune cards or Fate cards only.');
@@ -451,7 +476,7 @@ export default function EditMapProgressPage() {
     if (anySpeedrun) {
       const selectedSpeedruns = Array.from(selectedChallengeIds).filter((cid) => {
         const c = map.challenges.find((ch) => ch.id === cid);
-        return c && isIwSpeedrunChallengeType(c.type);
+        return c && isSpeedrunChallengeType(c.type);
       });
       const missingTime = selectedSpeedruns.some((cid) => speedrunTimes[cid] == null || (speedrunTimes[cid] ?? 0) < 0);
       if (missingTime) {
@@ -477,20 +502,30 @@ export default function EditMapProgressPage() {
     try {
       const ids = Array.from(selectedChallengeIds);
       for (const challengeId of ids) {
+        const challenge = map.challenges.find((ch) => ch.id === challengeId);
+        const isNoMansLand = challenge?.type === 'NO_MANS_LAND';
+        const roundReached = isNoMansLand ? 1 : parseInt(form.roundReached, 10);
+        const killsReached = isNoMansLand ? parseInt(form.killsReached ?? '', 10) : undefined;
         const res = await fetch('/api/challenge-logs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             challengeId,
             mapId: map.id,
-            roundReached: round,
+            roundReached,
+            ...(killsReached != null && killsReached > 0 && { killsReached }),
             playerCount: form.playerCount,
             ...(map.game?.shortName === 'BO4' && form.difficulty && { difficulty: form.difficulty }),
             ...(isIw && {
               useFortuneCards: form.useFortuneCards === true,
               useDirectorsCut: form.useDirectorsCut ?? false,
             }),
-            ...(isBo3 && { bo3GobbleGumMode: form.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT }),
+            ...(isBo3 && {
+              bo3GobbleGumMode: form.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT,
+              bo3AatUsed: ids.some((cid) => map.challenges.find((c) => c.id === cid)?.type === 'NO_ATS')
+                ? false
+                : form.bo3AatUsed,
+            }),
             ...(isBo4Game(map.game?.shortName) && form.bo4ElixirMode && { bo4ElixirMode: form.bo4ElixirMode }),
             ...(isBocw && { bocwSupportMode: form.bocwSupportMode ?? BOCW_SUPPORT_DEFAULT }),
             ...(isBo6 && {
@@ -511,7 +546,7 @@ export default function EditMapProgressPage() {
             notes: form.notes || null,
             completionTimeSeconds: (() => {
               const c = map.challenges.find((ch) => ch.id === challengeId);
-              return c && isIwSpeedrunChallengeType(c.type)
+              return c && isSpeedrunChallengeType(c.type)
                 ? (speedrunTimes[challengeId] ?? null)
                 : (form.completionTimeSeconds ?? null);
             })(),
@@ -586,7 +621,11 @@ export default function EditMapProgressPage() {
             wawNoJug: sharedChallengeForm.wawNoJug ?? false,
             wawFixedWunderwaffe: sharedChallengeForm.wawFixedWunderwaffe ?? false,
           }),
-          ...(map.game?.shortName === 'BO2' && getBo2MapConfig(map.slug)?.hasBank && { bo2BankUsed: sharedChallengeForm.bo2BankUsed ?? true }),
+            ...(map.game?.shortName === 'BO2' && getBo2MapConfig(map.slug)?.hasBank && { bo2BankUsed: sharedChallengeForm.bo2BankUsed ?? true }),
+            ...(isBo3Game(map?.game?.shortName) && {
+              bo3GobbleGumMode: sharedChallengeForm.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT,
+              bo3AatUsed: sharedChallengeForm.bo3AatUsed,
+            }),
           proofUrls: normalizeProofUrls(form.proofUrls ?? []),
           notes: form.notes || null,
           completionTimeSeconds: form.completionTimeSeconds ?? null,
@@ -732,7 +771,7 @@ export default function EditMapProgressPage() {
               <TabsList className="min-w-0 w-full">
                 {map.challenges.map((challenge) => {
                   const isSelected = selectedChallengeIds.has(challenge.id);
-                  const isSpeedrun = isIwSpeedrunChallengeType(challenge.type);
+                  const isSpeedrun = isSpeedrunChallengeType(challenge.type);
                   return (
                     <button
                       key={challenge.id}
@@ -833,10 +872,25 @@ export default function EditMapProgressPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 min-w-0">
                     {(() => {
+                      const isNoMansLandOnly =
+                        selectedChallengeIds.size === 1 &&
+                        map.challenges.find((c) => c.id === Array.from(selectedChallengeIds)[0])?.type === 'NO_MANS_LAND';
+                      if (isNoMansLandOnly) {
+                        return (
+                          <Input
+                            label="Kills"
+                            type="number"
+                            min={1}
+                            placeholder="e.g. 450"
+                            value={sharedChallengeForm.killsReached ?? ''}
+                            onChange={(e) => handleSharedChallengeChange('killsReached', e.target.value)}
+                          />
+                        );
+                      }
                       const minRound = selectedChallengeIds.size > 0
                         ? Math.max(...Array.from(selectedChallengeIds).map((cid) => {
                             const c = map.challenges.find((ch) => ch.id === cid);
-                            return c && isIwSpeedrunChallengeType(c.type) ? getMinRoundForSpeedrunChallengeType(c.type) : 1;
+                            return c && isSpeedrunChallengeType(c.type) ? getMinRoundForSpeedrunChallengeType(c.type) : 1;
                           }))
                         : 1;
                       const enteredRound = parseInt(sharedChallengeForm.roundReached || '0', 10);
@@ -947,12 +1001,39 @@ export default function EditMapProgressPage() {
                       />
                     )}
                     {isBo3Game(map?.game?.shortName) && (
-                      <Select
-                        label="GobbleGums"
-                        options={BO3_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo3GobbleGumLabel(m) }))}
-                        value={sharedChallengeForm.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT}
-                        onChange={(e) => handleSharedChallengeChange('bo3GobbleGumMode', e.target.value)}
-                      />
+                      <>
+                        <Select
+                          label="GobbleGums"
+                          options={BO3_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo3GobbleGumLabel(m) }))}
+                          value={sharedChallengeForm.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT}
+                          onChange={(e) => handleSharedChallengeChange('bo3GobbleGumMode', e.target.value)}
+                        />
+                        {!Array.from(selectedChallengeIds).some(
+                          (cid) => map?.challenges.find((c) => c.id === cid)?.type === 'NO_ATS'
+                        ) && (
+                          <Select
+                            label="AATs"
+                            options={[
+                              { value: '', label: 'Any' },
+                              { value: 'true', label: 'AATs Used' },
+                              { value: 'false', label: 'No AATs' },
+                            ]}
+                            value={
+                              sharedChallengeForm.bo3AatUsed === true
+                                ? 'true'
+                                : sharedChallengeForm.bo3AatUsed === false
+                                  ? 'false'
+                                  : ''
+                            }
+                            onChange={(e) =>
+                              handleSharedChallengeChange(
+                                'bo3AatUsed',
+                                e.target.value === '' ? undefined : e.target.value === 'true'
+                              )
+                            }
+                          />
+                        )}
+                      </>
                     )}
                     {map?.game?.shortName === 'BO4' && (
                       <Select
@@ -1052,10 +1133,10 @@ export default function EditMapProgressPage() {
                   {(() => {
                     const selectedSpeedrunChallenges = Array.from(selectedChallengeIds)
                       .map((cid) => map.challenges.find((c) => c.id === cid))
-                      .filter((c): c is NonNullable<typeof c> => !!c && isIwSpeedrunChallengeType(c.type));
+                      .filter((c): c is NonNullable<typeof c> => !!c && isSpeedrunChallengeType(c.type));
                     const hasNonSpeedrun = Array.from(selectedChallengeIds).some((cid) => {
                       const c = map.challenges.find((ch) => ch.id === cid);
-                      return c && !isIwSpeedrunChallengeType(c.type);
+                      return c && !isSpeedrunChallengeType(c.type);
                     });
                     return (
                       <>
@@ -1116,13 +1197,24 @@ export default function EditMapProgressPage() {
                 isSaving={isSaving}
                 saveStatus={saveStatus}
                 saveDisabled={
-                  !sharedChallengeForm.roundReached ||
-                  parseInt(sharedChallengeForm.roundReached, 10) <= 0 ||
-                  (isIwGame(map?.game?.shortName) && sharedChallengeForm.useFortuneCards !== true && sharedChallengeForm.useFortuneCards !== false) ||
-                  Array.from(selectedChallengeIds).some((cid) => {
-                    const c = map?.challenges.find((ch) => ch.id === cid);
-                    return c && isIwSpeedrunChallengeType(c.type) && !(speedrunTimes[cid] != null && (speedrunTimes[cid] as number) > 0);
-                  })
+                  (() => {
+                    const isNoMansLandOnly =
+                      selectedChallengeIds.size === 1 &&
+                      map?.challenges.find((c) => c.id === Array.from(selectedChallengeIds)[0])?.type === 'NO_MANS_LAND';
+                    const hasValidRound = sharedChallengeForm.roundReached && parseInt(sharedChallengeForm.roundReached, 10) > 0;
+                    const hasValidKills = isNoMansLandOnly &&
+                      sharedChallengeForm.killsReached &&
+                      parseInt(sharedChallengeForm.killsReached, 10) > 0;
+                    const roundOrKillsOk = isNoMansLandOnly ? hasValidKills : hasValidRound;
+                    return (
+                      !roundOrKillsOk ||
+                      (isIwGame(map?.game?.shortName) && sharedChallengeForm.useFortuneCards !== true && sharedChallengeForm.useFortuneCards !== false) ||
+                      Array.from(selectedChallengeIds).some((cid) => {
+                        const c = map?.challenges.find((ch) => ch.id === cid);
+                        return c && isSpeedrunChallengeType(c.type) && !(speedrunTimes[cid] != null && (speedrunTimes[cid] as number) > 0);
+                      })
+                    );
+                  })()
                 }
                 saveErrorMessage={saveErrorMessage}
                 hideInlineError={!!saveErrorModalMessage}

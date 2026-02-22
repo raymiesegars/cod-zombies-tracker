@@ -60,10 +60,13 @@ import {
   getSortedCategoryKeys,
   getNonSpeedrunCategoryFilterOptions,
   getSpeedrunCategoryFilterOptions,
+  getAllowedSpeedrunCategoriesForMap,
+  getAllowedNonSpeedrunCategoriesForMap,
   isSpeedrunCategory,
 } from '@/lib/achievements/categories';
 import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-config';
-import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
+import { getBo2MapConfig, getBo2ChallengeTypeLabel } from '@/lib/bo2/bo2-map-config';
+import { getBo3MapConfig } from '@/lib/bo3/bo3-map-config';
 
 const BUILDABLE_PART_CACHE_KEY_PREFIX = 'buildable-parts';
 const BUILDABLE_PART_CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
@@ -198,12 +201,14 @@ function AchievementsTabContent({
   canRelock,
   onRelock,
   gameShortName,
+  mapSlug,
 }: {
   achievements?: { id: string; name: string; slug: string; type: string; difficulty?: string | null; criteria: { round?: number; challengeType?: string; isCap?: boolean }; xpReward: number; rarity: string; easterEggId?: string | null; easterEgg?: { id: string; name: string; slug: string } | null }[];
   unlockedIds?: string[];
   canRelock?: boolean;
   onRelock?: () => void | Promise<void>;
   gameShortName?: string;
+  mapSlug?: string;
 }) {
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [speedrunFilter, setSpeedrunFilter] = useState<string>('');
@@ -254,8 +259,16 @@ function AchievementsTabContent({
   const sortedCategoriesForOptions = getSortedCategoryKeys(byCategoryForOptions as Record<string, unknown[]>);
   const nonSpeedrunCatsForOptions = sortedCategoriesForOptions.filter((c) => !isSpeedrunCategory(c));
   const speedrunCatsForOptions = sortedCategoriesForOptions.filter((c) => isSpeedrunCategory(c));
-  const categoryOptions = getNonSpeedrunCategoryFilterOptions(nonSpeedrunCatsForOptions.length ? nonSpeedrunCatsForOptions : undefined);
-  const speedrunOptions = getSpeedrunCategoryFilterOptions(speedrunCatsForOptions.length ? speedrunCatsForOptions : undefined);
+  const allowedSpeedrunCats = getAllowedSpeedrunCategoriesForMap(gameShortName, mapSlug);
+  const allowedNonSpeedrunCats = getAllowedNonSpeedrunCategoriesForMap(gameShortName, mapSlug);
+  const categoryOptions = getNonSpeedrunCategoryFilterOptions(
+    nonSpeedrunCatsForOptions.length ? nonSpeedrunCatsForOptions : undefined,
+    allowedNonSpeedrunCats
+  );
+  const speedrunOptions = getSpeedrunCategoryFilterOptions(
+    speedrunCatsForOptions.length ? speedrunCatsForOptions : undefined,
+    allowedSpeedrunCats
+  );
 
   const visibleCount = visibleCategories.reduce((sum, cat) => sum + (byCategory[cat]?.length ?? 0), 0);
   const filterEmpty =
@@ -406,6 +419,10 @@ const challengeTypeLabels: Record<string, string> = {
   ROUND_70_SPEEDRUN: 'Round 70 Speedrun',
   ROUND_100_SPEEDRUN: 'Round 100 Speedrun',
   ROUND_200_SPEEDRUN: 'Round 200 Speedrun',
+  ROUND_255_SPEEDRUN: 'Round 255 Speedrun',
+  NO_JUG: 'No Jug',
+  NO_ATS: 'No AATs',
+  NO_MANS_LAND: "No Man's Land",
   EASTER_EGG_SPEEDRUN: 'Easter Egg Speedrun',
   GHOST_AND_SKULLS: 'Ghost and Skulls',
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
@@ -517,6 +534,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   const [leaderboardDirectorsCut, setLeaderboardDirectorsCut] = useState(false);
   // BO3
   const [lbBo3GobbleGumMode, setLbBo3GobbleGumMode] = useState<string>('');
+  const [lbBo3AatUsed, setLbBo3AatUsed] = useState<string>('');
   // BO4
   const [lbBo4ElixirMode, setLbBo4ElixirMode] = useState<string>('');
   // BOCW
@@ -631,7 +649,10 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
             else if (leaderboardFortuneCards === 'false') params.set('fortuneCards', 'false');
             if (leaderboardDirectorsCut) params.set('directorsCut', 'true');
           }
-          if (isBo3Game(map.game?.shortName) && lbBo3GobbleGumMode) params.set('bo3GobbleGumMode', lbBo3GobbleGumMode);
+          if (isBo3Game(map.game?.shortName)) {
+            if (lbBo3GobbleGumMode) params.set('bo3GobbleGumMode', lbBo3GobbleGumMode);
+            if (lbBo3AatUsed === 'true' || lbBo3AatUsed === 'false') params.set('bo3AatUsed', lbBo3AatUsed);
+          }
           if (isBo4Game(map.game?.shortName) && lbBo4ElixirMode) params.set('bo4ElixirMode', lbBo4ElixirMode);
           if (isBocwGame(map.game?.shortName) && lbBocwSupportMode) params.set('bocwSupportMode', lbBocwSupportMode);
           if (isBo6Game(map.game?.shortName)) {
@@ -665,7 +686,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     })();
     // Intentionally omit leaderboard.length / leaderboardFetchedOnce to avoid re-fetch loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut, lbBo3GobbleGumMode, lbBo4ElixirMode, lbBocwSupportMode, lbBo6GobbleGumMode, lbBo6SupportMode, lbBo7SupportMode, lbBo7CursedFilter, lbBo7SelectedRelics, lbWawNoJug, lbWawFixedWunderwaffe, lbBo2BankUsed]);
+  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut, lbBo3GobbleGumMode, lbBo3AatUsed, lbBo4ElixirMode, lbBocwSupportMode, lbBo6GobbleGumMode, lbBo6SupportMode, lbBo7SupportMode, lbBo7CursedFilter, lbBo7SelectedRelics, lbWawNoJug, lbWawFixedWunderwaffe, lbBo2BankUsed]);
 
   // Sync activeTab with URL so switching to Your Runs triggers fetch
   useEffect(() => {
@@ -852,13 +873,15 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     { value: 'SQUAD', label: 'Squad' },
   ];
 
-  // Single category dropdown like Leaderboards page: Highest Round, all map challenges (IW in canonical order), all loggable EEs (Time)
+  // Single category dropdown like Leaderboards page: Highest Round, all map challenges (IW/BO2/BO3 in config order), all loggable EEs (Time)
   const mapChallengeOptions = useMemo(() => {
     const challenges = (map?.challenges ?? []).filter((c) => c.type !== 'HIGHEST_ROUND');
     const getLabel = (type: string, fallbackName?: string | null) =>
       map?.game?.shortName === 'WAW'
         ? (fallbackName || getWaWChallengeTypeLabel(type))
-        : (fallbackName ?? challengeTypeLabels[type] ?? type);
+        : map?.game?.shortName === 'BO2'
+          ? (fallbackName ?? challengeTypeLabels[type] ?? getBo2ChallengeTypeLabel(type) ?? type)
+          : (fallbackName ?? challengeTypeLabels[type] ?? type);
     if (map?.game?.shortName === 'IW' && challenges.length > 0) {
       const ordered = IW_CHALLENGE_TYPES_ORDER.filter((t) => challenges.some((c) => c.type === t));
       return ordered.map((t) => {
@@ -866,10 +889,24 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
         return { value: t, label: c?.name ?? challengeTypeLabels[t] ?? t };
       });
     }
+    if (map?.game?.shortName === 'BO2' && map?.slug && getBo2MapConfig(map.slug)) {
+      const types = getBo2MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      return types.map((t) => {
+        const c = challenges.find((ch) => ch.type === t);
+        return { value: t, label: getLabel(t, c?.name) };
+      });
+    }
+    if (map?.game?.shortName === 'BO3' && map?.slug && getBo3MapConfig(map.slug)) {
+      const types = getBo3MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      return types.map((t) => {
+        const c = challenges.find((ch) => ch.type === t);
+        return { value: t, label: getLabel(t, c?.name) };
+      });
+    }
     return challenges
       .sort((a, b) => (a.name || a.type).localeCompare(b.name || b.type))
       .map((c) => ({ value: c.type, label: getLabel(c.type, c.name) }));
-  }, [map?.challenges, map?.game?.shortName]);
+  }, [map?.challenges, map?.game?.shortName, map?.slug]);
   const mainQuestEasterEggs = (map?.easterEggs ?? []).filter((ee) => ee.type === 'MAIN_QUEST');
   const leaderboardCategoryOptions = [
     { value: 'HIGHEST_ROUND', label: 'Highest Round' },
@@ -1064,15 +1101,21 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                     </div>
                     <div className="text-center p-3 sm:p-4 bg-bunker-800/50 rounded-lg border border-bunker-700">
                       <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400 mx-auto mb-1 sm:mb-2" />
-                      <p className={`text-xl sm:text-2xl font-zombies ${(selectedLeaderboardCategory.startsWith('ee-time-') || isIwSpeedrunChallengeType(selectedLeaderboardCategory)) ? 'text-element-400' : 'text-white'}`}>
-                        {(selectedLeaderboardCategory.startsWith('ee-time-') || isIwSpeedrunChallengeType(selectedLeaderboardCategory))
+                      <p className={`text-xl sm:text-2xl font-zombies ${(selectedLeaderboardCategory.startsWith('ee-time-') || isSpeedrunCategory(selectedLeaderboardCategory)) ? 'text-element-400' : 'text-white'}`}>
+                        {(selectedLeaderboardCategory.startsWith('ee-time-') || isSpeedrunCategory(selectedLeaderboardCategory))
                           ? (leaderboard[0]?.value != null && Number.isFinite(Number(leaderboard[0].value))
                               ? formatCompletionTime(Number(leaderboard[0].value))
                               : '—')
-                          : (mapStats?.highestRound || leaderboard[0]?.value || '—')}
+                          : selectedLeaderboardCategory === 'NO_MANS_LAND'
+                            ? (leaderboard[0]?.value ?? '—')
+                            : (mapStats?.highestRound || leaderboard[0]?.value || '—')}
                       </p>
                       <p className="text-xs text-bunker-400">
-                        {(selectedLeaderboardCategory.startsWith('ee-time-') || isIwSpeedrunChallengeType(selectedLeaderboardCategory)) ? 'Top Time' : 'Top Round'}
+                        {selectedLeaderboardCategory === 'NO_MANS_LAND'
+                          ? 'Top Kills'
+                          : (selectedLeaderboardCategory.startsWith('ee-time-') || isSpeedrunCategory(selectedLeaderboardCategory))
+                            ? 'Top Time'
+                            : 'Top Round'}
                       </p>
                     </div>
                     <div className="text-center p-3 sm:p-4 bg-bunker-800/50 rounded-lg border border-bunker-700">
@@ -1121,7 +1164,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                             {getPlayerCountLabel(entry.playerCount)}
                           </span>
                           <div className="flex-shrink-0 min-w-[3.5rem] flex justify-end">
-                            {(selectedLeaderboardCategory.startsWith('ee-time-') || isIwSpeedrunChallengeType(selectedLeaderboardCategory)) ? (
+                            {(selectedLeaderboardCategory.startsWith('ee-time-') || isSpeedrunCategory(selectedLeaderboardCategory)) ? (
                               <span className="text-xs sm:text-sm font-zombies font-semibold text-element-400 tabular-nums">
                                 {formatCompletionTime(entry.value)}
                               </span>
@@ -1155,6 +1198,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                 await refreshProfile?.();
               }}
               gameShortName={map?.game?.shortName}
+              mapSlug={map?.slug}
             />
           </TabsContent>
 
@@ -1687,7 +1731,11 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                     <Select
                       options={leaderboardCategoryOptions}
                       value={selectedLeaderboardCategory}
-                      onChange={(e) => setSelectedLeaderboardCategory(e.target.value)}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setSelectedLeaderboardCategory(v);
+                        if (v === 'NO_ATS') setLbBo3AatUsed('');
+                      }}
                       className="w-full min-w-0 sm:w-52 max-w-full"
                     />
                     <Select
@@ -1745,12 +1793,26 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                       </>
                     )}
                     {isBo3Game(map?.game?.shortName) && (
-                      <Select
-                        options={[{ value: '', label: 'All GobbleGums' }, ...BO3_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo3GobbleGumLabel(m) }))]}
-                        value={lbBo3GobbleGumMode}
-                        onChange={(e) => setLbBo3GobbleGumMode(e.target.value)}
-                        className="w-full min-w-0 sm:w-52 max-w-full"
-                      />
+                      <>
+                        <Select
+                          options={[{ value: '', label: 'All GobbleGums' }, ...BO3_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo3GobbleGumLabel(m) }))]}
+                          value={lbBo3GobbleGumMode}
+                          onChange={(e) => setLbBo3GobbleGumMode(e.target.value)}
+                          className="w-full min-w-0 sm:w-52 max-w-full"
+                        />
+                        {selectedLeaderboardCategory !== 'NO_ATS' && (
+                          <Select
+                            options={[
+                              { value: '', label: 'Any AATs' },
+                              { value: 'true', label: 'AATs Used' },
+                              { value: 'false', label: 'No AATs' },
+                            ]}
+                            value={lbBo3AatUsed}
+                            onChange={(e) => setLbBo3AatUsed(e.target.value)}
+                            className="w-full min-w-0 sm:w-40 max-w-full"
+                          />
+                        )}
+                      </>
                     )}
                     {map?.game?.shortName === 'BO4' && (
                       <Select
@@ -1870,7 +1932,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                         entry={entry}
                         index={index}
                         isCurrentUser={entry.user.id === profile?.id}
-                        valueKind={selectedLeaderboardCategory.startsWith('ee-time-') || isIwSpeedrunChallengeType(selectedLeaderboardCategory) ? 'time' : 'round'}
+                        valueKind={selectedLeaderboardCategory.startsWith('ee-time-') || isSpeedrunCategory(selectedLeaderboardCategory) ? 'time' : 'round'}
                         mapSlug={slug}
                       />
                     ))
