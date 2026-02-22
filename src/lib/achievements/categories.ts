@@ -1,4 +1,5 @@
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
+import { getBo3MapConfig } from '@/lib/bo3/bo3-map-config';
 
 // How we group and order achievements on map detail and profile
 export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
@@ -13,13 +14,17 @@ export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
   PISTOL_ONLY: 'Pistol Only',
   NO_POWER: 'No Power',
   NO_MAGIC: 'No Magic',
-  // IW speedrun categories
+  NO_JUG: 'No Jug',
+  NO_ATS: 'No AATs',
+  // IW/BO3 speedrun categories
   ROUND_30_SPEEDRUN: 'Round 30 Speedrun',
   ROUND_50_SPEEDRUN: 'Round 50 Speedrun',
   ROUND_70_SPEEDRUN: 'Round 70 Speedrun',
   ROUND_100_SPEEDRUN: 'Round 100 Speedrun',
   ROUND_200_SPEEDRUN: 'Round 200 Speedrun',
+  ROUND_255_SPEEDRUN: 'Round 255 Speedrun',
   EASTER_EGG_SPEEDRUN: 'Easter Egg Speedrun',
+  NO_MANS_LAND: "No Man's Land",
   GHOST_AND_SKULLS: 'Ghost and Skulls',
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
   CRYPTID_FIGHT: 'Cryptid Fight',
@@ -35,6 +40,7 @@ export const SPEEDRUN_CATEGORIES: string[] = [
   'ROUND_70_SPEEDRUN',
   'ROUND_100_SPEEDRUN',
   'ROUND_200_SPEEDRUN',
+  'ROUND_255_SPEEDRUN',
   'EASTER_EGG_SPEEDRUN',
   'GHOST_AND_SKULLS',
   'ALIENS_BOSS_FIGHT',
@@ -57,11 +63,15 @@ const CATEGORY_ORDER = [
   'PISTOL_ONLY',
   'NO_POWER',
   'NO_MAGIC',
+  'NO_JUG',
+  'NO_ATS',
+  'NO_MANS_LAND',
   'ROUND_30_SPEEDRUN',
   'ROUND_50_SPEEDRUN',
   'ROUND_70_SPEEDRUN',
   'ROUND_100_SPEEDRUN',
   'ROUND_200_SPEEDRUN',
+  'ROUND_255_SPEEDRUN',
   'EASTER_EGG_SPEEDRUN',
   'GHOST_AND_SKULLS',
   'ALIENS_BOSS_FIGHT',
@@ -99,11 +109,22 @@ export function getAllowedNonSpeedrunCategoriesForMap(
   gameShortName: string | null | undefined,
   mapSlug: string | null | undefined
 ): string[] | null {
-  if (!gameShortName || !mapSlug || gameShortName !== 'BO2') return null;
-  const cfg = getBo2MapConfig(mapSlug);
-  if (!cfg?.challengeTypes) return null;
-  const fromConfig = cfg.challengeTypes.filter((c) => !isSpeedrunCategory(c) && c !== 'HIGHEST_ROUND');
-  return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG']));
+  if (!gameShortName || !mapSlug) return null;
+  if (gameShortName === 'BO2') {
+    const cfg = getBo2MapConfig(mapSlug);
+    if (!cfg?.challengeTypes) return null;
+    const fromConfig = cfg.challengeTypes.filter((c) => !isSpeedrunCategory(c) && c !== 'HIGHEST_ROUND');
+    return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG']));
+  }
+  if (gameShortName === 'BO3') {
+    const cfg = getBo3MapConfig(mapSlug);
+    if (!cfg?.challengeTypes) return null;
+    const fromConfig = cfg.challengeTypes.filter(
+      (c) => !isSpeedrunCategory(c) && c !== 'HIGHEST_ROUND' && (c as string) !== 'NO_MANS_LAND'
+    );
+    return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG']));
+  }
+  return null;
 }
 
 /** First filter: non-speedrun categories only (All types + Base Rounds, No Downs, etc.). Pass existing categories to restrict to those present. */
@@ -148,6 +169,13 @@ export function getAllowedSpeedrunCategoriesForMap(
     }
     return bo2Generic;
   }
+  if (gameShortName === 'BO3') {
+    const cfg = getBo3MapConfig(mapSlug);
+    if (cfg?.challengeTypes) {
+      return cfg.challengeTypes.filter((c) => isSpeedrunCategory(c));
+    }
+    return [...bo2Generic, 'ROUND_255_SPEEDRUN'];
+  }
   return bo2Generic;
 }
 
@@ -178,11 +206,33 @@ export function sortAchievementsByXp<T extends { xpReward: number }>(achievement
   return [...achievements].sort((a, b) => a.xpReward - b.xpReward);
 }
 
-/** Sort achievements for display: by type, then speedrun tiers by fastest first (maxTimeSeconds asc), then by round, then slug. */
+/** Main quest completion (not timed) - should always appear first in its section. */
+export function isMainEasterEggAchievement(a: { type?: string; criteria?: unknown }): boolean {
+  return a.type === 'EASTER_EGG_COMPLETE' && typeof (a.criteria as { maxTimeSeconds?: number })?.maxTimeSeconds !== 'number';
+}
+
+/** Sort achievements within a category: main EE first, then by XP. Use when rendering a category block. */
+export function sortAchievementsInCategory<T extends { type?: string; xpReward: number; slug: string; criteria?: unknown }>(
+  achievements: T[]
+): T[] {
+  return [...achievements].sort((a, b) => {
+    const aMain = isMainEasterEggAchievement(a);
+    const bMain = isMainEasterEggAchievement(b);
+    if (aMain && !bMain) return -1;
+    if (!aMain && bMain) return 1;
+    return a.xpReward - b.xpReward;
+  });
+}
+
+/** Sort achievements for display: main EE (not timed) first, then by type, speedrun tiers (fastest first), round, slug. */
 export function sortAchievementsForDisplay<T extends { type: string; slug: string; criteria?: unknown }>(
   achievements: T[]
 ): T[] {
   return [...achievements].sort((a, b) => {
+    const aMain = isMainEasterEggAchievement(a);
+    const bMain = isMainEasterEggAchievement(b);
+    if (aMain && !bMain) return -1;
+    if (!aMain && bMain) return 1;
     if (a.type !== b.type) return a.type.localeCompare(b.type);
     const critA = a.criteria as { round?: number; maxTimeSeconds?: number } | undefined;
     const critB = b.criteria as { round?: number; maxTimeSeconds?: number } | undefined;

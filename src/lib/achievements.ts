@@ -9,6 +9,7 @@ export type MapAchievementContext = {
   challengeLogs: {
     challengeType: string;
     roundReached: number;
+    killsReached?: number | null;
     difficulty?: Bo4Difficulty | null;
     completionTimeSeconds?: number | null;
   }[];
@@ -63,13 +64,15 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
 
   CHALLENGE_COMPLETE: async (userId, criteria, achievement) => {
     if (!achievement.mapId) return false;
-    const { round, challengeType, isCap, maxTimeSeconds } = criteria as {
+    const { round, kills, challengeType, isCap, maxTimeSeconds } = criteria as {
       round?: number;
+      kills?: number;
       challengeType?: string;
       isCap?: boolean;
       maxTimeSeconds?: number;
     };
     const targetRound = round as number | undefined;
+    const targetKills = kills as number | undefined;
 
     // EE speedrun tier (e.g. Call of the Dead Stand-in vs Ensemble Cast): check EasterEggLog by easterEggId
     if (
@@ -118,7 +121,11 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
       return !!log;
     }
 
-    if (targetRound != null) baseWhere.roundReached = { gte: targetRound };
+    if (challengeType === 'NO_MANS_LAND' && targetKills != null) {
+      (baseWhere as Record<string, unknown>).killsReached = { gte: targetKills };
+    } else if (targetRound != null) {
+      baseWhere.roundReached = { gte: targetRound };
+    }
 
     const log = await prisma.challengeLog.findFirst({
       where: baseWhere,
@@ -270,8 +277,9 @@ function checkWithContext(
       return maxRound >= cap;
     }
     case 'CHALLENGE_COMPLETE': {
-      const { round, challengeType, isCap, maxTimeSeconds } = criteria;
+      const { round, kills, challengeType, isCap, maxTimeSeconds } = criteria;
       const targetRound = round != null ? Number(round) : undefined;
+      const targetKills = kills != null ? Number(kills) : undefined;
       const type = challengeType as string;
       if (!type) return false;
       const logs =
@@ -298,6 +306,15 @@ function checkWithContext(
             l.challengeType === type &&
             l.completionTimeSeconds != null &&
             l.completionTimeSeconds <= maxTime
+        );
+      }
+      // No Man's Land: use killsReached
+      if (type === 'NO_MANS_LAND' && targetKills != null && !Number.isNaN(targetKills)) {
+        return logs.some(
+          (l) =>
+            l.challengeType === type &&
+            l.killsReached != null &&
+            l.killsReached >= targetKills
         );
       }
       const capRaw = isCap && ctx.map?.roundCap != null ? ctx.map.roundCap : targetRound;
@@ -333,6 +350,7 @@ export async function processMapAchievements(
         select: {
           challenge: { select: { type: true } },
           roundReached: true,
+          killsReached: true,
           difficulty: true,
           completionTimeSeconds: true,
         },
@@ -355,6 +373,7 @@ export async function processMapAchievements(
     challengeLogs: challengeLogs.map((l) => ({
       challengeType: l.challenge.type,
       roundReached: l.roundReached,
+      killsReached: l.killsReached ?? undefined,
       difficulty: l.difficulty ?? undefined,
       completionTimeSeconds: l.completionTimeSeconds ?? undefined,
     })),
@@ -534,6 +553,7 @@ export async function revokeAchievementsForMapAfterDelete(
         select: {
           challenge: { select: { type: true } },
           roundReached: true,
+          killsReached: true,
           difficulty: true,
           completionTimeSeconds: true,
         },
@@ -555,6 +575,7 @@ export async function revokeAchievementsForMapAfterDelete(
     challengeLogs: challengeLogs.map((l) => ({
       challengeType: l.challenge.type,
       roundReached: l.roundReached,
+      killsReached: l.killsReached ?? undefined,
       difficulty: l.difficulty ?? undefined,
       completionTimeSeconds: l.completionTimeSeconds ?? undefined,
     })),

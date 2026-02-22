@@ -5,7 +5,7 @@ import { processMapAchievements } from '@/lib/achievements';
 import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
 import { createCoOpRunPendingsForChallengeLog } from '@/lib/coop-pending';
 import { isBo4Game, BO4_DIFFICULTIES } from '@/lib/bo4';
-import { isIwGame, isIwSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType } from '@/lib/iw';
+import { isIwGame, isIwSpeedrunChallengeType, isSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType } from '@/lib/iw';
 import { isBo3Game, BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT } from '@/lib/bo3';
 import { isBocwGame, BOCW_SUPPORT_MODES, BOCW_SUPPORT_DEFAULT } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_GOBBLEGUM_DEFAULT, BO6_SUPPORT_MODES, BO6_SUPPORT_DEFAULT } from '@/lib/bo6';
@@ -33,6 +33,9 @@ export async function POST(request: NextRequest) {
     const challengeId = body.challengeId;
     const mapId = body.mapId;
     const roundReached = typeof body.roundReached === 'number' ? body.roundReached : parseInt(String(body.roundReached), 10);
+    const killsReached = body.killsReached != null
+      ? (typeof body.killsReached === 'number' ? body.killsReached : parseInt(String(body.killsReached), 10))
+      : undefined;
     const playerCount = body.playerCount;
     const rawProofUrls = Array.isArray(body.proofUrls)
       ? body.proofUrls
@@ -74,10 +77,9 @@ export async function POST(request: NextRequest) {
       prisma.challenge.findUnique({ where: { id: challengeId }, select: { id: true, type: true } }),
       prisma.map.findUnique({ where: { id: mapId }, include: { game: { select: { shortName: true } } } }),
       (async () => {
-        const isSpeedrunType = challengeId
-          ? await prisma.challenge.findUnique({ where: { id: challengeId }, select: { type: true } }).then((c) => c && isIwSpeedrunChallengeType(c.type))
-          : false;
-        if (isSpeedrunType) {
+        const c = await prisma.challenge.findUnique({ where: { id: challengeId }, select: { type: true } });
+        if (!c) return null;
+        if (isIwSpeedrunChallengeType(c.type)) {
           const best = await prisma.challengeLog.findFirst({
             where: {
               userId: user.id,
@@ -92,7 +94,22 @@ export async function POST(request: NextRequest) {
           });
           return best ? { completionTimeSeconds: best.completionTimeSeconds } : null;
         }
-        return prisma.challengeLog.findFirst({
+        if (c.type === 'NO_MANS_LAND') {
+          const best = await prisma.challengeLog.findFirst({
+            where: {
+              userId: user.id,
+              challengeId,
+              mapId,
+              playerCount,
+              killsReached: { not: null },
+              ...(body.difficulty != null && { difficulty: body.difficulty as Bo4Difficulty }),
+            },
+            orderBy: { killsReached: 'desc' },
+            select: { killsReached: true },
+          });
+          return best ? { killsReached: best.killsReached } : null;
+        }
+        const best = await prisma.challengeLog.findFirst({
           where: {
             userId: user.id,
             challengeId,
@@ -103,6 +120,7 @@ export async function POST(request: NextRequest) {
           orderBy: { roundReached: 'desc' },
           select: { roundReached: true },
         });
+        return best ? { roundReached: best.roundReached } : null;
       })(),
     ]);
 
@@ -111,12 +129,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Challenge or map not found' }, { status: 404 });
     }
 
-    const minRound = isIwSpeedrunChallengeType(challenge.type) ? getMinRoundForSpeedrunChallengeType(challenge.type) : 1;
-    if (roundReached < minRound) {
-      return NextResponse.json(
-        { error: `Round must be at least ${minRound} for this challenge (e.g. Round ${minRound} Speedrun requires round ${minRound}+).` },
-        { status: 400 }
-      );
+    if (challenge.type === 'NO_MANS_LAND') {
+      if (killsReached == null || Number.isNaN(killsReached) || killsReached < 1) {
+        return NextResponse.json(
+          { error: "No Man's Land requires a valid kills count (1+)." },
+          { status: 400 }
+        );
+      }
+    } else {
+      const minRound = isSpeedrunChallengeType(challenge.type) ? getMinRoundForSpeedrunChallengeType(challenge.type) : 1;
+      if (roundReached < minRound) {
+        return NextResponse.json(
+          { error: `Round must be at least ${minRound} for this challenge (e.g. Round ${minRound} Speedrun requires round ${minRound}+).` },
+          { status: 400 }
+        );
+      }
     }
 
     const isBo4 = isBo4Game(map.game?.shortName);
@@ -138,7 +165,7 @@ export async function POST(request: NextRequest) {
     const isBocw = isBocwGame(gameShortName);
     const isBo6 = isBo6Game(gameShortName);
     const isBo7 = isBo7Game(gameShortName);
-    const isSpeedrun = challenge && isIwSpeedrunChallengeType(challenge.type);
+    const isSpeedrun = challenge && isSpeedrunChallengeType(challenge.type);
 
     if (isIw) {
       const useFortuneCards = body.useFortuneCards;
@@ -203,6 +230,7 @@ export async function POST(request: NextRequest) {
     const useFortuneCards = isIw ? Boolean(body.useFortuneCards) : undefined;
     const useDirectorsCut = isIw ? Boolean(body.useDirectorsCut ?? false) : undefined;
     const bo3GobbleGumMode = isBo3 ? (body.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT) : undefined;
+    const bo3AatUsed = isBo3 && body.bo3AatUsed !== undefined ? Boolean(body.bo3AatUsed) : undefined;
     const bo4ElixirMode = isBo4 ? (body.bo4ElixirMode ?? undefined) : undefined;
     const bocwSupportMode = isBocw ? (body.bocwSupportMode ?? BOCW_SUPPORT_DEFAULT) : undefined;
     const bo6GobbleGumMode = isBo6 ? (body.bo6GobbleGumMode ?? BO6_GOBBLEGUM_DEFAULT) : undefined;
@@ -222,12 +250,16 @@ export async function POST(request: NextRequest) {
     const bo2HasBank = isBo2 && map ? getBo2MapConfig(map.slug)?.hasBank : false;
     const bo2BankUsed = bo2HasBank && body.bo2BankUsed !== undefined ? Boolean(body.bo2BankUsed) : undefined;
 
-    const isSpeedrunChal = challenge && isIwSpeedrunChallengeType(challenge.type);
+    const isSpeedrunChal = challenge && isSpeedrunChallengeType(challenge.type);
+    const isNoMansLandChal = challenge?.type === 'NO_MANS_LAND';
     const previousRound = previousBest && 'roundReached' in previousBest ? previousBest.roundReached ?? 0 : 0;
+    const previousKills = previousBest && 'killsReached' in previousBest ? previousBest.killsReached ?? 0 : 0;
     const previousTime = previousBest && 'completionTimeSeconds' in previousBest ? previousBest.completionTimeSeconds : null;
     const isImprovement = isSpeedrunChal
       ? (completionTimeSeconds != null && (previousTime == null || completionTimeSeconds < previousTime))
-      : roundReached > previousRound;
+      : isNoMansLandChal
+        ? (killsReached != null && killsReached > previousKills)
+        : roundReached > previousRound;
 
     const log = await prisma.challengeLog.create({
       data: {
@@ -247,6 +279,7 @@ export async function POST(request: NextRequest) {
         ...(useFortuneCards != null && { useFortuneCards }),
         ...(useDirectorsCut != null && { useDirectorsCut }),
         ...(bo3GobbleGumMode != null && { bo3GobbleGumMode }),
+        ...(bo3AatUsed != null && { bo3AatUsed }),
         ...(bo4ElixirMode != null && { bo4ElixirMode }),
         ...(bocwSupportMode != null && { bocwSupportMode }),
         ...(bo6GobbleGumMode != null && { bo6GobbleGumMode }),
@@ -257,6 +290,7 @@ export async function POST(request: NextRequest) {
         ...(wawNoJug != null && { wawNoJug }),
         ...(wawFixedWunderwaffe != null && { wawFixedWunderwaffe }),
         ...(bo2BankUsed != null && { bo2BankUsed }),
+        ...(killsReached != null && killsReached > 0 && { killsReached }),
       },
     });
 

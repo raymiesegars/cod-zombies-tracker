@@ -35,8 +35,8 @@ import {
   getAllowedSpeedrunCategoriesForMap,
   getAllowedNonSpeedrunCategoriesForMap,
   getSortedCategoryKeys,
+  sortAchievementsInCategory,
   isSpeedrunCategory,
-  sortAchievementsByXp,
 } from '@/lib/achievements/categories';
 import { getAssetUrl } from '@/lib/assets';
 import { getDisplayAvatarUrl } from '@/lib/avatar';
@@ -372,7 +372,7 @@ function AchievementsSection({
                           {ACHIEVEMENT_CATEGORY_LABELS[cat] ?? cat}
                         </p>
                         <ul className="space-y-2">
-                          {sortAchievementsByXp(byCategory[cat]).map((a) => {
+                          {sortAchievementsInCategory(byCategory[cat]).map((a) => {
                             const unlocked = unlockedSet.has(a.id);
                             const c = a.criteria as { round?: number; isCap?: boolean; maxTimeSeconds?: number } | undefined;
                             const subLabel = c?.isCap ? 'Cap' : c?.round != null ? `Round ${c.round}` : null;

@@ -450,6 +450,138 @@ export const BO2_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
   origins: addBo2EeTiers(buildBo2SpeedrunTiers(30 * 60 + 38, 58 * 60 + 31, 92 * 60 + 8, 190 * 60 + 40), 36 * 60),
 };
 
+/** BO3 round speedrun tiers — WR-based. Same pattern as BO2, plus ROUND_255_SPEEDRUN where applicable. */
+function buildBo3SpeedrunTiers(
+  r30: number,
+  r50: number,
+  r70: number,
+  r100?: number,
+  r255?: number
+): SpeedrunTiersByType {
+  const buf = 1.2;
+  const base: SpeedrunTiersByType = {
+    ROUND_30_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(r30 * buf * 1.5), xpReward: 80 },
+      { maxTimeSeconds: Math.round(r30 * buf * 1.2), xpReward: 200 },
+      { maxTimeSeconds: Math.round(r30 * buf), xpReward: 500 },
+      { maxTimeSeconds: Math.round(r30 * 1.05), xpReward: 1200 },
+    ],
+    ROUND_50_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(r50 * buf * 1.5), xpReward: 120 },
+      { maxTimeSeconds: Math.round(r50 * buf * 1.2), xpReward: 300 },
+      { maxTimeSeconds: Math.round(r50 * buf), xpReward: 700 },
+      { maxTimeSeconds: Math.round(r50 * 1.05), xpReward: 1500 },
+    ],
+    ROUND_70_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(r70 * buf * 1.5), xpReward: 150 },
+      { maxTimeSeconds: Math.round(r70 * buf * 1.2), xpReward: 400 },
+      { maxTimeSeconds: Math.round(r70 * buf), xpReward: 900 },
+      { maxTimeSeconds: Math.round(r70 * 1.05), xpReward: 2000 },
+    ],
+  };
+  if (r100 != null) {
+    base.ROUND_100_SPEEDRUN = [
+      { maxTimeSeconds: Math.round(r100 * buf * 1.5), xpReward: 200 },
+      { maxTimeSeconds: Math.round(r100 * buf * 1.2), xpReward: 500 },
+      { maxTimeSeconds: Math.round(r100 * buf), xpReward: 1200 },
+      { maxTimeSeconds: Math.round(r100 * 1.05), xpReward: 2500 },
+    ];
+  }
+  if (r255 != null) {
+    base.ROUND_255_SPEEDRUN = [
+      { maxTimeSeconds: Math.round(r255 * buf * 1.5), xpReward: 300 },
+      { maxTimeSeconds: Math.round(r255 * buf * 1.2), xpReward: 800 },
+      { maxTimeSeconds: Math.round(r255 * buf), xpReward: 1800 },
+      { maxTimeSeconds: Math.round(r255 * 1.05), xpReward: 3500 },
+    ];
+  }
+  return base;
+}
+
+function addBo3EeTiers(base: SpeedrunTiersByType, wrSeconds: number): SpeedrunTiersByType {
+  const buf = 1.2;
+  return {
+    ...base,
+    EASTER_EGG_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(wrSeconds * buf * 1.5), xpReward: 200 },
+      { maxTimeSeconds: Math.round(wrSeconds * buf * 1.2), xpReward: 600 },
+      { maxTimeSeconds: Math.round(wrSeconds * buf), xpReward: 1500 },
+      { maxTimeSeconds: Math.round(wrSeconds * 1.05), xpReward: 2500 },
+    ],
+  };
+}
+
+/** BO3 speedrun tiers per map — uses BO3_MAP_CONFIG speedrunWRs. */
+export const BO3_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
+  'shadows-of-evil': addBo3EeTiers(
+    buildBo3SpeedrunTiers(27 * 60 + 55, 54 * 60, 85 * 60, 170 * 60 + 40, 45 * 3600),
+    19 * 60 + 39
+  ),
+  'the-giant': addBo3EeTiers(
+    buildBo3SpeedrunTiers(27 * 60 + 55, 52 * 60, 95 * 60 + 40, 222 * 60 + 40, 55 * 3600),
+    65 * 60
+  ),
+  'der-eisendrache': addBo3EeTiers(
+    buildBo3SpeedrunTiers(29 * 60, 56 * 60, 94 * 60 + 40, 200 * 60, 47 * 3600),
+    26 * 60
+  ),
+  'zetsubou-no-shima': addBo3EeTiers(
+    buildBo3SpeedrunTiers(28 * 60, 62 * 60 + 40, 106 * 60 + 40, 230 * 60 + 40, 51 * 3600),
+    20 * 60 + 6
+  ),
+  'gorod-krovi': addBo3EeTiers(
+    buildBo3SpeedrunTiers(31 * 60, 66 * 60 + 40, 155 * 60 + 40, 5 * 3600, 70 * 3600),
+    31 * 60
+  ),
+  revelations: addBo3EeTiers(
+    buildBo3SpeedrunTiers(30 * 60, 56 * 60, 90 * 60 + 40, 167 * 60 + 40, 32 * 3600),
+    23 * 60 + 4
+  ),
+  'bo3-nacht-der-untoten': buildBo3SpeedrunTiers(
+    38 * 60,
+    95 * 60 + 40,
+    230 * 60 + 40,
+    13 * 3600,
+    300 * 3600
+  ),
+  'bo3-verruckt': buildBo3SpeedrunTiers(
+    29 * 60,
+    95 * 60 + 40,
+    100 * 60 + 40,
+    340 * 60 + 40,
+    110 * 3600
+  ),
+  'bo3-shi-no-numa': buildBo3SpeedrunTiers(
+    30 * 60,
+    60,
+    117 * 60 + 40,
+    345 * 60 + 40
+  ),
+  'bo3-kino-der-toten': buildBo3SpeedrunTiers(
+    28 * 60,
+    53 * 60,
+    90 * 60 + 40,
+    200 * 60 + 40,
+    66 * 3600
+  ),
+  'bo3-ascension': addBo3EeTiers(
+    buildBo3SpeedrunTiers(28 * 60, 52 * 60, 84 * 60 + 40, 163 * 60 + 20, 50 * 3600),
+    6 * 60 + 40
+  ),
+  'bo3-shangri-la': addBo3EeTiers(
+    buildBo3SpeedrunTiers(31 * 60, 64 * 60 + 40, 111 * 60 + 40, 249 * 60 + 40),
+    8 * 60
+  ),
+  'bo3-moon': addBo3EeTiers(
+    buildBo3SpeedrunTiers(27 * 60, 47 * 60, 75 * 60 + 40, 153 * 60 + 40, 38 * 3600),
+    19 * 60 + 20
+  ),
+  'bo3-origins': addBo3EeTiers(
+    buildBo3SpeedrunTiers(31 * 60, 62 * 60 + 40, 100 * 60 + 40, 195 * 60 + 40, 87 * 3600),
+    32 * 60
+  ),
+};
+
 /** BO2 EE speedrun tiers per Easter Egg (Richtofen / Maxis variants). WRs in seconds. */
 export const BO2_TRANZIT_RICHTOFEN_EE_TIERS: SpeedrunTier[] = [
   { maxTimeSeconds: 780, xpReward: 200 },

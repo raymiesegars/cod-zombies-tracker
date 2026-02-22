@@ -6,7 +6,8 @@ import { LeaderboardEntry, LeaderboardsHelpContent, Bo7RelicPicker } from '@/com
 import type { LeaderboardEntry as LeaderboardEntryType, Game, MapWithGame, PlayerCount, ChallengeType } from '@/types';
 import { cn } from '@/lib/utils';
 import { getBo4DifficultyLabel, BO4_DIFFICULTIES, isBo4Game } from '@/lib/bo4';
-import { IW_CHALLENGE_TYPES_ORDER, isIwSpeedrunChallengeType } from '@/lib/iw';
+import { IW_CHALLENGE_TYPES_ORDER } from '@/lib/iw';
+import { isSpeedrunCategory } from '@/lib/achievements/categories';
 import { isBo3Game, BO3_GOBBLEGUM_MODES, getBo3GobbleGumLabel } from '@/lib/bo3';
 import { isBocwGame, BOCW_SUPPORT_MODES, getBocwSupportLabel } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
@@ -15,6 +16,7 @@ import { Trophy, Medal, Filter, Search, X, ShieldCheck, CheckCircle2 } from 'luc
 import { useAuth } from '@/context/auth-context';
 import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { getBo2MapConfig, getBo2ChallengeTypeLabel } from '@/lib/bo2/bo2-map-config';
+import { getBo3MapConfig } from '@/lib/bo3/bo3-map-config';
 
 const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
 const PAGE_SIZE = 25;
@@ -37,6 +39,10 @@ const challengeTypeLabels: Record<string, string> = {
   ROUND_70_SPEEDRUN: 'Round 70 Speedrun',
   ROUND_100_SPEEDRUN: 'Round 100 Speedrun',
   ROUND_200_SPEEDRUN: 'Round 200 Speedrun',
+  ROUND_255_SPEEDRUN: 'Round 255 Speedrun',
+  NO_JUG: 'No Jug',
+  NO_ATS: 'No AATs',
+  NO_MANS_LAND: "No Man's Land",
   EASTER_EGG_SPEEDRUN: 'Easter Egg Speedrun',
   GHOST_AND_SKULLS: 'Ghost and Skulls',
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
@@ -67,6 +73,7 @@ export default function LeaderboardsPage() {
   const [directorsCutFilter, setDirectorsCutFilter] = useState(false);
   // BO3
   const [bo3GobbleGumFilter, setBo3GobbleGumFilter] = useState<string>('');
+  const [bo3AatUsedFilter, setBo3AatUsedFilter] = useState<string>('');
   // BO4
   const [bo4ElixirFilter, setBo4ElixirFilter] = useState<string>('');
   // BOCW
@@ -203,7 +210,10 @@ export default function LeaderboardsPage() {
             else if (fortuneCardsFilter === 'false') params.set('fortuneCards', 'false');
             if (directorsCutFilter) params.set('directorsCut', 'true');
           }
-          if (isBo3Map && bo3GobbleGumFilter) params.set('bo3GobbleGumMode', bo3GobbleGumFilter);
+          if (isBo3Map) {
+            if (bo3GobbleGumFilter) params.set('bo3GobbleGumMode', bo3GobbleGumFilter);
+            if (bo3AatUsedFilter === 'true' || bo3AatUsedFilter === 'false') params.set('bo3AatUsed', bo3AatUsedFilter);
+          }
           if (isBo4Map && bo4ElixirFilter) params.set('bo4ElixirMode', bo4ElixirFilter);
           if (isBocwMap && bocwSupportFilter) params.set('bocwSupportMode', bocwSupportFilter);
           if (isBo6Map) {
@@ -234,7 +244,7 @@ export default function LeaderboardsPage() {
     }
 
     fetchLeaderboard();
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, searchForFetch, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo4ElixirFilter, bocwSupportFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, searchForFetch, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter]);
 
   const loadMore = useCallback(async () => {
     if (leaderboard.length >= total || total === 0) return;
@@ -286,7 +296,10 @@ export default function LeaderboardsPage() {
             else if (fortuneCardsFilter === 'false') params.set('fortuneCards', 'false');
             if (directorsCutFilter) params.set('directorsCut', 'true');
           }
-          if (isBo3Map && bo3GobbleGumFilter) params.set('bo3GobbleGumMode', bo3GobbleGumFilter);
+          if (isBo3Map) {
+            if (bo3GobbleGumFilter) params.set('bo3GobbleGumMode', bo3GobbleGumFilter);
+            if (bo3AatUsedFilter === 'true' || bo3AatUsedFilter === 'false') params.set('bo3AatUsed', bo3AatUsedFilter);
+          }
           if (isBo4Map && bo4ElixirFilter) params.set('bo4ElixirMode', bo4ElixirFilter);
           if (isBocwMap && bocwSupportFilter) params.set('bocwSupportMode', bocwSupportFilter);
           if (isBo6Map) {
@@ -323,7 +336,7 @@ export default function LeaderboardsPage() {
     } finally {
       loadingMoreRef.current = false;
     }
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo4ElixirFilter, bocwSupportFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, leaderboard.length, total]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, leaderboard.length, total]);
 
   // Only observe sentinel when search is empty so list stays stable while filtering
   useEffect(() => {
@@ -414,6 +427,15 @@ export default function LeaderboardsPage() {
     } else if (selectedMapData?.game?.shortName === 'BO2' && selectedMap) {
       const bo2Config = getBo2MapConfig(selectedMap);
       const types = bo2Config?.challengeTypes ?? mapChallenges.map((c) => c.type);
+      challengeOptions = types
+        .filter((t) => t !== 'HIGHEST_ROUND')
+        .map((t) => {
+          const c = mapChallenges.find((ch) => ch.type === t);
+          return { value: t, label: getLabel(t, c?.name) };
+        });
+    } else if (selectedMapData?.game?.shortName === 'BO3' && selectedMap) {
+      const bo3Config = getBo3MapConfig(selectedMap);
+      const types = bo3Config?.challengeTypes ?? mapChallenges.map((c) => c.type);
       challengeOptions = types
         .filter((t) => t !== 'HIGHEST_ROUND')
         .map((t) => {
@@ -535,7 +557,11 @@ export default function LeaderboardsPage() {
               <Select
                 options={challengeTypeOptionsWithEe}
                 value={selectedChallengeType}
-                onChange={(e) => setSelectedChallengeType(e.target.value)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setSelectedChallengeType(v);
+                  if (v === 'NO_ATS') setBo3AatUsedFilter('');
+                }}
                 className="w-full"
                 disabled={isRankView}
               />
@@ -631,12 +657,26 @@ export default function LeaderboardsPage() {
                     </>
                   )}
                   {isBo3Map && (
-                    <Select
-                      options={[{ value: '', label: 'All GobbleGums' }, ...BO3_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo3GobbleGumLabel(m) }))]}
-                      value={bo3GobbleGumFilter}
-                      onChange={(e) => setBo3GobbleGumFilter(e.target.value)}
-                      className="w-full min-w-0 sm:w-52 max-w-full"
-                    />
+                    <>
+                      <Select
+                        options={[{ value: '', label: 'All GobbleGums' }, ...BO3_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo3GobbleGumLabel(m) }))]}
+                        value={bo3GobbleGumFilter}
+                        onChange={(e) => setBo3GobbleGumFilter(e.target.value)}
+                        className="w-full min-w-0 sm:w-52 max-w-full"
+                      />
+                      {selectedChallengeType !== 'NO_ATS' && (
+                        <Select
+                          options={[
+                            { value: '', label: 'Any AATs' },
+                            { value: 'true', label: 'AATs Used' },
+                            { value: 'false', label: 'No AATs' },
+                          ]}
+                          value={bo3AatUsedFilter}
+                          onChange={(e) => setBo3AatUsedFilter(e.target.value)}
+                          className="w-full min-w-0 sm:w-40 max-w-full"
+                        />
+                      )}
+                    </>
                   )}
                   {isBo4Map && (
                     <Select
@@ -845,11 +885,11 @@ export default function LeaderboardsPage() {
                   <>
                     {leaderboard.map((entry, index) => (
                       <LeaderboardEntry
-                        key={isEeTimeView || (isIwMap && isIwSpeedrunChallengeType(selectedChallengeType)) ? `${entry.user.id}-${entry.playerCount}-${index}` : `${entry.user.id}-${entry.playerCount}`}
+                        key={isEeTimeView || isSpeedrunCategory(selectedChallengeType) ? `${entry.user.id}-${entry.playerCount}-${index}` : `${entry.user.id}-${entry.playerCount}`}
                         entry={entry}
                         index={index}
                         isCurrentUser={entry.user.id === profile?.id}
-                        valueKind={isEeTimeView || (isIwMap && isIwSpeedrunChallengeType(selectedChallengeType)) ? 'time' : 'round'}
+                        valueKind={isEeTimeView || isSpeedrunCategory(selectedChallengeType) ? 'time' : 'round'}
                         mapSlug={selectedMap}
                       />
                     ))}

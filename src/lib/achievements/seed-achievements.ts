@@ -7,6 +7,9 @@ import {
 } from './milestones';
 
 const MIN_ACHIEVEMENT_XP = 50;
+
+/** Achievement types that must NEVER be deactivated by balance patches. Main quest completion achievements are created by seed-easter-eggs and are not in getMapAchievementDefinitions. */
+export const ACHIEVEMENT_TYPES_NEVER_DEACTIVATE = ['EASTER_EGG_COMPLETE'] as const;
 import {
   getRoundConfigForMap,
   getXpForRoundFromMilestones,
@@ -14,8 +17,9 @@ import {
 import { getWaWMapConfig, getWaWRoundMilestones, getWaWChallengeTypeLabel } from '@/lib/waw/waw-map-config';
 import { getBo1MapConfig, getBo1RoundMilestones, getBo1ChallengeTypeLabel } from '@/lib/bo1/bo1-map-config';
 import { getBo2MapConfig, getBo2RoundMilestones, getBo2ChallengeTypeLabel } from '@/lib/bo2/bo2-map-config';
+import { getBo3MapConfig, getBo3RoundMilestones, getBo3ChallengeTypeLabel } from '@/lib/bo3/bo3-map-config';
 import { isBo4Game, BO4_DIFFICULTIES, BO4_DIFFICULTY_XP_MULTIPLIER, type Bo4DifficultyType } from '../bo4';
-import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, IW_AOTRT_SPEEDRUN_TIERS, IW_BEAST_SPEEDRUN_TIERS, WAW_SPEEDRUN_TIERS_BY_MAP, BO1_SPEEDRUN_TIERS_BY_MAP, BO2_SPEEDRUN_TIERS_BY_MAP, BO1_COTD_STAND_IN_EE_TIERS, BO1_COTD_ENSEMBLE_CAST_EE_TIERS, BO2_TRANZIT_RICHTOFEN_EE_TIERS, BO2_TRANZIT_MAXIS_EE_TIERS, BO2_DIE_RISE_RICHTOFEN_EE_TIERS, BO2_DIE_RISE_MAXIS_EE_TIERS, BO2_BURIED_RICHTOFEN_EE_TIERS, BO2_BURIED_MAXIS_EE_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
+import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, IW_AOTRT_SPEEDRUN_TIERS, IW_BEAST_SPEEDRUN_TIERS, WAW_SPEEDRUN_TIERS_BY_MAP, BO1_SPEEDRUN_TIERS_BY_MAP, BO2_SPEEDRUN_TIERS_BY_MAP, BO3_SPEEDRUN_TIERS_BY_MAP, BO1_COTD_STAND_IN_EE_TIERS, BO1_COTD_ENSEMBLE_CAST_EE_TIERS, BO2_TRANZIT_RICHTOFEN_EE_TIERS, BO2_TRANZIT_MAXIS_EE_TIERS, BO2_DIE_RISE_RICHTOFEN_EE_TIERS, BO2_DIE_RISE_MAXIS_EE_TIERS, BO2_BURIED_RICHTOFEN_EE_TIERS, BO2_BURIED_MAXIS_EE_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
 
 const CHALLENGE_TYPES = [
   'HIGHEST_ROUND',
@@ -82,6 +86,7 @@ export type AchievementSeedRow = {
   type: 'ROUND_MILESTONE' | 'CHALLENGE_COMPLETE' | 'EASTER_EGG_COMPLETE';
   criteria: {
     round?: number;
+    kills?: number;
     challengeType?: string;
     isCap?: boolean;
     difficulty?: Bo4DifficultyType;
@@ -362,6 +367,107 @@ export function getMapAchievementDefinitions(
     }
   }
 
+  // BO3: per-map config with WR-based achievements, NO_JUG, NO_ATS, ROUND_255, First Room variants, No Man's Land
+  if (gameShortName === 'BO3') {
+    const bo3Cfg = getBo3MapConfig(mapSlug);
+    if (bo3Cfg) {
+      const milestones = getBo3RoundMilestones(bo3Cfg.highRoundWR);
+      const maxRound = bo3Cfg.highRoundWR;
+      for (const { round, xp } of milestones) {
+        rows.push({
+          slug: `round-${round}`,
+          name: `Round ${round}`,
+          type: 'ROUND_MILESTONE',
+          criteria: { round, challengeType: 'HIGHEST_ROUND' },
+          xpReward: xp,
+          rarity: rarityForRound(round, maxRound),
+        });
+      }
+      if (bo3Cfg.noDownsWR != null) {
+        for (const { round, xp } of milestones) {
+          if (round <= bo3Cfg.noDownsWR!) {
+            rows.push({
+              slug: `no-downs-${round}`,
+              name: `No Downs Round ${round}`,
+              type: 'CHALLENGE_COMPLETE',
+              criteria: { round, challengeType: 'NO_DOWNS' },
+              xpReward: xp,
+              rarity: rarityForRound(round, bo3Cfg.noDownsWR!),
+            });
+          }
+        }
+      }
+      for (const cType of bo3Cfg.challengeTypes) {
+        const cTypeStr = cType as string;
+        if (cTypeStr === 'HIGHEST_ROUND' || cTypeStr === 'NO_DOWNS' || cTypeStr === 'NO_MANS_LAND') continue;
+        const wr =
+          cTypeStr === 'STARTING_ROOM' ? bo3Cfg.firstRoomWR
+          : cTypeStr === 'STARTING_ROOM_JUG_SIDE' ? bo3Cfg.firstRoomJugWR
+          : cTypeStr === 'STARTING_ROOM_QUICK_SIDE' ? bo3Cfg.firstRoomQuickWR
+          : cTypeStr === 'NO_POWER' ? bo3Cfg.noPowerWR
+          : cTypeStr === 'NO_PERKS' ? bo3Cfg.noPerksWR
+          : cTypeStr === 'NO_JUG' ? bo3Cfg.noJugWR
+          : cTypeStr === 'NO_ATS' ? (bo3Cfg as { noAtsWR?: number }).noAtsWR ?? bo3Cfg.noJugWR
+          : undefined;
+        if (wr == null) continue;
+        const cMilestones = getBo3RoundMilestones(wr);
+        const slugPrefix = cTypeStr.toLowerCase().replace(/_/g, '-');
+        for (const { round, xp } of cMilestones) {
+          if (round > wr) continue;
+          rows.push({
+            slug: `${slugPrefix}-${round}`,
+            name: `${getBo3ChallengeTypeLabel(cTypeStr)} Round ${round}`,
+            type: 'CHALLENGE_COMPLETE',
+            criteria: { round, challengeType: cType },
+            xpReward: Math.max(MIN_ACHIEVEMENT_XP, xp),
+            rarity: rarityForRound(round, wr),
+          });
+        }
+      }
+      if (bo3Cfg.challengeTypes.includes('ONE_BOX')) {
+        rows.push({
+          slug: 'one-box-30',
+          name: 'One Box Round 30',
+          type: 'CHALLENGE_COMPLETE',
+          criteria: { round: 30, challengeType: 'ONE_BOX' },
+          xpReward: 600,
+          rarity: 'RARE',
+        });
+      }
+      if (bo3Cfg.challengeTypes.includes('PISTOL_ONLY')) {
+        const pistolWR = maxRound;
+        const pistolMilestones = getBo3RoundMilestones(Math.min(pistolWR, 100), 5);
+        for (const { round, xp } of pistolMilestones) {
+          rows.push({
+            slug: `pistol-only-${round}`,
+            name: `Pistol Only Round ${round}`,
+            type: 'CHALLENGE_COMPLETE',
+            criteria: { round, challengeType: 'PISTOL_ONLY' },
+            xpReward: Math.max(MIN_ACHIEVEMENT_XP, Math.floor(xp * 3)),
+            rarity: rarityForRound(round, pistolWR),
+          });
+        }
+      }
+      if (bo3Cfg.noMansLandWR != null) {
+        const killsMilestones = [100, 200, 300, 400, bo3Cfg.noMansLandWR];
+        const killsXp = [100, 300, 600, 1000, 2000];
+        for (let i = 0; i < killsMilestones.length; i++) {
+          const kills = killsMilestones[i]!;
+          const xp = killsXp[i] ?? 2000;
+          rows.push({
+            slug: `no-mans-land-${kills}`,
+            name: `No Man's Land ${kills} kills`,
+            type: 'CHALLENGE_COMPLETE',
+            criteria: { kills, challengeType: 'NO_MANS_LAND' },
+            xpReward: Math.max(MIN_ACHIEVEMENT_XP, xp),
+            rarity: kills >= 400 ? 'LEGENDARY' : kills >= 300 ? 'EPIC' : kills >= 200 ? 'RARE' : 'UNCOMMON',
+          });
+        }
+      }
+      return rows;
+    }
+  }
+
   const mapConfig = gameShortName ? getRoundConfigForMap(mapSlug, gameShortName) : null;
   const maxRound =
     mapConfig?.roundCap ??
@@ -527,6 +633,7 @@ const SPEEDRUN_TYPE_LABELS: Record<string, string> = {
   ROUND_70_SPEEDRUN: 'Round 70',
   ROUND_100_SPEEDRUN: 'Round 100',
   ROUND_200_SPEEDRUN: 'Round 200',
+  ROUND_255_SPEEDRUN: 'Round 255',
   EASTER_EGG_SPEEDRUN: 'Easter Egg',
   GHOST_AND_SKULLS: 'Ghost and Skulls',
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
@@ -551,6 +658,7 @@ export function getSpeedrunAchievementDefinitions(
     : gameShortName === 'WAW' ? WAW_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : gameShortName === 'BO1' ? BO1_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : gameShortName === 'BO2' ? BO2_SPEEDRUN_TIERS_BY_MAP[mapSlug]
+    : gameShortName === 'BO3' ? BO3_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : undefined;
   if (!tiersByType) return [];
   const rows: AchievementSeedRow[] = [];

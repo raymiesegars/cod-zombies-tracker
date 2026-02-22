@@ -154,6 +154,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     const bo3GobbleGumMode = body.bo3GobbleGumMode !== undefined
       ? isBo3Game(gameShortName) && (BO3_GOBBLEGUM_MODES as readonly string[]).includes(body.bo3GobbleGumMode) ? body.bo3GobbleGumMode : undefined
       : undefined;
+    const bo3AatUsed = body.bo3AatUsed !== undefined && isBo3Game(gameShortName) ? Boolean(body.bo3AatUsed) : undefined;
     const bo4ElixirMode = body.bo4ElixirMode !== undefined && isBo4Game(gameShortName) ? body.bo4ElixirMode : undefined;
     const bocwSupportMode = body.bocwSupportMode !== undefined
       ? isBocwGame(gameShortName) && (BOCW_SUPPORT_MODES as readonly string[]).includes(body.bocwSupportMode) ? body.bocwSupportMode : undefined
@@ -226,6 +227,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         ...(useFortuneCards !== undefined && { useFortuneCards }),
         ...(useDirectorsCut !== undefined && { useDirectorsCut }),
         ...(bo3GobbleGumMode !== undefined && { bo3GobbleGumMode }),
+        ...(bo3AatUsed !== undefined && { bo3AatUsed }),
         ...(bo4ElixirMode !== undefined && { bo4ElixirMode }),
         ...(bocwSupportMode !== undefined && { bocwSupportMode }),
         ...(bo6GobbleGumMode !== undefined && { bo6GobbleGumMode }),
