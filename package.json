@@ -21,7 +21,8 @@
     "db:backfill-round-milestone-achievements": "tsx scripts/backfill-round-milestone-achievements.ts",
     "db:add-iw": "tsx scripts/add-iw-content.ts",
     "db:backfill-bo4-difficulty-achievements": "tsx scripts/backfill-bo4-difficulty-achievements.ts",
-    "db:waw-balance-patch": "tsx scripts/waw-balance-patch.ts"
+    "db:waw-balance-patch": "tsx scripts/waw-balance-patch.ts",
+    "db:update-der-riese-fly-trap": "tsx scripts/update-der-riese-fly-trap.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.9.1",
