@@ -1,3 +1,5 @@
+import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
+
 // How we group and order achievements on map detail and profile
 export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
   BASE_ROUNDS: 'Base Rounds',
@@ -89,23 +91,75 @@ export function getAchievementCategoryFilterOptions(): { value: string; label: s
   ];
 }
 
+/**
+ * Get allowed non-speedrun categories for a game/map. Prevents game-specific categories
+ * (e.g. STARTING_ROOM_JUG_SIDE) from appearing on maps that don't support them.
+ */
+export function getAllowedNonSpeedrunCategoriesForMap(
+  gameShortName: string | null | undefined,
+  mapSlug: string | null | undefined
+): string[] | null {
+  if (!gameShortName || !mapSlug || gameShortName !== 'BO2') return null;
+  const cfg = getBo2MapConfig(mapSlug);
+  if (!cfg?.challengeTypes) return null;
+  const fromConfig = cfg.challengeTypes.filter((c) => !isSpeedrunCategory(c) && c !== 'HIGHEST_ROUND');
+  return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG']));
+}
+
 /** First filter: non-speedrun categories only (All types + Base Rounds, No Downs, etc.). Pass existing categories to restrict to those present. */
 export function getNonSpeedrunCategoryFilterOptions(
-  existingCategories?: string[]
+  existingCategories?: string[],
+  allowedCategories?: string[] | null
 ): { value: string; label: string }[] {
-  const nonSpeedrun =
+  let nonSpeedrun =
     existingCategories ?? CATEGORY_ORDER.filter((c) => c !== 'OTHER' && !isSpeedrunCategory(c));
+  if (allowedCategories && allowedCategories.length > 0) {
+    nonSpeedrun = nonSpeedrun.filter((c) => allowedCategories.includes(c));
+  }
   return [
     { value: '', label: 'All types' },
     ...nonSpeedrun.map((c) => ({ value: c, label: ACHIEVEMENT_CATEGORY_LABELS[c] ?? c })),
   ];
 }
 
+/**
+ * Get allowed speedrun categories for a game/map. Prevents IW-only categories (G&S, Aliens, etc.)
+ * from appearing on BO2/other games.
+ */
+export function getAllowedSpeedrunCategoriesForMap(
+  gameShortName: string | null | undefined,
+  mapSlug: string | null | undefined
+): string[] | null {
+  if (!gameShortName || !mapSlug) return null;
+  if (gameShortName === 'IW') return SPEEDRUN_CATEGORIES;
+  // BO2 and others: only round/EE speedruns, no IW bosses
+  const bo2Generic = [
+    'ROUND_30_SPEEDRUN',
+    'ROUND_50_SPEEDRUN',
+    'ROUND_70_SPEEDRUN',
+    'ROUND_100_SPEEDRUN',
+    'ROUND_200_SPEEDRUN',
+    'EASTER_EGG_SPEEDRUN',
+  ];
+  if (gameShortName === 'BO2') {
+    const cfg = getBo2MapConfig(mapSlug);
+    if (cfg?.challengeTypes) {
+      return cfg.challengeTypes.filter((c) => isSpeedrunCategory(c));
+    }
+    return bo2Generic;
+  }
+  return bo2Generic;
+}
+
 /** Second filter: Speedruns dropdown (All + each speedrun category in canonical order: 30/50/70/100, EE, G&S, bosses) */
 export function getSpeedrunCategoryFilterOptions(
-  existingCategories?: string[]
+  existingCategories?: string[],
+  allowedCategories?: string[] | null
 ): { value: string; label: string }[] {
-  const list = existingCategories ?? SPEEDRUN_CATEGORIES;
+  let list = existingCategories ?? SPEEDRUN_CATEGORIES;
+  if (allowedCategories && allowedCategories.length > 0) {
+    list = list.filter((c) => allowedCategories.includes(c));
+  }
   const speedrunCats = list.filter((c) => isSpeedrunCategory(c));
   const ordered = [...speedrunCats].sort(
     (a, b) => SPEEDRUN_CATEGORIES.indexOf(a) - SPEEDRUN_CATEGORIES.indexOf(b)

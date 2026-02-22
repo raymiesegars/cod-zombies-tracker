@@ -32,6 +32,8 @@ import {
   getAchievementCategory,
   getNonSpeedrunCategoryFilterOptions,
   getSpeedrunCategoryFilterOptions,
+  getAllowedSpeedrunCategoriesForMap,
+  getAllowedNonSpeedrunCategoriesForMap,
   getSortedCategoryKeys,
   isSpeedrunCategory,
   sortAchievementsByXp,
@@ -173,8 +175,23 @@ function AchievementsSection({
   );
   const nonSpeedrunCats = existingCategories.filter((c) => !isSpeedrunCategory(c));
   const speedrunCats = existingCategories.filter((c) => isSpeedrunCategory(c));
-  const categoryOptions = getNonSpeedrunCategoryFilterOptions(nonSpeedrunCats.length ? nonSpeedrunCats : undefined);
-  const speedrunOptions = getSpeedrunCategoryFilterOptions(speedrunCats.length ? speedrunCats : undefined);
+  const selectedMapData = mapAchievementsForFilterOptions[0]?.map;
+  const allowedSpeedrunCats = getAllowedSpeedrunCategoriesForMap(
+    selectedMapData?.game?.shortName,
+    selectedMapData?.slug
+  );
+  const allowedNonSpeedrunCats = getAllowedNonSpeedrunCategoriesForMap(
+    selectedMapData?.game?.shortName,
+    selectedMapData?.slug
+  );
+  const categoryOptions = getNonSpeedrunCategoryFilterOptions(
+    nonSpeedrunCats.length ? nonSpeedrunCats : undefined,
+    allowedNonSpeedrunCats
+  );
+  const speedrunOptions = getSpeedrunCategoryFilterOptions(
+    speedrunCats.length ? speedrunCats : undefined,
+    allowedSpeedrunCats
+  );
 
   const filteredAchievements = useMemo(() => {
     if (!overview?.achievements || !filterMap) return [];

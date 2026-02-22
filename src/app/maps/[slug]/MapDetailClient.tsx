@@ -60,6 +60,8 @@ import {
   getSortedCategoryKeys,
   getNonSpeedrunCategoryFilterOptions,
   getSpeedrunCategoryFilterOptions,
+  getAllowedSpeedrunCategoriesForMap,
+  getAllowedNonSpeedrunCategoriesForMap,
   isSpeedrunCategory,
 } from '@/lib/achievements/categories';
 import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-config';
@@ -198,12 +200,14 @@ function AchievementsTabContent({
   canRelock,
   onRelock,
   gameShortName,
+  mapSlug,
 }: {
   achievements?: { id: string; name: string; slug: string; type: string; difficulty?: string | null; criteria: { round?: number; challengeType?: string; isCap?: boolean }; xpReward: number; rarity: string; easterEggId?: string | null; easterEgg?: { id: string; name: string; slug: string } | null }[];
   unlockedIds?: string[];
   canRelock?: boolean;
   onRelock?: () => void | Promise<void>;
   gameShortName?: string;
+  mapSlug?: string;
 }) {
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [speedrunFilter, setSpeedrunFilter] = useState<string>('');
@@ -254,8 +258,16 @@ function AchievementsTabContent({
   const sortedCategoriesForOptions = getSortedCategoryKeys(byCategoryForOptions as Record<string, unknown[]>);
   const nonSpeedrunCatsForOptions = sortedCategoriesForOptions.filter((c) => !isSpeedrunCategory(c));
   const speedrunCatsForOptions = sortedCategoriesForOptions.filter((c) => isSpeedrunCategory(c));
-  const categoryOptions = getNonSpeedrunCategoryFilterOptions(nonSpeedrunCatsForOptions.length ? nonSpeedrunCatsForOptions : undefined);
-  const speedrunOptions = getSpeedrunCategoryFilterOptions(speedrunCatsForOptions.length ? speedrunCatsForOptions : undefined);
+  const allowedSpeedrunCats = getAllowedSpeedrunCategoriesForMap(gameShortName, mapSlug);
+  const allowedNonSpeedrunCats = getAllowedNonSpeedrunCategoriesForMap(gameShortName, mapSlug);
+  const categoryOptions = getNonSpeedrunCategoryFilterOptions(
+    nonSpeedrunCatsForOptions.length ? nonSpeedrunCatsForOptions : undefined,
+    allowedNonSpeedrunCats
+  );
+  const speedrunOptions = getSpeedrunCategoryFilterOptions(
+    speedrunCatsForOptions.length ? speedrunCatsForOptions : undefined,
+    allowedSpeedrunCats
+  );
 
   const visibleCount = visibleCategories.reduce((sum, cat) => sum + (byCategory[cat]?.length ?? 0), 0);
   const filterEmpty =
@@ -1155,6 +1167,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                 await refreshProfile?.();
               }}
               gameShortName={map?.game?.shortName}
+              mapSlug={map?.slug}
             />
           </TabsContent>
 

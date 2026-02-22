@@ -14,7 +14,7 @@ import { isBo7Game, BO7_SUPPORT_MODES, getBo7SupportLabel } from '@/lib/bo7';
 import { Trophy, Medal, Filter, Search, X, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-config';
-import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
+import { getBo2MapConfig, getBo2ChallengeTypeLabel } from '@/lib/bo2/bo2-map-config';
 
 const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
 const PAGE_SIZE = 25;
@@ -395,27 +395,43 @@ export default function LeaderboardsPage() {
     return () => { cancelled = true; };
   }, [selectedMap, isRankView]);
 
-  // Build options: Highest Round, each challenge this map has (IW in canonical order), each loggable EE (Time)
+  // Build options: Highest Round, each challenge this map has (IW/BO2 in canonical order), each loggable EE (Time)
   const challengeTypeOptionsWithEe = useMemo(() => {
     const getLabel = (type: string, fallbackName?: string | null) =>
       selectedMapData?.game?.shortName === 'WAW'
         ? (fallbackName || getWaWChallengeTypeLabel(type))
-        : (fallbackName ?? challengeTypeLabels[type] ?? type);
-    const challengeOptions = mapChallenges.length > 0 && selectedMapData?.game?.shortName === 'IW'
-      ? IW_CHALLENGE_TYPES_ORDER.filter((t) => mapChallenges.some((c) => c.type === t)).map((t) => {
+        : selectedMapData?.game?.shortName === 'BO2'
+          ? (fallbackName ?? challengeTypeLabels[type] ?? getBo2ChallengeTypeLabel(type) ?? type)
+          : (fallbackName ?? challengeTypeLabels[type] ?? type);
+    let challengeOptions: { value: string; label: string }[];
+    if (selectedMapData?.game?.shortName === 'IW') {
+      challengeOptions = mapChallenges.length > 0
+        ? IW_CHALLENGE_TYPES_ORDER.filter((t) => mapChallenges.some((c) => c.type === t)).map((t) => {
+            const c = mapChallenges.find((ch) => ch.type === t);
+            return { value: t, label: c?.name ?? challengeTypeLabels[t] ?? t };
+          })
+        : [];
+    } else if (selectedMapData?.game?.shortName === 'BO2' && selectedMap) {
+      const bo2Config = getBo2MapConfig(selectedMap);
+      const types = bo2Config?.challengeTypes ?? mapChallenges.map((c) => c.type);
+      challengeOptions = types
+        .filter((t) => t !== 'HIGHEST_ROUND')
+        .map((t) => {
           const c = mapChallenges.find((ch) => ch.type === t);
-          return { value: t, label: c?.name ?? challengeTypeLabels[t] ?? t };
-        })
-      : mapChallenges.map((c) => ({
-          value: c.type,
-          label: getLabel(c.type, c.name),
-        }));
+          return { value: t, label: getLabel(t, c?.name) };
+        });
+    } else {
+      challengeOptions = mapChallenges.map((c) => ({
+        value: c.type,
+        label: getLabel(c.type, c.name),
+      }));
+    }
     return [
       { value: 'HIGHEST_ROUND', label: 'Highest Round' },
       ...challengeOptions,
       ...mapEasterEggs.map((ee) => ({ value: `ee-time-${ee.id}`, label: `${ee.name} (Time)` })),
     ];
-  }, [mapChallenges, mapEasterEggs, selectedMapData?.game?.shortName]);
+  }, [mapChallenges, mapEasterEggs, selectedMapData?.game?.shortName, selectedMap]);
 
   // When map changes, reset to Highest Round
   useEffect(() => {
