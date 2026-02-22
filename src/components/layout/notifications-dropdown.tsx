@@ -6,13 +6,13 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, ShieldCheck, ShieldOff, Loader2, CheckCheck, Trash2, UserPlus, UserMinus, Check, X } from 'lucide-react';
 
-/** Persists across remounts/navigation so we only show verified XP toast once per notification. */
+/** Persists across sessions (localStorage) so verified XP toast shows only once ever per notification. */
 const VERIFIED_TOAST_SHOWN_KEY = 'cod-tracker-verified-xp-toast-shown';
 
 function hasShownVerifiedToastFor(notificationId: string): boolean {
   if (typeof window === 'undefined') return true;
   try {
-    const raw = sessionStorage.getItem(VERIFIED_TOAST_SHOWN_KEY);
+    const raw = localStorage.getItem(VERIFIED_TOAST_SHOWN_KEY);
     const ids: string[] = raw ? JSON.parse(raw) : [];
     return ids.includes(notificationId);
   } catch {
@@ -23,11 +23,11 @@ function hasShownVerifiedToastFor(notificationId: string): boolean {
 function markVerifiedToastShown(notificationId: string): void {
   if (typeof window === 'undefined') return;
   try {
-    const raw = sessionStorage.getItem(VERIFIED_TOAST_SHOWN_KEY);
+    const raw = localStorage.getItem(VERIFIED_TOAST_SHOWN_KEY);
     const ids: string[] = raw ? JSON.parse(raw) : [];
     if (!ids.includes(notificationId)) {
       ids.push(notificationId);
-      sessionStorage.setItem(VERIFIED_TOAST_SHOWN_KEY, JSON.stringify(ids.slice(-100)));
+      localStorage.setItem(VERIFIED_TOAST_SHOWN_KEY, JSON.stringify(ids.slice(-100)));
     }
   } catch {
     // ignore
