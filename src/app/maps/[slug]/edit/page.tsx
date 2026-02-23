@@ -119,7 +119,7 @@ function OfficialRulesModal({
 
   const byType = rules && 'challengeRulesByType' in rules ? (rules as { challengeRulesByType: Record<string, string> }).challengeRulesByType : null;
   const typesToShow = (mapChallengeTypes && mapChallengeTypes.length > 0
-    ? [...new Set(mapChallengeTypes)]
+    ? Array.from(new Set(mapChallengeTypes))
     : byType ? Object.keys(byType) : []
   ).sort((a, b) => {
     const ia = CATEGORY_ORDER_FOR_RULES.indexOf(a);

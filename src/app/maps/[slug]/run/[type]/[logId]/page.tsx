@@ -157,6 +157,7 @@ type ChallengeLogDetail = {
   bo7SupportMode?: string | null;
   bo7IsCursedRun?: boolean | null;
   bo7RelicsUsed?: string[];
+  rampageInducerUsed?: boolean | null;
 };
 
 type EasterEggLogDetail = {
@@ -179,6 +180,7 @@ type EasterEggLogDetail = {
   teammateNonUserNames?: string[];
   isVerified?: boolean;
   verificationRequestedAt?: string | null;
+  rampageInducerUsed?: boolean | null;
 };
 
 export default function RunDetailPage() {
@@ -393,10 +395,7 @@ export default function RunDetailPage() {
         <div className="text-center">
           <Logo size="xl" animated={false} className="mx-auto mb-4 opacity-50" />
           <p className="text-bunker-400 mb-4">{error ?? 'Run not found.'}</p>
-          <Link
-            href="/maps"
-            className="inline-flex items-center gap-2 rounded-lg border border-bunker-500 bg-bunker-800/95 px-4 py-2.5 text-sm font-medium text-white shadow-md backdrop-blur-sm transition-colors hover:border-bunker-400 hover:bg-bunker-700/95"
-          >
+          <Link href="/maps" className="inline-flex items-center gap-2 rounded-lg border border-bunker-500 bg-bunker-800/95 px-4 py-2.5 text-sm font-medium text-white shadow-md backdrop-blur-sm transition-colors hover:border-bunker-400 hover:bg-bunker-700/95">
             <ChevronLeft className="h-4 w-4" aria-hidden />
             Back to Maps
           </Link>
@@ -588,15 +587,15 @@ export default function RunDetailPage() {
                       </span>
                     </div>
                   )}
-                  {(['BOCW', 'BO6', 'BO7'].includes(map.game.shortName) && (log as ChallengeLogDetail & { rampageInducerUsed?: boolean }).rampageInducerUsed != null && (
+                  {['BOCW', 'BO6', 'BO7'].includes(map.game.shortName) && (log as ChallengeLogDetail).rampageInducerUsed != null && (
                     <div className="flex items-center justify-between">
                       <span className="text-bunker-400 text-sm">Rampage Inducer</span>
                       <span className="text-white font-medium">
-                        {(log as ChallengeLogDetail & { rampageInducerUsed?: boolean }).rampageInducerUsed ? 'Yes' : 'No'}
+                        {(log as ChallengeLogDetail).rampageInducerUsed ? 'Yes' : 'No'}
                       </span>
                     </div>
                   )}
-                  {map.game.shortName === 'BO7' && (log as ChallengeLogDetail).bo7IsCursedRun && ((log as ChallengeLogDetail).bo7RelicsUsed ?? []).length > 0 && (
+                  {map.game.shortName === 'BO7' && (log as ChallengeLogDetail).bo7IsCursedRun && (((log as ChallengeLogDetail).bo7RelicsUsed ?? []).length > 0) && (
                     <div className="flex flex-col gap-1.5">
                       <span className="text-bunker-400 text-sm">Relics used</span>
                       <div className="flex flex-wrap gap-1">
@@ -608,7 +607,7 @@ export default function RunDetailPage() {
                   )}
                   {(() => {
                     const sec = (log as ChallengeLogDetail).completionTimeSeconds;
-                    return sec != null && sec > 0 ? (
+                    return (sec != null && sec > 0) ? (
                       <div className="flex items-center justify-between">
                         <span className="text-bunker-400 text-sm flex items-center gap-1.5">
                           <Clock className="w-3.5 h-3.5" />
@@ -645,7 +644,7 @@ export default function RunDetailPage() {
                   )}
                   {(() => {
                     const sec = (log as EasterEggLogDetail).completionTimeSeconds;
-                    return sec != null && sec > 0 ? (
+                    return (sec != null && sec > 0) ? (
                       <div className="flex items-center justify-between">
                         <span className="text-bunker-400 text-sm flex items-center gap-1.5">
                           <Clock className="w-3.5 h-3.5" />
@@ -667,11 +666,11 @@ export default function RunDetailPage() {
                       )}
                     </div>
                   )}
-                  {(['BOCW', 'BO6', 'BO7'].includes(map.game.shortName) && (log as EasterEggLogDetail & { rampageInducerUsed?: boolean }).rampageInducerUsed != null && (
+                  {['BOCW', 'BO6', 'BO7'].includes(map.game.shortName) && (log as EasterEggLogDetail).rampageInducerUsed != null && (
                     <div className="flex items-center justify-between">
                       <span className="text-bunker-400 text-sm">Rampage Inducer</span>
                       <span className="text-white font-medium">
-                        {(log as EasterEggLogDetail & { rampageInducerUsed?: boolean }).rampageInducerUsed ? 'Yes' : 'No'}
+                        {(log as EasterEggLogDetail).rampageInducerUsed ? 'Yes' : 'No'}
                       </span>
                     </div>
                   )}
