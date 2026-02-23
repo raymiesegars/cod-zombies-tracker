@@ -20,6 +20,7 @@ import { getBo3MapConfig } from '@/lib/bo3/bo3-map-config';
 import { getBo4MapConfig, getBo4ChallengeTypeLabel } from '@/lib/bo4/bo4-map-config';
 import { getBocwMapConfig, getBocwChallengeTypeLabel } from '@/lib/bocw/bocw-map-config';
 import { getBo6MapConfig, getBo6ChallengeTypeLabel } from '@/lib/bo6/bo6-map-config';
+import { getBo7MapConfig, getBo7ChallengeTypeLabel } from '@/lib/bo7/bo7-map-config';
 
 const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
 const PAGE_SIZE = 25;
@@ -440,7 +441,9 @@ export default function LeaderboardsPage() {
               ? (fallbackName ?? challengeTypeLabels[type] ?? getBocwChallengeTypeLabel(type) ?? type)
               : selectedMapData?.game?.shortName === 'BO6'
                 ? (fallbackName ?? challengeTypeLabels[type] ?? getBo6ChallengeTypeLabel(type) ?? type)
-                : (fallbackName ?? challengeTypeLabels[type] ?? type);
+                : selectedMapData?.game?.shortName === 'BO7'
+                  ? (fallbackName ?? challengeTypeLabels[type] ?? getBo7ChallengeTypeLabel(type) ?? type)
+                  : (fallbackName ?? challengeTypeLabels[type] ?? type);
     let challengeOptions: { value: string; label: string }[];
     if (selectedMapData?.game?.shortName === 'IW') {
       challengeOptions = mapChallenges.length > 0
@@ -488,6 +491,15 @@ export default function LeaderboardsPage() {
     } else if (selectedMapData?.game?.shortName === 'BO6' && selectedMap) {
       const bo6Config = getBo6MapConfig(selectedMap);
       const types = bo6Config?.challengeTypes ?? mapChallenges.map((c) => c.type);
+      challengeOptions = types
+        .filter((t) => t !== 'HIGHEST_ROUND')
+        .map((t) => {
+          const c = mapChallenges.find((ch) => ch.type === t);
+          return { value: t, label: getLabel(t, c?.name) };
+        });
+    } else if (selectedMapData?.game?.shortName === 'BO7' && selectedMap) {
+      const bo7Config = getBo7MapConfig(selectedMap);
+      const types = bo7Config?.challengeTypes ?? mapChallenges.map((c) => c.type);
       challengeOptions = types
         .filter((t) => t !== 'HIGHEST_ROUND')
         .map((t) => {

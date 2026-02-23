@@ -3,6 +3,7 @@ import { getBo3MapConfig } from '@/lib/bo3/bo3-map-config';
 import { getBo4MapConfig } from '@/lib/bo4/bo4-map-config';
 import { getBocwMapConfig } from '@/lib/bocw/bocw-map-config';
 import { getBo6MapConfig } from '@/lib/bo6/bo6-map-config';
+import { getBo7MapConfig } from '@/lib/bo7/bo7-map-config';
 
 // How we group and order achievements on map detail and profile
 export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
@@ -180,6 +181,14 @@ export function getAllowedNonSpeedrunCategoriesForMap(
     );
     return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG']));
   }
+  if (gameShortName === 'BO7') {
+    const cfg = getBo7MapConfig(mapSlug);
+    if (!cfg?.challengeTypes) return null;
+    const fromConfig = cfg.challengeTypes.filter(
+      (c) => !isSpeedrunCategory(c) && c !== 'HIGHEST_ROUND'
+    );
+    return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG']));
+  }
   return null;
 }
 
@@ -247,6 +256,12 @@ export function getAllowedSpeedrunCategoriesForMap(
   }
   if (gameShortName === 'BO6') {
     const cfg = getBo6MapConfig(mapSlug);
+    if (cfg?.challengeTypes) {
+      return cfg.challengeTypes.filter((c) => isSpeedrunCategory(c));
+    }
+  }
+  if (gameShortName === 'BO7') {
+    const cfg = getBo7MapConfig(mapSlug);
     if (cfg?.challengeTypes) {
       return cfg.challengeTypes.filter((c) => isSpeedrunCategory(c));
     }

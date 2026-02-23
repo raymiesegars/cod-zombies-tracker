@@ -688,6 +688,29 @@ export const BO6_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
   }),
 };
 
+export const BO7_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
+  'ashes-of-the-damned': buildBo6SpeedrunTiers({
+    r30: mBo6(13) + 24, r50: mBo6(24) + 27, r70: mBo6(34) + 49, r100: mBo6(52) + 36, r200: hBo6(4), r999: hBo6(80),
+    exfil: mBo6(4) + 20, exfilR21: mBo6(10), ee: mBo6(30),
+  }),
+  'vandorn-farm': buildBo6SpeedrunTiers({
+    r30: mBo6(14) + 50, r50: mBo6(29), r70: mBo6(52), r100: hsBo6(1, 34, 40), r200: hsBo6(7, 45, 20), r999: hBo6(130),
+    exfil: mBo6(4) + 20, exfilR21: mBo6(9) + 40,
+  }),
+  'astra-malorum': buildBo6SpeedrunTiers({
+    r30: mBo6(16), r50: mBo6(30), r70: hsBo6(1, 20, 40), r100: hsBo6(2, 10, 40), r200: hBo6(8), r999: hBo6(115),
+    exfil: mBo6(4) + 50, exfilR21: mBo6(11), ee: mBo6(30),
+  }),
+  'exit-115': buildBo6SpeedrunTiers({
+    r30: mBo6(15), r50: mBo6(35), r70: mBo6(60), r100: hsBo6(1, 40, 40), r200: hBo6(10), r999: hBo6(130),
+    exfil: mBo6(4) + 23, exfilR21: mBo6(9) + 30,
+  }),
+  'zarya-cosmodrome': buildBo6SpeedrunTiers({
+    r30: mBo6(14) + 30, r50: mBo6(34) + 20, r70: mBo6(54), r100: hsBo6(1, 50, 40), r200: hsBo6(8, 30, 0), r999: hBo6(120),
+    exfil: mBo6(4), exfilR21: mBo6(9),
+  }),
+};
+
 export const BOCW_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
   'die-maschine': buildBocwSpeedrunTiers({
     r30: m(21), r50: m(39), r70: m(54), r100: hs(1, 20, 40), r200: hs(3, 11, 40), r935: h(87),
