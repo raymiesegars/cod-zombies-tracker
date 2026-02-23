@@ -10,6 +10,7 @@ type TabsContextType = {
   activeTab: string;
   setActiveTab: (value: string) => void;
   variant?: TabsVariant;
+  layoutId?: string;
 };
 
 const TabsContext = createContext<TabsContextType | undefined>(undefined);
@@ -29,9 +30,11 @@ interface TabsProps {
   className?: string;
   onChange?: (value: string) => void;
   variant?: TabsVariant;
+  /** Unique layoutId for Framer Motion tab indicator - avoids conflicts when multiple Tabs are mounted (e.g. modal + page). Omit for default. */
+  layoutId?: string;
 }
 
-export function Tabs({ defaultValue, value, children, className, onChange, variant }: TabsProps) {
+export function Tabs({ defaultValue, value, children, className, onChange, variant, layoutId }: TabsProps) {
   const [internalTab, setInternalTab] = useState(defaultValue ?? value ?? '');
 
   const isControlled = value !== undefined;
@@ -43,7 +46,7 @@ export function Tabs({ defaultValue, value, children, className, onChange, varia
   };
 
   return (
-    <TabsContext.Provider value={{ activeTab, setActiveTab: handleTabChange, variant }}>
+    <TabsContext.Provider value={{ activeTab, setActiveTab: handleTabChange, variant, layoutId }}>
       <div className={className}>{children}</div>
     </TabsContext.Provider>
   );
@@ -80,8 +83,9 @@ interface TabsTriggerProps {
 }
 
 export function TabsTrigger({ value, children, className }: TabsTriggerProps) {
-  const { activeTab, setActiveTab, variant } = useTabs();
+  const { activeTab, setActiveTab, variant, layoutId } = useTabs();
   const isActive = activeTab === value;
+  const indicatorLayoutId = layoutId ?? 'active-tab';
 
   if (variant === 'separate') {
     return (
@@ -114,7 +118,7 @@ export function TabsTrigger({ value, children, className }: TabsTriggerProps) {
     >
       {isActive && (
         <motion.div
-          layoutId="active-tab"
+          layoutId={indicatorLayoutId}
           className="absolute inset-0 bg-blood-950/40 border border-blood-800/40 rounded-md"
           transition={{ type: 'spring', duration: 0.3 }}
         />

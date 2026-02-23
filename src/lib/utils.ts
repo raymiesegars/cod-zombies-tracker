@@ -26,6 +26,14 @@ export function formatRound(round: number): string {
   return round.toString().padStart(2, '0');
 }
 
+/** Format RUSH score for display (e.g. 1782651900 -> "1.78B"). */
+export function formatRushScore(score: number): string {
+  if (score >= 1e9) return (score / 1e9).toFixed(2).replace(/\.?0+$/, '') + 'B';
+  if (score >= 1e6) return (score / 1e6).toFixed(2).replace(/\.?0+$/, '') + 'M';
+  if (score >= 1e3) return (score / 1e3).toFixed(2).replace(/\.?0+$/, '') + 'K';
+  return String(score);
+}
+
 export function getPlayerCountLabel(count: string): string {
   const labels: Record<string, string> = {
     SOLO: 'Solo',

@@ -10,6 +10,7 @@ export type MapAchievementContext = {
     challengeType: string;
     roundReached: number;
     killsReached?: number | null;
+    scoreReached?: number | null;
     difficulty?: Bo4Difficulty | null;
     completionTimeSeconds?: number | null;
   }[];
@@ -64,15 +65,17 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
 
   CHALLENGE_COMPLETE: async (userId, criteria, achievement) => {
     if (!achievement.mapId) return false;
-    const { round, kills, challengeType, isCap, maxTimeSeconds } = criteria as {
+    const { round, kills, score, challengeType, isCap, maxTimeSeconds } = criteria as {
       round?: number;
       kills?: number;
+      score?: number;
       challengeType?: string;
       isCap?: boolean;
       maxTimeSeconds?: number;
     };
     const targetRound = round as number | undefined;
     const targetKills = kills as number | undefined;
+    const targetScore = score as number | undefined;
 
     // EE speedrun tier (e.g. Call of the Dead Stand-in vs Ensemble Cast): check EasterEggLog by easterEggId
     if (
@@ -123,6 +126,8 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
 
     if (challengeType === 'NO_MANS_LAND' && targetKills != null) {
       (baseWhere as Record<string, unknown>).killsReached = { gte: targetKills };
+    } else if (challengeType === 'RUSH' && targetScore != null) {
+      (baseWhere as Record<string, unknown>).scoreReached = { gte: targetScore };
     } else if (targetRound != null) {
       baseWhere.roundReached = { gte: targetRound };
     }
@@ -277,9 +282,10 @@ function checkWithContext(
       return maxRound >= cap;
     }
     case 'CHALLENGE_COMPLETE': {
-      const { round, kills, challengeType, isCap, maxTimeSeconds } = criteria;
+      const { round, kills, score, challengeType, isCap, maxTimeSeconds } = criteria;
       const targetRound = round != null ? Number(round) : undefined;
       const targetKills = kills != null ? Number(kills) : undefined;
+      const targetScore = score != null ? Number(score) : undefined;
       const type = challengeType as string;
       if (!type) return false;
       const logs =
@@ -317,6 +323,15 @@ function checkWithContext(
             l.killsReached >= targetKills
         );
       }
+      // RUSH: use scoreReached
+      if (type === 'RUSH' && targetScore != null && !Number.isNaN(targetScore)) {
+        return logs.some(
+          (l) =>
+            l.challengeType === type &&
+            l.scoreReached != null &&
+            l.scoreReached >= targetScore
+        );
+      }
       const capRaw = isCap && ctx.map?.roundCap != null ? ctx.map.roundCap : targetRound;
       const cap = capRaw != null ? Number(capRaw) : undefined;
       return logs.some(
@@ -351,6 +366,7 @@ export async function processMapAchievements(
           challenge: { select: { type: true } },
           roundReached: true,
           killsReached: true,
+          scoreReached: true,
           difficulty: true,
           completionTimeSeconds: true,
         },
@@ -374,6 +390,7 @@ export async function processMapAchievements(
       challengeType: l.challenge.type,
       roundReached: l.roundReached,
       killsReached: l.killsReached ?? undefined,
+      scoreReached: l.scoreReached ?? undefined,
       difficulty: l.difficulty ?? undefined,
       completionTimeSeconds: l.completionTimeSeconds ?? undefined,
     })),
@@ -554,6 +571,7 @@ export async function revokeAchievementsForMapAfterDelete(
           challenge: { select: { type: true } },
           roundReached: true,
           killsReached: true,
+          scoreReached: true,
           difficulty: true,
           completionTimeSeconds: true,
         },
@@ -576,6 +594,7 @@ export async function revokeAchievementsForMapAfterDelete(
       challengeType: l.challenge.type,
       roundReached: l.roundReached,
       killsReached: l.killsReached ?? undefined,
+      scoreReached: l.scoreReached ?? undefined,
       difficulty: l.difficulty ?? undefined,
       completionTimeSeconds: l.completionTimeSeconds ?? undefined,
     })),

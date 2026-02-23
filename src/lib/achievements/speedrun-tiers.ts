@@ -512,6 +512,87 @@ function addBo3EeTiers(base: SpeedrunTiersByType, wrSeconds: number): SpeedrunTi
 }
 
 /** BO3 speedrun tiers per map — uses BO3_MAP_CONFIG speedrunWRs. */
+/** BO4 round speedrun tiers — WR-based. Uses ROUND_200 (no ROUND_255). INSTAKILL_ROUND_SPEEDRUN for Blood, Dead, Ancient, Tag. */
+function buildBo4SpeedrunTiers(
+  r30: number,
+  r50: number,
+  r70: number,
+  r100?: number,
+  r200?: number,
+  eeSeconds?: number,
+  instakillSeconds?: number
+): SpeedrunTiersByType {
+  const buf = 1.2;
+  const base: SpeedrunTiersByType = {
+    ROUND_30_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(r30 * buf * 1.5), xpReward: 80 },
+      { maxTimeSeconds: Math.round(r30 * buf * 1.2), xpReward: 200 },
+      { maxTimeSeconds: Math.round(r30 * buf), xpReward: 500 },
+      { maxTimeSeconds: Math.round(r30 * 1.05), xpReward: 1200 },
+    ],
+    ROUND_50_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(r50 * buf * 1.5), xpReward: 120 },
+      { maxTimeSeconds: Math.round(r50 * buf * 1.2), xpReward: 300 },
+      { maxTimeSeconds: Math.round(r50 * buf), xpReward: 700 },
+      { maxTimeSeconds: Math.round(r50 * 1.05), xpReward: 1500 },
+    ],
+    ROUND_70_SPEEDRUN: [
+      { maxTimeSeconds: Math.round(r70 * buf * 1.5), xpReward: 150 },
+      { maxTimeSeconds: Math.round(r70 * buf * 1.2), xpReward: 400 },
+      { maxTimeSeconds: Math.round(r70 * buf), xpReward: 900 },
+      { maxTimeSeconds: Math.round(r70 * 1.05), xpReward: 2000 },
+    ],
+  };
+  if (r100 != null) {
+    base.ROUND_100_SPEEDRUN = [
+      { maxTimeSeconds: Math.round(r100 * buf * 1.5), xpReward: 200 },
+      { maxTimeSeconds: Math.round(r100 * buf * 1.2), xpReward: 500 },
+      { maxTimeSeconds: Math.round(r100 * buf), xpReward: 1200 },
+      { maxTimeSeconds: Math.round(r100 * 1.05), xpReward: 2500 },
+    ];
+  }
+  if (r200 != null) {
+    base.ROUND_200_SPEEDRUN = [
+      { maxTimeSeconds: Math.round(r200 * buf * 1.5), xpReward: 300 },
+      { maxTimeSeconds: Math.round(r200 * buf * 1.2), xpReward: 800 },
+      { maxTimeSeconds: Math.round(r200 * buf), xpReward: 1800 },
+      { maxTimeSeconds: Math.round(r200 * 1.05), xpReward: 3500 },
+    ];
+  }
+  if (eeSeconds != null) {
+    base.EASTER_EGG_SPEEDRUN = [
+      { maxTimeSeconds: Math.round(eeSeconds * buf * 1.5), xpReward: 200 },
+      { maxTimeSeconds: Math.round(eeSeconds * buf * 1.2), xpReward: 600 },
+      { maxTimeSeconds: Math.round(eeSeconds * buf), xpReward: 1500 },
+      { maxTimeSeconds: Math.round(eeSeconds * 1.05), xpReward: 2500 },
+    ];
+  }
+  if (instakillSeconds != null) {
+    base.INSTAKILL_ROUND_SPEEDRUN = [
+      { maxTimeSeconds: Math.round(instakillSeconds * buf * 1.5), xpReward: 200 },
+      { maxTimeSeconds: Math.round(instakillSeconds * buf * 1.2), xpReward: 600 },
+      { maxTimeSeconds: Math.round(instakillSeconds * buf), xpReward: 1500 },
+      { maxTimeSeconds: Math.round(instakillSeconds * 1.05), xpReward: 2500 },
+    ];
+  }
+  return base;
+}
+
+const m = (x: number) => x * 60;
+const h = (x: number) => x * 3600;
+const hs = (h: number, m: number, s: number) => h * 3600 + m * 60 + s;
+
+export const BO4_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
+  ix: buildBo4SpeedrunTiers(m(23), m(47), hs(1, 13, 30), hs(2, 20, 40), h(20), m(34)),
+  'voyage-of-despair': buildBo4SpeedrunTiers(m(30), m(58), hs(1, 42, 0), hs(3, 40, 40), h(30), m(38)),
+  'blood-of-the-dead': buildBo4SpeedrunTiers(hs(0, 26, 30), m(52), hs(1, 21, 40), hs(2, 32, 40), h(21), hs(0, 43, 40), h(24)),
+  classified: buildBo4SpeedrunTiers(m(26), m(50), hs(1, 23, 40), hs(2, 51, 0), h(41), hs(0, 7, 30)),
+  'dead-of-the-night': buildBo4SpeedrunTiers(m(27), m(55), hs(1, 27, 40), hs(2, 50, 40), hs(18, 25, 40), m(26), h(17)),
+  'ancient-evil': buildBo4SpeedrunTiers(m(28), m(54), hs(1, 30, 40), hs(2, 55, 40), h(20), m(25), hs(10, 17, 2)),
+  'alpha-omega': buildBo4SpeedrunTiers(m(24), m(52), hs(1, 30, 40), hs(3, 25, 0), h(25), m(33)),
+  'tag-der-toten': buildBo4SpeedrunTiers(19 * 60 + 33, m(39), h(1), hs(1, 45, 0), hs(9, 25, 40), m(42), hs(7, 30, 0)),
+};
+
 export const BO3_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
   'shadows-of-evil': addBo3EeTiers(
     buildBo3SpeedrunTiers(27 * 60 + 55, 54 * 60, 85 * 60, 170 * 60 + 40, 45 * 3600),

@@ -67,6 +67,7 @@ import {
 import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { getBo2MapConfig, getBo2ChallengeTypeLabel } from '@/lib/bo2/bo2-map-config';
 import { getBo3MapConfig } from '@/lib/bo3/bo3-map-config';
+import { getBo4MapConfig, getBo4ChallengeTypeLabel } from '@/lib/bo4/bo4-map-config';
 
 const BUILDABLE_PART_CACHE_KEY_PREFIX = 'buildable-parts';
 const BUILDABLE_PART_CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
@@ -423,6 +424,8 @@ const challengeTypeLabels: Record<string, string> = {
   NO_JUG: 'No Jug',
   NO_ATS: 'No AATs',
   NO_MANS_LAND: "No Man's Land",
+  RUSH: 'Rush',
+  INSTAKILL_ROUND_SPEEDRUN: 'Instakill Round Speedrun',
   EASTER_EGG_SPEEDRUN: 'Easter Egg Speedrun',
   GHOST_AND_SKULLS: 'Ghost and Skulls',
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
@@ -881,7 +884,9 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
         ? (fallbackName || getWaWChallengeTypeLabel(type))
         : map?.game?.shortName === 'BO2'
           ? (fallbackName ?? challengeTypeLabels[type] ?? getBo2ChallengeTypeLabel(type) ?? type)
-          : (fallbackName ?? challengeTypeLabels[type] ?? type);
+          : map?.game?.shortName === 'BO4'
+            ? (fallbackName ?? challengeTypeLabels[type] ?? getBo4ChallengeTypeLabel(type) ?? type)
+            : (fallbackName ?? challengeTypeLabels[type] ?? type);
     if (map?.game?.shortName === 'IW' && challenges.length > 0) {
       const ordered = IW_CHALLENGE_TYPES_ORDER.filter((t) => challenges.some((c) => c.type === t));
       return ordered.map((t) => {
@@ -898,6 +903,13 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     }
     if (map?.game?.shortName === 'BO3' && map?.slug && getBo3MapConfig(map.slug)) {
       const types = getBo3MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      return types.map((t) => {
+        const c = challenges.find((ch) => ch.type === t);
+        return { value: t, label: getLabel(t, c?.name) };
+      });
+    }
+    if (map?.game?.shortName === 'BO4' && map?.slug && getBo4MapConfig(map.slug)) {
+      const types = getBo4MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
@@ -1932,7 +1944,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                         entry={entry}
                         index={index}
                         isCurrentUser={entry.user.id === profile?.id}
-                        valueKind={selectedLeaderboardCategory.startsWith('ee-time-') || isSpeedrunCategory(selectedLeaderboardCategory) ? 'time' : 'round'}
+                        valueKind={selectedLeaderboardCategory.startsWith('ee-time-') || isSpeedrunCategory(selectedLeaderboardCategory) ? 'time' : selectedLeaderboardCategory === 'RUSH' ? 'score' : 'round'}
                         mapSlug={slug}
                       />
                     ))

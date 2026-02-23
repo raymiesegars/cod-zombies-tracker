@@ -155,8 +155,9 @@ export async function GET(
     const isSpecificChallenge = challengeType && challengeType !== 'HIGHEST_ROUND';
     const isSpeedrun =
       isSpecificChallenge &&
-      (isIwSpeedrunChallengeType(challengeType!) || challengeType === 'ROUND_255_SPEEDRUN');
+      (isIwSpeedrunChallengeType(challengeType!) || challengeType === 'ROUND_255_SPEEDRUN' || challengeType === 'INSTAKILL_ROUND_SPEEDRUN');
     const isNoMansLand = isSpecificChallenge && challengeType === 'NO_MANS_LAND';
+    const isRush = isSpecificChallenge && challengeType === 'RUSH';
     if (isSpecificChallenge) {
       whereClause.challenge = { type: challengeType };
     }
@@ -166,13 +167,18 @@ export async function GET(
     if (isNoMansLand) {
       (whereClause as Record<string, unknown>).killsReached = { not: null };
     }
+    if (isRush) {
+      (whereClause as Record<string, unknown>).scoreReached = { not: null };
+    }
 
     const orderBy =
       isSpeedrun
         ? { completionTimeSeconds: 'asc' as const }
         : isNoMansLand
           ? { killsReached: 'desc' as const }
-          : { roundReached: 'desc' as const };
+          : isRush
+            ? { scoreReached: 'desc' as const }
+            : { roundReached: 'desc' as const };
 
     const challengeLogs = await prisma.challengeLog.findMany({
       where: whereClause,
@@ -235,14 +241,32 @@ export async function GET(
       const existing = userBestMap.get(key);
       const logTime = log.completionTimeSeconds ?? null;
       const logKills = (log as { killsReached?: number | null }).killsReached ?? null;
+      const logScore = (log as { scoreReached?: number | null }).scoreReached ?? null;
       if (isSpeedrun) {
         if (logTime == null) continue;
         if (!existing || existing.completionTimeSeconds == null || logTime < existing.completionTimeSeconds) {
           userBestMap.set(key, {
             userId: log.userId,
             playerCount: log.playerCount,
-            round: isNoMansLand && logKills != null ? logKills : log.roundReached,
+            round: isNoMansLand && logKills != null ? logKills : isRush && logScore != null ? logScore : log.roundReached,
             completionTimeSeconds: logTime,
+            user: log.user,
+            proofUrls: log.proofUrls ?? [],
+            proofUrl: (log.proofUrls && log.proofUrls.length > 0) ? log.proofUrls[0]! : null,
+            completedAt: log.completedAt,
+            logId: log.id,
+            runType: 'challenge',
+            isVerified: log.isVerified ?? false,
+          });
+        }
+      } else if (isRush) {
+        if (logScore == null) continue;
+        if (!existing || logScore > existing.round) {
+          userBestMap.set(key, {
+            userId: log.userId,
+            playerCount: log.playerCount,
+            round: logScore,
+            completionTimeSeconds: log.completionTimeSeconds,
             user: log.user,
             proofUrls: log.proofUrls ?? [],
             proofUrl: (log.proofUrls && log.proofUrls.length > 0) ? log.proofUrls[0]! : null,
