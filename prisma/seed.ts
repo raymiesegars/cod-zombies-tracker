@@ -6,6 +6,8 @@ import { getMapAchievementDefinitions, getSpeedrunAchievementDefinitions } from 
 import { getRoundCapForMap } from '../src/lib/achievements/map-round-config';
 import { getWaWMapConfig } from '../src/lib/waw/waw-map-config';
 import { getBo2MapConfig } from '../src/lib/bo2/bo2-map-config';
+import { getBocwMapConfig, getBocwChallengeTypeLabel } from '../src/lib/bocw/bocw-map-config';
+import { getBo6MapConfig, getBo6ChallengeTypeLabel } from '../src/lib/bo6/bo6-map-config';
 
 // Load .env then .env.local (same order as Next.js) so seed uses the SAME DB as the app
 function loadEnv() {
@@ -288,6 +290,9 @@ async function main() {
     PISTOL_ONLY: { type: 'PISTOL_ONLY', name: 'Pistol Only', description: 'Only use your starting pistol' },
     NO_POWER: { type: 'NO_POWER', name: 'No Power', description: 'Never turn on the power' },
     NO_MAGIC: { type: 'NO_MAGIC', name: 'No Magic', description: 'BO2 Custom Game: Magic disabled' },
+    NO_JUG: { type: 'NO_JUG', name: 'No Jug', description: 'No Juggernog' },
+    NO_ARMOR: { type: 'NO_ARMOR', name: 'No Armor', description: 'No armor (BOCW)' },
+    PURIST: { type: 'PURIST', name: 'Purist', description: 'Stricter rules, map-specific (BOCW)' },
   };
 
   const iwSpeedrunTypes = [
@@ -354,6 +359,42 @@ async function main() {
           },
         });
         challengeCount++;
+      }
+    } else if (gameShortName === 'BOCW') {
+      const bocwCfg = getBocwMapConfig(map.slug);
+      if (bocwCfg) {
+        for (const cType of bocwCfg.challengeTypes) {
+          const info = roundChallengeTypes[cType];
+          await prisma.challenge.create({
+            data: {
+              name: getBocwChallengeTypeLabel(cType) || info?.name || (cType as string).replace(/_/g, ' '),
+              slug: (cType as string).toLowerCase().replace(/_/g, '-'),
+              type: cType as any,
+              mapId: map.id,
+              xpReward: 0,
+              description: info?.description || `Challenge: ${cType}`,
+            },
+          });
+          challengeCount++;
+        }
+      }
+    } else if (gameShortName === 'BO6') {
+      const bo6Cfg = getBo6MapConfig(map.slug);
+      if (bo6Cfg) {
+        for (const cType of bo6Cfg.challengeTypes) {
+          const info = roundChallengeTypes[cType];
+          await prisma.challenge.create({
+            data: {
+              name: getBo6ChallengeTypeLabel(cType) || info?.name || (cType as string).replace(/_/g, ' '),
+              slug: (cType as string).toLowerCase().replace(/_/g, '-'),
+              type: cType as any,
+              mapId: map.id,
+              xpReward: 0,
+              description: info?.description || `Challenge: ${cType}`,
+            },
+          });
+          challengeCount++;
+        }
       }
     } else if (gameShortName === 'BO2') {
       const bo2Cfg = getBo2MapConfig(map.slug);

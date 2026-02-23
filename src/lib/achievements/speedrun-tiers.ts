@@ -626,6 +626,68 @@ function buildBocwSpeedrunTiers(cfg: {
   return base;
 }
 
+/** BO6 speedrun tiers — same as BOCW builder but with r999. */
+function buildBo6SpeedrunTiers(cfg: {
+  r30?: number; r50?: number; r70?: number; r100?: number; r200?: number; r999?: number;
+  exfil?: number; exfilR21?: number; ee?: number; buildEe?: number;
+}): SpeedrunTiersByType {
+  const buf = 1.2;
+  const base: SpeedrunTiersByType = {};
+  const tier = (sec: number) => [
+    { maxTimeSeconds: Math.round(sec * buf * 1.5), xpReward: 80 },
+    { maxTimeSeconds: Math.round(sec * buf * 1.2), xpReward: 200 },
+    { maxTimeSeconds: Math.round(sec * buf), xpReward: 500 },
+    { maxTimeSeconds: Math.round(sec * 1.05), xpReward: 1200 },
+  ];
+  if (cfg.r30 != null) base.ROUND_30_SPEEDRUN = tier(cfg.r30);
+  if (cfg.r50 != null) base.ROUND_50_SPEEDRUN = tier(cfg.r50);
+  if (cfg.r70 != null) base.ROUND_70_SPEEDRUN = tier(cfg.r70);
+  if (cfg.r100 != null) base.ROUND_100_SPEEDRUN = tier(cfg.r100);
+  if (cfg.r200 != null) base.ROUND_200_SPEEDRUN = tier(cfg.r200);
+  if (cfg.r999 != null) base.ROUND_999_SPEEDRUN = [
+    { maxTimeSeconds: Math.round(cfg.r999 * buf * 2), xpReward: 500 },
+    { maxTimeSeconds: Math.round(cfg.r999 * buf * 1.5), xpReward: 1200 },
+    { maxTimeSeconds: Math.round(cfg.r999 * buf), xpReward: 2500 },
+    { maxTimeSeconds: Math.round(cfg.r999 * 1.05), xpReward: 5000 },
+  ];
+  if (cfg.exfil != null) base.EXFIL_SPEEDRUN = tier(cfg.exfil);
+  if (cfg.exfilR21 != null) base.EXFIL_R21_SPEEDRUN = tier(cfg.exfilR21);
+  if (cfg.ee != null) base.EASTER_EGG_SPEEDRUN = tier(cfg.ee);
+  if (cfg.buildEe != null) base.BUILD_EE_SPEEDRUN = tier(cfg.buildEe);
+  return base;
+}
+
+const mBo6 = (x: number) => x * 60;
+const hBo6 = (x: number) => x * 3600;
+const hsBo6 = (h: number, m: number, s: number) => h * 3600 + m * 60 + s;
+
+export const BO6_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
+  terminus: buildBo6SpeedrunTiers({
+    r30: mBo6(24), r50: mBo6(44), r70: hsBo6(1, 9, 40), r100: hsBo6(1, 50, 40), r200: hsBo6(4, 54, 40), r999: hBo6(107),
+    exfil: mBo6(6) + 20, exfilR21: mBo6(13) + 30, ee: mBo6(19), buildEe: mBo6(21),
+  }),
+  'liberty-falls': buildBo6SpeedrunTiers({
+    r30: mBo6(22), r50: mBo6(42), r70: hsBo6(1, 5, 40), r100: hsBo6(1, 40, 40), r200: hsBo6(4, 30, 40), r999: hBo6(171),
+    exfil: mBo6(5) + 30, exfilR21: mBo6(12) + 30, ee: mBo6(12), buildEe: mBo6(12),
+  }),
+  'citadelle-des-morts': buildBo6SpeedrunTiers({
+    r30: mBo6(24), r50: mBo6(42) + 30, r70: mBo6(59), r100: hsBo6(1, 32, 40), r200: hsBo6(3, 52, 40), r999: hBo6(94),
+    exfil: mBo6(6) + 50, exfilR21: mBo6(16), ee: mBo6(23),
+  }),
+  'the-tomb': buildBo6SpeedrunTiers({
+    r30: mBo6(21), r50: mBo6(38), r70: mBo6(54), r100: hsBo6(1, 21, 40), r200: hsBo6(3, 8, 40), r999: hBo6(55),
+    exfil: mBo6(6), exfilR21: mBo6(13) + 37, ee: mBo6(29), buildEe: mBo6(23),
+  }),
+  'shattered-veil': buildBo6SpeedrunTiers({
+    r30: mBo6(20) + 42, r50: mBo6(42), r70: mBo6(59), r100: hsBo6(1, 30, 40), r200: hsBo6(3, 35, 40), r999: hBo6(68),
+    exfil: mBo6(6), exfilR21: mBo6(12) + 30, ee: mBo6(35), buildEe: mBo6(22),
+  }),
+  reckoning: buildBo6SpeedrunTiers({
+    r30: mBo6(23), r50: mBo6(47), r70: hsBo6(1, 21, 40), r100: hsBo6(2, 2, 40), r200: hsBo6(4, 42, 40), r999: hBo6(89),
+    exfil: mBo6(6) + 20, exfilR21: mBo6(14), ee: mBo6(22),
+  }),
+};
+
 export const BOCW_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
   'die-maschine': buildBocwSpeedrunTiers({
     r30: m(21), r50: m(39), r70: m(54), r100: hs(1, 20, 40), r200: hs(3, 11, 40), r935: h(87),

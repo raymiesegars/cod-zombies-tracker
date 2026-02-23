@@ -19,6 +19,7 @@ import { getBo2MapConfig, getBo2ChallengeTypeLabel } from '@/lib/bo2/bo2-map-con
 import { getBo3MapConfig } from '@/lib/bo3/bo3-map-config';
 import { getBo4MapConfig, getBo4ChallengeTypeLabel } from '@/lib/bo4/bo4-map-config';
 import { getBocwMapConfig, getBocwChallengeTypeLabel } from '@/lib/bocw/bocw-map-config';
+import { getBo6MapConfig, getBo6ChallengeTypeLabel } from '@/lib/bo6/bo6-map-config';
 
 const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
 const PAGE_SIZE = 25;
@@ -57,6 +58,7 @@ const challengeTypeLabels: Record<string, string> = {
   ROUND_10_SPEEDRUN: 'Round 10 Speedrun',
   ROUND_20_SPEEDRUN: 'Round 20 Speedrun',
   ROUND_935_SPEEDRUN: 'Round 935 Speedrun',
+  ROUND_999_SPEEDRUN: 'Round 999 Speedrun',
   EXFIL_SPEEDRUN: 'Exfil Round 11',
   EXFIL_R21_SPEEDRUN: 'Exfil Round 21',
   BUILD_EE_SPEEDRUN: 'Build% EE Speedrun',
@@ -436,7 +438,9 @@ export default function LeaderboardsPage() {
             ? (fallbackName ?? challengeTypeLabels[type] ?? getBo4ChallengeTypeLabel(type) ?? type)
             : selectedMapData?.game?.shortName === 'BOCW'
               ? (fallbackName ?? challengeTypeLabels[type] ?? getBocwChallengeTypeLabel(type) ?? type)
-              : (fallbackName ?? challengeTypeLabels[type] ?? type);
+              : selectedMapData?.game?.shortName === 'BO6'
+                ? (fallbackName ?? challengeTypeLabels[type] ?? getBo6ChallengeTypeLabel(type) ?? type)
+                : (fallbackName ?? challengeTypeLabels[type] ?? type);
     let challengeOptions: { value: string; label: string }[];
     if (selectedMapData?.game?.shortName === 'IW') {
       challengeOptions = mapChallenges.length > 0
@@ -475,6 +479,15 @@ export default function LeaderboardsPage() {
     } else if (selectedMapData?.game?.shortName === 'BOCW' && selectedMap) {
       const bocwConfig = getBocwMapConfig(selectedMap);
       const types = bocwConfig?.challengeTypes ?? mapChallenges.map((c) => c.type);
+      challengeOptions = types
+        .filter((t) => t !== 'HIGHEST_ROUND')
+        .map((t) => {
+          const c = mapChallenges.find((ch) => ch.type === t);
+          return { value: t, label: getLabel(t, c?.name) };
+        });
+    } else if (selectedMapData?.game?.shortName === 'BO6' && selectedMap) {
+      const bo6Config = getBo6MapConfig(selectedMap);
+      const types = bo6Config?.challengeTypes ?? mapChallenges.map((c) => c.type);
       challengeOptions = types
         .filter((t) => t !== 'HIGHEST_ROUND')
         .map((t) => {

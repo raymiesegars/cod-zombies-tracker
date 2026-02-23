@@ -239,6 +239,7 @@ enum ChallengeType {
   ROUND_200_SPEEDRUN
   ROUND_255_SPEEDRUN   // BO3+: Round 255 speedrun
   ROUND_935_SPEEDRUN   // BOCW: Round 935 cap speedrun (round-based maps)
+  ROUND_999_SPEEDRUN   // BO6/BO7: Round 999 cap speedrun
   ROUND_10_SPEEDRUN    // BOCW Outbreak: Round 10 speedrun
   ROUND_20_SPEEDRUN    // BOCW Outbreak: Round 20 speedrun
   EXFIL_SPEEDRUN       // BOCW: Exfil Round 11 speedrun

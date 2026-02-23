@@ -24,6 +24,8 @@
     "db:waw-balance-patch": "tsx scripts/waw-balance-patch.ts",
     "db:bo1-balance-patch": "tsx scripts/bo1-balance-patch.ts",
     "db:bo2-balance-patch": "tsx scripts/bo2-balance-patch.ts",
+    "db:bocw-balance-patch": "tsx scripts/bocw-balance-patch.ts",
+    "db:bo6-balance-patch": "tsx scripts/bo6-balance-patch.ts",
     "db:update-der-riese-fly-trap": "tsx scripts/update-der-riese-fly-trap.ts"
   },
   "dependencies": {

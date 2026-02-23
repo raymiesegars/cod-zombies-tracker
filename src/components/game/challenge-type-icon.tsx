@@ -34,6 +34,7 @@ const CHALLENGE_TYPE_ICONS: Record<ChallengeType, LucideIcon> = {
   ROUND_200_SPEEDRUN: Timer,
   ROUND_255_SPEEDRUN: Timer,
   ROUND_935_SPEEDRUN: Timer,
+  ROUND_999_SPEEDRUN: Timer,
   ROUND_10_SPEEDRUN: Timer,
   ROUND_20_SPEEDRUN: Timer,
   EXFIL_SPEEDRUN: Timer,

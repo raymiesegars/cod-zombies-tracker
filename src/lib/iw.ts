@@ -33,12 +33,18 @@ const BOCW_SPEEDRUN_TYPES = [
   'EXFIL_SPEEDRUN', 'EXFIL_R21_SPEEDRUN', 'BUILD_EE_SPEEDRUN', 'EASTER_EGG_SPEEDRUN',
 ] as const;
 
+const BO6_SPEEDRUN_TYPES = [
+  ...BOCW_SPEEDRUN_TYPES,
+  'ROUND_999_SPEEDRUN',
+] as const;
+
 /** All speedrun types across games. Used for form/validation. */
 export function isSpeedrunChallengeType(type: string): boolean {
   return isIwSpeedrunChallengeType(type)
     || type === 'ROUND_255_SPEEDRUN'
     || type === 'INSTAKILL_ROUND_SPEEDRUN'
-    || (BOCW_SPEEDRUN_TYPES as readonly string[]).includes(type);
+    || (BOCW_SPEEDRUN_TYPES as readonly string[]).includes(type)
+    || (BO6_SPEEDRUN_TYPES as readonly string[]).includes(type);
 }
 
 /** Minimum round required when logging this speedrun type. Non-round speedruns (EE, exfil, etc.) return 1. */
@@ -55,6 +61,7 @@ export function getMinRoundForSpeedrunChallengeType(type: string): number {
     case 'ROUND_200_SPEEDRUN': return 200;
     case 'ROUND_255_SPEEDRUN': return 255;
     case 'ROUND_935_SPEEDRUN': return 935;
+    case 'ROUND_999_SPEEDRUN': return 999;
     default: return 1;
   }
 }
