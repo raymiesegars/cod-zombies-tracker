@@ -26,6 +26,7 @@
     "db:bo2-balance-patch": "tsx scripts/bo2-balance-patch.ts",
     "db:bocw-balance-patch": "tsx scripts/bocw-balance-patch.ts",
     "db:bo6-balance-patch": "tsx scripts/bo6-balance-patch.ts",
+    "db:bo6-reunlock-achievements": "tsx scripts/bo6-reunlock-achievements.ts",
     "db:update-der-riese-fly-trap": "tsx scripts/update-der-riese-fly-trap.ts"
   },
   "dependencies": {
