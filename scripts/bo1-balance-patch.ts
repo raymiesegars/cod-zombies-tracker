@@ -128,6 +128,23 @@ async function main() {
       }
     }
 
+    // Moon: create No Man's Land if missing
+    if (map.slug === 'moon' && allowedTypes.has('NO_MANS_LAND') && !existingTypes.has('NO_MANS_LAND')) {
+      if (!DRY_RUN) {
+        await prisma.challenge.create({
+          data: {
+            name: "No Man's Land",
+            slug: 'no-mans-land',
+            type: 'NO_MANS_LAND',
+            mapId: map.id,
+            xpReward: 0,
+            isActive: true,
+          },
+        });
+      }
+      challengesCreated++;
+    }
+
     // Create speedrun challenges based on config
     const hasR200 = cfg.speedrunWRs?.r200 != null;
     const hasEe = cfg.eeSpeedrunWR != null || cfg.eeSpeedrunSoloWR != null;

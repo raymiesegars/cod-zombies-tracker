@@ -34,10 +34,10 @@ export async function POST(request: NextRequest) {
     const mapId = body.mapId;
     const roundReached = typeof body.roundReached === 'number' ? body.roundReached : parseInt(String(body.roundReached), 10);
     const killsReached = body.killsReached != null
-      ? (typeof body.killsReached === 'number' ? body.killsReached : parseInt(String(body.killsReached), 10))
+      ? (typeof body.killsReached === 'number' ? body.killsReached : parseInt(String(body.killsReached).replace(/\D/g, ''), 10))
       : undefined;
     const scoreReached = body.scoreReached != null
-      ? (typeof body.scoreReached === 'number' ? body.scoreReached : parseInt(String(body.scoreReached), 10))
+      ? (typeof body.scoreReached === 'number' ? body.scoreReached : parseInt(String(body.scoreReached).replace(/\D/g, ''), 10))
       : undefined;
     const playerCount = body.playerCount;
     const rawProofUrls = Array.isArray(body.proofUrls)

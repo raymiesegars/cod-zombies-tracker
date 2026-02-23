@@ -122,6 +122,14 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       body.roundReached != null
         ? Math.floor(Number(body.roundReached))
         : undefined;
+    const killsReached =
+      body.killsReached != null
+        ? (typeof body.killsReached === 'number' ? body.killsReached : parseInt(String(body.killsReached).replace(/\D/g, ''), 10))
+        : undefined;
+    const scoreReached =
+      body.scoreReached != null
+        ? (typeof body.scoreReached === 'number' ? body.scoreReached : parseInt(String(body.scoreReached).replace(/\D/g, ''), 10))
+        : undefined;
     const playerCount = body.playerCount;
     const proofUrlsRaw =
       body.proofUrls !== undefined
@@ -197,6 +205,12 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     if (roundReached !== undefined && (Number.isNaN(roundReached) || roundReached < 1)) {
       return NextResponse.json({ error: 'Invalid roundReached' }, { status: 400 });
     }
+    if (killsReached !== undefined && (Number.isNaN(killsReached) || killsReached < 1)) {
+      return NextResponse.json({ error: 'Invalid killsReached (must be 1 or more)' }, { status: 400 });
+    }
+    if (scoreReached !== undefined && (Number.isNaN(scoreReached) || scoreReached < 1)) {
+      return NextResponse.json({ error: 'Invalid scoreReached (must be 1 or more)' }, { status: 400 });
+    }
     const challenge = log.challenge;
     if (roundReached !== undefined && challenge && isSpeedrunChallengeType(challenge.type)) {
       const minRound = getMinRoundForSpeedrunChallengeType(challenge.type);
@@ -224,6 +238,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       where: { id },
       data: {
         ...(roundReached !== undefined && { roundReached }),
+        ...(killsReached !== undefined && { killsReached }),
+        ...(scoreReached !== undefined && { scoreReached }),
         ...(playerCount !== undefined && { playerCount }),
         ...(proofUrls !== undefined && { proofUrls }),
         ...(screenshotUrl !== undefined && { screenshotUrl }),

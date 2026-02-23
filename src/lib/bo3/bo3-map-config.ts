@@ -510,7 +510,7 @@ export const BO3_MAP_CONFIG: Record<Bo3MapSlug, Bo3MapConfig> = {
     noPowerWR: 255,
     noPerksWR: 179,
     noJugWR: 255,
-    noMansLandWR: 472,
+    noMansLandWR: 450,
   },
   'bo3-origins': {
     challengeTypes: [

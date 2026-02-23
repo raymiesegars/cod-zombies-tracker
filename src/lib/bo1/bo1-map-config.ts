@@ -42,6 +42,8 @@ export type Bo1ChallengeConfig = {
   noPowerWR?: number;
   noPerksWR?: number;
   noJugWR?: number;
+  /** No Man's Land (Moon only): WR kills */
+  noMansLandWR?: number;
 };
 
 /** Base rounds for WR-based achievement tiers */
@@ -96,6 +98,7 @@ export const BO1_CHALLENGE_TYPE_LABELS: Record<string, string> = {
   NO_PERKS: 'No Perks',
   NO_PACK: 'No Pack-a-Punch',
   NO_POWER: 'No Power',
+  NO_MANS_LAND: "No Man's Land",
   ONE_BOX: 'One Box',
   PISTOL_ONLY: 'Pistol Only',
 };
@@ -170,7 +173,7 @@ export const BO1_MAP_CONFIG: Record<Bo1MapSlug, Bo1ChallengeConfig> = {
     noJugWR: 111,
   },
   moon: {
-    challengeTypes: ['HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN', 'EASTER_EGG_SPEEDRUN'],
+    challengeTypes: ['HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'NO_MANS_LAND', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN', 'EASTER_EGG_SPEEDRUN'],
     noDownsSoloAllowed: true,
     noDownsAvailable: true,
     hasFixedWunderwaffeTag: false,
@@ -181,6 +184,7 @@ export const BO1_MAP_CONFIG: Record<Bo1MapSlug, Bo1ChallengeConfig> = {
     noPowerWR: 165,
     noPerksWR: 82,
     noJugWR: 200,
+    noMansLandWR: 450,
   },
   'bo1-nacht-der-untoten': {
     challengeTypes: ['HIGHEST_ROUND', 'STARTING_ROOM', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN'],

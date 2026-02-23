@@ -26,7 +26,7 @@ import {
   HelpTrigger,
 } from '@/components/ui';
 import { RoundCounter, LeaderboardEntry, RelockAchievementButton, ChallengeTypeIcon, MapChallengesEeHelpContent, Bo7RelicPicker } from '@/components/game';
-import { getPlayerCountLabel, cn } from '@/lib/utils';
+import { getPlayerCountLabel, formatRushScore, cn } from '@/lib/utils';
 import { getAssetUrl } from '@/lib/assets';
 import { getBo4DifficultyLabel, BO4_DIFFICULTIES, isBo4Game } from '@/lib/bo4';
 import { isIwGame, isIwSpeedrunChallengeType, IW_CHALLENGE_TYPES_ORDER } from '@/lib/iw';
@@ -65,6 +65,7 @@ import {
   isSpeedrunCategory,
 } from '@/lib/achievements/categories';
 import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-config';
+import { getBo1MapConfig, getBo1ChallengeTypeLabel } from '@/lib/bo1/bo1-map-config';
 import { getBo2MapConfig, getBo2ChallengeTypeLabel } from '@/lib/bo2/bo2-map-config';
 import { getBo3MapConfig } from '@/lib/bo3/bo3-map-config';
 import { getBo4MapConfig, getBo4ChallengeTypeLabel } from '@/lib/bo4/bo4-map-config';
@@ -909,7 +910,9 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     const getLabel = (type: string, fallbackName?: string | null) =>
       map?.game?.shortName === 'WAW'
         ? (fallbackName || getWaWChallengeTypeLabel(type))
-        : map?.game?.shortName === 'BO2'
+        : map?.game?.shortName === 'BO1'
+          ? (fallbackName ?? challengeTypeLabels[type] ?? getBo1ChallengeTypeLabel(type) ?? type)
+          : map?.game?.shortName === 'BO2'
           ? (fallbackName ?? challengeTypeLabels[type] ?? getBo2ChallengeTypeLabel(type) ?? type)
           : map?.game?.shortName === 'BO4'
             ? (fallbackName ?? challengeTypeLabels[type] ?? getBo4ChallengeTypeLabel(type) ?? type)
@@ -925,6 +928,13 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
       return ordered.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: c?.name ?? challengeTypeLabels[t] ?? t };
+      });
+    }
+    if (map?.game?.shortName === 'BO1' && map?.slug && getBo1MapConfig(map.slug)) {
+      const types = getBo1MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      return types.map((t) => {
+        const c = challenges.find((ch) => ch.type === t);
+        return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'BO2' && map?.slug && getBo2MapConfig(map.slug)) {
@@ -1173,15 +1183,19 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                               ? formatCompletionTime(Number(leaderboard[0].value))
                               : '—')
                           : selectedLeaderboardCategory === 'NO_MANS_LAND'
-                            ? (leaderboard[0]?.value ?? '—')
-                            : (mapStats?.highestRound || leaderboard[0]?.value || '—')}
+                            ? (leaderboard[0]?.value != null ? String(leaderboard[0].value) : '—')
+                            : selectedLeaderboardCategory === 'RUSH'
+                              ? (leaderboard[0]?.value != null && Number.isFinite(Number(leaderboard[0].value)) ? formatRushScore(Number(leaderboard[0].value)) : '—')
+                              : (mapStats?.highestRound || leaderboard[0]?.value || '—')}
                       </p>
                       <p className="text-xs text-bunker-400">
                         {selectedLeaderboardCategory === 'NO_MANS_LAND'
                           ? 'Top Kills'
-                          : (selectedLeaderboardCategory.startsWith('ee-time-') || isSpeedrunCategory(selectedLeaderboardCategory))
-                            ? 'Top Time'
-                            : 'Top Round'}
+                          : selectedLeaderboardCategory === 'RUSH'
+                            ? 'Top Score'
+                            : (selectedLeaderboardCategory.startsWith('ee-time-') || isSpeedrunCategory(selectedLeaderboardCategory))
+                              ? 'Top Time'
+                              : 'Top Round'}
                       </p>
                     </div>
                     <div className="text-center p-3 sm:p-4 bg-bunker-800/50 rounded-lg border border-bunker-700">
@@ -1233,6 +1247,10 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                             {(selectedLeaderboardCategory.startsWith('ee-time-') || isSpeedrunCategory(selectedLeaderboardCategory)) ? (
                               <span className="text-xs sm:text-sm font-zombies font-semibold text-element-400 tabular-nums">
                                 {formatCompletionTime(entry.value)}
+                              </span>
+                            ) : selectedLeaderboardCategory === 'RUSH' ? (
+                              <span className="text-xs sm:text-sm font-zombies font-semibold text-white tabular-nums">
+                                {formatRushScore(entry.value)}
                               </span>
                             ) : (
                               <RoundCounter round={entry.value} size="sm" animated={false} />
@@ -2127,7 +2145,13 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                               )}
                             </span>
                             <span className="flex justify-end flex-shrink-0 min-w-[3rem]">
-                              <RoundCounter round={item.log.roundReached} size="xs" animated={false} />
+                              {item.log.challenge?.type === 'NO_MANS_LAND' && (item.log as unknown as { killsReached?: number | null }).killsReached != null ? (
+                                <span className="text-sm font-zombies font-semibold text-white tabular-nums">{(item.log as unknown as { killsReached: number }).killsReached.toLocaleString()}</span>
+                              ) : item.log.challenge?.type === 'RUSH' && (item.log as unknown as { scoreReached?: number | null }).scoreReached != null ? (
+                                <span className="text-sm font-zombies font-semibold text-white tabular-nums">{formatRushScore((item.log as unknown as { scoreReached: number }).scoreReached)}</span>
+                              ) : (
+                                <RoundCounter round={item.log.roundReached} size="xs" animated={false} />
+                              )}
                             </span>
                           </CardContent>
                         </Card>
