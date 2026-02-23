@@ -4,7 +4,14 @@ import { getBo4DifficultiesBelow } from './bo4';
 export type AchievementForPreview = {
   id: string;
   type: string;
-  criteria: { round?: number; challengeType?: string; isCap?: boolean; maxTimeSeconds?: number };
+  criteria: {
+    round?: number;
+    challengeType?: string;
+    isCap?: boolean;
+    maxTimeSeconds?: number;
+    kills?: number;
+    score?: number;
+  };
   xpReward: number;
   easterEggId?: string | null;
   difficulty?: string | null;
@@ -26,14 +33,25 @@ export function getXpForChallengeLog(
   /** BO4 only: selected difficulty so preview includes cascade (this + all lower) */
   difficulty?: string | null,
   /** IW speedruns: completion time in seconds so preview includes speedrun tier XP */
-  completionTimeSeconds?: number | null
+  completionTimeSeconds?: number | null,
+  /** No Man's Land: kills reached so preview includes kills-based tiers */
+  killsReached?: number | null,
+  /** BO4 Rush: score reached so preview includes score-based tiers */
+  scoreReached?: number | null
 ): number {
   const set = new Set(unlockedIds);
   let total = 0;
   for (const a of achievements) {
     if (set.has(a.id)) continue;
     if (!matchesDifficultyForPreview(a.difficulty, difficulty)) continue;
-    const c = a.criteria as { round?: number; challengeType?: string; isCap?: boolean; maxTimeSeconds?: number };
+    const c = a.criteria as {
+      round?: number;
+      challengeType?: string;
+      isCap?: boolean;
+      maxTimeSeconds?: number;
+      kills?: number;
+      score?: number;
+    };
     // Speedrun tier: qualify if completionTimeSeconds <= maxTimeSeconds
     if (c.maxTimeSeconds != null && c.challengeType === challengeType) {
       if (completionTimeSeconds != null && completionTimeSeconds >= 0 && completionTimeSeconds <= c.maxTimeSeconds) {
@@ -41,6 +59,23 @@ export function getXpForChallengeLog(
       }
       continue;
     }
+    // No Man's Land: qualify if killsReached >= criteria.kills
+    if (c.kills != null && c.challengeType === 'NO_MANS_LAND' && challengeType === 'NO_MANS_LAND') {
+      const entered = killsReached ?? 0;
+      if (entered >= c.kills) {
+        total += a.xpReward;
+      }
+      continue;
+    }
+    // BO4 Rush: qualify if scoreReached >= criteria.score
+    if (c.score != null && c.challengeType === 'RUSH' && challengeType === 'RUSH') {
+      const entered = scoreReached ?? 0;
+      if (entered >= c.score) {
+        total += a.xpReward;
+      }
+      continue;
+    }
+    // Round-based: round/roundCap matching
     const matchesRound =
       c.isCap && roundCap != null
         ? round >= roundCap

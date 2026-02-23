@@ -18,6 +18,7 @@ import {
 } from '@/components/ui';
 import { formatCompletionTime } from '@/components/ui/time-input';
 import { getAssetUrl } from '@/lib/assets';
+import { formatRushScore } from '@/lib/utils';
 import { RoundCounter, ProofEmbed, ChallengeTypeIcon, UserWithRank } from '@/components/game';
 import { getBo4DifficultyLabel } from '@/lib/bo4';
 import { getBo3GobbleGumLabel } from '@/lib/bo3';
@@ -132,6 +133,8 @@ type ChallengeLogDetail = {
   id: string;
   mapId: string;
   roundReached: number;
+  killsReached?: number | null;
+  scoreReached?: number | null;
   playerCount: string;
   difficulty?: string | null;
   proofUrls?: string[];
@@ -512,10 +515,22 @@ export default function RunDetailPage() {
             <CardContent className="space-y-3">
               {isChallenge ? (
                 <>
-                  <div className="flex items-center justify-between">
-                    <span className="text-bunker-400 text-sm">Round reached</span>
-                    <RoundCounter round={(log as ChallengeLogDetail).roundReached} size="sm" animated={false} />
-                  </div>
+                  {((log as ChallengeLogDetail).challenge?.type === 'NO_MANS_LAND' && (log as ChallengeLogDetail).killsReached != null) ? (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">Kills</span>
+                      <span className="text-white font-medium font-zombies">{(log as ChallengeLogDetail).killsReached!.toLocaleString()}</span>
+                    </div>
+                  ) : ((log as ChallengeLogDetail).challenge?.type === 'RUSH' && (log as ChallengeLogDetail).scoreReached != null) ? (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">Score</span>
+                      <span className="text-white font-medium font-zombies tabular-nums">{formatRushScore((log as ChallengeLogDetail).scoreReached!)}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">Round reached</span>
+                      <RoundCounter round={(log as ChallengeLogDetail).roundReached} size="sm" animated={false} />
+                    </div>
+                  )}
                   <div className="flex items-center justify-between">
                     <span className="text-bunker-400 text-sm">Player count</span>
                     <span className="text-white font-medium">{(log as ChallengeLogDetail).playerCount}</span>

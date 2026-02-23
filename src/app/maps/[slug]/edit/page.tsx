@@ -575,8 +575,8 @@ export default function EditMapProgressPage() {
         const isNoMansLand = challenge?.type === 'NO_MANS_LAND';
         const isRush = challenge?.type === 'RUSH';
         const roundReached = isNoMansLand || isRush ? 1 : parseInt(form.roundReached, 10);
-        const killsReached = isNoMansLand ? parseInt(form.killsReached ?? '', 10) : undefined;
-        const scoreReached = isRush ? parseInt(form.scoreReached ?? '', 10) : undefined;
+        const killsReached = isNoMansLand ? parseInt(String(form.killsReached ?? '').trim().replace(/\D/g, ''), 10) : undefined;
+        const scoreReached = isRush ? parseInt(String(form.scoreReached ?? '').trim().replace(/\D/g, ''), 10) : undefined;
         const res = await fetch('/api/challenge-logs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -939,7 +939,9 @@ export default function EditMapProgressPage() {
                             parseInt(sharedChallengeForm.roundReached || '0', 10) || 0,
                             map.roundCap ?? null,
                             map?.game?.shortName === 'BO4' ? (sharedChallengeForm.difficulty ?? 'NORMAL') : undefined,
-                            sharedChallengeForm.completionTimeSeconds ?? undefined
+                            sharedChallengeForm.completionTimeSeconds ?? undefined,
+                            sharedChallengeForm.killsReached ? parseInt(sharedChallengeForm.killsReached, 10) : undefined,
+                            sharedChallengeForm.scoreReached ? parseInt(sharedChallengeForm.scoreReached, 10) : undefined
                           );
                         }, 0)} XP
                       </Badge>
@@ -958,11 +960,13 @@ export default function EditMapProgressPage() {
                         return (
                           <Input
                             label="Kills"
-                            type="number"
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             min={1}
                             placeholder="e.g. 450"
                             value={sharedChallengeForm.killsReached ?? ''}
-                            onChange={(e) => handleSharedChallengeChange('killsReached', e.target.value)}
+                            onChange={(e) => handleSharedChallengeChange('killsReached', e.target.value.replace(/\D/g, ''))}
                           />
                         );
                       }
@@ -970,11 +974,13 @@ export default function EditMapProgressPage() {
                         return (
                           <Input
                             label="Score"
-                            type="number"
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             min={1}
                             placeholder="e.g. 1782651900"
                             value={sharedChallengeForm.scoreReached ?? ''}
-                            onChange={(e) => handleSharedChallengeChange('scoreReached', e.target.value)}
+                            onChange={(e) => handleSharedChallengeChange('scoreReached', e.target.value.replace(/\D/g, ''))}
                           />
                         );
                       }

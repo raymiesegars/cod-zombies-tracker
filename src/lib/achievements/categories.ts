@@ -1,3 +1,4 @@
+import { getBo1MapConfig } from '@/lib/bo1/bo1-map-config';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 import { getBo3MapConfig } from '@/lib/bo3/bo3-map-config';
 import { getBo4MapConfig } from '@/lib/bo4/bo4-map-config';
@@ -149,13 +150,31 @@ export function getAllowedNonSpeedrunCategoriesForMap(
     const fromConfig = cfg.challengeTypes.filter((c) => !isSpeedrunCategory(c) && c !== 'HIGHEST_ROUND');
     return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG']));
   }
+  if (gameShortName === 'BO1') {
+    const cfg = getBo1MapConfig(mapSlug);
+    if (!cfg?.challengeTypes) return null;
+    const fromConfig = cfg.challengeTypes.filter(
+      (c) => !isSpeedrunCategory(c) && c !== 'HIGHEST_ROUND' && (c as string) !== 'NO_MANS_LAND'
+    );
+    const hasNoMansLand =
+      (cfg.challengeTypes as readonly string[]).includes('NO_MANS_LAND') &&
+      (cfg as { noMansLandWR?: number }).noMansLandWR != null;
+    return Array.from(
+      new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG', ...(hasNoMansLand ? ['NO_MANS_LAND'] : [])])
+    );
+  }
   if (gameShortName === 'BO3') {
     const cfg = getBo3MapConfig(mapSlug);
     if (!cfg?.challengeTypes) return null;
     const fromConfig = cfg.challengeTypes.filter(
       (c) => !isSpeedrunCategory(c) && c !== 'HIGHEST_ROUND' && (c as string) !== 'NO_MANS_LAND'
     );
-    return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG']));
+    const hasNoMansLand =
+      (cfg.challengeTypes as readonly string[]).includes('NO_MANS_LAND') &&
+      (cfg as { noMansLandWR?: number }).noMansLandWR != null;
+    return Array.from(
+      new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG', ...(hasNoMansLand ? ['NO_MANS_LAND'] : [])])
+    );
   }
   if (gameShortName === 'BO4') {
     const cfg = getBo4MapConfig(mapSlug);
@@ -227,6 +246,13 @@ export function getAllowedSpeedrunCategoriesForMap(
     'ROUND_200_SPEEDRUN',
     'EASTER_EGG_SPEEDRUN',
   ];
+  if (gameShortName === 'BO1') {
+    const cfg = getBo1MapConfig(mapSlug);
+    if (cfg?.challengeTypes) {
+      return cfg.challengeTypes.filter((c) => isSpeedrunCategory(c));
+    }
+    return bo2Generic;
+  }
   if (gameShortName === 'BO2') {
     const cfg = getBo2MapConfig(mapSlug);
     if (cfg?.challengeTypes) {

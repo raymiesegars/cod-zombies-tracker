@@ -247,7 +247,7 @@ export function getMapAchievementDefinitions(
         }
       }
       for (const cType of bo1Cfg.challengeTypes) {
-        if (cType === 'HIGHEST_ROUND' || cType === 'NO_DOWNS') continue;
+        if (['HIGHEST_ROUND', 'NO_DOWNS', 'NO_MANS_LAND'].includes(cType as string)) continue;
         const wr = (cType as string) === 'STARTING_ROOM' ? bo1Cfg.firstRoomWR
           : (cType as string) === 'STARTING_ROOM_JUG_SIDE' ? bo1Cfg.firstRoomJugWR
           : (cType as string) === 'STARTING_ROOM_QUICK_SIDE' ? bo1Cfg.firstRoomQuickWR
@@ -290,6 +290,25 @@ export function getMapAchievementDefinitions(
             criteria: { round, challengeType: 'PISTOL_ONLY' },
             xpReward: Math.max(MIN_ACHIEVEMENT_XP, Math.floor(xp * 3)),
             rarity: rarityForRound(round, pistolWR),
+          });
+        }
+      }
+      if (bo1Cfg.noMansLandWR != null) {
+        // Cap at 400 when WR<=400 to avoid duplicate 400 tier; otherwise add WR as final tier
+        const killsMilestones = bo1Cfg.noMansLandWR <= 400
+          ? [100, 200, 300, 400]
+          : [100, 200, 300, 400, bo1Cfg.noMansLandWR];
+        const killsXp = [100, 300, 600, 1000, 2000];
+        for (let i = 0; i < killsMilestones.length; i++) {
+          const kills = killsMilestones[i]!;
+          const xp = killsXp[i] ?? 2000;
+          rows.push({
+            slug: `no-mans-land-${kills}`,
+            name: `No Man's Land ${kills} kills`,
+            type: 'CHALLENGE_COMPLETE',
+            criteria: { kills, challengeType: 'NO_MANS_LAND' },
+            xpReward: Math.max(MIN_ACHIEVEMENT_XP, xp),
+            rarity: kills >= 400 ? 'LEGENDARY' : kills >= 300 ? 'EPIC' : kills >= 200 ? 'RARE' : 'UNCOMMON',
           });
         }
       }
@@ -457,7 +476,10 @@ export function getMapAchievementDefinitions(
         }
       }
       if (bo3Cfg.noMansLandWR != null) {
-        const killsMilestones = [100, 200, 300, 400, bo3Cfg.noMansLandWR];
+        // Cap at 400 when WR<=400 to avoid duplicate 400 tier; otherwise add WR as final tier
+        const killsMilestones = bo3Cfg.noMansLandWR <= 400
+          ? [100, 200, 300, 400]
+          : [100, 200, 300, 400, bo3Cfg.noMansLandWR];
         const killsXp = [100, 300, 600, 1000, 2000];
         for (let i = 0; i < killsMilestones.length; i++) {
           const kills = killsMilestones[i]!;

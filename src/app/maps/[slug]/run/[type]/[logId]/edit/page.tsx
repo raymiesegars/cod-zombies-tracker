@@ -37,13 +37,15 @@ type MapInfo = { id: string; name: string; slug: string; imageUrl: string | null
 type ChallengeLog = {
   id: string;
   roundReached: number;
+  killsReached?: number | null;
+  scoreReached?: number | null;
   playerCount: string;
   difficulty?: string | null;
   proofUrls?: string[];
   proofUrl?: string | null;
   notes: string | null;
   completionTimeSeconds: number | null;
-  challenge: { id: string; name: string };
+  challenge: { id: string; name: string; type?: string };
   map: MapInfo;
   isVerified?: boolean;
   // Game-specific toggles
@@ -89,6 +91,8 @@ export default function EditRunPage() {
 
   // Populated when the log loads
   const [roundReached, setRoundReached] = useState('');
+  const [killsReached, setKillsReached] = useState('');
+  const [scoreReached, setScoreReached] = useState('');
   const [roundCompleted, setRoundCompleted] = useState('');
   const [playerCount, setPlayerCount] = useState<PlayerCount>('SOLO');
   const [proofUrls, setProofUrls] = useState<string[]>([]);
@@ -170,6 +174,8 @@ export default function EditRunPage() {
         setRequestVerification(Boolean(data.verificationRequestedAt));
         if (data.roundReached != null) {
           setRoundReached(String(data.roundReached));
+          if (data.killsReached != null) setKillsReached(String(data.killsReached));
+          if (data.scoreReached != null) setScoreReached(String(data.scoreReached));
           // Game-specific toggles for challenge logs
           if (data.useFortuneCards != null) setUseFortuneCards(data.useFortuneCards);
           setUseDirectorsCut(Boolean(data.useDirectorsCut));
@@ -195,10 +201,27 @@ export default function EditRunPage() {
 
   const handleUpdateChallenge = async (e: React.FormEvent) => {
     e.preventDefault();
-    const round = parseInt(String(roundReached).trim(), 10);
-    if (Number.isNaN(round) || round < 1) {
-      setError('Enter a valid round.');
-      return;
+    const chalType = (log as ChallengeLog)?.challenge?.type;
+    const isNoMansLand = chalType === 'NO_MANS_LAND';
+    const isRush = chalType === 'RUSH';
+    if (isNoMansLand) {
+      const kills = parseInt(String(killsReached).trim(), 10);
+      if (Number.isNaN(kills) || kills < 1) {
+        setError('Enter a valid kills count (1+).');
+        return;
+      }
+    } else if (isRush) {
+      const score = parseInt(String(scoreReached).trim(), 10);
+      if (Number.isNaN(score) || score < 1) {
+        setError('Enter a valid score (1+).');
+        return;
+      }
+    } else {
+      const round = parseInt(String(roundReached).trim(), 10);
+      if (Number.isNaN(round) || round < 1) {
+        setError('Enter a valid round.');
+        return;
+      }
     }
     if (requestVerification) {
       const hasProof = proofUrls.filter(Boolean).length > 0;
@@ -214,7 +237,11 @@ export default function EditRunPage() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          roundReached: round,
+          ...(isNoMansLand
+            ? { roundReached: 1, killsReached: parseInt(String(killsReached ?? '').trim().replace(/\D/g, ''), 10) }
+            : isRush
+              ? { roundReached: 1, scoreReached: parseInt(String(scoreReached ?? '').trim().replace(/\D/g, ''), 10) }
+              : { roundReached: parseInt(String(roundReached).trim(), 10) }),
           playerCount,
           ...(log?.map?.game?.shortName === 'BO4' && { difficulty }),
           ...(log?.map?.game?.shortName === 'IW' && { useFortuneCards: useFortuneCards === true, useDirectorsCut }),
@@ -355,16 +382,40 @@ export default function EditRunPage() {
           <Card variant="bordered">
             <CardContent className="py-4 sm:py-6">
               <form onSubmit={handleUpdateChallenge} className="space-y-4">
-                <Input
-                  label="Round Reached"
-                  type="number"
-                  min={1}
-                  step={1}
-                  inputMode="numeric"
-                  value={roundReached}
-                  onChange={(e) => setRoundReached(e.target.value)}
-                  disabled={verifiedAndLocked}
-                />
+                {(log as ChallengeLog).challenge?.type === 'NO_MANS_LAND' ? (
+                  <Input
+                    label="Kills"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    min={1}
+                    value={killsReached}
+                    onChange={(e) => setKillsReached(e.target.value.replace(/\D/g, ''))}
+                    disabled={verifiedAndLocked}
+                  />
+                ) : (log as ChallengeLog).challenge?.type === 'RUSH' ? (
+                  <Input
+                    label="Score"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    min={1}
+                    value={scoreReached}
+                    onChange={(e) => setScoreReached(e.target.value.replace(/\D/g, ''))}
+                    disabled={verifiedAndLocked}
+                  />
+                ) : (
+                  <Input
+                    label="Round Reached"
+                    type="number"
+                    min={1}
+                    step={1}
+                    inputMode="numeric"
+                    value={roundReached}
+                    onChange={(e) => setRoundReached(e.target.value)}
+                    disabled={verifiedAndLocked}
+                  />
+                )}
                 <Select
                   label="Player Count"
                   options={playerCountOptions}
