@@ -8,6 +8,7 @@ import { getWaWMapConfig } from '../src/lib/waw/waw-map-config';
 import { getBo2MapConfig } from '../src/lib/bo2/bo2-map-config';
 import { getBocwMapConfig, getBocwChallengeTypeLabel } from '../src/lib/bocw/bocw-map-config';
 import { getBo6MapConfig, getBo6ChallengeTypeLabel } from '../src/lib/bo6/bo6-map-config';
+import { getBo7MapConfig, getBo7ChallengeTypeLabel } from '../src/lib/bo7/bo7-map-config';
 
 // Load .env then .env.local (same order as Next.js) so seed uses the SAME DB as the app
 function loadEnv() {
@@ -386,6 +387,24 @@ async function main() {
           await prisma.challenge.create({
             data: {
               name: getBo6ChallengeTypeLabel(cType) || info?.name || (cType as string).replace(/_/g, ' '),
+              slug: (cType as string).toLowerCase().replace(/_/g, '-'),
+              type: cType as any,
+              mapId: map.id,
+              xpReward: 0,
+              description: info?.description || `Challenge: ${cType}`,
+            },
+          });
+          challengeCount++;
+        }
+      }
+    } else if (gameShortName === 'BO7') {
+      const bo7Cfg = getBo7MapConfig(map.slug);
+      if (bo7Cfg) {
+        for (const cType of bo7Cfg.challengeTypes) {
+          const info = roundChallengeTypes[cType];
+          await prisma.challenge.create({
+            data: {
+              name: getBo7ChallengeTypeLabel(cType) || info?.name || (cType as string).replace(/_/g, ' '),
               slug: (cType as string).toLowerCase().replace(/_/g, '-'),
               type: cType as any,
               mapId: map.id,

@@ -39,6 +39,7 @@ import { BO3_OFFICIAL_RULES } from '@/lib/bo3/bo3-official-rules';
 import { BO4_OFFICIAL_RULES } from '@/lib/bo4/bo4-official-rules';
 import { BOCW_OFFICIAL_RULES } from '@/lib/bocw/bocw-official-rules';
 import { getBo6OfficialRulesForMap } from '@/lib/bo6/bo6-official-rules';
+import { getBo7OfficialRulesForMap } from '@/lib/bo7/bo7-official-rules';
 import { isRuleLink, isRuleInlineLinks } from '@/lib/rules/types';
 import { getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
@@ -121,7 +122,7 @@ function OfficialRulesModal({
   const isBo6 = gameShortName === 'BO6';
   const isBo7 = gameShortName === 'BO7';
   const hasRules = isWaw || isBo1 || isBo2 || isBo3 || isBo4 || isBocw || isBo6 || isBo7;
-  const rules = isWaw ? WAW_OFFICIAL_RULES : isBo1 ? BO1_OFFICIAL_RULES : isBo2 ? BO2_OFFICIAL_RULES : isBo3 ? BO3_OFFICIAL_RULES : isBo4 ? BO4_OFFICIAL_RULES : isBocw ? BOCW_OFFICIAL_RULES : (isBo6 || isBo7) && mapSlug ? getBo6OfficialRulesForMap(mapSlug) : null;
+  const rules = isWaw ? WAW_OFFICIAL_RULES : isBo1 ? BO1_OFFICIAL_RULES : isBo2 ? BO2_OFFICIAL_RULES : isBo3 ? BO3_OFFICIAL_RULES : isBo4 ? BO4_OFFICIAL_RULES : isBocw ? BOCW_OFFICIAL_RULES : isBo6 && mapSlug ? getBo6OfficialRulesForMap(mapSlug) : isBo7 && mapSlug ? getBo7OfficialRulesForMap(mapSlug) : null;
 
   const byType = rules && 'challengeRulesByType' in rules ? (rules as { challengeRulesByType: Record<string, string> }).challengeRulesByType : null;
   const typesToShow = (mapChallengeTypes && mapChallengeTypes.length > 0
