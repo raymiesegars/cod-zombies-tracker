@@ -348,9 +348,11 @@ function checkWithContext(
 }
 
 // After logging a challenge or EE on a map: batch-fetch, then run map-specific checks and unlock + XP in one go.
+// When dryRun is true, returns what would unlock without creating records.
 export async function processMapAchievements(
   userId: string,
-  mapId: string
+  mapId: string,
+  dryRun?: boolean
 ): Promise<Achievement[]> {
   const [achievements, userAchievements, map, challengeLogs, easterEggLogs] =
     await Promise.all([
@@ -442,6 +444,7 @@ export async function processMapAchievements(
   }
 
   if (toUnlock.length === 0) return [];
+  if (dryRun) return toUnlock;
 
   const totalXpToAdd = toUnlock.reduce((s, a) => s + a.xpReward, 0);
 
