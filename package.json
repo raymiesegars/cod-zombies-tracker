@@ -28,6 +28,8 @@
     "db:bo6-balance-patch": "tsx scripts/bo6-balance-patch.ts",
     "db:bo6-reunlock-achievements": "tsx scripts/bo6-reunlock-achievements.ts",
     "db:bo7-balance-patch": "tsx scripts/bo7-balance-patch.ts",
+    "db:recompute-verified-xp": "tsx scripts/recompute-verified-xp.ts",
+    "db:verify-user-xp": "tsx scripts/verify-user-xp.ts",
     "db:reunlock-achievements": "node scripts/run-reunlock-with-direct.js",
     "db:update-der-riese-fly-trap": "tsx scripts/update-der-riese-fly-trap.ts"
   },

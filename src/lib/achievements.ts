@@ -252,9 +252,15 @@ export async function checkAllAchievements(userId: string): Promise<Achievement[
   return unlockedAchievements;
 }
 
+/** Minimal achievement fields needed for context-based checks (verified XP, etc.) */
+export type AchievementForContextCheck = Pick<
+  Achievement,
+  'type' | 'criteria' | 'difficulty' | 'easterEggId'
+>;
+
 // Uses pre-fetched context only (no DB). ROUND_MILESTONE, CHALLENGE_COMPLETE, EASTER_EGG_COMPLETE.
-function checkWithContext(
-  achievement: Achievement,
+export function checkWithContext(
+  achievement: AchievementForContextCheck,
   ctx: MapAchievementContext
 ): boolean {
   const criteria = achievement.criteria as Record<string, unknown>;
@@ -467,6 +473,64 @@ export async function processMapAchievements(
   }
 
   return toUnlock;
+}
+
+/**
+ * Check if an achievement is satisfied by VERIFIED runs only.
+ * Used for verified XP: only achievements unlocked by verified runs count.
+ * For ROUND_MILESTONE, CHALLENGE_COMPLETE, EASTER_EGG_COMPLETE - builds context from verified logs and runs checkWithContext.
+ */
+export async function isAchievementSatisfiedByVerifiedRun(
+  userId: string,
+  achievement: AchievementForContextCheck,
+  mapId: string
+): Promise<boolean> {
+  if (!['ROUND_MILESTONE', 'CHALLENGE_COMPLETE', 'EASTER_EGG_COMPLETE'].includes(achievement.type)) {
+    return false;
+  }
+
+  const [map, challengeLogs, easterEggLogs] = await Promise.all([
+    prisma.map.findUnique({ where: { id: mapId }, select: { id: true, roundCap: true } }),
+    prisma.challengeLog.findMany({
+      where: { userId, mapId, isVerified: true },
+      select: {
+        challenge: { select: { type: true } },
+        roundReached: true,
+        killsReached: true,
+        scoreReached: true,
+        difficulty: true,
+        completionTimeSeconds: true,
+      },
+    }),
+    prisma.easterEggLog.findMany({
+      where: { userId, mapId, isVerified: true },
+      select: { easterEggId: true, roundCompleted: true, difficulty: true, completionTimeSeconds: true },
+    }),
+  ]);
+
+  const easterEggRoundsOnMap = easterEggLogs
+    .filter((e) => e.roundCompleted != null)
+    .map((e) => ({ round: e.roundCompleted!, difficulty: e.difficulty ?? null }));
+  const easterEggLogsWithTime = easterEggLogs
+    .filter((e) => e.completionTimeSeconds != null)
+    .map((e) => ({ easterEggId: e.easterEggId, completionTimeSeconds: e.completionTimeSeconds! }));
+
+  const ctx: MapAchievementContext = {
+    map,
+    challengeLogs: challengeLogs.map((l) => ({
+      challengeType: l.challenge.type,
+      roundReached: l.roundReached,
+      killsReached: l.killsReached ?? undefined,
+      scoreReached: l.scoreReached ?? undefined,
+      difficulty: l.difficulty ?? undefined,
+      completionTimeSeconds: l.completionTimeSeconds ?? undefined,
+    })),
+    easterEggIds: new Set(easterEggLogs.map((e) => e.easterEggId)),
+    easterEggLogsWithTime,
+    easterEggRoundsOnMap,
+  };
+
+  return checkWithContext(achievement, ctx);
 }
 
 export async function getAchievementProgress(

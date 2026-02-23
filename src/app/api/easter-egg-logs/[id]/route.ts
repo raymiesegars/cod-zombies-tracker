@@ -30,8 +30,9 @@ async function getLogAndUser(id: string) {
     },
   });
   if (!log) return { error: 'Not found' as const, status: 404 as const };
-  // Super admins can edit any log; regular users can only edit their own
-  if (log.userId !== user.id && !isSuperAdmin(user.id)) return { error: 'Not found' as const, status: 404 as const };
+  const isOwner = log.userId === user.id;
+  const isAdminEditingPending = user.isAdmin === true && (log as { verificationRequestedAt?: string | null }).verificationRequestedAt != null && !log.isVerified;
+  if (!isOwner && !isSuperAdmin(user.id) && !isAdminEditingPending) return { error: 'Not found' as const, status: 404 as const };
   return { log, user };
 }
 
@@ -115,9 +116,12 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     }
 
     const body = await request.json();
-    const roundCompleted = body.roundCompleted !== undefined
-      ? (body.roundCompleted == null ? null : (typeof body.roundCompleted === 'number' ? body.roundCompleted : parseInt(String(body.roundCompleted), 10)))
-      : undefined;
+    const roundCompleted =
+      body.roundCompleted !== undefined
+        ? (body.roundCompleted == null || body.roundCompleted === ''
+            ? null
+            : Math.max(1, Math.floor(Number(body.roundCompleted))))
+        : undefined;
     const playerCount = body.playerCount;
     const isSolo = body.isSolo;
     const isNoGuide = body.isNoGuide;
@@ -134,9 +138,13 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     const proofUrls = proofUrlsRaw !== undefined ? normalizeProofUrls(proofUrlsRaw.map(String)) : undefined;
     const screenshotUrl = body.screenshotUrl !== undefined ? body.screenshotUrl : undefined;
     const notes = body.notes !== undefined ? body.notes : undefined;
-    const completionTimeSeconds = body.completionTimeSeconds !== undefined
-      ? (body.completionTimeSeconds != null && Number.isFinite(Number(body.completionTimeSeconds)) ? Math.max(0, Math.floor(Number(body.completionTimeSeconds))) : null)
-      : undefined;
+    const completionTimeSeconds =
+      body.completionTimeSeconds !== undefined
+        ? (body.completionTimeSeconds != null &&
+          Number.isFinite(Number(body.completionTimeSeconds))
+          ? Math.max(0, Math.floor(Number(body.completionTimeSeconds)))
+          : null)
+        : undefined;
     const teammateUserIds = body.teammateUserIds !== undefined
       ? (Array.isArray(body.teammateUserIds) ? body.teammateUserIds.filter((id: unknown) => typeof id === 'string').slice(0, 10) : [])
       : undefined;

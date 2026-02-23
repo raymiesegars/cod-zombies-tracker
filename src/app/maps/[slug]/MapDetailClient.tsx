@@ -542,7 +542,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('NORMAL');
   /** Same as Leaderboards page: 'HIGHEST_ROUND', challenge type, or 'ee-time-{easterEggId}' */
   const [selectedLeaderboardCategory, setSelectedLeaderboardCategory] = useState<string>('HIGHEST_ROUND');
-  const [leaderboardVerifiedOnly, setLeaderboardVerifiedOnly] = useState(false);
+  const [leaderboardVerifiedOnly, setLeaderboardVerifiedOnly] = useState(true);
   const [leaderboardFortuneCards, setLeaderboardFortuneCards] = useState<string>('false');
   const [leaderboardDirectorsCut, setLeaderboardDirectorsCut] = useState(false);
   // BO3
@@ -643,6 +643,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
         if (isEeTimeView && eeId) {
           const params = new URLSearchParams();
           params.set('easterEggId', eeId);
+          params.set('includeCounts', 'true');
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
           if (map.game?.shortName === 'BO4' && selectedDifficulty) params.set('difficulty', selectedDifficulty);
           if (leaderboardVerifiedOnly) params.set('verified', 'true');
@@ -650,10 +651,17 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           const res = await fetch(`/api/maps/${slug}/easter-egg-leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
+            const verifiedTotal = data.verifiedTotal ?? 0;
+            const unverifiedTotal = data.unverifiedTotal ?? 0;
+            if (verifiedTotal === 0 && unverifiedTotal > 0 && leaderboardVerifiedOnly) {
+              setLeaderboardVerifiedOnly(false);
+              return;
+            }
             setLeaderboard(data.entries ?? []);
           }
         } else {
           const params = new URLSearchParams();
+          params.set('includeCounts', 'true');
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
           const challengeType = selectedLeaderboardCategory === 'HIGHEST_ROUND' ? '' : selectedLeaderboardCategory;
           if (challengeType) params.set('challengeType', challengeType);
@@ -690,6 +698,12 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           const res = await fetch(`/api/maps/${slug}/leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
+            const verifiedTotal = data.verifiedTotal ?? 0;
+            const unverifiedTotal = data.unverifiedTotal ?? 0;
+            if (verifiedTotal === 0 && unverifiedTotal > 0 && leaderboardVerifiedOnly) {
+              setLeaderboardVerifiedOnly(false);
+              return;
+            }
             setLeaderboard(data.entries ?? []);
           }
         }

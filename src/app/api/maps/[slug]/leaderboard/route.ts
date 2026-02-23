@@ -45,6 +45,7 @@ export async function GET(
   const limitParam = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') || '25', 10) || 25));
   const offsetParam = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10) || 0);
   const mergeTake = 500;
+  const includeCounts = searchParams.get('includeCounts') === 'true';
 
   try {
     const { slug } = await params;
@@ -371,7 +372,27 @@ export async function GET(
         isVerified: entry.isVerified,
       }));
 
-    return NextResponse.json({ total, entries });
+    const out: Record<string, unknown> = { total, entries };
+    if (includeCounts) {
+      const verifiedWhere = { ...whereClause, isVerified: true };
+      const unverifiedWhere = { ...whereClause, isVerified: { not: true } };
+      const [verifiedChallengeCount, unverifiedChallengeCount] = await Promise.all([
+        prisma.challengeLog.count({ where: verifiedWhere }),
+        prisma.challengeLog.count({ where: unverifiedWhere }),
+      ]);
+      let verifiedEeCount = 0;
+      let unverifiedEeCount = 0;
+      if (!isSpecificChallenge) {
+        [verifiedEeCount, unverifiedEeCount] = await Promise.all([
+          prisma.easterEggLog.count({ where: { ...eeWhereClause, isVerified: true } }),
+          prisma.easterEggLog.count({ where: { ...eeWhereClause, isVerified: { not: true } } }),
+        ]);
+      }
+      out.verifiedTotal = verifiedChallengeCount + verifiedEeCount;
+      out.unverifiedTotal = unverifiedChallengeCount + unverifiedEeCount;
+    }
+
+    return NextResponse.json(out);
   } catch (error) {
     console.error('Error fetching leaderboard:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

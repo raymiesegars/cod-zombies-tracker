@@ -7,13 +7,15 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-export function secondsToHms(totalSeconds: number | null): { h: number; m: number; s: number } {
-  if (totalSeconds == null || totalSeconds < 0 || !Number.isFinite(totalSeconds)) {
+export function secondsToHms(totalSeconds: number | null | undefined): { h: number; m: number; s: number } {
+  const n = totalSeconds != null ? Number(totalSeconds) : NaN;
+  if (!Number.isFinite(n) || n < 0) {
     return { h: 0, m: 0, s: 0 };
   }
-  const s = Math.floor(totalSeconds % 60);
-  const m = Math.floor((totalSeconds / 60) % 60);
-  const h = Math.floor(totalSeconds / 3600);
+  const sec = Math.floor(n);
+  const s = sec % 60;
+  const m = Math.floor((sec / 60) % 60);
+  const h = Math.floor(sec / 3600);
   return { h, m, s };
 }
 
@@ -46,7 +48,15 @@ export function TimeInput({
   className,
   disabled,
 }: TimeInputProps) {
-  const { h, m, s } = useMemo(() => secondsToHms(valueSeconds ?? 0), [valueSeconds]);
+  const { h, m, s } = useMemo(
+    () =>
+      secondsToHms(
+        valueSeconds != null && Number.isFinite(Number(valueSeconds))
+          ? Math.floor(Number(valueSeconds))
+          : null
+      ),
+    [valueSeconds]
+  );
 
   const update = useCallback(
     (field: 'h' | 'm' | 's', raw: string) => {

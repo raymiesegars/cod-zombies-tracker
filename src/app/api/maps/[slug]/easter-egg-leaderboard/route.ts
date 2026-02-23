@@ -26,6 +26,7 @@ export async function GET(
   const rampageInducerParam = searchParams.get('rampageInducerUsed'); // 'true' | 'false' | null
   const limitParam = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') || '25', 10) || 25));
   const offsetParam = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10) || 0);
+  const includeCounts = searchParams.get('includeCounts') === 'true';
 
   if (!easterEggId) {
     return NextResponse.json({ error: 'easterEggId is required' }, { status: 400 });
@@ -121,7 +122,17 @@ export async function GET(
       isVerified: log.isVerified ?? false,
     }));
 
-    return NextResponse.json({ total, entries, easterEggName: ee.name });
+    const out: Record<string, unknown> = { total, entries, easterEggName: ee.name };
+    if (includeCounts) {
+      const [verifiedTotal, unverifiedTotal] = await Promise.all([
+        prisma.easterEggLog.count({ where: { ...whereClause, isVerified: true } }),
+        prisma.easterEggLog.count({ where: { ...whereClause, isVerified: { not: true } } }),
+      ]);
+      out.verifiedTotal = verifiedTotal;
+      out.unverifiedTotal = unverifiedTotal;
+    }
+
+    return NextResponse.json(out);
   } catch (error) {
     console.error('Error fetching easter egg time leaderboard:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -26,7 +26,18 @@ import {
   TabsTrigger,
   TabsContent,
 } from '@/components/ui';
-import { RoundCounter, XpRankDisplay, RelockAchievementButton, RankHelpContent, PendingCoOpSection, PendingVerificationSection } from '@/components/game';
+import {
+  RoundCounter,
+  XpRankDisplay,
+  RelockAchievementButton,
+  RankHelpContent,
+  PendingCoOpSection,
+  PendingVerificationSection,
+  RunsModal,
+  EasterEggsModal,
+  MapsModal,
+  AchievementsModal,
+} from '@/components/game';
 import {
   ACHIEVEMENT_CATEGORY_LABELS,
   getAchievementCategory,
@@ -482,6 +493,10 @@ export default function UserProfilePage() {
   const [achievementMapLoading, setAchievementMapLoading] = useState(false);
   const [profileRefreshTrigger, setProfileRefreshTrigger] = useState(0);
 
+  const [runsModalOpen, setRunsModalOpen] = useState<'all' | 'verified' | null>(null);
+  const [easterEggsModalOpen, setEasterEggsModalOpen] = useState(false);
+  const [mapsModalOpen, setMapsModalOpen] = useState(false);
+  const [achievementsModalOpen, setAchievementsModalOpen] = useState(false);
   const [adminMe, setAdminMe] = useState<{ isAdmin: boolean; isSuperAdmin: boolean } | null>(null);
   const [promoteModalOpen, setPromoteModalOpen] = useState(false);
   const [demoteModalOpen, setDemoteModalOpen] = useState(false);
@@ -823,7 +838,7 @@ export default function UserProfilePage() {
     const tooltips: Record<ProfileStatBlockId, string> = {
       'maps-played': 'Maps you’ve played at least one run on, out of all maps in the tracker.',
       'easter-eggs': 'Main-quest Easter eggs you’ve completed (unlocked the achievement), out of all main-quest EEs.',
-      'avg-round': 'Average of your best round on each map you’ve played (one number per map).',
+      'avg-round': "Your average best round across all maps; maps you haven't played count as 0.",
       achievements: 'Map achievements you’ve unlocked, out of all available achievements.',
       'world-records': 'Leaderboards across the site where you’re currently ranked #1.',
       'verified-world-records': 'Verified leaderboards where you’re currently ranked #1.',
@@ -1067,19 +1082,43 @@ export default function UserProfilePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             {selectedBlockIds.map((blockId) => {
               const { label, value, suffix, icon: Icon, iconClass, tooltip } = getBlockDisplay(blockId);
+              const isRunsBlock = blockId === 'total-runs' || blockId === 'verified-runs';
+              const isEasterEggsBlock = blockId === 'easter-eggs';
+              const isMapsBlock = blockId === 'maps-played';
+              const isAchievementsBlock = blockId === 'achievements';
+              const handleClick = isRunsBlock
+                ? () => setRunsModalOpen(blockId === 'verified-runs' ? 'verified' : 'all')
+                : isEasterEggsBlock
+                  ? () => setEasterEggsModalOpen(true)
+                  : isMapsBlock
+                    ? () => setMapsModalOpen(true)
+                    : isAchievementsBlock
+                      ? () => setAchievementsModalOpen(true)
+                      : undefined;
+              const Wrapper = handleClick ? 'button' : 'div';
               return (
                 <div key={blockId} className="group relative">
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-bunker-800 rounded-lg shadow-xl border border-bunker-700 opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10 w-56 text-center">
                     <p className="text-xs text-bunker-300">{tooltip}</p>
                   </div>
-                  <Card variant="bordered" className="text-center p-3 sm:p-4">
-                    <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${iconClass} mx-auto mb-2`} />
-                    <p className="text-xl sm:text-2xl font-zombies text-white">
-                      {value}
-                      {suffix != null && <span className={`${iconClass}/80`}> {suffix}</span>}
-                    </p>
-                    <p className="text-xs text-bunker-400">{label}</p>
-                  </Card>
+                  <Wrapper
+                    {...(handleClick
+                      ? {
+                          type: 'button' as const,
+                          onClick: handleClick,
+                          className: 'w-full text-left cursor-pointer hover:opacity-90 transition-opacity',
+                        }
+                      : { className: 'w-full' })}
+                  >
+                    <Card variant="bordered" className={`text-center p-3 sm:p-4 ${handleClick ? 'cursor-pointer' : ''}`}>
+                      <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${iconClass} mx-auto mb-2`} />
+                      <p className="text-xl sm:text-2xl font-zombies text-white">
+                        {value}
+                        {suffix != null && <span className={`${iconClass}/80`}> {suffix}</span>}
+                      </p>
+                      <p className="text-xs text-bunker-400">{label}</p>
+                    </Card>
+                  </Wrapper>
                 </div>
               );
             })}
@@ -1271,6 +1310,34 @@ export default function UserProfilePage() {
           isMapAchievementsLoading={achievementMapLoading}
         />
       </div>
+
+      {/* Runs modal (total / verified) */}
+      <RunsModal
+        isOpen={runsModalOpen !== null}
+        onClose={() => setRunsModalOpen(null)}
+        username={username}
+        title={runsModalOpen === 'verified' ? 'Verified Runs' : 'Total Runs'}
+        verifiedOnly={runsModalOpen === 'verified'}
+      />
+
+      <EasterEggsModal
+        isOpen={easterEggsModalOpen}
+        onClose={() => setEasterEggsModalOpen(false)}
+        username={username}
+      />
+
+      <MapsModal
+        isOpen={mapsModalOpen}
+        onClose={() => setMapsModalOpen(false)}
+        username={username}
+        isOwnProfile={isOwnProfile}
+      />
+
+      <AchievementsModal
+        isOpen={achievementsModalOpen}
+        onClose={() => setAchievementsModalOpen(false)}
+        username={username}
+      />
 
       {/* Promote to admin confirmation */}
       <Modal

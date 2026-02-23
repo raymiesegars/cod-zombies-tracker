@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { isBo4Game } from '@/lib/bo4';
+import { isSpeedrunCategory } from '@/lib/achievements/categories';
+import { computeWorldRecords } from '@/lib/world-records';
 import type { UserMapStats } from '@/types';
 
 // Per-map stats (highest round, main EE done) + totals for the profile dashboard.
@@ -104,7 +106,11 @@ export async function GET(
       user.challengeLogs.filter((l) => l.isVerified).length +
       user.easterEggLogs.filter((l) => l.isVerified).length;
     const highestRound = highestByMap.size > 0 ? Math.max(...Array.from(highestByMap.values())) : 0;
-    const speedrunCompletions = user.challengeLogs.filter((l) => l.completionTimeSeconds != null).length;
+    const speedrunChallengeCount = user.challengeLogs.filter(
+      (l) => isSpeedrunCategory(l.challenge?.type ?? '') && l.completionTimeSeconds != null
+    ).length;
+    const speedrunEeCount = user.easterEggLogs.filter((l) => l.completionTimeSeconds != null).length;
+    const speedrunCompletions = speedrunChallengeCount + speedrunEeCount;
 
     const allRounds: number[] = [];
     for (const log of user.challengeLogs) allRounds.push(log.roundReached);
@@ -112,7 +118,7 @@ export async function GET(
     const avgRoundLoggedRuns =
       allRounds.length > 0 ? allRounds.reduce((a, b) => a + b, 0) / allRounds.length : 0;
 
-    const [totalMaps, totalMainEasterEggs, totalChallenges, totalAchievements, easterEggAchievementsUnlocked, xpRank, verifiedXpRank] =
+    const [totalMaps, totalMainEasterEggs, totalChallenges, totalAchievements, easterEggAchievementsUnlocked, xpRank, verifiedXpRank, wr] =
       await Promise.all([
         prisma.map.count(),
         prisma.easterEgg.count({ where: { type: 'MAIN_QUEST', isActive: true } }),
@@ -126,6 +132,7 @@ export async function GET(
         }),
         prisma.user.count({ where: { isPublic: true, totalXp: { gt: user.totalXp ?? 0 } } }),
         prisma.user.count({ where: { isPublic: true, verifiedTotalXp: { gt: user.verifiedTotalXp ?? 0 } } }),
+        computeWorldRecords(user.id),
       ]);
 
     return NextResponse.json({
@@ -142,8 +149,8 @@ export async function GET(
       speedrunCompletions,
       xpRank: xpRank + 1,
       verifiedXpRank: verifiedXpRank + 1,
-      worldRecords: 0,
-      verifiedWorldRecords: 0,
+      worldRecords: wr.worldRecords,
+      verifiedWorldRecords: wr.verifiedWorldRecords,
     });
   } catch (error) {
     console.error('Error fetching user stats:', error);

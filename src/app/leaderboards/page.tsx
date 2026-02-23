@@ -82,8 +82,8 @@ export default function LeaderboardsPage() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('NORMAL');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchForFetch, setSearchForFetch] = useState(''); // Debounced; drives server-side search
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
-  const [rankVerifiedXpOnly, setRankVerifiedXpOnly] = useState(false);
+  const [verifiedOnly, setVerifiedOnly] = useState(true); // Default to verified when available
+  const [rankVerifiedXpOnly, setRankVerifiedXpOnly] = useState(true);
   const [fortuneCardsFilter, setFortuneCardsFilter] = useState<string>('false');
   const [directorsCutFilter, setDirectorsCutFilter] = useState(false);
   // BO3
@@ -199,6 +199,7 @@ export default function LeaderboardsPage() {
           params.set('easterEggId', eeId);
           params.set('offset', '0');
           params.set('limit', String(searchForFetch ? 100 : PAGE_SIZE));
+          params.set('includeCounts', 'true');
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
           if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
           if (searchForFetch) params.set('search', searchForFetch);
@@ -207,6 +208,12 @@ export default function LeaderboardsPage() {
           const res = await fetch(`/api/maps/${selectedMap}/easter-egg-leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
+            const verifiedTotal = data.verifiedTotal ?? 0;
+            const unverifiedTotal = data.unverifiedTotal ?? 0;
+            if (verifiedTotal === 0 && unverifiedTotal > 0 && verifiedOnly) {
+              setVerifiedOnly(false);
+              return;
+            }
             setTotal(data.total ?? 0);
             setLeaderboard(data.entries ?? []);
           } else {
@@ -217,6 +224,7 @@ export default function LeaderboardsPage() {
           const params = new URLSearchParams();
           params.set('offset', '0');
           params.set('limit', String(searchForFetch ? 100 : PAGE_SIZE));
+          params.set('includeCounts', 'true');
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
           if (selectedChallengeType) params.set('challengeType', selectedChallengeType);
           if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
@@ -250,6 +258,12 @@ export default function LeaderboardsPage() {
           const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
+            const verifiedTotal = data.verifiedTotal ?? 0;
+            const unverifiedTotal = data.unverifiedTotal ?? 0;
+            if (verifiedTotal === 0 && unverifiedTotal > 0 && verifiedOnly) {
+              setVerifiedOnly(false);
+              return;
+            }
             setTotal(data.total ?? 0);
             setLeaderboard(data.entries ?? []);
           }

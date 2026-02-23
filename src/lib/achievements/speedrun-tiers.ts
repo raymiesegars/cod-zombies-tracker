@@ -709,6 +709,10 @@ export const BO7_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
     r30: mBo6(14) + 30, r50: mBo6(34) + 20, r70: mBo6(54), r100: hsBo6(1, 50, 40), r200: hsBo6(8, 30, 0), r999: hBo6(120),
     exfil: mBo6(4), exfilR21: mBo6(9),
   }),
+  mars: buildBo6SpeedrunTiers({
+    r30: mBo6(14) + 30, r50: mBo6(34) + 20, r70: mBo6(54), r100: hsBo6(1, 50, 40), r200: hsBo6(8, 30, 0), r999: hBo6(120),
+    exfil: mBo6(4), exfilR21: mBo6(9),
+  }),
 };
 
 export const BOCW_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {

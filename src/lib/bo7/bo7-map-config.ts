@@ -252,7 +252,19 @@ export const BO7_MAP_CONFIG: Record<Bo7MapSlug, Bo7MapConfig> = {
     ],
     highRoundWR: 999,
     noDownsWR: 999,
-    speedrunWRs: null,
+    firstRoomWR: 610,
+    noPerksWR: 70,
+    noJugWR: 100,
+    speedrunWRs: {
+      r30: min(14) + 30,
+      r50: min(34) + 20,
+      r70: min(54),
+      r100: hms(1, 50, 40),
+      r200: hms(8, 30, 0),
+      r999: h(120),
+      exfilSpeedrunWR: min(4),
+      exfilR21SpeedrunWR: min(9),
+    },
   },
 };
 
