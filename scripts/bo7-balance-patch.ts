@@ -82,6 +82,32 @@ async function main() {
     return;
   }
 
+  console.log('0. Updating isDlc and order for BO7 maps...');
+  const bo7Order: { slug: string; isDlc: boolean; order: number }[] = [
+    { slug: 'ashes-of-the-damned', isDlc: false, order: 1 },
+    { slug: 'vandorn-farm', isDlc: false, order: 2 },
+    { slug: 'exit-115', isDlc: false, order: 3 },
+    { slug: 'astra-malorum', isDlc: true, order: 4 },
+    { slug: 'zarya-cosmodrome', isDlc: true, order: 5 },
+    { slug: 'mars', isDlc: true, order: 6 },
+  ];
+  const bo7Maps = await prisma.map.findMany({
+    where: { gameId: game.id },
+    select: { id: true, slug: true, isDlc: true, order: true },
+  });
+  const slugToSpec = new Map(bo7Order.map((s) => [s.slug, s]));
+  for (const m of bo7Maps) {
+    const spec = slugToSpec.get(m.slug);
+    if (!spec) continue;
+    const needsUpdate = m.isDlc !== spec.isDlc || m.order !== spec.order;
+    if (needsUpdate && !DRY_RUN) {
+      await prisma.map.update({
+        where: { id: m.id },
+        data: { isDlc: spec.isDlc, order: spec.order },
+      });
+    }
+  }
+
   console.log('1. Updating challenge visibility (isActive) and creating missing challenges...');
   let challengesDeactivated = 0;
   let challengesCreated = 0;
@@ -290,16 +316,26 @@ async function main() {
 
   if (DRY_RUN) {
     console.log('\n*** Dry run complete. Run without --dry-run to apply. ***');
-    console.log('Then run: pnpm db:reunlock-achievements to unlock achievements and grant verified XP for users with BO7 logs.');
+    console.log('Then run: pnpm db:reunlock-achievements to unlock achievements.');
+    console.log('Then run: pnpm db:recompute-verified-xp to fix verified XP from verified runs only.');
   } else {
-    console.log('\n4. Running reunlock to grant achievements and verified XP for users with BO7 logs...');
-    const res = spawnSync('pnpm', ['db:reunlock-achievements'], {
+    console.log('\n4. Running reunlock to grant achievements for users with logs...');
+    const reunlockRes = spawnSync('pnpm', ['db:reunlock-achievements'], {
       stdio: 'inherit',
       cwd: root,
     });
-    if (res.status !== 0) {
+    if (reunlockRes.status !== 0) {
       console.error('\nReunlock failed. Run manually: pnpm db:reunlock-achievements');
-      process.exit(res.status ?? 1);
+      process.exit(reunlockRes.status ?? 1);
+    }
+    console.log('\n5. Recomputing verified XP from verified runs only...');
+    const recomputeRes = spawnSync('pnpm', ['db:recompute-verified-xp'], {
+      stdio: 'inherit',
+      cwd: root,
+    });
+    if (recomputeRes.status !== 0) {
+      console.error('\nRecompute verified XP failed. Run manually: pnpm db:recompute-verified-xp');
+      process.exit(recomputeRes.status ?? 1);
     }
     console.log('\nBO7 balance patch applied successfully.');
   }

@@ -728,7 +728,7 @@ export default function RunDetailPage() {
                   </div>
                 );
               })()}
-              {(isOwner || adminMe?.isSuperAdmin) && (
+              {(isOwner || adminMe?.isSuperAdmin || (adminMe?.isAdmin && isPendingVerification)) && (
                 <div className="flex flex-col gap-2 pt-3 border-t border-bunker-700 mt-3">
                   {/* Verified lock notice for owners */}
                   {isOwner && isVerified && !adminMe?.isSuperAdmin && (
@@ -738,8 +738,8 @@ export default function RunDetailPage() {
                     </p>
                   )}
                   <div className="flex flex-wrap gap-2">
-                    {/* Edit: show for owner only when not verified; always show for super admins */}
-                    {((isOwner && !isVerified) || adminMe?.isSuperAdmin) && (
+                    {/* Edit: owner when not verified; super admin always; admin when pending verification (edit but not delete) */}
+                    {((isOwner && !isVerified) || adminMe?.isSuperAdmin || (adminMe?.isAdmin && isPendingVerification && !isVerified)) && (
                       <Link href={`/maps/${map.slug}/run/${type}/${logId}/edit`} className="flex-1 min-w-0">
                         <Button variant="secondary" size="sm" className="w-full" leftIcon={<Pencil className="w-3.5 h-3.5" />}>
                           Edit

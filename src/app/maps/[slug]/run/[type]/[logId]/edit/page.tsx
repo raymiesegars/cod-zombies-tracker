@@ -154,10 +154,16 @@ export default function EditRunPage() {
         setLog(data);
         setIsVerified(Boolean(data.isVerified));
         setPlayerCount(data.playerCount || 'SOLO');
+        // Coerce to number for TimeInput (API/Prisma may return string in edge cases)
+        const rawTime = data.completionTimeSeconds;
+        setCompletionTimeSeconds(
+          rawTime != null && Number.isFinite(Number(rawTime))
+            ? Math.max(0, Math.floor(Number(rawTime)))
+            : null
+        );
         setDifficulty(data.difficulty && BO4_DIFFICULTIES.includes(data.difficulty) ? data.difficulty : 'NORMAL');
         setProofUrls(Array.isArray(data.proofUrls) ? data.proofUrls : data.proofUrl ? [data.proofUrl] : []);
         setNotes(data.notes || '');
-        setCompletionTimeSeconds(data.completionTimeSeconds ?? null);
         setTeammateUserIds(Array.isArray(data.teammateUserIds) ? data.teammateUserIds : []);
         setTeammateNonUserNames(Array.isArray(data.teammateNonUserNames) ? data.teammateNonUserNames : []);
         setTeammateUserDetails(Array.isArray(data.teammateUserDetails) ? data.teammateUserDetails : []);
@@ -189,7 +195,7 @@ export default function EditRunPage() {
 
   const handleUpdateChallenge = async (e: React.FormEvent) => {
     e.preventDefault();
-    const round = parseInt(roundReached, 10);
+    const round = parseInt(String(roundReached).trim(), 10);
     if (Number.isNaN(round) || round < 1) {
       setError('Enter a valid round.');
       return;
@@ -220,7 +226,8 @@ export default function EditRunPage() {
           ...((isBocwGame(log?.map?.game?.shortName) || isBo6Game(log?.map?.game?.shortName) || isBo7Game(log?.map?.game?.shortName)) && { rampageInducerUsed }),
           proofUrls: normalizeProofUrls(proofUrls),
           notes: notes || null,
-          completionTimeSeconds,
+          // Always send explicitly (JSON.stringify omits undefined, which would skip the API update)
+          completionTimeSeconds: completionTimeSeconds != null ? completionTimeSeconds : null,
           teammateUserIds,
           teammateNonUserNames,
           requestVerification,
@@ -252,7 +259,7 @@ export default function EditRunPage() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          roundCompleted: roundCompleted ? parseInt(roundCompleted, 10) : null,
+          roundCompleted: roundCompleted?.trim() ? parseInt(String(roundCompleted).trim(), 10) : null,
           playerCount,
           ...(log?.map?.game?.shortName === 'BO4' && { difficulty }),
           isSolo,
@@ -260,7 +267,8 @@ export default function EditRunPage() {
           ...((isBocwGame(log?.map?.game?.shortName) || isBo6Game(log?.map?.game?.shortName) || isBo7Game(log?.map?.game?.shortName)) && { rampageInducerUsed }),
           proofUrls: normalizeProofUrls(proofUrls),
           notes: notes || null,
-          completionTimeSeconds,
+          // Always send explicitly (JSON.stringify omits undefined, which would skip the API update)
+          completionTimeSeconds: completionTimeSeconds != null ? completionTimeSeconds : null,
           teammateUserIds,
           teammateNonUserNames,
           requestVerification,
@@ -351,6 +359,8 @@ export default function EditRunPage() {
                   label="Round Reached"
                   type="number"
                   min={1}
+                  step={1}
+                  inputMode="numeric"
                   value={roundReached}
                   onChange={(e) => setRoundReached(e.target.value)}
                   disabled={verifiedAndLocked}
@@ -535,6 +545,8 @@ export default function EditRunPage() {
                   label="Round Completed"
                   type="number"
                   min={1}
+                  step={1}
+                  inputMode="numeric"
                   value={roundCompleted}
                   onChange={(e) => setRoundCompleted(e.target.value)}
                   placeholder="e.g. 18"

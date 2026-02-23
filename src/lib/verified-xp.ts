@@ -1,41 +1,73 @@
 import prisma from '@/lib/prisma';
+import { isAchievementSatisfiedByVerifiedRun } from '@/lib/achievements';
 
 /**
- * When a run is verified, grant verified status to all map-specific achievements
- * the user has unlocked on that map, and recalculate their verifiedTotalXp.
+ * When a run is verified, grant verified status ONLY to map-specific achievements
+ * that are satisfied by verified runs (not all unlocked achievements on the map).
+ * Recalculates verifiedTotalXp.
  * Returns the new verifiedTotalXp and the XP gained from this verification.
  */
 export async function grantVerifiedAchievementsForMap(
   userId: string,
-  mapId: string
+  mapId: string,
+  options?: { skipUserUpdate?: boolean }
 ): Promise<{ verifiedTotalXp: number; xpGained: number }> {
   const now = new Date();
+  const skipUserUpdate = options?.skipUserUpdate ?? false;
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { verifiedTotalXp: true },
-  });
+  const user = skipUserUpdate
+    ? null
+    : await prisma.user.findUnique({
+        where: { id: userId },
+        select: { verifiedTotalXp: true },
+      });
   const previousVerifiedTotalXp = user?.verifiedTotalXp ?? 0;
 
-  // Get all map-specific achievements for this map
-  const mapAchievementIds = await prisma.achievement.findMany({
-    where: { mapId },
-    select: { id: true, xpReward: true },
-  });
-
-  if (mapAchievementIds.length === 0) {
-    return { verifiedTotalXp: previousVerifiedTotalXp, xpGained: 0 };
-  }
-
-  // Update UserAchievement: set verifiedAt for any unlocked achievement on this map that isn't already verified
-  await prisma.userAchievement.updateMany({
+  // Get all UNLOCKED map-specific achievements (mapId = X or easterEgg.mapId = X)
+  const userAchievements = await prisma.userAchievement.findMany({
     where: {
       userId,
-      achievementId: { in: mapAchievementIds.map((a) => a.id) },
-      verifiedAt: null,
+      achievement: {
+        isActive: true,
+        OR: [{ mapId }, { easterEgg: { mapId } }],
+      },
     },
-    data: { verifiedAt: now },
+    include: {
+      achievement: {
+        select: {
+          id: true,
+          type: true,
+          mapId: true,
+          easterEggId: true,
+          criteria: true,
+          difficulty: true,
+          xpReward: true,
+          easterEgg: { select: { mapId: true } },
+        },
+      },
+    },
   });
+
+  const toVerify: string[] = [];
+  for (const ua of userAchievements) {
+    if (ua.verifiedAt != null) continue;
+    const ach = ua.achievement;
+    const effectiveMapId = ach.mapId ?? ach.easterEgg?.mapId ?? null;
+    if (!effectiveMapId) continue;
+    const satisfied = await isAchievementSatisfiedByVerifiedRun(userId, ach, effectiveMapId);
+    if (satisfied) toVerify.push(ua.id);
+  }
+
+  if (toVerify.length > 0) {
+    await prisma.userAchievement.updateMany({
+      where: { id: { in: toVerify } },
+      data: { verifiedAt: now },
+    });
+  }
+
+  if (skipUserUpdate) {
+    return { verifiedTotalXp: 0, xpGained: 0 };
+  }
 
   // Recalculate verifiedTotalXp for this user
   const verified = await prisma.userAchievement.findMany({
@@ -54,27 +86,53 @@ export async function grantVerifiedAchievementsForMap(
 }
 
 /**
- * When a verified run is deleted, if the user has no other verified run on this map,
- * clear verifiedAt on all map achievements and recalculate verifiedTotalXp.
+ * When a verified run is deleted, re-evaluate all map achievements that currently
+ * have verifiedAt. Clear verifiedAt for any that are no longer satisfied by
+ * verified runs, then recalculate verifiedTotalXp.
  */
 export async function revokeVerifiedAchievementsForMapIfNeeded(
   userId: string,
   mapId: string
 ): Promise<void> {
-  const [challengeCount, easterEggCount] = await Promise.all([
-    prisma.challengeLog.count({ where: { userId, mapId, isVerified: true } }),
-    prisma.easterEggLog.count({ where: { userId, mapId, isVerified: true } }),
-  ]);
-  if (challengeCount > 0 || easterEggCount > 0) return;
-
-  await prisma.userAchievement.updateMany({
+  const userAchievements = await prisma.userAchievement.findMany({
     where: {
       userId,
-      achievement: { mapId },
       verifiedAt: { not: null },
+      achievement: {
+        isActive: true,
+        OR: [{ mapId }, { easterEgg: { mapId } }],
+      },
     },
-    data: { verifiedAt: null },
+    include: {
+      achievement: {
+        select: {
+          id: true,
+          type: true,
+          mapId: true,
+          easterEggId: true,
+          criteria: true,
+          difficulty: true,
+          easterEgg: { select: { mapId: true } },
+        },
+      },
+    },
   });
+
+  const toRevoke: string[] = [];
+  for (const ua of userAchievements) {
+    const ach = ua.achievement;
+    const effectiveMapId = ach.mapId ?? ach.easterEgg?.mapId ?? null;
+    if (!effectiveMapId) continue;
+    const stillSatisfied = await isAchievementSatisfiedByVerifiedRun(userId, ach, effectiveMapId);
+    if (!stillSatisfied) toRevoke.push(ua.id);
+  }
+
+  if (toRevoke.length > 0) {
+    await prisma.userAchievement.updateMany({
+      where: { id: { in: toRevoke } },
+      data: { verifiedAt: null },
+    });
+  }
 
   const verified = await prisma.userAchievement.findMany({
     where: { userId, verifiedAt: { not: null } },

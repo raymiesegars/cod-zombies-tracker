@@ -243,11 +243,11 @@ async function main() {
     ],
     BO7: [
       { name: 'Ashes of the Damned', slug: 'ashes-of-the-damned', isDlc: false, hasEasterEgg: true, order: 1, description: 'Black Ops 7 Zombies. Survive the undead.' },
-      { name: 'Astra Malorum', slug: 'astra-malorum', isDlc: false, hasEasterEgg: true, order: 2, description: 'Black Ops 7 Zombies. Thurston Observatory and Mars.' },
-      { name: 'Mars', slug: 'mars', isDlc: true, hasEasterEgg: false, order: 3, description: 'Black Ops 7 Zombies DLC. Survival map on Mars.', imageUrl: '/images/maps/mars.webp' },
-      { name: 'Vandorn Farm', slug: 'vandorn-farm', isDlc: false, hasEasterEgg: true, order: 4, description: 'Black Ops 7 Zombies. Survival map.' },
-      { name: 'Exit 115', slug: 'exit-115', isDlc: false, hasEasterEgg: true, order: 5, description: 'Black Ops 7 Zombies. Survival map.' },
-      { name: 'Zarya Cosmodrome', slug: 'zarya-cosmodrome', isDlc: false, hasEasterEgg: true, order: 6, description: 'Black Ops 7 Zombies. Survival map. A cosmodrome under siege.' },
+      { name: 'Vandorn Farm', slug: 'vandorn-farm', isDlc: false, hasEasterEgg: true, order: 2, description: 'Black Ops 7 Zombies. Survival map.' },
+      { name: 'Exit 115', slug: 'exit-115', isDlc: false, hasEasterEgg: true, order: 3, description: 'Black Ops 7 Zombies. Survival map.' },
+      { name: 'Astra Malorum', slug: 'astra-malorum', isDlc: true, hasEasterEgg: true, order: 4, description: 'Black Ops 7 Zombies DLC. Thurston Observatory and Mars.' },
+      { name: 'Zarya Cosmodrome', slug: 'zarya-cosmodrome', isDlc: true, hasEasterEgg: true, order: 5, description: 'Black Ops 7 Zombies DLC. Survival map. A cosmodrome under siege.' },
+      { name: 'Mars', slug: 'mars', isDlc: true, hasEasterEgg: false, order: 6, description: 'Black Ops 7 Zombies DLC. Survival map on Mars.', imageUrl: '/images/maps/mars.webp' },
     ],
   };
 

@@ -49,6 +49,23 @@ export async function GET(
       ORDER BY g."order"
     `;
 
+    type MapSummaryRow = { mapId: string; mapName: string; mapSlug: string; gameShortName: string | null; gameOrder: number; mapOrder: number; total: bigint; unlocked: bigint };
+    let mapSummaryRows: MapSummaryRow[] = [];
+    if (!mapId) {
+      mapSummaryRows = (await prisma.$queryRaw`
+        SELECT m.id as "mapId", m.name as "mapName", m.slug as "mapSlug",
+          g."shortName" as "gameShortName", g."order" as "gameOrder", m."order" as "mapOrder",
+          COUNT(a.id)::bigint as total,
+          COUNT(ua.id)::bigint as unlocked
+        FROM "Map" m
+        JOIN "Game" g ON m."gameId" = g.id
+        JOIN "Achievement" a ON a."mapId" = m.id AND a."isActive" = true
+        LEFT JOIN "UserAchievement" ua ON ua."achievementId" = a.id AND ua."userId" = ${user.id}
+        GROUP BY m.id, m.name, m.slug, g."shortName", g."order", m."order"
+        ORDER BY g."order", m."order"
+      `) as MapSummaryRow[];
+    }
+
     const completionByGame = completionRows.map((r) => ({
       gameId: r.gameId,
       gameName: r.gameName,
@@ -79,8 +96,17 @@ export async function GET(
     }
 
     if (!mapId) {
+      const summaryByMap = mapSummaryRows.map((r) => ({
+        mapId: r.mapId,
+        mapName: r.mapName,
+        mapSlug: r.mapSlug,
+        gameShortName: r.gameShortName,
+        total: Number(r.total),
+        unlocked: Number(r.unlocked),
+      }));
       return NextResponse.json({
         completionByGame,
+        summaryByMap,
         mapsByGame: Object.fromEntries(
           Array.from(mapsByGameMap.entries()).map(([gameId, maps]) => [
             gameId,
