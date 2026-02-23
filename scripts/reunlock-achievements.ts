@@ -11,10 +11,10 @@
  * - If the user has a verified run on that map, grants verifiedAt (and verifiedTotalXp) for the new achievements
  * - Recalculates totalXp and level for affected users
  *
- * Usage:
- *   pnpm exec tsx scripts/reunlock-achievements.ts           # Run and create unlocks
- *   pnpm exec tsx scripts/reunlock-achievements.ts --dry-run # Report only, no changes
- *   BACKFILL_USER_ID=xxx pnpm exec tsx scripts/reunlock-achievements.ts  # Single user
+ * Usage (use pnpm db:reunlock-achievements - it uses DIRECT_URL to avoid connection limits):
+ *   pnpm db:reunlock-achievements           # Run and create unlocks
+ *   pnpm db:reunlock-achievements --dry-run # Report only, no changes
+ *   BACKFILL_USER_ID=xxx pnpm db:reunlock-achievements  # Single user
  */
 
 import * as fs from 'fs';
