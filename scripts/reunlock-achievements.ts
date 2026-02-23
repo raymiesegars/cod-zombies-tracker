@@ -6,7 +6,10 @@
  * check to create any missing UserAchievement records. Use after balance patches
  * or migrations that change achievement definitions.
  *
- * SAFE: Only creates UserAchievement records. Does not delete or deactivate.
+ * SAFE: Only creates UserAchievement records. Does not delete, deactivate, or modify logs.
+ * - Creates UserAchievement for any achievement the user qualifies for based on existing logs
+ * - If the user has a verified run on that map, grants verifiedAt (and verifiedTotalXp) for the new achievements
+ * - Recalculates totalXp and level for affected users
  *
  * Usage:
  *   pnpm exec tsx scripts/reunlock-achievements.ts           # Run and create unlocks
@@ -35,6 +38,7 @@ for (const file of ['.env', '.env.local']) {
 import prisma from '../src/lib/prisma';
 import { processMapAchievements } from '../src/lib/achievements';
 import { getLevelFromXp } from '../src/lib/ranks';
+import { grantVerifiedAchievementsForMap } from '../src/lib/verified-xp';
 
 const DRY_RUN = process.argv.includes('--dry-run');
 const filterUserId = process.env.BACKFILL_USER_ID?.trim();
@@ -90,6 +94,8 @@ async function main() {
   let processed = 0;
   let totalNewUnlocks = 0;
   const usersWithNewUnlocks = new Set<string>();
+  /** (userId, mapId) pairs that got new unlocks - for granting verified XP if run is verified */
+  const pairsWithNewUnlocks = new Map<string, { userId: string; mapId: string }>();
 
   for (const { userId, mapId } of pairs) {
     const unlocked = await processMapAchievements(userId, mapId, DRY_RUN);
@@ -97,6 +103,7 @@ async function main() {
     if (unlocked.length > 0) {
       totalNewUnlocks += unlocked.length;
       usersWithNewUnlocks.add(userId);
+      pairsWithNewUnlocks.set(`${userId}:${mapId}`, { userId, mapId });
       const mapSlug = mapsById.get(mapId) ?? mapId.slice(0, 8);
       if (DRY_RUN) {
         console.log(`  [DRY] Would unlock ${unlocked.length} for user ${userId.slice(0, 8)}... on ${mapSlug}`);
@@ -111,7 +118,23 @@ async function main() {
 
   console.log(`\nProcessed ${pairs.length} pairs. Total new unlocks: ${totalNewUnlocks} (${usersWithNewUnlocks.size} users).`);
 
-  if (!DRY_RUN && usersWithNewUnlocks.size > 0 && totalNewUnlocks > 0) {
+  if (!DRY_RUN && totalNewUnlocks > 0) {
+    // Grant verified XP: for each (userId, mapId) where we created unlocks, if user has a verified run on that map, set verifiedAt on the new achievements
+    let verifiedGrants = 0;
+    for (const { userId, mapId } of Array.from(pairsWithNewUnlocks.values())) {
+      const [hasVerifiedChallenge, hasVerifiedEe] = await Promise.all([
+        prisma.challengeLog.findFirst({ where: { userId, mapId, isVerified: true }, select: { id: true } }).then((r) => !!r),
+        prisma.easterEggLog.findFirst({ where: { userId, mapId, isVerified: true }, select: { id: true } }).then((r) => !!r),
+      ]);
+      if (hasVerifiedChallenge || hasVerifiedEe) {
+        await grantVerifiedAchievementsForMap(userId, mapId);
+        verifiedGrants++;
+      }
+    }
+    if (verifiedGrants > 0) {
+      console.log(`\nGranted verified XP for ${verifiedGrants} (userId, mapId) pairs with verified runs.`);
+    }
+
     console.log('\nRecalculating totalXp and level for affected users...');
     let usersUpdated = 0;
     for (const userId of Array.from(usersWithNewUnlocks)) {
