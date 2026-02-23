@@ -431,6 +431,12 @@ const challengeTypeLabels: Record<string, string> = {
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
   CRYPTID_FIGHT: 'Cryptid Fight',
   MEPHISTOPHELES: 'Mephistopheles',
+  EXFIL_SPEEDRUN: 'Exfil Round 11',
+  EXFIL_R21_SPEEDRUN: 'Exfil Round 21',
+  BUILD_EE_SPEEDRUN: 'Build% EE Speedrun',
+  ROUND_935_SPEEDRUN: 'Round 935 Speedrun',
+  ROUND_10_SPEEDRUN: 'Round 10 Speedrun',
+  ROUND_20_SPEEDRUN: 'Round 20 Speedrun',
 };
 
 type StepSection = { heading?: string; lines: string[] };
@@ -542,6 +548,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   const [lbBo4ElixirMode, setLbBo4ElixirMode] = useState<string>('');
   // BOCW
   const [lbBocwSupportMode, setLbBocwSupportMode] = useState<string>('');
+  const [lbRampageInducerFilter, setLbRampageInducerFilter] = useState<string>('false'); // Default: No Rampage Inducer
   // BO6
   const [lbBo6GobbleGumMode, setLbBo6GobbleGumMode] = useState<string>('');
   const [lbBo6SupportMode, setLbBo6SupportMode] = useState<string>('');
@@ -635,6 +642,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
           if (map.game?.shortName === 'BO4' && selectedDifficulty) params.set('difficulty', selectedDifficulty);
           if (leaderboardVerifiedOnly) params.set('verified', 'true');
+          if ((isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName)) && lbRampageInducerFilter) params.set('rampageInducerUsed', lbRampageInducerFilter);
           const res = await fetch(`/api/maps/${slug}/easter-egg-leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -674,6 +682,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           if (map.game?.shortName === 'BO2' && getBo2MapConfig(map.slug)?.hasBank) {
             if (lbBo2BankUsed === 'true' || lbBo2BankUsed === 'false') params.set('bo2BankUsed', lbBo2BankUsed);
           }
+          if ((isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName)) && lbRampageInducerFilter) params.set('rampageInducerUsed', lbRampageInducerFilter);
           const res = await fetch(`/api/maps/${slug}/leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -689,7 +698,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     })();
     // Intentionally omit leaderboard.length / leaderboardFetchedOnce to avoid re-fetch loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut, lbBo3GobbleGumMode, lbBo3AatUsed, lbBo4ElixirMode, lbBocwSupportMode, lbBo6GobbleGumMode, lbBo6SupportMode, lbBo7SupportMode, lbBo7CursedFilter, lbBo7SelectedRelics, lbWawNoJug, lbWawFixedWunderwaffe, lbBo2BankUsed]);
+  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut, lbBo3GobbleGumMode, lbBo3AatUsed, lbBo4ElixirMode, lbBocwSupportMode, lbRampageInducerFilter, lbBo6GobbleGumMode, lbBo6SupportMode, lbBo7SupportMode, lbBo7CursedFilter, lbBo7SelectedRelics, lbWawNoJug, lbWawFixedWunderwaffe, lbBo2BankUsed]);
 
   // Sync activeTab with URL so switching to Your Runs triggers fetch
   useEffect(() => {
@@ -1839,12 +1848,23 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                       />
                     )}
                     {isBocwGame(map?.game?.shortName) && (
-                      <Select
-                        options={[{ value: '', label: 'All Support' }, ...BOCW_SUPPORT_MODES.map((m) => ({ value: m, label: getBocwSupportLabel(m) }))]}
-                        value={lbBocwSupportMode}
-                        onChange={(e) => setLbBocwSupportMode(e.target.value)}
-                        className="w-full min-w-0 sm:w-48 max-w-full"
-                      />
+                      <>
+                        <Select
+                          options={[{ value: '', label: 'All Support' }, ...BOCW_SUPPORT_MODES.map((m) => ({ value: m, label: getBocwSupportLabel(m) }))]}
+                          value={lbBocwSupportMode}
+                          onChange={(e) => setLbBocwSupportMode(e.target.value)}
+                          className="w-full min-w-0 sm:w-48 max-w-full"
+                        />
+                        <Select
+                          options={[
+                            { value: 'false', label: 'No Rampage Inducer' },
+                            { value: 'true', label: 'Rampage Inducer' },
+                          ]}
+                          value={lbRampageInducerFilter}
+                          onChange={(e) => setLbRampageInducerFilter(e.target.value)}
+                          className="w-full min-w-0 sm:w-44 max-w-full"
+                        />
+                      </>
                     )}
                     {isBo6Game(map?.game?.shortName) && (
                       <>
@@ -1860,6 +1880,15 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                           onChange={(e) => setLbBo6SupportMode(e.target.value)}
                           className="w-full min-w-0 sm:w-40 max-w-full"
                         />
+                        <Select
+                          options={[
+                            { value: 'false', label: 'No Rampage Inducer' },
+                            { value: 'true', label: 'Rampage Inducer' },
+                          ]}
+                          value={lbRampageInducerFilter}
+                          onChange={(e) => setLbRampageInducerFilter(e.target.value)}
+                          className="w-full min-w-0 sm:w-44 max-w-full"
+                        />
                       </>
                     )}
                     {isBo7Game(map?.game?.shortName) && (
@@ -1869,6 +1898,15 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                           value={lbBo7SupportMode}
                           onChange={(e) => setLbBo7SupportMode(e.target.value)}
                           className="w-full min-w-0 sm:w-40 max-w-full"
+                        />
+                        <Select
+                          options={[
+                            { value: 'false', label: 'No Rampage Inducer' },
+                            { value: 'true', label: 'Rampage Inducer' },
+                          ]}
+                          value={lbRampageInducerFilter}
+                          onChange={(e) => setLbRampageInducerFilter(e.target.value)}
+                          className="w-full min-w-0 sm:w-44 max-w-full"
                         />
                         <Select
                           options={[

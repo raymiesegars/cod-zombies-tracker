@@ -5,7 +5,7 @@ import { processMapAchievements } from '@/lib/achievements';
 import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
 import { createCoOpRunPendingsForChallengeLog } from '@/lib/coop-pending';
 import { isBo4Game, BO4_DIFFICULTIES } from '@/lib/bo4';
-import { isIwGame, isIwSpeedrunChallengeType, isSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType } from '@/lib/iw';
+import { isIwGame, isSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType } from '@/lib/iw';
 import { isBo3Game, BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT } from '@/lib/bo3';
 import { isBocwGame, BOCW_SUPPORT_MODES, BOCW_SUPPORT_DEFAULT } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_GOBBLEGUM_DEFAULT, BO6_SUPPORT_MODES, BO6_SUPPORT_DEFAULT } from '@/lib/bo6';
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       (async () => {
         const c = await prisma.challenge.findUnique({ where: { id: challengeId }, select: { type: true } });
         if (!c) return null;
-        if (isIwSpeedrunChallengeType(c.type)) {
+        if (isSpeedrunChallengeType(c.type)) {
           const best = await prisma.challengeLog.findFirst({
             where: {
               userId: user.id,
@@ -91,6 +91,7 @@ export async function POST(request: NextRequest) {
               playerCount,
               completionTimeSeconds: { not: null },
               ...(body.difficulty != null && { difficulty: body.difficulty as Bo4Difficulty }),
+              ...(body.bocwSupportMode != null && { bocwSupportMode: body.bocwSupportMode }),
             },
             orderBy: { completionTimeSeconds: 'asc' },
             select: { completionTimeSeconds: true },
@@ -275,6 +276,8 @@ export async function POST(request: NextRequest) {
     const bo2HasBank = isBo2 && map ? getBo2MapConfig(map.slug)?.hasBank : false;
     const bo2BankUsed = bo2HasBank && body.bo2BankUsed !== undefined ? Boolean(body.bo2BankUsed) : undefined;
 
+    const rampageInducerUsed = (isBocw || isBo6 || isBo7) && body.rampageInducerUsed !== undefined ? Boolean(body.rampageInducerUsed) : undefined;
+
     const isSpeedrunChal = challenge && isSpeedrunChallengeType(challenge.type);
     const isNoMansLandChal = challenge?.type === 'NO_MANS_LAND';
     const isRushChal = challenge?.type === 'RUSH';
@@ -320,6 +323,7 @@ export async function POST(request: NextRequest) {
         ...(wawNoJug != null && { wawNoJug }),
         ...(wawFixedWunderwaffe != null && { wawFixedWunderwaffe }),
         ...(bo2BankUsed != null && { bo2BankUsed }),
+        ...(rampageInducerUsed != null && { rampageInducerUsed }),
         ...(killsReached != null && killsReached > 0 && { killsReached }),
         ...(scoreReached != null && scoreReached > 0 && { scoreReached }),
       },

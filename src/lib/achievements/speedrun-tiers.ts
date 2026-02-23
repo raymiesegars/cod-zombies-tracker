@@ -593,6 +593,62 @@ export const BO4_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
   'tag-der-toten': buildBo4SpeedrunTiers(19 * 60 + 33, m(39), h(1), hs(1, 45, 0), hs(9, 25, 40), m(42), hs(7, 30, 0)),
 };
 
+/** BOCW speedrun tiers per map — WR-based. Exfil, Build% EE, ROUND_935, Outbreak R10/R20. */
+function buildBocwSpeedrunTiers(cfg: {
+  r30?: number; r50?: number; r70?: number; r100?: number; r200?: number; r935?: number;
+  exfil?: number; exfilR21?: number; ee?: number; buildEe?: number; r10?: number; r20?: number;
+}): SpeedrunTiersByType {
+  const buf = 1.2;
+  const base: SpeedrunTiersByType = {};
+  const tier = (sec: number, wrLabel: string) => [
+    { maxTimeSeconds: Math.round(sec * buf * 1.5), xpReward: 80 },
+    { maxTimeSeconds: Math.round(sec * buf * 1.2), xpReward: 200 },
+    { maxTimeSeconds: Math.round(sec * buf), xpReward: 500 },
+    { maxTimeSeconds: Math.round(sec * 1.05), xpReward: 1200 },
+  ];
+  if (cfg.r30 != null) base.ROUND_30_SPEEDRUN = tier(cfg.r30, 'r30');
+  if (cfg.r50 != null) base.ROUND_50_SPEEDRUN = tier(cfg.r50, 'r50');
+  if (cfg.r70 != null) base.ROUND_70_SPEEDRUN = tier(cfg.r70, 'r70');
+  if (cfg.r100 != null) base.ROUND_100_SPEEDRUN = tier(cfg.r100, 'r100');
+  if (cfg.r200 != null) base.ROUND_200_SPEEDRUN = tier(cfg.r200, 'r200');
+  if (cfg.r935 != null) base.ROUND_935_SPEEDRUN = [
+    { maxTimeSeconds: Math.round(cfg.r935 * buf * 2), xpReward: 500 },
+    { maxTimeSeconds: Math.round(cfg.r935 * buf * 1.5), xpReward: 1200 },
+    { maxTimeSeconds: Math.round(cfg.r935 * buf), xpReward: 2500 },
+    { maxTimeSeconds: Math.round(cfg.r935 * 1.05), xpReward: 5000 },
+  ];
+  if (cfg.exfil != null) base.EXFIL_SPEEDRUN = tier(cfg.exfil, 'exfil');
+  if (cfg.exfilR21 != null) base.EXFIL_R21_SPEEDRUN = tier(cfg.exfilR21, 'exfilR21');
+  if (cfg.ee != null) base.EASTER_EGG_SPEEDRUN = tier(cfg.ee, 'ee');
+  if (cfg.buildEe != null) base.BUILD_EE_SPEEDRUN = tier(cfg.buildEe, 'buildEe');
+  if (cfg.r10 != null) base.ROUND_10_SPEEDRUN = tier(cfg.r10, 'r10');
+  if (cfg.r20 != null) base.ROUND_20_SPEEDRUN = tier(cfg.r20, 'r20');
+  return base;
+}
+
+export const BOCW_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
+  'die-maschine': buildBocwSpeedrunTiers({
+    r30: m(21), r50: m(39), r70: m(54), r100: hs(1, 20, 40), r200: hs(3, 11, 40), r935: h(87),
+    exfil: m(6) + 40, exfilR21: m(16), ee: m(20) + 22,
+  }),
+  'firebase-z': buildBocwSpeedrunTiers({
+    r30: m(28), r50: m(53), r70: hs(1, 17, 40), r100: h(2), r200: hs(5, 39, 40), r935: h(88),
+    exfil: m(7) + 30, exfilR21: m(18), ee: m(20) + 22, buildEe: m(21) + 20,
+  }),
+  'mauer-der-toten': buildBocwSpeedrunTiers({
+    r30: m(22), r50: m(41), r70: m(58) + 30, r100: hs(1, 27, 40), r200: hs(3, 48, 40), r935: h(56),
+    exfil: m(7) + 20, exfilR21: m(16) + 30, ee: m(23),
+  }),
+  outbreak: buildBocwSpeedrunTiers({
+    r10: m(32) + 38, r20: hs(1, 9, 18), r30: hs(1, 44, 24), r50: hs(3, 8, 40),
+    ee: m(20),
+  }),
+  forsaken: buildBocwSpeedrunTiers({
+    r30: m(16), r50: m(37), r70: m(55), r100: hs(1, 24, 30), r200: h(4), r935: h(102),
+    exfil: m(4) + 30, exfilR21: m(10), ee: m(12) + 30, buildEe: m(14) + 30,
+  }),
+};
+
 export const BO3_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
   'shadows-of-evil': addBo3EeTiers(
     buildBo3SpeedrunTiers(27 * 60 + 55, 54 * 60, 85 * 60, 170 * 60 + 40, 45 * 3600),

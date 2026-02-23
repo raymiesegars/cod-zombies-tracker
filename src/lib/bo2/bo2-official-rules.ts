@@ -357,11 +357,12 @@ export const BO2_OFFICIAL_RULES = {
       ],
     },
   ],
-  challengeRules: [
-    { name: 'No Downs', desc: 'Reach the highest round possible without a player going down. Every round must be played in full.' },
-    { name: 'No Perks', desc: 'Reach the highest round you can without using perks. Every round must be played in full. Perma Perks are ALLOWED. Glitches or Exploits are NOT ALLOWED. Multi-pov is required for co-op.' },
-    { name: 'No Pack-a-Punch', desc: 'Reach the highest round possible without pack-a-punching. Every round must be played in full. Glitches or Exploits are NOT ALLOWED. Use of buildables on any map is NOT ALLOWED including staffs. Generator Despawn strat with the generators on Origins is NOT ALLOWED. Gen strat and traps are NOT ALLOWED. Multi-pov is required for co-op.' },
-    { name: 'One Box Challenge', desc: 'Reach the highest round possible by hitting the box one time per player. Buying a wall weapon is NOT ALLOWED. Pack-a-Punching is ALLOWED. The use of buildables is NOT ALLOWED including staffs. Generator Despawn strat with the generators on Origins is NOT ALLOWED. Gen strat and traps are NOT ALLOWED. Buying nades off the wall is NOT ALLOWED. Every round must be played in full. Glitches or Exploits are NOT ALLOWED. Multi-pov is required for co-op.' },
-    { name: 'Pistol Only', desc: 'Reach the highest round possible only using any pistol on the map. Hitting the box is ALLOWED. Picking up weapons other than Pistols is NOT ALLOWED. Using the Ray Gun is NOT ALLOWED. Pack-a-Punching is ALLOWED. Buying nades off the wall is NOT ALLOWED. The use of buildables is NOT ALLOWED including staffs. Generator Despawn strat with the generators on Origins is NOT ALLOWED. Gen strat and traps are NOT ALLOWED. Every round must be played in full. Glitches or Exploits are NOT ALLOWED. Multi-pov is required for co-op.' },
-  ],
+  /** Challenge type -> rule description. Missing types show "Official rules coming soon." */
+  challengeRulesByType: {
+    NO_DOWNS: 'Reach the highest round possible without a player going down. Every round must be played in full.',
+    NO_PERKS: 'Reach the highest round you can without using perks. Every round must be played in full. Perma Perks are ALLOWED. Glitches or Exploits are NOT ALLOWED. Multi-pov is required for co-op.',
+    NO_PACK: 'Reach the highest round possible without pack-a-punching. Every round must be played in full. Glitches or Exploits are NOT ALLOWED. Use of buildables on any map is NOT ALLOWED including staffs. Generator Despawn strat with the generators on Origins is NOT ALLOWED. Gen strat and traps are NOT ALLOWED. Multi-pov is required for co-op.',
+    ONE_BOX: 'Reach the highest round possible by hitting the box one time per player. Buying a wall weapon is NOT ALLOWED. Pack-a-Punching is ALLOWED. The use of buildables is NOT ALLOWED including staffs. Generator Despawn strat with the generators on Origins is NOT ALLOWED. Gen strat and traps are NOT ALLOWED. Buying nades off the wall is NOT ALLOWED. Every round must be played in full. Glitches or Exploits are NOT ALLOWED. Multi-pov is required for co-op.',
+    PISTOL_ONLY: 'Reach the highest round possible only using any pistol on the map. Hitting the box is ALLOWED. Picking up weapons other than Pistols is NOT ALLOWED. Using the Ray Gun is NOT ALLOWED. Pack-a-Punching is ALLOWED. Buying nades off the wall is NOT ALLOWED. The use of buildables is NOT ALLOWED including staffs. Generator Despawn strat with the generators on Origins is NOT ALLOWED. Gen strat and traps are NOT ALLOWED. Every round must be played in full. Glitches or Exploits are NOT ALLOWED. Multi-pov is required for co-op.',
+  } as Record<string, string>,
 };

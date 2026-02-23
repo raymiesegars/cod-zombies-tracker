@@ -113,6 +113,7 @@ export default function EditRunPage() {
   const [bo7SupportMode, setBo7SupportMode] = useState('WITH_SUPPORT');
   const [bo7IsCursedRun, setBo7IsCursedRun] = useState(false);
   const [bo7RelicsUsed, setBo7RelicsUsed] = useState<string[]>([]);
+  const [rampageInducerUsed, setRampageInducerUsed] = useState(false);
   // Admin / verified status
   const [isVerified, setIsVerified] = useState(false);
   const [isSuperAdminUser, setIsSuperAdminUser] = useState(false);
@@ -174,10 +175,12 @@ export default function EditRunPage() {
           if (data.bo7SupportMode) setBo7SupportMode(data.bo7SupportMode);
           setBo7IsCursedRun(Boolean(data.bo7IsCursedRun));
           if (Array.isArray(data.bo7RelicsUsed)) setBo7RelicsUsed(data.bo7RelicsUsed);
+          if (data.rampageInducerUsed != null) setRampageInducerUsed(data.rampageInducerUsed);
         } else {
           setRoundCompleted(data.roundCompleted != null ? String(data.roundCompleted) : '');
           setIsSolo(!!data.isSolo);
           setIsNoGuide(!!data.isNoGuide);
+          if (data.rampageInducerUsed != null) setRampageInducerUsed(data.rampageInducerUsed);
         }
       })
       .catch(() => setError('Failed to load run.'))
@@ -214,6 +217,7 @@ export default function EditRunPage() {
           ...(isBocwGame(log?.map?.game?.shortName) && { bocwSupportMode }),
           ...(isBo6Game(log?.map?.game?.shortName) && { bo6GobbleGumMode, bo6SupportMode }),
           ...(isBo7Game(log?.map?.game?.shortName) && { bo7SupportMode, bo7IsCursedRun, bo7RelicsUsed: bo7IsCursedRun ? bo7RelicsUsed : [] }),
+          ...((isBocwGame(log?.map?.game?.shortName) || isBo6Game(log?.map?.game?.shortName) || isBo7Game(log?.map?.game?.shortName)) && { rampageInducerUsed }),
           proofUrls: normalizeProofUrls(proofUrls),
           notes: notes || null,
           completionTimeSeconds,
@@ -253,6 +257,7 @@ export default function EditRunPage() {
           ...(log?.map?.game?.shortName === 'BO4' && { difficulty }),
           isSolo,
           isNoGuide,
+          ...((isBocwGame(log?.map?.game?.shortName) || isBo6Game(log?.map?.game?.shortName) || isBo7Game(log?.map?.game?.shortName)) && { rampageInducerUsed }),
           proofUrls: normalizeProofUrls(proofUrls),
           notes: notes || null,
           completionTimeSeconds,
@@ -433,6 +438,18 @@ export default function EditRunPage() {
                     />
                   </>
                 )}
+                {((isBocwGame(gameShortName) || isBo6Game(gameShortName) || isBo7Game(gameShortName)) && isChallenge) && (
+                  <Select
+                    label="Rampage Inducer"
+                    options={[
+                      { value: 'false', label: 'No Rampage Inducer' },
+                      { value: 'true', label: 'Rampage Inducer' },
+                    ]}
+                    value={rampageInducerUsed ? 'true' : 'false'}
+                    onChange={(e) => setRampageInducerUsed(e.target.value === 'true')}
+                    disabled={verifiedAndLocked}
+                  />
+                )}
                 {isBo7Game(gameShortName) && (
                   <>
                     <Select
@@ -534,6 +551,18 @@ export default function EditRunPage() {
                     options={BO4_DIFFICULTIES.map((d) => ({ value: d, label: getBo4DifficultyLabel(d) }))}
                     value={difficulty}
                     onChange={(e) => setDifficulty(e.target.value)}
+                  />
+                )}
+                {((isBocwGame(log?.map?.game?.shortName) || isBo6Game(log?.map?.game?.shortName) || isBo7Game(log?.map?.game?.shortName)) && !isChallenge) && (
+                  <Select
+                    label="Rampage Inducer"
+                    options={[
+                      { value: 'false', label: 'No Rampage Inducer' },
+                      { value: 'true', label: 'Rampage Inducer' },
+                    ]}
+                    value={rampageInducerUsed ? 'true' : 'false'}
+                    onChange={(e) => setRampageInducerUsed(e.target.value === 'true')}
+                    disabled={verifiedAndLocked}
                   />
                 )}
                 <ProofUrlsInput

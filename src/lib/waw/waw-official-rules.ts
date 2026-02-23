@@ -67,34 +67,16 @@ export const WAW_OFFICIAL_RULES = {
       ],
     },
   ],
-  challengeRules: [
-    {
-      name: 'No Downs',
-      desc: 'Reach the highest round possible without a player going down. Every round must be played in full.',
-    },
-    {
-      name: 'No Perks',
-      desc: 'Reach the highest round you can without using perks. Every round must be played in full. Glitches or Exploits are NOT ALLOWED. Multi-pov is required for co-op.',
-    },
-    {
-      name: 'No Pack-a-Punch',
-      desc: 'Reach the highest round possible without pack-a-punching. Every round must be played in full. Glitches or Exploits are NOT ALLOWED. Multi-pov is required for co-op.',
-    },
-    {
-      name: 'First Room',
-      desc: 'Reach the highest round possible without opening any doors. Fixed backspeed is ALLOWED. Every round must be played in full. Glitches or Exploits are NOT ALLOWED.',
-    },
-    {
-      name: 'One Box Challenge',
-      desc: 'Reach the highest round possible by hitting the box one time per player. Buying a wall weapon is NOT ALLOWED. If you get a wall weapon out of the box purchasing ammo off the wall is ALLOWED. Pack-a-Punching is ALLOWED. Buying nades off the wall is NOT ALLOWED. Every round must be played in full. Glitches or Exploits are NOT ALLOWED. Multi-pov is required for co-op.',
-    },
-    {
-      name: 'Pistol Only',
-      desc: 'Reach the highest round possible only using your any pistol on the map. Hitting the box is ALLOWED. Picking up weapons other than Pistols is NOT ALLOWED. Using the Ray Gun is NOT ALLOWED. Pack-a-Punching is ALLOWED. Buying nades off the wall is NOT ALLOWED.',
-    },
-    {
-      name: 'No Power',
-      desc: 'Reach the highest round possible without turning on power. Every round must be played in full. Glitches or Exploits are NOT ALLOWED.',
-    },
-  ],
+  /** Challenge type -> rule description. Missing types show "Official rules coming soon." */
+  challengeRulesByType: {
+    NO_DOWNS: 'Reach the highest round possible without a player going down. Every round must be played in full.',
+    NO_PERKS: 'Reach the highest round you can without using perks. Every round must be played in full. Glitches or Exploits are NOT ALLOWED. Multi-pov is required for co-op.',
+    NO_PACK: 'Reach the highest round possible without pack-a-punching. Every round must be played in full. Glitches or Exploits are NOT ALLOWED. Multi-pov is required for co-op.',
+    STARTING_ROOM: 'Reach the highest round possible without opening any doors. Fixed backspeed is ALLOWED. Every round must be played in full. Glitches or Exploits are NOT ALLOWED.',
+    STARTING_ROOM_JUG_SIDE: 'Official rules coming soon.',
+    STARTING_ROOM_QUICK_SIDE: 'Official rules coming soon.',
+    ONE_BOX: 'Reach the highest round possible by hitting the box one time per player. Buying a wall weapon is NOT ALLOWED. If you get a wall weapon out of the box purchasing ammo off the wall is ALLOWED. Pack-a-Punching is ALLOWED. Buying nades off the wall is NOT ALLOWED. Every round must be played in full. Glitches or Exploits are NOT ALLOWED. Multi-pov is required for co-op.',
+    PISTOL_ONLY: 'Reach the highest round possible only using any pistol on the map. Hitting the box is ALLOWED. Picking up weapons other than Pistols is NOT ALLOWED. Using the Ray Gun is NOT ALLOWED. Pack-a-Punching is ALLOWED. Buying nades off the wall is NOT ALLOWED.',
+    NO_POWER: 'Reach the highest round possible without turning on power. Every round must be played in full. Glitches or Exploits are NOT ALLOWED.',
+  } as Record<string, string>,
 };
