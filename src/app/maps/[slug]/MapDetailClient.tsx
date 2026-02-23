@@ -68,6 +68,8 @@ import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-con
 import { getBo2MapConfig, getBo2ChallengeTypeLabel } from '@/lib/bo2/bo2-map-config';
 import { getBo3MapConfig } from '@/lib/bo3/bo3-map-config';
 import { getBo4MapConfig, getBo4ChallengeTypeLabel } from '@/lib/bo4/bo4-map-config';
+import { getBocwMapConfig, getBocwChallengeTypeLabel } from '@/lib/bocw/bocw-map-config';
+import { getBo6MapConfig, getBo6ChallengeTypeLabel } from '@/lib/bo6/bo6-map-config';
 
 const BUILDABLE_PART_CACHE_KEY_PREFIX = 'buildable-parts';
 const BUILDABLE_PART_CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
@@ -435,6 +437,7 @@ const challengeTypeLabels: Record<string, string> = {
   EXFIL_R21_SPEEDRUN: 'Exfil Round 21',
   BUILD_EE_SPEEDRUN: 'Build% EE Speedrun',
   ROUND_935_SPEEDRUN: 'Round 935 Speedrun',
+  ROUND_999_SPEEDRUN: 'Round 999 Speedrun',
   ROUND_10_SPEEDRUN: 'Round 10 Speedrun',
   ROUND_20_SPEEDRUN: 'Round 20 Speedrun',
 };
@@ -895,7 +898,11 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           ? (fallbackName ?? challengeTypeLabels[type] ?? getBo2ChallengeTypeLabel(type) ?? type)
           : map?.game?.shortName === 'BO4'
             ? (fallbackName ?? challengeTypeLabels[type] ?? getBo4ChallengeTypeLabel(type) ?? type)
-            : (fallbackName ?? challengeTypeLabels[type] ?? type);
+            : map?.game?.shortName === 'BOCW'
+              ? (fallbackName ?? challengeTypeLabels[type] ?? getBocwChallengeTypeLabel(type) ?? type)
+              : map?.game?.shortName === 'BO6'
+                ? (fallbackName ?? challengeTypeLabels[type] ?? getBo6ChallengeTypeLabel(type) ?? type)
+                : (fallbackName ?? challengeTypeLabels[type] ?? type);
     if (map?.game?.shortName === 'IW' && challenges.length > 0) {
       const ordered = IW_CHALLENGE_TYPES_ORDER.filter((t) => challenges.some((c) => c.type === t));
       return ordered.map((t) => {
@@ -919,6 +926,20 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     }
     if (map?.game?.shortName === 'BO4' && map?.slug && getBo4MapConfig(map.slug)) {
       const types = getBo4MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      return types.map((t) => {
+        const c = challenges.find((ch) => ch.type === t);
+        return { value: t, label: getLabel(t, c?.name) };
+      });
+    }
+    if (map?.game?.shortName === 'BOCW' && map?.slug && getBocwMapConfig(map.slug)) {
+      const types = getBocwMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      return types.map((t) => {
+        const c = challenges.find((ch) => ch.type === t);
+        return { value: t, label: getLabel(t, c?.name) };
+      });
+    }
+    if (map?.game?.shortName === 'BO6' && map?.slug && getBo6MapConfig(map.slug)) {
+      const types = getBo6MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };

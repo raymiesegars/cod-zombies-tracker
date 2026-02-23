@@ -38,6 +38,7 @@ import { BO2_OFFICIAL_RULES } from '@/lib/bo2/bo2-official-rules';
 import { BO3_OFFICIAL_RULES } from '@/lib/bo3/bo3-official-rules';
 import { BO4_OFFICIAL_RULES } from '@/lib/bo4/bo4-official-rules';
 import { BOCW_OFFICIAL_RULES } from '@/lib/bocw/bocw-official-rules';
+import { getBo6OfficialRulesForMap } from '@/lib/bo6/bo6-official-rules';
 import { isRuleLink, isRuleInlineLinks } from '@/lib/rules/types';
 import { getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
@@ -79,6 +80,7 @@ const challengeTypeLabels: Record<string, string> = {
   ROUND_10_SPEEDRUN: 'Round 10 Speedrun',
   ROUND_20_SPEEDRUN: 'Round 20 Speedrun',
   ROUND_935_SPEEDRUN: 'Round 935 Speedrun',
+  ROUND_999_SPEEDRUN: 'Round 999 Speedrun',
 };
 
 const playerCountOptions = [
@@ -93,7 +95,7 @@ const CATEGORY_ORDER_FOR_RULES = [
   'STARTING_ROOM_JUG_SIDE', 'STARTING_ROOM_QUICK_SIDE', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'NO_MAGIC',
   'NO_JUG', 'NO_ARMOR', 'NO_ATS', 'NO_MANS_LAND', 'ROUND_10_SPEEDRUN', 'ROUND_20_SPEEDRUN',
   'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN',
-  'ROUND_255_SPEEDRUN', 'ROUND_935_SPEEDRUN', 'EXFIL_SPEEDRUN', 'EXFIL_R21_SPEEDRUN', 'BUILD_EE_SPEEDRUN', 'INSTAKILL_ROUND_SPEEDRUN',
+  'ROUND_255_SPEEDRUN', 'ROUND_935_SPEEDRUN', 'ROUND_999_SPEEDRUN', 'EXFIL_SPEEDRUN', 'EXFIL_R21_SPEEDRUN', 'BUILD_EE_SPEEDRUN', 'INSTAKILL_ROUND_SPEEDRUN',
   'EASTER_EGG_SPEEDRUN', 'RUSH', 'PURIST', 'GHOST_AND_SKULLS', 'ALIENS_BOSS_FIGHT', 'CRYPTID_FIGHT', 'MEPHISTOPHELES', 'OTHER',
 ];
 
@@ -101,11 +103,13 @@ function OfficialRulesModal({
   isOpen,
   onClose,
   gameShortName,
+  mapSlug,
   mapChallengeTypes,
 }: {
   isOpen: boolean;
   onClose: () => void;
   gameShortName?: string | null;
+  mapSlug?: string | null;
   mapChallengeTypes?: string[];
 }) {
   const isWaw = gameShortName === 'WAW';
@@ -114,8 +118,10 @@ function OfficialRulesModal({
   const isBo3 = gameShortName === 'BO3';
   const isBo4 = gameShortName === 'BO4';
   const isBocw = gameShortName === 'BOCW';
-  const hasRules = isWaw || isBo1 || isBo2 || isBo3 || isBo4 || isBocw;
-  const rules = isWaw ? WAW_OFFICIAL_RULES : isBo1 ? BO1_OFFICIAL_RULES : isBo2 ? BO2_OFFICIAL_RULES : isBo3 ? BO3_OFFICIAL_RULES : isBo4 ? BO4_OFFICIAL_RULES : isBocw ? BOCW_OFFICIAL_RULES : null;
+  const isBo6 = gameShortName === 'BO6';
+  const isBo7 = gameShortName === 'BO7';
+  const hasRules = isWaw || isBo1 || isBo2 || isBo3 || isBo4 || isBocw || isBo6 || isBo7;
+  const rules = isWaw ? WAW_OFFICIAL_RULES : isBo1 ? BO1_OFFICIAL_RULES : isBo2 ? BO2_OFFICIAL_RULES : isBo3 ? BO3_OFFICIAL_RULES : isBo4 ? BO4_OFFICIAL_RULES : isBocw ? BOCW_OFFICIAL_RULES : (isBo6 || isBo7) && mapSlug ? getBo6OfficialRulesForMap(mapSlug) : null;
 
   const byType = rules && 'challengeRulesByType' in rules ? (rules as { challengeRulesByType: Record<string, string> }).challengeRulesByType : null;
   const typesToShow = (mapChallengeTypes && mapChallengeTypes.length > 0
@@ -135,7 +141,7 @@ function OfficialRulesModal({
       isOpen={isOpen}
       onClose={onClose}
       title="Official Rules"
-      description={hasRules ? `Rules and requirements for ${isWaw ? 'World at War' : isBo1 ? 'Black Ops 1' : isBo2 ? 'Black Ops 2' : isBo3 ? 'Black Ops 3' : isBo4 ? 'Black Ops 4' : isBocw ? 'Black Ops Cold War' : 'submissions'}` : 'Rules and requirements for challenge submissions'}
+      description={hasRules ? `Rules and requirements for ${isWaw ? 'World at War' : isBo1 ? 'Black Ops 1' : isBo2 ? 'Black Ops 2' : isBo3 ? 'Black Ops 3' : isBo4 ? 'Black Ops 4' : isBocw ? 'Black Ops Cold War' : isBo6 ? 'Black Ops 6' : isBo7 ? 'Black Ops 7' : 'submissions'}` : 'Rules and requirements for challenge submissions'}
       size="lg"
     >
       {rules ? (
@@ -907,6 +913,7 @@ export default function EditMapProgressPage() {
             isOpen={challengeRulesModalOpen}
             onClose={() => setChallengeRulesModalOpen(false)}
             gameShortName={map?.game?.shortName}
+            mapSlug={map?.slug}
             mapChallengeTypes={map?.challenges?.map((c) => c.type) ?? undefined}
           />
 
