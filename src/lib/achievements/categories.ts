@@ -1,5 +1,6 @@
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 import { getBo3MapConfig } from '@/lib/bo3/bo3-map-config';
+import { getBo4MapConfig } from '@/lib/bo4/bo4-map-config';
 
 // How we group and order achievements on map detail and profile
 export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
@@ -23,8 +24,11 @@ export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
   ROUND_100_SPEEDRUN: 'Round 100 Speedrun',
   ROUND_200_SPEEDRUN: 'Round 200 Speedrun',
   ROUND_255_SPEEDRUN: 'Round 255 Speedrun',
+  INSTAKILL_ROUND_SPEEDRUN: 'Instakill Round Speedrun',
   EASTER_EGG_SPEEDRUN: 'Easter Egg Speedrun',
   NO_MANS_LAND: "No Man's Land",
+  RUSH: 'Rush',
+  PURIST: 'Purist',
   GHOST_AND_SKULLS: 'Ghost and Skulls',
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
   CRYPTID_FIGHT: 'Cryptid Fight',
@@ -41,6 +45,7 @@ export const SPEEDRUN_CATEGORIES: string[] = [
   'ROUND_100_SPEEDRUN',
   'ROUND_200_SPEEDRUN',
   'ROUND_255_SPEEDRUN',
+  'INSTAKILL_ROUND_SPEEDRUN',
   'EASTER_EGG_SPEEDRUN',
   'GHOST_AND_SKULLS',
   'ALIENS_BOSS_FIGHT',
@@ -72,7 +77,10 @@ const CATEGORY_ORDER = [
   'ROUND_100_SPEEDRUN',
   'ROUND_200_SPEEDRUN',
   'ROUND_255_SPEEDRUN',
+  'INSTAKILL_ROUND_SPEEDRUN',
   'EASTER_EGG_SPEEDRUN',
+  'RUSH',
+  'PURIST',
   'GHOST_AND_SKULLS',
   'ALIENS_BOSS_FIGHT',
   'CRYPTID_FIGHT',
@@ -123,6 +131,14 @@ export function getAllowedNonSpeedrunCategoriesForMap(
       (c) => !isSpeedrunCategory(c) && c !== 'HIGHEST_ROUND' && (c as string) !== 'NO_MANS_LAND'
     );
     return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG']));
+  }
+  if (gameShortName === 'BO4') {
+    const cfg = getBo4MapConfig(mapSlug);
+    if (!cfg?.challengeTypes) return null;
+    const fromConfig = cfg.challengeTypes.filter(
+      (c) => !isSpeedrunCategory(c) && c !== 'HIGHEST_ROUND' && (c as string) !== 'RUSH'
+    );
+    return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG', 'RUSH']));
   }
   return null;
 }
@@ -175,6 +191,13 @@ export function getAllowedSpeedrunCategoriesForMap(
       return cfg.challengeTypes.filter((c) => isSpeedrunCategory(c));
     }
     return [...bo2Generic, 'ROUND_255_SPEEDRUN'];
+  }
+  if (gameShortName === 'BO4') {
+    const cfg = getBo4MapConfig(mapSlug);
+    if (cfg?.challengeTypes) {
+      return cfg.challengeTypes.filter((c) => isSpeedrunCategory(c));
+    }
+    return [...bo2Generic, 'INSTAKILL_ROUND_SPEEDRUN'];
   }
   return bo2Generic;
 }

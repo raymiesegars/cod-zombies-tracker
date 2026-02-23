@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { cn, getPlayerCountLabel, formatXpCompact } from '@/lib/utils';
+import { cn, getPlayerCountLabel, formatXpCompact, formatRushScore } from '@/lib/utils';
 import { Badge, Avatar } from '@/components/ui';
 import { RoundCounter } from './round-counter';
 import { formatCompletionTime } from '@/components/ui/time-input';
@@ -18,7 +18,7 @@ interface LeaderboardEntryProps {
   isCurrentUser?: boolean;
   showRound?: boolean;
   invertRanking?: boolean;
-  valueKind?: 'round' | 'xp' | 'time';
+  valueKind?: 'round' | 'xp' | 'time' | 'score';
   hidePlayerCount?: boolean;
   mapSlug?: string;
   /** When true (e.g. verified XP rank leaderboard), show blue verified checkmark on every entry */
@@ -52,9 +52,11 @@ export function LeaderboardEntry({
       ? `/maps/${mapSlug}/run/${entry.runType === 'easter-egg' ? 'easter-egg' : 'challenge'}/${entry.logId}`
       : undefined;
 
-  const hasRightSlots = !hidePlayerCount && (valueKind === 'time' || valueKind === 'round');
+  const hasRightSlots = !hidePlayerCount && (valueKind === 'time' || valueKind === 'round' || valueKind === 'score');
   /** For time leaderboards, value is completion time in seconds; coerce so string from API still works */
   const timeSeconds = valueKind === 'time' ? Number(entry.value) : null;
+  /** For RUSH leaderboards, value is score */
+  const scoreValue = valueKind === 'score' ? Number(entry.value) : null;
   const showTime = valueKind === 'time' && timeSeconds != null && Number.isFinite(timeSeconds) && timeSeconds >= 0;
 
   // <400px: 4 cols. 400–768px: 5 cols. 771px+: 6 cols. lg: +full value. Fixed/min widths on value columns so Solo/Duo/Trio/Squad and round digits align vertically.
@@ -171,7 +173,7 @@ export function LeaderboardEntry({
       )}
 
       {/* Value: compact on small (rank/name/value only), full on md+; 1rem right padding on timed leaderboards */}
-      {(showRound || valueKind === 'xp' || valueKind === 'time') && (
+      {(showRound || valueKind === 'xp' || valueKind === 'time' || valueKind === 'score') && (
         <div className={cn('min-w-0 flex items-center justify-end flex-shrink-0', valueKind === 'time' ? 'pr-4' : 'pr-2 sm:pr-0')}>
           {valueKind === 'xp' ? (
             <>
@@ -192,6 +194,10 @@ export function LeaderboardEntry({
                       {formatCompletionTime(timeSeconds)}
                     </span>
                   ) : null
+                ) : valueKind === 'score' && scoreValue != null ? (
+                  <span className="text-xs sm:text-sm font-zombies font-semibold text-element-400 tabular-nums leading-none truncate">
+                    {formatRushScore(scoreValue)}
+                  </span>
                 ) : (
                   <RoundCounter round={entry.value} size="xs" animated={false} className="shrink-0 tabular-nums" />
                 )}
@@ -227,6 +233,10 @@ export function LeaderboardEntry({
                 <div className="flex items-center justify-end w-20 shrink-0 tabular-nums">
                   {valueKind === 'time' && entry.roundCompleted != null ? (
                     <RoundCounter round={entry.roundCompleted} size="sm" animated={false} className="shrink-0" />
+                  ) : valueKind === 'score' && scoreValue != null ? (
+                    <span className="text-sm font-zombies font-semibold text-element-400 tabular-nums leading-none">
+                      {formatRushScore(scoreValue)}
+                    </span>
                   ) : valueKind === 'round' ? (
                     <>
                       <RoundCounter round={entry.value} size="sm" animated={false} className="shrink-0" />

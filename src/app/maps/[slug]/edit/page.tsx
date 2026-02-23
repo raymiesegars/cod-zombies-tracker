@@ -36,11 +36,12 @@ import { WAW_OFFICIAL_RULES } from '@/lib/waw/waw-official-rules';
 import { BO1_OFFICIAL_RULES } from '@/lib/bo1/bo1-official-rules';
 import { BO2_OFFICIAL_RULES } from '@/lib/bo2/bo2-official-rules';
 import { BO3_OFFICIAL_RULES } from '@/lib/bo3/bo3-official-rules';
+import { BO4_OFFICIAL_RULES } from '@/lib/bo4/bo4-official-rules';
 import { isRuleLink, isRuleInlineLinks } from '@/lib/rules/types';
 import { getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 
-const challengeTypeLabels: Record<ChallengeType, string> = {
+const challengeTypeLabels: Record<string, string> = {
   HIGHEST_ROUND: 'Highest Round',
   NO_DOWNS: 'No Downs',
   NO_PERKS: 'No Perks',
@@ -66,6 +67,9 @@ const challengeTypeLabels: Record<ChallengeType, string> = {
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
   CRYPTID_FIGHT: 'Cryptid Fight',
   MEPHISTOPHELES: 'Mephistopheles',
+  RUSH: 'Rush',
+  PURIST: 'Purist',
+  INSTAKILL_ROUND_SPEEDRUN: 'Instakill Round Speedrun',
 };
 
 const playerCountOptions = [
@@ -88,22 +92,23 @@ function OfficialRulesModal({
   const isBo1 = gameShortName === 'BO1';
   const isBo2 = gameShortName === 'BO2';
   const isBo3 = gameShortName === 'BO3';
-  const hasRules = isWaw || isBo1 || isBo2 || isBo3;
-  const rules = isWaw ? WAW_OFFICIAL_RULES : isBo1 ? BO1_OFFICIAL_RULES : isBo2 ? BO2_OFFICIAL_RULES : isBo3 ? BO3_OFFICIAL_RULES : null;
+  const isBo4 = gameShortName === 'BO4';
+  const hasRules = isWaw || isBo1 || isBo2 || isBo3 || isBo4;
+  const rules = isWaw ? WAW_OFFICIAL_RULES : isBo1 ? BO1_OFFICIAL_RULES : isBo2 ? BO2_OFFICIAL_RULES : isBo3 ? BO3_OFFICIAL_RULES : isBo4 ? BO4_OFFICIAL_RULES : null;
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title="Official Rules"
-      description={hasRules ? `Rules and requirements for ${isWaw ? 'World at War' : isBo1 ? 'Black Ops 1' : isBo2 ? 'Black Ops 2' : 'Black Ops 3'} submissions` : 'Rules and requirements for challenge submissions'}
+      description={hasRules ? `Rules and requirements for ${isWaw ? 'World at War' : isBo1 ? 'Black Ops 1' : isBo2 ? 'Black Ops 2' : isBo3 ? 'Black Ops 3' : isBo4 ? 'Black Ops 4' : 'submissions'}` : 'Rules and requirements for challenge submissions'}
       size="lg"
     >
       {rules ? (
-        <Tabs defaultValue="general" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="general">General Rules</TabsTrigger>
-            <TabsTrigger value="challenges">Challenge Rules</TabsTrigger>
+        <Tabs defaultValue="general" className="w-full" variant="separate">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-2 md:grid-cols-2 mb-4 p-2 gap-2">
+            <TabsTrigger value="general" className="py-1.5 px-3 text-sm">General Rules</TabsTrigger>
+            <TabsTrigger value="challenges" className="py-1.5 px-3 text-sm">Challenge Rules</TabsTrigger>
           </TabsList>
           <div className="max-h-[60vh] min-h-[12rem] overflow-y-auto overflow-x-hidden pr-2">
             <TabsContent value="general" className="mt-0 space-y-4">
@@ -248,6 +253,7 @@ export default function EditMapProgressPage() {
     bo2BankUsed?: boolean | null;
     bo3AatUsed?: boolean | null;
     killsReached?: string;
+    scoreReached?: string;
   }>({
     roundReached: '',
     playerCount: 'SOLO',
@@ -409,12 +415,18 @@ export default function EditMapProgressPage() {
     const isAdding = !selectedChallengeIds.has(challengeId);
     const challenge = map?.challenges.find((c) => c.id === challengeId);
     const isNoMansLand = challenge?.type === 'NO_MANS_LAND';
+    const isRush = challenge?.type === 'RUSH';
     if (isAdding) setEeTabValue('ee-none');
     setSelectedChallengeIds((prev) => {
+      const hasRushSelected = Array.from(prev).some(
+        (id) => map?.challenges.find((c) => c.id === id)?.type === 'RUSH'
+      );
+      if (hasRushSelected && isAdding && !isRush) return prev;
       const next = new Set(prev);
       if (next.has(challengeId)) next.delete(challengeId);
       else {
         next.add(challengeId);
+        if (isRush) return new Set([challengeId]);
         if (isNoMansLand) return new Set([challengeId]);
         const noMansLandId = map?.challenges.find((c) => c.type === 'NO_MANS_LAND')?.id;
         if (noMansLandId) next.delete(noMansLandId);
@@ -439,13 +451,21 @@ export default function EditMapProgressPage() {
   const handleSaveSelectedChallenges = async () => {
     if (!profile || !map || selectedChallengeIds.size === 0) return;
     const form = sharedChallengeForm;
+    const selectedChallenges = Array.from(selectedChallengeIds).map((cid) => map.challenges.find((c) => c.id === cid));
     const isNoMansLandOnly =
-      selectedChallengeIds.size === 1 &&
-      map.challenges.find((c) => c.id === Array.from(selectedChallengeIds)[0])?.type === 'NO_MANS_LAND';
+      selectedChallengeIds.size === 1 && selectedChallenges[0]?.type === 'NO_MANS_LAND';
+    const isRushOnly =
+      selectedChallengeIds.size === 1 && selectedChallenges[0]?.type === 'RUSH';
     if (isNoMansLandOnly) {
       const kills = parseInt(form.killsReached ?? '', 10);
       if (!form.killsReached || Number.isNaN(kills) || kills <= 0) {
         setSaveErrorModalMessage("No Man's Land requires a valid kills count (1+).");
+        return;
+      }
+    } else if (isRushOnly) {
+      const score = parseInt(form.scoreReached ?? '', 10);
+      if (!form.scoreReached || Number.isNaN(score) || score <= 0) {
+        setSaveErrorModalMessage('Rush requires a valid score (1+).');
         return;
       }
     } else {
@@ -504,8 +524,10 @@ export default function EditMapProgressPage() {
       for (const challengeId of ids) {
         const challenge = map.challenges.find((ch) => ch.id === challengeId);
         const isNoMansLand = challenge?.type === 'NO_MANS_LAND';
-        const roundReached = isNoMansLand ? 1 : parseInt(form.roundReached, 10);
+        const isRush = challenge?.type === 'RUSH';
+        const roundReached = isNoMansLand || isRush ? 1 : parseInt(form.roundReached, 10);
         const killsReached = isNoMansLand ? parseInt(form.killsReached ?? '', 10) : undefined;
+        const scoreReached = isRush ? parseInt(form.scoreReached ?? '', 10) : undefined;
         const res = await fetch('/api/challenge-logs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -514,6 +536,7 @@ export default function EditMapProgressPage() {
             mapId: map.id,
             roundReached,
             ...(killsReached != null && killsReached > 0 && { killsReached }),
+            ...(scoreReached != null && scoreReached > 0 && { scoreReached }),
             playerCount: form.playerCount,
             ...(map.game?.shortName === 'BO4' && form.difficulty && { difficulty: form.difficulty }),
             ...(isIw && {
@@ -875,6 +898,9 @@ export default function EditMapProgressPage() {
                       const isNoMansLandOnly =
                         selectedChallengeIds.size === 1 &&
                         map.challenges.find((c) => c.id === Array.from(selectedChallengeIds)[0])?.type === 'NO_MANS_LAND';
+                      const isRushOnly =
+                        selectedChallengeIds.size === 1 &&
+                        map.challenges.find((c) => c.id === Array.from(selectedChallengeIds)[0])?.type === 'RUSH';
                       if (isNoMansLandOnly) {
                         return (
                           <Input
@@ -884,6 +910,18 @@ export default function EditMapProgressPage() {
                             placeholder="e.g. 450"
                             value={sharedChallengeForm.killsReached ?? ''}
                             onChange={(e) => handleSharedChallengeChange('killsReached', e.target.value)}
+                          />
+                        );
+                      }
+                      if (isRushOnly) {
+                        return (
+                          <Input
+                            label="Score"
+                            type="number"
+                            min={1}
+                            placeholder="e.g. 1782651900"
+                            value={sharedChallengeForm.scoreReached ?? ''}
+                            onChange={(e) => handleSharedChallengeChange('scoreReached', e.target.value)}
                           />
                         );
                       }
@@ -1201,13 +1239,19 @@ export default function EditMapProgressPage() {
                     const isNoMansLandOnly =
                       selectedChallengeIds.size === 1 &&
                       map?.challenges.find((c) => c.id === Array.from(selectedChallengeIds)[0])?.type === 'NO_MANS_LAND';
+                    const isRushOnly =
+                      selectedChallengeIds.size === 1 &&
+                      map?.challenges.find((c) => c.id === Array.from(selectedChallengeIds)[0])?.type === 'RUSH';
                     const hasValidRound = sharedChallengeForm.roundReached && parseInt(sharedChallengeForm.roundReached, 10) > 0;
                     const hasValidKills = isNoMansLandOnly &&
                       sharedChallengeForm.killsReached &&
                       parseInt(sharedChallengeForm.killsReached, 10) > 0;
-                    const roundOrKillsOk = isNoMansLandOnly ? hasValidKills : hasValidRound;
+                    const hasValidScore = isRushOnly &&
+                      sharedChallengeForm.scoreReached &&
+                      parseInt(sharedChallengeForm.scoreReached, 10) > 0;
+                    const roundOrKillsOrScoreOk = isNoMansLandOnly ? hasValidKills : isRushOnly ? hasValidScore : hasValidRound;
                     return (
-                      !roundOrKillsOk ||
+                      !roundOrKillsOrScoreOk ||
                       (isIwGame(map?.game?.shortName) && sharedChallengeForm.useFortuneCards !== true && sharedChallengeForm.useFortuneCards !== false) ||
                       Array.from(selectedChallengeIds).some((cid) => {
                         const c = map?.challenges.find((ch) => ch.id === cid);

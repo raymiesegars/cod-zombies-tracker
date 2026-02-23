@@ -17,6 +17,7 @@ import { useAuth } from '@/context/auth-context';
 import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { getBo2MapConfig, getBo2ChallengeTypeLabel } from '@/lib/bo2/bo2-map-config';
 import { getBo3MapConfig } from '@/lib/bo3/bo3-map-config';
+import { getBo4MapConfig, getBo4ChallengeTypeLabel } from '@/lib/bo4/bo4-map-config';
 
 const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
 const PAGE_SIZE = 25;
@@ -48,6 +49,8 @@ const challengeTypeLabels: Record<string, string> = {
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
   CRYPTID_FIGHT: 'Cryptid Fight',
   MEPHISTOPHELES: 'Mephistopheles',
+  RUSH: 'Rush',
+  INSTAKILL_ROUND_SPEEDRUN: 'Instakill Round Speedrun',
 };
 
 export default function LeaderboardsPage() {
@@ -415,7 +418,9 @@ export default function LeaderboardsPage() {
         ? (fallbackName || getWaWChallengeTypeLabel(type))
         : selectedMapData?.game?.shortName === 'BO2'
           ? (fallbackName ?? challengeTypeLabels[type] ?? getBo2ChallengeTypeLabel(type) ?? type)
-          : (fallbackName ?? challengeTypeLabels[type] ?? type);
+          : selectedMapData?.game?.shortName === 'BO4'
+            ? (fallbackName ?? challengeTypeLabels[type] ?? getBo4ChallengeTypeLabel(type) ?? type)
+            : (fallbackName ?? challengeTypeLabels[type] ?? type);
     let challengeOptions: { value: string; label: string }[];
     if (selectedMapData?.game?.shortName === 'IW') {
       challengeOptions = mapChallenges.length > 0
@@ -436,6 +441,15 @@ export default function LeaderboardsPage() {
     } else if (selectedMapData?.game?.shortName === 'BO3' && selectedMap) {
       const bo3Config = getBo3MapConfig(selectedMap);
       const types = bo3Config?.challengeTypes ?? mapChallenges.map((c) => c.type);
+      challengeOptions = types
+        .filter((t) => t !== 'HIGHEST_ROUND')
+        .map((t) => {
+          const c = mapChallenges.find((ch) => ch.type === t);
+          return { value: t, label: getLabel(t, c?.name) };
+        });
+    } else if (selectedMapData?.game?.shortName === 'BO4' && selectedMap) {
+      const bo4Config = getBo4MapConfig(selectedMap);
+      const types = bo4Config?.challengeTypes ?? mapChallenges.map((c) => c.type);
       challengeOptions = types
         .filter((t) => t !== 'HIGHEST_ROUND')
         .map((t) => {
@@ -889,7 +903,7 @@ export default function LeaderboardsPage() {
                         entry={entry}
                         index={index}
                         isCurrentUser={entry.user.id === profile?.id}
-                        valueKind={isEeTimeView || isSpeedrunCategory(selectedChallengeType) ? 'time' : 'round'}
+                        valueKind={isEeTimeView || isSpeedrunCategory(selectedChallengeType) ? 'time' : selectedChallengeType === 'RUSH' ? 'score' : 'round'}
                         mapSlug={selectedMap}
                       />
                     ))}

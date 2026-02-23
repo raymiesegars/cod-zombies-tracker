@@ -36,6 +36,9 @@ export async function POST(request: NextRequest) {
     const killsReached = body.killsReached != null
       ? (typeof body.killsReached === 'number' ? body.killsReached : parseInt(String(body.killsReached), 10))
       : undefined;
+    const scoreReached = body.scoreReached != null
+      ? (typeof body.scoreReached === 'number' ? body.scoreReached : parseInt(String(body.scoreReached), 10))
+      : undefined;
     const playerCount = body.playerCount;
     const rawProofUrls = Array.isArray(body.proofUrls)
       ? body.proofUrls
@@ -56,7 +59,7 @@ export async function POST(request: NextRequest) {
     const teammateNonUserNames = Array.isArray(body.teammateNonUserNames) ? body.teammateNonUserNames.filter((n: unknown) => typeof n === 'string').slice(0, 10) : [];
     const requestVerification = Boolean(body.requestVerification);
 
-    if (!challengeId || !mapId || Number.isNaN(roundReached) || roundReached < 1 || !playerCount) {
+    if (!challengeId || !mapId || !playerCount) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -109,6 +112,21 @@ export async function POST(request: NextRequest) {
           });
           return best ? { killsReached: best.killsReached } : null;
         }
+        if (c.type === 'RUSH') {
+          const best = await prisma.challengeLog.findFirst({
+            where: {
+              userId: user.id,
+              challengeId,
+              mapId,
+              playerCount,
+              scoreReached: { not: null },
+              ...(body.difficulty != null && { difficulty: body.difficulty as Bo4Difficulty }),
+            },
+            orderBy: { scoreReached: 'desc' },
+            select: { scoreReached: true },
+          });
+          return best ? { scoreReached: best.scoreReached } : null;
+        }
         const best = await prisma.challengeLog.findFirst({
           where: {
             userId: user.id,
@@ -136,9 +154,16 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
+    } else if (challenge.type === 'RUSH') {
+      if (scoreReached == null || Number.isNaN(scoreReached) || scoreReached < 1) {
+        return NextResponse.json(
+          { error: 'Rush requires a valid score (1+).' },
+          { status: 400 }
+        );
+      }
     } else {
       const minRound = isSpeedrunChallengeType(challenge.type) ? getMinRoundForSpeedrunChallengeType(challenge.type) : 1;
-      if (roundReached < minRound) {
+      if (Number.isNaN(roundReached) || roundReached < minRound) {
         return NextResponse.json(
           { error: `Round must be at least ${minRound} for this challenge (e.g. Round ${minRound} Speedrun requires round ${minRound}+).` },
           { status: 400 }
@@ -252,21 +277,26 @@ export async function POST(request: NextRequest) {
 
     const isSpeedrunChal = challenge && isSpeedrunChallengeType(challenge.type);
     const isNoMansLandChal = challenge?.type === 'NO_MANS_LAND';
+    const isRushChal = challenge?.type === 'RUSH';
     const previousRound = previousBest && 'roundReached' in previousBest ? previousBest.roundReached ?? 0 : 0;
     const previousKills = previousBest && 'killsReached' in previousBest ? previousBest.killsReached ?? 0 : 0;
+    const previousScore = previousBest && 'scoreReached' in previousBest ? previousBest.scoreReached ?? 0 : 0;
     const previousTime = previousBest && 'completionTimeSeconds' in previousBest ? previousBest.completionTimeSeconds : null;
     const isImprovement = isSpeedrunChal
       ? (completionTimeSeconds != null && (previousTime == null || completionTimeSeconds < previousTime))
       : isNoMansLandChal
         ? (killsReached != null && killsReached > previousKills)
-        : roundReached > previousRound;
+        : isRushChal
+          ? (scoreReached != null && scoreReached > previousScore)
+          : roundReached > previousRound;
 
+    const effectiveRoundReached = challenge.type === 'RUSH' ? 1 : roundReached;
     const log = await prisma.challengeLog.create({
       data: {
         userId: user.id,
         challengeId,
         mapId,
-        roundReached,
+        roundReached: effectiveRoundReached,
         playerCount,
         proofUrls,
         screenshotUrl,
@@ -291,6 +321,7 @@ export async function POST(request: NextRequest) {
         ...(wawFixedWunderwaffe != null && { wawFixedWunderwaffe }),
         ...(bo2BankUsed != null && { bo2BankUsed }),
         ...(killsReached != null && killsReached > 0 && { killsReached }),
+        ...(scoreReached != null && scoreReached > 0 && { scoreReached }),
       },
     });
 

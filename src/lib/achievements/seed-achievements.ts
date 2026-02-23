@@ -10,6 +10,7 @@ const MIN_ACHIEVEMENT_XP = 50;
 
 /** Achievement types that must NEVER be deactivated by balance patches. Main quest completion achievements are created by seed-easter-eggs and are not in getMapAchievementDefinitions. */
 export const ACHIEVEMENT_TYPES_NEVER_DEACTIVATE = ['EASTER_EGG_COMPLETE'] as const;
+import { formatRushScore } from '@/lib/utils';
 import {
   getRoundConfigForMap,
   getXpForRoundFromMilestones,
@@ -18,8 +19,9 @@ import { getWaWMapConfig, getWaWRoundMilestones, getWaWChallengeTypeLabel } from
 import { getBo1MapConfig, getBo1RoundMilestones, getBo1ChallengeTypeLabel } from '@/lib/bo1/bo1-map-config';
 import { getBo2MapConfig, getBo2RoundMilestones, getBo2ChallengeTypeLabel } from '@/lib/bo2/bo2-map-config';
 import { getBo3MapConfig, getBo3RoundMilestones, getBo3ChallengeTypeLabel } from '@/lib/bo3/bo3-map-config';
+import { getBo4MapConfig, getBo4RoundMilestones, getBo4ChallengeTypeLabel } from '@/lib/bo4/bo4-map-config';
 import { isBo4Game, BO4_DIFFICULTIES, BO4_DIFFICULTY_XP_MULTIPLIER, type Bo4DifficultyType } from '../bo4';
-import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, IW_AOTRT_SPEEDRUN_TIERS, IW_BEAST_SPEEDRUN_TIERS, WAW_SPEEDRUN_TIERS_BY_MAP, BO1_SPEEDRUN_TIERS_BY_MAP, BO2_SPEEDRUN_TIERS_BY_MAP, BO3_SPEEDRUN_TIERS_BY_MAP, BO1_COTD_STAND_IN_EE_TIERS, BO1_COTD_ENSEMBLE_CAST_EE_TIERS, BO2_TRANZIT_RICHTOFEN_EE_TIERS, BO2_TRANZIT_MAXIS_EE_TIERS, BO2_DIE_RISE_RICHTOFEN_EE_TIERS, BO2_DIE_RISE_MAXIS_EE_TIERS, BO2_BURIED_RICHTOFEN_EE_TIERS, BO2_BURIED_MAXIS_EE_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
+import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, IW_AOTRT_SPEEDRUN_TIERS, IW_BEAST_SPEEDRUN_TIERS, WAW_SPEEDRUN_TIERS_BY_MAP, BO1_SPEEDRUN_TIERS_BY_MAP, BO2_SPEEDRUN_TIERS_BY_MAP, BO3_SPEEDRUN_TIERS_BY_MAP, BO4_SPEEDRUN_TIERS_BY_MAP, BO1_COTD_STAND_IN_EE_TIERS, BO1_COTD_ENSEMBLE_CAST_EE_TIERS, BO2_TRANZIT_RICHTOFEN_EE_TIERS, BO2_TRANZIT_MAXIS_EE_TIERS, BO2_DIE_RISE_RICHTOFEN_EE_TIERS, BO2_DIE_RISE_MAXIS_EE_TIERS, BO2_BURIED_RICHTOFEN_EE_TIERS, BO2_BURIED_MAXIS_EE_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
 
 const CHALLENGE_TYPES = [
   'HIGHEST_ROUND',
@@ -87,6 +89,8 @@ export type AchievementSeedRow = {
   criteria: {
     round?: number;
     kills?: number;
+    /** For RUSH challenge: qualify if scoreReached >= this */
+    score?: number;
     challengeType?: string;
     isCap?: boolean;
     difficulty?: Bo4DifficultyType;
@@ -468,6 +472,91 @@ export function getMapAchievementDefinitions(
     }
   }
 
+  // BO4: per-map config with WRs per difficulty, RUSH (score), INSTAKILL_ROUND_SPEEDRUN (speedrun tiers)
+  if (gameShortName === 'BO4') {
+    const bo4Cfg = getBo4MapConfig(mapSlug);
+    if (bo4Cfg) {
+      const difficulties = BO4_DIFFICULTIES.filter((d) => bo4Cfg.highRoundWR[d] > 0);
+      for (const diff of difficulties) {
+        const wr = bo4Cfg.highRoundWR[diff];
+        const milestones = getBo4RoundMilestones(wr);
+        for (const { round, xp } of milestones) {
+          if (round > wr) continue;
+          const baseXp = Math.max(MIN_ACHIEVEMENT_XP, Math.floor(xp * BO4_DIFFICULTY_XP_MULTIPLIER[diff]));
+          rows.push({
+            slug: `round-${round}-${diff.toLowerCase()}`,
+            name: `Round ${round} (${diff.charAt(0) + diff.slice(1).toLowerCase()})`,
+            type: 'ROUND_MILESTONE',
+            criteria: { round, challengeType: 'HIGHEST_ROUND', difficulty: diff },
+            xpReward: baseXp,
+            rarity: rarityForRound(round, wr),
+            difficulty: diff,
+          });
+        }
+        const ndWr = bo4Cfg.noDownsWR[diff];
+        if (ndWr > 0) {
+          const ndMilestones = getBo4RoundMilestones(ndWr);
+          for (const { round, xp } of ndMilestones) {
+            if (round > ndWr) continue;
+            const baseXp = Math.max(MIN_ACHIEVEMENT_XP, Math.floor(xp * BO4_DIFFICULTY_XP_MULTIPLIER[diff]));
+            rows.push({
+              slug: `no-downs-${round}-${diff.toLowerCase()}`,
+              name: `No Downs Round ${round} (${diff.charAt(0) + diff.slice(1).toLowerCase()})`,
+              type: 'CHALLENGE_COMPLETE',
+              criteria: { round, challengeType: 'NO_DOWNS', difficulty: diff },
+              xpReward: baseXp,
+              rarity: rarityForRound(round, ndWr),
+              difficulty: diff,
+            });
+          }
+        }
+      }
+      for (const cType of bo4Cfg.challengeTypes) {
+        const ct = cType as string;
+        if (ct === 'HIGHEST_ROUND' || ct === 'NO_DOWNS' || ct === 'RUSH' || ct.startsWith('ROUND_') || ct === 'EASTER_EGG_SPEEDRUN' || ct === 'INSTAKILL_ROUND_SPEEDRUN') continue;
+        const wr = ct === 'STARTING_ROOM' ? bo4Cfg.firstRoomWR
+          : ct === 'NO_POWER' ? bo4Cfg.noPowerWR
+          : ct === 'NO_PERKS' ? bo4Cfg.noPerksWR
+          : ct === 'PURIST' ? bo4Cfg.puristWR
+          : undefined;
+        if (wr == null) continue;
+        const cMilestones = getBo4RoundMilestones(wr);
+        const slugPrefix = ct.toLowerCase().replace(/_/g, '-');
+        for (const { round, xp } of cMilestones) {
+          if (round > wr) continue;
+          rows.push({
+            slug: `${slugPrefix}-${round}`,
+            name: `${getBo4ChallengeTypeLabel(ct)} Round ${round}`,
+            type: 'CHALLENGE_COMPLETE',
+            criteria: { round, challengeType: cType, difficulty: 'NORMAL' },
+            xpReward: Math.max(MIN_ACHIEVEMENT_XP, xp),
+            rarity: rarityForRound(round, wr),
+            difficulty: 'NORMAL',
+          });
+        }
+      }
+      if (bo4Cfg.rushWR != null && bo4Cfg.rushWR > 0) {
+        const rushWr = bo4Cfg.rushWR;
+        const scoreMilestones = [Math.floor(rushWr * 0.1), Math.floor(rushWr * 0.25), Math.floor(rushWr * 0.5), Math.floor(rushWr * 0.75), rushWr];
+        const scoreXp = [100, 300, 600, 1000, 2000];
+        for (let i = 0; i < scoreMilestones.length; i++) {
+          const score = scoreMilestones[i]!;
+          const xp = scoreXp[i] ?? 2000;
+          rows.push({
+            slug: `rush-${score}`,
+            name: `Rush ${formatRushScore(score)}`,
+            type: 'CHALLENGE_COMPLETE',
+            criteria: { score, challengeType: 'RUSH', difficulty: 'NORMAL' },
+            xpReward: Math.max(MIN_ACHIEVEMENT_XP, xp),
+            rarity: score >= rushWr * 0.75 ? 'LEGENDARY' : score >= rushWr * 0.5 ? 'EPIC' : score >= rushWr * 0.25 ? 'RARE' : 'UNCOMMON',
+            difficulty: 'NORMAL',
+          });
+        }
+      }
+      return rows;
+    }
+  }
+
   const mapConfig = gameShortName ? getRoundConfigForMap(mapSlug, gameShortName) : null;
   const maxRound =
     mapConfig?.roundCap ??
@@ -634,6 +723,7 @@ const SPEEDRUN_TYPE_LABELS: Record<string, string> = {
   ROUND_100_SPEEDRUN: 'Round 100',
   ROUND_200_SPEEDRUN: 'Round 200',
   ROUND_255_SPEEDRUN: 'Round 255',
+  INSTAKILL_ROUND_SPEEDRUN: 'Instakill Round',
   EASTER_EGG_SPEEDRUN: 'Easter Egg',
   GHOST_AND_SKULLS: 'Ghost and Skulls',
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
@@ -659,6 +749,7 @@ export function getSpeedrunAchievementDefinitions(
     : gameShortName === 'BO1' ? BO1_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : gameShortName === 'BO2' ? BO2_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : gameShortName === 'BO3' ? BO3_SPEEDRUN_TIERS_BY_MAP[mapSlug]
+    : gameShortName === 'BO4' ? BO4_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : undefined;
   if (!tiersByType) return [];
   const rows: AchievementSeedRow[] = [];

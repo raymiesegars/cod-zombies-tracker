@@ -238,7 +238,10 @@ enum ChallengeType {
   ROUND_200_SPEEDRUN
   ROUND_255_SPEEDRUN   // BO3+: Round 255 speedrun
   EASTER_EGG_SPEEDRUN
-  NO_MANS_LAND         // Moon: kills not rounds (killsReached used)
+  INSTAKILL_ROUND_SPEEDRUN  // BO4: Instakill round speedrun (some maps only)
+  RUSH                // BO4: Score-based rush mode
+  PURIST              // BO4: Stricter rules, map-specific challenge mode
+  NO_MANS_LAND        // Moon: kills not rounds (killsReached used)
   GHOST_AND_SKULLS
   ALIENS_BOSS_FIGHT
   CRYPTID_FIGHT       // Beast From Beyond: Cryptid swarm boss
@@ -407,6 +410,8 @@ model ChallengeLog {
   bo3AatUsed              Boolean?
   // For NO_MANS_LAND challenge: kills achieved (roundReached ignored)
   killsReached            Int?
+  // For RUSH challenge: score achieved (roundReached ignored)
+  scoreReached            Int?
 
   // BO4 only: Elixir/Talisman mode — 'CLASSIC_ONLY' | 'ALL_ELIXIRS_TALISMANS' (required)
   bo4ElixirMode           String?
