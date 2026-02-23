@@ -8,6 +8,9 @@ import { getLevelFromXp } from '@/lib/ranks';
 import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
 import { createCoOpRunPendingsForEasterEggLog } from '@/lib/coop-pending';
 import { isBo4Game, BO4_DIFFICULTIES } from '@/lib/bo4';
+import { isBocwGame } from '@/lib/bocw';
+import { isBo6Game } from '@/lib/bo6';
+import { isBo7Game } from '@/lib/bo7';
 import type { Bo4Difficulty } from '@prisma/client';
 
 type Params = { params: Promise<{ id: string }> };
@@ -142,9 +145,15 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       : undefined;
     const requestVerification = body.requestVerification === undefined ? undefined : Boolean(body.requestVerification);
 
+    const mapWithGame = log.map ?? await prisma.map.findUnique({ where: { id: log.mapId }, include: { game: { select: { shortName: true } } } });
+    const gameShortName = (mapWithGame as { game?: { shortName?: string } })?.game?.shortName;
+    const rampageInducerUsed = body.rampageInducerUsed !== undefined &&
+      (isBocwGame(gameShortName) || isBo6Game(gameShortName) || isBo7Game(gameShortName))
+      ? Boolean(body.rampageInducerUsed)
+      : undefined;
+
     let difficulty: Bo4Difficulty | undefined;
     if (body.difficulty !== undefined) {
-      const mapWithGame = log.map ?? await prisma.map.findUnique({ where: { id: log.mapId }, include: { game: { select: { shortName: true } } } });
       if (isBo4Game((mapWithGame as { game?: { shortName?: string } })?.game?.shortName)) {
         if (!body.difficulty || !BO4_DIFFICULTIES.includes(body.difficulty as any)) {
           return NextResponse.json({ error: 'BO4 maps require difficulty: CASUAL, NORMAL, HARDCORE, or REALISTIC' }, { status: 400 });
@@ -182,6 +191,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         ...(requestVerification !== undefined && {
           verificationRequestedAt: requestVerification ? new Date() : null,
         }),
+        ...(rampageInducerUsed !== undefined && { rampageInducerUsed }),
       },
       include: {
         easterEgg: true,

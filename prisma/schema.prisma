@@ -229,6 +229,7 @@ enum ChallengeType {
   NO_POWER            // Never turn on power
   NO_MAGIC            // BO2 Custom Game: Magic disabled (some maps only)
   NO_JUG              // BO3+: No Juggernog
+  NO_ARMOR            // BOCW: No Armor
   NO_ATS              // BO3+: No Alternate Ammo Types (AATs)
   // IW speedruns (time-based; completionTimeSeconds required)
   ROUND_30_SPEEDRUN
@@ -237,6 +238,12 @@ enum ChallengeType {
   ROUND_100_SPEEDRUN
   ROUND_200_SPEEDRUN
   ROUND_255_SPEEDRUN   // BO3+: Round 255 speedrun
+  ROUND_935_SPEEDRUN   // BOCW: Round 935 cap speedrun (round-based maps)
+  ROUND_10_SPEEDRUN    // BOCW Outbreak: Round 10 speedrun
+  ROUND_20_SPEEDRUN    // BOCW Outbreak: Round 20 speedrun
+  EXFIL_SPEEDRUN       // BOCW: Exfil Round 11 speedrun
+  EXFIL_R21_SPEEDRUN   // BOCW: Exfil Round 21 speedrun
+  BUILD_EE_SPEEDRUN    // BOCW: Build% EE speedrun (Firebase Z, Forsaken)
   EASTER_EGG_SPEEDRUN
   INSTAKILL_ROUND_SPEEDRUN  // BO4: Instakill round speedrun (some maps only)
   RUSH                // BO4: Score-based rush mode
@@ -431,6 +438,9 @@ model ChallengeLog {
   // BO7 only: Relic names selected for a cursed run (empty = 0 relics or not a cursed run)
   bo7RelicsUsed           String[]    @default([])
 
+  // BOCW / BO6 / BO7: Rampage Inducer used (default false = No Rampage Inducer). Leaderboard filter.
+  rampageInducerUsed      Boolean?    @default(false)
+
   // WaW (and future titles): run modifiers — tags that can be combined with any challenge
   wawNoJug                Boolean?    // No Jug — no achievements; leaderboard filter
   wawFixedWunderwaffe     Boolean?    // Der Riese: Fixed Wunderwaffe variant; leaderboard filter
@@ -494,6 +504,9 @@ model EasterEggLog {
   // Co-op: site users (user ids) and display names for non-users
   teammateUserIds      String[]   @default([])
   teammateNonUserNames String[]   @default([])
+
+  // BOCW / BO6 / BO7: Rampage Inducer used (default false = No Rampage Inducer). Leaderboard filter.
+  rampageInducerUsed    Boolean?   @default(false)
   
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt

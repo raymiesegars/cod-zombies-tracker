@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { isBo4Game } from '@/lib/bo4';
 import { BO4_DIFFICULTIES } from '@/lib/bo4';
+import { isBocwGame } from '@/lib/bocw';
+import { isBo6Game } from '@/lib/bo6';
+import { isBo7Game } from '@/lib/bo7';
 import type { PlayerCount, Bo4Difficulty, Prisma } from '@prisma/client';
 
 /**
@@ -20,6 +23,7 @@ export async function GET(
   const difficulty = searchParams.get('difficulty') as Bo4Difficulty | null;
   const searchQ = searchParams.get('search')?.trim() ?? '';
   const verifiedOnly = searchParams.get('verified') === 'true';
+  const rampageInducerParam = searchParams.get('rampageInducerUsed'); // 'true' | 'false' | null
   const limitParam = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') || '25', 10) || 25));
   const offsetParam = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10) || 0);
 
@@ -55,6 +59,13 @@ export async function GET(
     if (playerCount) whereClause.playerCount = playerCount;
     if (isBo4Game(map.game?.shortName) && difficulty && BO4_DIFFICULTIES.includes(difficulty as any)) {
       whereClause.difficulty = difficulty;
+    }
+    if (isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName)) {
+      if (rampageInducerParam === 'true') {
+        (whereClause as Record<string, unknown>).rampageInducerUsed = true;
+      } else {
+        (whereClause as Record<string, unknown>).rampageInducerUsed = { not: true };
+      }
     }
 
     if (searchQ.length > 0) {

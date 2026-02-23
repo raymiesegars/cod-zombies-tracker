@@ -8,7 +8,7 @@ import { revokeAchievementsForMapAfterDelete } from '@/lib/achievements';
 import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
 import { createCoOpRunPendingsForChallengeLog } from '@/lib/coop-pending';
 import { isBo4Game, BO4_DIFFICULTIES } from '@/lib/bo4';
-import { isIwGame, isIwSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType } from '@/lib/iw';
+import { isIwGame, isIwSpeedrunChallengeType, isSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType } from '@/lib/iw';
 import { isBo3Game, BO3_GOBBLEGUM_MODES } from '@/lib/bo3';
 import { isBocwGame, BOCW_SUPPORT_MODES } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES } from '@/lib/bo6';
@@ -172,6 +172,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     const bo7RelicsUsed = body.bo7RelicsUsed !== undefined && isBo7Game(gameShortName) && Array.isArray(body.bo7RelicsUsed)
       ? (body.bo7RelicsUsed as unknown[]).filter((r): r is string => (BO7_RELICS as readonly string[]).includes(r as string))
       : undefined;
+    const rampageInducerUsed = body.rampageInducerUsed !== undefined && (isBocwGame(gameShortName) || isBo6Game(gameShortName) || isBo7Game(gameShortName))
+      ? Boolean(body.rampageInducerUsed)
+      : undefined;
 
     let difficulty: Bo4Difficulty | undefined;
     if (body.difficulty !== undefined) {
@@ -187,7 +190,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       return NextResponse.json({ error: 'Invalid roundReached' }, { status: 400 });
     }
     const challenge = log.challenge;
-    if (roundReached !== undefined && challenge && isIwSpeedrunChallengeType(challenge.type)) {
+    if (roundReached !== undefined && challenge && isSpeedrunChallengeType(challenge.type)) {
       const minRound = getMinRoundForSpeedrunChallengeType(challenge.type);
       if (roundReached < minRound) {
         return NextResponse.json(
@@ -235,6 +238,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         ...(bo7SupportMode !== undefined && { bo7SupportMode }),
         ...(bo7IsCursedRun !== undefined && { bo7IsCursedRun }),
         ...(bo7RelicsUsed !== undefined && { bo7RelicsUsed }),
+        ...(rampageInducerUsed !== undefined && { rampageInducerUsed }),
       },
       include: {
         challenge: true,

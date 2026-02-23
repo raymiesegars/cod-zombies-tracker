@@ -37,9 +37,11 @@ import { BO1_OFFICIAL_RULES } from '@/lib/bo1/bo1-official-rules';
 import { BO2_OFFICIAL_RULES } from '@/lib/bo2/bo2-official-rules';
 import { BO3_OFFICIAL_RULES } from '@/lib/bo3/bo3-official-rules';
 import { BO4_OFFICIAL_RULES } from '@/lib/bo4/bo4-official-rules';
+import { BOCW_OFFICIAL_RULES } from '@/lib/bocw/bocw-official-rules';
 import { isRuleLink, isRuleInlineLinks } from '@/lib/rules/types';
 import { getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
+import { ACHIEVEMENT_CATEGORY_LABELS } from '@/lib/achievements/categories';
 
 const challengeTypeLabels: Record<string, string> = {
   HIGHEST_ROUND: 'Highest Round',
@@ -69,7 +71,14 @@ const challengeTypeLabels: Record<string, string> = {
   MEPHISTOPHELES: 'Mephistopheles',
   RUSH: 'Rush',
   PURIST: 'Purist',
+  NO_ARMOR: 'No Armor',
   INSTAKILL_ROUND_SPEEDRUN: 'Instakill Round Speedrun',
+  EXFIL_SPEEDRUN: 'Exfil Round 11',
+  EXFIL_R21_SPEEDRUN: 'Exfil Round 21',
+  BUILD_EE_SPEEDRUN: 'Build% EE Speedrun',
+  ROUND_10_SPEEDRUN: 'Round 10 Speedrun',
+  ROUND_20_SPEEDRUN: 'Round 20 Speedrun',
+  ROUND_935_SPEEDRUN: 'Round 935 Speedrun',
 };
 
 const playerCountOptions = [
@@ -79,29 +88,54 @@ const playerCountOptions = [
   { value: 'SQUAD', label: 'Squad' },
 ];
 
+const CATEGORY_ORDER_FOR_RULES = [
+  'EASTER_EGG', 'BASE_ROUNDS', 'HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM',
+  'STARTING_ROOM_JUG_SIDE', 'STARTING_ROOM_QUICK_SIDE', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'NO_MAGIC',
+  'NO_JUG', 'NO_ARMOR', 'NO_ATS', 'NO_MANS_LAND', 'ROUND_10_SPEEDRUN', 'ROUND_20_SPEEDRUN',
+  'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN',
+  'ROUND_255_SPEEDRUN', 'ROUND_935_SPEEDRUN', 'EXFIL_SPEEDRUN', 'EXFIL_R21_SPEEDRUN', 'BUILD_EE_SPEEDRUN', 'INSTAKILL_ROUND_SPEEDRUN',
+  'EASTER_EGG_SPEEDRUN', 'RUSH', 'PURIST', 'GHOST_AND_SKULLS', 'ALIENS_BOSS_FIGHT', 'CRYPTID_FIGHT', 'MEPHISTOPHELES', 'OTHER',
+];
+
 function OfficialRulesModal({
   isOpen,
   onClose,
   gameShortName,
+  mapChallengeTypes,
 }: {
   isOpen: boolean;
   onClose: () => void;
   gameShortName?: string | null;
+  mapChallengeTypes?: string[];
 }) {
   const isWaw = gameShortName === 'WAW';
   const isBo1 = gameShortName === 'BO1';
   const isBo2 = gameShortName === 'BO2';
   const isBo3 = gameShortName === 'BO3';
   const isBo4 = gameShortName === 'BO4';
-  const hasRules = isWaw || isBo1 || isBo2 || isBo3 || isBo4;
-  const rules = isWaw ? WAW_OFFICIAL_RULES : isBo1 ? BO1_OFFICIAL_RULES : isBo2 ? BO2_OFFICIAL_RULES : isBo3 ? BO3_OFFICIAL_RULES : isBo4 ? BO4_OFFICIAL_RULES : null;
+  const isBocw = gameShortName === 'BOCW';
+  const hasRules = isWaw || isBo1 || isBo2 || isBo3 || isBo4 || isBocw;
+  const rules = isWaw ? WAW_OFFICIAL_RULES : isBo1 ? BO1_OFFICIAL_RULES : isBo2 ? BO2_OFFICIAL_RULES : isBo3 ? BO3_OFFICIAL_RULES : isBo4 ? BO4_OFFICIAL_RULES : isBocw ? BOCW_OFFICIAL_RULES : null;
+
+  const byType = rules && 'challengeRulesByType' in rules ? (rules as { challengeRulesByType: Record<string, string> }).challengeRulesByType : null;
+  const typesToShow = (mapChallengeTypes && mapChallengeTypes.length > 0
+    ? Array.from(new Set(mapChallengeTypes))
+    : byType ? Object.keys(byType) : []
+  ).sort((a, b) => {
+    const ia = CATEGORY_ORDER_FOR_RULES.indexOf(a);
+    const ib = CATEGORY_ORDER_FOR_RULES.indexOf(b);
+    if (ia >= 0 && ib >= 0) return ia - ib;
+    if (ia >= 0) return -1;
+    if (ib >= 0) return 1;
+    return a.localeCompare(b);
+  });
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title="Official Rules"
-      description={hasRules ? `Rules and requirements for ${isWaw ? 'World at War' : isBo1 ? 'Black Ops 1' : isBo2 ? 'Black Ops 2' : isBo3 ? 'Black Ops 3' : isBo4 ? 'Black Ops 4' : 'submissions'}` : 'Rules and requirements for challenge submissions'}
+      description={hasRules ? `Rules and requirements for ${isWaw ? 'World at War' : isBo1 ? 'Black Ops 1' : isBo2 ? 'Black Ops 2' : isBo3 ? 'Black Ops 3' : isBo4 ? 'Black Ops 4' : isBocw ? 'Black Ops Cold War' : 'submissions'}` : 'Rules and requirements for challenge submissions'}
       size="lg"
     >
       {rules ? (
@@ -142,12 +176,16 @@ function OfficialRulesModal({
               ))}
             </TabsContent>
             <TabsContent value="challenges" className="mt-0 space-y-4">
-              {rules.challengeRules.map((cr) => (
-                <div key={cr.name}>
-                  <h4 className="text-sm font-semibold text-bunker-100 mb-1">{cr.name}</h4>
-                  <p className="text-sm text-bunker-300">{cr.desc}</p>
-                </div>
-              ))}
+              {typesToShow.map((type) => {
+                const label = ACHIEVEMENT_CATEGORY_LABELS[type] ?? type.replace(/_/g, ' ');
+                const desc = byType?.[type] ?? 'Official rules coming soon.';
+                return (
+                  <div key={type}>
+                    <h4 className="text-sm font-semibold text-bunker-100 mb-1">{label}</h4>
+                    <p className="text-sm text-bunker-300">{desc}</p>
+                  </div>
+                );
+              })}
             </TabsContent>
           </div>
         </Tabs>
@@ -248,6 +286,7 @@ export default function EditMapProgressPage() {
     bo7SupportMode?: string;
     bo7IsCursedRun?: boolean;
     bo7RelicsUsed?: string[];
+    rampageInducerUsed?: boolean;
     wawNoJug?: boolean;
     wawFixedWunderwaffe?: boolean;
     bo2BankUsed?: boolean | null;
@@ -284,6 +323,7 @@ export default function EditMapProgressPage() {
         teammateUserIds: string[];
         teammateNonUserNames: string[];
         requestVerification: boolean;
+        rampageInducerUsed?: boolean;
       }
     >
   >({});
@@ -331,9 +371,9 @@ export default function EditMapProgressPage() {
             ...(isBo4 && { difficulty: 'NORMAL' }),
             ...(isIw && { useFortuneCards: false, useDirectorsCut: false }),
             ...(isBo3 && { bo3GobbleGumMode: BO3_GOBBLEGUM_DEFAULT }),
-            ...(isBocw && { bocwSupportMode: BOCW_SUPPORT_DEFAULT }),
-            ...(isBo6 && { bo6GobbleGumMode: BO6_GOBBLEGUM_DEFAULT, bo6SupportMode: BO6_SUPPORT_DEFAULT }),
-            ...(isBo7 && { bo7SupportMode: BO7_SUPPORT_DEFAULT, bo7IsCursedRun: false, bo7RelicsUsed: [] }),
+            ...(isBocw && { bocwSupportMode: BOCW_SUPPORT_DEFAULT, rampageInducerUsed: false }),
+            ...(isBo6 && { bo6GobbleGumMode: BO6_GOBBLEGUM_DEFAULT, bo6SupportMode: BO6_SUPPORT_DEFAULT, rampageInducerUsed: false }),
+            ...(isBo7 && { bo7SupportMode: BO7_SUPPORT_DEFAULT, bo7IsCursedRun: false, bo7RelicsUsed: [], rampageInducerUsed: false }),
             ...((data.game?.shortName ?? '') === 'BO2' && getBo2MapConfig(data.slug)?.hasBank && { bo2BankUsed: true }),
             proofUrls: [],
             notes: '',
@@ -358,6 +398,7 @@ export default function EditMapProgressPage() {
             teammateUserIds: string[];
             teammateNonUserNames: string[];
             requestVerification: boolean;
+            rampageInducerUsed?: boolean;
           }> = {};
           for (const ee of mainQuestEasterEggs) {
             eeInitial[ee.id] = {
@@ -373,6 +414,7 @@ export default function EditMapProgressPage() {
               teammateUserIds: [],
               teammateNonUserNames: [],
               requestVerification: false,
+              ...((isBocw || isBo6 || isBo7) && { rampageInducerUsed: false }),
             };
           }
           setEasterEggForms(eeInitial);
@@ -560,6 +602,7 @@ export default function EditMapProgressPage() {
               bo7IsCursedRun: form.bo7IsCursedRun ?? false,
               bo7RelicsUsed: form.bo7IsCursedRun ? (form.bo7RelicsUsed ?? []) : [],
             }),
+            ...((isBocw || isBo6 || isBo7) && { rampageInducerUsed: form.rampageInducerUsed ?? false }),
             ...(map?.game?.shortName === 'WAW' && {
               wawNoJug: form.wawNoJug ?? false,
               wawFixedWunderwaffe: form.wawFixedWunderwaffe ?? false,
@@ -712,6 +755,7 @@ export default function EditMapProgressPage() {
           teammateUserIds: form.teammateUserIds ?? [],
           teammateNonUserNames: form.teammateNonUserNames ?? [],
           requestVerification: form.requestVerification ?? false,
+          ...((isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName)) && { rampageInducerUsed: form.rampageInducerUsed ?? false }),
         }),
       });
       const data = await res.json();
@@ -863,6 +907,7 @@ export default function EditMapProgressPage() {
             isOpen={challengeRulesModalOpen}
             onClose={() => setChallengeRulesModalOpen(false)}
             gameShortName={map?.game?.shortName}
+            mapChallengeTypes={map?.challenges?.map((c) => c.type) ?? undefined}
           />
 
           {/* Challenge logging form (when one or more challenges selected) */}
@@ -1109,6 +1154,17 @@ export default function EditMapProgressPage() {
                         />
                       </>
                     )}
+                    {((isBocwGame(map?.game?.shortName) || isBo6Game(map?.game?.shortName) || isBo7Game(map?.game?.shortName)) && (
+                      <Select
+                        label="Rampage Inducer"
+                        options={[
+                          { value: 'false', label: 'No Rampage Inducer' },
+                          { value: 'true', label: 'Rampage Inducer' },
+                        ]}
+                        value={sharedChallengeForm.rampageInducerUsed === true ? 'true' : 'false'}
+                        onChange={(e) => handleSharedChallengeChange('rampageInducerUsed', e.target.value === 'true')}
+                      />
+                    ))}
                     {isBo7Game(map?.game?.shortName) && (
                       <>
                         <Select
@@ -1347,6 +1403,19 @@ export default function EditMapProgressPage() {
                             value={easterEggForms[ee.id]?.difficulty || 'NORMAL'}
                             onChange={(e) =>
                               handleEasterEggChange(ee.id, 'difficulty', e.target.value)
+                            }
+                          />
+                        )}
+                        {(isBocwGame(map?.game?.shortName) || isBo6Game(map?.game?.shortName) || isBo7Game(map?.game?.shortName)) && (
+                          <Select
+                            label="Rampage Inducer"
+                            options={[
+                              { value: 'false', label: 'No Rampage Inducer' },
+                              { value: 'true', label: 'Rampage Inducer' },
+                            ]}
+                            value={easterEggForms[ee.id]?.rampageInducerUsed === true ? 'true' : 'false'}
+                            onChange={(e) =>
+                              handleEasterEggChange(ee.id, 'rampageInducerUsed', e.target.value === 'true')
                             }
                           />
                         )}

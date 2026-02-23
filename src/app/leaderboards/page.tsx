@@ -18,6 +18,7 @@ import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-con
 import { getBo2MapConfig, getBo2ChallengeTypeLabel } from '@/lib/bo2/bo2-map-config';
 import { getBo3MapConfig } from '@/lib/bo3/bo3-map-config';
 import { getBo4MapConfig, getBo4ChallengeTypeLabel } from '@/lib/bo4/bo4-map-config';
+import { getBocwMapConfig, getBocwChallengeTypeLabel } from '@/lib/bocw/bocw-map-config';
 
 const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
 const PAGE_SIZE = 25;
@@ -51,6 +52,14 @@ const challengeTypeLabels: Record<string, string> = {
   MEPHISTOPHELES: 'Mephistopheles',
   RUSH: 'Rush',
   INSTAKILL_ROUND_SPEEDRUN: 'Instakill Round Speedrun',
+  PURIST: 'Purist',
+  NO_ARMOR: 'No Armor',
+  ROUND_10_SPEEDRUN: 'Round 10 Speedrun',
+  ROUND_20_SPEEDRUN: 'Round 20 Speedrun',
+  ROUND_935_SPEEDRUN: 'Round 935 Speedrun',
+  EXFIL_SPEEDRUN: 'Exfil Round 11',
+  EXFIL_R21_SPEEDRUN: 'Exfil Round 21',
+  BUILD_EE_SPEEDRUN: 'Build% EE Speedrun',
 };
 
 export default function LeaderboardsPage() {
@@ -81,6 +90,7 @@ export default function LeaderboardsPage() {
   const [bo4ElixirFilter, setBo4ElixirFilter] = useState<string>('');
   // BOCW
   const [bocwSupportFilter, setBocwSupportFilter] = useState<string>('');
+  const [rampageInducerFilter, setRampageInducerFilter] = useState<string>('false'); // Default: No Rampage Inducer
   // BO6
   const [bo6GobbleGumFilter, setBo6GobbleGumFilter] = useState<string>('');
   const [bo6SupportFilter, setBo6SupportFilter] = useState<string>('');
@@ -190,6 +200,7 @@ export default function LeaderboardsPage() {
           if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
           if (searchForFetch) params.set('search', searchForFetch);
           if (verifiedOnly) params.set('verified', 'true');
+          if ((isBocwMap || isBo6Map || isBo7Map) && rampageInducerFilter) params.set('rampageInducerUsed', rampageInducerFilter);
           const res = await fetch(`/api/maps/${selectedMap}/easter-egg-leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -232,6 +243,7 @@ export default function LeaderboardsPage() {
             if (wawNoJugFilter === 'true' || wawNoJugFilter === 'false') params.set('wawNoJug', wawNoJugFilter);
             if (wawFixedWunderwaffeFilter === 'true' || wawFixedWunderwaffeFilter === 'false') params.set('wawFixedWunderwaffe', wawFixedWunderwaffeFilter);
           }
+          if ((isBocwMap || isBo6Map || isBo7Map) && rampageInducerFilter) params.set('rampageInducerUsed', rampageInducerFilter);
           const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -247,7 +259,7 @@ export default function LeaderboardsPage() {
     }
 
     fetchLeaderboard();
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, searchForFetch, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, searchForFetch, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter]);
 
   const loadMore = useCallback(async () => {
     if (leaderboard.length >= total || total === 0) return;
@@ -280,6 +292,7 @@ export default function LeaderboardsPage() {
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
           if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
           if (verifiedOnly) params.set('verified', 'true');
+          if ((isBocwMap || isBo6Map || isBo7Map) && rampageInducerFilter) params.set('rampageInducerUsed', rampageInducerFilter);
           const res = await fetch(`/api/maps/${selectedMap}/easter-egg-leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -321,6 +334,7 @@ export default function LeaderboardsPage() {
           if (isBo2Map && selectedMap && getBo2MapConfig(selectedMap)?.hasBank) {
             if (bo2BankUsedFilter === 'true' || bo2BankUsedFilter === 'false') params.set('bo2BankUsed', bo2BankUsedFilter);
           }
+          if ((isBocwMap || isBo6Map || isBo7Map) && rampageInducerFilter) params.set('rampageInducerUsed', rampageInducerFilter);
           const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -339,7 +353,7 @@ export default function LeaderboardsPage() {
     } finally {
       loadingMoreRef.current = false;
     }
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, leaderboard.length, total]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, leaderboard.length, total]);
 
   // Only observe sentinel when search is empty so list stays stable while filtering
   useEffect(() => {
@@ -420,7 +434,9 @@ export default function LeaderboardsPage() {
           ? (fallbackName ?? challengeTypeLabels[type] ?? getBo2ChallengeTypeLabel(type) ?? type)
           : selectedMapData?.game?.shortName === 'BO4'
             ? (fallbackName ?? challengeTypeLabels[type] ?? getBo4ChallengeTypeLabel(type) ?? type)
-            : (fallbackName ?? challengeTypeLabels[type] ?? type);
+            : selectedMapData?.game?.shortName === 'BOCW'
+              ? (fallbackName ?? challengeTypeLabels[type] ?? getBocwChallengeTypeLabel(type) ?? type)
+              : (fallbackName ?? challengeTypeLabels[type] ?? type);
     let challengeOptions: { value: string; label: string }[];
     if (selectedMapData?.game?.shortName === 'IW') {
       challengeOptions = mapChallenges.length > 0
@@ -450,6 +466,15 @@ export default function LeaderboardsPage() {
     } else if (selectedMapData?.game?.shortName === 'BO4' && selectedMap) {
       const bo4Config = getBo4MapConfig(selectedMap);
       const types = bo4Config?.challengeTypes ?? mapChallenges.map((c) => c.type);
+      challengeOptions = types
+        .filter((t) => t !== 'HIGHEST_ROUND')
+        .map((t) => {
+          const c = mapChallenges.find((ch) => ch.type === t);
+          return { value: t, label: getLabel(t, c?.name) };
+        });
+    } else if (selectedMapData?.game?.shortName === 'BOCW' && selectedMap) {
+      const bocwConfig = getBocwMapConfig(selectedMap);
+      const types = bocwConfig?.challengeTypes ?? mapChallenges.map((c) => c.type);
       challengeOptions = types
         .filter((t) => t !== 'HIGHEST_ROUND')
         .map((t) => {
@@ -705,12 +730,23 @@ export default function LeaderboardsPage() {
                     />
                   )}
                   {isBocwMap && (
-                    <Select
-                      options={[{ value: '', label: 'All Support' }, ...BOCW_SUPPORT_MODES.map((m) => ({ value: m, label: getBocwSupportLabel(m) }))]}
-                      value={bocwSupportFilter}
-                      onChange={(e) => setBocwSupportFilter(e.target.value)}
-                      className="w-full min-w-0 sm:w-48 max-w-full"
-                    />
+                    <>
+                      <Select
+                        options={[{ value: '', label: 'All Support' }, ...BOCW_SUPPORT_MODES.map((m) => ({ value: m, label: getBocwSupportLabel(m) }))]}
+                        value={bocwSupportFilter}
+                        onChange={(e) => setBocwSupportFilter(e.target.value)}
+                        className="w-full min-w-0 sm:w-48 max-w-full"
+                      />
+                      <Select
+                        options={[
+                          { value: 'false', label: 'No Rampage Inducer' },
+                          { value: 'true', label: 'Rampage Inducer' },
+                        ]}
+                        value={rampageInducerFilter}
+                        onChange={(e) => setRampageInducerFilter(e.target.value)}
+                        className="w-full min-w-0 sm:w-44 max-w-full"
+                      />
+                    </>
                   )}
                   {isBo6Map && (
                     <>
@@ -726,6 +762,15 @@ export default function LeaderboardsPage() {
                         onChange={(e) => setBo6SupportFilter(e.target.value)}
                         className="w-full min-w-0 sm:w-40 max-w-full"
                       />
+                      <Select
+                        options={[
+                          { value: 'false', label: 'No Rampage Inducer' },
+                          { value: 'true', label: 'Rampage Inducer' },
+                        ]}
+                        value={rampageInducerFilter}
+                        onChange={(e) => setRampageInducerFilter(e.target.value)}
+                        className="w-full min-w-0 sm:w-44 max-w-full"
+                      />
                     </>
                   )}
                   {isBo7Map && (
@@ -735,6 +780,15 @@ export default function LeaderboardsPage() {
                         value={bo7SupportFilter}
                         onChange={(e) => setBo7SupportFilter(e.target.value)}
                         className="w-full min-w-0 sm:w-40 max-w-full"
+                      />
+                      <Select
+                        options={[
+                          { value: 'false', label: 'No Rampage Inducer' },
+                          { value: 'true', label: 'Rampage Inducer' },
+                        ]}
+                        value={rampageInducerFilter}
+                        onChange={(e) => setRampageInducerFilter(e.target.value)}
+                        className="w-full min-w-0 sm:w-44 max-w-full"
                       />
                       <Select
                         options={[

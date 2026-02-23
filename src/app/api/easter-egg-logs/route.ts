@@ -5,6 +5,9 @@ import { processMapAchievements } from '@/lib/achievements';
 import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
 import { createCoOpRunPendingsForEasterEggLog } from '@/lib/coop-pending';
 import { isBo4Game, BO4_DIFFICULTIES } from '@/lib/bo4';
+import { isBocwGame } from '@/lib/bocw';
+import { isBo6Game } from '@/lib/bo6';
+import { isBo7Game } from '@/lib/bo7';
 import type { Bo4Difficulty } from '@prisma/client';
 
 // Log an EE completion (new run each time). Main-quest XP once per user per EE.
@@ -78,6 +81,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Map not found' }, { status: 404 });
     }
 
+    const rampageInducerUsed =
+      (isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName)) &&
+      body.rampageInducerUsed !== undefined
+        ? Boolean(body.rampageInducerUsed)
+        : undefined;
+
     let difficulty: Bo4Difficulty | undefined;
     if (isBo4Game(map.game?.shortName)) {
       const d = body.difficulty;
@@ -106,6 +115,7 @@ export async function POST(request: NextRequest) {
         teammateUserIds,
         teammateNonUserNames,
         ...(difficulty != null && { difficulty }),
+        ...(rampageInducerUsed != null && { rampageInducerUsed }),
         ...(requestVerification && { verificationRequestedAt: new Date() }),
       },
     });

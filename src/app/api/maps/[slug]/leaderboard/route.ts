@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { isBo4Game, BO4_DIFFICULTIES } from '@/lib/bo4';
-import { isIwGame, isIwSpeedrunChallengeType } from '@/lib/iw';
+import { isIwGame, isSpeedrunChallengeType } from '@/lib/iw';
 import { isBo3Game } from '@/lib/bo3';
 import { isBocwGame } from '@/lib/bocw';
 import { isBo6Game } from '@/lib/bo6';
@@ -40,6 +40,8 @@ export async function GET(
   const wawNoJug = searchParams.get('wawNoJug'); // 'true' | 'false' | null
   const wawFixedWunderwaffe = searchParams.get('wawFixedWunderwaffe'); // 'true' | 'false' | null
   const bo2BankUsed = searchParams.get('bo2BankUsed'); // 'true' | 'false' | null
+  // BOCW/BO6/BO7: Rampage Inducer. Default 'false' = No Rampage Inducer; 'true' = Rampage Inducer only.
+  const rampageInducerParam = searchParams.get('rampageInducerUsed'); // 'true' | 'false' | null
   const limitParam = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') || '25', 10) || 25));
   const offsetParam = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10) || 0);
   const mergeTake = 500;
@@ -146,6 +148,17 @@ export async function GET(
       else if (wawFixedWunderwaffe === 'false') (whereClause as Record<string, unknown>).wawFixedWunderwaffe = false;
     }
 
+    if ((isBocwGame(gameShortName) || isBo6Game(gameShortName) || isBo7Game(gameShortName))) {
+      if (rampageInducerParam === 'true') {
+        (whereClause as Record<string, unknown>).rampageInducerUsed = true;
+        (eeWhereClause as Record<string, unknown>).rampageInducerUsed = true;
+      } else {
+        // Default: No Rampage Inducer (false or null/legacy)
+        (whereClause as Record<string, unknown>).rampageInducerUsed = { not: true };
+        (eeWhereClause as Record<string, unknown>).rampageInducerUsed = { not: true };
+      }
+    }
+
     if (gameShortName === 'BO2' && getBo2MapConfig(slug)?.hasBank) {
       if (bo2BankUsed === 'true') (whereClause as Record<string, unknown>).bo2BankUsed = true;
       else if (bo2BankUsed === 'false') (whereClause as Record<string, unknown>).bo2BankUsed = false;
@@ -155,7 +168,7 @@ export async function GET(
     const isSpecificChallenge = challengeType && challengeType !== 'HIGHEST_ROUND';
     const isSpeedrun =
       isSpecificChallenge &&
-      (isIwSpeedrunChallengeType(challengeType!) || challengeType === 'ROUND_255_SPEEDRUN' || challengeType === 'INSTAKILL_ROUND_SPEEDRUN');
+      isSpeedrunChallengeType(challengeType!);
     const isNoMansLand = isSpecificChallenge && challengeType === 'NO_MANS_LAND';
     const isRush = isSpecificChallenge && challengeType === 'RUSH';
     if (isSpecificChallenge) {
