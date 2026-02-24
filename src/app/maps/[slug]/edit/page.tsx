@@ -1070,7 +1070,7 @@ export default function EditMapProgressPage() {
                     />
                     {map?.slug && hasFirstRoomVariantFilter(map.slug) && Array.from(selectedChallengeIds).some((cid) => map.challenges.find((c) => c.id === cid)?.type === 'STARTING_ROOM') && (
                       <Select
-                        label="Room Variant"
+                        label="Room Variant (required)"
                         options={[
                           { value: '', label: 'Select variant…' },
                           ...(getFirstRoomVariantsForMap(map.slug) ?? []).map((o) => ({ value: o.value, label: o.label })),
