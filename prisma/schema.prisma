@@ -230,6 +230,7 @@ enum ChallengeType {
   NO_MAGIC            // BO2 Custom Game: Magic disabled (some maps only)
   NO_JUG              // BO3+: No Juggernog
   NO_ARMOR            // BOCW: No Armor
+  NO_BLITZ            // WW2: No Blitz (perks)
   NO_ATS              // BO3+: No Alternate Ammo Types (AATs)
   // IW speedruns (time-based; completionTimeSeconds required)
   ROUND_30_SPEEDRUN
@@ -245,6 +246,7 @@ enum ChallengeType {
   EXFIL_SPEEDRUN       // BOCW: Exfil Round 11 speedrun
   EXFIL_R21_SPEEDRUN   // BOCW: Exfil Round 21 speedrun
   BUILD_EE_SPEEDRUN    // BOCW: Build% EE speedrun (Firebase Z, Forsaken)
+  SUPER_30_SPEEDRUN    // WW2: Multi-map R30 (Final Reich→Groesten Haus→Darkest Shore→Shadowed Throne→Frozen Dawn)
   EASTER_EGG_SPEEDRUN
   INSTAKILL_ROUND_SPEEDRUN  // BO4: Instakill round speedrun (some maps only)
   RUSH                // BO4: Score-based rush mode
@@ -446,6 +448,9 @@ model ChallengeLog {
   wawNoJug                Boolean?    // No Jug — no achievements; leaderboard filter
   wawFixedWunderwaffe     Boolean?    // Der Riese: Fixed Wunderwaffe variant; leaderboard filter
 
+  // WW2 only: Consumables (gums) — true = With Consumables (default), false = No Consumables. Leaderboard filter.
+  ww2ConsumablesUsed      Boolean?
+
   // BO2 only: Bank/Storage used (maps with bank: Tranzit, Die Rise, Buried). true = Bank+Storage (default), false = No Bank No Storage
   bo2BankUsed             Boolean?
   
@@ -508,6 +513,9 @@ model EasterEggLog {
 
   // BOCW / BO6 / BO7: Rampage Inducer used (default false = No Rampage Inducer). Leaderboard filter.
   rampageInducerUsed    Boolean?   @default(false)
+
+  // WW2 only: Consumables used — true = With Consumables (default), false = No Consumables. Leaderboard filter.
+  ww2ConsumablesUsed   Boolean?
   
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt

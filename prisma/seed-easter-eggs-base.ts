@@ -12152,4 +12152,350 @@ export const SPECIFIC_EASTER_EGGS_BASE: SpecificEasterEgg[] = [
       },
     ],
   },
+  // ——— WW2 Zombies ———
+  // The Final Reich — Main Quests
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-final-reich',
+    name: 'Fireworks',
+    slug: 'fireworks',
+    type: 'MAIN_QUEST',
+    xpReward: 1500,
+    description:
+      'One of the Main Quests for The Final Reich. Tasks Raven Squad to retrieve the artefact hidden within Mittelburg. Complete Steps 1–7 to reach the hilt, then shoot it with the Tesla Gun to trigger the Panzermörder boss fight.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/nA4VXZx3250',
+    steps: [
+      { order: 1, label: 'Activate three gas valves (behind Geistschild, left of Command Room door, further along from Riverside door). Activate pilot light for Well Trap to clear barricades. Activate generator near Tunnel exit to power doors.' },
+      { order: 2, label: 'Activate two power switches within a short timeframe: Morgue (behind STG44) and Laboratory (right of Geistschild). Salt Mine door becomes purchasable.' },
+      { order: 3, label: 'Emperor\'s Chamber: Interact with hilt to charge Geistkraft Transfer Device (10 kills). Open device canopy. Forge sends device to Laboratory (5 kills per stop, Wüstling may awaken). Pick up Tesla Gun Barrel. Device returns, then treks to Morgue (same process). Pick up Tesla Gun Core. Brenner spawns—defeat to get head. Forge base Tesla Gun at Weapon Assembly Station.' },
+      { order: 4, label: 'Right Hand of God: Activate rerouting panel in Command Room. Match four power switches to panel colours (1 right of panel, 2 outside Morgue/Sewer, 3 tunnel to Riverside, 4 beside Tower door).' },
+      { order: 5, label: 'Activate lightning rod defense (central rod), then secondary rods. Lightning strikes—activate Right Hand of God.' },
+      { order: 6, label: 'Left Hand of God: Heinz zeppelin arrives. Damage weak points to drop geistkraft battery. Charge with zombies for Überschnalle. Place on Left Hand of God. Complete wave, repeat (battery in Riverside). Third time Heinz magnetizes battery—damage again. Final battery near Pub. Place Überschnalle.' },
+      { order: 7, label: 'Voice of God: Change four pipes (Bloodraven, Moonraven, Deathraven, Stormraven). Find paintings (Morgue, Sewer, Courtyard, Pub)—use Brenner Head for sigil + Roman numeral. Input at Voice of God before activating.' },
+      { order: 8, label: 'Activate Voice of God. Shoot Hilt with coordinated Tesla Gun shots. Grab hilt, flee to surface. Panzermörder fight: drop batteries from zeppelin, charge, place on Panzermörder (three Überschnalles). Cutscene plays.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-final-reich',
+    name: 'Dark Reunion',
+    slug: 'dark-reunion',
+    type: 'MAIN_QUEST',
+    xpReward: 3500,
+    description:
+      'Hardcore version of Fireworks. Requires completing Fireworks up until shooting the hilt. All four Tesla Gun variants must be constructed. Saves Klaus Fischer—Rabenhertz gem revives him upon completion.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/nA4VXZx3250',
+    steps: [
+      { order: 1, label: 'Finding the Keepsakes: Locate three keepsakes (red, orange, green) around the village. Shoot to drop and pick up. Place all three in the toy shop window adjacent to bunker doors.' },
+      { order: 2, label: 'Finding the Record: Keepsakes show arrow (clock direction). Find codices in zombie spawns with number and coloured bow. Match each keepsake to correct direction. Record pops from drawer under toy shop.' },
+      { order: 3, label: 'Weather Vane: At waterfront, golden weather vane appears. Use it—points to tiny spark. Shoot spark; mill reveals coil. After lightning rod defense, shoot coil with Tesla Gun to power windmill (Pub power).' },
+      { order: 4, label: 'Tesla Coil & Red Talon: Turn Morgue and Lab power switches back on, plus switch in front of salt mine. Shoot Tesla coil with Tesla Gun—lights cut, two panels open (Lab and Morgue). Shine Brenner head on safes for fingerprints; change numbers until blue glow. Each safe has half of medallion. Place pieces at Barbarossa statue in crypt—receive Red Talon.' },
+      { order: 5, label: 'Second Voice of God: Place record in Pub gramophone. Get ~30–50 kills with Red Talon near gramophone. Light blinks numbers for second Voice of God. Input at Voice of God (clockwise from first number on left). Activate.' },
+      { order: 6, label: 'Rabenhertz Gem & Panzermörder Fight: Shoot chandelier with all four Tesla variants. Receive Rabenhertz gem. Retrieve hilt, proceed to boss. Panzermörder fight unchanged but zeppelin opens one light at a time; faster battery placement. Klaus revives from gem—infinite ammo and Geistschild for nearby players.' },
+    ],
+  },
+  // The Final Reich — Buildables
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-final-reich',
+    name: 'Tesla Gun',
+    slug: 'tesla-gun',
+    type: 'BUILDABLE',
+    xpReward: 0,
+    description:
+      'Wonder weapon constructed from barrel and core. Barrel: charge Geistkraft Transfer Device in Emperor\'s Chamber, escort to Laboratory (5 kills per stop). Core: device to Morgue, same process. Brenner spawns—defeat for head. Forge at Weapon Assembly Station.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/PAev_AI4l2U',
+    steps: [
+      { order: 1, label: 'Charge Geistkraft Transfer Device in Emperor\'s Chamber (10 kills). Activate forge—device moves to Laboratory. Kill zombies in red ring (5 per stop). Barrel spawns at Laboratory machine.' },
+      { order: 2, label: 'Device moves to Morgue. Repeat escort (5 kills per stop). Core spawns. Brenner spawns in Command Room—defeat. Add barrel and core to Weapon Assembly Station, forge Tesla Gun.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-final-reich',
+    name: 'Tesla Gun — Midnight',
+    slug: 'tesla-gun-midnight',
+    type: 'BUILDABLE',
+    xpReward: 0,
+    description:
+      'Moonraven variant. Brenner Head at Courtyard statue—shatter to reveal battery. Shoot with Tesla Gun, place in Überschnalle charger. Get 5+ zombies, activate S-Mine Trap when battery pulses green. Place charged Überschnalle in left slot at Laboratory milling machine. Defend until process complete. Place base Tesla on Midnight\'s table.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/YOuLguE5Jpw?start=107',
+    steps: [
+      { order: 1, label: 'Brenner Head to Courtyard statue—shine to shatter. Shoot battery with Tesla Gun, place in Überschnalle charger. S-Mine Trap with 5+ zombies nearby when battery pulses green.' },
+      { order: 2, label: 'Place charged Überschnalle in left slot at Laboratory milling machine (after Lightning Rods). Defend from zombies. Place base Tesla on Midnight\'s table at Weapon Assembly Station.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-final-reich',
+    name: 'Tesla Gun — Reaper',
+    slug: 'tesla-gun-reaper',
+    type: 'BUILDABLE',
+    xpReward: 0,
+    description:
+      'Lure Wüstling to closed locker in Sewers—break open for battery. Place in device by locker. Lure two Bombers near battery (lights green). Kill with Saw Trap twice to charge. Place in Morgue machine side slot. Defend. Place base Tesla on Reaper\'s table.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/YOuLguE5Jpw?start=682',
+    steps: [
+      { order: 1, label: 'Wüstling breaks locker in Sewers—battery inside. Place in device by locker. Two Bombers near battery, kill with Saw Trap (repeat twice).' },
+      { order: 2, label: 'Place battery in Morgue machine side slot. Defend. Place base Tesla on Reaper\'s table at Weapon Assembly Station.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-final-reich',
+    name: 'Tesla Gun — Hurricane',
+    slug: 'tesla-gun-hurricane',
+    type: 'BUILDABLE',
+    xpReward: 0,
+    description:
+      'Bomber with bomb to closed locker on Laboratory staircase near Disposal Tube. Detonate to break locker—battery inside. Place in Laboratory Trap device. Lure two Wüstlings into trap, activate when battery lights green. Repeat to charge. Place in Laboratory machine side slot. Defend. Place base Tesla on Hurricane\'s table.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/YOuLguE5Jpw?start=305',
+    steps: [
+      { order: 1, label: 'Bomber detonates at locker on Laboratory stairs. Battery in device in Laboratory Trap. Two Wüstlings in trap, activate (repeat twice).' },
+      { order: 2, label: 'Place battery in Laboratory machine side slot. Defend. Place base Tesla on Hurricane\'s table at Weapon Assembly Station.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-final-reich',
+    name: 'Tesla Gun — Bloodthirst',
+    slug: 'tesla-gun-bloodthirst',
+    type: 'BUILDABLE',
+    xpReward: 0,
+    description:
+      'Shoot flickering streetlight in Riverside with Tesla Gun. Chain to next flickering light until final light in Morgue lowest floor—battery appears. Place in device. Charge by killing Pests with Morgue Trap (battery glows green when ready). Activate trap twice. Place in Morgue machine side slot. Defend. Place base Tesla on Bloodthirst\'s table.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/YOuLguE5Jpw?start=475',
+    steps: [
+      { order: 1, label: 'Chain flickering streetlights from Riverside to Morgue lowest floor. Battery in device. Morgue Trap kills Pests when battery glows green (repeat twice).' },
+      { order: 2, label: 'Place battery in Morgue machine side slot. Defend. Place base Tesla on Bloodthirst\'s table at Weapon Assembly Station.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-final-reich',
+    name: 'Red Talon',
+    slug: 'red-talon',
+    type: 'BUILDABLE',
+    xpReward: 0,
+    description:
+      'Requires Brenner Head, Tesla Gun, and Left Hand of God step (Richter\'s blimp in map). Reactivate Morgue and Lab power switches. New switch appears right of Salt Mine door—turn to reveal machinery. Zap with Tesla Gun (power cuts). Brenner Head on both safes (Lab and Morgue)—reveal purple fingerprints, open for key pieces. Place pieces below Barbarossa statue in Emperor\'s Chamber—receive Red Talon.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/ahteH5mvUnk',
+    steps: [
+      { order: 1, label: 'With Brenner Head, Tesla Gun, and Left Hand of God active: turn Morgue and Lab power switches. Turn new switch right of Salt Mine door. Zap machinery with Tesla Gun.' },
+      { order: 2, label: 'Shine Brenner Head on safes in Lab and Morgue entryways. Match five numbers to purple fingerprints. Collect key pieces from both. Place below Barbarossa statue in Emperor\'s Chamber.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-darkest-shore',
+    name: 'Making History',
+    slug: 'making-history',
+    type: 'MAIN_QUEST',
+    xpReward: 3000,
+    description:
+      'The Main Quest for The Darkest Shore. Requires Ripsaw built and upgraded at least once. Corpse Gate in U-Boat Pen needs a head—use upgraded Ripsaw to cut head from body hanging outside Bunker 3. Two paths: Pommel of Barbarossa and allied airstrike. Both must be completed for final boss fight.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/QUfl3uQ9rQw',
+    steps: [
+      { order: 1, label: 'Build and upgrade Ripsaw (at least once). Use upgraded Ripsaw to launch sawblade—cut head from body hanging outside Bunker 3. Install head on Corpse Gate in U-Boat Pen. Kill zombies to charge, revive body.' },
+      { order: 2, label: 'Pen locks down, flames appear. Fight zombies, turn off 3 valves when flame outside is leaking. Gate opens after second demise. Brenner awaits inside—defeat to disable lockdown.' },
+      { order: 3, label: 'Path A—Pommel of Barbarossa: Complete ritual path to obtain Pommel.' },
+      { order: 4, label: 'Path B—Allied airstrike: Call in and clear path for airstrike.' },
+      { order: 5, label: 'Both paths complete. Final boss fight—escape Heligoland.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-darkest-shore',
+    name: 'Ripsaw',
+    slug: 'ripsaw',
+    type: 'BUILDABLE',
+    xpReward: 0,
+    description:
+      'Buildable wonder weapon. Sawblade: corpse left of fuse panel for Ubersprengen. Handle: Artillery Bunker—table right of BAR, bunk in power room, or table right of Faustblitz. Assemble at table in hallway between U-Boat Pens and Bluffs for 2,500 Jolts. Upgrade: bayonet charge zombie for glowing spine, place on table, kill ~20 zombies nearby. Pick up for 500 more (3,000 total). Further upgrade via Ubersprengen with fuse from artillery coordinate.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/8NP8OysW9gs',
+    steps: [
+      { order: 1, label: 'Sawblade: corpse left of fuse panel (Ubersprengen). Handle: Artillery Bunker (table near BAR, bunk, or Faustblitz table).' },
+      { order: 2, label: 'Assemble at table between U-Boat Pens and Bluffs. Purchase for 2,500 Jolts.' },
+      { order: 3, label: 'Upgrade: Bayonet charge zombie for glowing spine. Place on table. Kill ~20 zombies. Pick up for 500 Jolts.' },
+      { order: 4, label: 'Ubersprengen upgrade: Six Enigma devices for coordinate. Fire artillery at coordinate after shell loaded. Fuse drops. Upgrade at Ubersprengen for 5,000 Jolts (R.I.P. Saw).' },
+    ],
+  },
+  // The Shadowed Throne — Main Quest & Buildable
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-shadowed-throne',
+    name: 'Stadtjäger Down',
+    slug: 'stadtjager-down',
+    type: 'MAIN_QUEST',
+    xpReward: 3000,
+    description:
+      'The Main Quest for The Shadowed Throne. Defeat the Stadtjäger on Straub\'s Zeppelin. Contact Red Army via Main Street radio (code on radio + Church map red pin = frequency). Launch flare from locked box to summon Zeppelin. Four tethers in Broken Apartments, Museum ceiling, Plaza center, Barbarossa\'s Refuge. Overload with Wunderbuss to lower drop pod.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/aaX-agpI5yU',
+    steps: [
+      { order: 1, label: 'Radio: Code (two letters, one number) on top of Main Street radio. Church map—red pin gives location. Chart left of map gives frequency. Contact Red Army.' },
+      { order: 2, label: 'Flares: Locked box opposite radio barricade. Damage to open, melee to launch. Zeppelin arrives, fires four tethers (Broken Apartments, Museum ceiling, Plaza, Barbarossa\'s Refuge). Final tether locked behind Blade of Barbarossa steps.' },
+      { order: 3, label: 'Overload all four tethers with Wunderbuss. Drop pod lowers to Main Street. All players in pod with full Wunderbuss ammo—shoot chain to raise to Zeppelin.' },
+      { order: 4, label: 'Zeppelin: Move power source via terminals into Straub\'s Laboratory. Zombies reanimate, kill Straub. Return to drop pod—Stadtjäger drops.' },
+      { order: 5, label: 'Stadtjäger fight: Phase 1—damage during charge wind-up (chassis glows orange). Phase 2 (≤60% HP)—immune during wind-up, vulnerable when firing Geistbolts. Phase 3 (≤30% HP)—vulnerable during energy storm. Wunderbuss for final phase. Exit pod for ending.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-shadowed-throne',
+    name: 'Wunderbuss',
+    slug: 'wunderbuss',
+    type: 'BUILDABLE',
+    xpReward: 0,
+    description:
+      'Geistkraft weapon. Battery: one of three locations—right of Faustblitz (Museum 2nd floor), left of Geistschild (Museum 1st floor), right of M1928 (Cabaret). Geistbolt: contact Red Army, shoot flare crate lock, melee to launch. Zeppelin creates Gekochts—melee one for Geistbolt. Build in Apartments caged workshop. Insert battery to open gates, place Geistbolt in unfinished Wunderbuss, take battery (locks room), insert into Wunderbuss. Fire beam at control panel to exit.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/jouoLbsetq8',
+    steps: [
+      { order: 1, label: 'Battery: Museum (right of Faustblitz or left of Geistschild) or Cabaret (right of M1928).' },
+      { order: 2, label: 'Contact Red Army, shoot flare crate lock, launch flare. Melee Gekocht for Geistbolt.' },
+      { order: 3, label: 'Apartments workshop: Insert battery to open. Place Geistbolt in Wunderbuss. Take battery (gates close). Insert battery into Wunderbuss. Fire beam at panel to exit.' },
+    ],
+  },
+  // Altar of Blood — Main Quest & Buildables
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'altar-of-blood',
+    name: 'Sword of Barbarossa',
+    slug: 'sword-of-barbarossa',
+    type: 'MAIN_QUEST',
+    xpReward: 2750,
+    description:
+      'Requires reforging the Sword of Barbarossa in The Tortured Path first. Deposit 1,750 Jolts on each of the four Sacrifice Stones (noise and red Geistkraft burst when correct). Place 1,750 Jolts in bowls around the Forge altar. Forge pulses white. Being downed in the blood pool revives with full Geistschild and Sword of Barbarossa (solo: consumes Lebenblitz if purchased).',
+    videoEmbedUrl: 'https://www.youtube.com/embed/hETXFHh93uM',
+    steps: [
+      { order: 1, label: 'Deposit 1,750 Jolts on each of the four Sacrifice Stones. Correct amount: noise + red Geistkraft burst.' },
+      { order: 2, label: 'Place 1,750 Jolts in bowls around the Forge altar (central room). Same effect signifies correct amount.' },
+      { order: 3, label: 'Forge produces white pulse. Get downed in blood pool around Forge—instant revive with full Geistschild and Sword of Barbarossa.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'altar-of-blood',
+    name: 'Upgraded Ubersprengen',
+    slug: 'upgraded-ubersprengen',
+    type: 'BUILDABLE',
+    xpReward: 0,
+    description:
+      'Code: seven runes from Elder Futhark (ᛒ, ᛃ, ᛚ, ᛗ, ᚾ, ᚢ, ᛉ). Info from Bodega Cervantes and U.S.S. Mount Olympus. Shoot runic wall opposite Kugelblitz machine to input. Hidden rock section left of Laufenblitz opens—battery inside. Pick up to auto-place on Ubersprengen. Upgrades Ripsaw, Tesla Gun, Ice Pick, Trench Knife, Baseball Bat.',
+    steps: [
+      { order: 1, label: 'Assemble rune code from Bodega Cervantes and U.S.S. Mount Olympus info. Code: ᛒ ᛃ ᛚ ᛗ ᚾ ᚢ ᛉ.' },
+      { order: 2, label: 'Shoot runic wall opposite Kugelblitz machine. Rock section left of Laufenblitz opens. Pick up battery.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'altar-of-blood',
+    name: 'Kontrollgranates',
+    slug: 'kontrollgranates',
+    type: 'BUILDABLE',
+    xpReward: 0,
+    description:
+      'Five Jack-in-the-Box symbols. Throw Jack-in-the-Box at each—destroys when it explodes. Locations: behind/above Lebenblitz; above M1 Garand behind pottery; between barrels behind Schnellblitz; above doorway Kugelblitz to Schildblitz; ceiling near scaffolding above M1903. All destroyed: earthquake, flares and Kontrollgranates fall on staircase to Blood Forge. Tactical equipment—red gas, zombies become allied.',
+    steps: [
+      { order: 1, label: 'Behind/above Lebenblitz.' },
+      { order: 2, label: 'Above M1 Garand, behind pottery, left of opening.' },
+      { order: 3, label: 'Between barrels behind Schnellblitz.' },
+      { order: 4, label: 'Above doorway Kugelblitz to Schildblitz.' },
+      { order: 5, label: 'Ceiling near scaffolding above M1903. All five: flares and Kontrollgranates on Blood Forge stairs.' },
+    ],
+  },
+  // The Frozen Dawn — Main Quest & Buildables
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-frozen-dawn',
+    name: 'Kingfall',
+    slug: 'kingfall',
+    type: 'MAIN_QUEST',
+    xpReward: 2750,
+    description:
+      'The Main Quest for The Frozen Dawn. Defeat the God-King. Complete four trials (Bloodraven, Deathraven, Moonraven, Stormraven) to obtain upgraded Raven weapons. Place them on four pedestals in Ice Caves. Thulian Transport to boss fight in God King\'s Citadel.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/DQtMLo-0OfI',
+    steps: [
+      { order: 1, label: 'Trial of Bloodraven: Fill three blood pools (5 kills each)—Ice Caves near Thulian Archives, Morgue left of M1928, Overlook (get Bloodraven stone from Morgue bones first). Blood Altar: kill Wüstling for Thulian Shield. Crash Site debris: Bomber destroys—get radio and speaker. Place on stones. Shield kill empowered Corpse Eater on aurora pools for patterns. Radio cycles patterns at Blood Altar, kill zombie for each. Down in pool—Bloodraven trial. Reflect light with shield twice for Roar of Sang\'ket.' },
+      { order: 2, label: 'Trial of Deathraven: Phylactery stone—survive ~1 min for Thulian Scythe. Crash Site wire + Corpse Eater spine (scythe kill). Place on Phylactery device. Kill zombies until blade ablaze. Wait two rounds. Thulian Transport—Deathraven trial. Kill 2 empowered Corpse Eaters + 3 Wüstlings for Fang of An\'heist.' },
+      { order: 3, label: 'Trial of Moonraven: Two books (Overlook rocks; Passage, Blood Altar, or Morgue ledge). Place on Thulian Archives pedestal—cypher. Three gears (Ice Caves, Phylactery, Blood Altar, Overlook, Passage, Cypher room). Place in Gearworks. Kill zombies at Orrery. Set orbs per mirrored cypher. Broken Flail appears. Moonraven stones (3 zombies each, right to left). Find constellations with Flail (Orrery, Overlook pool, Phylactery window, Blood Altar left/right, Crash Site). Throw Orb at yellow Orrery—trial. Avoid fire wall twice for Talon of Lu\'roth.' },
+      { order: 4, label: 'Trial of Stormraven: Crash Site Überschnalle battery—Overlook cauldron. Kill zombies to charge. Thulian Hammer spawns. Four T-shaped stones (Ice Caves, Thulian Archives, Morgue, Blood Altar). Place in slots. Code below stones—kill zombie at runes in order. Four pillars arise. Match lightning runes on incomplete pillars (shoot to rotate). Hammer teleports—go prone, interact from below. Follow to Overlook, pillars zap it. Crash Site purple rune—melee with hammer. Chain: Ice Caves, Morgue, Phylactery (melee zombie on pedestal), hallway rune. Contraption puzzle—fill purple runes (3 puzzles, skull resets). Hammer walk lightning bridge to Stormraven trial. Throw Fist at bubble zombies for Fist of Tal\'rek.' },
+      { order: 5, label: 'Key to the Forgotten Tomb: Place Roar of Sang\'ket, Fang of An\'heist, Talon of Lu\'roth, Fist of Tal\'rek on four pedestals (Ice Caves, overlooking Thule). Roar on floor pedestal nearest Crash Site.' },
+      { order: 6, label: 'Thulian Transport near Morgue opens. Enter to fight God-King in God King\'s Citadel.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-frozen-dawn',
+    name: 'Roar of Sang\'ket (Thulian Shield)',
+    slug: 'roar-of-sangket',
+    type: 'BUILDABLE',
+    xpReward: 0,
+    description:
+      'Thulian Shield + upgrade. Fill three blood pools (5 kills each). Bloodraven stone from Morgue bones for Overlook pool. Blood Altar Wüstling drops shield. Crash Site: Bomber on debris for radio and speaker. Shield kill empowered Corpse Eater on aurora pools for patterns. Blood Altar: cycle patterns, kill zombie each. Down in pool—trial. Reflect light twice.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/THHxwlLGOkk',
+    steps: [
+      { order: 1, label: 'Fill three blood pools. Bloodraven stone (Morgue bones) for Overlook. Kill Wüstling in Blood Altar for shield.' },
+      { order: 2, label: 'Crash Site: Bomber on debris. Radio and speaker on stones. Aurora pools: shield kill Corpse Eater for patterns. Trial: reflect light twice.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-frozen-dawn',
+    name: 'Fang of An\'heist (Thulian Scythe)',
+    slug: 'fang-of-anheist',
+    type: 'BUILDABLE',
+    xpReward: 0,
+    description:
+      'Thulian Scythe + upgrade. Phylactery Deathraven stone—survive for scythe. Crash Site wire + Corpse Eater spine (scythe kill + interact). Place on Phylactery device. Kill zombies until blade ablaze. Two rounds to cool. Thulian Transport—trial. Kill 2 empowered Corpse Eaters + 3 Wüstlings.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/rW1eKYxYssE',
+    steps: [
+      { order: 1, label: 'Phylactery stone—survive for Thulian Scythe. Wire (Crash Site) + spine. Blade ablaze, wait two rounds.' },
+      { order: 2, label: 'Thulian Transport—trial. Kill 2 empowered Corpse Eaters and 3 Wüstlings.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-frozen-dawn',
+    name: 'Talon of Lu\'roth (Broken Flail)',
+    slug: 'talon-of-luroth',
+    type: 'BUILDABLE',
+    xpReward: 0,
+    description:
+      'Broken Flail + Talon of Lu\'roth. Two books (Overlook; Passage/Blood Altar/Morgue). Thulian Archives pedestal—cypher. Three gears (random locations). Gearworks Orrery—kill zombies, set orbs per cypher. Moonraven stones: 3 zombies each. Constellations with Flail (6 locations). Throw Orb at yellow Orrery—trial. Avoid fire wall twice.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/j4kdFj-CLTw',
+    steps: [
+      { order: 1, label: 'Two books, cypher. Three gears, Orrery. Broken Flail. Moonraven stones, constellations.' },
+      { order: 2, label: 'Throw Orb at yellow Orrery. Trial: avoid fire wall twice.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-frozen-dawn',
+    name: 'Fist of Tal\'rek (Thulian Hammer)',
+    slug: 'fist-of-talrek',
+    type: 'BUILDABLE',
+    xpReward: 0,
+    description:
+      'Thulian Hammer + upgrade. Crash Site battery—Overlook cauldron. Four T-shaped stones. Code from stones, runes. Four pillars—match lightning. Hammer teleports—prone interact. Follow to Overlook. Purple rune chain: Crash Site, Ice Caves, Morgue, Phylactery, hallway. Contraption puzzle (3). Lightning bridge to trial. Throw Fist at bubble zombies.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/2fv6Fa8QybA',
+    steps: [
+      { order: 1, label: 'Battery in cauldron. Four stones, code, pillars. Prone interact hammer, follow to Overlook.' },
+      { order: 2, label: 'Rune chain, contraption puzzle. Lightning bridge. Trial: throw Fist at bubble zombies.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-frozen-dawn',
+    name: 'Raven Claw',
+    slug: 'raven-claw',
+    type: 'SIDE_QUEST',
+    xpReward: 0,
+    description:
+      'Hide-and-seek Easter egg. Once per game. Interact with golden raven statue (high ground behind blood pool missing Bloodraven stone). Raven spawns—find and shoot with pistol only (other weapons fail). Corpse Eater spawns after shot. Kill it. Repeat four times. Raven Claw on stone slab in Blood Altar. Upgrades via Ubersprengen to Raven Eye.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/4fG-Z4fAV9I',
+    steps: [
+      { order: 1, label: 'Interact golden raven statue (behind Overlook blood pool).' },
+      { order: 2, label: 'Find and shoot raven with pistol. Kill Corpse Eater. Repeat four times for Raven Claw.' },
+    ],
+  },
 ];

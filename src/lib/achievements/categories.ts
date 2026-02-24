@@ -5,6 +5,7 @@ import { getBo4MapConfig } from '@/lib/bo4/bo4-map-config';
 import { getBocwMapConfig } from '@/lib/bocw/bocw-map-config';
 import { getBo6MapConfig } from '@/lib/bo6/bo6-map-config';
 import { getBo7MapConfig } from '@/lib/bo7/bo7-map-config';
+import { getWw2MapConfig } from '@/lib/ww2/ww2-map-config';
 
 // How we group and order achievements on map detail and profile
 export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
@@ -21,6 +22,7 @@ export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
   NO_MAGIC: 'No Magic',
   NO_JUG: 'No Jug',
   NO_ARMOR: 'No Armor',
+  NO_BLITZ: 'No Blitz',
   NO_ATS: 'No AATs',
   // IW/BO3 speedrun categories
   ROUND_30_SPEEDRUN: 'Round 30 Speedrun',
@@ -36,6 +38,7 @@ export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
   EXFIL_SPEEDRUN: 'Exfil Round 11',
   EXFIL_R21_SPEEDRUN: 'Exfil Round 21',
   BUILD_EE_SPEEDRUN: 'Build% EE Speedrun',
+  SUPER_30_SPEEDRUN: 'Super 30 Speedrun',
   INSTAKILL_ROUND_SPEEDRUN: 'Instakill Round Speedrun',
   EASTER_EGG_SPEEDRUN: 'Easter Egg Speedrun',
   NO_MANS_LAND: "No Man's Land",
@@ -64,6 +67,7 @@ export const SPEEDRUN_CATEGORIES: string[] = [
   'EXFIL_SPEEDRUN',
   'EXFIL_R21_SPEEDRUN',
   'BUILD_EE_SPEEDRUN',
+  'SUPER_30_SPEEDRUN',
   'INSTAKILL_ROUND_SPEEDRUN',
   'EASTER_EGG_SPEEDRUN',
   'GHOST_AND_SKULLS',
@@ -88,6 +92,8 @@ const CATEGORY_ORDER = [
   'NO_POWER',
   'NO_MAGIC',
   'NO_JUG',
+  'NO_ARMOR',
+  'NO_BLITZ',
   'NO_ATS',
   'NO_MANS_LAND',
   'ROUND_30_SPEEDRUN',
@@ -103,6 +109,7 @@ const CATEGORY_ORDER = [
   'EXFIL_SPEEDRUN',
   'EXFIL_R21_SPEEDRUN',
   'BUILD_EE_SPEEDRUN',
+  'SUPER_30_SPEEDRUN',
   'INSTAKILL_ROUND_SPEEDRUN',
   'EASTER_EGG_SPEEDRUN',
   'RUSH',
@@ -208,6 +215,14 @@ export function getAllowedNonSpeedrunCategoriesForMap(
     );
     return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG']));
   }
+  if (gameShortName === 'WW2') {
+    const cfg = getWw2MapConfig(mapSlug);
+    if (!cfg?.challengeTypes) return null;
+    const fromConfig = cfg.challengeTypes.filter(
+      (c) => !isSpeedrunCategory(c) && c !== 'HIGHEST_ROUND'
+    );
+    return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG']));
+  }
   return null;
 }
 
@@ -292,6 +307,13 @@ export function getAllowedSpeedrunCategoriesForMap(
       return cfg.challengeTypes.filter((c) => isSpeedrunCategory(c));
     }
   }
+  if (gameShortName === 'WW2') {
+    const cfg = getWw2MapConfig(mapSlug);
+    if (cfg?.challengeTypes) {
+      return cfg.challengeTypes.filter((c) => isSpeedrunCategory(c));
+    }
+    return [...bo2Generic, 'ROUND_10_SPEEDRUN', 'SUPER_30_SPEEDRUN'];
+  }
   return bo2Generic;
 }
 
@@ -340,11 +362,35 @@ export function sortAchievementsInCategory<T extends { type?: string; xpReward: 
   });
 }
 
-/** Sort achievements for display: main EE (not timed) first, then by type, speedrun tiers (fastest first), round, slug. */
-export function sortAchievementsForDisplay<T extends { type: string; slug: string; criteria?: unknown }>(
+/** Deduplicate achievements. For EASTER_EGG_COMPLETE, keep one per (mapId, name) preferring the one with easterEggId (the one that unlocks). */
+export function deduplicateAchievementsById<T extends { id?: string; type?: string; mapId?: string | null; name?: string; easterEggId?: string | null }>(
   achievements: T[]
 ): T[] {
-  return [...achievements].sort((a, b) => {
+  const eeByKey = new Map<string, T[]>();
+  const other: T[] = [];
+  for (const a of achievements) {
+    if (a.type === 'EASTER_EGG_COMPLETE') {
+      const key = `${a.mapId ?? ''}::${a.name ?? ''}`;
+      if (!eeByKey.has(key)) eeByKey.set(key, []);
+      eeByKey.get(key)!.push(a);
+    } else {
+      other.push(a);
+    }
+  }
+  const keptEe: T[] = [];
+  for (const list of Array.from(eeByKey.values())) {
+    const withEe = list.find((a: T) => a.easterEggId);
+    keptEe.push(withEe ?? list[0]!);
+  }
+  return [...other, ...keptEe];
+}
+
+/** Sort achievements for display: main EE (not timed) first, then by type, speedrun tiers (fastest first), round, slug. */
+export function sortAchievementsForDisplay<T extends { id?: string; type: string; slug: string; criteria?: unknown }>(
+  achievements: T[]
+): T[] {
+  const deduped = deduplicateAchievementsById(achievements);
+  return [...deduped].sort((a, b) => {
     const aMain = isMainEasterEggAchievement(a);
     const bMain = isMainEasterEggAchievement(b);
     if (aMain && !bMain) return -1;

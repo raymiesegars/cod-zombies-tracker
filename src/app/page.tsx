@@ -15,7 +15,7 @@ const features = [
   {
     icon: MapIcon,
     title: 'Every Map Covered',
-    description: 'From World at War to Black Ops 6—every Treyarch Zombies map with full Easter egg coverage and progress tracking.',
+    description: 'From World at War to Black Ops 7—every CoD Zombies map including IW and WWII, with full Easter egg coverage and progress tracking.',
   },
   {
     icon: Target,

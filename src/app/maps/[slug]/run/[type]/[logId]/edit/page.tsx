@@ -22,6 +22,7 @@ import { isBo3Game, BO3_GOBBLEGUM_MODES, getBo3GobbleGumLabel } from '@/lib/bo3'
 import { isBocwGame, BOCW_SUPPORT_MODES, getBocwSupportLabel } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
 import { isBo7Game, BO7_SUPPORT_MODES, getBo7SupportLabel } from '@/lib/bo7';
+import { isWw2Game } from '@/lib/ww2';
 import { Bo7RelicPicker } from '@/components/game';
 import { ChevronLeft, Save, Lock } from 'lucide-react';
 import type { PlayerCount } from '@/types';
@@ -59,6 +60,7 @@ type ChallengeLog = {
   bo7SupportMode?: string | null;
   bo7IsCursedRun?: boolean | null;
   bo7RelicsUsed?: string[];
+  ww2ConsumablesUsed?: boolean | null;
 };
 type EasterEggLog = {
   id: string;
@@ -74,6 +76,7 @@ type EasterEggLog = {
   easterEgg: { id: string; name: string };
   map: MapInfo;
   isVerified?: boolean;
+  ww2ConsumablesUsed?: boolean | null;
 };
 
 export default function EditRunPage() {
@@ -118,6 +121,7 @@ export default function EditRunPage() {
   const [bo7IsCursedRun, setBo7IsCursedRun] = useState(false);
   const [bo7RelicsUsed, setBo7RelicsUsed] = useState<string[]>([]);
   const [rampageInducerUsed, setRampageInducerUsed] = useState(false);
+  const [ww2ConsumablesUsed, setWw2ConsumablesUsed] = useState(true);
   // Admin / verified status
   const [isVerified, setIsVerified] = useState(false);
   const [isSuperAdminUser, setIsSuperAdminUser] = useState(false);
@@ -188,11 +192,13 @@ export default function EditRunPage() {
           setBo7IsCursedRun(Boolean(data.bo7IsCursedRun));
           if (Array.isArray(data.bo7RelicsUsed)) setBo7RelicsUsed(data.bo7RelicsUsed);
           if (data.rampageInducerUsed != null) setRampageInducerUsed(data.rampageInducerUsed);
+          if (data.ww2ConsumablesUsed != null) setWw2ConsumablesUsed(data.ww2ConsumablesUsed);
         } else {
           setRoundCompleted(data.roundCompleted != null ? String(data.roundCompleted) : '');
           setIsSolo(!!data.isSolo);
           setIsNoGuide(!!data.isNoGuide);
           if (data.rampageInducerUsed != null) setRampageInducerUsed(data.rampageInducerUsed);
+          if (data.ww2ConsumablesUsed != null) setWw2ConsumablesUsed(data.ww2ConsumablesUsed);
         }
       })
       .catch(() => setError('Failed to load run.'))
@@ -251,6 +257,7 @@ export default function EditRunPage() {
           ...(isBo6Game(log?.map?.game?.shortName) && { bo6GobbleGumMode, bo6SupportMode }),
           ...(isBo7Game(log?.map?.game?.shortName) && { bo7SupportMode, bo7IsCursedRun, bo7RelicsUsed: bo7IsCursedRun ? bo7RelicsUsed : [] }),
           ...((isBocwGame(log?.map?.game?.shortName) || isBo6Game(log?.map?.game?.shortName) || isBo7Game(log?.map?.game?.shortName)) && { rampageInducerUsed }),
+          ...(isWw2Game(log?.map?.game?.shortName) && { ww2ConsumablesUsed }),
           proofUrls: normalizeProofUrls(proofUrls),
           notes: notes || null,
           // Always send explicitly (JSON.stringify omits undefined, which would skip the API update)
@@ -292,6 +299,7 @@ export default function EditRunPage() {
           isSolo,
           isNoGuide,
           ...((isBocwGame(log?.map?.game?.shortName) || isBo6Game(log?.map?.game?.shortName) || isBo7Game(log?.map?.game?.shortName)) && { rampageInducerUsed }),
+          ...(isWw2Game(log?.map?.game?.shortName) && { ww2ConsumablesUsed }),
           proofUrls: normalizeProofUrls(proofUrls),
           notes: notes || null,
           // Always send explicitly (JSON.stringify omits undefined, which would skip the API update)
@@ -508,6 +516,18 @@ export default function EditRunPage() {
                     ]}
                     value={rampageInducerUsed ? 'true' : 'false'}
                     onChange={(e) => setRampageInducerUsed(e.target.value === 'true')}
+                    disabled={verifiedAndLocked}
+                  />
+                )}
+                {isWw2Game(gameShortName) && (
+                  <Select
+                    label="Consumables"
+                    options={[
+                      { value: 'true', label: 'With Consumables' },
+                      { value: 'false', label: 'No Consumables' },
+                    ]}
+                    value={ww2ConsumablesUsed ? 'true' : 'false'}
+                    onChange={(e) => setWw2ConsumablesUsed(e.target.value === 'true')}
                     disabled={verifiedAndLocked}
                   />
                 )}

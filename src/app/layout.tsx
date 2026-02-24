@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     'Zombies Easter egg teammates',
     'Black Ops Zombies',
     'WAW Zombies',
-    'BO1 BO2 BO3 BO4 BOCW BO6 BO7 Zombies',
+    'BO1 BO2 BO3 IW WW2 BO4 BOCW BO6 BO7 Zombies',
     'Zombies progress tracker',
     'Zombies achievements',
     'Easter egg speedrun',

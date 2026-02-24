@@ -808,6 +808,151 @@ export const BO3_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
   ),
 };
 
+/** WW2 round speedrun tiers — WR-based. R10, R30, R50, R70, R100, R200, EE, Super 30. */
+function buildWw2SpeedrunTiers(cfg: {
+  r10?: number;
+  r30: number;
+  r50?: number;
+  r70?: number;
+  r100?: number;
+  r200?: number;
+  ee?: number;
+  super30?: number;
+}): SpeedrunTiersByType {
+  const buf = 1.2;
+  const base: SpeedrunTiersByType = {};
+  if (cfg.r10 != null) {
+    base.ROUND_10_SPEEDRUN = [
+      { maxTimeSeconds: Math.round(cfg.r10 * buf * 1.5), xpReward: 60 },
+      { maxTimeSeconds: Math.round(cfg.r10 * buf * 1.2), xpReward: 150 },
+      { maxTimeSeconds: Math.round(cfg.r10 * buf), xpReward: 400 },
+      { maxTimeSeconds: Math.round(cfg.r10 * 1.05), xpReward: 1000 },
+    ];
+  }
+  base.ROUND_30_SPEEDRUN = [
+    { maxTimeSeconds: Math.round(cfg.r30 * buf * 1.5), xpReward: 80 },
+    { maxTimeSeconds: Math.round(cfg.r30 * buf * 1.2), xpReward: 200 },
+    { maxTimeSeconds: Math.round(cfg.r30 * buf), xpReward: 500 },
+    { maxTimeSeconds: Math.round(cfg.r30 * 1.05), xpReward: 1200 },
+  ];
+  if (cfg.r50 != null) {
+    base.ROUND_50_SPEEDRUN = [
+      { maxTimeSeconds: Math.round(cfg.r50 * buf * 1.5), xpReward: 120 },
+      { maxTimeSeconds: Math.round(cfg.r50 * buf * 1.2), xpReward: 300 },
+      { maxTimeSeconds: Math.round(cfg.r50 * buf), xpReward: 700 },
+      { maxTimeSeconds: Math.round(cfg.r50 * 1.05), xpReward: 1500 },
+    ];
+  }
+  if (cfg.r70 != null) {
+    base.ROUND_70_SPEEDRUN = [
+      { maxTimeSeconds: Math.round(cfg.r70 * buf * 1.5), xpReward: 150 },
+      { maxTimeSeconds: Math.round(cfg.r70 * buf * 1.2), xpReward: 400 },
+      { maxTimeSeconds: Math.round(cfg.r70 * buf), xpReward: 900 },
+      { maxTimeSeconds: Math.round(cfg.r70 * 1.05), xpReward: 2000 },
+    ];
+  }
+  if (cfg.r100 != null) {
+    base.ROUND_100_SPEEDRUN = [
+      { maxTimeSeconds: Math.round(cfg.r100 * buf * 1.5), xpReward: 200 },
+      { maxTimeSeconds: Math.round(cfg.r100 * buf * 1.2), xpReward: 500 },
+      { maxTimeSeconds: Math.round(cfg.r100 * buf), xpReward: 1200 },
+      { maxTimeSeconds: Math.round(cfg.r100 * 1.05), xpReward: 2500 },
+    ];
+  }
+  if (cfg.r200 != null) {
+    base.ROUND_200_SPEEDRUN = [
+      { maxTimeSeconds: Math.round(cfg.r200 * buf * 1.5), xpReward: 300 },
+      { maxTimeSeconds: Math.round(cfg.r200 * buf * 1.2), xpReward: 800 },
+      { maxTimeSeconds: Math.round(cfg.r200 * buf), xpReward: 1800 },
+      { maxTimeSeconds: Math.round(cfg.r200 * 1.05), xpReward: 3500 },
+    ];
+  }
+  if (cfg.ee != null) {
+    base.EASTER_EGG_SPEEDRUN = [
+      { maxTimeSeconds: Math.round(cfg.ee * buf * 1.5), xpReward: 200 },
+      { maxTimeSeconds: Math.round(cfg.ee * buf * 1.2), xpReward: 600 },
+      { maxTimeSeconds: Math.round(cfg.ee * buf), xpReward: 1500 },
+      { maxTimeSeconds: Math.round(cfg.ee * 1.05), xpReward: 2500 },
+    ];
+  }
+  if (cfg.super30 != null) {
+    base.SUPER_30_SPEEDRUN = [
+      { maxTimeSeconds: Math.round(cfg.super30 * buf * 1.5), xpReward: 300 },
+      { maxTimeSeconds: Math.round(cfg.super30 * buf * 1.2), xpReward: 800 },
+      { maxTimeSeconds: Math.round(cfg.super30 * buf), xpReward: 1800 },
+      { maxTimeSeconds: Math.round(cfg.super30 * 1.05), xpReward: 3500 },
+    ];
+  }
+  return base;
+}
+
+export const WW2_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
+  prologue: buildWw2SpeedrunTiers({ r30: m(40) + 1 }),
+  'the-final-reich': buildWw2SpeedrunTiers({
+    r10: m(7) + 48,
+    r30: m(28) + 27,
+    r50: m(54) + 51,
+    r70: hs(1, 45, 40),
+    r100: hs(3, 50, 40),
+    r200: hs(22, 30, 20),
+    ee: m(23),
+    super30: hs(2, 30, 30),
+  }),
+  'groesten-haus': buildWw2SpeedrunTiers({
+    r30: m(23) + 33,
+    r50: m(53) + 15,
+    r70: hs(2, 43, 40),
+  }),
+  'the-darkest-shore': buildWw2SpeedrunTiers({
+    r10: m(8) + 6,
+    r30: m(23) + 20,
+    r50: m(50),
+    r70: hs(1, 41, 40),
+    r100: h(4),
+    r200: hs(17, 30, 40),
+    ee: m(30),
+  }),
+  'the-shadowed-throne': buildWw2SpeedrunTiers({
+    r10: m(8),
+    r30: m(30),
+    r50: h(1),
+    r70: h(2),
+    r100: hs(4, 20, 30),
+    r200: hs(18, 30, 40),
+    ee: m(30),
+  }),
+  'bodega-cervantes': buildWw2SpeedrunTiers({
+    r30: m(26) + 30,
+    r50: m(50),
+    r70: hs(1, 21, 30),
+    r100: hs(3, 22, 20),
+    r200: h(15),
+  }),
+  'uss-mount-olympus': buildWw2SpeedrunTiers({
+    r30: m(28),
+    r50: m(58),
+    r70: hs(1, 56, 40),
+    r100: hs(4, 56, 40),
+    r200: h(26),
+  }),
+  'altar-of-blood': buildWw2SpeedrunTiers({
+    r30: m(28),
+    r50: m(56) + 30,
+    r70: hs(1, 56, 40),
+    r100: h(5),
+    r200: hs(21, 30, 40),
+  }),
+  'the-frozen-dawn': buildWw2SpeedrunTiers({
+    r10: m(1) + 25,
+    r30: m(24),
+    r50: m(56),
+    r70: hs(1, 46, 40),
+    r100: hs(4, 8, 40),
+    r200: h(23),
+    ee: m(20),
+  }),
+};
+
 /** BO2 EE speedrun tiers per Easter Egg (Richtofen / Maxis variants). WRs in seconds. */
 export const BO2_TRANZIT_RICHTOFEN_EE_TIERS: SpeedrunTier[] = [
   { maxTimeSeconds: 780, xpReward: 200 },

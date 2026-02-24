@@ -8,6 +8,7 @@ import { isBo4Game, BO4_DIFFICULTIES } from '@/lib/bo4';
 import { isBocwGame } from '@/lib/bocw';
 import { isBo6Game } from '@/lib/bo6';
 import { isBo7Game } from '@/lib/bo7';
+import { isWw2Game, WW2_CONSUMABLES_DEFAULT } from '@/lib/ww2';
 import type { Bo4Difficulty } from '@prisma/client';
 
 // Log an EE completion (new run each time). Main-quest XP once per user per EE.
@@ -86,6 +87,10 @@ export async function POST(request: NextRequest) {
       body.rampageInducerUsed !== undefined
         ? Boolean(body.rampageInducerUsed)
         : undefined;
+    const isWw2 = isWw2Game(map.game?.shortName);
+    const ww2ConsumablesUsed = isWw2
+      ? (body.ww2ConsumablesUsed !== undefined ? Boolean(body.ww2ConsumablesUsed) : WW2_CONSUMABLES_DEFAULT === 'WITH_CONSUMABLES')
+      : undefined;
 
     let difficulty: Bo4Difficulty | undefined;
     if (isBo4Game(map.game?.shortName)) {
@@ -116,6 +121,7 @@ export async function POST(request: NextRequest) {
         teammateNonUserNames,
         ...(difficulty != null && { difficulty }),
         ...(rampageInducerUsed != null && { rampageInducerUsed }),
+        ...(ww2ConsumablesUsed != null && { ww2ConsumablesUsed }),
         ...(requestVerification && { verificationRequestedAt: new Date() }),
       },
     });

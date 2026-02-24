@@ -181,6 +181,28 @@ const IW: Record<string, MapRoundConfig> = {
   'the-beast-from-beyond': config(134, IW_134),
 };
 
+const WW2_53: RoundMilestone[] = buildRoundMilestones(53, 800);
+const WW2_255: RoundMilestone[] = buildRoundMilestones(255, 2500);
+const WW2_154: RoundMilestone[] = buildRoundMilestones(154, 1500);
+const WW2_433: RoundMilestone[] = buildRoundMilestones(433, 3500);
+const WW2_341: RoundMilestone[] = buildRoundMilestones(341, 3000);
+const WW2_320: RoundMilestone[] = buildRoundMilestones(320, 2500);
+const WW2_444: RoundMilestone[] = buildRoundMilestones(444, 3500);
+const WW2_451: RoundMilestone[] = buildRoundMilestones(451, 3500);
+const WW2_440: RoundMilestone[] = buildRoundMilestones(440, 3500);
+
+const WW2: Record<string, MapRoundConfig> = {
+  prologue: config(53, WW2_53),
+  'the-final-reich': config(255, WW2_255),
+  'groesten-haus': config(154, WW2_154),
+  'the-darkest-shore': config(433, WW2_433),
+  'the-shadowed-throne': config(341, WW2_341),
+  'bodega-cervantes': config(320, WW2_320),
+  'uss-mount-olympus': config(444, WW2_444),
+  'altar-of-blood': config(451, WW2_451),
+  'the-frozen-dawn': config(440, WW2_440),
+};
+
 const BY_GAME: Record<string, Record<string, MapRoundConfig>> = {
   WAW,
   BO1,
@@ -191,6 +213,7 @@ const BY_GAME: Record<string, Record<string, MapRoundConfig>> = {
   BOCW,
   BO6,
   BO7,
+  WW2,
 };
 
 export function getRoundConfigForMap(

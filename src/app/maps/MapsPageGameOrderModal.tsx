@@ -37,10 +37,12 @@ export function MapsPageGameOrderModal({
     const order = initialGameOrder.length > 0 ? initialGameOrder : defaultOrder;
     const visibleSet = new Set(order);
     const visibleOrdered = order.filter((id) => games.some((g) => g.id === id));
-    const hidden = games.filter((g) => !visibleSet.has(g.id));
+    const notInOrder = games.filter((g) => !visibleSet.has(g.id));
+    // New games (not in saved order) are visible by default so they appear when new maps are added
+    const newGamesSorted = [...notInOrder].sort((a, b) => a.order - b.order);
     setList([
       ...visibleOrdered.map((gameId) => ({ gameId, visible: true })),
-      ...hidden.map((g) => ({ gameId: g.id, visible: false })),
+      ...newGamesSorted.map((g) => ({ gameId: g.id, visible: true })),
     ]);
   }, [isOpen, games, initialGameOrder]);
 

@@ -13,6 +13,7 @@ import { isBo3Game, BO3_GOBBLEGUM_MODES } from '@/lib/bo3';
 import { isBocwGame, BOCW_SUPPORT_MODES } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES } from '@/lib/bo6';
 import { isBo7Game, BO7_SUPPORT_MODES, BO7_RELICS } from '@/lib/bo7';
+import { isWw2Game } from '@/lib/ww2';
 import type { Bo4Difficulty } from '@prisma/client';
 
 type Params = { params: Promise<{ id: string }> };
@@ -191,6 +192,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     const rampageInducerUsed = body.rampageInducerUsed !== undefined && (isBocwGame(gameShortName) || isBo6Game(gameShortName) || isBo7Game(gameShortName))
       ? Boolean(body.rampageInducerUsed)
       : undefined;
+    const ww2ConsumablesUsed = body.ww2ConsumablesUsed !== undefined && isWw2Game(gameShortName)
+      ? Boolean(body.ww2ConsumablesUsed)
+      : undefined;
 
     let difficulty: Bo4Difficulty | undefined;
     if (body.difficulty !== undefined) {
@@ -263,6 +267,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         ...(bo7IsCursedRun !== undefined && { bo7IsCursedRun }),
         ...(bo7RelicsUsed !== undefined && { bo7RelicsUsed }),
         ...(rampageInducerUsed !== undefined && { rampageInducerUsed }),
+        ...(ww2ConsumablesUsed !== undefined && { ww2ConsumablesUsed }),
       },
       include: {
         challenge: true,
