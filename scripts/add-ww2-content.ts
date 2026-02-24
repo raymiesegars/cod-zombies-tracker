@@ -11,7 +11,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const root = path.resolve(__dirname, '..');
-for (const file of ['.env', '.env.local']) {
+for (const file of ['.env', '.env.local', '.env.production']) {
   const p = path.join(root, file);
   if (fs.existsSync(p)) {
     const content = fs.readFileSync(p, 'utf-8');
@@ -210,6 +210,34 @@ async function main() {
     }
   }
   if (achievementsCreated > 0) console.log(`Created ${achievementsCreated} WW2 achievements`);
+
+  // EASTER_EGG_COMPLETE achievements for main quest eggs (seed-easter-eggs creates these when run, but add-ww2 runs alone)
+  let eeAchievementsCreated = 0;
+  for (const eeData of ww2Ees) {
+    if ((eeData.xpReward ?? 0) <= 0) continue;
+    const map = allWw2Maps.find((m) => m.slug === eeData.mapSlug);
+    if (!map) continue;
+    const ee = await prisma.easterEgg.findFirst({ where: { mapId: map.id, slug: eeData.slug } });
+    if (!ee) continue;
+    const existing = await prisma.achievement.findFirst({
+      where: { easterEggId: ee.id, type: 'EASTER_EGG_COMPLETE' },
+    });
+    if (existing) continue;
+    await prisma.achievement.create({
+      data: {
+        mapId: map.id,
+        easterEggId: ee.id,
+        name: ee.name,
+        slug: eeData.slug,
+        type: 'EASTER_EGG_COMPLETE',
+        rarity: 'LEGENDARY',
+        xpReward: eeData.xpReward ?? 0,
+        criteria: {},
+      },
+    });
+    eeAchievementsCreated++;
+  }
+  if (eeAchievementsCreated > 0) console.log(`Created ${eeAchievementsCreated} EASTER_EGG_COMPLETE achievements`);
 
   console.log('WW2 content added.');
 }

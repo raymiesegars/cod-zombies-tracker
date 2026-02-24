@@ -140,11 +140,47 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
 
   EASTER_EGG_COMPLETE: async (userId, criteria, achievement) => {
     const eeId = achievement.easterEggId;
-    if (!eeId) return false;
+    const mapId = achievement.mapId;
+    if (!eeId || !mapId) return false;
+
+    // Path 1: User logged this Easter egg specifically
     const log = await prisma.easterEggLog.findFirst({
       where: { userId, easterEggId: eeId },
     });
-    return !!log;
+    if (log) return true;
+
+    // Path 2: User completed the EE speedrun for this map (only when map has exactly one main quest with XP)
+    const mainQuestEesOnMap = await prisma.easterEgg.count({
+      where: { mapId, type: 'MAIN_QUEST', xpReward: { gt: 0 }, isActive: true },
+    });
+    if (mainQuestEesOnMap === 1) {
+      const eeSpeedrunLog = await prisma.challengeLog.findFirst({
+        where: {
+          userId,
+          mapId,
+          challenge: { type: 'EASTER_EGG_SPEEDRUN' },
+        },
+      });
+      if (eeSpeedrunLog) return true;
+    }
+
+    // Path 3: User checked all boxes in the Easter egg guide
+    const ee = await prisma.easterEgg.findUnique({
+      where: { id: eeId },
+      include: { steps: true },
+    });
+    if (ee && ee.steps.length > 0) {
+      const stepIds = ee.steps.map((s) => s.id);
+      const checkedCount = await prisma.userEasterEggStepProgress.count({
+        where: {
+          userId,
+          easterEggStepId: { in: stepIds },
+        },
+      });
+      if (checkedCount === ee.steps.length) return true;
+    }
+
+    return false;
   },
 
   MAPS_PLAYED: async (userId, criteria, _achievement) => {

@@ -362,11 +362,35 @@ export function sortAchievementsInCategory<T extends { type?: string; xpReward: 
   });
 }
 
-/** Sort achievements for display: main EE (not timed) first, then by type, speedrun tiers (fastest first), round, slug. */
-export function sortAchievementsForDisplay<T extends { type: string; slug: string; criteria?: unknown }>(
+/** Deduplicate achievements. For EASTER_EGG_COMPLETE, keep one per (mapId, name) preferring the one with easterEggId (the one that unlocks). */
+export function deduplicateAchievementsById<T extends { id?: string; type?: string; mapId?: string | null; name?: string; easterEggId?: string | null }>(
   achievements: T[]
 ): T[] {
-  return [...achievements].sort((a, b) => {
+  const eeByKey = new Map<string, T[]>();
+  const other: T[] = [];
+  for (const a of achievements) {
+    if (a.type === 'EASTER_EGG_COMPLETE') {
+      const key = `${a.mapId ?? ''}::${a.name ?? ''}`;
+      if (!eeByKey.has(key)) eeByKey.set(key, []);
+      eeByKey.get(key)!.push(a);
+    } else {
+      other.push(a);
+    }
+  }
+  const keptEe: T[] = [];
+  for (const list of Array.from(eeByKey.values())) {
+    const withEe = list.find((a: T) => a.easterEggId);
+    keptEe.push(withEe ?? list[0]!);
+  }
+  return [...other, ...keptEe];
+}
+
+/** Sort achievements for display: main EE (not timed) first, then by type, speedrun tiers (fastest first), round, slug. */
+export function sortAchievementsForDisplay<T extends { id?: string; type: string; slug: string; criteria?: unknown }>(
+  achievements: T[]
+): T[] {
+  const deduped = deduplicateAchievementsById(achievements);
+  return [...deduped].sort((a, b) => {
     const aMain = isMainEasterEggAchievement(a);
     const bMain = isMainEasterEggAchievement(b);
     if (aMain && !bMain) return -1;
