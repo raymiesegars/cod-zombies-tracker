@@ -30,10 +30,10 @@ export async function GET() {
       },
       include: {
         fromUser: {
-          select: { id: true, username: true, displayName: true, avatarUrl: true, avatarPreset: true, lastSeenAt: true },
+          select: { id: true, username: true, displayName: true, avatarUrl: true, avatarPreset: true, lastSeenAt: true, level: true, totalXp: true },
         },
         toUser: {
-          select: { id: true, username: true, displayName: true, avatarUrl: true, avatarPreset: true, lastSeenAt: true },
+          select: { id: true, username: true, displayName: true, avatarUrl: true, avatarPreset: true, lastSeenAt: true, level: true, totalXp: true },
         },
       },
     });
@@ -48,6 +48,9 @@ export async function GET() {
         username: friend.username,
         displayName: friend.displayName ?? friend.username,
         avatarUrl: getDisplayAvatarUrl(friend),
+        avatarPreset: friend.avatarPreset,
+        level: friend.level ?? 1,
+        totalXp: friend.totalXp ?? 0,
         isOnline,
         lastSeenAt: friend.lastSeenAt?.toISOString() ?? null,
       };

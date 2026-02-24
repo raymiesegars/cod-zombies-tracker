@@ -67,7 +67,18 @@ export function PendingCoOpSection() {
         setConfirmModal(null);
         await refreshProfile?.();
         if (typeof data.xpGained === 'number' && data.xpGained > 0) {
-          dispatchXpToast(data.xpGained, typeof data.totalXp === 'number' ? { totalXp: data.totalXp } : undefined);
+          const mysteryBoxXp = typeof data.mysteryBoxXp === 'number' ? data.mysteryBoxXp : 0;
+          const achievementXp = data.xpGained - mysteryBoxXp;
+          // Show mystery box and achievement toasts separately (same order as host logging)
+          if (mysteryBoxXp > 0) {
+            dispatchXpToast(mysteryBoxXp, {
+              totalXp: typeof data.mysteryBoxTotalXp === 'number' ? data.mysteryBoxTotalXp : data.totalXp,
+              label: 'Mystery Box Challenge Complete',
+            });
+          }
+          if (achievementXp > 0) {
+            dispatchXpToast(achievementXp, typeof data.totalXp === 'number' ? { totalXp: data.totalXp } : undefined);
+          }
         }
         if (typeof window !== 'undefined') {
           window.dispatchEvent(

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
 import {
@@ -24,6 +24,7 @@ import { ProofEmbed, ProofUrlsInput, TeammatePicker, Bo7RelicPicker } from '@/co
 import { cn, normalizeProofUrls } from '@/lib/utils';
 import { useXpToast } from '@/context/xp-toast-context';
 import { getXpForChallengeLog, getXpForEasterEggLog, type AchievementForPreview } from '@/lib/xp-preview';
+import { computeMysteryBoxXp, type MysteryBoxFilterSettings } from '@/lib/mystery-box';
 import { isBo4Game, BO4_DIFFICULTIES, getBo4DifficultyLabel } from '@/lib/bo4';
 import { isIwGame, isIwSpeedrunChallengeType, isSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType } from '@/lib/iw';
 import { isBo3Game, BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT, getBo3GobbleGumLabel } from '@/lib/bo3';
@@ -266,12 +267,17 @@ function SaveProgressRow({
 export default function EditMapProgressPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const slug = params.slug as string;
+  const preselectedChallengeId = searchParams.get('challengeId');
+  const mysteryBoxRollId = searchParams.get('mysteryBoxRollId');
   const { profile, isLoading: authLoading } = useAuth();
   const { showXpToast } = useXpToast();
 
   const [map, setMap] = useState<(MapWithDetails & { achievements?: AchievementForPreview[]; unlockedAchievementIds?: string[] }) | null>(null);
   const mapWithAchievements = map;
+  /** When navigating from mystery box, roll's filterSettings for XP preview */
+  const [mysteryBoxFilterSettings, setMysteryBoxFilterSettings] = useState<MysteryBoxFilterSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -368,6 +374,34 @@ export default function EditMapProgressPage() {
           const data = await res.json();
           setMap(data);
 
+          // If mystery box roll in URL, fetch roll tags to pre-fill form (ensures tag match for completion credit)
+          type RollTags = {
+            wawNoJug?: boolean; wawFixedWunderwaffe?: boolean; firstRoomVariant?: string;
+            useFortuneCards?: boolean; useDirectorsCut?: boolean;
+            bo3GobbleGumMode?: string; bo3AatUsed?: boolean;
+            bo4ElixirMode?: string; bocwSupportMode?: string; bo6GobbleGumMode?: string; bo6SupportMode?: string;
+            bo7SupportMode?: string; bo7IsCursedRun?: boolean; bo7RelicsUsed?: string[];
+            bo2BankUsed?: boolean; rampageInducerUsed?: boolean; ww2ConsumablesUsed?: boolean;
+            vanguardVoidUsed?: boolean;
+          };
+          let rollTags: RollTags | null = null;
+          let rollFilterSettings: MysteryBoxFilterSettings | null = null;
+          if (mysteryBoxRollId) {
+            try {
+              const mbRes = await fetch('/api/mystery-box/me', { credentials: 'same-origin' });
+              if (mbRes.ok) {
+                const mb = await mbRes.json();
+                const roll = mb.lobby?.roll;
+                if (roll?.id === mysteryBoxRollId && roll?.mapId === data.id) {
+                  if (roll.tags) rollTags = roll.tags;
+                  if (roll.filterSettings) rollFilterSettings = roll.filterSettings as MysteryBoxFilterSettings;
+                }
+              }
+            } catch {
+              // ignore
+            }
+          }
+
           const mainQuestEasterEggs = (data.easterEggs ?? []).filter((ee: { type: string }) => ee.type === 'MAIN_QUEST');
 
           const isBo4 = (data.game?.shortName ?? '') === 'BO4';
@@ -399,17 +433,39 @@ export default function EditMapProgressPage() {
             roundReached: '',
             playerCount: 'SOLO',
             ...(isBo4 && { difficulty: 'NORMAL' }),
-            ...(isIw && { useFortuneCards: false, useDirectorsCut: false }),
-            ...(isBo3 && { bo3GobbleGumMode: BO3_GOBBLEGUM_DEFAULT }),
-            ...(isBocw && { bocwSupportMode: BOCW_SUPPORT_DEFAULT, rampageInducerUsed: false }),
-            ...(isBo6 && { bo6GobbleGumMode: BO6_GOBBLEGUM_DEFAULT, bo6SupportMode: BO6_SUPPORT_DEFAULT, rampageInducerUsed: false }),
-            ...(isBo7 && { bo7SupportMode: BO7_SUPPORT_DEFAULT, bo7IsCursedRun: false, bo7RelicsUsed: [], rampageInducerUsed: false }),
-            ...((data.game?.shortName ?? '') === 'BO2' && getBo2MapConfig(data.slug)?.hasBank && { bo2BankUsed: true }),
-            ...(isWw2 && { ww2ConsumablesUsed: true }),
-            ...(hasVoidFilter && { vanguardVoidUsed: true }),
-            ...(hasRampageFilter && { rampageInducerUsed: false }),
-            ...(data.slug && hasNoJugSupport(data.slug, data.game?.shortName) && { wawNoJug: false }),
-            ...((data.game?.shortName ?? '') === 'WAW' && data.slug === 'der-riese' && { wawFixedWunderwaffe: false }),
+            ...(isIw && {
+              useFortuneCards: rollTags?.useFortuneCards ?? false,
+              useDirectorsCut: rollTags?.useDirectorsCut ?? false,
+            }),
+            ...(isBo3 && {
+              bo3GobbleGumMode: rollTags?.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT,
+              ...(rollTags?.bo3AatUsed !== undefined && { bo3AatUsed: rollTags.bo3AatUsed }),
+            }),
+            ...(isBocw && {
+              bocwSupportMode: rollTags?.bocwSupportMode ?? BOCW_SUPPORT_DEFAULT,
+              rampageInducerUsed: rollTags?.rampageInducerUsed ?? false,
+            }),
+            ...(isBo6 && {
+              bo6GobbleGumMode: rollTags?.bo6GobbleGumMode ?? BO6_GOBBLEGUM_DEFAULT,
+              bo6SupportMode: rollTags?.bo6SupportMode ?? BO6_SUPPORT_DEFAULT,
+              rampageInducerUsed: rollTags?.rampageInducerUsed ?? false,
+            }),
+            ...(isBo7 && {
+              bo7SupportMode: rollTags?.bo7SupportMode ?? BO7_SUPPORT_DEFAULT,
+              bo7IsCursedRun: rollTags?.bo7IsCursedRun ?? false,
+              bo7RelicsUsed: rollTags?.bo7RelicsUsed ?? [],
+              rampageInducerUsed: rollTags?.rampageInducerUsed ?? false,
+            }),
+            ...((data.game?.shortName ?? '') === 'BO2' && getBo2MapConfig(data.slug)?.hasBank && {
+              bo2BankUsed: rollTags?.bo2BankUsed ?? true,
+            }),
+            ...(isWw2 && { ww2ConsumablesUsed: rollTags?.ww2ConsumablesUsed ?? true }),
+            ...(hasVoidFilter && { vanguardVoidUsed: rollTags?.vanguardVoidUsed ?? true }),
+            ...(hasRampageFilter && { rampageInducerUsed: rollTags?.rampageInducerUsed ?? false }),
+            ...(isBo4 && rollTags?.bo4ElixirMode && { bo4ElixirMode: rollTags.bo4ElixirMode }),
+            ...(data.slug && hasNoJugSupport(data.slug, data.game?.shortName) && { wawNoJug: rollTags?.wawNoJug ?? false }),
+            ...((data.game?.shortName ?? '') === 'WAW' && data.slug === 'der-riese' && { wawFixedWunderwaffe: rollTags?.wawFixedWunderwaffe ?? false }),
+            ...(rollTags?.firstRoomVariant && { firstRoomVariant: rollTags.firstRoomVariant }),
             proofUrls: [],
             notes: '',
             completionTimeSeconds: null,
@@ -418,8 +474,13 @@ export default function EditMapProgressPage() {
             requestVerification: false,
           });
 
-          const highRoundChallenge = (data.challenges ?? []).find((c: { type: string }) => c.type === 'HIGHEST_ROUND');
-          setSelectedChallengeIds(highRoundChallenge ? new Set([highRoundChallenge.id]) : new Set());
+          setMysteryBoxFilterSettings(rollFilterSettings);
+
+          const preselected = preselectedChallengeId
+            ? (data.challenges ?? []).find((c: { id: string }) => c.id === preselectedChallengeId)
+            : null;
+          const defaultChallenge = preselected ?? (data.challenges ?? []).find((c: { type: string }) => c.type === 'HIGHEST_ROUND');
+          setSelectedChallengeIds(defaultChallenge ? new Set([defaultChallenge.id]) : new Set());
 
           const eeInitial: Record<string, {
             completed: boolean;
@@ -465,7 +526,7 @@ export default function EditMapProgressPage() {
     }
 
     fetchMap();
-  }, [slug]);
+  }, [slug, preselectedChallengeId, mysteryBoxRollId]);
 
   useEffect(() => {
     const wawCfg = map?.game?.shortName === 'WAW' ? getWaWMapConfig(map?.slug ?? '') : null;
@@ -607,6 +668,7 @@ export default function EditMapProgressPage() {
     setSaveErrorMessage(null);
     setSaveErrorModalMessage(null);
     let totalXpGained = 0;
+    let totalMysteryBoxXp = 0;
     let lastTotalXp: number | undefined;
 
     try {
@@ -668,15 +730,24 @@ export default function EditMapProgressPage() {
             teammateUserIds: form.teammateUserIds ?? [],
             teammateNonUserNames: form.teammateNonUserNames ?? [],
             requestVerification: form.requestVerification ?? false,
+            ...(mysteryBoxRollId && challengeId === preselectedChallengeId && { mysteryBoxRollId }),
           }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to save');
         totalXpGained += typeof data.xpGained === 'number' ? data.xpGained : 0;
         if (typeof data.totalXp === 'number') lastTotalXp = data.totalXp;
+        if (typeof data.mysteryBoxXp === 'number' && data.mysteryBoxXp > 0) {
+          totalMysteryBoxXp += data.mysteryBoxXp;
+          showXpToast(data.mysteryBoxXp, {
+            totalXp: data.mysteryBoxTotalXp,
+            label: 'Mystery Box Challenge Complete',
+          });
+        }
       }
-      if (totalXpGained > 0) {
-        showXpToast(totalXpGained, lastTotalXp != null ? { totalXp: lastTotalXp } : undefined);
+      const achievementXp = totalXpGained - totalMysteryBoxXp;
+      if (achievementXp > 0) {
+        showXpToast(achievementXp, lastTotalXp != null ? { totalXp: lastTotalXp } : undefined);
       }
       setSaveStatus('success');
       setTimeout(() => router.push(`/maps/${slug}?achievementUpdated=1`), 1500);
@@ -707,6 +778,7 @@ export default function EditMapProgressPage() {
     if (!profile || !map) return;
 
     const form = challengeForms[challengeId];
+    const challenge = map.challenges?.find((c) => c.id === challengeId);
     if (!form?.roundReached || parseInt(form.roundReached) <= 0) return;
 
     if (form.requestVerification) {
@@ -734,6 +806,7 @@ export default function EditMapProgressPage() {
           ...(map.game?.shortName === 'BO4' && form.difficulty && { difficulty: form.difficulty }),
           ...(map?.slug && hasNoJugSupport(map.slug, map.game?.shortName) && { wawNoJug: sharedChallengeForm.wawNoJug ?? false }),
           ...(map?.game?.shortName === 'WAW' && map?.slug === 'der-riese' && { wawFixedWunderwaffe: sharedChallengeForm.wawFixedWunderwaffe ?? false }),
+          ...(challenge?.type === 'STARTING_ROOM' && map?.slug && hasFirstRoomVariantFilter(map.slug) && sharedChallengeForm.firstRoomVariant && { firstRoomVariant: sharedChallengeForm.firstRoomVariant }),
             ...(map.game?.shortName === 'BO2' && getBo2MapConfig(map.slug)?.hasBank && { bo2BankUsed: sharedChallengeForm.bo2BankUsed ?? true }),
             ...((isBocwGame(map?.game?.shortName) || isBo6Game(map?.game?.shortName) || isBo7Game(map?.game?.shortName) || (isVanguardGame(map?.game?.shortName) && hasVanguardRampageFilter(map?.slug))) && { rampageInducerUsed: sharedChallengeForm.rampageInducerUsed ?? false }),
             ...(isVanguardGame(map?.game?.shortName) && hasVanguardVoidFilter(map?.slug) && { vanguardVoidUsed: sharedChallengeForm.vanguardVoidUsed ?? true }),
@@ -748,14 +821,22 @@ export default function EditMapProgressPage() {
           teammateUserIds: form.teammateUserIds ?? [],
           teammateNonUserNames: form.teammateNonUserNames ?? [],
           requestVerification: form.requestVerification ?? false,
+          ...(mysteryBoxRollId && challengeId === preselectedChallengeId && { mysteryBoxRollId }),
         }),
       });
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.error || 'Failed to save');
 
-      if (typeof data.xpGained === 'number' && data.xpGained > 0) {
-        showXpToast(data.xpGained, typeof data.totalXp === 'number' ? { totalXp: data.totalXp } : undefined);
+      if (typeof data.mysteryBoxXp === 'number' && data.mysteryBoxXp > 0) {
+        showXpToast(data.mysteryBoxXp, {
+          totalXp: data.mysteryBoxTotalXp,
+          label: 'Mystery Box Challenge Complete',
+        });
+      }
+      const achievementXp = typeof data.xpGained === 'number' ? data.xpGained - (typeof data.mysteryBoxXp === 'number' ? data.mysteryBoxXp : 0) : 0;
+      if (achievementXp > 0) {
+        showXpToast(achievementXp, typeof data.totalXp === 'number' ? { totalXp: data.totalXp } : undefined);
       }
       setSaveStatus('success');
       setTimeout(() => router.push(`/maps/${slug}?achievementUpdated=1`), 1500);
@@ -977,23 +1058,58 @@ export default function EditMapProgressPage() {
                     <p className="text-sm text-bunker-400">
                       Same run details will apply to all {selectedChallengeIds.size} selected challenge{selectedChallengeIds.size !== 1 ? 's' : ''}.
                     </p>
-                    {mapWithAchievements?.achievements && (
+                    {(mapWithAchievements?.achievements || (mysteryBoxRollId && mysteryBoxFilterSettings)) && (
                       <Badge variant="info" size="sm" className="self-start sm:flex-shrink-0 shrink-0">
-                        +{Array.from(selectedChallengeIds).reduce((sum, challengeId) => {
-                          const challenge = map.challenges.find((c) => c.id === challengeId);
-                          if (!challenge || !mapWithAchievements?.achievements) return sum;
-                          return sum + getXpForChallengeLog(
-                            mapWithAchievements.achievements,
-                            mapWithAchievements.unlockedAchievementIds ?? [],
-                            challenge.type,
-                            parseInt(sharedChallengeForm.roundReached || '0', 10) || 0,
-                            map.roundCap ?? null,
-                            map?.game?.shortName === 'BO4' ? (sharedChallengeForm.difficulty ?? 'NORMAL') : undefined,
-                            sharedChallengeForm.completionTimeSeconds ?? undefined,
-                            sharedChallengeForm.killsReached ? parseInt(sharedChallengeForm.killsReached, 10) : undefined,
-                            sharedChallengeForm.scoreReached ? parseInt(sharedChallengeForm.scoreReached, 10) : undefined
-                          );
-                        }, 0)} XP
+                        +{(() => {
+                          const getRoundForChallenge = (challenge: { type: string }) => {
+                            if (challenge.type === 'RUSH') return 1;
+                            if (challenge.type === 'NO_MANS_LAND') return 1;
+                            if (isSpeedrunChallengeType(challenge.type)) return getMinRoundForSpeedrunChallengeType(challenge.type);
+                            return parseInt(sharedChallengeForm.roundReached || '0', 10) || 1;
+                          };
+                          const getCompletionTimeForChallenge = (challenge: { id: string; type: string }) => {
+                            if (isSpeedrunChallengeType(challenge.type)) {
+                              const t = speedrunTimes[challenge.id];
+                              return t != null ? t : undefined;
+                            }
+                            return sharedChallengeForm.completionTimeSeconds ?? undefined;
+                          };
+                          const achievementXp = mapWithAchievements?.achievements
+                            ? Array.from(selectedChallengeIds).reduce((sum, challengeId) => {
+                                const challenge = map.challenges.find((c) => c.id === challengeId);
+                                if (!challenge || !mapWithAchievements?.achievements) return sum;
+                                return sum + getXpForChallengeLog(
+                                  mapWithAchievements.achievements,
+                                  mapWithAchievements.unlockedAchievementIds ?? [],
+                                  challenge.type,
+                                  getRoundForChallenge(challenge),
+                                  map.roundCap ?? null,
+                                  map?.game?.shortName === 'BO4' ? (sharedChallengeForm.difficulty ?? 'NORMAL') : undefined,
+                                  getCompletionTimeForChallenge(challenge),
+                                  sharedChallengeForm.killsReached ? parseInt(sharedChallengeForm.killsReached, 10) : undefined,
+                                  sharedChallengeForm.scoreReached ? parseInt(sharedChallengeForm.scoreReached, 10) : undefined
+                                );
+                              }, 0)
+                            : 0;
+                          const roundForMb = selectedChallengeIds.size > 0
+                            ? (() => {
+                                const ids = Array.from(selectedChallengeIds);
+                                const anyRush = ids.some((id) => map.challenges.find((ch) => ch.id === id)?.type === 'RUSH');
+                                if (anyRush) return 1;
+                                const entered = parseInt(sharedChallengeForm.roundReached || '0', 10);
+                                if (entered > 0) return entered;
+                                const minRounds = ids.map((id) => {
+                                  const c = map.challenges.find((ch) => ch.id === id);
+                                  return c && isSpeedrunChallengeType(c.type) ? getMinRoundForSpeedrunChallengeType(c.type) : 1;
+                                });
+                                return Math.max(1, ...minRounds);
+                              })()
+                            : 1;
+                          const mysteryBoxXp = mysteryBoxRollId && mysteryBoxFilterSettings
+                            ? computeMysteryBoxXp(mysteryBoxFilterSettings, roundForMb)
+                            : 0;
+                          return achievementXp + mysteryBoxXp;
+                        })()} XP
                       </Badge>
                     )}
                   </div>

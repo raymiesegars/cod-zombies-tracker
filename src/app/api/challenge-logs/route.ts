@@ -15,6 +15,7 @@ import { isWw2Game, WW2_CONSUMABLES_DEFAULT } from '@/lib/ww2';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap } from '@/lib/first-room-variants';
 import { hasNoJugSupport } from '@/lib/no-jug-support';
+import { computeMysteryBoxXp, type MysteryBoxFilterSettings } from '@/lib/mystery-box';
 import type { Bo4Difficulty } from '@prisma/client';
 
 // Log a new run. We run the achievement check when it’s a new best for that user+challenge+map+playerCount.
@@ -62,6 +63,7 @@ export async function POST(request: NextRequest) {
     const teammateUserIds = Array.isArray(body.teammateUserIds) ? body.teammateUserIds.filter((id: unknown) => typeof id === 'string').slice(0, 10) : [];
     const teammateNonUserNames = Array.isArray(body.teammateNonUserNames) ? body.teammateNonUserNames.filter((n: unknown) => typeof n === 'string').slice(0, 10) : [];
     const requestVerification = Boolean(body.requestVerification);
+    const mysteryBoxRollId = typeof body.mysteryBoxRollId === 'string' ? body.mysteryBoxRollId : undefined;
 
     if (!challengeId || !mapId || !playerCount) {
       return NextResponse.json(
@@ -355,11 +357,95 @@ export async function POST(request: NextRequest) {
         ...(firstRoomVariant != null && { firstRoomVariant }),
         ...(killsReached != null && killsReached > 0 && { killsReached }),
         ...(scoreReached != null && scoreReached > 0 && { scoreReached }),
+        ...(mysteryBoxRollId && { mysteryBoxRollId }),
       },
     });
 
     if (teammateUserIds.length > 0) {
       await createCoOpRunPendingsForChallengeLog(log.id, user.id, teammateUserIds);
+    }
+
+    let mysteryBoxXp = 0;
+    let mysteryBoxTotalXp: number | undefined;
+    let mysteryBoxCompletionsCount: number | undefined;
+
+    if (mysteryBoxRollId) {
+      const roll = await prisma.mysteryBoxRoll.findUnique({
+        where: { id: mysteryBoxRollId },
+        include: { lobby: { include: { members: { select: { userId: true } } } } },
+      });
+      if (roll && roll.mapId === mapId && roll.challengeId === challengeId) {
+        const tags = (roll.tags ?? {}) as Record<string, unknown>;
+        const arrEq = (a: unknown[], b: unknown[]) =>
+          JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
+        const tagMatch =
+          (tags.wawNoJug === undefined || tags.wawNoJug === wawNoJug) &&
+          (tags.wawFixedWunderwaffe === undefined || tags.wawFixedWunderwaffe === wawFixedWunderwaffe) &&
+          (tags.firstRoomVariant === undefined || tags.firstRoomVariant === firstRoomVariant) &&
+          (tags.bo2BankUsed === undefined || tags.bo2BankUsed === bo2BankUsed) &&
+          (tags.useFortuneCards === undefined || tags.useFortuneCards === useFortuneCards) &&
+          (tags.useDirectorsCut === undefined || tags.useDirectorsCut === useDirectorsCut) &&
+          (tags.bo3GobbleGumMode === undefined || tags.bo3GobbleGumMode === bo3GobbleGumMode) &&
+          (tags.bo3AatUsed === undefined || tags.bo3AatUsed === bo3AatUsed) &&
+          (tags.bo4ElixirMode === undefined || tags.bo4ElixirMode === bo4ElixirMode) &&
+          (tags.bocwSupportMode === undefined || tags.bocwSupportMode === bocwSupportMode) &&
+          (tags.bo6GobbleGumMode === undefined || tags.bo6GobbleGumMode === bo6GobbleGumMode) &&
+          (tags.bo6SupportMode === undefined || tags.bo6SupportMode === bo6SupportMode) &&
+          (tags.bo7SupportMode === undefined || tags.bo7SupportMode === bo7SupportMode) &&
+          (tags.bo7IsCursedRun === undefined || tags.bo7IsCursedRun === bo7IsCursedRun) &&
+          (tags.bo7RelicsUsed === undefined || (Array.isArray(tags.bo7RelicsUsed) && Array.isArray(bo7RelicsUsed) && arrEq(tags.bo7RelicsUsed as unknown[], bo7RelicsUsed))) &&
+          (tags.rampageInducerUsed === undefined || tags.rampageInducerUsed === rampageInducerUsed) &&
+          (tags.ww2ConsumablesUsed === undefined || tags.ww2ConsumablesUsed === ww2ConsumablesUsed) &&
+          (tags.vanguardVoidUsed === undefined || tags.vanguardVoidUsed === vanguardVoidUsed);
+        if (tagMatch) {
+          const existingCompletion = await prisma.mysteryBoxCompletion.findUnique({
+            where: { userId_rollId: { userId: user.id, rollId: roll.id } },
+          });
+          if (!existingCompletion) {
+            const filterSettings = (roll.filterSettings ?? {}) as MysteryBoxFilterSettings | null;
+            mysteryBoxXp = computeMysteryBoxXp(filterSettings, roundReached);
+            const lobbyUserIds = [roll.lobby.hostId, ...roll.lobby.members.map((m) => m.userId)];
+            const expectedCount = new Set(lobbyUserIds).size;
+            await prisma.$transaction([
+              prisma.mysteryBoxCompletion.create({
+                data: {
+                  userId: user.id,
+                  rollId: roll.id,
+                  challengeLogId: log.id,
+                  xpAwarded: mysteryBoxXp,
+                },
+              }),
+              prisma.user.update({
+                where: { id: user.id },
+                data: {
+                  totalXp: { increment: mysteryBoxXp },
+                  mysteryBoxCompletionsLifetime: { increment: 1 },
+                },
+              }),
+            ]);
+            const completionCount = await prisma.mysteryBoxCompletion.count({ where: { rollId: roll.id } });
+            if (completionCount >= expectedCount) {
+              await prisma.mysteryBoxRoll.update({
+                where: { id: roll.id },
+                data: { completedByHost: true },
+              });
+            }
+          }
+        }
+      }
+      if (mysteryBoxXp > 0) {
+        const updated = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { totalXp: true },
+        });
+        mysteryBoxTotalXp = updated?.totalXp;
+        mysteryBoxCompletionsCount = (
+          await prisma.user.findUnique({
+            where: { id: user.id },
+            select: { mysteryBoxCompletionsLifetime: true },
+          })
+        )?.mysteryBoxCompletionsLifetime ?? 0;
+      }
     }
 
     let newlyUnlocked: Awaited<ReturnType<typeof processMapAchievements>> = [];
@@ -369,16 +455,21 @@ export async function POST(request: NextRequest) {
 
     const xpGained = newlyUnlocked.reduce((sum, a) => sum + a.xpReward, 0);
     const totalXp =
-      xpGained > 0
+      xpGained > 0 || mysteryBoxXp > 0
         ? (await prisma.user.findUnique({ where: { id: user.id }, select: { totalXp: true } }))?.totalXp ?? undefined
         : undefined;
 
     return NextResponse.json({
       ...log,
-      xpGained,
+      xpGained: xpGained + mysteryBoxXp,
       newlyUnlockedAchievements: newlyUnlocked.length,
       isNewRecord: isImprovement,
       ...(totalXp != null && { totalXp }),
+      ...(mysteryBoxXp > 0 && {
+        mysteryBoxXp,
+        mysteryBoxTotalXp: mysteryBoxTotalXp ?? totalXp,
+        mysteryBoxCompletionsCount,
+      }),
     });
   } catch (error) {
     console.error('Error creating challenge log:', error);

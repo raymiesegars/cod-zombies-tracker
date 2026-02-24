@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/auth-context';
-import { Button, Logo, MapIcon } from '@/components/ui';
+import { Button, Logo, MapIcon, MysteryBoxIcon } from '@/components/ui';
 import { UserWithRank } from '@/components/game';
 import { NotificationsDropdown } from '@/components/layout/notifications-dropdown';
 import { Menu, X, LogOut, User, Settings, Trophy, LayoutDashboard, Users, PenLine, ChevronDown } from 'lucide-react';
@@ -68,10 +68,18 @@ export function Navbar() {
               return (
                 <Link key={link.href} href={link.href} className={`${linkClass} inline-flex items-center gap-1`} aria-label={link.href === '/find-group' ? 'Find Group' : link.label}>
                   <Icon className="w-4 h-4 flex-shrink-0 text-current" />
-                  <span className="hidden min-[1100px]:inline">{link.label}</span>
+                  <span className="hidden min-[1230px]:inline">{link.label}</span>
                 </Link>
               );
             })}
+            {/* Mystery Box icon link - left of Discord */}
+            <Link
+              href="/mystery-box"
+              className={`${iconOnlyClass} inline-flex items-center`}
+              aria-label="Mystery Box"
+            >
+              <MysteryBoxIcon className="w-5 h-5 text-current" />
+            </Link>
             {/* Discord (default) + Tools dropdown */}
             <div className="relative inline-flex flex-col items-end shrink-0">
               <button
@@ -269,6 +277,16 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
+              {/* Mystery Box */}
+              <Link
+                href="/mystery-box"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 min-h-[44px] text-base font-zombies text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors tracking-wide touch-manipulation"
+                aria-label="Mystery Box"
+              >
+                <MysteryBoxIcon className="w-5 h-5 flex-shrink-0 text-current" />
+                Mystery Box
+              </Link>
               {/* Discord + Tools */}
               <a
                 href={DISCORD_URL}

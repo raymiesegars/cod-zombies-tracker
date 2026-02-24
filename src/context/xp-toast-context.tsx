@@ -10,12 +10,14 @@ import { CheckCircle2 } from 'lucide-react';
 export type XpToastOptions = {
   totalXp?: number; // So we can show rank + bar
   verified?: boolean; // Verified XP variant: blue outline, checkmark
+  label?: string; // e.g. "Mystery Box Challenge Complete"
 };
 
 type ToastState = {
   amount: number;
   totalXp: number | null;
   verified: boolean;
+  label?: string;
 };
 
 type XpToastContextValue = {
@@ -66,7 +68,9 @@ export function dispatchXpToast(amount: number, options?: XpToastOptions) {
   const eventName = options?.verified ? XP_TOAST_VERIFIED_EVENT : XP_TOAST_EVENT;
   if (typeof window !== 'undefined') {
     window.dispatchEvent(
-      new CustomEvent(eventName, { detail: { amount, totalXp: options?.totalXp } })
+      new CustomEvent(eventName, {
+        detail: { amount, totalXp: options?.totalXp, label: options?.label },
+      })
     );
   }
 }
@@ -76,21 +80,45 @@ export function XpToastProvider({ children }: { children: React.ReactNode }) {
   const [toastId, setToastId] = useState(0);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const queueRef = useRef<Array<{ amount: number; options?: XpToastOptions }>>([]);
+  const showNextInQueue = useCallback(() => {
+    if (queueRef.current.length > 0) {
+      const next = queueRef.current.shift()!;
+      if (next.amount > 0) {
+        playAchievementSound();
+        setToastId((n) => n + 1);
+        setToast({
+          amount: next.amount,
+          totalXp: next.options?.totalXp ?? null,
+          verified: next.options?.verified ?? false,
+          label: next.options?.label,
+        });
+        timeoutRef.current = setTimeout(showNextInQueue, TOAST_DURATION_MS);
+      } else {
+        showNextInQueue();
+      }
+    } else {
+      setToast(null);
+      timeoutRef.current = null;
+    }
+  }, []);
+
   const showXpToast = useCallback((amount: number, options?: XpToastOptions) => {
     if (amount <= 0) return;
+    if (timeoutRef.current) {
+      queueRef.current.push({ amount, options });
+      return;
+    }
     playAchievementSound();
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setToastId((n) => n + 1);
     setToast({
       amount,
       totalXp: options?.totalXp ?? null,
       verified: options?.verified ?? false,
+      label: options?.label,
     });
-    timeoutRef.current = setTimeout(() => {
-      setToast(null);
-      timeoutRef.current = null;
-    }, TOAST_DURATION_MS);
-  }, []);
+    timeoutRef.current = setTimeout(showNextInQueue, TOAST_DURATION_MS);
+  }, [showNextInQueue]);
 
   useEffect(() => {
     xpToastShowRef = showXpToast;
@@ -101,9 +129,9 @@ export function XpToastProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const handler = (e: Event) => {
-      const { amount, totalXp } = (e as CustomEvent<{ amount: number; totalXp?: number }>).detail ?? {};
+      const { amount, totalXp, label } = (e as CustomEvent<{ amount: number; totalXp?: number; label?: string }>).detail ?? {};
       if (typeof amount === 'number' && amount > 0) {
-        showXpToast(amount, totalXp != null ? { totalXp } : undefined);
+        showXpToast(amount, totalXp != null || label ? { totalXp, label } : undefined);
       }
     };
     const verifiedHandler = (e: Event) => {
@@ -130,6 +158,7 @@ export function XpToastProvider({ children }: { children: React.ReactNode }) {
             amount={toast.amount}
             totalXp={toast.totalXp}
             verified={toast.verified}
+            label={toast.label}
           />
         )}
       </AnimatePresence>
@@ -137,7 +166,7 @@ export function XpToastProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-function XpToastContent({ amount, totalXp, verified }: ToastState) {
+function XpToastContent({ amount, totalXp, verified, label }: ToastState) {
   const hasRankAndBar = totalXp != null && totalXp >= 0;
   const totalXpBefore = hasRankAndBar ? Math.max(0, totalXp - amount) : 0;
   const after = hasRankAndBar ? getLevelFromXp(totalXp) : null;
@@ -164,11 +193,27 @@ function XpToastContent({ amount, totalXp, verified }: ToastState) {
             'rounded-xl border shadow-xl overflow-hidden',
             verified
               ? 'border-blue-500/70 bg-bunker-900 ring-2 ring-blue-500/40'
-              : 'border-bunker-600 bg-bunker-900'
+              : label === 'Mystery Box Challenge Complete'
+                ? 'border-amber-500/80 bg-bunker-900 ring-2 ring-amber-400/60 shadow-[0_0_20px_rgba(251,191,36,0.35)]'
+                : 'border-bunker-600 bg-bunker-900'
           )}
         >
           {/* +N XP row */}
-          <div className={cn('px-4 py-3', verified ? 'border-b border-blue-900/50' : 'border-b border-bunker-700')}>
+          <div
+            className={cn(
+              'px-4 py-3',
+              verified
+                ? 'border-b border-blue-900/50'
+                : label === 'Mystery Box Challenge Complete'
+                  ? 'border-b border-amber-900/40'
+                  : 'border-b border-bunker-700'
+            )}
+          >
+            {label && (
+              <p className="text-center text-xs font-semibold uppercase tracking-wider text-amber-400 mb-2">
+                {label}
+              </p>
+            )}
             {leveledUp && (
               <p className={cn(
                 'text-center text-xs font-black uppercase tracking-widest mb-2',

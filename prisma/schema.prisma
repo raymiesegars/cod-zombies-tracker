@@ -52,6 +52,12 @@ model User {
   
   // Presence: updated on heartbeat; "online" = lastSeenAt within last ~5 min
   lastSeenAt    DateTime?
+
+  // Mystery Box: 1 token per 24h, cap 3
+  mysteryBoxTokens        Int       @default(0)
+  mysteryBoxLastTokenAt    DateTime?
+  // Lifetime mystery box challenge completions (persists when rolls are discarded)
+  mysteryBoxCompletionsLifetime Int  @default(0)
   
   // Relations
   challengeLogs           ChallengeLog[]
@@ -70,6 +76,9 @@ model User {
   directMessagesReceived   DirectMessage[]  @relation("DMRecipient")
   blocksMade               UserBlock[]      @relation("BlocksMade")
   blocksReceived           UserBlock[]      @relation("BlocksReceived")
+  mysteryBoxLobbiesHosted  MysteryBoxLobby[] @relation("MysteryBoxHost")
+  mysteryBoxLobbyMembers   MysteryBoxLobbyMember[]
+  mysteryBoxCompletions    MysteryBoxCompletion[]
 
   @@index([username])
   @@index([supabaseId])
@@ -468,6 +477,9 @@ model ChallengeLog {
 
   // First room variant: required for STARTING_ROOM on verruckt/bo1-verruckt/bo3-verruckt (JUG_SIDE, QUICK_SIDE), buried (PROCESSING, QUICK_SIDE, PROCESSING_WITH_RAYGUN), aw-carrier (MK14_SIDE, BULLDOG_SIDE, MIXED)
   firstRoomVariant         String?
+
+  // Mystery box: when this log was created from a mystery box roll (for co-op teammates who confirm)
+  mysteryBoxRollId         String?
   
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
@@ -567,6 +579,85 @@ model CoOpRunPending {
   @@unique([challengeLogId, teammateUserId])
   @@unique([easterEggLogId, teammateUserId])
   @@index([teammateUserId, status])
+}
+
+// ============================================================================
+// MYSTERY BOX
+// ============================================================================
+
+model MysteryBoxLobby {
+  id        String   @id @default(cuid())
+  hostId    String
+  host      User     @relation("MysteryBoxHost", fields: [hostId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  members        MysteryBoxLobbyMember[]
+  currentRoll    MysteryBoxRoll?
+  discardVote    MysteryBoxDiscardVote?
+  notifications  Notification[]
+
+  @@index([hostId])
+}
+
+model MysteryBoxLobbyMember {
+  id       String   @id @default(cuid())
+  lobbyId  String
+  lobby    MysteryBoxLobby @relation(fields: [lobbyId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt DateTime @default(now())
+
+  @@unique([lobbyId, userId])
+  @@index([userId])
+  @@index([lobbyId])
+}
+
+model MysteryBoxDiscardVote {
+  id        String   @id @default(cuid())
+  lobbyId   String   @unique  // One active vote per lobby
+  lobby     MysteryBoxLobby @relation(fields: [lobbyId], references: [id], onDelete: Cascade)
+  rollId    String
+  roll      MysteryBoxRoll @relation(fields: [rollId], references: [id], onDelete: Cascade)
+  votes     Json?    // { [userId]: "YES" | "NO" }
+  intent    String?  // "discard" | "reroll" – reroll spends another token and spins
+  createdAt DateTime @default(now())
+
+  @@index([lobbyId])
+}
+
+model MysteryBoxRoll {
+  id            String   @id @default(cuid())
+  lobbyId       String   @unique  // One active roll per lobby
+  lobby         MysteryBoxLobby @relation(fields: [lobbyId], references: [id], onDelete: Cascade)
+  discardVotes  MysteryBoxDiscardVote[]
+  gameId        String
+  mapId         String
+  challengeId   String
+  // Optional tags (wawNoJug, wawFixedWunderwaffe, firstRoomVariant, etc.)
+  tags         Json?    // { wawNoJug?: boolean, firstRoomVariant?: string, ... }
+  // Filter settings used when rolling (for XP scaling)
+  filterSettings Json?   // { excludedGameIds?: string[], excludeSpeedruns?: boolean, maxRound?: number }
+  completedByHost Boolean @default(false)  // Host has logged and claimed
+  createdAt     DateTime @default(now())
+
+  completions   MysteryBoxCompletion[]
+
+  @@index([lobbyId])
+}
+
+model MysteryBoxCompletion {
+  id             String      @id @default(cuid())
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rollId         String
+  roll           MysteryBoxRoll @relation(fields: [rollId], references: [id], onDelete: Cascade)
+  challengeLogId String
+  xpAwarded      Int
+  completedAt    DateTime    @default(now())
+
+  @@unique([userId, rollId])
+  @@index([userId])
+  @@index([rollId])
 }
 
 enum PlayerCount {
@@ -736,6 +827,7 @@ enum NotificationType {
   FRIEND_REQUEST_RECEIVED
   FRIEND_REQUEST_ACCEPTED
   FRIEND_REMOVED
+  MYSTERY_BOX_INVITE
 }
 
 model Notification {
@@ -749,6 +841,8 @@ model Notification {
   easterEggLog     EasterEggLog?    @relation(fields: [easterEggLogId], references: [id], onDelete: Cascade)
   friendRequestId  String?
   friendRequest    FriendRequest?   @relation(fields: [friendRequestId], references: [id], onDelete: Cascade)
+  mysteryBoxLobbyId String?
+  mysteryBoxLobby  MysteryBoxLobby? @relation(fields: [mysteryBoxLobbyId], references: [id], onDelete: Cascade)
   message          String?          @db.Text  // for VERIFICATION_DENIED: admin's reason; for FRIEND_*: optional context
   read             Boolean          @default(false)
   createdAt        DateTime         @default(now())
