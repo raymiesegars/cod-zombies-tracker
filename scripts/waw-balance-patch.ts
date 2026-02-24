@@ -3,7 +3,7 @@
  *
  * SAFE: Only affects WAW game maps. No truncation, no deletion of user logs.
  * - Deactivates challenges that don't exist per map (isActive=false)
- * - Creates new challenges (First Room Jug/Quick for Verruckt, speedruns for all WAW)
+ * - Creates new challenges (First Room for Verruckt, speedruns for all WAW)
  * - Replaces WAW achievements with WR-based definitions; recalculates user XP
  *
  * IMPORTANT: NEVER deactivate EASTER_EGG_COMPLETE achievements (main quest completion).
@@ -107,27 +107,23 @@ async function main() {
       }
     }
 
-    // Create new challenges: Verruckt First Room variants, speedruns
+    // Create new challenges: Verruckt First Room (single STARTING_ROOM), speedruns
     const existingTypes = new Set(map.challenges.map((c) => c.type));
 
-    if (map.slug === 'verruckt') {
-      for (const t of ['STARTING_ROOM_JUG_SIDE', 'STARTING_ROOM_QUICK_SIDE'] as const) {
-        if (existingTypes.has(t)) continue;
-        const name = t === 'STARTING_ROOM_JUG_SIDE' ? 'First Room (Jug Side)' : 'First Room (Quick Side)';
-        if (!DRY_RUN) {
-          await prisma.challenge.create({
-            data: {
-              name,
-              slug: t.toLowerCase().replace(/_/g, '-'),
-              type: t,
-              mapId: map.id,
-              xpReward: 0,
-              isActive: true,
-            },
-          });
-        }
-        challengesCreated++;
+    if (map.slug === 'verruckt' && !existingTypes.has('STARTING_ROOM')) {
+      if (!DRY_RUN) {
+        await prisma.challenge.create({
+          data: {
+            name: 'First Room',
+            slug: 'starting-room',
+            type: 'STARTING_ROOM',
+            mapId: map.id,
+            xpReward: 0,
+            isActive: true,
+          },
+        });
       }
+      challengesCreated++;
     }
 
     const speedrunTypesToCreate = map.slug === 'der-riese'

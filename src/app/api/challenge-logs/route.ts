@@ -13,6 +13,8 @@ import { isBo7Game, BO7_SUPPORT_MODES, BO7_SUPPORT_DEFAULT, BO7_RELICS } from '@
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 import { isWw2Game, WW2_CONSUMABLES_DEFAULT } from '@/lib/ww2';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
+import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap } from '@/lib/first-room-variants';
+import { hasNoJugSupport } from '@/lib/no-jug-support';
 import type { Bo4Difficulty } from '@prisma/client';
 
 // Log a new run. We run the achievement check when it’s a new best for that user+challenge+map+playerCount.
@@ -203,20 +205,28 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      if (isSpeedrun && (completionTimeSeconds == null || completionTimeSeconds < 0)) {
+    }
+
+    // All speedrun challenges require completion time (seconds)
+    if (isSpeedrun && (completionTimeSeconds == null || completionTimeSeconds < 0)) {
+      return NextResponse.json(
+        { error: 'Speedrun challenges require completion time (include hours, minutes, and seconds)' },
+        { status: 400 }
+      );
+    }
+
+    // First room variant required for Verrückt, Buried, AW Carrier when logging STARTING_ROOM
+    const isWaw = gameShortName === 'WAW';
+    if (challenge?.type === 'STARTING_ROOM' && map && hasFirstRoomVariantFilter(map.slug)) {
+      const variant = body.firstRoomVariant;
+      const options = getFirstRoomVariantsForMap(map.slug);
+      const validValues = options?.map((o) => o.value) ?? [];
+      if (!variant || !validValues.includes(variant)) {
         return NextResponse.json(
-          { error: 'Speedrun challenges require completion time' },
+          { error: `First room challenge on this map requires selecting a room variant (e.g. ${validValues.slice(0, 2).join(', ')})` },
           { status: 400 }
         );
       }
-    }
-
-    const isWaw = gameShortName === 'WAW';
-    if (isWaw && isSpeedrun && (completionTimeSeconds == null || completionTimeSeconds < 0)) {
-      return NextResponse.json(
-        { error: 'Speedrun challenges require completion time' },
-        { status: 400 }
-      );
     }
 
     if (isBo3) {
@@ -271,8 +281,13 @@ export async function POST(request: NextRequest) {
         : []
       : undefined;
 
-    const wawNoJug = isWaw ? Boolean(body.wawNoJug ?? false) : undefined;
+    const wawNoJug = map && hasNoJugSupport(map.slug, gameShortName) ? Boolean(body.wawNoJug ?? false) : undefined;
     const wawFixedWunderwaffe = isWaw ? Boolean(body.wawFixedWunderwaffe ?? false) : undefined;
+
+    const firstRoomVariant =
+      challenge?.type === 'STARTING_ROOM' && map && hasFirstRoomVariantFilter(map.slug)
+        ? (body.firstRoomVariant as string)
+        : undefined;
 
     const isBo2 = map?.game?.shortName === 'BO2';
     const bo2HasBank = isBo2 && map ? getBo2MapConfig(map.slug)?.hasBank : false;
@@ -337,6 +352,7 @@ export async function POST(request: NextRequest) {
         ...(rampageInducerUsed != null && { rampageInducerUsed }),
         ...(ww2ConsumablesUsed != null && { ww2ConsumablesUsed }),
         ...(vanguardVoidUsed != null && { vanguardVoidUsed }),
+        ...(firstRoomVariant != null && { firstRoomVariant }),
         ...(killsReached != null && killsReached > 0 && { killsReached }),
         ...(scoreReached != null && scoreReached > 0 && { scoreReached }),
       },

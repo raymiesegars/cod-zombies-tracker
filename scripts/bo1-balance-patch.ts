@@ -3,7 +3,7 @@
  *
  * SAFE: Only affects BO1 game maps. No truncation, no deletion of user logs.
  * - Deactivates challenges that don't exist per map (isActive=false)
- * - Creates new challenges (speedruns including R200, Verruckt first room jug/quick)
+ * - Creates new challenges (speedruns including R200, Verruckt First Room)
  * - Replaces BO1 achievements with WR-based definitions; recalculates user XP
  * - Call of the Dead: separate EE speedrun achievements for Stand-in (Solo) and Ensemble Cast (2+)
  *
@@ -107,25 +107,21 @@ async function main() {
 
     const existingTypes = new Set(map.challenges.map((c) => c.type));
 
-    // bo1-verruckt: create First Room Jug/Quick if missing
-    if (map.slug === 'bo1-verruckt') {
-      for (const t of ['STARTING_ROOM_JUG_SIDE', 'STARTING_ROOM_QUICK_SIDE'] as const) {
-        if (existingTypes.has(t)) continue;
-        const name = t === 'STARTING_ROOM_JUG_SIDE' ? 'First Room (Jug Side)' : 'First Room (Quick Side)';
-        if (!DRY_RUN) {
-          await prisma.challenge.create({
-            data: {
-              name,
-              slug: t.toLowerCase().replace(/_/g, '-'),
-              type: t,
-              mapId: map.id,
-              xpReward: 0,
-              isActive: true,
-            },
-          });
-        }
-        challengesCreated++;
+    // bo1-verruckt: create First Room (single STARTING_ROOM) if missing
+    if (map.slug === 'bo1-verruckt' && !existingTypes.has('STARTING_ROOM')) {
+      if (!DRY_RUN) {
+        await prisma.challenge.create({
+          data: {
+            name: 'First Room',
+            slug: 'starting-room',
+            type: 'STARTING_ROOM',
+            mapId: map.id,
+            xpReward: 0,
+            isActive: true,
+          },
+        });
       }
+      challengesCreated++;
     }
 
     // Moon: create No Man's Land if missing

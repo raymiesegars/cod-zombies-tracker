@@ -41,7 +41,7 @@ const AW_MAPS = [
   {
     name: 'Outbreak',
     slug: 'aw-outbreak',
-    isDlc: false,
+    isDlc: true,
     hasEasterEgg: true,
     order: 1,
     imageUrl: '/images/maps/outbreak-aw.webp',

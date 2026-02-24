@@ -26,6 +26,8 @@ import { getWw2MapConfig, getWw2ChallengeTypeLabel } from '@/lib/ww2/ww2-map-con
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 import { getVanguardMapConfig, getVanguardChallengeTypeLabel } from '@/lib/vanguard/vanguard-map-config';
 import { getAwMapConfig, getAwChallengeTypeLabel } from '@/lib/aw/aw-map-config';
+import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap } from '@/lib/first-room-variants';
+import { hasNoJugSupport } from '@/lib/no-jug-support';
 
 const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
 const PAGE_SIZE = 25;
@@ -136,6 +138,7 @@ export default function LeaderboardsPage() {
   const [ww2ConsumablesFilter, setWw2ConsumablesFilter] = useState<string>('true'); // Default: With Consumables
   const [wawFixedWunderwaffeFilter, setWawFixedWunderwaffeFilter] = useState<string>('');
   const [bo2BankUsedFilter, setBo2BankUsedFilter] = useState<string>('');
+  const [firstRoomVariantFilter, setFirstRoomVariantFilter] = useState<string>('');
 
   // Debounce search: clear immediately, type delay 300ms so we search all users on the server
   useEffect(() => {
@@ -272,9 +275,14 @@ export default function LeaderboardsPage() {
             if (bo7CursedFilter === 'true' || bo7CursedFilter === 'false') params.set('bo7CursedRun', bo7CursedFilter);
             if (bo7CursedFilter === 'true' && bo7RelicsFilter.length > 0) params.set('bo7Relics', bo7RelicsFilter.join(','));
           }
-          if (isWawMap) {
+          if (selectedMap && hasNoJugSupport(selectedMap, selectedMapData?.game?.shortName)) {
             if (wawNoJugFilter === 'true' || wawNoJugFilter === 'false') params.set('wawNoJug', wawNoJugFilter);
+          }
+          if (isWawMap) {
             if (wawFixedWunderwaffeFilter === 'true' || wawFixedWunderwaffeFilter === 'false') params.set('wawFixedWunderwaffe', wawFixedWunderwaffeFilter);
+          }
+          if (selectedMap && hasFirstRoomVariantFilter(selectedMap) && selectedChallengeType === 'STARTING_ROOM' && firstRoomVariantFilter) {
+            params.set('firstRoomVariant', firstRoomVariantFilter);
           }
           if (isBo2Map && selectedMap && getBo2MapConfig(selectedMap)?.hasBank) {
             if (bo2BankUsedFilter === 'true' || bo2BankUsedFilter === 'false') params.set('bo2BankUsed', bo2BankUsedFilter);
@@ -303,7 +311,7 @@ export default function LeaderboardsPage() {
     }
 
     fetchLeaderboard();
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, isVanguardMap, hasVanguardVoid, hasVanguardRampage, searchForFetch, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, isVanguardMap, hasVanguardVoid, hasVanguardRampage, searchForFetch, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter]);
 
   const loadMore = useCallback(async () => {
     if (leaderboard.length >= total || total === 0) return;
@@ -373,9 +381,14 @@ export default function LeaderboardsPage() {
             if (bo7CursedFilter === 'true' || bo7CursedFilter === 'false') params.set('bo7CursedRun', bo7CursedFilter);
             if (bo7CursedFilter === 'true' && bo7RelicsFilter.length > 0) params.set('bo7Relics', bo7RelicsFilter.join(','));
           }
-          if (isWawMap) {
+          if (selectedMap && hasNoJugSupport(selectedMap, selectedMapData?.game?.shortName)) {
             if (wawNoJugFilter === 'true' || wawNoJugFilter === 'false') params.set('wawNoJug', wawNoJugFilter);
+          }
+          if (isWawMap) {
             if (wawFixedWunderwaffeFilter === 'true' || wawFixedWunderwaffeFilter === 'false') params.set('wawFixedWunderwaffe', wawFixedWunderwaffeFilter);
+          }
+          if (selectedMap && hasFirstRoomVariantFilter(selectedMap) && selectedChallengeType === 'STARTING_ROOM' && firstRoomVariantFilter) {
+            params.set('firstRoomVariant', firstRoomVariantFilter);
           }
           if (isBo2Map && selectedMap && getBo2MapConfig(selectedMap)?.hasBank) {
             if (bo2BankUsedFilter === 'true' || bo2BankUsedFilter === 'false') params.set('bo2BankUsed', bo2BankUsedFilter);
@@ -401,7 +414,7 @@ export default function LeaderboardsPage() {
     } finally {
       loadingMoreRef.current = false;
     }
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, hasVanguardVoid, hasVanguardRampage, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, leaderboard.length, total]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, hasVanguardVoid, hasVanguardRampage, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter, leaderboard.length, total]);
 
   // Only observe sentinel when search is empty so list stays stable while filtering
   useEffect(() => {
@@ -498,7 +511,7 @@ export default function LeaderboardsPage() {
     let challengeOptions: { value: string; label: string }[];
     if (selectedMapData?.game?.shortName === 'IW') {
       challengeOptions = mapChallenges.length > 0
-        ? IW_CHALLENGE_TYPES_ORDER.filter((t) => mapChallenges.some((c) => c.type === t)).map((t) => {
+        ? IW_CHALLENGE_TYPES_ORDER.filter((t) => t !== 'NO_JUG' && mapChallenges.some((c) => c.type === t)).map((t) => {
             const c = mapChallenges.find((ch) => ch.type === t);
             return { value: t, label: c?.name ?? challengeTypeLabels[t] ?? t };
           })
@@ -579,16 +592,25 @@ export default function LeaderboardsPage() {
       const awConfig = getAwMapConfig(selectedMap);
       const types = awConfig?.challengeTypes ?? mapChallenges.map((c) => c.type);
       challengeOptions = types
-        .filter((t) => t !== 'HIGHEST_ROUND')
+        .filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG')
         .map((t) => {
           const c = mapChallenges.find((ch) => ch.type === t);
           return { value: t, label: getLabel(t, c?.name) };
         });
+    } else if (selectedMapData?.game?.shortName === 'WAW' && selectedMap) {
+      const wawConfig = getWaWMapConfig(selectedMap);
+      const types = (wawConfig?.challengeTypes ?? mapChallenges.map((c) => c.type)).filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
+      challengeOptions = types.map((t) => {
+        const c = mapChallenges.find((ch) => ch.type === t);
+        return { value: t, label: getLabel(t, c?.name) };
+      });
     } else {
-      challengeOptions = mapChallenges.map((c) => ({
-        value: c.type,
-        label: getLabel(c.type, c.name),
-      }));
+      challengeOptions = mapChallenges
+        .filter((c) => c.type !== 'NO_JUG')
+        .map((c) => ({
+          value: c.type,
+          label: getLabel(c.type, c.name),
+        }));
     }
     return [
       { value: 'HIGHEST_ROUND', label: 'Highest Round' },
@@ -913,7 +935,18 @@ export default function LeaderboardsPage() {
                       )}
                     </>
                   )}
-                  {isWawMap && getWaWMapConfig(selectedMap)?.noJugWR != null && (
+                  {selectedMap && hasFirstRoomVariantFilter(selectedMap) && selectedChallengeType === 'STARTING_ROOM' && (
+                    <Select
+                      options={[
+                        { value: '', label: 'All variants' },
+                        ...(getFirstRoomVariantsForMap(selectedMap) ?? []).map((o) => ({ value: o.value, label: o.label })),
+                      ]}
+                      value={firstRoomVariantFilter}
+                      onChange={(e) => setFirstRoomVariantFilter(e.target.value)}
+                      className="w-full min-w-0 sm:w-44 max-w-full"
+                    />
+                  )}
+                  {selectedMap && hasNoJugSupport(selectedMap, selectedMapData?.game?.shortName) && (
                     <>
                       <Select
                         options={[
@@ -924,7 +957,7 @@ export default function LeaderboardsPage() {
                         onChange={(e) => setWawNoJugFilter(e.target.value)}
                         className="w-full min-w-0 sm:w-40 max-w-full"
                       />
-                      {selectedMapData?.slug === 'der-riese' && (
+                      {isWawMap && selectedMapData?.slug === 'der-riese' && (
                       <Select
                         options={[
                           { value: '', label: 'Standard' },

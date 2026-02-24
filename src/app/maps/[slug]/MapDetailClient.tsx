@@ -77,6 +77,8 @@ import { getWw2MapConfig, getWw2ChallengeTypeLabel } from '@/lib/ww2/ww2-map-con
 import { getVanguardMapConfig, getVanguardChallengeTypeLabel } from '@/lib/vanguard/vanguard-map-config';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 import { getAwMapConfig, getAwChallengeTypeLabel } from '@/lib/aw/aw-map-config';
+import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap } from '@/lib/first-room-variants';
+import { hasNoJugSupport } from '@/lib/no-jug-support';
 
 const BUILDABLE_PART_CACHE_KEY_PREFIX = 'buildable-parts';
 const BUILDABLE_PART_CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
@@ -581,6 +583,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   // WW2 consumables filter
   const [lbWw2Consumables, setLbWw2Consumables] = useState<string>('true');
   const [lbVanguardVoidFilter, setLbVanguardVoidFilter] = useState<string>('true'); // Default: With Void (der-anfang, terra-maledicta only)
+  const [lbFirstRoomVariant, setLbFirstRoomVariant] = useState<string>('');
   const leaderboardSlugRef = useRef<string | null>(null);
 
   // Your runs for this map when logged in; URL ?tab=your-runs triggers fetch on load
@@ -704,9 +707,14 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
             if (lbBo7CursedFilter === 'true' || lbBo7CursedFilter === 'false') params.set('bo7CursedRun', lbBo7CursedFilter);
             if (lbBo7CursedFilter === 'true' && lbBo7SelectedRelics.length > 0) params.set('bo7Relics', lbBo7SelectedRelics.join(','));
           }
-          if (map.game?.shortName === 'WAW') {
+          if (slug && hasNoJugSupport(slug, map.game?.shortName)) {
             if (lbWawNoJug === 'true' || lbWawNoJug === 'false') params.set('wawNoJug', lbWawNoJug);
+          }
+          if (map.game?.shortName === 'WAW') {
             if (lbWawFixedWunderwaffe === 'true' || lbWawFixedWunderwaffe === 'false') params.set('wawFixedWunderwaffe', lbWawFixedWunderwaffe);
+          }
+          if (slug && hasFirstRoomVariantFilter(slug) && selectedLeaderboardCategory === 'STARTING_ROOM' && lbFirstRoomVariant) {
+            params.set('firstRoomVariant', lbFirstRoomVariant);
           }
           if (map.game?.shortName === 'BO2' && getBo2MapConfig(map.slug)?.hasBank) {
             if (lbBo2BankUsed === 'true' || lbBo2BankUsed === 'false') params.set('bo2BankUsed', lbBo2BankUsed);
@@ -735,7 +743,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     })();
     // Intentionally omit leaderboard.length / leaderboardFetchedOnce to avoid re-fetch loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut, lbBo3GobbleGumMode, lbBo3AatUsed, lbBo4ElixirMode, lbBocwSupportMode, lbRampageInducerFilter, lbBo6GobbleGumMode, lbBo6SupportMode, lbBo7SupportMode, lbBo7CursedFilter, lbBo7SelectedRelics, lbWawNoJug, lbWawFixedWunderwaffe, lbBo2BankUsed, lbWw2Consumables, lbVanguardVoidFilter]);
+  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut, lbBo3GobbleGumMode, lbBo3AatUsed, lbBo4ElixirMode, lbBocwSupportMode, lbRampageInducerFilter, lbBo6GobbleGumMode, lbBo6SupportMode, lbBo7SupportMode, lbBo7CursedFilter, lbBo7SelectedRelics, lbWawNoJug, lbWawFixedWunderwaffe, lbBo2BankUsed, lbWw2Consumables, lbVanguardVoidFilter, lbFirstRoomVariant]);
 
   // Sync activeTab with URL so switching to Your Runs triggers fetch
   useEffect(() => {
@@ -922,9 +930,9 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     { value: 'SQUAD', label: 'Squad' },
   ];
 
-  // Single category dropdown like Leaderboards page: Highest Round, all map challenges (IW/BO2/BO3 in config order), all loggable EEs (Time)
+  // Single category dropdown like Leaderboards page: Highest Round, all map challenges (IW/BO2/BO3 in config order), all loggable EEs (Time). NO_JUG is a toggle, not a challenge.
   const mapChallengeOptions = useMemo(() => {
-    const challenges = (map?.challenges ?? []).filter((c) => c.type !== 'HIGHEST_ROUND');
+    const challenges = (map?.challenges ?? []).filter((c) => c.type !== 'HIGHEST_ROUND' && c.type !== 'NO_JUG');
     const getLabel = (type: string, fallbackName?: string | null) =>
       map?.game?.shortName === 'WAW'
         ? (fallbackName || getWaWChallengeTypeLabel(type))
@@ -948,77 +956,84 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                     ? (challengeTypeLabels[type] ?? getAwChallengeTypeLabel(type) ?? fallbackName ?? type)
                     : (fallbackName ?? challengeTypeLabels[type] ?? type);
     if (map?.game?.shortName === 'IW' && challenges.length > 0) {
-      const ordered = IW_CHALLENGE_TYPES_ORDER.filter((t) => challenges.some((c) => c.type === t));
+      const ordered = IW_CHALLENGE_TYPES_ORDER.filter((t) => t !== 'NO_JUG' && challenges.some((c) => c.type === t));
       return ordered.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: c?.name ?? challengeTypeLabels[t] ?? t };
       });
     }
+    if (map?.game?.shortName === 'WAW' && map?.slug && getWaWMapConfig(map.slug)) {
+      const types = getWaWMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
+      return types.map((t) => {
+        const c = challenges.find((ch) => ch.type === t);
+        return { value: t, label: getLabel(t, c?.name) };
+      });
+    }
     if (map?.game?.shortName === 'BO1' && map?.slug && getBo1MapConfig(map.slug)) {
-      const types = getBo1MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      const types = getBo1MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'BO2' && map?.slug && getBo2MapConfig(map.slug)) {
-      const types = getBo2MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      const types = getBo2MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'BO3' && map?.slug && getBo3MapConfig(map.slug)) {
-      const types = getBo3MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      const types = getBo3MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'BO4' && map?.slug && getBo4MapConfig(map.slug)) {
-      const types = getBo4MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      const types = getBo4MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'BOCW' && map?.slug && getBocwMapConfig(map.slug)) {
-      const types = getBocwMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      const types = getBocwMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'BO6' && map?.slug && getBo6MapConfig(map.slug)) {
-      const types = getBo6MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      const types = getBo6MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'BO7' && map?.slug && getBo7MapConfig(map.slug)) {
-      const types = getBo7MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      const types = getBo7MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'WW2' && map?.slug && getWw2MapConfig(map.slug)) {
-      const types = getWw2MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      const types = getWw2MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'VANGUARD' && map?.slug && getVanguardMapConfig(map.slug)) {
-      const types = getVanguardMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      const types = getVanguardMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'AW' && map?.slug && getAwMapConfig(map.slug)) {
-      const types = getAwMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      const types = getAwMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
@@ -2036,31 +2051,38 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                       )}
                     </>
                   )}
-                    {map?.game?.shortName === 'WAW' && (
-                      <>
-                        {getWaWMapConfig(map.slug)?.noJugWR != null && (
-                          <Select
-                            options={[
-                              { value: '', label: 'Jug Allowed' },
-                              { value: 'true', label: 'No Jug' },
-                            ]}
-                            value={lbWawNoJug}
-                            onChange={(e) => setLbWawNoJug(e.target.value)}
-                            className="w-full min-w-0 sm:w-40 max-w-full"
-                          />
-                        )}
-                        {map?.slug === 'der-riese' && (
-                          <Select
-                            options={[
-                              { value: '', label: 'Standard' },
-                              { value: 'true', label: 'Fixed Wunderwaffe' },
-                            ]}
-                            value={lbWawFixedWunderwaffe}
-                            onChange={(e) => setLbWawFixedWunderwaffe(e.target.value)}
-                            className="w-full min-w-0 sm:w-40 max-w-full"
-                          />
-                        )}
-                      </>
+                    {map?.slug && hasFirstRoomVariantFilter(map.slug) && selectedLeaderboardCategory === 'STARTING_ROOM' && (
+                      <Select
+                        options={[
+                          { value: '', label: 'All variants' },
+                          ...(getFirstRoomVariantsForMap(map.slug) ?? []).map((o) => ({ value: o.value, label: o.label })),
+                        ]}
+                        value={lbFirstRoomVariant}
+                        onChange={(e) => setLbFirstRoomVariant(e.target.value)}
+                        className="w-full min-w-0 sm:w-44 max-w-full"
+                      />
+                    )}
+                    {map?.slug && hasNoJugSupport(map.slug, map.game?.shortName) && (
+                      <Select
+                        options={[
+                          { value: '', label: 'Jug Allowed' },
+                          { value: 'true', label: 'No Jug' },
+                        ]}
+                        value={lbWawNoJug}
+                        onChange={(e) => setLbWawNoJug(e.target.value)}
+                        className="w-full min-w-0 sm:w-40 max-w-full"
+                      />
+                    )}
+                    {map?.game?.shortName === 'WAW' && map?.slug === 'der-riese' && (
+                      <Select
+                        options={[
+                          { value: '', label: 'Standard' },
+                          { value: 'true', label: 'Fixed Wunderwaffe' },
+                        ]}
+                        value={lbWawFixedWunderwaffe}
+                        onChange={(e) => setLbWawFixedWunderwaffe(e.target.value)}
+                        className="w-full min-w-0 sm:w-40 max-w-full"
+                      />
                     )}
                     {map?.game?.shortName === 'BO2' && getBo2MapConfig(map.slug)?.hasBank && (
                       <Select
@@ -2218,10 +2240,27 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                                 ? formatCompletionTime(item.log.completionTimeSeconds)
                                 : null}
                             </span>
-                            <span className="hidden sm:flex items-center justify-end gap-1.5 text-sm text-bunker-400 flex-shrink-0">
+                            <span className="hidden sm:flex items-center justify-end gap-1.5 text-sm text-bunker-400 flex-shrink-0 flex-wrap">
                               {item.log.playerCount}
                               {map?.game?.shortName === 'BO4' && item.log.difficulty && (
                                 <span className="text-bunker-500">· {getBo4DifficultyLabel(item.log.difficulty)}</span>
+                              )}
+                              {slug && hasNoJugSupport(slug, map?.game?.shortName) && (item.log as unknown as { wawNoJug?: boolean | null }).wawNoJug === true && (
+                                <span className="px-1.5 py-0.5 rounded border border-blood-600/60 bg-blood-950/70 text-blood-300 text-xs">No Jug</span>
+                              )}
+                              {map?.game?.shortName === 'BO6' && (
+                                <>
+                                  {((item.log as unknown as { bo6GobbleGumMode?: string | null }).bo6GobbleGumMode) && (
+                                    <span className="text-bunker-500 text-xs truncate max-w-[5rem]" title={getBo6GobbleGumLabel((item.log as unknown as { bo6GobbleGumMode: string }).bo6GobbleGumMode)}>
+                                      {getBo6GobbleGumLabel((item.log as unknown as { bo6GobbleGumMode: string }).bo6GobbleGumMode)}
+                                    </span>
+                                  )}
+                                  {((item.log as unknown as { bo6SupportMode?: string | null }).bo6SupportMode) && (
+                                    <span className="text-bunker-500 text-xs truncate max-w-[5rem]" title={getBo6SupportLabel((item.log as unknown as { bo6SupportMode: string }).bo6SupportMode)}>
+                                      {getBo6SupportLabel((item.log as unknown as { bo6SupportMode: string }).bo6SupportMode)}
+                                    </span>
+                                  )}
+                                </>
                               )}
                             </span>
                             <span className="flex justify-end flex-shrink-0 min-w-[3rem]">

@@ -24,6 +24,7 @@ import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES, getBo6GobbleGumLabel
 import { isBo7Game, BO7_SUPPORT_MODES, getBo7SupportLabel } from '@/lib/bo7';
 import { isWw2Game } from '@/lib/ww2';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
+import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap } from '@/lib/first-room-variants';
 import { Bo7RelicPicker } from '@/components/game';
 import { ChevronLeft, Save, Lock } from 'lucide-react';
 import type { PlayerCount } from '@/types';
@@ -64,6 +65,7 @@ type ChallengeLog = {
   rampageInducerUsed?: boolean | null;
   vanguardVoidUsed?: boolean | null;
   ww2ConsumablesUsed?: boolean | null;
+  firstRoomVariant?: string | null;
 };
 type EasterEggLog = {
   id: string;
@@ -128,6 +130,7 @@ export default function EditRunPage() {
   const [rampageInducerUsed, setRampageInducerUsed] = useState(false);
   const [vanguardVoidUsed, setVanguardVoidUsed] = useState(true);
   const [ww2ConsumablesUsed, setWw2ConsumablesUsed] = useState(true);
+  const [firstRoomVariant, setFirstRoomVariant] = useState<string>('');
   // Admin / verified status
   const [isVerified, setIsVerified] = useState(false);
   const [isSuperAdminUser, setIsSuperAdminUser] = useState(false);
@@ -200,6 +203,7 @@ export default function EditRunPage() {
           if (data.rampageInducerUsed != null) setRampageInducerUsed(data.rampageInducerUsed);
           if (data.vanguardVoidUsed != null) setVanguardVoidUsed(data.vanguardVoidUsed);
           if (data.ww2ConsumablesUsed != null) setWw2ConsumablesUsed(data.ww2ConsumablesUsed);
+          if (data.firstRoomVariant != null) setFirstRoomVariant(String(data.firstRoomVariant));
         } else {
           setRoundCompleted(data.roundCompleted != null ? String(data.roundCompleted) : '');
           setIsSolo(!!data.isSolo);
@@ -267,6 +271,7 @@ export default function EditRunPage() {
           ...((isBocwGame(log?.map?.game?.shortName) || isBo6Game(log?.map?.game?.shortName) || isBo7Game(log?.map?.game?.shortName) || (isVanguardGame(log?.map?.game?.shortName) && log?.map?.slug && hasVanguardRampageFilter(log.map.slug))) && { rampageInducerUsed }),
           ...(isVanguardGame(log?.map?.game?.shortName) && log?.map?.slug && hasVanguardVoidFilter(log.map.slug) && { vanguardVoidUsed }),
           ...(isWw2Game(log?.map?.game?.shortName) && { ww2ConsumablesUsed }),
+          ...(log?.map?.slug && chalType === 'STARTING_ROOM' && hasFirstRoomVariantFilter(log.map.slug) && { firstRoomVariant: firstRoomVariant || undefined }),
           proofUrls: normalizeProofUrls(proofUrls),
           notes: notes || null,
           // Always send explicitly (JSON.stringify omits undefined, which would skip the API update)
@@ -538,6 +543,18 @@ export default function EditRunPage() {
                     ]}
                     value={vanguardVoidUsed ? 'true' : 'false'}
                     onChange={(e) => setVanguardVoidUsed(e.target.value === 'true')}
+                    disabled={verifiedAndLocked}
+                  />
+                )}
+                {log?.map?.slug && (log as ChallengeLog).challenge?.type === 'STARTING_ROOM' && hasFirstRoomVariantFilter(log.map.slug) && (
+                  <Select
+                    label="Room Variant"
+                    options={[
+                      { value: '', label: 'Select variant…' },
+                      ...(getFirstRoomVariantsForMap(log.map.slug) ?? []).map((o) => ({ value: o.value, label: o.label })),
+                    ]}
+                    value={firstRoomVariant}
+                    onChange={(e) => setFirstRoomVariant(e.target.value)}
                     disabled={verifiedAndLocked}
                   />
                 )}

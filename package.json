@@ -25,6 +25,8 @@
     "db:deploy-vanguard": "tsx scripts/deploy-vanguard.ts",
     "db:add-aw": "tsx scripts/add-aw-content.ts",
     "db:deploy-aw": "tsx scripts/deploy-aw.ts",
+    "db:first-room-migration": "tsx scripts/run-first-room-migration.ts",
+    "db:deploy-first-room": "tsx scripts/deploy-first-room-and-game-order.ts",
     "db:deploy-ww2": "tsx scripts/deploy-ww2-production.ts",
     "db:dedupe-ee-achievements": "tsx scripts/dedupe-ee-achievements.ts",
     "db:backfill-bo4-difficulty-achievements": "tsx scripts/backfill-bo4-difficulty-achievements.ts",

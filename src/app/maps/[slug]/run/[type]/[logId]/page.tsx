@@ -27,6 +27,7 @@ import { getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
 import { getBo7SupportLabel } from '@/lib/bo7';
 import { getWw2ConsumablesLabel } from '@/lib/ww2';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter, getVanguardVoidLabel } from '@/lib/vanguard';
+import { hasNoJugSupport } from '@/lib/no-jug-support';
 import { ChevronLeft, FileText, ExternalLink, Clock, Pencil, Trash2, Users, ShieldCheck, ShieldOff, Loader2, Check, Lock } from 'lucide-react';
 
 function DeleteRunButton({
@@ -163,6 +164,7 @@ type ChallengeLogDetail = {
   bo7IsCursedRun?: boolean | null;
   bo7RelicsUsed?: string[];
   rampageInducerUsed?: boolean | null;
+  wawNoJug?: boolean | null;
   vanguardVoidUsed?: boolean | null;
   ww2ConsumablesUsed?: boolean | null;
 };
@@ -547,6 +549,14 @@ export default function RunDetailPage() {
                       <span className="text-white font-medium">{getBo4DifficultyLabel((log as ChallengeLogDetail).difficulty)}</span>
                     </div>
                   )}
+                  {map.slug && hasNoJugSupport(map.slug, map.game?.shortName) && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">No Jug</span>
+                      <span className="text-white font-medium">
+                        {(log as ChallengeLogDetail).wawNoJug === true ? 'Yes' : 'No'}
+                      </span>
+                    </div>
+                  )}
                   {/* Game-specific metadata */}
                   {map.game.shortName === 'IW' && (log as ChallengeLogDetail).useFortuneCards != null && (
                     <div className="flex items-center justify-between">
@@ -562,42 +572,64 @@ export default function RunDetailPage() {
                       <span className="text-white font-medium">Yes</span>
                     </div>
                   )}
-                  {map.game.shortName === 'BO3' && (log as ChallengeLogDetail).bo3GobbleGumMode && (
+                  {map.game.shortName === 'BO3' && (
                     <div className="flex items-center justify-between">
                       <span className="text-bunker-400 text-sm">GobbleGums</span>
-                      <span className="text-white font-medium">{getBo3GobbleGumLabel((log as ChallengeLogDetail).bo3GobbleGumMode!)}</span>
-                    </div>
-                  )}
-                  {map.game.shortName === 'BO4' && (log as ChallengeLogDetail).bo4ElixirMode && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-bunker-400 text-sm">Elixirs</span>
                       <span className="text-white font-medium">
-                        {(log as ChallengeLogDetail).bo4ElixirMode === 'CLASSIC_ONLY' ? 'Classic Only' : 'All Elixirs & Talismans'}
+                        {(log as ChallengeLogDetail).bo3GobbleGumMode
+                          ? getBo3GobbleGumLabel((log as ChallengeLogDetail).bo3GobbleGumMode!)
+                          : 'Not specified'}
                       </span>
                     </div>
                   )}
-                  {map.game.shortName === 'BOCW' && (log as ChallengeLogDetail).bocwSupportMode && (
+                  {map.game.shortName === 'BO4' && (
                     <div className="flex items-center justify-between">
-                      <span className="text-bunker-400 text-sm">Support</span>
-                      <span className="text-white font-medium">{getBocwSupportLabel((log as ChallengeLogDetail).bocwSupportMode!)}</span>
+                      <span className="text-bunker-400 text-sm">Elixirs</span>
+                      <span className="text-white font-medium">
+                        {(log as ChallengeLogDetail).bo4ElixirMode
+                          ? ((log as ChallengeLogDetail).bo4ElixirMode === 'CLASSIC_ONLY' ? 'Classic Only' : 'All Elixirs & Talismans')
+                          : 'Not specified'}
+                      </span>
                     </div>
                   )}
-                  {map.game.shortName === 'BO6' && (log as ChallengeLogDetail).bo6GobbleGumMode && (
+                  {map.game.shortName === 'BOCW' && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">Support</span>
+                      <span className="text-white font-medium">
+                        {(log as ChallengeLogDetail).bocwSupportMode
+                          ? getBocwSupportLabel((log as ChallengeLogDetail).bocwSupportMode!)
+                          : 'Not specified'}
+                      </span>
+                    </div>
+                  )}
+                  {map.game.shortName === 'BO6' && (
                     <div className="flex items-center justify-between">
                       <span className="text-bunker-400 text-sm">GobbleGums</span>
-                      <span className="text-white font-medium">{getBo6GobbleGumLabel((log as ChallengeLogDetail).bo6GobbleGumMode!)}</span>
+                      <span className="text-white font-medium">
+                        {(log as ChallengeLogDetail).bo6GobbleGumMode
+                          ? getBo6GobbleGumLabel((log as ChallengeLogDetail).bo6GobbleGumMode!)
+                          : 'Not specified'}
+                      </span>
                     </div>
                   )}
-                  {map.game.shortName === 'BO6' && (log as ChallengeLogDetail).bo6SupportMode && (
+                  {map.game.shortName === 'BO6' && (
                     <div className="flex items-center justify-between">
                       <span className="text-bunker-400 text-sm">Support</span>
-                      <span className="text-white font-medium">{getBo6SupportLabel((log as ChallengeLogDetail).bo6SupportMode!)}</span>
+                      <span className="text-white font-medium">
+                        {(log as ChallengeLogDetail).bo6SupportMode
+                          ? getBo6SupportLabel((log as ChallengeLogDetail).bo6SupportMode!)
+                          : 'Not specified'}
+                      </span>
                     </div>
                   )}
-                  {map.game.shortName === 'BO7' && (log as ChallengeLogDetail).bo7SupportMode && (
+                  {map.game.shortName === 'BO7' && (
                     <div className="flex items-center justify-between">
                       <span className="text-bunker-400 text-sm">Support</span>
-                      <span className="text-white font-medium">{getBo7SupportLabel((log as ChallengeLogDetail).bo7SupportMode!)}</span>
+                      <span className="text-white font-medium">
+                        {(log as ChallengeLogDetail).bo7SupportMode
+                          ? getBo7SupportLabel((log as ChallengeLogDetail).bo7SupportMode!)
+                          : 'Not specified'}
+                      </span>
                     </div>
                   )}
                   {map.game.shortName === 'WW2' && (log as ChallengeLogDetail).ww2ConsumablesUsed != null && (
