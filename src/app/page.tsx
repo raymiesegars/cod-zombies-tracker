@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button, Card, CardContent, Logo, EasterEggIcon, MapIcon } from '@/components/ui';
 import { useAuth } from '@/context/auth-context';
-import { Trophy, Target, Users, ChevronRight, Wrench, ExternalLink } from 'lucide-react';
+import { Trophy, Target, Users, ChevronRight, Wrench, ExternalLink, PenLine } from 'lucide-react';
+import { useLogProgressModal } from '@/context/log-progress-modal-context';
 
 const features = [
   {
@@ -42,6 +43,7 @@ const statsConfig: { label: string; value?: string; key?: 'maps' }[] = [
 
 export default function HomePage() {
   const { user, profile, signInWithGoogle } = useAuth();
+  const { openLogProgressModal } = useLogProgressModal() ?? {};
   const [mapCount, setMapCount] = useState<number | null>(null);
 
   useEffect(() => {
@@ -91,8 +93,18 @@ export default function HomePage() {
             <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
               {user ? (
                 <>
+                  {openLogProgressModal && (
+                    <Button
+                      size="lg"
+                      onClick={openLogProgressModal}
+                      rightIcon={<PenLine className="w-5 h-5" />}
+                      className="w-full sm:w-auto bg-blood-600 hover:bg-blood-500 text-white border-blood-500/50 shadow-lg shadow-blood-900/40 [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]"
+                    >
+                      Log Progress
+                    </Button>
+                  )}
                   <Link href="/maps" className="w-full sm:w-auto">
-                    <Button size="lg" rightIcon={<ChevronRight className="w-5 h-5" />} className="w-full sm:w-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]">
+                    <Button size="lg" rightIcon={<ChevronRight className="w-5 h-5" />} variant="secondary" className="w-full sm:w-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]">
                       Browse Maps
                     </Button>
                   </Link>
@@ -157,6 +169,30 @@ export default function HomePage() {
             </p>
           </div>
 
+          {user && openLogProgressModal && (
+            <div className="mb-8 sm:mb-12">
+              <button
+                type="button"
+                onClick={openLogProgressModal}
+                className="w-full p-6 sm:p-8 rounded-xl border-2 border-blood-600/60 bg-blood-950/50 hover:bg-blood-900/60 hover:border-blood-500/80 transition-all text-left group"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-blood-600/30 border border-blood-600/50 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <PenLine className="w-7 h-7 sm:w-8 sm:h-8 text-blood-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-zombies text-white tracking-wide">
+                      Log Progress Now
+                    </h3>
+                    <p className="mt-1 text-sm text-bunker-400">
+                      Pick a game and map → log your run with proof, challenges, and squad. Earn XP and climb the leaderboards.
+                    </p>
+                  </div>
+                  <ChevronRight className="w-6 h-6 text-blood-500 group-hover:translate-x-1 transition-transform ml-auto flex-shrink-0" />
+                </div>
+              </button>
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
             {features.map((feature) => (
               <div key={feature.title}>
@@ -259,13 +295,25 @@ export default function HomePage() {
             <p className="mt-3 sm:mt-4 text-base sm:text-lg text-bunker-400">
               Free account. Easter egg guides, challenges, speedruns, XP and ranks. Log runs with squad, get verified, customize your maps and profile.
             </p>
-            <div className="mt-6 sm:mt-8">
+            <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
               {user ? (
-                <Link href="/maps">
-                  <Button size="lg" rightIcon={<ChevronRight className="w-5 h-5" />} className="[text-shadow:0_1px_2px_rgba(0,0,0,0.6)]">
-                    Browse Maps
-                  </Button>
-                </Link>
+                <>
+                  {openLogProgressModal && (
+                    <Button
+                      size="lg"
+                      onClick={openLogProgressModal}
+                      rightIcon={<PenLine className="w-5 h-5" />}
+                      className="bg-blood-600 hover:bg-blood-500 text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]"
+                    >
+                      Log Progress
+                    </Button>
+                  )}
+                  <Link href="/maps">
+                    <Button size="lg" variant="secondary" rightIcon={<ChevronRight className="w-5 h-5" />} className="[text-shadow:0_1px_2px_rgba(0,0,0,0.6)]">
+                      Browse Maps
+                    </Button>
+                  </Link>
+                </>
               ) : (
                 <Button
                   size="lg"
