@@ -22,3 +22,4 @@ export * from './runs-modal';
 export * from './easter-eggs-modal';
 export * from './maps-modal';
 export * from './achievements-modal';
+export * from './world-records-modal';

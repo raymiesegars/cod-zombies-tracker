@@ -291,54 +291,60 @@ async function main() {
 
   console.log(`   Created: ${achievementsCreated}, Updated: ${achievementsUpdated}, Deactivated: ${achievementsDeactivated}`);
 
-  // 3. Recalculate user totalXp
-  console.log('3. Recalculating user XP...');
+  // 3. Recalculate user XP only when achievements were updated or deactivated
+  // (created achievements have no UserAchievements yet, so no XP impact)
+  const needsXpRecalc = achievementsUpdated > 0 || achievementsDeactivated > 0;
+  if (!needsXpRecalc) {
+    console.log('3. Skipping user XP recalculation (no achievements updated/deactivated).');
+  } else {
+    console.log('3. Recalculating user XP...');
 
-  const users = await prisma.user.findMany({
-    select: { id: true },
-  });
-
-  let usersUpdated = 0;
-  for (const user of users) {
-    const uas = await prisma.userAchievement.findMany({
-      where: { userId: user.id },
-      include: { achievement: { select: { xpReward: true, isActive: true } } },
-    });
-    const totalXp = uas
-      .filter((ua) => ua.achievement.isActive)
-      .reduce((sum, ua) => sum + ua.achievement.xpReward, 0);
-
-    const verifiedUas = await prisma.userAchievement.findMany({
-      where: { userId: user.id, verifiedAt: { not: null } },
-      include: { achievement: { select: { xpReward: true, isActive: true } } },
-    });
-    const verifiedTotalXp = verifiedUas
-      .filter((ua) => ua.achievement.isActive)
-      .reduce((sum, ua) => sum + ua.achievement.xpReward, 0);
-
-    const current = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { totalXp: true, level: true, verifiedTotalXp: true },
+    const users = await prisma.user.findMany({
+      select: { id: true },
     });
 
-    const { getLevelFromXp } = await import('../src/lib/ranks');
-    const needsUpdate =
-      (current && current.totalXp !== totalXp) ||
-      (current && (current.verifiedTotalXp ?? 0) !== verifiedTotalXp);
+    let usersUpdated = 0;
+    for (const user of users) {
+      const uas = await prisma.userAchievement.findMany({
+        where: { userId: user.id },
+        include: { achievement: { select: { xpReward: true, isActive: true } } },
+      });
+      const totalXp = uas
+        .filter((ua) => ua.achievement.isActive)
+        .reduce((sum, ua) => sum + ua.achievement.xpReward, 0);
 
-    if (needsUpdate) {
-      const { level } = getLevelFromXp(totalXp);
-      if (!DRY_RUN) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { totalXp, level, verifiedTotalXp },
-        });
+      const verifiedUas = await prisma.userAchievement.findMany({
+        where: { userId: user.id, verifiedAt: { not: null } },
+        include: { achievement: { select: { xpReward: true, isActive: true } } },
+      });
+      const verifiedTotalXp = verifiedUas
+        .filter((ua) => ua.achievement.isActive)
+        .reduce((sum, ua) => sum + ua.achievement.xpReward, 0);
+
+      const current = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { totalXp: true, level: true, verifiedTotalXp: true },
+      });
+
+      const { getLevelFromXp } = await import('../src/lib/ranks');
+      const needsUpdate =
+        (current && current.totalXp !== totalXp) ||
+        (current && (current.verifiedTotalXp ?? 0) !== verifiedTotalXp);
+
+      if (needsUpdate) {
+        const { level } = getLevelFromXp(totalXp);
+        if (!DRY_RUN) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { totalXp, level, verifiedTotalXp },
+          });
+        }
+        usersUpdated++;
       }
-      usersUpdated++;
     }
-  }
 
-  console.log(`   Users updated: ${usersUpdated}`);
+    console.log(`   Users updated: ${usersUpdated}`);
+  }
 
   if (DRY_RUN) {
     console.log('\n*** Dry run complete. Run without --dry-run to apply. ***');

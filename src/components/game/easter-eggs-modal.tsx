@@ -12,7 +12,8 @@ type EasterEggItem = {
   mapName: string;
   mapSlug: string;
   gameShortName: string | null;
-  logId?: string;
+  /** When present, links to the run; when absent (achievement-only), links to map */
+  logId?: string | null;
 };
 
 type EasterEggsData = {
@@ -75,7 +76,7 @@ export function EasterEggsModal({
                   {done.map((item) => (
                     <li key={item.id}>
                       <Link
-                        href={`/maps/${item.mapSlug}/run/easter-egg/${item.logId}`}
+                        href={item.logId ? `/maps/${item.mapSlug}/run/easter-egg/${item.logId}` : `/maps/${item.mapSlug}`}
                         className="flex items-center gap-3 p-2.5 rounded-lg border border-bunker-700 bg-bunker-800/50 hover:border-element-700 hover:bg-bunker-800 transition-colors group"
                       >
                         <CheckCircle2 className="w-4 h-4 text-element-400 shrink-0" />
