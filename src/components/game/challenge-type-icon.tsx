@@ -27,6 +27,8 @@ const CHALLENGE_TYPE_ICONS: Record<ChallengeType, LucideIcon> = {
   PISTOL_ONLY: Crosshair,
   NO_POWER: ZapOff,
   NO_MAGIC: Sparkles,
+  ROUND_5_SPEEDRUN: Timer,
+  ROUND_15_SPEEDRUN: Timer,
   ROUND_30_SPEEDRUN: Timer,
   ROUND_50_SPEEDRUN: Timer,
   ROUND_70_SPEEDRUN: Timer,

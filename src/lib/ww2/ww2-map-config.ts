@@ -59,7 +59,7 @@ export const WW2_MAP_CONFIG: Record<Ww2MapSlug, Ww2MapConfig> = {
   'the-final-reich': {
     challengeTypes: [
       'HIGHEST_ROUND', 'NO_DOWNS', 'NO_POWER', 'NO_ARMOR', 'NO_BLITZ', 'STARTING_ROOM',
-      'ROUND_10_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN',
+      'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_10_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN',
       'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN', 'SUPER_30_SPEEDRUN', 'EASTER_EGG_SPEEDRUN',
     ],
     hasNoPower: true,
@@ -102,7 +102,7 @@ export const WW2_MAP_CONFIG: Record<Ww2MapSlug, Ww2MapConfig> = {
   'the-darkest-shore': {
     challengeTypes: [
       'HIGHEST_ROUND', 'NO_DOWNS', 'NO_POWER', 'NO_ARMOR', 'NO_BLITZ', 'STARTING_ROOM',
-      'ROUND_10_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN',
+      'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_10_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN',
       'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN', 'EASTER_EGG_SPEEDRUN',
     ],
     hasNoPower: true,
@@ -126,7 +126,7 @@ export const WW2_MAP_CONFIG: Record<Ww2MapSlug, Ww2MapConfig> = {
   'the-shadowed-throne': {
     challengeTypes: [
       'HIGHEST_ROUND', 'NO_DOWNS', 'NO_POWER', 'NO_ARMOR', 'NO_BLITZ', 'STARTING_ROOM',
-      'ROUND_10_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN',
+      'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_10_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN',
       'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN', 'EASTER_EGG_SPEEDRUN',
     ],
     hasNoPower: true,
@@ -150,7 +150,7 @@ export const WW2_MAP_CONFIG: Record<Ww2MapSlug, Ww2MapConfig> = {
   'bodega-cervantes': {
     challengeTypes: [
       'HIGHEST_ROUND', 'NO_DOWNS', 'NO_ARMOR', 'NO_BLITZ',
-      'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN',
+      'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN',
     ],
     hasNoPower: false,
     hasFirstRoom: false,
@@ -169,7 +169,7 @@ export const WW2_MAP_CONFIG: Record<Ww2MapSlug, Ww2MapConfig> = {
   'uss-mount-olympus': {
     challengeTypes: [
       'HIGHEST_ROUND', 'NO_DOWNS', 'NO_ARMOR', 'NO_BLITZ',
-      'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN',
+      'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN',
     ],
     hasNoPower: false,
     hasFirstRoom: false,
@@ -188,7 +188,7 @@ export const WW2_MAP_CONFIG: Record<Ww2MapSlug, Ww2MapConfig> = {
   'altar-of-blood': {
     challengeTypes: [
       'HIGHEST_ROUND', 'NO_DOWNS', 'NO_ARMOR', 'NO_BLITZ',
-      'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN',
+      'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN',
     ],
     hasNoPower: false,
     hasFirstRoom: false,
@@ -207,7 +207,7 @@ export const WW2_MAP_CONFIG: Record<Ww2MapSlug, Ww2MapConfig> = {
   'the-frozen-dawn': {
     challengeTypes: [
       'HIGHEST_ROUND', 'NO_DOWNS', 'NO_ARMOR', 'NO_BLITZ', 'STARTING_ROOM',
-      'ROUND_10_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN',
+      'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_10_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN',
       'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN', 'EASTER_EGG_SPEEDRUN',
     ],
     hasNoPower: false,

@@ -318,6 +318,8 @@ async function main() {
   };
 
   const iwSpeedrunTypes = [
+    { type: 'ROUND_5_SPEEDRUN', name: 'Round 5 Speedrun', description: 'Reach round 5 as fast as possible' },
+    { type: 'ROUND_15_SPEEDRUN', name: 'Round 15 Speedrun', description: 'Reach round 15 as fast as possible' },
     { type: 'ROUND_30_SPEEDRUN', name: 'Round 30 Speedrun', description: 'Reach round 30 as fast as possible' },
     { type: 'ROUND_50_SPEEDRUN', name: 'Round 50 Speedrun', description: 'Reach round 50 as fast as possible' },
     { type: 'ROUND_70_SPEEDRUN', name: 'Round 70 Speedrun', description: 'Reach round 70 as fast as possible' },
@@ -328,6 +330,8 @@ async function main() {
   ];
 
   const wawSpeedrunTypes = [
+    { type: 'ROUND_5_SPEEDRUN', name: 'Round 5 Speedrun', description: 'Reach round 5 as fast as possible' },
+    { type: 'ROUND_15_SPEEDRUN', name: 'Round 15 Speedrun', description: 'Reach round 15 as fast as possible' },
     { type: 'ROUND_30_SPEEDRUN', name: 'Round 30 Speedrun', description: 'Reach round 30 as fast as possible' },
     { type: 'ROUND_50_SPEEDRUN', name: 'Round 50 Speedrun', description: 'Reach round 50 as fast as possible' },
     { type: 'ROUND_70_SPEEDRUN', name: 'Round 70 Speedrun', description: 'Reach round 70 as fast as possible' },
@@ -336,6 +340,8 @@ async function main() {
   ];
 
   const bo2SpeedrunTypes = [
+    { type: 'ROUND_5_SPEEDRUN', name: 'Round 5 Speedrun', description: 'Reach round 5 as fast as possible' },
+    { type: 'ROUND_15_SPEEDRUN', name: 'Round 15 Speedrun', description: 'Reach round 15 as fast as possible' },
     { type: 'ROUND_30_SPEEDRUN', name: 'Round 30 Speedrun', description: 'Reach round 30 as fast as possible' },
     { type: 'ROUND_50_SPEEDRUN', name: 'Round 50 Speedrun', description: 'Reach round 50 as fast as possible' },
     { type: 'ROUND_70_SPEEDRUN', name: 'Round 70 Speedrun', description: 'Reach round 70 as fast as possible' },
@@ -369,7 +375,7 @@ async function main() {
         });
         challengeCount++;
       }
-      for (const speedrun of (map.slug === 'der-riese' ? wawSpeedrunTypes : wawSpeedrunTypes.slice(0, 4))) {
+      for (const speedrun of (map.slug === 'der-riese' ? wawSpeedrunTypes : wawSpeedrunTypes.filter((s) => s.type !== 'EASTER_EGG_SPEEDRUN'))) {
         await prisma.challenge.create({
           data: {
             name: speedrun.name,

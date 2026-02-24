@@ -29,6 +29,7 @@ import { getAwMapConfig, getAwRoundMilestones, getAwChallengeTypeLabel } from '@
 import { isBo4Game, BO4_DIFFICULTIES, BO4_DIFFICULTY_XP_MULTIPLIER, type Bo4DifficultyType } from '../bo4';
 import { isBocwGame } from '../bocw';
 import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, IW_AOTRT_SPEEDRUN_TIERS, IW_BEAST_SPEEDRUN_TIERS, WAW_SPEEDRUN_TIERS_BY_MAP, BO1_SPEEDRUN_TIERS_BY_MAP, BO2_SPEEDRUN_TIERS_BY_MAP, BO3_SPEEDRUN_TIERS_BY_MAP, BO4_SPEEDRUN_TIERS_BY_MAP, BOCW_SPEEDRUN_TIERS_BY_MAP, BO6_SPEEDRUN_TIERS_BY_MAP, BO7_SPEEDRUN_TIERS_BY_MAP, WW2_SPEEDRUN_TIERS_BY_MAP, VANGUARD_SPEEDRUN_TIERS_BY_MAP, AW_SPEEDRUN_TIERS_BY_MAP, BO1_COTD_STAND_IN_EE_TIERS, BO1_COTD_ENSEMBLE_CAST_EE_TIERS, BO2_TRANZIT_RICHTOFEN_EE_TIERS, BO2_TRANZIT_MAXIS_EE_TIERS, BO2_DIE_RISE_RICHTOFEN_EE_TIERS, BO2_DIE_RISE_MAXIS_EE_TIERS, BO2_BURIED_RICHTOFEN_EE_TIERS, BO2_BURIED_MAXIS_EE_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
+import { getR5R15TiersForMap } from './round-5-15-wr-data';
 
 const CHALLENGE_TYPES = [
   'HIGHEST_ROUND',
@@ -1179,6 +1180,8 @@ export function getMapAchievementDefinitions(
 }
 
 const SPEEDRUN_TYPE_LABELS: Record<string, string> = {
+  ROUND_5_SPEEDRUN: 'Round 5',
+  ROUND_15_SPEEDRUN: 'Round 15',
   ROUND_10_SPEEDRUN: 'Round 10',
   ROUND_20_SPEEDRUN: 'Round 20',
   ROUND_30_SPEEDRUN: 'Round 30',
@@ -1231,8 +1234,10 @@ export function getSpeedrunAchievementDefinitions(
     : gameShortName === 'AW' ? AW_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : undefined;
   if (!tiersByType) return [];
+  const r5r15Tiers = getR5R15TiersForMap(gameShortName, mapSlug);
+  const mergedTiers: SpeedrunTiersByType = { ...tiersByType, ...r5r15Tiers };
   const rows: AchievementSeedRow[] = [];
-  for (const [challengeType, tiers] of Object.entries(tiersByType)) {
+  for (const [challengeType, tiers] of Object.entries(mergedTiers)) {
     const label = SPEEDRUN_TYPE_LABELS[challengeType] ?? challengeType.replace(/_/g, ' ');
     for (let i = 0; i < tiers.length; i++) {
       const { maxTimeSeconds, xpReward } = tiers[i]!;

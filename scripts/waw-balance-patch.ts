@@ -41,6 +41,8 @@ import type { ChallengeType } from '@prisma/client';
 const DRY_RUN = process.argv.includes('--dry-run');
 
 const WAW_SPEEDRUN_TYPES: { type: ChallengeType; name: string }[] = [
+  { type: 'ROUND_5_SPEEDRUN', name: 'Round 5 Speedrun' },
+  { type: 'ROUND_15_SPEEDRUN', name: 'Round 15 Speedrun' },
   { type: 'ROUND_30_SPEEDRUN', name: 'Round 30 Speedrun' },
   { type: 'ROUND_50_SPEEDRUN', name: 'Round 50 Speedrun' },
   { type: 'ROUND_70_SPEEDRUN', name: 'Round 70 Speedrun' },
@@ -87,6 +89,8 @@ async function main() {
     const allowedTypes = new Set(cfg.challengeTypes);
     // Speedruns: allow R30/R50/R70/R100 for all WAW; add EE speedrun for Der Riese
     if (cfg.speedrunWRs) {
+      allowedTypes.add('ROUND_5_SPEEDRUN');
+      allowedTypes.add('ROUND_15_SPEEDRUN');
       allowedTypes.add('ROUND_30_SPEEDRUN');
       allowedTypes.add('ROUND_50_SPEEDRUN');
       allowedTypes.add('ROUND_70_SPEEDRUN');

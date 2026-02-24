@@ -45,6 +45,8 @@ const challengeTypeLabels: Record<string, string> = {
   PISTOL_ONLY: 'Pistol Only',
   NO_POWER: 'No Power',
   NO_MAGIC: 'No Magic',
+  ROUND_5_SPEEDRUN: 'Round 5 Speedrun',
+  ROUND_15_SPEEDRUN: 'Round 15 Speedrun',
   ROUND_30_SPEEDRUN: 'Round 30 Speedrun',
   ROUND_50_SPEEDRUN: 'Round 50 Speedrun',
   ROUND_70_SPEEDRUN: 'Round 70 Speedrun',
