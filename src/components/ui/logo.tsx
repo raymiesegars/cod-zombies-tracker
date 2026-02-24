@@ -1,5 +1,6 @@
 'use client';
 
+import { useId } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -190,6 +191,61 @@ export function Logo({ size = 'md', animated = true, className }: LogoProps) {
         />
       )}
     </motion.div>
+  );
+}
+
+// Mystery box nav icon: box outline with tiny ? inside (for navbar)
+// Box: light brown; ?: bright yellow from logo (#fbbf24) with subtle glow
+export function MysteryBoxIcon({ className }: { className?: string }) {
+  const filterId = useId().replace(/:/g, '-');
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={cn('w-full h-full', className)}
+      aria-hidden
+    >
+      <defs>
+        <filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="0.5" result="blur" />
+          <feFlood floodColor="#fbbf24" floodOpacity="0.5" result="glowColor" />
+          <feComposite in="glowColor" in2="blur" operator="in" result="softGlow" />
+          <feMerge>
+            <feMergeNode in="softGlow" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      {/* Box frame - light brown */}
+      <rect
+        x="3"
+        y="3"
+        width="18"
+        height="18"
+        rx="2.5"
+        stroke="#b45309"
+        strokeWidth="1.5"
+        fill="none"
+        strokeLinejoin="round"
+      />
+      {/* Corner accents - light brown */}
+      <path d="M3 8 L3 3 L8 3" stroke="#b45309" strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.85" />
+      <path d="M16 3 L21 3 L21 8" stroke="#b45309" strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.85" />
+      <path d="M3 16 L3 21 L8 21" stroke="#b45309" strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.85" />
+      <path d="M16 21 L21 21 L21 16" stroke="#b45309" strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.85" />
+      {/* Question mark - bright yellow from logo with glow */}
+      <g transform="translate(12,12) scale(0.28) translate(-50,-50)" filter={`url(#${filterId})`}>
+        <path
+          d="M38 38 Q38 26 50 26 Q62 26 62 38 Q62 48 50 52 L50 58"
+          stroke="#fbbf24"
+          strokeWidth="6"
+          strokeLinecap="round"
+          fill="none"
+        />
+        <circle cx="50" cy="72" r="5" fill="#fbbf24" />
+      </g>
+    </svg>
   );
 }
 

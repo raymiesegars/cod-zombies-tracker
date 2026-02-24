@@ -118,6 +118,8 @@ export async function GET(
     const avgRoundLoggedRuns =
       allRounds.length > 0 ? allRounds.reduce((a, b) => a + b, 0) / allRounds.length : 0;
 
+    const mysteryBoxCompletions = user.mysteryBoxCompletionsLifetime ?? 0;
+
     const [totalMaps, totalMainEasterEggs, totalChallenges, totalAchievements, easterEggAchievementsUnlocked, xpRank, verifiedXpRank, wr] =
       await Promise.all([
         prisma.map.count(),
@@ -147,6 +149,7 @@ export async function GET(
       highestRound,
       avgRoundLoggedRuns,
       speedrunCompletions,
+      mysteryBoxCompletions,
       xpRank: xpRank + 1,
       verifiedXpRank: verifiedXpRank + 1,
       worldRecords: wr.worldRecords,

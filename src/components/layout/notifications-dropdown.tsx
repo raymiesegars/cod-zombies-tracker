@@ -4,7 +4,22 @@ import { useState, useEffect, useRef } from 'react';
 import { dispatchXpToast } from '@/context/xp-toast-context';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, ShieldCheck, ShieldOff, Loader2, CheckCheck, Trash2, UserPlus, UserMinus, Check, X } from 'lucide-react';
+import { Button } from '@/components/ui';
+import { Bell, ShieldCheck, ShieldOff, Loader2, CheckCheck, Trash2, UserPlus, UserMinus, Check, X, Box } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+
+const NOTIFICATION_SOUND_VOLUME = 0.06;
+
+function playNotificationSound() {
+  if (typeof window === 'undefined') return;
+  try {
+    const audio = new Audio('/audio/notification.mp3');
+    audio.volume = NOTIFICATION_SOUND_VOLUME;
+    audio.play().catch(() => {});
+  } catch {
+    // ignore
+  }
+}
 
 /** Persists across sessions (localStorage) so verified XP toast shows only once ever per notification. */
 const VERIFIED_TOAST_SHOWN_KEY = 'cod-tracker-verified-xp-toast-shown';
@@ -45,17 +60,21 @@ type NotificationItem = {
   logType: string;
   logId: string | null;
   friendRequestId?: string;
+  mysteryBoxLobbyId?: string;
   verifiedXpGained?: number;
   verifiedTotalXp?: number;
 };
 
 export function NotificationsDropdown() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<'read-all' | 'clear' | null>(null);
+  const [lobbyRolledModalMessage, setLobbyRolledModalMessage] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const prevUnreadRef = useRef<number | null>(null);
 
   const fetchNotifications = () => {
     setLoading(true);
@@ -63,7 +82,12 @@ export function NotificationsDropdown() {
       .then((res) => (res.ok ? res.json() : { unreadCount: 0, notifications: [] }))
       .then((data) => {
         const list = data.notifications ?? [];
-        setUnreadCount(data.unreadCount ?? 0);
+        const newUnread = data.unreadCount ?? 0;
+        if (prevUnreadRef.current !== null && newUnread > prevUnreadRef.current) {
+          playNotificationSound();
+        }
+        prevUnreadRef.current = newUnread;
+        setUnreadCount(newUnread);
         setNotifications(list);
         // Show verified XP toast only once per notification (persisted in sessionStorage so it survives remounts/navigation)
         const verified = list.find(
@@ -173,11 +197,35 @@ export function NotificationsDropdown() {
     });
   };
 
+  const handleAcceptMysteryBoxInvite = (notificationId: string) => {
+    removeFriendRequestNotification(notificationId);
+    fetch('/api/mystery-box/lobby/invite/accept', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ notificationId }),
+    }).then(async (res) => {
+      const json = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setOpen(false);
+        router.push('/mystery-box');
+      } else if (res.status === 400 && (json.error === 'LOBBY_ALREADY_ROLLED' || json.error === 'YOU_HAVE_ACTIVE_CHALLENGE')) {
+        setLobbyRolledModalMessage(json.message ?? 'Cannot join this lobby.');
+      }
+    });
+  };
+
+  const deleteNotification = (id: string) => {
+    removeFriendRequestNotification(id);
+    fetch(`/api/me/notifications/${id}/read`, { method: 'DELETE', credentials: 'same-origin' });
+  };
+
   const getNotificationIcon = (type: string) => {
     if (type === 'VERIFICATION_APPROVED') return <ShieldCheck className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />;
     if (type === 'VERIFICATION_REMOVED') return <ShieldOff className="w-4 h-4 text-blood-400 flex-shrink-0 mt-0.5" />;
     if (type === 'FRIEND_REQUEST_RECEIVED' || type === 'FRIEND_REQUEST_ACCEPTED') return <UserPlus className="w-4 h-4 text-element-400 flex-shrink-0 mt-0.5" />;
     if (type === 'FRIEND_REMOVED') return <UserMinus className="w-4 h-4 text-blood-400 flex-shrink-0 mt-0.5" />;
+    if (type === 'MYSTERY_BOX_INVITE') return <Box className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />;
     return <ShieldOff className="w-4 h-4 text-bunker-400 flex-shrink-0 mt-0.5" />;
   };
 
@@ -228,6 +276,47 @@ export function NotificationsDropdown() {
                   <ul className="py-1">
                     {notifications.map((n) => {
                       const isFriendRequest = n.type === 'FRIEND_REQUEST_RECEIVED' && n.friendRequestId;
+                      const isMysteryBoxInvite = n.type === 'MYSTERY_BOX_INVITE';
+
+                      if (isMysteryBoxInvite) {
+                        return (
+                          <li key={n.id}>
+                            <div
+                              className={`block px-3 py-2.5 text-left hover:bg-bunker-800/80 transition-colors border-l-2 ${
+                                n.read ? 'border-transparent' : 'border-amber-500'
+                              }`}
+                            >
+                              <div className="flex items-start gap-2">
+                                {getNotificationIcon(n.type)}
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm text-white font-medium truncate">{n.message ?? n.runLabel}</p>
+                                  <p className="text-[10px] text-bunker-500 mt-1">
+                                    {new Date(n.createdAt).toLocaleDateString()}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleAcceptMysteryBoxInvite(n.id)}
+                                      className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-amber-600 hover:bg-amber-500 text-white"
+                                    >
+                                      <Check className="w-3 h-3" />
+                                      Join
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => deleteNotification(n.id)}
+                                      className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-bunker-600 hover:bg-bunker-500 text-white"
+                                    >
+                                      <X className="w-3 h-3" />
+                                      Decline
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </li>
+                        );
+                      }
 
                       if (isFriendRequest) {
                         return (
@@ -367,6 +456,23 @@ export function NotificationsDropdown() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Modal: Cannot join lobby - already rolled */}
+      {lobbyRolledModalMessage && (
+        <div
+          className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60"
+          onClick={() => setLobbyRolledModalMessage(null)}
+        >
+          <div
+            className="bg-bunker-900 border border-bunker-700 rounded-xl max-w-md w-full p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-zombies text-white">Cannot join lobby</h3>
+            <p className="text-sm text-bunker-300">{lobbyRolledModalMessage}</p>
+            <Button onClick={() => setLobbyRolledModalMessage(null)}>Got it</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

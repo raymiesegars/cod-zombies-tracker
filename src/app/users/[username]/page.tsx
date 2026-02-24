@@ -16,6 +16,7 @@ import {
   Logo,
   EasterEggIcon,
   MapIcon,
+  MysteryBoxIcon,
   Select,
   PageLoader,
   HelpTrigger,
@@ -470,6 +471,7 @@ export default function UserProfilePage() {
     highestRound?: number;
     avgRoundLoggedRuns?: number;
     speedrunCompletions?: number;
+    mysteryBoxCompletions?: number;
     xpRank?: number;
     verifiedXpRank?: number;
     worldRecords?: number;
@@ -720,6 +722,7 @@ export default function UserProfilePage() {
             highestRound: statsData.highestRound ?? 0,
             avgRoundLoggedRuns: statsData.avgRoundLoggedRuns ?? 0,
             speedrunCompletions: statsData.speedrunCompletions ?? 0,
+            mysteryBoxCompletions: statsData.mysteryBoxCompletions ?? 0,
             xpRank: statsData.xpRank ?? undefined,
             verifiedXpRank: statsData.verifiedXpRank ?? undefined,
             worldRecords: statsData.worldRecords ?? 0,
@@ -850,6 +853,7 @@ export default function UserProfilePage() {
       rank: 'Your position on the global XP leaderboard (all XP).',
       'highest-round': 'Average round across every run you’ve logged (each run counts once).',
       speedruns: 'Speedrun challenge runs you’ve completed (time-based).',
+      'mystery-box': "Mystery Box challenges you've completed for bonus XP.",
     };
     switch (blockId) {
       case 'maps-played':
@@ -883,6 +887,8 @@ export default function UserProfilePage() {
         };
       case 'speedruns':
         return { label: 'Speedruns', value: String(statsTotals.speedrunCompletions ?? 0), suffix: null, icon: Timer, iconClass: 'text-yellow-400', tooltip: tooltips.speedruns };
+      case 'mystery-box':
+        return { label: 'Box Challenges', value: String(statsTotals.mysteryBoxCompletions ?? 0), suffix: null, icon: MysteryBoxIcon, iconClass: 'text-amber-400', tooltip: tooltips['mystery-box'] };
       default:
         return { label: blockId, value: '—', suffix: null, icon: Award, iconClass: 'text-bunker-400', tooltip: 'Stat block.' };
     }

@@ -428,7 +428,12 @@ export async function processMapAchievements(
 ): Promise<Achievement[]> {
   const [achievements, userAchievements, map, challengeLogs, easterEggLogs] =
     await Promise.all([
-      prisma.achievement.findMany({ where: { isActive: true, mapId } }),
+      prisma.achievement.findMany({
+        where: {
+          isActive: true,
+          OR: [{ mapId }, { easterEgg: { mapId } }],
+        },
+      }),
       prisma.userAchievement.findMany({
         where: { userId },
         select: { achievementId: true },

@@ -42,6 +42,7 @@ export async function GET() {
               easterEgg: { select: { name: true } },
             },
           },
+          mysteryBoxLobby: { select: { id: true } },
         },
       }),
     ]);
@@ -55,15 +56,19 @@ export async function GET() {
       const mapSlug = log?.map?.slug ?? null;
       const runLabel = isFriendType(n.type)
         ? (n.message ?? 'Friend')
-        : n.challengeLog
-          ? `${n.challengeLog.challenge.name} – Round ${n.challengeLog.roundReached}`
-          : n.easterEggLog
-            ? n.easterEggLog.easterEgg.name
-            : 'Run';
+        : n.type === 'MYSTERY_BOX_INVITE'
+          ? (n.message ?? 'Mystery Box Invite')
+          : n.challengeLog
+            ? `${n.challengeLog.challenge.name} – Round ${n.challengeLog.roundReached}`
+            : n.easterEggLog
+              ? n.easterEggLog.easterEgg.name
+              : 'Run';
       const runPath =
-        mapSlug && log
-          ? `/maps/${mapSlug}/run/${logType === 'easter_egg' ? 'easter-egg' : 'challenge'}/${log.id}`
-          : null;
+        n.type === 'MYSTERY_BOX_INVITE'
+          ? '/mystery-box'
+          : mapSlug && log
+            ? `/maps/${mapSlug}/run/${logType === 'easter_egg' ? 'easter-egg' : 'challenge'}/${log.id}`
+            : null;
       return {
         id: n.id,
         type: n.type,
@@ -75,6 +80,7 @@ export async function GET() {
         logType,
         logId: n.challengeLogId ?? n.easterEggLogId,
         friendRequestId: n.friendRequestId ?? undefined,
+        mysteryBoxLobbyId: n.mysteryBoxLobbyId ?? undefined,
         verifiedXpGained: n.verifiedXpGained ?? undefined,
         verifiedTotalXp: n.verifiedTotalXp ?? undefined,
       };
