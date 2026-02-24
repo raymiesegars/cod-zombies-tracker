@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Modal } from '@/components/ui';
 import Link from 'next/link';
 import { Crown, ShieldCheck, ExternalLink, Loader2 } from 'lucide-react';
@@ -39,6 +40,7 @@ export function WorldRecordsModal({
   const [data, setData] = useState<WorldRecordsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [filterVerified, setFilterVerified] = useState<'all' | 'verified'>('all');
+  const [hoverTooltip, setHoverTooltip] = useState<{ text: string; x: number; y: number } | null>(null);
 
   useEffect(() => {
     if (isOpen && username) {
@@ -105,11 +107,26 @@ export function WorldRecordsModal({
             </p>
           ) : (
             <ul className="space-y-1.5">
-              {filtered.map((item, idx) => (
+              {filtered.map((item, idx) => {
+                const fullTitle = `${item.mapName} · ${item.challengeLabel}`;
+                const metaParts = [
+                  PLAYER_COUNT_LABEL[item.playerCount] ?? item.playerCount,
+                  ...(item.filters.length > 0 ? [item.filters.join(' · ')] : []),
+                  ...(item.isVerified ? ['Verified'] : []),
+                ];
+                const fullTooltip = metaParts.length > 0
+                  ? `${fullTitle} — ${metaParts.join(' · ')}`
+                  : fullTitle;
+                return (
                 <li key={`${item.mapSlug}-${item.challengeLabel}-${item.playerCount}-${item.filters.join('-')}-${idx}`}>
                   <Link
                     href={`/maps/${item.mapSlug}`}
                     className="flex items-center gap-3 p-2.5 rounded-lg border border-bunker-700 bg-bunker-800/50 hover:border-bunker-600 hover:bg-bunker-800 transition-colors group"
+                    onMouseEnter={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setHoverTooltip({ text: fullTooltip, x: rect.left + rect.width / 2, y: rect.top });
+                    }}
+                    onMouseLeave={() => setHoverTooltip(null)}
                   >
                     <Crown className="w-4 h-4 text-yellow-400 shrink-0" />
                     <div className="flex-1 min-w-0">
@@ -136,11 +153,24 @@ export function WorldRecordsModal({
                     <ExternalLink className="w-4 h-4 text-bunker-500 group-hover:text-element-400 shrink-0" />
                   </Link>
                 </li>
-              ))}
+              );
+              })}
             </ul>
           )}
         </div>
       </div>
+
+      {typeof document !== 'undefined' &&
+        hoverTooltip &&
+        createPortal(
+          <div
+            className="fixed z-[10001] w-64 -translate-x-1/2 -translate-y-full -mt-2 px-3 py-2 bg-bunker-800 rounded-lg shadow-xl border border-bunker-700 text-center pointer-events-none"
+            style={{ left: hoverTooltip.x, top: hoverTooltip.y }}
+          >
+            <p className="text-sm text-bunker-200 whitespace-normal break-words">{hoverTooltip.text}</p>
+          </div>,
+          document.body
+        )}
     </Modal>
   );
 }
