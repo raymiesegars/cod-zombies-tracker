@@ -842,8 +842,8 @@ export default function UserProfilePage() {
       'easter-eggs': 'Main-quest Easter eggs you’ve completed (unlocked the achievement), out of all main-quest EEs.',
       'avg-round': "Your average best round across all maps; maps you haven't played count as 0.",
       achievements: 'Map achievements you’ve unlocked, out of all available achievements.',
-      'world-records': 'Leaderboards across the site where you’re currently ranked #1.',
-      'verified-world-records': 'Verified leaderboards where you’re currently ranked #1.',
+      'world-records': 'Leaderboard combinations across the site where you’re ranked #1.',
+      'verified-world-records': 'Verified leaderboard combinations where you’re ranked #1.',
       'total-runs': 'Total challenge and Easter egg runs you’ve logged.',
       'verified-runs': 'Runs that have been verified by an admin.',
       'verified-rank': 'Your position on the global verified XP leaderboard.',
@@ -861,9 +861,9 @@ export default function UserProfilePage() {
       case 'achievements':
         return { label: 'Achievements', value: `${achievementsUnlocked}/${totalAchievements}`, suffix: `(${achievementsPct}%)`, icon: Award, iconClass: 'text-yellow-400', tooltip: tooltips.achievements };
       case 'world-records':
-        return { label: 'World Records', value: String(statsTotals.worldRecords ?? 0), suffix: null, icon: Crown, iconClass: 'text-yellow-400', tooltip: tooltips['world-records'] };
+        return { label: "Rank 1's", value: String(statsTotals.worldRecords ?? 0), suffix: null, icon: Crown, iconClass: 'text-yellow-400', tooltip: tooltips['world-records'] };
       case 'verified-world-records':
-        return { label: 'Verified WRs', value: String(statsTotals.verifiedWorldRecords ?? 0), suffix: null, icon: ShieldCheck, iconClass: verifiedIconClass, tooltip: tooltips['verified-world-records'] };
+        return { label: "Verified Rank 1's", value: String(statsTotals.verifiedWorldRecords ?? 0), suffix: null, icon: ShieldCheck, iconClass: verifiedIconClass, tooltip: tooltips['verified-world-records'] };
       case 'total-runs':
         return { label: 'Total Runs', value: String(statsTotals.totalRuns ?? 0), suffix: null, icon: ListOrdered, iconClass: 'text-blood-400', tooltip: tooltips['total-runs'] };
       case 'verified-runs':
