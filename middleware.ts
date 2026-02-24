@@ -1,7 +1,23 @@
 import { updateSession } from '@/lib/supabase/middleware';
 import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+  // Canonicalize: http→https, www→non-www (only in production)
+  if (process.env.NODE_ENV === 'production') {
+    const host = request.headers.get('host') || '';
+    const proto = request.headers.get('x-forwarded-proto') || request.nextUrl.protocol.replace(':', '');
+    const isHttp = proto === 'http';
+    const isWww = host.startsWith('www.');
+
+    if (isHttp || isWww) {
+      const target = new URL(request.url);
+      target.protocol = 'https:';
+      target.host = 'codzombiestracker.com';
+      return NextResponse.redirect(target.toString(), 301);
+    }
+  }
+
   return await updateSession(request);
 }
 

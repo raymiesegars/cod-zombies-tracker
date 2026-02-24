@@ -7,6 +7,7 @@ import { isBocwGame } from '@/lib/bocw';
 import { isBo6Game } from '@/lib/bo6';
 import { isBo7Game } from '@/lib/bo7';
 import { isWw2Game } from '@/lib/ww2';
+import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 import type { PlayerCount, ChallengeType, Prisma, Bo4Difficulty } from '@prisma/client';
 
@@ -45,6 +46,7 @@ export async function GET(
   const ww2ConsumablesParam = searchParams.get('ww2ConsumablesUsed'); // 'true' | 'false' | null
   // BOCW/BO6/BO7: Rampage Inducer. Default 'false' = No Rampage Inducer; 'true' = Rampage Inducer only.
   const rampageInducerParam = searchParams.get('rampageInducerUsed'); // 'true' | 'false' | null
+  const vanguardVoidParam = searchParams.get('vanguardVoidUsed'); // 'true' | 'false' | null (Der Anfang, Terra Maledicta only)
   const limitParam = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') || '25', 10) || 25));
   const offsetParam = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10) || 0);
   const mergeTake = 500;
@@ -152,14 +154,22 @@ export async function GET(
       else if (wawFixedWunderwaffe === 'false') (whereClause as Record<string, unknown>).wawFixedWunderwaffe = false;
     }
 
-    if ((isBocwGame(gameShortName) || isBo6Game(gameShortName) || isBo7Game(gameShortName))) {
+    if ((isBocwGame(gameShortName) || isBo6Game(gameShortName) || isBo7Game(gameShortName)) || (isVanguardGame(gameShortName) && hasVanguardRampageFilter(slug))) {
       if (rampageInducerParam === 'true') {
         (whereClause as Record<string, unknown>).rampageInducerUsed = true;
         (eeWhereClause as Record<string, unknown>).rampageInducerUsed = true;
       } else {
-        // Default: No Rampage Inducer (false or null/legacy)
         (whereClause as Record<string, unknown>).rampageInducerUsed = { not: true };
         (eeWhereClause as Record<string, unknown>).rampageInducerUsed = { not: true };
+      }
+    }
+    if (isVanguardGame(gameShortName) && hasVanguardVoidFilter(slug)) {
+      if (vanguardVoidParam === 'true') {
+        (whereClause as Record<string, unknown>).vanguardVoidUsed = true;
+        (eeWhereClause as Record<string, unknown>).vanguardVoidUsed = true;
+      } else if (vanguardVoidParam === 'false') {
+        (whereClause as Record<string, unknown>).vanguardVoidUsed = false;
+        (eeWhereClause as Record<string, unknown>).vanguardVoidUsed = false;
       }
     }
 

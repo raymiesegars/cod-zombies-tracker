@@ -14,6 +14,7 @@ import { isBocwGame, BOCW_SUPPORT_MODES } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES } from '@/lib/bo6';
 import { isBo7Game, BO7_SUPPORT_MODES, BO7_RELICS } from '@/lib/bo7';
 import { isWw2Game } from '@/lib/ww2';
+import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 import type { Bo4Difficulty } from '@prisma/client';
 
 type Params = { params: Promise<{ id: string }> };
@@ -189,9 +190,12 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     const bo7RelicsUsed = body.bo7RelicsUsed !== undefined && isBo7Game(gameShortName) && Array.isArray(body.bo7RelicsUsed)
       ? (body.bo7RelicsUsed as unknown[]).filter((r): r is string => (BO7_RELICS as readonly string[]).includes(r as string))
       : undefined;
-    const rampageInducerUsed = body.rampageInducerUsed !== undefined && (isBocwGame(gameShortName) || isBo6Game(gameShortName) || isBo7Game(gameShortName))
+    const hasRampageFilter = isVanguardGame(gameShortName) && (log.map as { slug?: string })?.slug && hasVanguardRampageFilter((log.map as { slug?: string }).slug);
+    const hasVoidFilter = isVanguardGame(gameShortName) && (log.map as { slug?: string })?.slug && hasVanguardVoidFilter((log.map as { slug?: string }).slug);
+    const rampageInducerUsed = body.rampageInducerUsed !== undefined && (isBocwGame(gameShortName) || isBo6Game(gameShortName) || isBo7Game(gameShortName) || hasRampageFilter)
       ? Boolean(body.rampageInducerUsed)
       : undefined;
+    const vanguardVoidUsed = body.vanguardVoidUsed !== undefined && hasVoidFilter ? Boolean(body.vanguardVoidUsed) : undefined;
     const ww2ConsumablesUsed = body.ww2ConsumablesUsed !== undefined && isWw2Game(gameShortName)
       ? Boolean(body.ww2ConsumablesUsed)
       : undefined;
@@ -267,6 +271,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         ...(bo7IsCursedRun !== undefined && { bo7IsCursedRun }),
         ...(bo7RelicsUsed !== undefined && { bo7RelicsUsed }),
         ...(rampageInducerUsed !== undefined && { rampageInducerUsed }),
+        ...(vanguardVoidUsed !== undefined && { vanguardVoidUsed }),
         ...(ww2ConsumablesUsed !== undefined && { ww2ConsumablesUsed }),
       },
       include: {

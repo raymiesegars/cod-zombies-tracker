@@ -12,6 +12,7 @@ import { isBocwGame } from '@/lib/bocw';
 import { isBo6Game } from '@/lib/bo6';
 import { isBo7Game } from '@/lib/bo7';
 import { isWw2Game } from '@/lib/ww2';
+import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 import type { Bo4Difficulty } from '@prisma/client';
 
 type Params = { params: Promise<{ id: string }> };
@@ -154,12 +155,16 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       : undefined;
     const requestVerification = body.requestVerification === undefined ? undefined : Boolean(body.requestVerification);
 
-    const mapWithGame = log.map ?? await prisma.map.findUnique({ where: { id: log.mapId }, include: { game: { select: { shortName: true } } } });
+    const mapWithGame = log.map ?? await prisma.map.findUnique({ where: { id: log.mapId }, select: { game: { select: { shortName: true } }, slug: true } });
     const gameShortName = (mapWithGame as { game?: { shortName?: string } })?.game?.shortName;
+    const mapSlug = (mapWithGame as { slug?: string })?.slug;
+    const hasRampageFilter = isVanguardGame(gameShortName) && mapSlug && hasVanguardRampageFilter(mapSlug);
+    const hasVoidFilter = isVanguardGame(gameShortName) && mapSlug && hasVanguardVoidFilter(mapSlug);
     const rampageInducerUsed = body.rampageInducerUsed !== undefined &&
-      (isBocwGame(gameShortName) || isBo6Game(gameShortName) || isBo7Game(gameShortName))
+      (isBocwGame(gameShortName) || isBo6Game(gameShortName) || isBo7Game(gameShortName) || hasRampageFilter)
       ? Boolean(body.rampageInducerUsed)
       : undefined;
+    const vanguardVoidUsed = body.vanguardVoidUsed !== undefined && hasVoidFilter ? Boolean(body.vanguardVoidUsed) : undefined;
     const ww2ConsumablesUsed = body.ww2ConsumablesUsed !== undefined && isWw2Game(gameShortName)
       ? Boolean(body.ww2ConsumablesUsed)
       : undefined;
@@ -204,6 +209,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
           verificationRequestedAt: requestVerification ? new Date() : null,
         }),
         ...(rampageInducerUsed !== undefined && { rampageInducerUsed }),
+        ...(vanguardVoidUsed !== undefined && { vanguardVoidUsed }),
         ...(ww2ConsumablesUsed !== undefined && { ww2ConsumablesUsed }),
       },
       include: {

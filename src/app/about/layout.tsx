@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-const BASE = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://codzombiestracker.com';
+const BASE = (process.env.NEXT_PUBLIC_APP_URL || 'https://codzombiestracker.com').replace(/^https?:\/\/www\./, 'https://').replace(/\/$/, '');
 
 export const metadata: Metadata = {
   title: 'About',

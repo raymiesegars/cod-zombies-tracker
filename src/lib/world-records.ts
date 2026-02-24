@@ -8,6 +8,7 @@ import { isBo7Game } from '@/lib/bo7';
 import { isIwGame } from '@/lib/iw';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 import { isWw2Game } from '@/lib/ww2';
+import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 import type { PlayerCount } from '@prisma/client';
 
 export type WorldRecordsResult = { worldRecords: number; verifiedWorldRecords: number };
@@ -59,6 +60,7 @@ type LogWithMeta = {
   wawFixedWunderwaffe?: boolean | null;
   bo2BankUsed?: boolean | null;
   rampageInducerUsed?: boolean | null;
+  vanguardVoidUsed?: boolean | null;
   ww2ConsumablesUsed?: boolean | null;
 };
 
@@ -99,6 +101,16 @@ function getFilterKeyVariants(log: LogWithMeta, gameShortName: string, mapSlug?:
     if (parts.length) {
       variants.push(parts.join('|'));
       parts.forEach((p) => variants.push(p));
+    }
+  }
+  if (isVanguardGame(gameShortName) && mapSlug) {
+    if (hasVanguardVoidFilter(mapSlug)) {
+      const vv = log.vanguardVoidUsed;
+      if (vv !== undefined && vv !== null) variants.push(`vanguardVoid:${vv}`);
+    }
+    if (hasVanguardRampageFilter(mapSlug)) {
+      const ramp = log.rampageInducerUsed;
+      if (ramp !== undefined && ramp !== null) variants.push(`ramp:${ramp}`);
     }
   }
   if (isBo7Game(gameShortName)) {
@@ -161,6 +173,7 @@ function getFilterLabels(filterKey: string): string[] {
     else if (k === 'fixedWaffe' && v === 'true') labels.push('Fixed Wunderwaffe');
     else if (k === 'bank') labels.push(v === 'true' ? 'Bank Used' : 'No Bank');
     else if (k === 'ww2consumables') labels.push(v === 'true' ? 'With Consumables' : 'No Consumables');
+    else if (k === 'vanguardVoid') labels.push(v === 'true' ? 'With Void' : 'Without Void');
     else labels.push(`${k}: ${v}`);
   }
   return labels;
@@ -191,6 +204,8 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
       isVerified: true,
       playerCount: true,
       difficulty: true,
+      rampageInducerUsed: true,
+      vanguardVoidUsed: true,
       ww2ConsumablesUsed: true,
       challenge: { select: { type: true, name: true } },
       map: { select: { slug: true, name: true, game: { select: { shortName: true } } } },
@@ -208,6 +223,8 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
       isVerified: true,
       playerCount: true,
       difficulty: true,
+      rampageInducerUsed: true,
+      vanguardVoidUsed: true,
       ww2ConsumablesUsed: true,
       easterEgg: { select: { name: true } },
       map: { select: { slug: true, name: true, game: { select: { shortName: true } } } },
@@ -231,11 +248,13 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
     wawFixedWunderwaffe?: boolean | null;
     bo2BankUsed?: boolean | null;
     rampageInducerUsed?: boolean | null;
+    vanguardVoidUsed?: boolean | null;
     ww2ConsumablesUsed?: boolean | null;
   }>;
 
   const eeRaw = eeLogs as unknown as Array<{
     rampageInducerUsed?: boolean | null;
+    vanguardVoidUsed?: boolean | null;
     ww2ConsumablesUsed?: boolean | null;
   }>;
 
@@ -283,6 +302,7 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
         wawFixedWunderwaffe: r.wawFixedWunderwaffe,
         bo2BankUsed: r.bo2BankUsed,
         rampageInducerUsed: r.rampageInducerUsed,
+        vanguardVoidUsed: r.vanguardVoidUsed,
         ww2ConsumablesUsed: r.ww2ConsumablesUsed,
       };
     } else {
@@ -306,6 +326,7 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
         challengeName: e.easterEgg.name,
         easterEggName: e.easterEgg.name,
         rampageInducerUsed: r.rampageInducerUsed,
+        vanguardVoidUsed: r.vanguardVoidUsed,
         ww2ConsumablesUsed: r.ww2ConsumablesUsed,
         difficulty: (e as { difficulty?: string | null }).difficulty ?? null,
       };

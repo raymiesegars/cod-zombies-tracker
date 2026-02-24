@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import prisma from '@/lib/prisma';
 
-const BASE = process.env.NEXT_PUBLIC_APP_URL || 'https://codzombiestracker.com';
-const baseUrl = BASE.replace(/\/$/, '');
+const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://codzombiestracker.com').replace(/^https?:\/\/www\./, 'https://').replace(/\/$/, '');
 
 type Props = { params: Promise<{ slug: string }>; children: React.ReactNode };
 

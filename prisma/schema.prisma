@@ -230,6 +230,7 @@ enum ChallengeType {
   NO_MAGIC            // BO2 Custom Game: Magic disabled (some maps only)
   NO_JUG              // BO3+: No Juggernog
   NO_ARMOR            // BOCW: No Armor
+  NO_JUG_NO_ARMOR     // Vanguard Der Anfang: No Jug and No Armor
   NO_BLITZ            // WW2: No Blitz (perks)
   NO_ATS              // BO3+: No Alternate Ammo Types (AATs)
   // IW speedruns (time-based; completionTimeSeconds required)
@@ -245,6 +246,9 @@ enum ChallengeType {
   ROUND_20_SPEEDRUN    // BOCW Outbreak: Round 20 speedrun
   EXFIL_SPEEDRUN       // BOCW: Exfil Round 11 speedrun
   EXFIL_R21_SPEEDRUN   // BOCW: Exfil Round 21 speedrun
+  EXFIL_R5_SPEEDRUN    // Vanguard: Exfil Round 5 speedrun (Der Anfang, Terra Maledicta)
+  EXFIL_R10_SPEEDRUN   // Vanguard: Exfil Round 10 speedrun (all 4 maps)
+  EXFIL_R20_SPEEDRUN   // Vanguard: Exfil Round 20 speedrun (Shi No Numa Reborn, The Archon)
   BUILD_EE_SPEEDRUN    // BOCW: Build% EE speedrun (Firebase Z, Forsaken)
   SUPER_30_SPEEDRUN    // WW2: Multi-map R30 (Final Reich→Groesten Haus→Darkest Shore→Shadowed Throne→Frozen Dawn)
   EASTER_EGG_SPEEDRUN
@@ -451,6 +455,9 @@ model ChallengeLog {
   // WW2 only: Consumables (gums) — true = With Consumables (default), false = No Consumables. Leaderboard filter.
   ww2ConsumablesUsed      Boolean?
 
+  // Vanguard only (Der Anfang, Terra Maledicta): With/Without Void — true = With Void (default), false = Without Void. Leaderboard filter.
+  vanguardVoidUsed        Boolean?
+
   // BO2 only: Bank/Storage used (maps with bank: Tranzit, Die Rise, Buried). true = Bank+Storage (default), false = No Bank No Storage
   bo2BankUsed             Boolean?
   
@@ -516,6 +523,9 @@ model EasterEggLog {
 
   // WW2 only: Consumables used — true = With Consumables (default), false = No Consumables. Leaderboard filter.
   ww2ConsumablesUsed   Boolean?
+
+  // Vanguard only (Der Anfang, Terra Maledicta): With/Without Void — true = With Void (default), false = Without Void. Leaderboard filter.
+  vanguardVoidUsed     Boolean?
   
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt

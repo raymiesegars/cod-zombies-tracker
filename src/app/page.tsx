@@ -10,29 +10,34 @@ const features = [
   {
     icon: EasterEggIcon,
     title: 'Full Easter Egg Guides & Tracking',
-    description: 'Step-by-step guides for every map: main quests, musical eggs, and side Easter eggs. Track which steps you’ve done and log full completions.',
+    description: 'Step-by-step guides for every map: main quests, musical eggs, side eggs, and buildables. Track steps, log completions with proof, and earn XP.',
   },
   {
     icon: MapIcon,
     title: 'Every Map Covered',
-    description: 'From World at War to Black Ops 7—every CoD Zombies map including IW and WWII, with full Easter egg coverage and progress tracking.',
+    description: 'World at War through Black Ops 7, plus IW, WW2, AW, Vanguard, and MW2 Zombies. Full Easter egg coverage, leaderboards, and achievements.',
   },
   {
     icon: Target,
-    title: 'Challenges',
-    description: 'No Downs, Pistol Only, Starting Room, and more. Log rounds and compete on challenges.',
+    title: 'Challenges & Speedruns',
+    description: 'No Downs, Pistol Only, Starting Room, and more. Round milestones from any challenge. EE speedruns. BO4 difficulty tiers (Casual–Realistic).',
   },
   {
     icon: Trophy,
-    title: 'Leaderboards',
-    description: 'Climb the ranks in Solo, Duo, Trio, or Squad. See who’s on top for every map.',
+    title: 'Leaderboards & Verified Runs',
+    description: 'Solo, Duo, Trio, Squad. Search by name. Verified XP. EE speedrun boards. Filters: GobbleGums, Elixirs, Support, Fortune Cards.',
+  },
+  {
+    icon: Users,
+    title: 'Co-op, Friends & Messaging',
+    description: 'Log runs with your squad—teammates get credit when they confirm. Add friends, send DMs, find groups. Run verification with admin-approved proof.',
   },
 ];
 
 const statsConfig: { label: string; value?: string; key?: 'maps' }[] = [
   { label: 'Maps', key: 'maps' },
-  { label: 'Challenge Types', value: '10+' },
-  { label: 'Achievements', value: '4,000+' },
+  { label: 'Games', value: '12+' },
+  { label: 'Achievements', value: '5,000+' },
 ];
 
 export default function HomePage() {
@@ -80,7 +85,7 @@ export default function HomePage() {
             </h1>
 
             <p className="mt-4 sm:mt-6 text-base sm:text-lg md:text-xl text-bunker-300 max-w-2xl mx-auto px-4">
-              Step-by-step Easter egg guides and progress tracking for every map. Main quests, musical eggs, side eggs—all in one place. Log completions, find teammates for Easter eggs, and climb leaderboards.
+              Easter egg guides, challenges, speedruns, and leaderboards for every CoD Zombies map. Log runs with your squad, get verified, earn XP and ranks. Find teammates, message friends, and climb the boards.
             </p>
 
             <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
@@ -145,14 +150,14 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-10 sm:mb-16">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-zombies text-white tracking-wide">
-              Guides & Tracking for Every Map
+              Guides, Leaderboards & Community
             </h2>
             <p className="mt-3 sm:mt-4 text-base sm:text-lg text-bunker-400 max-w-2xl mx-auto">
-              Full Easter egg guides—main quest, musical, and side—with step-by-step instructions and progress tracking on every Treyarch Zombies map. Find teammates for Easter eggs on the Find Group page.
+              Step-by-step Easter egg guides, buildables, challenges, and speedruns across WAW, BO1–7, IW, WW2, AW, Vanguard, and MW2. Log runs with proof, co-op with your squad, get verified, and find teammates.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
             {features.map((feature) => (
               <div key={feature.title}>
                 <Card variant="bordered" className="h-full hover:border-blood-800/50 transition-colors">
@@ -252,7 +257,7 @@ export default function HomePage() {
               Start Completing Every Easter Egg
             </h2>
             <p className="mt-3 sm:mt-4 text-base sm:text-lg text-bunker-400">
-              Free account. Full guides and step tracking for main quests, musical eggs, and side eggs on every map.
+              Free account. Easter egg guides, challenges, speedruns, XP and ranks. Log runs with squad, get verified, customize your maps and profile.
             </p>
             <div className="mt-6 sm:mt-8">
               {user ? (

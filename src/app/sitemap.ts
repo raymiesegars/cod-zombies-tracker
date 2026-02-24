@@ -1,11 +1,11 @@
 import { MetadataRoute } from 'next';
 import prisma from '@/lib/prisma';
 
-const PRODUCTION_DOMAIN = 'https://www.codzombiestracker.com';
+const PRODUCTION_DOMAIN = 'https://codzombiestracker.com'; // Canonical: no www
 
 function getBaseUrl(): string {
   const raw = process.env.NEXT_PUBLIC_APP_URL || '';
-  const env = raw.trim().replace(/\/$/, '');
+  const env = raw.trim().replace(/\/$/, '').replace(/^https?:\/\/www\./, 'https://'); // Strip www
   if (process.env.NODE_ENV === 'production' && (!env || env.includes('localhost'))) {
     return PRODUCTION_DOMAIN;
   }

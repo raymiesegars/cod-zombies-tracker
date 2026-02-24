@@ -26,6 +26,7 @@ import { getBocwSupportLabel } from '@/lib/bocw';
 import { getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
 import { getBo7SupportLabel } from '@/lib/bo7';
 import { getWw2ConsumablesLabel } from '@/lib/ww2';
+import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter, getVanguardVoidLabel } from '@/lib/vanguard';
 import { ChevronLeft, FileText, ExternalLink, Clock, Pencil, Trash2, Users, ShieldCheck, ShieldOff, Loader2, Check, Lock } from 'lucide-react';
 
 function DeleteRunButton({
@@ -162,6 +163,7 @@ type ChallengeLogDetail = {
   bo7IsCursedRun?: boolean | null;
   bo7RelicsUsed?: string[];
   rampageInducerUsed?: boolean | null;
+  vanguardVoidUsed?: boolean | null;
   ww2ConsumablesUsed?: boolean | null;
 };
 
@@ -186,6 +188,7 @@ type EasterEggLogDetail = {
   isVerified?: boolean;
   verificationRequestedAt?: string | null;
   rampageInducerUsed?: boolean | null;
+  vanguardVoidUsed?: boolean | null;
   ww2ConsumablesUsed?: boolean | null;
 };
 
@@ -603,6 +606,12 @@ export default function RunDetailPage() {
                       <span className="text-white font-medium">{getWw2ConsumablesLabel((log as ChallengeLogDetail).ww2ConsumablesUsed)}</span>
                     </div>
                   )}
+                  {isVanguardGame(map.game.shortName) && hasVanguardVoidFilter(map.slug) && (log as ChallengeLogDetail).vanguardVoidUsed != null && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">Void</span>
+                      <span className="text-white font-medium">{getVanguardVoidLabel((log as ChallengeLogDetail).vanguardVoidUsed)}</span>
+                    </div>
+                  )}
                   {map.game.shortName === 'BO7' && (
                     <div className="flex items-center justify-between">
                       <span className="text-bunker-400 text-sm">Cursed Run</span>
@@ -611,7 +620,7 @@ export default function RunDetailPage() {
                       </span>
                     </div>
                   )}
-                  {['BOCW', 'BO6', 'BO7'].includes(map.game.shortName) && (log as ChallengeLogDetail).rampageInducerUsed != null && (
+                  {(['BOCW', 'BO6', 'BO7'].includes(map.game.shortName) || (isVanguardGame(map.game.shortName) && hasVanguardRampageFilter(map.slug))) && (log as ChallengeLogDetail).rampageInducerUsed != null && (
                     <div className="flex items-center justify-between">
                       <span className="text-bunker-400 text-sm">Rampage Inducer</span>
                       <span className="text-white font-medium">
@@ -672,6 +681,12 @@ export default function RunDetailPage() {
                       <span className="text-white font-medium">{getWw2ConsumablesLabel((log as EasterEggLogDetail).ww2ConsumablesUsed)}</span>
                     </div>
                   )}
+                  {isVanguardGame(map.game.shortName) && hasVanguardVoidFilter(map.slug) && (log as EasterEggLogDetail).vanguardVoidUsed != null && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">Void</span>
+                      <span className="text-white font-medium">{getVanguardVoidLabel((log as EasterEggLogDetail).vanguardVoidUsed)}</span>
+                    </div>
+                  )}
                   {(() => {
                     const sec = (log as EasterEggLogDetail).completionTimeSeconds;
                     return (sec != null && sec > 0) ? (
@@ -696,7 +711,7 @@ export default function RunDetailPage() {
                       )}
                     </div>
                   )}
-                  {['BOCW', 'BO6', 'BO7'].includes(map.game.shortName) && (log as EasterEggLogDetail).rampageInducerUsed != null && (
+                  {(['BOCW', 'BO6', 'BO7'].includes(map.game.shortName) || (isVanguardGame(map.game.shortName) && hasVanguardRampageFilter(map.slug))) && (log as EasterEggLogDetail).rampageInducerUsed != null && (
                     <div className="flex items-center justify-between">
                       <span className="text-bunker-400 text-sm">Rampage Inducer</span>
                       <span className="text-white font-medium">

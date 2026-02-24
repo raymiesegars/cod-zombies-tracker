@@ -10,21 +10,22 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://codzombiestracker.com';
-const BASE = SITE_URL.replace(/\/$/, '');
+// Canonical: https://codzombiestracker.com (no www)
+const SITE_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://codzombiestracker.com').replace(/^https?:\/\/www\./, 'https://').replace(/\/$/, '');
+const BASE = SITE_URL;
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE),
   title: {
-    default: 'CoD Zombies Tracker – Easter Egg Guides, High Round Leaderboards, Speedruns & Find Group',
+    default: 'CoD Zombies Tracker – Easter Egg Guides, Leaderboards, Co-op & Verified Runs',
     template: '%s | CoD Zombies Tracker',
   },
   description:
-    'Free, open source CoD Zombies tracker: Easter egg guides, high round and speedrun leaderboards, find group, log runs with proof, achievements and XP. No ads, no paywalls—tips help keep it running.',
+    'Free CoD Zombies tracker: Easter egg guides, challenges, speedruns, leaderboards, co-op logging, verified runs, XP and ranks. WW2, IW, AW, Vanguard, MW2. Find group, friends, messaging. No ads.',
   keywords: [
     'Call of Duty Zombies',
     'CoD Zombies',
-    'Treyarch Zombies',
+    'Zombies tracker',
     'Easter egg guide',
     'Zombies Easter egg',
     'main quest guide',
@@ -33,20 +34,20 @@ export const metadata: Metadata = {
     'Zombies speedrun',
     'find group Zombies',
     'LFG CoD Zombies',
-    'looking for group Zombies Easter egg',
-    'find people to do Zombies Easter eggs',
-    'Zombies Easter egg teammates',
+    'Co-op Zombies',
+    'verified Zombies runs',
     'Black Ops Zombies',
-    'WAW Zombies',
-    'BO1 BO2 BO3 IW WW2 BO4 BOCW BO6 BO7 Zombies',
+    'WAW BO1 BO2 BO3 BO4 BOCW BO6 BO7',
+    'Infinite Warfare Zombies',
+    'WW2 Zombies',
+    'Vanguard Zombies',
+    'MW2 Zombies',
     'Zombies progress tracker',
     'Zombies achievements',
     'Easter egg speedrun',
     'No Downs',
-    'Zombies squad',
+    'Pistol Only',
     'free Zombies tracker',
-    'open source Zombies',
-    'step by step Easter egg',
     'Zombies buildables guide',
   ],
   authors: [{ name: 'CoD Zombies Tracker', url: BASE }],
@@ -55,15 +56,15 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     siteName: 'CoD Zombies Tracker',
-    title: 'CoD Zombies Tracker – Easter Egg Guides, Leaderboards, Find Group & Progress',
-    description: 'Free, open source. Easter egg guides, leaderboards, find group, log runs. No ads; tips help keep the site running.',
+    title: 'CoD Zombies Tracker – Easter Egg Guides, Leaderboards, Co-op & Verified Runs',
+    description: 'Free CoD Zombies tracker. Easter egg guides, challenges, speedruns, leaderboards, co-op logging, verified runs. WW2, IW, AW, Vanguard, MW2. No ads.',
     url: BASE,
     images: [{ url: '/images/og-default.png', width: 1200, height: 630, alt: 'CoD Zombies Tracker' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CoD Zombies Tracker – Easter Egg Guides, Leaderboards & Find Group',
-    description: 'Free, open source CoD Zombies tracker. Easter egg guides, leaderboards, find group, progress tracking. No ads.',
+    title: 'CoD Zombies Tracker – Easter Egg Guides, Leaderboards & Co-op',
+    description: 'Free CoD Zombies tracker. Easter egg guides, challenges, speedruns, co-op logging, verified runs. No ads.',
   },
   robots: {
     index: true,
@@ -99,7 +100,7 @@ const jsonLd = {
       '@id': `${BASE}/#website`,
       url: BASE,
       name: 'CoD Zombies Tracker',
-      description: 'Free, open source CoD Zombies tracker. Easter egg guides, high round and speedrun leaderboards, find group, progress tracking. No monetization, no ads; built to stay around.',
+      description: 'Free CoD Zombies tracker. Easter egg guides, challenges, speedruns, leaderboards, co-op logging, verified runs, XP and ranks. WW2, IW, AW, Vanguard, MW2. No ads.',
       potentialAction: [
         { '@type': 'SearchAction', target: { '@type': 'EntryPoint', urlTemplate: `${BASE}/maps?search={search_term_string}` }, 'query-input': 'required name=search_term_string' },
         { '@type': 'ViewAction', target: BASE + '/maps', name: 'Browse Maps' },
@@ -111,14 +112,14 @@ const jsonLd = {
       '@type': 'Organization',
       name: 'CoD Zombies Tracker',
       url: BASE,
-      description: 'Free, open source. CoD Zombies Easter egg guides, leaderboards, find group, progress tracking. No ads.',
+      description: 'Free CoD Zombies tracker. Easter egg guides, challenges, speedruns, leaderboards, co-op, verified runs. No ads.',
     },
     {
       '@type': 'WebApplication',
       name: 'CoD Zombies Tracker',
       url: BASE,
       applicationCategory: 'GameApplication',
-      description: 'Free, open source. Track Easter eggs, high rounds, speedruns, achievements. Find groups, log runs, climb leaderboards. No ads.',
+      description: 'Free CoD Zombies tracker. Easter egg guides, challenges, speedruns, co-op logging, verified runs, XP and ranks. No ads.',
     },
   ],
 };

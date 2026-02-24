@@ -74,6 +74,8 @@ import { getBocwMapConfig, getBocwChallengeTypeLabel } from '@/lib/bocw/bocw-map
 import { getBo6MapConfig, getBo6ChallengeTypeLabel } from '@/lib/bo6/bo6-map-config';
 import { getBo7MapConfig, getBo7ChallengeTypeLabel } from '@/lib/bo7/bo7-map-config';
 import { getWw2MapConfig, getWw2ChallengeTypeLabel } from '@/lib/ww2/ww2-map-config';
+import { getVanguardMapConfig, getVanguardChallengeTypeLabel } from '@/lib/vanguard/vanguard-map-config';
+import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 
 const BUILDABLE_PART_CACHE_KEY_PREFIX = 'buildable-parts';
 const BUILDABLE_PART_CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
@@ -441,6 +443,10 @@ const challengeTypeLabels: Record<string, string> = {
   MEPHISTOPHELES: 'Mephistopheles',
   EXFIL_SPEEDRUN: 'Exfil Round 11',
   EXFIL_R21_SPEEDRUN: 'Exfil Round 21',
+  EXFIL_R5_SPEEDRUN: 'Exfil Round 5 Speedrun',
+  EXFIL_R10_SPEEDRUN: 'Exfil Round 10 Speedrun',
+  EXFIL_R20_SPEEDRUN: 'Exfil Round 20 Speedrun',
+  NO_JUG_NO_ARMOR: 'No Jug No Armor',
   BUILD_EE_SPEEDRUN: 'Build% EE Speedrun',
   ROUND_935_SPEEDRUN: 'Round 935 Speedrun',
   ROUND_999_SPEEDRUN: 'Round 999 Speedrun',
@@ -573,6 +579,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   const [lbBo2BankUsed, setLbBo2BankUsed] = useState<string>('');
   // WW2 consumables filter
   const [lbWw2Consumables, setLbWw2Consumables] = useState<string>('true');
+  const [lbVanguardVoidFilter, setLbVanguardVoidFilter] = useState<string>('true'); // Default: With Void (der-anfang, terra-maledicta only)
   const leaderboardSlugRef = useRef<string | null>(null);
 
   // Your runs for this map when logged in; URL ?tab=your-runs triggers fetch on load
@@ -655,7 +662,8 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
           if (map.game?.shortName === 'BO4' && selectedDifficulty) params.set('difficulty', selectedDifficulty);
           if (leaderboardVerifiedOnly) params.set('verified', 'true');
-          if ((isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName)) && lbRampageInducerFilter) params.set('rampageInducerUsed', lbRampageInducerFilter);
+          if ((isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName) || (isVanguardGame(map.game?.shortName) && hasVanguardRampageFilter(slug))) && lbRampageInducerFilter) params.set('rampageInducerUsed', lbRampageInducerFilter);
+          if (isVanguardGame(map.game?.shortName) && hasVanguardVoidFilter(slug) && (lbVanguardVoidFilter === 'true' || lbVanguardVoidFilter === 'false')) params.set('vanguardVoidUsed', lbVanguardVoidFilter);
           const res = await fetch(`/api/maps/${slug}/easter-egg-leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -703,7 +711,8 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
             if (lbBo2BankUsed === 'true' || lbBo2BankUsed === 'false') params.set('bo2BankUsed', lbBo2BankUsed);
           }
           if (isWw2Game(map.game?.shortName) && (lbWw2Consumables === 'true' || lbWw2Consumables === 'false')) params.set('ww2ConsumablesUsed', lbWw2Consumables);
-          if ((isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName)) && lbRampageInducerFilter) params.set('rampageInducerUsed', lbRampageInducerFilter);
+          if ((isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName) || (isVanguardGame(map.game?.shortName) && hasVanguardRampageFilter(slug))) && lbRampageInducerFilter) params.set('rampageInducerUsed', lbRampageInducerFilter);
+          if (isVanguardGame(map.game?.shortName) && hasVanguardVoidFilter(slug) && (lbVanguardVoidFilter === 'true' || lbVanguardVoidFilter === 'false')) params.set('vanguardVoidUsed', lbVanguardVoidFilter);
           const res = await fetch(`/api/maps/${slug}/leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -725,7 +734,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     })();
     // Intentionally omit leaderboard.length / leaderboardFetchedOnce to avoid re-fetch loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut, lbBo3GobbleGumMode, lbBo3AatUsed, lbBo4ElixirMode, lbBocwSupportMode, lbRampageInducerFilter, lbBo6GobbleGumMode, lbBo6SupportMode, lbBo7SupportMode, lbBo7CursedFilter, lbBo7SelectedRelics, lbWawNoJug, lbWawFixedWunderwaffe, lbBo2BankUsed, lbWw2Consumables]);
+  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut, lbBo3GobbleGumMode, lbBo3AatUsed, lbBo4ElixirMode, lbBocwSupportMode, lbRampageInducerFilter, lbBo6GobbleGumMode, lbBo6SupportMode, lbBo7SupportMode, lbBo7CursedFilter, lbBo7SelectedRelics, lbWawNoJug, lbWawFixedWunderwaffe, lbBo2BankUsed, lbWw2Consumables, lbVanguardVoidFilter]);
 
   // Sync activeTab with URL so switching to Your Runs triggers fetch
   useEffect(() => {
@@ -932,6 +941,8 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                   ? (fallbackName ?? challengeTypeLabels[type] ?? getBo7ChallengeTypeLabel(type) ?? type)
                   : map?.game?.shortName === 'WW2'
                     ? (challengeTypeLabels[type] ?? getWw2ChallengeTypeLabel(type) ?? fallbackName ?? type)
+                    : map?.game?.shortName === 'VANGUARD'
+                    ? (challengeTypeLabels[type] ?? getVanguardChallengeTypeLabel(type) ?? fallbackName ?? type)
                     : (fallbackName ?? challengeTypeLabels[type] ?? type);
     if (map?.game?.shortName === 'IW' && challenges.length > 0) {
       const ordered = IW_CHALLENGE_TYPES_ORDER.filter((t) => challenges.some((c) => c.type === t));
@@ -991,6 +1002,13 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     }
     if (map?.game?.shortName === 'WW2' && map?.slug && getWw2MapConfig(map.slug)) {
       const types = getWw2MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      return types.map((t) => {
+        const c = challenges.find((ch) => ch.type === t);
+        return { value: t, label: getLabel(t, c?.name) };
+      });
+    }
+    if (map?.game?.shortName === 'VANGUARD' && map?.slug && getVanguardMapConfig(map.slug)) {
+      const types = getVanguardMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
@@ -2058,6 +2076,29 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                         className="w-full min-w-0 sm:w-40 max-w-full"
                       />
                     )}
+                    {isVanguardGame(map?.game?.shortName) && hasVanguardVoidFilter(slug) && (
+                      <Select
+                        options={[
+                          { value: '', label: 'All (Void)' },
+                          { value: 'true', label: 'With Void' },
+                          { value: 'false', label: 'Without Void' },
+                        ]}
+                        value={lbVanguardVoidFilter}
+                        onChange={(e) => setLbVanguardVoidFilter(e.target.value)}
+                        className="w-full min-w-0 sm:w-40 max-w-full"
+                      />
+                    )}
+                    {isVanguardGame(map?.game?.shortName) && hasVanguardRampageFilter(slug) && (
+                      <Select
+                        options={[
+                          { value: 'false', label: 'No Rampage Inducer' },
+                          { value: 'true', label: 'Rampage Inducer' },
+                        ]}
+                        value={lbRampageInducerFilter}
+                        onChange={(e) => setLbRampageInducerFilter(e.target.value)}
+                        className="w-full min-w-0 sm:w-44 max-w-full"
+                      />
+                    )}
                 </div>
               </div>
             </CardHeader>
@@ -2237,7 +2278,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
 
           {/* Right column (large screens): Buildables when Easter Eggs tab has buildables */}
           {activeTab === 'easter-eggs' && buildables.length > 0 && (
-            <div className="hidden lg:flex lg:flex-col lg:min-w-0 lg:space-y-4">
+            <div className="hidden lg:flex lg:flex-col lg:min-w-0 lg:space-y-4 lg:pt-16">
               <div className="rounded-xl border border-bunker-600/80 bg-bunker-900/95 overflow-hidden flex flex-col">
               <div className="p-3 sm:p-4 border-b border-bunker-700/60 flex-shrink-0">
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-bunker-300 mb-3">Buildables</h3>

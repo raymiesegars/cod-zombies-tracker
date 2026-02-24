@@ -41,7 +41,9 @@ import { BOCW_OFFICIAL_RULES } from '@/lib/bocw/bocw-official-rules';
 import { getBo6OfficialRulesForMap } from '@/lib/bo6/bo6-official-rules';
 import { getBo7OfficialRulesForMap } from '@/lib/bo7/bo7-official-rules';
 import { WW2_OFFICIAL_RULES } from '@/lib/ww2/ww2-official-rules';
+import { VANGUARD_OFFICIAL_RULES } from '@/lib/vanguard/vanguard-official-rules';
 import { isWw2Game } from '@/lib/ww2';
+import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 import { isRuleLink, isRuleInlineLinks } from '@/lib/rules/types';
 import { getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
@@ -124,8 +126,9 @@ function OfficialRulesModal({
   const isBo6 = gameShortName === 'BO6';
   const isBo7 = gameShortName === 'BO7';
   const isWw2 = gameShortName === 'WW2';
-  const hasRules = isWaw || isBo1 || isBo2 || isBo3 || isBo4 || isBocw || isBo6 || isBo7 || isWw2;
-  const rules = isWaw ? WAW_OFFICIAL_RULES : isBo1 ? BO1_OFFICIAL_RULES : isBo2 ? BO2_OFFICIAL_RULES : isBo3 ? BO3_OFFICIAL_RULES : isBo4 ? BO4_OFFICIAL_RULES : isBocw ? BOCW_OFFICIAL_RULES : isBo6 && mapSlug ? getBo6OfficialRulesForMap(mapSlug) : isBo7 && mapSlug ? getBo7OfficialRulesForMap(mapSlug) : isWw2 ? WW2_OFFICIAL_RULES : null;
+  const isVanguard = gameShortName === 'VANGUARD';
+  const hasRules = isWaw || isBo1 || isBo2 || isBo3 || isBo4 || isBocw || isBo6 || isBo7 || isWw2 || isVanguard;
+  const rules = isWaw ? WAW_OFFICIAL_RULES : isBo1 ? BO1_OFFICIAL_RULES : isBo2 ? BO2_OFFICIAL_RULES : isBo3 ? BO3_OFFICIAL_RULES : isBo4 ? BO4_OFFICIAL_RULES : isBocw ? BOCW_OFFICIAL_RULES : isBo6 && mapSlug ? getBo6OfficialRulesForMap(mapSlug) : isBo7 && mapSlug ? getBo7OfficialRulesForMap(mapSlug) : isWw2 ? WW2_OFFICIAL_RULES : isVanguard ? VANGUARD_OFFICIAL_RULES : null;
 
   const byType = rules && 'challengeRulesByType' in rules ? (rules as { challengeRulesByType: Record<string, string> }).challengeRulesByType : null;
   const typesToShow = (mapChallengeTypes && mapChallengeTypes.length > 0
@@ -145,7 +148,7 @@ function OfficialRulesModal({
       isOpen={isOpen}
       onClose={onClose}
       title="Official Rules"
-      description={hasRules ? `Rules and requirements for ${isWaw ? 'World at War' : isBo1 ? 'Black Ops 1' : isBo2 ? 'Black Ops 2' : isBo3 ? 'Black Ops 3' : isBo4 ? 'Black Ops 4' : isBocw ? 'Black Ops Cold War' : isBo6 ? 'Black Ops 6' : isBo7 ? 'Black Ops 7' : isWw2 ? 'WWII Zombies' : 'submissions'}` : 'Rules and requirements for challenge submissions'}
+      description={hasRules ? `Rules and requirements for ${isWaw ? 'World at War' : isBo1 ? 'Black Ops 1' : isBo2 ? 'Black Ops 2' : isBo3 ? 'Black Ops 3' : isBo4 ? 'Black Ops 4' : isBocw ? 'Black Ops Cold War' : isBo6 ? 'Black Ops 6' : isBo7 ? 'Black Ops 7' : isWw2 ? 'WWII Zombies' : isVanguard ? 'Vanguard Zombies' : 'submissions'}` : 'Rules and requirements for challenge submissions'}
       size="lg"
     >
       {rules ? (
@@ -302,6 +305,7 @@ export default function EditMapProgressPage() {
     bo2BankUsed?: boolean | null;
     bo3AatUsed?: boolean | null;
     ww2ConsumablesUsed?: boolean;
+    vanguardVoidUsed?: boolean;
     killsReached?: string;
     scoreReached?: string;
   }>({
@@ -335,6 +339,7 @@ export default function EditMapProgressPage() {
         teammateNonUserNames: string[];
         requestVerification: boolean;
         rampageInducerUsed?: boolean;
+        vanguardVoidUsed?: boolean;
         ww2ConsumablesUsed?: boolean;
       }
     >
@@ -378,6 +383,9 @@ export default function EditMapProgressPage() {
           const isBo6 = isBo6Game(data.game?.shortName);
           const isBo7 = isBo7Game(data.game?.shortName);
           const isWw2 = isWw2Game(data.game?.shortName);
+          const isVanguard = isVanguardGame(data.game?.shortName);
+          const hasVoidFilter = isVanguard && data.slug && hasVanguardVoidFilter(data.slug);
+          const hasRampageFilter = isVanguard && data.slug && hasVanguardRampageFilter(data.slug);
           setSharedChallengeForm({
             roundReached: '',
             playerCount: 'SOLO',
@@ -389,6 +397,8 @@ export default function EditMapProgressPage() {
             ...(isBo7 && { bo7SupportMode: BO7_SUPPORT_DEFAULT, bo7IsCursedRun: false, bo7RelicsUsed: [], rampageInducerUsed: false }),
             ...((data.game?.shortName ?? '') === 'BO2' && getBo2MapConfig(data.slug)?.hasBank && { bo2BankUsed: true }),
             ...(isWw2 && { ww2ConsumablesUsed: true }),
+            ...(hasVoidFilter && { vanguardVoidUsed: true }),
+            ...(hasRampageFilter && { rampageInducerUsed: false }),
             proofUrls: [],
             notes: '',
             completionTimeSeconds: null,
@@ -413,6 +423,7 @@ export default function EditMapProgressPage() {
             teammateNonUserNames: string[];
             requestVerification: boolean;
             rampageInducerUsed?: boolean;
+            vanguardVoidUsed?: boolean;
           }> = {};
           for (const ee of mainQuestEasterEggs) {
             eeInitial[ee.id] = {
@@ -428,7 +439,8 @@ export default function EditMapProgressPage() {
               teammateUserIds: [],
               teammateNonUserNames: [],
               requestVerification: false,
-              ...((isBocw || isBo6 || isBo7) && { rampageInducerUsed: false }),
+              ...((isBocw || isBo6 || isBo7 || (isVanguardGame(data.game?.shortName) && hasVanguardRampageFilter(data.slug))) && { rampageInducerUsed: false }),
+              ...(isVanguardGame(data.game?.shortName) && hasVanguardVoidFilter(data.slug) && { vanguardVoidUsed: true }),
               ...(isWw2Game(data.game?.shortName) && { ww2ConsumablesUsed: true }),
             };
           }
@@ -617,7 +629,8 @@ export default function EditMapProgressPage() {
               bo7IsCursedRun: form.bo7IsCursedRun ?? false,
               bo7RelicsUsed: form.bo7IsCursedRun ? (form.bo7RelicsUsed ?? []) : [],
             }),
-            ...((isBocw || isBo6 || isBo7) && { rampageInducerUsed: form.rampageInducerUsed ?? false }),
+            ...((isBocw || isBo6 || isBo7 || (isVanguardGame(map?.game?.shortName) && hasVanguardRampageFilter(map?.slug))) && { rampageInducerUsed: form.rampageInducerUsed ?? false }),
+            ...(isVanguardGame(map?.game?.shortName) && hasVanguardVoidFilter(map?.slug) && { vanguardVoidUsed: form.vanguardVoidUsed ?? true }),
             ...(map?.game?.shortName === 'WAW' && {
               wawNoJug: form.wawNoJug ?? false,
               wawFixedWunderwaffe: form.wawFixedWunderwaffe ?? false,
@@ -704,6 +717,8 @@ export default function EditMapProgressPage() {
             wawFixedWunderwaffe: sharedChallengeForm.wawFixedWunderwaffe ?? false,
           }),
             ...(map.game?.shortName === 'BO2' && getBo2MapConfig(map.slug)?.hasBank && { bo2BankUsed: sharedChallengeForm.bo2BankUsed ?? true }),
+            ...((isBocwGame(map?.game?.shortName) || isBo6Game(map?.game?.shortName) || isBo7Game(map?.game?.shortName) || (isVanguardGame(map?.game?.shortName) && hasVanguardRampageFilter(map?.slug))) && { rampageInducerUsed: sharedChallengeForm.rampageInducerUsed ?? false }),
+            ...(isVanguardGame(map?.game?.shortName) && hasVanguardVoidFilter(map?.slug) && { vanguardVoidUsed: sharedChallengeForm.vanguardVoidUsed ?? true }),
             ...(isWw2Game(map?.game?.shortName) && { ww2ConsumablesUsed: sharedChallengeForm.ww2ConsumablesUsed ?? true }),
             ...(isBo3Game(map?.game?.shortName) && {
               bo3GobbleGumMode: sharedChallengeForm.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT,
@@ -772,7 +787,8 @@ export default function EditMapProgressPage() {
           teammateUserIds: form.teammateUserIds ?? [],
           teammateNonUserNames: form.teammateNonUserNames ?? [],
           requestVerification: form.requestVerification ?? false,
-          ...((isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName)) && { rampageInducerUsed: form.rampageInducerUsed ?? false }),
+          ...((isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName) || (isVanguardGame(map.game?.shortName) && hasVanguardRampageFilter(map.slug))) && { rampageInducerUsed: form.rampageInducerUsed ?? false }),
+          ...(isVanguardGame(map.game?.shortName) && hasVanguardVoidFilter(map.slug) && { vanguardVoidUsed: form.vanguardVoidUsed ?? true }),
           ...(isWw2Game(map.game?.shortName) && { ww2ConsumablesUsed: form.ww2ConsumablesUsed ?? true }),
         }),
       });
@@ -1120,6 +1136,18 @@ export default function EditMapProgressPage() {
                         className="w-full"
                       />
                     )}
+                    {isVanguardGame(map?.game?.shortName) && hasVanguardVoidFilter(map?.slug) && (
+                      <Select
+                        label="Void"
+                        options={[
+                          { value: 'true', label: 'With Void (default)' },
+                          { value: 'false', label: 'Without Void' },
+                        ]}
+                        value={sharedChallengeForm.vanguardVoidUsed === true ? 'true' : 'false'}
+                        onChange={(e) => handleSharedChallengeChange('vanguardVoidUsed', e.target.value === 'true')}
+                        className="w-full"
+                      />
+                    )}
                     {isBo3Game(map?.game?.shortName) && (
                       <>
                         <Select
@@ -1191,7 +1219,7 @@ export default function EditMapProgressPage() {
                         />
                       </>
                     )}
-                    {((isBocwGame(map?.game?.shortName) || isBo6Game(map?.game?.shortName) || isBo7Game(map?.game?.shortName)) && (
+                    {((isBocwGame(map?.game?.shortName) || isBo6Game(map?.game?.shortName) || isBo7Game(map?.game?.shortName) || (isVanguardGame(map?.game?.shortName) && hasVanguardRampageFilter(map?.slug))) && (
                       <Select
                         label="Rampage Inducer"
                         options={[
@@ -1443,7 +1471,7 @@ export default function EditMapProgressPage() {
                             }
                           />
                         )}
-                        {(isBocwGame(map?.game?.shortName) || isBo6Game(map?.game?.shortName) || isBo7Game(map?.game?.shortName)) && (
+                        {(isBocwGame(map?.game?.shortName) || isBo6Game(map?.game?.shortName) || isBo7Game(map?.game?.shortName) || (isVanguardGame(map?.game?.shortName) && hasVanguardRampageFilter(map?.slug))) && (
                           <Select
                             label="Rampage Inducer"
                             options={[
@@ -1453,6 +1481,19 @@ export default function EditMapProgressPage() {
                             value={easterEggForms[ee.id]?.rampageInducerUsed === true ? 'true' : 'false'}
                             onChange={(e) =>
                               handleEasterEggChange(ee.id, 'rampageInducerUsed', e.target.value === 'true')
+                            }
+                          />
+                        )}
+                        {isVanguardGame(map?.game?.shortName) && hasVanguardVoidFilter(map?.slug) && (
+                          <Select
+                            label="Void"
+                            options={[
+                              { value: 'true', label: 'With Void (default)' },
+                              { value: 'false', label: 'Without Void' },
+                            ]}
+                            value={easterEggForms[ee.id]?.vanguardVoidUsed === true ? 'true' : 'false'}
+                            onChange={(e) =>
+                              handleEasterEggChange(ee.id, 'vanguardVoidUsed', e.target.value === 'true')
                             }
                           />
                         )}
