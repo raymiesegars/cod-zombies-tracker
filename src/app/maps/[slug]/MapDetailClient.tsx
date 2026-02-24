@@ -76,6 +76,7 @@ import { getBo7MapConfig, getBo7ChallengeTypeLabel } from '@/lib/bo7/bo7-map-con
 import { getWw2MapConfig, getWw2ChallengeTypeLabel } from '@/lib/ww2/ww2-map-config';
 import { getVanguardMapConfig, getVanguardChallengeTypeLabel } from '@/lib/vanguard/vanguard-map-config';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
+import { getAwMapConfig, getAwChallengeTypeLabel } from '@/lib/aw/aw-map-config';
 
 const BUILDABLE_PART_CACHE_KEY_PREFIX = 'buildable-parts';
 const BUILDABLE_PART_CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
@@ -943,6 +944,8 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                     ? (challengeTypeLabels[type] ?? getWw2ChallengeTypeLabel(type) ?? fallbackName ?? type)
                     : map?.game?.shortName === 'VANGUARD'
                     ? (challengeTypeLabels[type] ?? getVanguardChallengeTypeLabel(type) ?? fallbackName ?? type)
+                    : map?.game?.shortName === 'AW'
+                    ? (challengeTypeLabels[type] ?? getAwChallengeTypeLabel(type) ?? fallbackName ?? type)
                     : (fallbackName ?? challengeTypeLabels[type] ?? type);
     if (map?.game?.shortName === 'IW' && challenges.length > 0) {
       const ordered = IW_CHALLENGE_TYPES_ORDER.filter((t) => challenges.some((c) => c.type === t));
@@ -1009,6 +1012,13 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     }
     if (map?.game?.shortName === 'VANGUARD' && map?.slug && getVanguardMapConfig(map.slug)) {
       const types = getVanguardMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      return types.map((t) => {
+        const c = challenges.find((ch) => ch.type === t);
+        return { value: t, label: getLabel(t, c?.name) };
+      });
+    }
+    if (map?.game?.shortName === 'AW' && map?.slug && getAwMapConfig(map.slug)) {
+      const types = getAwMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };

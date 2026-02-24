@@ -233,6 +233,9 @@ enum ChallengeType {
   NO_JUG_NO_ARMOR     // Vanguard Der Anfang: No Jug and No Armor
   NO_BLITZ            // WW2: No Blitz (perks)
   NO_ATS              // BO3+: No Alternate Ammo Types (AATs)
+  NO_EXO_SUIT         // AW Exo Zombies: No Exo Suit upgrades
+  NO_EXO_HEALTH       // AW Exo Zombies: No Exo Health upgrades
+  DOUBLE_FEATURE      // AW Exo Zombies: Descent only — Double Feature mode
   // IW speedruns (time-based; completionTimeSeconds required)
   ROUND_30_SPEEDRUN
   ROUND_50_SPEEDRUN

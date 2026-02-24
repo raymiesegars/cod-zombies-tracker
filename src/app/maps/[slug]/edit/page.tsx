@@ -86,6 +86,9 @@ const challengeTypeLabels: Record<string, string> = {
   ROUND_20_SPEEDRUN: 'Round 20 Speedrun',
   ROUND_935_SPEEDRUN: 'Round 935 Speedrun',
   ROUND_999_SPEEDRUN: 'Round 999 Speedrun',
+  NO_EXO_SUIT: 'No Exo Suit',
+  NO_EXO_HEALTH: 'No Exo Health',
+  DOUBLE_FEATURE: 'Double Feature',
 };
 
 const playerCountOptions = [

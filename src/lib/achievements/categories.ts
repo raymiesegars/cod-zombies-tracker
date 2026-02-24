@@ -7,6 +7,7 @@ import { getBo6MapConfig } from '@/lib/bo6/bo6-map-config';
 import { getBo7MapConfig } from '@/lib/bo7/bo7-map-config';
 import { getWw2MapConfig } from '@/lib/ww2/ww2-map-config';
 import { getVanguardMapConfig } from '@/lib/vanguard/vanguard-map-config';
+import { getAwMapConfig } from '@/lib/aw/aw-map-config';
 
 // How we group and order achievements on map detail and profile
 export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
@@ -26,6 +27,9 @@ export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
   NO_JUG_NO_ARMOR: 'No Jug No Armor',
   NO_BLITZ: 'No Blitz',
   NO_ATS: 'No AATs',
+  NO_EXO_SUIT: 'No Exo Suit',
+  NO_EXO_HEALTH: 'No Exo Health',
+  DOUBLE_FEATURE: 'Double Feature',
   // IW/BO3 speedrun categories
   ROUND_30_SPEEDRUN: 'Round 30 Speedrun',
   ROUND_50_SPEEDRUN: 'Round 50 Speedrun',
@@ -104,6 +108,9 @@ const CATEGORY_ORDER = [
   'NO_JUG_NO_ARMOR',
   'NO_BLITZ',
   'NO_ATS',
+  'NO_EXO_SUIT',
+  'NO_EXO_HEALTH',
+  'DOUBLE_FEATURE',
   'NO_MANS_LAND',
   'ROUND_30_SPEEDRUN',
   'ROUND_50_SPEEDRUN',
@@ -243,6 +250,14 @@ export function getAllowedNonSpeedrunCategoriesForMap(
     );
     return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG']));
   }
+  if (gameShortName === 'AW') {
+    const cfg = getAwMapConfig(mapSlug);
+    if (!cfg?.challengeTypes) return null;
+    const fromConfig = cfg.challengeTypes.filter(
+      (c) => !isSpeedrunCategory(c) && c !== 'HIGHEST_ROUND'
+    );
+    return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG']));
+  }
   return null;
 }
 
@@ -340,6 +355,13 @@ export function getAllowedSpeedrunCategoriesForMap(
       return cfg.challengeTypes.filter((c) => isSpeedrunCategory(c));
     }
     return [...bo2Generic, 'ROUND_10_SPEEDRUN', 'ROUND_20_SPEEDRUN', 'EXFIL_R5_SPEEDRUN', 'EXFIL_R10_SPEEDRUN', 'EXFIL_R20_SPEEDRUN'];
+  }
+  if (gameShortName === 'AW') {
+    const cfg = getAwMapConfig(mapSlug);
+    if (cfg?.challengeTypes) {
+      return cfg.challengeTypes.filter((c) => isSpeedrunCategory(c));
+    }
+    return bo2Generic;
   }
   return bo2Generic;
 }
