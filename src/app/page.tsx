@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Button, Card, CardContent, Logo, EasterEggIcon, MapIcon } from '@/components/ui';
+import { Button, Card, CardContent, Logo, EasterEggIcon, MapIcon, MysteryBoxIcon } from '@/components/ui';
 import { useAuth } from '@/context/auth-context';
 import { Trophy, Target, Users, ChevronRight, Wrench, ExternalLink, PenLine } from 'lucide-react';
 import { useLogProgressModal } from '@/context/log-progress-modal-context';
@@ -108,13 +108,14 @@ export default function HomePage() {
                       Browse Maps
                     </Button>
                   </Link>
-                  {profile?.username && (
-                    <Link href={`/users/${profile.username}`} className="w-full sm:w-auto">
-                      <Button variant="secondary" size="lg" className="w-full sm:w-auto">
-                        View Profile
-                      </Button>
-                    </Link>
-                  )}
+                  <Link href="/mystery-box" className="w-full sm:w-auto">
+                    <Button
+                      size="lg"
+                      className="w-full sm:w-auto bg-[#fbbf24] hover:bg-amber-300 text-white border-amber-500/40 shadow-lg shadow-black/25 [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]"
+                    >
+                      Mystery Box
+                    </Button>
+                  </Link>
                 </>
               ) : (
                 <>
@@ -155,6 +156,29 @@ export default function HomePage() {
             <div className="w-1.5 h-3 bg-blood-700 rounded-full" />
           </div>
         </div>
+      </section>
+
+      {/* Mystery Box — Big Promo */}
+      <section className="py-8 sm:py-12 px-4 border-y border-amber-900/40 bg-gradient-to-b from-amber-950/40 to-bunker-950">
+        <Link
+          href="/mystery-box"
+          className="block max-w-4xl mx-auto p-6 sm:p-8 rounded-2xl border-2 border-amber-700/50 bg-amber-950/60 hover:bg-amber-900/50 hover:border-amber-600/70 transition-all text-left group"
+        >
+          <div className="flex items-center gap-4 sm:gap-6">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-amber-900/50 border-2 border-amber-600/50 flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
+              <MysteryBoxIcon className="w-10 h-10 sm:w-12 sm:h-12 text-amber-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-zombies text-amber-100 tracking-wide">
+                Mystery Box
+              </h2>
+              <p className="mt-1 sm:mt-2 text-sm sm:text-base text-amber-200/80">
+                Spin for random challenges. Invite friends, spin together, complete runs for bonus XP. 3 tokens to start—1 per 24h.
+              </p>
+            </div>
+            <ChevronRight className="w-8 h-8 text-amber-500 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+          </div>
+        </Link>
       </section>
 
       {/* Features Section */}
