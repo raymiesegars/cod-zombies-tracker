@@ -12660,4 +12660,170 @@ export const SPECIFIC_EASTER_EGGS_BASE: SpecificEasterEgg[] = [
       { order: 3, label: 'Dig up the third (final) part. The Ray Gun and Bonus Points Power-Ups will spawn.' },
     ],
   },
+  // ——— Advanced Warfare Exo Zombies ———
+  // Outbreak — Game Over Man main quest + Ride of the Valkyries musical
+  {
+    gameShortName: 'AW',
+    mapSlug: 'aw-outbreak',
+    name: 'Game Over Man',
+    slug: 'game-over-man',
+    type: 'MAIN_QUEST',
+    xpReward: 2500,
+    description:
+      'Call in a rescue from the Atlas facility. Complete the black box recovery and collect all four character ID Cards, upgrade them to Security Clearance Level 50, then call in the rescue. Can be done solo or with up to 4 players.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/2EC_5x9tCvE',
+    rewardsDescription: 'Call in rescue helicopter, continue match with new Weapons Upgrade Station (Mk20+) in Exo Testing room',
+    steps: [
+      { order: 1, label: 'Recover the Black Box: Find the crashed helicopter\'s black box in the Courtyard (back of wreckage). Take it to the Morgue and place it on the computer on the east side of the room.' },
+      { order: 2, label: 'Obtain Oz\'s ID Card: In Holding Cells (west side), shoot the broken piston beneath a raised white cell until down. Exo Slam that cell to lower it and raise the one with the ID Card. Grab it before it lowers.' },
+      { order: 3, label: 'Obtain Lilith\'s ID Card: Get the EM1 from a 3D Printer. Activate the printer with 1,000 credits, shoot it with the EM1 to reveal the ID Card. Pick it up quickly before it disappears.' },
+      { order: 4, label: 'Obtain Decker\'s ID Card: Buy the trash chute trap in Exo Testing or Administration. Solo: buy twice to enter Incineration Room. Co-op: both players buy simultaneously in different locations. Shoot the ground repeatedly in the Incineration Room to find the card; pick it up quickly.' },
+      { order: 5, label: 'Obtain Kahn\'s ID Card: During an infection round (green zombies), stay infected. Interact with all four green LCD keypads in the Administration block (one per player in co-op). Then go to the glass window between Administration and Courtyard to get the card.' },
+      { order: 6, label: 'Upgrade ID Cards to Level 50: Return to Morgue computer. Kill zombies; some drop ID Cards—collect them until all reach 49. Use each character\'s fingerprint scanner (Kahn: Admin left of Morgue door; Lilith: Morgue second floor past Exo Reload; Decker: Exo Testing stairwell right of Explosive Drone; Oz: Holding left of Exo Health). Interact with Morgue computer again.' },
+      { order: 7, label: 'Call in a Rescue: Go to Exo Testing room; all players interact with Exo Suits until the computer confirms. Exit to courtyard; helicopter arrives and achievement unlocks.' },
+    ],
+  },
+  {
+    gameShortName: 'AW',
+    mapSlug: 'aw-outbreak',
+    name: 'Ride of the Valkyries',
+    slug: 'ride-of-the-valkyries',
+    type: 'MUSICAL',
+    xpReward: 0,
+    description:
+      'Musical Easter egg. Activate "Ride of the Valkyries" (Richard Wagner) by interacting with three items in order. A few notes play when each is done correctly.',
+    steps: [
+      { order: 1, label: 'Administration: Wrench sticking out of a crack in a white wall next to a sign near the MP11.' },
+      { order: 2, label: 'Exo Testing Room: Bonesaw on a table behind two mostly closed doors.' },
+      { order: 3, label: 'Holding: In one of the rooms on a bed with a corpse. The item looks like a flat iron.' },
+    ],
+  },
+  // Infection — MEAT IS MURDER main quest + Toccata and Fugue musical + toilet side quest
+  {
+    gameShortName: 'AW',
+    mapSlug: 'aw-infection',
+    name: 'MEAT IS MURDER',
+    slug: 'meat-is-murder',
+    type: 'MAIN_QUEST',
+    xpReward: 2500,
+    description:
+      'Activate Bubby, the Burgertown mascot, by completing the golden pan ritual, cooking a contaminated burger, and feeding it to Bubby. Requires Exo Suit from Sewers.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/exckMt7ZWHg',
+    rewardsDescription: 'MEAT IS MURDER achievement',
+    steps: [
+      { order: 1, label: 'Open doors to Value Voltage and Sewers. Grab an Exo Suit from the Sewers. Return to Hoard More; Exo Boost to the highest crate and grab the golden pan from the cracked rooftop.' },
+      { order: 2, label: 'In Sewers: Turn four orange valves on connected pipes to open the secret passage behind the waterfall.' },
+      { order: 3, label: 'Place the golden pan on the altar and kill zombies in the pit until the altar rises. Pick up the pan and bring it to Burgertown, placing it on the oven.' },
+      { order: 4, label: 'Find four pieces of meat (Burgertown, Value Voltage, Atlas Command, Sewers). Cook the meat using the Magnetron Microwave Gun.' },
+      { order: 5, label: 'Kill Burgertown Worker Zombies until one drops a burger. Place it on the cooked meat in the pan. Pick up the burger and run to the pit in the sewers to decontaminate yourself.' },
+      { order: 6, label: 'Feed the contaminated burger to Bubby.' },
+      { order: 7, label: 'Pick up Bubby\'s battery from Atlas Command Building 2, charge it in Value Voltage, and exchange it for a key to the roof Burgertown Burger.' },
+      { order: 8, label: 'Use an alligator arm (from Insta-Gator trap) on the hand scanner in spawn to get a tablet from the safe.' },
+      { order: 9, label: 'Use the tablet on Bubby\'s picture in the roof Burgertown Burger. Wait for the rocket to launch, then give the new tablet to Bubby to complete the Easter egg.' },
+    ],
+  },
+  {
+    gameShortName: 'AW',
+    mapSlug: 'aw-infection',
+    name: 'Toccata and Fugue',
+    slug: 'toccata-and-fugue',
+    type: 'MUSICAL',
+    xpReward: 0,
+    description:
+      'Musical Easter egg. Activate "Toccata and Fugue in D Minor" (J.S. Bach) by hitting the action button in front of three golden rocket shells.',
+    steps: [
+      { order: 1, label: 'Value Voltage: On a shelf facing the Upgrade Station.' },
+      { order: 2, label: 'On the ground, to the right of the Exo Slam machine.' },
+      { order: 3, label: 'Burger Town rooftop, behind a grate. Best seen by crouching.' },
+    ],
+  },
+  {
+    gameShortName: 'AW',
+    mapSlug: 'aw-infection',
+    name: 'Toilet Side Quest',
+    slug: 'toilet-side-quest',
+    type: 'SIDE_QUEST',
+    xpReward: 0,
+    description:
+      'Miscellaneous Easter egg. A toilet in Burger Town makes a flushing sound when you hold the use button.',
+    steps: [
+      { order: 1, label: 'Burger Town: Find the toilet and hold the use button to make a flushing sound.' },
+    ],
+  },
+  // Carrier — Flotsam & Jetsam main quest + Mars musical
+  {
+    gameShortName: 'AW',
+    mapSlug: 'aw-carrier',
+    name: 'Flotsam & Jetsam',
+    slug: 'flotsam-jetsam',
+    type: 'MAIN_QUEST',
+    xpReward: 2500,
+    description:
+      'Sink the boat on the Carrier. Access the hidden Power Generator, build a fishing pole, collect data tablets, and open the vault. Completing this Easter egg ends the current game.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/Kw33B-41a_Y',
+    rewardsDescription: 'Flotsam & Jetsam achievement',
+    steps: [
+      { order: 1, label: 'Access Armory, then Lift, then Cargo. Buy Teleport Grenades from the wall in the Armory. Return to Cargo and activate Chompy (cleansweep robot) by interacting with the panel. Throw a Teleport Grenade behind Chompy to reach the hidden Power Generator.' },
+      { order: 2, label: 'Turn on the hidden power and collect components throughout the map to build the fishing pole.' },
+      { order: 3, label: 'Use the fishing pole to retrieve four data tablets in the correct sequence.' },
+      { order: 4, label: 'Open the vault with the data tablets to sink the boat and complete the Easter egg.' },
+    ],
+  },
+  {
+    gameShortName: 'AW',
+    mapSlug: 'aw-carrier',
+    name: 'Mars',
+    slug: 'mars',
+    type: 'MUSICAL',
+    xpReward: 0,
+    description:
+      'Musical Easter egg. Activate "Mars, the Bringer of War" (Gustav Holst) by finding three shark toys.',
+    steps: [
+      { order: 1, label: 'Hangar: On top of Captain DJ\'s locker.' },
+      { order: 2, label: 'Room connecting the Hangar and the Gun Deck, at a corner.' },
+      { order: 3, label: 'Lift area, on a secluded corner of the Lift.' },
+    ],
+  },
+  // Descent — Reunion main quest + Dies Irae musical
+  {
+    gameShortName: 'AW',
+    mapSlug: 'aw-descent',
+    name: 'Reunion',
+    slug: 'reunion',
+    type: 'MAIN_QUEST',
+    xpReward: 2500,
+    description:
+      'Complete all of Oz\'s challenges in the Descent. Override encryption, deactivate security, complete nine trials, then survive the Memory Tester Machine with AI teammates.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/iHsv_A6VhYI',
+    rewardsDescription: 'Reunion achievement',
+    steps: [
+      { order: 1, label: 'Override the Encryption: Go to Tidal Generator. Shoot three valves on the spiral staircase walls until three blue lights activate, opening the Mark-25 Upgrade Station.' },
+      { order: 2, label: 'Deactivate Security: Depressurize the door to the Floodable Air-Lock area. Travel through the red-lit path to reach the Mark-25 Upgrade Station.' },
+      { order: 3, label: 'Drone Challenge: Destroy five drones using the CEL-3 Cauterizer.' },
+      { order: 4, label: 'Charging Challenge: Kill zombies while letting electric-charged zombies hit you at the Bomb Charging Station.' },
+      { order: 5, label: 'Grenade Challenge: Use contact grenades to complete the trial.' },
+      { order: 6, label: 'Jump Puzzle: Complete platforming while avoiding zombies using Exo boosts.' },
+      { order: 7, label: 'Move Challenge: Navigate the path while losing health with each step.' },
+      { order: 8, label: 'Memory Challenge: At Reception Self Check-In, activate lights in order: 1, 3, 1, 2, 4, 2.' },
+      { order: 9, label: 'Friendly Fire Challenge: Kill zombies instead of the AI clones attacking you.' },
+      { order: 10, label: 'Numbers Game: At Tidal Generator, solve the board puzzle (exo-slam hits, jumps, equipment buys, kills).' },
+      { order: 11, label: 'Rocket Challenge: Eliminate enemies with the Mahem MK-25 Rocket Launcher.' },
+      { order: 12, label: 'Final Step: Access the Memory Tester Machine. Survive defending against zombies with AI teammates to unlock Reunion.' },
+    ],
+  },
+  {
+    gameShortName: 'AW',
+    mapSlug: 'aw-descent',
+    name: 'Dies Irae',
+    slug: 'dies-irae',
+    type: 'MUSICAL',
+    xpReward: 0,
+    description:
+      'Musical Easter egg. Activate "Dies Irae" and "Tuba Mirum" (Giuseppe Verdi\'s Requiem) by finding three manta ray toys.',
+    steps: [
+      { order: 1, label: 'Elevator shaft that drops down to the Concierge.' },
+      { order: 2, label: 'Broken glass display case near the entrance to the Great Hall from the Galleria.' },
+      { order: 3, label: 'Behind and atop the Teleporter in the Tidal Generator.' },
+    ],
+  },
 ];

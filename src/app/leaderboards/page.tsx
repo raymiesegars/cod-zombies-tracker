@@ -25,6 +25,7 @@ import { isWw2Game } from '@/lib/ww2';
 import { getWw2MapConfig, getWw2ChallengeTypeLabel } from '@/lib/ww2/ww2-map-config';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 import { getVanguardMapConfig, getVanguardChallengeTypeLabel } from '@/lib/vanguard/vanguard-map-config';
+import { getAwMapConfig, getAwChallengeTypeLabel } from '@/lib/aw/aw-map-config';
 
 const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
 const PAGE_SIZE = 25;
@@ -73,6 +74,9 @@ const challengeTypeLabels: Record<string, string> = {
   EXFIL_R20_SPEEDRUN: 'Exfil Round 20 Speedrun',
   NO_JUG_NO_ARMOR: 'No Jug No Armor',
   BUILD_EE_SPEEDRUN: 'Build% EE Speedrun',
+  NO_EXO_SUIT: 'No Exo Suit',
+  NO_EXO_HEALTH: 'No Exo Health',
+  DOUBLE_FEATURE: 'Double Feature',
 };
 
 export default function LeaderboardsPage() {
@@ -488,7 +492,9 @@ export default function LeaderboardsPage() {
                     ? (challengeTypeLabels[type] ?? getWw2ChallengeTypeLabel(type) ?? fallbackName ?? type)
                     : selectedMapData?.game?.shortName === 'VANGUARD'
                       ? (fallbackName ?? challengeTypeLabels[type] ?? getVanguardChallengeTypeLabel(type) ?? type)
-                      : (fallbackName ?? challengeTypeLabels[type] ?? type);
+                      : selectedMapData?.game?.shortName === 'AW'
+                        ? (fallbackName ?? challengeTypeLabels[type] ?? getAwChallengeTypeLabel(type) ?? type)
+                        : (fallbackName ?? challengeTypeLabels[type] ?? type);
     let challengeOptions: { value: string; label: string }[];
     if (selectedMapData?.game?.shortName === 'IW') {
       challengeOptions = mapChallenges.length > 0
@@ -563,6 +569,15 @@ export default function LeaderboardsPage() {
     } else if (selectedMapData?.game?.shortName === 'VANGUARD' && selectedMap) {
       const vanguardConfig = getVanguardMapConfig(selectedMap);
       const types = vanguardConfig?.challengeTypes ?? mapChallenges.map((c) => c.type);
+      challengeOptions = types
+        .filter((t) => t !== 'HIGHEST_ROUND')
+        .map((t) => {
+          const c = mapChallenges.find((ch) => ch.type === t);
+          return { value: t, label: getLabel(t, c?.name) };
+        });
+    } else if (selectedMapData?.game?.shortName === 'AW' && selectedMap) {
+      const awConfig = getAwMapConfig(selectedMap);
+      const types = awConfig?.challengeTypes ?? mapChallenges.map((c) => c.type);
       challengeOptions = types
         .filter((t) => t !== 'HIGHEST_ROUND')
         .map((t) => {

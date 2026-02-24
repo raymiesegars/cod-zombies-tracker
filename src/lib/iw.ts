@@ -38,6 +38,12 @@ const BO6_SPEEDRUN_TYPES = [
   'ROUND_999_SPEEDRUN',
 ] as const;
 
+/** AW Exo Zombies speedrun types — R30/R50/R70/R100, EE. */
+const AW_SPEEDRUN_TYPES = [
+  'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN',
+  'ROUND_100_SPEEDRUN', 'EASTER_EGG_SPEEDRUN',
+] as const;
+
 /** All speedrun types across games. Used for form/validation. */
 export function isSpeedrunChallengeType(type: string): boolean {
   return isIwSpeedrunChallengeType(type)
@@ -47,6 +53,7 @@ export function isSpeedrunChallengeType(type: string): boolean {
     || type === 'EXFIL_R5_SPEEDRUN'
     || type === 'EXFIL_R10_SPEEDRUN'
     || type === 'EXFIL_R20_SPEEDRUN'
+    || (AW_SPEEDRUN_TYPES as readonly string[]).includes(type)
     || (BOCW_SPEEDRUN_TYPES as readonly string[]).includes(type)
     || (BO6_SPEEDRUN_TYPES as readonly string[]).includes(type);
 }

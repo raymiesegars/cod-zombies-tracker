@@ -998,6 +998,45 @@ export const VANGUARD_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType>
   }),
 };
 
+/** AW Exo Zombies speedrun tiers — R30/R50/R70/R100, EE. Based on user WRs. */
+function buildAwSpeedrunTiers(cfg: {
+  r30?: number; r50?: number; r70?: number; r100?: number; ee?: number;
+}): SpeedrunTiersByType {
+  const buf = 1.2;
+  const base: SpeedrunTiersByType = {};
+  const tier = (sec: number) => [
+    { maxTimeSeconds: Math.round(sec * buf * 1.5), xpReward: 80 },
+    { maxTimeSeconds: Math.round(sec * buf * 1.2), xpReward: 200 },
+    { maxTimeSeconds: Math.round(sec * buf), xpReward: 500 },
+    { maxTimeSeconds: Math.round(sec * 1.05), xpReward: 1200 },
+  ];
+  if (cfg.r30 != null) base.ROUND_30_SPEEDRUN = tier(cfg.r30);
+  if (cfg.r50 != null) base.ROUND_50_SPEEDRUN = tier(cfg.r50);
+  if (cfg.r70 != null) base.ROUND_70_SPEEDRUN = tier(cfg.r70);
+  if (cfg.r100 != null) base.ROUND_100_SPEEDRUN = tier(cfg.r100);
+  if (cfg.ee != null) base.EASTER_EGG_SPEEDRUN = tier(cfg.ee);
+  return base;
+}
+
+const mAw = (x: number) => x * 60;
+const hAw = (x: number) => x * 3600;
+const hsAw = (h: number, m: number, s: number) => h * 3600 + m * 60 + s;
+
+export const AW_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
+  'aw-outbreak': buildAwSpeedrunTiers({
+    r30: mAw(27) + 48, r50: hsAw(1, 7, 33), r70: hAw(3), r100: hAw(9), ee: mAw(9),
+  }),
+  'aw-infection': buildAwSpeedrunTiers({
+    r30: mAw(34), r50: hsAw(1, 41, 40), r70: hsAw(4, 24, 40), r100: hsAw(12, 30, 40), ee: mAw(12) + 40,
+  }),
+  'aw-carrier': buildAwSpeedrunTiers({
+    r30: mAw(29), r50: hsAw(1, 23, 40), r70: hAw(5), r100: hsAw(14, 20, 20), ee: mAw(26),
+  }),
+  'aw-descent': buildAwSpeedrunTiers({
+    r30: mAw(35) + 40, r50: hsAw(1, 20, 40), r70: hsAw(4, 50, 40), r100: hsAw(25, 20, 40), ee: mAw(43) + 21,
+  }),
+};
+
 /** BO2 EE speedrun tiers per Easter Egg (Richtofen / Maxis variants). WRs in seconds. */
 export const BO2_TRANZIT_RICHTOFEN_EE_TIERS: SpeedrunTier[] = [
   { maxTimeSeconds: 780, xpReward: 200 },

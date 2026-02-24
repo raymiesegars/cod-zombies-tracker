@@ -203,6 +203,18 @@ const VANGUARD: Record<string, MapRoundConfig> = {
   'the-archon': config(994, VANGUARD_994),
 };
 
+const AW_174: RoundMilestone[] = buildRoundMilestones(174, 2500);
+const AW_146: RoundMilestone[] = buildRoundMilestones(146, 2500);
+const AW_131: RoundMilestone[] = buildRoundMilestones(131, 2500);
+const AW_106: RoundMilestone[] = buildRoundMilestones(106, 2500);
+
+const AW: Record<string, MapRoundConfig> = {
+  'aw-outbreak': config(174, AW_174),
+  'aw-infection': config(146, AW_146),
+  'aw-carrier': config(131, AW_131),
+  'aw-descent': config(106, AW_106),
+};
+
 const WW2: Record<string, MapRoundConfig> = {
   prologue: config(53, WW2_53),
   'the-final-reich': config(255, WW2_255),
@@ -227,6 +239,7 @@ const BY_GAME: Record<string, Record<string, MapRoundConfig>> = {
   BO7,
   WW2,
   VANGUARD,
+  AW,
 };
 
 export function getRoundConfigForMap(
