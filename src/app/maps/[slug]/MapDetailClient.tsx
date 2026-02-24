@@ -1106,7 +1106,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                 <MapChallengesEeHelpContent />
               </HelpTrigger>
             </div>
-            {profile && !(activeTab === 'easter-eggs' && buildables.length > 0) && (
+            {profile && (
               <Link href={`/maps/${slug}/edit`} className="flex-shrink-0 w-full min-[874px]:w-auto">
                 <Button leftIcon={<span className="mr-2 inline-flex shrink-0"><Edit className="w-4 h-4" /></span>} size="lg" className="!text-white w-full min-[874px]:w-auto justify-center min-[874px]:justify-start">
                   Log Progress
@@ -2206,18 +2206,9 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
         </Tabs>
           </div>
 
-          {/* Right column (large screens): Log Progress + Buildables aligned with tabs row */}
+          {/* Right column (large screens): Buildables when Easter Eggs tab has buildables */}
           {activeTab === 'easter-eggs' && buildables.length > 0 && (
             <div className="hidden lg:flex lg:flex-col lg:min-w-0 lg:space-y-4">
-              {profile && (
-                <div className="flex justify-end flex-shrink-0">
-                  <Link href={`/maps/${slug}/edit`}>
-                    <Button leftIcon={<span className="mr-2 inline-flex shrink-0"><Edit className="w-4 h-4" /></span>} size="lg" className="!text-white">
-                      Log Progress
-                    </Button>
-                  </Link>
-                </div>
-              )}
               <div className="rounded-xl border border-bunker-600/80 bg-bunker-900/95 overflow-hidden flex flex-col">
               <div className="p-3 sm:p-4 border-b border-bunker-700/60 flex-shrink-0">
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-bunker-300 mb-3">Buildables</h3>

@@ -61,7 +61,7 @@ export function WorldRecordsModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="World Records"
+      title="Rank 1's"
       description={`${data?.worldRecords ?? 0} leaderboard combinations where you're #1 (${data?.verifiedWorldRecords ?? 0} verified)`}
       size="lg"
     >
