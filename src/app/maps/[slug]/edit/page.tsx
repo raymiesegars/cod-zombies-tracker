@@ -47,6 +47,7 @@ import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from 
 import { isRuleLink, isRuleInlineLinks } from '@/lib/rules/types';
 import { getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { hasNoJugSupport } from '@/lib/no-jug-support';
+import { sortChallengesForDisplay } from '@/lib/challenge-order';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap } from '@/lib/first-room-variants';
 import { ACHIEVEMENT_CATEGORY_LABELS } from '@/lib/achievements/categories';
@@ -63,6 +64,8 @@ const challengeTypeLabels: Record<string, string> = {
   PISTOL_ONLY: 'Pistol Only',
   NO_POWER: 'No Power',
   NO_MAGIC: 'No Magic',
+  ROUND_5_SPEEDRUN: 'Round 5 Speedrun',
+  ROUND_15_SPEEDRUN: 'Round 15 Speedrun',
   ROUND_30_SPEEDRUN: 'Round 30 Speedrun',
   ROUND_50_SPEEDRUN: 'Round 50 Speedrun',
   ROUND_70_SPEEDRUN: 'Round 70 Speedrun',
@@ -830,6 +833,11 @@ export default function EditMapProgressPage() {
     [map?.easterEggs]
   );
 
+  const sortedLoggableChallenges = useMemo(() => {
+    const loggable = (map?.challenges ?? []).filter((c: { type: string }) => c.type !== 'NO_JUG');
+    return sortChallengesForDisplay(loggable, map?.game?.shortName, map?.slug);
+  }, [map?.challenges, map?.game?.shortName, map?.slug]);
+
   if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-bunker-950 flex items-center justify-center">
@@ -875,7 +883,7 @@ export default function EditMapProgressPage() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 space-y-6 sm:space-y-8 min-w-0">
         {/* Challenges: same tab-style UI as Main Quest, multi-select toggles + one shared form */}
-        {(map.challenges?.filter((c) => c.type !== 'NO_JUG') ?? []).length > 0 && (
+        {sortedLoggableChallenges.length > 0 && (
           <Tabs value="challenges-multi" variant="separate" className="space-y-4 min-w-0">
             <div className="space-y-3 min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-widest text-bunker-200 mb-0 pl-0.5">
@@ -885,7 +893,7 @@ export default function EditMapProgressPage() {
                 Toggle the challenges you completed in this run. One log will be created per selected challenge with the same details below.
               </p>
               <TabsList className="min-w-0 w-full">
-                {map.challenges.filter((c) => c.type !== 'NO_JUG').map((challenge) => {
+                {sortedLoggableChallenges.map((challenge) => {
                   const isSelected = selectedChallengeIds.has(challenge.id);
                   const isSpeedrun = isSpeedrunChallengeType(challenge.type);
                   return (

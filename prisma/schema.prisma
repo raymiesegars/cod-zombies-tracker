@@ -237,6 +237,8 @@ enum ChallengeType {
   NO_EXO_HEALTH       // AW Exo Zombies: No Exo Health upgrades
   DOUBLE_FEATURE      // AW Exo Zombies: Descent only — Double Feature mode
   // IW speedruns (time-based; completionTimeSeconds required)
+  ROUND_5_SPEEDRUN
+  ROUND_15_SPEEDRUN
   ROUND_30_SPEEDRUN
   ROUND_50_SPEEDRUN
   ROUND_70_SPEEDRUN

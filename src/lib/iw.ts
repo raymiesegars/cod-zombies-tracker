@@ -7,6 +7,8 @@
 export const GAME_SHORT_NAME_IW = 'IW';
 
 const IW_SPEEDRUN_TYPES = [
+  'ROUND_5_SPEEDRUN',
+  'ROUND_15_SPEEDRUN',
   'ROUND_30_SPEEDRUN',
   'ROUND_50_SPEEDRUN',
   'ROUND_70_SPEEDRUN',
@@ -28,7 +30,7 @@ export function isIwSpeedrunChallengeType(type: string): boolean {
 }
 
 const BOCW_SPEEDRUN_TYPES = [
-  'ROUND_10_SPEEDRUN', 'ROUND_20_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN',
+  'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_10_SPEEDRUN', 'ROUND_20_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN',
   'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN', 'ROUND_935_SPEEDRUN',
   'EXFIL_SPEEDRUN', 'EXFIL_R21_SPEEDRUN', 'BUILD_EE_SPEEDRUN', 'EASTER_EGG_SPEEDRUN',
 ] as const;
@@ -38,9 +40,9 @@ const BO6_SPEEDRUN_TYPES = [
   'ROUND_999_SPEEDRUN',
 ] as const;
 
-/** AW Exo Zombies speedrun types — R30/R50/R70/R100, EE. */
+/** AW Exo Zombies speedrun types — R5/R15/R30/R50/R70/R100, EE. */
 const AW_SPEEDRUN_TYPES = [
-  'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN',
+  'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN',
   'ROUND_100_SPEEDRUN', 'EASTER_EGG_SPEEDRUN',
 ] as const;
 
@@ -61,6 +63,8 @@ export function isSpeedrunChallengeType(type: string): boolean {
 /** Minimum round required when logging this speedrun type. Non-round speedruns (EE, exfil, etc.) return 1. */
 export function getMinRoundForSpeedrunChallengeType(type: string): number {
   switch (type) {
+    case 'ROUND_5_SPEEDRUN': return 5;
+    case 'ROUND_15_SPEEDRUN': return 15;
     case 'ROUND_10_SPEEDRUN': return 10;
     case 'ROUND_20_SPEEDRUN': return 20;
     case 'EXFIL_SPEEDRUN': return 11;
@@ -91,6 +95,8 @@ export const IW_CHALLENGE_TYPES_ORDER: string[] = [
   'ONE_BOX',
   'PISTOL_ONLY',
   'NO_POWER',
+  'ROUND_5_SPEEDRUN',
+  'ROUND_15_SPEEDRUN',
   'ROUND_30_SPEEDRUN',
   'ROUND_50_SPEEDRUN',
   'ROUND_70_SPEEDRUN',

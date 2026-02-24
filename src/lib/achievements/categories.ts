@@ -32,6 +32,8 @@ export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
   NO_EXO_HEALTH: 'No Exo Health',
   DOUBLE_FEATURE: 'Double Feature',
   // IW/BO3 speedrun categories
+  ROUND_5_SPEEDRUN: 'Round 5 Speedrun',
+  ROUND_15_SPEEDRUN: 'Round 15 Speedrun',
   ROUND_30_SPEEDRUN: 'Round 30 Speedrun',
   ROUND_50_SPEEDRUN: 'Round 50 Speedrun',
   ROUND_70_SPEEDRUN: 'Round 70 Speedrun',
@@ -64,6 +66,8 @@ export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
 
 /** Speedrun-only categories (IW and similar); used to split first filter = non-speedrun, second = Speedruns */
 export const SPEEDRUN_CATEGORIES: string[] = [
+  'ROUND_5_SPEEDRUN',
+  'ROUND_15_SPEEDRUN',
   'ROUND_30_SPEEDRUN',
   'ROUND_50_SPEEDRUN',
   'ROUND_70_SPEEDRUN',
@@ -113,6 +117,8 @@ const CATEGORY_ORDER = [
   'NO_EXO_HEALTH',
   'DOUBLE_FEATURE',
   'NO_MANS_LAND',
+  'ROUND_5_SPEEDRUN',
+  'ROUND_15_SPEEDRUN',
   'ROUND_30_SPEEDRUN',
   'ROUND_50_SPEEDRUN',
   'ROUND_70_SPEEDRUN',
