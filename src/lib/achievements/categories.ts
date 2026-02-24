@@ -6,6 +6,7 @@ import { getBocwMapConfig } from '@/lib/bocw/bocw-map-config';
 import { getBo6MapConfig } from '@/lib/bo6/bo6-map-config';
 import { getBo7MapConfig } from '@/lib/bo7/bo7-map-config';
 import { getWw2MapConfig } from '@/lib/ww2/ww2-map-config';
+import { getVanguardMapConfig } from '@/lib/vanguard/vanguard-map-config';
 
 // How we group and order achievements on map detail and profile
 export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
@@ -22,6 +23,7 @@ export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
   NO_MAGIC: 'No Magic',
   NO_JUG: 'No Jug',
   NO_ARMOR: 'No Armor',
+  NO_JUG_NO_ARMOR: 'No Jug No Armor',
   NO_BLITZ: 'No Blitz',
   NO_ATS: 'No AATs',
   // IW/BO3 speedrun categories
@@ -37,6 +39,9 @@ export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
   ROUND_20_SPEEDRUN: 'Round 20 Speedrun',
   EXFIL_SPEEDRUN: 'Exfil Round 11',
   EXFIL_R21_SPEEDRUN: 'Exfil Round 21',
+  EXFIL_R5_SPEEDRUN: 'Exfil Round 5 Speedrun',
+  EXFIL_R10_SPEEDRUN: 'Exfil Round 10 Speedrun',
+  EXFIL_R20_SPEEDRUN: 'Exfil Round 20 Speedrun',
   BUILD_EE_SPEEDRUN: 'Build% EE Speedrun',
   SUPER_30_SPEEDRUN: 'Super 30 Speedrun',
   INSTAKILL_ROUND_SPEEDRUN: 'Instakill Round Speedrun',
@@ -66,6 +71,9 @@ export const SPEEDRUN_CATEGORIES: string[] = [
   'ROUND_20_SPEEDRUN',
   'EXFIL_SPEEDRUN',
   'EXFIL_R21_SPEEDRUN',
+  'EXFIL_R5_SPEEDRUN',
+  'EXFIL_R10_SPEEDRUN',
+  'EXFIL_R20_SPEEDRUN',
   'BUILD_EE_SPEEDRUN',
   'SUPER_30_SPEEDRUN',
   'INSTAKILL_ROUND_SPEEDRUN',
@@ -93,6 +101,7 @@ const CATEGORY_ORDER = [
   'NO_MAGIC',
   'NO_JUG',
   'NO_ARMOR',
+  'NO_JUG_NO_ARMOR',
   'NO_BLITZ',
   'NO_ATS',
   'NO_MANS_LAND',
@@ -108,6 +117,9 @@ const CATEGORY_ORDER = [
   'ROUND_20_SPEEDRUN',
   'EXFIL_SPEEDRUN',
   'EXFIL_R21_SPEEDRUN',
+  'EXFIL_R5_SPEEDRUN',
+  'EXFIL_R10_SPEEDRUN',
+  'EXFIL_R20_SPEEDRUN',
   'BUILD_EE_SPEEDRUN',
   'SUPER_30_SPEEDRUN',
   'INSTAKILL_ROUND_SPEEDRUN',
@@ -223,6 +235,14 @@ export function getAllowedNonSpeedrunCategoriesForMap(
     );
     return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG']));
   }
+  if (gameShortName === 'VANGUARD') {
+    const cfg = getVanguardMapConfig(mapSlug);
+    if (!cfg?.challengeTypes) return null;
+    const fromConfig = cfg.challengeTypes.filter(
+      (c) => !isSpeedrunCategory(c) && c !== 'HIGHEST_ROUND'
+    );
+    return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG']));
+  }
   return null;
 }
 
@@ -313,6 +333,13 @@ export function getAllowedSpeedrunCategoriesForMap(
       return cfg.challengeTypes.filter((c) => isSpeedrunCategory(c));
     }
     return [...bo2Generic, 'ROUND_10_SPEEDRUN', 'SUPER_30_SPEEDRUN'];
+  }
+  if (gameShortName === 'VANGUARD') {
+    const cfg = getVanguardMapConfig(mapSlug);
+    if (cfg?.challengeTypes) {
+      return cfg.challengeTypes.filter((c) => isSpeedrunCategory(c));
+    }
+    return [...bo2Generic, 'ROUND_10_SPEEDRUN', 'ROUND_20_SPEEDRUN', 'EXFIL_R5_SPEEDRUN', 'EXFIL_R10_SPEEDRUN', 'EXFIL_R20_SPEEDRUN'];
   }
   return bo2Generic;
 }

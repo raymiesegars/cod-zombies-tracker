@@ -24,9 +24,10 @@ import { getBocwMapConfig, getBocwRoundMilestones, getBocwChallengeTypeLabel } f
 import { getBo6MapConfig, getBo6RoundMilestones, getBo6ChallengeTypeLabel } from '@/lib/bo6/bo6-map-config';
 import { getBo7MapConfig, getBo7RoundMilestones, getBo7ChallengeTypeLabel } from '@/lib/bo7/bo7-map-config';
 import { getWw2MapConfig, getWw2RoundMilestones, getWw2ChallengeTypeLabel } from '@/lib/ww2/ww2-map-config';
+import { getVanguardMapConfig, getVanguardRoundMilestones, getVanguardChallengeTypeLabel } from '@/lib/vanguard/vanguard-map-config';
 import { isBo4Game, BO4_DIFFICULTIES, BO4_DIFFICULTY_XP_MULTIPLIER, type Bo4DifficultyType } from '../bo4';
 import { isBocwGame } from '../bocw';
-import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, IW_AOTRT_SPEEDRUN_TIERS, IW_BEAST_SPEEDRUN_TIERS, WAW_SPEEDRUN_TIERS_BY_MAP, BO1_SPEEDRUN_TIERS_BY_MAP, BO2_SPEEDRUN_TIERS_BY_MAP, BO3_SPEEDRUN_TIERS_BY_MAP, BO4_SPEEDRUN_TIERS_BY_MAP, BOCW_SPEEDRUN_TIERS_BY_MAP, BO6_SPEEDRUN_TIERS_BY_MAP, BO7_SPEEDRUN_TIERS_BY_MAP, WW2_SPEEDRUN_TIERS_BY_MAP, BO1_COTD_STAND_IN_EE_TIERS, BO1_COTD_ENSEMBLE_CAST_EE_TIERS, BO2_TRANZIT_RICHTOFEN_EE_TIERS, BO2_TRANZIT_MAXIS_EE_TIERS, BO2_DIE_RISE_RICHTOFEN_EE_TIERS, BO2_DIE_RISE_MAXIS_EE_TIERS, BO2_BURIED_RICHTOFEN_EE_TIERS, BO2_BURIED_MAXIS_EE_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
+import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, IW_AOTRT_SPEEDRUN_TIERS, IW_BEAST_SPEEDRUN_TIERS, WAW_SPEEDRUN_TIERS_BY_MAP, BO1_SPEEDRUN_TIERS_BY_MAP, BO2_SPEEDRUN_TIERS_BY_MAP, BO3_SPEEDRUN_TIERS_BY_MAP, BO4_SPEEDRUN_TIERS_BY_MAP, BOCW_SPEEDRUN_TIERS_BY_MAP, BO6_SPEEDRUN_TIERS_BY_MAP, BO7_SPEEDRUN_TIERS_BY_MAP, WW2_SPEEDRUN_TIERS_BY_MAP, VANGUARD_SPEEDRUN_TIERS_BY_MAP, BO1_COTD_STAND_IN_EE_TIERS, BO1_COTD_ENSEMBLE_CAST_EE_TIERS, BO2_TRANZIT_RICHTOFEN_EE_TIERS, BO2_TRANZIT_MAXIS_EE_TIERS, BO2_DIE_RISE_RICHTOFEN_EE_TIERS, BO2_DIE_RISE_MAXIS_EE_TIERS, BO2_BURIED_RICHTOFEN_EE_TIERS, BO2_BURIED_MAXIS_EE_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
 
 const CHALLENGE_TYPES = [
   'HIGHEST_ROUND',
@@ -750,6 +751,61 @@ export function getMapAchievementDefinitions(
     }
   }
 
+  // Vanguard: per-map config with WRs, First Room, No Perks, No Armor, No Jug, No Jug No Armor, speedruns, exfil, EE
+  if (gameShortName === 'VANGUARD') {
+    const vgCfg = getVanguardMapConfig(mapSlug);
+    if (vgCfg) {
+      const milestones = getVanguardRoundMilestones(vgCfg.highRoundWR);
+      for (const { round, xp } of milestones) {
+        if (round > vgCfg.highRoundWR) continue;
+        rows.push({
+          slug: `round-${round}`,
+          name: `Round ${round}`,
+          type: 'ROUND_MILESTONE',
+          criteria: { round, challengeType: 'HIGHEST_ROUND' },
+          xpReward: xp,
+          rarity: rarityForRound(round, vgCfg.highRoundWR),
+        });
+      }
+      const ndMilestones = getVanguardRoundMilestones(vgCfg.noDownsWR);
+      for (const { round, xp } of ndMilestones) {
+        if (round > vgCfg.noDownsWR) continue;
+        rows.push({
+          slug: `no-downs-${round}`,
+          name: `No Downs Round ${round}`,
+          type: 'CHALLENGE_COMPLETE',
+          criteria: { round, challengeType: 'NO_DOWNS' },
+          xpReward: xp,
+          rarity: rarityForRound(round, vgCfg.noDownsWR),
+        });
+      }
+      for (const cType of vgCfg.challengeTypes) {
+        const ct = cType as string;
+        if (ct === 'HIGHEST_ROUND' || ct === 'NO_DOWNS' || ct.startsWith('ROUND_') || ct === 'EASTER_EGG_SPEEDRUN' || ct === 'EXFIL_R5_SPEEDRUN' || ct === 'EXFIL_R10_SPEEDRUN' || ct === 'EXFIL_R20_SPEEDRUN' || ct === 'BUILD_EE_SPEEDRUN') continue;
+        const wr = ct === 'STARTING_ROOM' ? vgCfg.firstRoomWR
+          : ct === 'NO_PERKS' ? vgCfg.noPerksWR
+          : ct === 'NO_ARMOR' ? vgCfg.noArmorWR
+          : ct === 'NO_JUG' ? vgCfg.noJugWR
+          : undefined;
+        if (wr == null || wr <= 0) continue;
+        const cMilestones = getVanguardRoundMilestones(wr);
+        const slugPrefix = ct.toLowerCase().replace(/_/g, '-');
+        for (const { round, xp } of cMilestones) {
+          if (round > wr) continue;
+          rows.push({
+            slug: `${slugPrefix}-${round}`,
+            name: `${getVanguardChallengeTypeLabel(ct)} Round ${round}`,
+            type: 'CHALLENGE_COMPLETE',
+            criteria: { round, challengeType: cType },
+            xpReward: Math.max(MIN_ACHIEVEMENT_XP, xp),
+            rarity: rarityForRound(round, wr),
+          });
+        }
+      }
+      return rows;
+    }
+  }
+
   // BO7: per-map config with WRs, First Room, No Perks, No Jug, speedruns, exfil, EE (same pattern as BO6)
   if (gameShortName === 'BO7') {
     const bo7Cfg = getBo7MapConfig(mapSlug);
@@ -977,6 +1033,9 @@ const SPEEDRUN_TYPE_LABELS: Record<string, string> = {
   ROUND_999_SPEEDRUN: 'Round 999',
   EXFIL_SPEEDRUN: 'Exfil Round 11',
   EXFIL_R21_SPEEDRUN: 'Exfil Round 21',
+  EXFIL_R5_SPEEDRUN: 'Exfil Round 5',
+  EXFIL_R10_SPEEDRUN: 'Exfil Round 10',
+  EXFIL_R20_SPEEDRUN: 'Exfil Round 20',
   BUILD_EE_SPEEDRUN: 'Build% EE',
   SUPER_30_SPEEDRUN: 'Super 30 Speedrun',
   INSTAKILL_ROUND_SPEEDRUN: 'Instakill Round',
@@ -1010,6 +1069,7 @@ export function getSpeedrunAchievementDefinitions(
     : gameShortName === 'BO6' ? BO6_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : gameShortName === 'BO7' ? BO7_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : gameShortName === 'WW2' ? WW2_SPEEDRUN_TIERS_BY_MAP[mapSlug]
+    : gameShortName === 'VANGUARD' ? VANGUARD_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : undefined;
   if (!tiersByType) return [];
   const rows: AchievementSeedRow[] = [];

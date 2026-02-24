@@ -6,6 +6,7 @@ import { isBocwGame } from '@/lib/bocw';
 import { isBo6Game } from '@/lib/bo6';
 import { isBo7Game } from '@/lib/bo7';
 import { isWw2Game } from '@/lib/ww2';
+import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 import type { PlayerCount, Bo4Difficulty, Prisma } from '@prisma/client';
 
 /**
@@ -25,6 +26,7 @@ export async function GET(
   const searchQ = searchParams.get('search')?.trim() ?? '';
   const verifiedOnly = searchParams.get('verified') === 'true';
   const rampageInducerParam = searchParams.get('rampageInducerUsed'); // 'true' | 'false' | null
+  const vanguardVoidParam = searchParams.get('vanguardVoidUsed'); // 'true' | 'false' | null
   const ww2ConsumablesParam = searchParams.get('ww2ConsumablesUsed'); // 'true' | 'false' | null
   const limitParam = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') || '25', 10) || 25));
   const offsetParam = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10) || 0);
@@ -63,12 +65,16 @@ export async function GET(
     if (isBo4Game(map.game?.shortName) && difficulty && BO4_DIFFICULTIES.includes(difficulty as any)) {
       whereClause.difficulty = difficulty;
     }
-    if (isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName)) {
+    if (isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName) || (isVanguardGame(map.game?.shortName) && hasVanguardRampageFilter(slug))) {
       if (rampageInducerParam === 'true') {
         (whereClause as Record<string, unknown>).rampageInducerUsed = true;
       } else {
         (whereClause as Record<string, unknown>).rampageInducerUsed = { not: true };
       }
+    }
+    if (isVanguardGame(map.game?.shortName) && hasVanguardVoidFilter(slug)) {
+      if (vanguardVoidParam === 'true') (whereClause as Record<string, unknown>).vanguardVoidUsed = true;
+      else if (vanguardVoidParam === 'false') (whereClause as Record<string, unknown>).vanguardVoidUsed = false;
     }
     if (isWw2Game(map.game?.shortName)) {
       if (ww2ConsumablesParam === 'true') (whereClause as Record<string, unknown>).ww2ConsumablesUsed = true;

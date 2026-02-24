@@ -9,6 +9,7 @@ import { isBocwGame } from '@/lib/bocw';
 import { isBo6Game } from '@/lib/bo6';
 import { isBo7Game } from '@/lib/bo7';
 import { isWw2Game, WW2_CONSUMABLES_DEFAULT } from '@/lib/ww2';
+import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 import type { Bo4Difficulty } from '@prisma/client';
 
 // Log an EE completion (new run each time). Main-quest XP once per user per EE.
@@ -82,11 +83,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Map not found' }, { status: 404 });
     }
 
+    const hasRampageFilter = isVanguardGame(map.game?.shortName) && hasVanguardRampageFilter(map.slug);
+    const hasVoidFilter = isVanguardGame(map.game?.shortName) && hasVanguardVoidFilter(map.slug);
     const rampageInducerUsed =
-      (isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName)) &&
+      (isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName) || hasRampageFilter) &&
       body.rampageInducerUsed !== undefined
         ? Boolean(body.rampageInducerUsed)
         : undefined;
+    const vanguardVoidUsed = hasVoidFilter && body.vanguardVoidUsed !== undefined ? Boolean(body.vanguardVoidUsed) : undefined;
     const isWw2 = isWw2Game(map.game?.shortName);
     const ww2ConsumablesUsed = isWw2
       ? (body.ww2ConsumablesUsed !== undefined ? Boolean(body.ww2ConsumablesUsed) : WW2_CONSUMABLES_DEFAULT === 'WITH_CONSUMABLES')
@@ -121,6 +125,7 @@ export async function POST(request: NextRequest) {
         teammateNonUserNames,
         ...(difficulty != null && { difficulty }),
         ...(rampageInducerUsed != null && { rampageInducerUsed }),
+        ...(vanguardVoidUsed != null && { vanguardVoidUsed }),
         ...(ww2ConsumablesUsed != null && { ww2ConsumablesUsed }),
         ...(requestVerification && { verificationRequestedAt: new Date() }),
       },

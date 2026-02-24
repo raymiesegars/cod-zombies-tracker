@@ -953,6 +953,51 @@ export const WW2_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
   }),
 };
 
+/** Vanguard speedrun tiers — exfilR5, exfilR10, exfilR20, r10/r20/r30/r50/r70/r100/r200, ee, buildEe. */
+function buildVanguardSpeedrunTiers(cfg: {
+  r10?: number; r20?: number; r30?: number; r50?: number; r70?: number; r100?: number; r200?: number;
+  exfilR5?: number; exfilR10?: number; exfilR20?: number; ee?: number; buildEe?: number;
+}): SpeedrunTiersByType {
+  const buf = 1.2;
+  const base: SpeedrunTiersByType = {};
+  const tier = (sec: number) => [
+    { maxTimeSeconds: Math.round(sec * buf * 1.5), xpReward: 80 },
+    { maxTimeSeconds: Math.round(sec * buf * 1.2), xpReward: 200 },
+    { maxTimeSeconds: Math.round(sec * buf), xpReward: 500 },
+    { maxTimeSeconds: Math.round(sec * 1.05), xpReward: 1200 },
+  ];
+  if (cfg.r10 != null) base.ROUND_10_SPEEDRUN = tier(cfg.r10);
+  if (cfg.r20 != null) base.ROUND_20_SPEEDRUN = tier(cfg.r20);
+  if (cfg.r30 != null) base.ROUND_30_SPEEDRUN = tier(cfg.r30);
+  if (cfg.r50 != null) base.ROUND_50_SPEEDRUN = tier(cfg.r50);
+  if (cfg.r70 != null) base.ROUND_70_SPEEDRUN = tier(cfg.r70);
+  if (cfg.r100 != null) base.ROUND_100_SPEEDRUN = tier(cfg.r100);
+  if (cfg.r200 != null) base.ROUND_200_SPEEDRUN = tier(cfg.r200);
+  if (cfg.exfilR5 != null) base.EXFIL_R5_SPEEDRUN = tier(cfg.exfilR5);
+  if (cfg.exfilR10 != null) base.EXFIL_R10_SPEEDRUN = tier(cfg.exfilR10);
+  if (cfg.exfilR20 != null) base.EXFIL_R20_SPEEDRUN = tier(cfg.exfilR20);
+  if (cfg.ee != null) base.EASTER_EGG_SPEEDRUN = tier(cfg.ee);
+  if (cfg.buildEe != null) base.BUILD_EE_SPEEDRUN = tier(cfg.buildEe);
+  return base;
+}
+
+export const VANGUARD_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
+  'der-anfang': buildVanguardSpeedrunTiers({
+    r10: m(21) + 30, r30: m(50), exfilR5: m(8) + 40, exfilR10: m(12) + 40, ee: m(9),
+  }),
+  'terra-maledicta': buildVanguardSpeedrunTiers({
+    r10: m(21), r20: m(50), exfilR5: m(9), exfilR10: m(20), ee: m(21),
+  }),
+  'shi-no-numa-reborn': buildVanguardSpeedrunTiers({
+    r30: m(16) + 30, r50: m(38), r70: hs(1, 2, 48), r100: h(2), r200: h(6),
+    exfilR10: m(4) + 30, exfilR20: m(9) + 30, ee: m(16) + 30, buildEe: m(24) + 30,
+  }),
+  'the-archon': buildVanguardSpeedrunTiers({
+    r30: m(15) + 42, r50: m(34), r70: m(49), r100: hs(1, 35, 40), r200: hs(3, 20, 40),
+    exfilR10: m(4) + 20, exfilR20: m(9) + 40, ee: m(24),
+  }),
+};
+
 /** BO2 EE speedrun tiers per Easter Egg (Richtofen / Maxis variants). WRs in seconds. */
 export const BO2_TRANZIT_RICHTOFEN_EE_TIERS: SpeedrunTier[] = [
   { maxTimeSeconds: 780, xpReward: 200 },

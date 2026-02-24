@@ -12498,4 +12498,166 @@ export const SPECIFIC_EASTER_EGGS_BASE: SpecificEasterEgg[] = [
       { order: 2, label: 'Find and shoot raven with pistol. Kill Corpse Eater. Repeat four times for Raven Claw.' },
     ],
   },
+  // ——— Vanguard Zombies ———
+  // Der Anfang — Prologue Quest (story objectives)
+  {
+    gameShortName: 'VANGUARD',
+    mapSlug: 'der-anfang',
+    name: 'Prologue Quest',
+    slug: 'prologue-quest',
+    type: 'SIDE_QUEST',
+    xpReward: 500,
+    description:
+      'Complete the Prologue Quest to unlock the green portal. Gain access to Panzer Column East, enter the Void at Shi No Numa, survive 3 rounds, then reach the stone tome.',
+    steps: [
+      { order: 1, label: 'Gain access to the Panzer Column East section by completing a portal objective.' },
+      { order: 2, label: 'Enter the Store area and complete the objective to unlock the command post and Von List\'s office.' },
+      { order: 3, label: 'Enter the Void portal in Von List\'s office and travel to Shi No Numa.' },
+      { order: 4, label: 'Survive 3 full rounds in the Void, then exit through the portal (cutscene with Kortifex plays).' },
+      { order: 5, label: 'Return to the command post and reach the second floor. Interact with the portal Krafft is sealed behind.' },
+      { order: 6, label: 'Activate the portal objectives toward the apartments.' },
+      { order: 7, label: 'Reach the top floor and interact with the stone tome. Dialogue will play.' },
+      { order: 8, label: 'Re-enter the command post and stand on top of the stairs. A green portal will now be visible.' },
+    ],
+  },
+  // Terra Maledicta — Story Event (Decimator Shield + Tome Page), Secret Room, Antenna EE
+  {
+    gameShortName: 'VANGUARD',
+    mapSlug: 'terra-maledicta',
+    name: 'Story Event',
+    slug: 'story-event',
+    type: 'SIDE_QUEST',
+    xpReward: 1000,
+    description:
+      'Free the Decimator Shield and the lost page of the Tome of Rituals. Rewards: four chests, two piles of random loot, and 10,000 XP on first in-game completion.',
+    rewardsDescription: 'Four chests, two piles of random loot, 10,000 XP (first completion in-game)',
+    steps: [
+      { order: 1, label: 'Go to Merchant Road near the trapped Decimator Shield. Trigger the dialogue sequence.' },
+      { order: 2, label: 'Complete another objective, then head to the Tents. Interact with the speaking stone near Demonic Frenzy to spawn a portal.' },
+      { order: 3, label: 'Complete the Purge objective in the Corrupted Lands.' },
+      { order: 4, label: 'Shoot four yellow glowing crystals near the hub.' },
+      { order: 5, label: 'Go to the Bazaar and interact with the speaking stone near Diabolical Damage. Spawn a portal and complete the Sacrifice objective in the Corrupted Lands.' },
+      { order: 6, label: 'Return to Merchant Road to pick up the Decimator Shield.' },
+      { order: 7, label: 'Go to the Debris Field and interact with the speaking stone near Venomous Vigor. Enter the spawned portal.' },
+      { order: 8, label: 'In the Void objective, use the Decimator Shield to slam four glowing body parts containing the Tome Page.' },
+      { order: 9, label: 'Pick up the Tome Page and return to spawn to claim rewards.' },
+    ],
+  },
+  {
+    gameShortName: 'VANGUARD',
+    mapSlug: 'terra-maledicta',
+    name: 'Secret Room',
+    slug: 'secret-room',
+    type: 'SIDE_QUEST',
+    xpReward: 0,
+    description:
+      'Unlock the secret room in the Outpost Courtyard behind the Kortifex rune. Contains Death Machine, or rarely a Ray Gun if dug by the player.',
+    rewardsDescription: 'Death Machine (or Ray Gun on rare occasion)',
+    steps: [
+      { order: 1, label: 'Use the Shovel to dig up four tome pages from dig piles across the map.' },
+      { order: 2, label: 'Find the Kortifex rune at the Outpost Courtyard and interact with it.' },
+      { order: 3, label: 'Place the four tome pages in the correct order to unlock the room.' },
+    ],
+  },
+  {
+    gameShortName: 'VANGUARD',
+    mapSlug: 'terra-maledicta',
+    name: 'Antenna Easter Egg',
+    slug: 'antenna',
+    type: 'SIDE_QUEST',
+    xpReward: 0,
+    description:
+      'Place and rotate antennas at comms tables to spawn Boom Schreiers and Sturmkriegers. The last Sturmkrieger drops a loot chest.',
+    steps: [
+      { order: 1, label: 'Dig up an Antenna and place it at the comms table at Merchant Road. A horde of Boom Schreiers spawns.' },
+      { order: 2, label: 'Rotate antennas at three more locations: Bazaar (near Diabolical Damage), Debris Field (near Venomous Vigor), or Market Storage—in any order.' },
+      { order: 3, label: 'The first two rotations spawn more Boom Schreiers. The third rotation spawns a horde of Sturmkriegers.' },
+      { order: 4, label: 'Kill the last Sturmkrieger to drop a loot chest.' },
+    ],
+  },
+  // Shi No Numa Reborn — Main Quest & Wunderwaffe Buildable
+  {
+    gameShortName: 'VANGUARD',
+    mapSlug: 'shi-no-numa-reborn',
+    name: 'Main Quest',
+    slug: 'main-quest',
+    type: 'MAIN_QUEST',
+    xpReward: 2500,
+    description:
+      'The main Easter egg for Shi No Numa Reborn. Round-based map with Dig Site, Pack-a-Punch, and crafting table.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/KuaegtcdL6U',
+    rewardsDescription: 'Main quest completion, Easter egg speedrun tracking',
+    steps: [
+      { order: 1, label: 'Begin the main quest. Complete the required objectives (see video guide).' },
+      { order: 2, label: 'Progress through the quest steps and collect required items.' },
+      { order: 3, label: 'Complete the main quest finale and claim your rewards.' },
+    ],
+  },
+  {
+    gameShortName: 'VANGUARD',
+    mapSlug: 'shi-no-numa-reborn',
+    name: 'Wunderwaffe DG-2',
+    slug: 'wunderwaffe-dg-2',
+    type: 'BUILDABLE',
+    xpReward: 0,
+    description:
+      'Buildable wonder weapon. The classic Wunderwaffe DG-2 returns in Shi No Numa Reborn. Parts are found across the map and assembled at the Dig Site crafting table.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/P0b6Bpzcuog',
+    steps: [
+      { order: 1, label: 'Find and collect all Wunderwaffe parts scattered across the map (see video guide).' },
+      { order: 2, label: 'Take the parts to the crafting table at the Dig Site (accessed via Comm Room or Storage Hut, 1000 points).' },
+      { order: 3, label: 'Assemble the Wunderwaffe DG-2 at the build table.' },
+    ],
+  },
+  // The Archon — Main Quest "There Archon Be Only One", Vanishing Shore, Mr. Peeks
+  {
+    gameShortName: 'VANGUARD',
+    mapSlug: 'the-archon',
+    name: 'There Archon Be Only One',
+    slug: 'main-quest',
+    type: 'MAIN_QUEST',
+    xpReward: 2500,
+    description:
+      'Complete the Construct trials and defeat Kortifex. Requires a shovel (found in a train car in the Derailment). Rewards: Wunderwaffe DG-2, five Sacrificial Hearts, tier upgrade for perks, calling card.',
+    videoEmbedUrl: 'https://www.youtube.com/embed/S-5Fu-FNlDA',
+    rewardsDescription: 'Wunderwaffe DG-2, five Sacrificial Hearts, tier upgrade for perks, "There Archon Be Only One" calling card',
+    steps: [
+      { order: 1, label: 'Step 1 – The Ritual: Rebuild Pack-a-Punch at the Temple. Parts: train car (Derailment), plane wing (Spike). Interact with PaP to start ritual. Kill enemies near PaP to fill soul box.' },
+      { order: 2, label: 'Step 2 – The Relic: Place Relic Mirror on the stone. Enter Dark Aether portal. Construct will down you and send you back to complete trials.' },
+      { order: 3, label: 'Step 3 – Trial of Mindfulness: Dig at Merchant Road to spawn red orb. Capture runes in symbol order. Complete trial (capture runes, kill fewest enemies). Zaballa spawns.' },
+      { order: 4, label: 'Step 3 – Trial of Resilience: Destroy a crystal in Debris Field to spawn orb. Collect Cursed Officer\'s Hat (Tents), Cursed Skull (Bazaar upper floor), Cursed Femur (Derailment dig site). Pick up Decimator Shield. Fill fountain by destroying Syphoncores with Decimator.' },
+      { order: 5, label: 'Step 3 – Trial of Sacrifice: Light three torches in Derailment with Molotovs. Give orb a Pack-a-Punched weapon. Kill Uberkrieger. Use Ring of Fire to charge obelisks by killing zombies.' },
+      { order: 6, label: 'Step 4 – Defeating Kortifex: Enter Dark Aether portal. Phase 1: Shoot upper eye. Phase 2: Destroy crystals, throw shards at Anemones, then at pillars to break shield. Phase 3: Same as Phase 2 but Kortifex heals; Sturmkriegers spawn.' },
+    ],
+  },
+  {
+    gameShortName: 'VANGUARD',
+    mapSlug: 'the-archon',
+    name: 'Vanishing Shore',
+    slug: 'vanishing-shore',
+    type: 'MUSICAL',
+    xpReward: 0,
+    description:
+      'Activate the song "Vanishing Shore" by interacting with the instrument on the upper floor of the Radio Outpost.',
+    steps: [
+      { order: 1, label: 'Go to the Radio Outpost (upper floor).' },
+      { order: 2, label: 'Interact with the instrument three times to activate "Vanishing Shore".' },
+    ],
+  },
+  {
+    gameShortName: 'VANGUARD',
+    mapSlug: 'the-archon',
+    name: 'Mr. Peeks Easter Egg',
+    slug: 'mr-peeks',
+    type: 'SIDE_QUEST',
+    xpReward: 0,
+    description:
+      'Dig up three parts of Mister Peeks bunny toy. When the last part is acquired, the Ray Gun spawns along with several Bonus Points Power-Ups.',
+    rewardsDescription: 'Ray Gun, Bonus Points Power-Ups',
+    steps: [
+      { order: 1, label: 'Use the shovel to dig up the first part of Mister Peeks around the map.' },
+      { order: 2, label: 'Dig up the second part at another dig site.' },
+      { order: 3, label: 'Dig up the third (final) part. The Ray Gun and Bonus Points Power-Ups will spawn.' },
+    ],
+  },
 ];

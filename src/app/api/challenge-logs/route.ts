@@ -12,6 +12,7 @@ import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_GOBBLEGUM_DEFAULT, BO6_SUPPORT_MODE
 import { isBo7Game, BO7_SUPPORT_MODES, BO7_SUPPORT_DEFAULT, BO7_RELICS } from '@/lib/bo7';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 import { isWw2Game, WW2_CONSUMABLES_DEFAULT } from '@/lib/ww2';
+import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 import type { Bo4Difficulty } from '@prisma/client';
 
 // Log a new run. We run the achievement check when it’s a new best for that user+challenge+map+playerCount.
@@ -277,7 +278,11 @@ export async function POST(request: NextRequest) {
     const bo2HasBank = isBo2 && map ? getBo2MapConfig(map.slug)?.hasBank : false;
     const bo2BankUsed = bo2HasBank && body.bo2BankUsed !== undefined ? Boolean(body.bo2BankUsed) : undefined;
 
-    const rampageInducerUsed = (isBocw || isBo6 || isBo7) && body.rampageInducerUsed !== undefined ? Boolean(body.rampageInducerUsed) : undefined;
+    const isVanguard = isVanguardGame(gameShortName);
+    const hasRampageFilter = isVanguard && map && hasVanguardRampageFilter(map.slug);
+    const hasVoidFilter = isVanguard && map && hasVanguardVoidFilter(map.slug);
+    const rampageInducerUsed = (isBocw || isBo6 || isBo7 || hasRampageFilter) && body.rampageInducerUsed !== undefined ? Boolean(body.rampageInducerUsed) : undefined;
+    const vanguardVoidUsed = hasVoidFilter && body.vanguardVoidUsed !== undefined ? Boolean(body.vanguardVoidUsed) : undefined;
 
     const isWw2 = isWw2Game(gameShortName);
     const ww2ConsumablesUsed = isWw2
@@ -331,6 +336,7 @@ export async function POST(request: NextRequest) {
         ...(bo2BankUsed != null && { bo2BankUsed }),
         ...(rampageInducerUsed != null && { rampageInducerUsed }),
         ...(ww2ConsumablesUsed != null && { ww2ConsumablesUsed }),
+        ...(vanguardVoidUsed != null && { vanguardVoidUsed }),
         ...(killsReached != null && killsReached > 0 && { killsReached }),
         ...(scoreReached != null && scoreReached > 0 && { scoreReached }),
       },
