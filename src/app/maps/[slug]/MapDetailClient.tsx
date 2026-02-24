@@ -2237,7 +2237,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
 
           {/* Right column (large screens): Buildables when Easter Eggs tab has buildables */}
           {activeTab === 'easter-eggs' && buildables.length > 0 && (
-            <div className="hidden lg:flex lg:flex-col lg:min-w-0 lg:space-y-4">
+            <div className="hidden lg:flex lg:flex-col lg:min-w-0 lg:space-y-4 lg:pt-16">
               <div className="rounded-xl border border-bunker-600/80 bg-bunker-900/95 overflow-hidden flex flex-col">
               <div className="p-3 sm:p-4 border-b border-bunker-700/60 flex-shrink-0">
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-bunker-300 mb-3">Buildables</h3>

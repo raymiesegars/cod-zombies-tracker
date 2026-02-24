@@ -32,7 +32,7 @@ export function Footer() {
         </div>
 
         <p className="text-xs sm:text-sm text-bunker-400 text-center max-w-2xl mx-auto mb-4 break-words">
-          Call of Duty Zombies Easter egg guides & buildables—every step, side egg, and part. Log runs, challenges, and speedruns; track progress with XP and ranks. Free fan project, no monetization, no advertisements. Secure databases; built to stay around.
+          CoD Zombies Easter egg guides, challenges, speedruns, and buildables. Log runs with your squad, get verified, earn XP and ranks. Find group, friends, messaging. WAW through BO7, IW, WW2, AW, Vanguard, MW2. Free, no ads.
         </p>
 
         <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs sm:text-sm text-bunker-400 mb-4" aria-label="Footer navigation">
