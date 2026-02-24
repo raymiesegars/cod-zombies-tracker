@@ -60,7 +60,7 @@ async function main() {
   }
 
   let deleted = 0;
-  for (const [key, list] of groups) {
+  for (const [, list] of Array.from(groups.entries())) {
     if (list.length <= 1) continue;
 
     // Keep first (prefer one with easterEggId set)

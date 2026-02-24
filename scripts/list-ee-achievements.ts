@@ -48,7 +48,7 @@ async function main() {
   }
 
   const duplicates: [string, typeof achievements][] = [];
-  for (const [key, list] of byKey) {
+  for (const [key, list] of Array.from(byKey.entries())) {
     if (list.length > 1) duplicates.push([key, list]);
   }
 
@@ -73,9 +73,9 @@ async function main() {
   }
 
   console.log('Per map:');
-  for (const [mapName, list] of [...byMap.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+  for (const [mapName, list] of Array.from(byMap.entries()).sort((a, b) => a[0].localeCompare(b[0]))) {
     const names = list.map((a) => a.name);
-    const uniqueNames = [...new Set(names)];
+    const uniqueNames = Array.from(new Set(names));
     console.log(`  ${mapName}: ${list.length} achievement(s) - ${uniqueNames.join(', ')}`);
   }
 }
