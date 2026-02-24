@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Avatar, Button, Logo, Modal, PageLoader } from '@/components/ui';
+import { motion } from 'framer-motion';
 import { Box, Settings, HelpCircle, UserPlus, LogOut, Shield, Trash2, Check, CheckCircle, Clock, Loader2, RefreshCw, XCircle } from 'lucide-react';
 import { getMysteryBoxXpRange, getChallengeRangeDisplay, getBaseXpFromFilters, getMysteryBoxXpMultiplierPercent } from '@/lib/mystery-box';
 import { getBo3GobbleGumLabel } from '@/lib/bo3';
@@ -36,6 +37,7 @@ type RollDetails = {
   filterSettings: object | null;
   completedByHost: boolean;
   userHasCompleted?: boolean;
+  createdAt?: string;
   game?: { id: string; name: string; shortName: string };
   map?: { id: string; name: string; slug: string };
   challenge?: { id: string; name: string; type: string };
@@ -104,6 +106,7 @@ export default function MysteryBoxPage() {
   const [discardWarningOpen, setDiscardWarningOpen] = useState(false);
   const [discardVoteSubmitting, setDiscardVoteSubmitting] = useState(false);
   const [pendingRerollAfterVote, setPendingRerollAfterVote] = useState(false);
+  const [spinning, setSpinning] = useState(false);
 
   const SPIN_WARNING_KEY = 'mystery-box-spin-warning-dismissed';
 
@@ -167,7 +170,7 @@ export default function MysteryBoxPage() {
     }
   };
 
-  const doSpin = async () => {
+  const doSpin = async (): Promise<boolean> => {
     const payload = {
       excludedGameIds: filterSettings.excludedGameIds.length ? filterSettings.excludedGameIds : undefined,
       excludeSpeedruns: filterSettings.excludeSpeedruns || undefined,
@@ -181,17 +184,30 @@ export default function MysteryBoxPage() {
     });
     if (res.ok) {
       fetchData();
-      return;
+      return true;
     }
-    const data = await res.json().catch(() => ({}));
-    if (data.insufficientTokens?.length > 0) {
-      setSpinInsufficientModal({ users: data.insufficientTokens });
+    const resData = await res.json().catch(() => ({}));
+    if (resData.insufficientTokens?.length > 0) {
+      setSpinInsufficientModal({ users: resData.insufficientTokens });
     }
+    return false;
+  };
+
+  const handleSpinWithAnimation = () => {
+    setSpinWarningOpen(false);
+    setSpinInsufficientModal(null);
+    setSpinning(true);
+    const audio = typeof window !== 'undefined' ? new Audio('/audio/mystery-box.mp3') : null;
+    audio?.play().catch(() => {});
+    doSpin().then((ok) => {
+      if (!ok) setSpinning(false);
+    });
+    setTimeout(() => setSpinning(false), 6000);
   };
 
   const requestSpin = () => {
     if (typeof window !== 'undefined' && localStorage.getItem(SPIN_WARNING_KEY) === '1') {
-      doSpin();
+      handleSpinWithAnimation();
     } else {
       setSpinWarningOpen(true);
     }
@@ -238,6 +254,25 @@ export default function MysteryBoxPage() {
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- poll keyed by lobby id only
   }, [data?.lobby?.id]);
+
+  // When anyone receives a fresh roll (created < 6s ago), show spinning animation so members see it too
+  const lastSpinningRollId = useRef<string | null>(null);
+  useEffect(() => {
+    const roll = data?.lobby?.roll;
+    if (!roll?.createdAt || !roll.id) return;
+    const created = new Date(roll.createdAt).getTime();
+    const now = Date.now();
+    const age = (now - created) / 1000;
+    if (age >= 6 || lastSpinningRollId.current === roll.id) return;
+    lastSpinningRollId.current = roll.id;
+    setSpinning(true);
+    const remaining = Math.max(0, 6000 - (now - created));
+    const t = setTimeout(() => {
+      setSpinning(false);
+      lastSpinningRollId.current = null;
+    }, remaining);
+    return () => clearTimeout(t);
+  }, [data?.lobby?.roll?.id, data?.lobby?.roll?.createdAt]);
 
   // When reroll vote passes: no roll, no vote → auto-spin
   useEffect(() => {
@@ -402,9 +437,11 @@ export default function MysteryBoxPage() {
               );
             })()}
 
-            {/* Box + Spin area */}
-            <div className="mt-6 sm:mt-8 rounded-xl border border-bunker-700 bg-bunker-900/80 p-4 sm:p-6 text-center">
-              {data.lobby.roll && !data.lobby.roll.completedByHost ? (
+            {/* Box + Spin area - overflow-visible when spinning so text can rise above */}
+            <div className={`mt-6 sm:mt-8 rounded-xl border border-bunker-700 bg-bunker-900/80 p-4 sm:p-6 text-center ${spinning ? 'overflow-visible' : ''}`}>
+              {spinning ? (
+                <MysteryBoxSpinning pendingRoll={data.lobby.roll} />
+              ) : data.lobby.roll && !data.lobby.roll.completedByHost ? (
                 <RollResult
                   roll={data.lobby.roll}
                   isHost={data.lobby.isHost}
@@ -455,8 +492,7 @@ export default function MysteryBoxPage() {
               if (dontShowAgain && typeof window !== 'undefined') {
                 localStorage.setItem(SPIN_WARNING_KEY, '1');
               }
-              doSpin();
-              setSpinWarningOpen(false);
+              handleSpinWithAnimation();
             }}
             onClose={() => setSpinWarningOpen(false)}
           />
@@ -617,6 +653,137 @@ function LobbySlot({
   );
 }
 
+const SAMPLE_CHALLENGES = [
+  'BO3 · Der Eisendrache · Round 5 Giant Speedrun',
+  'BO2 · Origins · Round 30 Speedrun',
+  'BOCW · Firebase Z · Round 10 Speedrun',
+  'WAW · Nacht · Highest Round',
+  'BO1 · Kino · No Jug Challenge',
+  'BO4 · IX · Round 15 Speedrun',
+  'BO6 · Liberty Falls · Round 5 Speedrun',
+  'BO7 · Terminus · Round 20 Speedrun',
+  'WW2 · The Final Reich · No Perks',
+  'BO2 · Mob · Round 50 Speedrun',
+  'BO3 · Revelations · Round 100',
+  'BOCW · Outbreak · Round 20',
+  'BO4 · Dead of the Night · Easter Egg',
+];
+
+function MysteryBoxWood({ open = false, className }: { open?: boolean; className?: string }) {
+  return (
+    <div className={className}>
+      <div
+        className="relative w-full max-w-[33rem] mx-auto rounded-md overflow-hidden"
+        style={{
+          height: '104px',
+          background: 'linear-gradient(180deg, #4a3728 0%, #5d4037 12%, #6d4c41 25%, #5d4037 50%, #4a3728 75%, #3e2723 100%)',
+          boxShadow: 'inset 0 1px 0 rgba(139,90,43,0.4), inset 0 -1px 0 rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.5)',
+          border: '2px solid #3e2723',
+          borderTopColor: '#6d4c41',
+          borderBottomColor: '#2c1810',
+        }}
+      >
+        {/* Wood grain lines */}
+        <div className="absolute inset-0 opacity-40" style={{
+          backgroundImage: 'repeating-linear-gradient(92deg, transparent 0px, transparent 2px, rgba(0,0,0,0.2) 2px, rgba(0,0,0,0.2) 5px)',
+        }} />
+        {/* Knot / grain variation */}
+        <div className="absolute inset-0 opacity-15" style={{
+          background: 'radial-gradient(ellipse 30% 50% at 30% 50%, rgba(0,0,0,0.3), transparent), radial-gradient(ellipse 25% 40% at 70% 50%, rgba(0,0,0,0.2), transparent)',
+        }} />
+        {/* Left logo */}
+        <div className="absolute left-0 top-0 bottom-0 w-1/2 flex items-center justify-center p-3">
+          <Logo size="lg" animated={false} className="opacity-90 drop-shadow-md" />
+        </div>
+        {/* Right logo */}
+        <div className="absolute right-0 top-0 bottom-0 w-1/2 flex items-center justify-center p-3">
+          <Logo size="lg" animated={false} className="opacity-90 drop-shadow-md" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MysteryBoxSpinning({ pendingRoll }: { pendingRoll: RollDetails | null }) {
+  const [displayText, setDisplayText] = useState(SAMPLE_CHALLENGES[0]);
+  const startRef = useRef(Date.now());
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const indexRef = useRef(0);
+  const pendingRollRef = useRef(pendingRoll);
+  pendingRollRef.current = pendingRoll;
+
+  useEffect(() => {
+    startRef.current = Date.now();
+    indexRef.current = 0;
+
+    const scheduleNext = () => {
+      const elapsed = (Date.now() - startRef.current) / 1000;
+      if (elapsed >= 5.8) {
+        const roll = pendingRollRef.current;
+        const final = roll
+          ? `${roll.game?.shortName ?? '?'} · ${roll.map?.name ?? '?'} · ${roll.challenge?.name ?? 'Challenge'}`
+          : SAMPLE_CHALLENGES[indexRef.current % SAMPLE_CHALLENGES.length];
+        setDisplayText(final);
+        return;
+      }
+      indexRef.current = (indexRef.current + 1) % SAMPLE_CHALLENGES.length;
+      setDisplayText(SAMPLE_CHALLENGES[indexRef.current]);
+      const progress = elapsed / 6;
+      const delay = 50 + Math.pow(progress, 2) * 450;
+      timeoutRef.current = setTimeout(scheduleNext, delay);
+    };
+    scheduleNext();
+    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
+  }, []);
+
+  return (
+    <div className="pb-6 overflow-visible">
+      {/* Explicit structure: space above box (text lands here) | box (text emerges from behind) */}
+      <div className="relative">
+        {/* Top slot: 120px of empty space - text rests here when visible above box */}
+        <div className="h-28 sm:h-32 flex items-end justify-center" aria-hidden />
+        {/* Text layer - spans both zones, z-below box so hidden when overlapping box */}
+        <div
+          className="absolute left-0 right-0 top-0 flex items-center justify-center px-4 z-[5]"
+          style={{ height: '220px' }}
+        >
+          <motion.p
+            key={displayText}
+            className="text-amber-400 font-zombies text-xs sm:text-sm drop-shadow-[0_0_6px_rgba(251,191,36,0.9)] text-center w-full"
+            initial={{ y: 90 }}
+            animate={{ y: -70 }}
+            transition={{ duration: 0.04 }}
+          >
+            {displayText}
+          </motion.p>
+        </div>
+        {/* Box - solid bg, z above text; text behind this is hidden, text above is visible */}
+        <motion.div
+          className="relative z-10 -mt-4"
+          initial={{ scaleY: 1 }}
+          animate={{ scaleY: [1, 1.03, 1] }}
+          transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <MysteryBoxWood open />
+        </motion.div>
+        {/* Light beam */}
+        <motion.div
+          className="absolute left-1/2 -translate-x-1/2 w-36 sm:w-44 h-28 pointer-events-none z-[6]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0.3, 0.6, 0.3] }}
+          transition={{ duration: 1.2, repeat: Infinity }}
+          style={{
+            top: 60,
+            background: 'linear-gradient(to top, rgba(251,191,36,0.4) 0%, rgba(251,191,36,0.1) 50%, transparent 100%)',
+            filter: 'blur(10px)',
+          }}
+        />
+      </div>
+      <p className="text-bunker-500 text-sm mt-4">Spinning…</p>
+    </div>
+  );
+}
+
 function MysteryBoxClosed({
   isHost,
   tokens,
@@ -633,8 +800,8 @@ function MysteryBoxClosed({
   const xpMultiplier = getMysteryBoxXpMultiplierPercent(toLibFilterSettings(filterSettings));
   return (
     <>
-      <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-4 rounded-lg border-4 border-amber-800 bg-amber-900/30 flex items-center justify-center text-4xl sm:text-5xl font-bold text-amber-400">
-        ?
+      <div className="pt-2 pb-2">
+        <MysteryBoxWood />
       </div>
       <p className="text-bunker-400 mb-4">
         {isHost ? 'The box is closed. Spin when ready!' : 'Waiting on the host to roll the box.'}

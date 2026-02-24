@@ -117,6 +117,7 @@ export async function GET() {
         filterSettings: roll.filterSettings as object | null,
         completedByHost: roll.completedByHost,
         userHasCompleted: Boolean(userCompletion),
+        createdAt: roll.createdAt.toISOString(),
         game: game ?? undefined,
         map: map ?? undefined,
         challenge: challenge ?? undefined,
