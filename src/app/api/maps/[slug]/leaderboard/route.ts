@@ -9,6 +9,8 @@ import { isBo7Game } from '@/lib/bo7';
 import { isWw2Game } from '@/lib/ww2';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
+import { hasFirstRoomVariantFilter } from '@/lib/first-room-variants';
+import { hasNoJugSupport } from '@/lib/no-jug-support';
 import type { PlayerCount, ChallengeType, Prisma, Bo4Difficulty } from '@prisma/client';
 
 export async function GET(
@@ -47,6 +49,7 @@ export async function GET(
   // BOCW/BO6/BO7: Rampage Inducer. Default 'false' = No Rampage Inducer; 'true' = Rampage Inducer only.
   const rampageInducerParam = searchParams.get('rampageInducerUsed'); // 'true' | 'false' | null
   const vanguardVoidParam = searchParams.get('vanguardVoidUsed'); // 'true' | 'false' | null (Der Anfang, Terra Maledicta only)
+  const firstRoomVariantParam = searchParams.get('firstRoomVariant'); // Verrückt, Buried, AW Carrier
   const limitParam = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') || '25', 10) || 25));
   const offsetParam = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10) || 0);
   const mergeTake = 500;
@@ -147,9 +150,11 @@ export async function GET(
       }
     }
 
-    if (gameShortName === 'WAW') {
+    if (hasNoJugSupport(slug, gameShortName)) {
       if (wawNoJug === 'true') (whereClause as Record<string, unknown>).wawNoJug = true;
       else if (wawNoJug === 'false') (whereClause as Record<string, unknown>).wawNoJug = false;
+    }
+    if (gameShortName === 'WAW') {
       if (wawFixedWunderwaffe === 'true') (whereClause as Record<string, unknown>).wawFixedWunderwaffe = true;
       else if (wawFixedWunderwaffe === 'false') (whereClause as Record<string, unknown>).wawFixedWunderwaffe = false;
     }
@@ -194,6 +199,13 @@ export async function GET(
     const isRush = isSpecificChallenge && challengeType === 'RUSH';
     if (isSpecificChallenge) {
       whereClause.challenge = { type: challengeType };
+    }
+    if (
+      challengeType === 'STARTING_ROOM' &&
+      firstRoomVariantParam &&
+      hasFirstRoomVariantFilter(slug)
+    ) {
+      (whereClause as Record<string, unknown>).firstRoomVariant = firstRoomVariantParam;
     }
     if (isSpeedrun) {
       whereClause.completionTimeSeconds = { not: null };

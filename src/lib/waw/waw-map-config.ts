@@ -5,7 +5,7 @@
  * Rules:
  * - All WaW maps: No Solo No Downs (no quick revive)
  * - Nacht: Remove No Perks, No Pack-a-Punch, No Power (map doesn't have them)
- * - Verruckt: Remove No Pack-a-Punch; First Room = Jug Side + Quick Side (replace generic STARTING_ROOM)
+ * - Verruckt: Remove No Pack-a-Punch; First Room = single STARTING_ROOM (accepts JUG_SIDE/QUICK_SIDE via firstRoomVariant on logs)
  * - Shi No Numa: Remove No Pack-a-Punch, No Power
  * - Der Riese: Has Fixed Wunderwaffe tag (no achievements for that tag)
  */
@@ -92,7 +92,7 @@ export const WAW_MAP_CONFIG: Record<WaWMapSlug, WaWChallengeConfig> = {
     noPerksWR: undefined, // Not on map
   },
   verruckt: {
-    challengeTypes: ['HIGHEST_ROUND', 'NO_PERKS', 'STARTING_ROOM_JUG_SIDE', 'STARTING_ROOM_QUICK_SIDE', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER'],
+    challengeTypes: ['HIGHEST_ROUND', 'NO_PERKS', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER'],
     noDownsSoloAllowed: false,
     noDownsAvailable: false, // Duo+ only, no duo+ achievements — remove category
     hasFixedWunderwaffeTag: false,

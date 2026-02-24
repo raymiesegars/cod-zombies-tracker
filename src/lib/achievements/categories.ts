@@ -1,3 +1,4 @@
+import { getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { getBo1MapConfig } from '@/lib/bo1/bo1-map-config';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 import { getBo3MapConfig } from '@/lib/bo3/bo3-map-config';
@@ -170,6 +171,14 @@ export function getAllowedNonSpeedrunCategoriesForMap(
   mapSlug: string | null | undefined
 ): string[] | null {
   if (!gameShortName || !mapSlug) return null;
+  if (gameShortName === 'WAW') {
+    const cfg = getWaWMapConfig(mapSlug);
+    if (!cfg?.challengeTypes) return null;
+    const fromConfig = cfg.challengeTypes.filter(
+      (c) => !isSpeedrunCategory(c) && c !== 'HIGHEST_ROUND'
+    );
+    return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG']));
+  }
   if (gameShortName === 'BO2') {
     const cfg = getBo2MapConfig(mapSlug);
     if (!cfg?.challengeTypes) return null;

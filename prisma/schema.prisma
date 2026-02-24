@@ -463,6 +463,9 @@ model ChallengeLog {
 
   // BO2 only: Bank/Storage used (maps with bank: Tranzit, Die Rise, Buried). true = Bank+Storage (default), false = No Bank No Storage
   bo2BankUsed             Boolean?
+
+  // First room variant: required for STARTING_ROOM on verruckt/bo1-verruckt/bo3-verruckt (JUG_SIDE, QUICK_SIDE), buried (PROCESSING, QUICK_SIDE, PROCESSING_WITH_RAYGUN), aw-carrier (MK14_SIDE, BULLDOG_SIDE, MIXED)
+  firstRoomVariant         String?
   
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt

@@ -103,6 +103,8 @@ export type AchievementSeedRow = {
     difficulty?: Bo4DifficultyType;
     /** Speedrun tier: qualify if completionTimeSeconds <= this */
     maxTimeSeconds?: number;
+    /** For STARTING_ROOM on Verrückt/Buried/AW Carrier: variant (e.g. JUG_SIDE, QUICK_SIDE) */
+    firstRoomVariant?: string;
   };
   xpReward: number;
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
@@ -172,9 +174,26 @@ export function getMapAchievementDefinitions(
       }
       for (const cType of wawCfg.challengeTypes) {
         if (cType === 'HIGHEST_ROUND' || cType === 'NO_DOWNS') continue;
+        // Verrückt: one "First Room Round X" per round (accepts either JUG_SIDE or QUICK_SIDE via firstRoomVariant)
+        if (mapSlug === 'verruckt' && cType === 'STARTING_ROOM') {
+          const maxWr = Math.max(wawCfg.firstRoomJugWR ?? 0, wawCfg.firstRoomQuickWR ?? 0);
+          if (maxWr > 0) {
+            const cMilestones = getWaWRoundMilestones(maxWr);
+            for (const { round, xp } of cMilestones) {
+              if (round > maxWr) continue;
+              rows.push({
+                slug: `starting-room-${round}`,
+                name: `First Room Round ${round}`,
+                type: 'CHALLENGE_COMPLETE',
+                criteria: { round, challengeType: 'STARTING_ROOM' },
+                xpReward: Math.max(MIN_ACHIEVEMENT_XP, xp),
+                rarity: rarityForRound(round, maxWr),
+              });
+            }
+          }
+          continue;
+        }
         const wr = (cType as string) === 'STARTING_ROOM' ? wawCfg.firstRoomWR
-          : (cType as string) === 'STARTING_ROOM_JUG_SIDE' ? wawCfg.firstRoomJugWR
-          : (cType as string) === 'STARTING_ROOM_QUICK_SIDE' ? wawCfg.firstRoomQuickWR
           : (cType as string) === 'NO_POWER' ? wawCfg.noPowerWR
           : (cType as string) === 'NO_PERKS' ? wawCfg.noPerksWR
           : undefined;
@@ -251,9 +270,26 @@ export function getMapAchievementDefinitions(
       }
       for (const cType of bo1Cfg.challengeTypes) {
         if (['HIGHEST_ROUND', 'NO_DOWNS', 'NO_MANS_LAND'].includes(cType as string)) continue;
+        // BO1 Verrückt: one "First Room Round X" per round (accepts either variant)
+        if (mapSlug === 'bo1-verruckt' && cType === 'STARTING_ROOM') {
+          const maxWr = Math.max(bo1Cfg.firstRoomJugWR ?? 0, bo1Cfg.firstRoomQuickWR ?? 0);
+          if (maxWr > 0) {
+            const cMilestones = getBo1RoundMilestones(maxWr);
+            for (const { round, xp } of cMilestones) {
+              if (round > maxWr) continue;
+              rows.push({
+                slug: `starting-room-${round}`,
+                name: `First Room Round ${round}`,
+                type: 'CHALLENGE_COMPLETE',
+                criteria: { round, challengeType: 'STARTING_ROOM' },
+                xpReward: Math.max(MIN_ACHIEVEMENT_XP, xp),
+                rarity: rarityForRound(round, maxWr),
+              });
+            }
+          }
+          continue;
+        }
         const wr = (cType as string) === 'STARTING_ROOM' ? bo1Cfg.firstRoomWR
-          : (cType as string) === 'STARTING_ROOM_JUG_SIDE' ? bo1Cfg.firstRoomJugWR
-          : (cType as string) === 'STARTING_ROOM_QUICK_SIDE' ? bo1Cfg.firstRoomQuickWR
           : (cType as string) === 'NO_POWER' ? bo1Cfg.noPowerWR
           : (cType as string) === 'NO_PERKS' ? bo1Cfg.noPerksWR
           : undefined;
@@ -349,6 +385,32 @@ export function getMapAchievementDefinitions(
       }
       for (const cType of bo2Cfg.challengeTypes) {
         if (cType === 'HIGHEST_ROUND' || cType === 'NO_DOWNS') continue;
+        // Buried: STARTING_ROOM has Processing, Quick Side, Processing (with Raygun) variants
+        if (mapSlug === 'buried' && cType === 'STARTING_ROOM') {
+          const buriedCfg = bo2Cfg as { firstRoomProcessingWR?: number; firstRoomQuickWR?: number; firstRoomWR?: number };
+          for (const [variant, wr] of [
+            ['PROCESSING', buriedCfg.firstRoomProcessingWR ?? bo2Cfg.firstRoomWR] as const,
+            ['QUICK_SIDE', buriedCfg.firstRoomQuickWR ?? bo2Cfg.firstRoomWR] as const,
+            ['PROCESSING_WITH_RAYGUN', bo2Cfg.firstRoomWR] as const,
+          ]) {
+            if (wr == null) continue;
+            const cMilestones = getBo2RoundMilestones(wr);
+            const label = variant === 'PROCESSING' ? 'First Room (Processing)' : variant === 'QUICK_SIDE' ? 'First Room (Quick Side)' : 'First Room (Processing with Raygun)';
+            const slugPrefix = `starting-room-${variant.toLowerCase().replace(/_/g, '-')}`;
+            for (const { round, xp } of cMilestones) {
+              if (round > wr) continue;
+              rows.push({
+                slug: `${slugPrefix}-${round}`,
+                name: `${label} Round ${round}`,
+                type: 'CHALLENGE_COMPLETE',
+                criteria: { round, challengeType: 'STARTING_ROOM', firstRoomVariant: variant },
+                xpReward: Math.max(MIN_ACHIEVEMENT_XP, xp),
+                rarity: rarityForRound(round, wr),
+              });
+            }
+          }
+          continue;
+        }
         const wr = (cType as string) === 'STARTING_ROOM' ? bo2Cfg.firstRoomWR
           : (cType as string) === 'NO_POWER' ? bo2Cfg.noPowerWR
           : (cType as string) === 'NO_PERKS' ? bo2Cfg.noPerksWR
@@ -430,10 +492,27 @@ export function getMapAchievementDefinitions(
       for (const cType of bo3Cfg.challengeTypes) {
         const cTypeStr = cType as string;
         if (cTypeStr === 'HIGHEST_ROUND' || cTypeStr === 'NO_DOWNS' || cTypeStr === 'NO_MANS_LAND') continue;
+        // BO3 Verrückt: one "First Room Round X" per round (accepts either variant)
+        if (mapSlug === 'bo3-verruckt' && cTypeStr === 'STARTING_ROOM') {
+          const maxWr = Math.max(bo3Cfg.firstRoomJugWR ?? 0, bo3Cfg.firstRoomQuickWR ?? 0);
+          if (maxWr > 0) {
+            const cMilestones = getBo3RoundMilestones(maxWr);
+            for (const { round, xp } of cMilestones) {
+              if (round > maxWr) continue;
+              rows.push({
+                slug: `starting-room-${round}`,
+                name: `First Room Round ${round}`,
+                type: 'CHALLENGE_COMPLETE',
+                criteria: { round, challengeType: 'STARTING_ROOM' },
+                xpReward: Math.max(MIN_ACHIEVEMENT_XP, xp),
+                rarity: rarityForRound(round, maxWr),
+              });
+            }
+          }
+          continue;
+        }
         const wr =
           cTypeStr === 'STARTING_ROOM' ? bo3Cfg.firstRoomWR
-          : cTypeStr === 'STARTING_ROOM_JUG_SIDE' ? bo3Cfg.firstRoomJugWR
-          : cTypeStr === 'STARTING_ROOM_QUICK_SIDE' ? bo3Cfg.firstRoomQuickWR
           : cTypeStr === 'NO_POWER' ? bo3Cfg.noPowerWR
           : cTypeStr === 'NO_PERKS' ? bo3Cfg.noPerksWR
           : cTypeStr === 'NO_JUG' ? bo3Cfg.noJugWR
@@ -838,6 +917,28 @@ export function getMapAchievementDefinitions(
       for (const cType of awCfg.challengeTypes) {
         const ct = cType as string;
         if (ct === 'HIGHEST_ROUND' || ct === 'NO_DOWNS' || ct.startsWith('ROUND_') || ct === 'EASTER_EGG_SPEEDRUN') continue;
+        // AW Carrier: STARTING_ROOM has MK14_SIDE, BULLDOG_SIDE, MIXED variants
+        if (mapSlug === 'aw-carrier' && ct === 'STARTING_ROOM') {
+          const wr = awCfg.firstRoomWR;
+          if (wr == null || wr <= 0) continue;
+          for (const variant of ['MK14_SIDE', 'BULLDOG_SIDE', 'MIXED'] as const) {
+            const label = variant === 'MK14_SIDE' ? 'First Room (MK14 Side)' : variant === 'BULLDOG_SIDE' ? 'First Room (Bulldog Side)' : 'First Room (Mixed)';
+            const cMilestones = getAwRoundMilestones(wr);
+            const slugPrefix = `starting-room-${variant.toLowerCase().replace(/_/g, '-')}`;
+            for (const { round, xp } of cMilestones) {
+              if (round > wr) continue;
+              rows.push({
+                slug: `${slugPrefix}-${round}`,
+                name: `${label} Round ${round}`,
+                type: 'CHALLENGE_COMPLETE',
+                criteria: { round, challengeType: 'STARTING_ROOM', firstRoomVariant: variant },
+                xpReward: Math.max(MIN_ACHIEVEMENT_XP, xp),
+                rarity: rarityForRound(round, wr),
+              });
+            }
+          }
+          continue;
+        }
         const wr = ct === 'STARTING_ROOM' ? awCfg.firstRoomWR
           : ct === 'NO_POWER' ? awCfg.noPowerWR
           : ct === 'NO_EXO_SUIT' ? awCfg.noExoSuitWR

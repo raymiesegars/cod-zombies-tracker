@@ -13,6 +13,7 @@ export type MapAchievementContext = {
     scoreReached?: number | null;
     difficulty?: Bo4Difficulty | null;
     completionTimeSeconds?: number | null;
+    wawNoJug?: boolean | null;
   }[];
   easterEggIds: Set<string>;
   /** EE completions with time (for EE speedrun tier achievements) */
@@ -65,11 +66,12 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
 
   CHALLENGE_COMPLETE: async (userId, criteria, achievement) => {
     if (!achievement.mapId) return false;
-    const { round, kills, score, challengeType, isCap, maxTimeSeconds } = criteria as {
+    const { round, kills, score, challengeType, firstRoomVariant, isCap, maxTimeSeconds } = criteria as {
       round?: number;
       kills?: number;
       score?: number;
       challengeType?: string;
+      firstRoomVariant?: string;
       isCap?: boolean;
       maxTimeSeconds?: number;
     };
@@ -94,12 +96,29 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
       return !!log;
     }
 
+    // NO_JUG is a run modifier (wawNoJug), not a challenge type. Achievements with challengeType NO_JUG check for HIGHEST_ROUND + wawNoJug.
+    if (challengeType === 'NO_JUG') {
+      const noJugWhere: any = {
+        userId,
+        mapId: achievement.mapId,
+        wawNoJug: true,
+        challenge: { type: 'HIGHEST_ROUND' },
+      };
+      if (achievement.difficulty != null) noJugWhere.difficulty = achievement.difficulty;
+      if (targetRound != null) noJugWhere.roundReached = { gte: targetRound };
+      const log = await prisma.challengeLog.findFirst({ where: noJugWhere });
+      return !!log;
+    }
+
     const baseWhere: any = {
       userId,
       mapId: achievement.mapId,
       challenge: { type: challengeType as ChallengeType },
     };
     if (achievement.difficulty != null) baseWhere.difficulty = achievement.difficulty;
+    if (firstRoomVariant != null && firstRoomVariant !== '') {
+      (baseWhere as Record<string, unknown>).firstRoomVariant = firstRoomVariant;
+    }
 
     // Speedrun tier: qualify if user has a run with completionTimeSeconds <= maxTimeSeconds
     if (maxTimeSeconds != null && typeof maxTimeSeconds === 'number' && challengeType) {
@@ -374,6 +393,17 @@ export function checkWithContext(
             l.scoreReached >= targetScore
         );
       }
+      // NO_JUG: run modifier; match HIGHEST_ROUND + wawNoJug
+      if (type === 'NO_JUG') {
+        const capRaw = isCap && ctx.map?.roundCap != null ? ctx.map.roundCap : targetRound;
+        const cap = capRaw != null ? Number(capRaw) : undefined;
+        return logs.some(
+          (l) =>
+            l.challengeType === 'HIGHEST_ROUND' &&
+            l.wawNoJug === true &&
+            (cap == null || (!Number.isNaN(cap) && l.roundReached >= cap))
+        );
+      }
       const capRaw = isCap && ctx.map?.roundCap != null ? ctx.map.roundCap : targetRound;
       const cap = capRaw != null ? Number(capRaw) : undefined;
       return logs.some(
@@ -413,6 +443,7 @@ export async function processMapAchievements(
           scoreReached: true,
           difficulty: true,
           completionTimeSeconds: true,
+          wawNoJug: true,
         },
       }),
       prisma.easterEggLog.findMany({
@@ -437,6 +468,7 @@ export async function processMapAchievements(
       scoreReached: l.scoreReached ?? undefined,
       difficulty: l.difficulty ?? undefined,
       completionTimeSeconds: l.completionTimeSeconds ?? undefined,
+      wawNoJug: l.wawNoJug ?? undefined,
     })),
     easterEggIds: new Set(easterEggLogs.map((e) => e.easterEggId)),
     easterEggLogsWithTime,
@@ -536,6 +568,7 @@ export async function isAchievementSatisfiedByVerifiedRun(
         scoreReached: true,
         difficulty: true,
         completionTimeSeconds: true,
+        wawNoJug: true,
       },
     }),
     prisma.easterEggLog.findMany({
@@ -560,6 +593,7 @@ export async function isAchievementSatisfiedByVerifiedRun(
       scoreReached: l.scoreReached ?? undefined,
       difficulty: l.difficulty ?? undefined,
       completionTimeSeconds: l.completionTimeSeconds ?? undefined,
+      wawNoJug: l.wawNoJug ?? undefined,
     })),
     easterEggIds: new Set(easterEggLogs.map((e) => e.easterEggId)),
     easterEggLogsWithTime,
@@ -677,6 +711,7 @@ export async function revokeAchievementsForMapAfterDelete(
           scoreReached: true,
           difficulty: true,
           completionTimeSeconds: true,
+          wawNoJug: true,
         },
       }),
       prisma.easterEggLog.findMany({
@@ -700,6 +735,7 @@ export async function revokeAchievementsForMapAfterDelete(
       scoreReached: l.scoreReached ?? undefined,
       difficulty: l.difficulty ?? undefined,
       completionTimeSeconds: l.completionTimeSeconds ?? undefined,
+      wawNoJug: l.wawNoJug ?? undefined,
     })),
     easterEggIds: new Set(easterEggLogs.map((e) => e.easterEggId)),
     easterEggLogsWithTime,
