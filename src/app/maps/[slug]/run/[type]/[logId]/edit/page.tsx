@@ -248,6 +248,10 @@ export default function EditRunPage() {
         return;
       }
     }
+    if (chalType === 'STARTING_ROOM' && log?.map?.slug && hasFirstRoomVariantFilter(log.map.slug) && !firstRoomVariant?.trim()) {
+      setErrorModalMessage('First room challenge on this map requires selecting a room variant.');
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -548,7 +552,7 @@ export default function EditRunPage() {
                 )}
                 {log?.map?.slug && (log as ChallengeLog).challenge?.type === 'STARTING_ROOM' && hasFirstRoomVariantFilter(log.map.slug) && (
                   <Select
-                    label="Room Variant"
+                    label="Room Variant (required)"
                     options={[
                       { value: '', label: 'Select variant…' },
                       ...(getFirstRoomVariantsForMap(log.map.slug) ?? []).map((o) => ({ value: o.value, label: o.label })),

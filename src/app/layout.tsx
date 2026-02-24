@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { AuthProvider } from '@/context/auth-context';
 import { XpToastProvider } from '@/context/xp-toast-context';
+import { LogProgressModalProvider } from '@/context/log-progress-modal-context';
 import { Navbar, Footer, BackToTop, TVRoomBackground, MusicPlayer, AuthLayoutWrapper, MessagingWidget } from '@/components/layout';
 import './globals.css';
 
@@ -137,13 +138,15 @@ export default function RootLayout({
         <div className="relative z-10 flex flex-col min-h-screen">
           <AuthProvider>
             <XpToastProvider>
-              <AuthLayoutWrapper>
-                <Navbar />
-                <main className="flex-1">{children}</main>
+              <LogProgressModalProvider>
+                <AuthLayoutWrapper>
+                  <Navbar />
+                  <main className="flex-1">{children}</main>
                 <Footer />
                 <BackToTop />
                 <MessagingWidget />
               </AuthLayoutWrapper>
+              </LogProgressModalProvider>
             </XpToastProvider>
           </AuthProvider>
         </div>

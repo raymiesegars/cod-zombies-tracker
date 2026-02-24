@@ -7,7 +7,8 @@ import { useAuth } from '@/context/auth-context';
 import { Button, Logo, MapIcon } from '@/components/ui';
 import { UserWithRank } from '@/components/game';
 import { NotificationsDropdown } from '@/components/layout/notifications-dropdown';
-import { Menu, X, LogOut, User, Settings, Trophy, LayoutDashboard, Users } from 'lucide-react';
+import { Menu, X, LogOut, User, Settings, Trophy, LayoutDashboard, Users, PenLine, ChevronDown } from 'lucide-react';
+import { useLogProgressModal } from '@/context/log-progress-modal-context';
 
 const DISCORD_URL = 'https://discord.gg/Gc6Cnt7XxT';
 const DISCORD_BLUE = '#5865F2';
@@ -26,76 +27,116 @@ const DiscordIcon = ({ className }: { className?: string }) => (
 
 export function Navbar() {
   const { user, profile, isLoading, signInWithGoogle, signOut } = useAuth();
+  const { openLogProgressModal } = useLogProgressModal() ?? {};
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const dashboardHref = user && profile?.username ? `/users/${profile.username}` : null;
   const linkClass =
-    'py-2.5 px-2.5 sm:px-3 text-sm font-medium font-zombies text-bunker-200 hover:text-white hover:bg-white/5 transition-colors rounded-lg border border-transparent hover:border-bunker-600/60 tracking-wide whitespace-nowrap shrink-0';
+    'py-2 px-2 sm:px-2.5 text-sm font-medium font-zombies text-bunker-200 hover:text-white hover:bg-white/5 transition-colors rounded-lg border border-transparent hover:border-bunker-600/60 tracking-wide whitespace-nowrap shrink-0';
   const iconOnlyClass =
-    'inline-flex items-center justify-center p-2.5 rounded-lg border border-transparent text-bunker-200 hover:text-white hover:bg-white/5 hover:border-bunker-600/60 transition-colors shrink-0';
+    'inline-flex items-center justify-center p-2 rounded-lg border border-transparent text-bunker-200 hover:text-white hover:bg-white/5 hover:border-bunker-600/60 transition-colors shrink-0';
 
-  const navLinks: { href: string; label: string; icon: React.ComponentType<{ className?: string }>; iconOnly?: boolean }[] = [
+  const navLinks: { href: string; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     ...(dashboardHref ? [{ href: dashboardHref, label: 'Dashboard', icon: LayoutDashboard }] : []),
     { href: '/maps', label: 'Maps', icon: MapIcon },
     { href: '/leaderboards', label: 'Leaderboards', icon: Trophy },
-    { href: '/find-group', label: 'Find Group', icon: Users },
-    { href: '/tools', label: 'Tools', icon: WrenchIcon, iconOnly: true },
+    { href: '/find-group', label: 'LFG', icon: Users },
   ];
 
   return (
     <nav className="navbar-creative sticky top-0 z-50 backdrop-blur-md">
       <div className="max-w-7xl mx-auto pl-4 sm:pl-5 lg:pl-6 pr-4 sm:pr-6 lg:pr-8">
-        <div className="flex items-center justify-between gap-2 h-14 sm:h-16 min-w-0">
-          {/* Logo + text: shrink-0 so it never gets cut off */}
+        <div className="flex items-center justify-between gap-2 h-14 sm:h-16 min-w-0 overflow-visible">
+          {/* Logo + text: CZT when narrow, Zombies Tracker mid, CoD Zombies Tracker when wide */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 min-h-[2.5rem] shrink-0">
             <span className="flex flex-shrink-0 items-center justify-center w-8 h-8 self-center">
               <Logo size="sm" animated={false} className="block w-full h-full" />
             </span>
-            <span className="text-lg sm:text-xl font-zombies text-white tracking-wide hidden sm:inline self-center">
-              CoD Zombies Tracker
-            </span>
-            <span className="text-lg font-zombies text-white tracking-wide sm:hidden self-center">
-              Zombies Tracker
+            <span className="text-lg sm:text-xl font-zombies text-white tracking-wide self-center">
+              <span className="min-[600px]:hidden">CZT</span>
+              <span className="hidden min-[600px]:inline min-[950px]:hidden">Zombies Tracker</span>
+              <span className="hidden min-[950px]:inline">CoD Zombies Tracker</span>
             </span>
           </Link>
 
-          {/* Desktop Navigation: switch to burger at 951px (950 and below) to avoid cramping/overlap */}
-          <div className="hidden navbar:flex items-center gap-0.5 min-w-0 shrink">
+          {/* Desktop Navigation: flex-1 to use available space; centered between logo and right group */}
+          <div className="hidden navbar:flex flex-1 items-center justify-center gap-px min-w-0 overflow-visible">
             {navLinks.map((link) => {
               const Icon = link.icon;
-              if (link.iconOnly) {
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={iconOnlyClass}
-                    aria-label={link.label}
-                  >
-                    <Icon className="w-5 h-5 text-current" />
-                  </Link>
-                );
-              }
               return (
-                <Link key={link.href} href={link.href} className={`${linkClass} inline-flex items-center gap-1.5`} aria-label={link.label}>
+                <Link key={link.href} href={link.href} className={`${linkClass} inline-flex items-center gap-1`} aria-label={link.href === '/find-group' ? 'Find Group' : link.label}>
                   <Icon className="w-4 h-4 flex-shrink-0 text-current" />
-                  <span className="hidden min-[1440px]:inline">{link.label}</span>
+                  <span className="hidden min-[1100px]:inline">{link.label}</span>
                 </Link>
               );
             })}
-            <a
-              href={DISCORD_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={iconOnlyClass}
-              aria-label="Join our Discord"
-            >
-              <DiscordIcon className="w-5 h-5" />
-            </a>
+            {/* Discord (default) + Tools dropdown */}
+            <div className="relative inline-flex flex-col items-end shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
+                className={`${iconOnlyClass} inline-flex items-center`}
+                aria-label="Discord and more"
+                aria-expanded={isMoreMenuOpen}
+              >
+                <DiscordIcon className="w-5 h-5" />
+                <ChevronDown className="w-3 h-3 ml-0.5 opacity-70" />
+              </button>
+              <AnimatePresence>
+                {isMoreMenuOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-[99]"
+                      onClick={() => setIsMoreMenuOpen(false)}
+                      aria-hidden
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-full right-0 mt-1.5 min-w-[10rem] py-2 bg-bunker-900 border border-bunker-700 rounded-lg shadow-xl z-[100]"
+                    >
+                      <a
+                        href={DISCORD_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setIsMoreMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-white hover:text-blood-400 hover:bg-bunker-800/50"
+                      >
+                        <DiscordIcon className="w-4 h-4 flex-shrink-0" />
+                        Discord
+                      </a>
+                      <Link
+                        href="/tools"
+                        onClick={() => setIsMoreMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-white hover:text-blood-400 hover:bg-bunker-800/50"
+                      >
+                        <WrenchIcon className="w-4 h-4 flex-shrink-0 text-current" />
+                        Tools
+                      </Link>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
-          {/* Desktop User Menu: min-w-0 so username truncates only when needed; ml-4 spacing from Discord */}
-          <div className="hidden navbar:flex items-center gap-2 min-w-0 ml-4">
+          {/* Log Progress + User: always at far right; Log Progress left of profile */}
+          <div className="hidden navbar:flex items-center gap-0.5 sm:gap-1.5 min-w-0 shrink-0 ml-1.5">
+            {user && openLogProgressModal && (
+              <button
+                type="button"
+                onClick={() => openLogProgressModal()}
+                className="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-blood-600 hover:bg-blood-500 text-white border border-blood-500/50 text-sm font-medium font-zombies tracking-wide shrink-0 shadow-sm hover:shadow-md hover:border-blood-400/50 transition-all duration-150"
+                aria-label="Log Progress"
+              >
+                <PenLine className="w-4 h-4 flex-shrink-0" strokeWidth={2} />
+                <span className="leading-none pt-0.5">Log</span>
+              </button>
+            )}
             {isLoading ? (
               <div className="w-8 h-8 rounded-full bg-bunker-800 animate-pulse shrink-0" />
             ) : user && profile ? (
@@ -192,7 +233,7 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Mobile Navigation: Log Progress first, then nav, Discord, account */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
@@ -202,6 +243,21 @@ export function Navbar() {
             className="navbar:hidden bg-bunker-900/95 border-b border-bunker-800/50"
           >
             <div className="px-4 py-4 space-y-2">
+              {/* Primary CTA: Log Progress (when logged in) */}
+              {user && openLogProgressModal && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    openLogProgressModal();
+                  }}
+                  className="flex items-center gap-3 w-full px-4 py-3 min-h-[44px] text-base font-zombies text-white bg-blood-600/90 hover:bg-blood-600 border border-blood-500/50 rounded-lg transition-colors tracking-wide touch-manipulation"
+                >
+                  <PenLine className="w-5 h-5 flex-shrink-0" />
+                  Log Progress
+                </button>
+              )}
+              {/* Main nav: Dashboard, Maps, Leaderboards, Find Group */}
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -213,6 +269,7 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
+              {/* Discord + Tools */}
               <a
                 href={DISCORD_URL}
                 target="_blank"
@@ -224,6 +281,15 @@ export function Navbar() {
                 <DiscordIcon className="w-5 h-5 flex-shrink-0" />
                 Discord
               </a>
+              <Link
+                href="/tools"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 min-h-[44px] text-base font-zombies text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors tracking-wide touch-manipulation"
+              >
+                <WrenchIcon className="w-5 h-5 flex-shrink-0 text-current" />
+                Tools
+              </Link>
+              {/* Account section (when logged in) */}
               {user ? (
                 <>
                   <hr className="border-bunker-700 my-2" />

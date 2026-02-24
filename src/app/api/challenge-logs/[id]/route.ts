@@ -15,7 +15,7 @@ import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES } from '@/lib/bo6';
 import { isBo7Game, BO7_SUPPORT_MODES, BO7_RELICS } from '@/lib/bo7';
 import { isWw2Game } from '@/lib/ww2';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
-import { hasFirstRoomVariantFilter } from '@/lib/first-room-variants';
+import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap } from '@/lib/first-room-variants';
 import type { Bo4Difficulty } from '@prisma/client';
 
 type Params = { params: Promise<{ id: string }> };
@@ -202,10 +202,29 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       : undefined;
     const mapSlug = (log.map as { slug?: string })?.slug;
     const challenge = log.challenge;
+    const existingFirstRoomVariant = (log as { firstRoomVariant?: string | null }).firstRoomVariant;
+    const needsFirstRoomVariant =
+      challenge?.type === 'STARTING_ROOM' && mapSlug && hasFirstRoomVariantFilter(mapSlug);
+    if (needsFirstRoomVariant) {
+      const variant = body.firstRoomVariant;
+      const options = getFirstRoomVariantsForMap(mapSlug);
+      const validValues = options?.map((o) => o.value) ?? [];
+      if (variant !== undefined) {
+        if (!variant || !validValues.includes(variant as string)) {
+          return NextResponse.json(
+            { error: `First room challenge on this map requires selecting a room variant (e.g. ${validValues.slice(0, 2).join(', ')})` },
+            { status: 400 }
+          );
+        }
+      } else if (!existingFirstRoomVariant || existingFirstRoomVariant.trim() === '') {
+        return NextResponse.json(
+          { error: 'First room challenge on this map requires selecting a room variant.' },
+          { status: 400 }
+        );
+      }
+    }
     const firstRoomVariant = body.firstRoomVariant !== undefined
-      ? (challenge?.type === 'STARTING_ROOM' && mapSlug && hasFirstRoomVariantFilter(mapSlug)
-          ? (body.firstRoomVariant as string)
-          : undefined)
+      ? (needsFirstRoomVariant ? (body.firstRoomVariant as string) : undefined)
       : undefined;
 
     let difficulty: Bo4Difficulty | undefined;
