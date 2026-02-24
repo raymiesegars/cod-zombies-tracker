@@ -34,6 +34,7 @@ import { isBo3Game, BO3_GOBBLEGUM_MODES, getBo3GobbleGumLabel } from '@/lib/bo3'
 import { isBocwGame, BOCW_SUPPORT_MODES, getBocwSupportLabel } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
 import { isBo7Game, BO7_SUPPORT_MODES, getBo7SupportLabel } from '@/lib/bo7';
+import { isWw2Game } from '@/lib/ww2';
 import { formatCompletionTime } from '@/components/ui/time-input';
 import type { MapWithDetails, LeaderboardEntry as LeaderboardEntryType, PlayerCount, ChallengeType } from '@/types';
 import {
@@ -72,6 +73,7 @@ import { getBo4MapConfig, getBo4ChallengeTypeLabel } from '@/lib/bo4/bo4-map-con
 import { getBocwMapConfig, getBocwChallengeTypeLabel } from '@/lib/bocw/bocw-map-config';
 import { getBo6MapConfig, getBo6ChallengeTypeLabel } from '@/lib/bo6/bo6-map-config';
 import { getBo7MapConfig, getBo7ChallengeTypeLabel } from '@/lib/bo7/bo7-map-config';
+import { getWw2MapConfig, getWw2ChallengeTypeLabel } from '@/lib/ww2/ww2-map-config';
 
 const BUILDABLE_PART_CACHE_KEY_PREFIX = 'buildable-parts';
 const BUILDABLE_PART_CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
@@ -419,6 +421,8 @@ const challengeTypeLabels: Record<string, string> = {
   PISTOL_ONLY: 'Pistol Only',
   NO_POWER: 'No Power',
   NO_MAGIC: 'No Magic',
+  NO_ARMOR: 'No Armor',
+  NO_BLITZ: 'No Blitz',
   ROUND_30_SPEEDRUN: 'Round 30 Speedrun',
   ROUND_50_SPEEDRUN: 'Round 50 Speedrun',
   ROUND_70_SPEEDRUN: 'Round 70 Speedrun',
@@ -442,6 +446,7 @@ const challengeTypeLabels: Record<string, string> = {
   ROUND_999_SPEEDRUN: 'Round 999 Speedrun',
   ROUND_10_SPEEDRUN: 'Round 10 Speedrun',
   ROUND_20_SPEEDRUN: 'Round 20 Speedrun',
+  SUPER_30_SPEEDRUN: 'Super 30 Speedrun',
 };
 
 type StepSection = { heading?: string; lines: string[] };
@@ -566,6 +571,8 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   const [lbWawFixedWunderwaffe, setLbWawFixedWunderwaffe] = useState<string>('');
   // BO2 (bank/storage filter for Tranzit, Die Rise, Buried)
   const [lbBo2BankUsed, setLbBo2BankUsed] = useState<string>('');
+  // WW2 consumables filter
+  const [lbWw2Consumables, setLbWw2Consumables] = useState<string>('true');
   const leaderboardSlugRef = useRef<string | null>(null);
 
   // Your runs for this map when logged in; URL ?tab=your-runs triggers fetch on load
@@ -695,6 +702,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           if (map.game?.shortName === 'BO2' && getBo2MapConfig(map.slug)?.hasBank) {
             if (lbBo2BankUsed === 'true' || lbBo2BankUsed === 'false') params.set('bo2BankUsed', lbBo2BankUsed);
           }
+          if (isWw2Game(map.game?.shortName) && (lbWw2Consumables === 'true' || lbWw2Consumables === 'false')) params.set('ww2ConsumablesUsed', lbWw2Consumables);
           if ((isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName)) && lbRampageInducerFilter) params.set('rampageInducerUsed', lbRampageInducerFilter);
           const res = await fetch(`/api/maps/${slug}/leaderboard?${params}`);
           if (res.ok) {
@@ -717,7 +725,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     })();
     // Intentionally omit leaderboard.length / leaderboardFetchedOnce to avoid re-fetch loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut, lbBo3GobbleGumMode, lbBo3AatUsed, lbBo4ElixirMode, lbBocwSupportMode, lbRampageInducerFilter, lbBo6GobbleGumMode, lbBo6SupportMode, lbBo7SupportMode, lbBo7CursedFilter, lbBo7SelectedRelics, lbWawNoJug, lbWawFixedWunderwaffe, lbBo2BankUsed]);
+  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut, lbBo3GobbleGumMode, lbBo3AatUsed, lbBo4ElixirMode, lbBocwSupportMode, lbRampageInducerFilter, lbBo6GobbleGumMode, lbBo6SupportMode, lbBo7SupportMode, lbBo7CursedFilter, lbBo7SelectedRelics, lbWawNoJug, lbWawFixedWunderwaffe, lbBo2BankUsed, lbWw2Consumables]);
 
   // Sync activeTab with URL so switching to Your Runs triggers fetch
   useEffect(() => {
@@ -922,7 +930,9 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                 ? (fallbackName ?? challengeTypeLabels[type] ?? getBo6ChallengeTypeLabel(type) ?? type)
                 : map?.game?.shortName === 'BO7'
                   ? (fallbackName ?? challengeTypeLabels[type] ?? getBo7ChallengeTypeLabel(type) ?? type)
-                  : (fallbackName ?? challengeTypeLabels[type] ?? type);
+                  : map?.game?.shortName === 'WW2'
+                    ? (challengeTypeLabels[type] ?? getWw2ChallengeTypeLabel(type) ?? fallbackName ?? type)
+                    : (fallbackName ?? challengeTypeLabels[type] ?? type);
     if (map?.game?.shortName === 'IW' && challenges.length > 0) {
       const ordered = IW_CHALLENGE_TYPES_ORDER.filter((t) => challenges.some((c) => c.type === t));
       return ordered.map((t) => {
@@ -974,6 +984,13 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     }
     if (map?.game?.shortName === 'BO7' && map?.slug && getBo7MapConfig(map.slug)) {
       const types = getBo7MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
+      return types.map((t) => {
+        const c = challenges.find((ch) => ch.type === t);
+        return { value: t, label: getLabel(t, c?.name) };
+      });
+    }
+    if (map?.game?.shortName === 'WW2' && map?.slug && getWw2MapConfig(map.slug)) {
+      const types = getWw2MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
@@ -2026,6 +2043,18 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                         ]}
                         value={lbBo2BankUsed}
                         onChange={(e) => setLbBo2BankUsed(e.target.value)}
+                        className="w-full min-w-0 sm:w-40 max-w-full"
+                      />
+                    )}
+                    {isWw2Game(map?.game?.shortName) && (
+                      <Select
+                        options={[
+                          { value: '', label: 'All (Consumables)' },
+                          { value: 'true', label: 'With Consumables' },
+                          { value: 'false', label: 'No Consumables' },
+                        ]}
+                        value={lbWw2Consumables}
+                        onChange={(e) => setLbWw2Consumables(e.target.value)}
                         className="w-full min-w-0 sm:w-40 max-w-full"
                       />
                     )}

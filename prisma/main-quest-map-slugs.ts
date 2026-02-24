@@ -38,4 +38,10 @@ export const MAIN_QUEST_MAP_SLUGS = new Set([
   'vandorn-farm',
   'exit-115',
   'zarya-cosmodrome',
+  // WW2 Zombies
+  'the-final-reich',
+  'the-darkest-shore',
+  'the-shadowed-throne',
+  'altar-of-blood',
+  'the-frozen-dawn',
 ]);

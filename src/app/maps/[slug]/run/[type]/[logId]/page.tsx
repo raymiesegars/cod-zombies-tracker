@@ -25,6 +25,7 @@ import { getBo3GobbleGumLabel } from '@/lib/bo3';
 import { getBocwSupportLabel } from '@/lib/bocw';
 import { getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
 import { getBo7SupportLabel } from '@/lib/bo7';
+import { getWw2ConsumablesLabel } from '@/lib/ww2';
 import { ChevronLeft, FileText, ExternalLink, Clock, Pencil, Trash2, Users, ShieldCheck, ShieldOff, Loader2, Check, Lock } from 'lucide-react';
 
 function DeleteRunButton({
@@ -161,6 +162,7 @@ type ChallengeLogDetail = {
   bo7IsCursedRun?: boolean | null;
   bo7RelicsUsed?: string[];
   rampageInducerUsed?: boolean | null;
+  ww2ConsumablesUsed?: boolean | null;
 };
 
 type EasterEggLogDetail = {
@@ -184,6 +186,7 @@ type EasterEggLogDetail = {
   isVerified?: boolean;
   verificationRequestedAt?: string | null;
   rampageInducerUsed?: boolean | null;
+  ww2ConsumablesUsed?: boolean | null;
 };
 
 export default function RunDetailPage() {
@@ -594,6 +597,12 @@ export default function RunDetailPage() {
                       <span className="text-white font-medium">{getBo7SupportLabel((log as ChallengeLogDetail).bo7SupportMode!)}</span>
                     </div>
                   )}
+                  {map.game.shortName === 'WW2' && (log as ChallengeLogDetail).ww2ConsumablesUsed != null && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">Consumables</span>
+                      <span className="text-white font-medium">{getWw2ConsumablesLabel((log as ChallengeLogDetail).ww2ConsumablesUsed)}</span>
+                    </div>
+                  )}
                   {map.game.shortName === 'BO7' && (
                     <div className="flex items-center justify-between">
                       <span className="text-bunker-400 text-sm">Cursed Run</span>
@@ -655,6 +664,12 @@ export default function RunDetailPage() {
                     <div className="flex items-center justify-between">
                       <span className="text-bunker-400 text-sm">Difficulty</span>
                       <span className="text-white font-medium">{getBo4DifficultyLabel((log as EasterEggLogDetail).difficulty)}</span>
+                    </div>
+                  )}
+                  {map.game.shortName === 'WW2' && (log as EasterEggLogDetail).ww2ConsumablesUsed != null && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-bunker-400 text-sm">Consumables</span>
+                      <span className="text-white font-medium">{getWw2ConsumablesLabel((log as EasterEggLogDetail).ww2ConsumablesUsed)}</span>
                     </div>
                   )}
                   {(() => {

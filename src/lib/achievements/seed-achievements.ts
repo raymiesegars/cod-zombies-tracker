@@ -23,9 +23,10 @@ import { getBo4MapConfig, getBo4RoundMilestones, getBo4ChallengeTypeLabel } from
 import { getBocwMapConfig, getBocwRoundMilestones, getBocwChallengeTypeLabel } from '@/lib/bocw/bocw-map-config';
 import { getBo6MapConfig, getBo6RoundMilestones, getBo6ChallengeTypeLabel } from '@/lib/bo6/bo6-map-config';
 import { getBo7MapConfig, getBo7RoundMilestones, getBo7ChallengeTypeLabel } from '@/lib/bo7/bo7-map-config';
+import { getWw2MapConfig, getWw2RoundMilestones, getWw2ChallengeTypeLabel } from '@/lib/ww2/ww2-map-config';
 import { isBo4Game, BO4_DIFFICULTIES, BO4_DIFFICULTY_XP_MULTIPLIER, type Bo4DifficultyType } from '../bo4';
 import { isBocwGame } from '../bocw';
-import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, IW_AOTRT_SPEEDRUN_TIERS, IW_BEAST_SPEEDRUN_TIERS, WAW_SPEEDRUN_TIERS_BY_MAP, BO1_SPEEDRUN_TIERS_BY_MAP, BO2_SPEEDRUN_TIERS_BY_MAP, BO3_SPEEDRUN_TIERS_BY_MAP, BO4_SPEEDRUN_TIERS_BY_MAP, BOCW_SPEEDRUN_TIERS_BY_MAP, BO6_SPEEDRUN_TIERS_BY_MAP, BO7_SPEEDRUN_TIERS_BY_MAP, BO1_COTD_STAND_IN_EE_TIERS, BO1_COTD_ENSEMBLE_CAST_EE_TIERS, BO2_TRANZIT_RICHTOFEN_EE_TIERS, BO2_TRANZIT_MAXIS_EE_TIERS, BO2_DIE_RISE_RICHTOFEN_EE_TIERS, BO2_DIE_RISE_MAXIS_EE_TIERS, BO2_BURIED_RICHTOFEN_EE_TIERS, BO2_BURIED_MAXIS_EE_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
+import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, IW_AOTRT_SPEEDRUN_TIERS, IW_BEAST_SPEEDRUN_TIERS, WAW_SPEEDRUN_TIERS_BY_MAP, BO1_SPEEDRUN_TIERS_BY_MAP, BO2_SPEEDRUN_TIERS_BY_MAP, BO3_SPEEDRUN_TIERS_BY_MAP, BO4_SPEEDRUN_TIERS_BY_MAP, BOCW_SPEEDRUN_TIERS_BY_MAP, BO6_SPEEDRUN_TIERS_BY_MAP, BO7_SPEEDRUN_TIERS_BY_MAP, WW2_SPEEDRUN_TIERS_BY_MAP, BO1_COTD_STAND_IN_EE_TIERS, BO1_COTD_ENSEMBLE_CAST_EE_TIERS, BO2_TRANZIT_RICHTOFEN_EE_TIERS, BO2_TRANZIT_MAXIS_EE_TIERS, BO2_DIE_RISE_RICHTOFEN_EE_TIERS, BO2_DIE_RISE_MAXIS_EE_TIERS, BO2_BURIED_RICHTOFEN_EE_TIERS, BO2_BURIED_MAXIS_EE_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
 
 const CHALLENGE_TYPES = [
   'HIGHEST_ROUND',
@@ -694,6 +695,61 @@ export function getMapAchievementDefinitions(
     }
   }
 
+  // WW2: per-map config with WRs, First Room, No Power, No Armor, No Blitz, speedruns, EE
+  if (gameShortName === 'WW2') {
+    const ww2Cfg = getWw2MapConfig(mapSlug);
+    if (ww2Cfg) {
+      const milestones = getWw2RoundMilestones(ww2Cfg.highRoundWR);
+      for (const { round, xp } of milestones) {
+        if (round > ww2Cfg.highRoundWR) continue;
+        rows.push({
+          slug: `round-${round}`,
+          name: `Round ${round}`,
+          type: 'ROUND_MILESTONE',
+          criteria: { round, challengeType: 'HIGHEST_ROUND' },
+          xpReward: xp,
+          rarity: rarityForRound(round, ww2Cfg.highRoundWR),
+        });
+      }
+      const ndMilestones = getWw2RoundMilestones(ww2Cfg.noDownsWR);
+      for (const { round, xp } of ndMilestones) {
+        if (round > ww2Cfg.noDownsWR) continue;
+        rows.push({
+          slug: `no-downs-${round}`,
+          name: `No Downs Round ${round}`,
+          type: 'CHALLENGE_COMPLETE',
+          criteria: { round, challengeType: 'NO_DOWNS' },
+          xpReward: xp,
+          rarity: rarityForRound(round, ww2Cfg.noDownsWR),
+        });
+      }
+      for (const cType of ww2Cfg.challengeTypes) {
+        const ct = cType as string;
+        if (ct === 'HIGHEST_ROUND' || ct === 'NO_DOWNS' || ct.startsWith('ROUND_') || ct === 'SUPER_30_SPEEDRUN' || ct === 'EASTER_EGG_SPEEDRUN') continue;
+        const wr = ct === 'STARTING_ROOM' ? ww2Cfg.firstRoomWR
+          : ct === 'NO_POWER' ? ww2Cfg.noPowerWR
+          : ct === 'NO_ARMOR' ? ww2Cfg.noArmorWR
+          : ct === 'NO_BLITZ' ? ww2Cfg.noBlitzWR
+          : undefined;
+        if (wr == null || wr <= 0) continue;
+        const cMilestones = getWw2RoundMilestones(wr);
+        const slugPrefix = ct.toLowerCase().replace(/_/g, '-');
+        for (const { round, xp } of cMilestones) {
+          if (round > wr) continue;
+          rows.push({
+            slug: `${slugPrefix}-${round}`,
+            name: `${getWw2ChallengeTypeLabel(ct)} Round ${round}`,
+            type: 'CHALLENGE_COMPLETE',
+            criteria: { round, challengeType: cType },
+            xpReward: Math.max(MIN_ACHIEVEMENT_XP, xp),
+            rarity: rarityForRound(round, wr),
+          });
+        }
+      }
+      return rows;
+    }
+  }
+
   // BO7: per-map config with WRs, First Room, No Perks, No Jug, speedruns, exfil, EE (same pattern as BO6)
   if (gameShortName === 'BO7') {
     const bo7Cfg = getBo7MapConfig(mapSlug);
@@ -922,6 +978,7 @@ const SPEEDRUN_TYPE_LABELS: Record<string, string> = {
   EXFIL_SPEEDRUN: 'Exfil Round 11',
   EXFIL_R21_SPEEDRUN: 'Exfil Round 21',
   BUILD_EE_SPEEDRUN: 'Build% EE',
+  SUPER_30_SPEEDRUN: 'Super 30 Speedrun',
   INSTAKILL_ROUND_SPEEDRUN: 'Instakill Round',
   EASTER_EGG_SPEEDRUN: 'Easter Egg',
   GHOST_AND_SKULLS: 'Ghost and Skulls',
@@ -952,6 +1009,7 @@ export function getSpeedrunAchievementDefinitions(
     : gameShortName === 'BOCW' ? BOCW_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : gameShortName === 'BO6' ? BO6_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : gameShortName === 'BO7' ? BO7_SPEEDRUN_TIERS_BY_MAP[mapSlug]
+    : gameShortName === 'WW2' ? WW2_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : undefined;
   if (!tiersByType) return [];
   const rows: AchievementSeedRow[] = [];

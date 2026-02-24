@@ -11,6 +11,7 @@ import { isBocwGame, BOCW_SUPPORT_MODES, BOCW_SUPPORT_DEFAULT } from '@/lib/bocw
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_GOBBLEGUM_DEFAULT, BO6_SUPPORT_MODES, BO6_SUPPORT_DEFAULT } from '@/lib/bo6';
 import { isBo7Game, BO7_SUPPORT_MODES, BO7_SUPPORT_DEFAULT, BO7_RELICS } from '@/lib/bo7';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
+import { isWw2Game, WW2_CONSUMABLES_DEFAULT } from '@/lib/ww2';
 import type { Bo4Difficulty } from '@prisma/client';
 
 // Log a new run. We run the achievement check when it’s a new best for that user+challenge+map+playerCount.
@@ -278,6 +279,11 @@ export async function POST(request: NextRequest) {
 
     const rampageInducerUsed = (isBocw || isBo6 || isBo7) && body.rampageInducerUsed !== undefined ? Boolean(body.rampageInducerUsed) : undefined;
 
+    const isWw2 = isWw2Game(gameShortName);
+    const ww2ConsumablesUsed = isWw2
+      ? (body.ww2ConsumablesUsed !== undefined ? Boolean(body.ww2ConsumablesUsed) : WW2_CONSUMABLES_DEFAULT === 'WITH_CONSUMABLES')
+      : undefined;
+
     const isSpeedrunChal = challenge && isSpeedrunChallengeType(challenge.type);
     const isNoMansLandChal = challenge?.type === 'NO_MANS_LAND';
     const isRushChal = challenge?.type === 'RUSH';
@@ -324,6 +330,7 @@ export async function POST(request: NextRequest) {
         ...(wawFixedWunderwaffe != null && { wawFixedWunderwaffe }),
         ...(bo2BankUsed != null && { bo2BankUsed }),
         ...(rampageInducerUsed != null && { rampageInducerUsed }),
+        ...(ww2ConsumablesUsed != null && { ww2ConsumablesUsed }),
         ...(killsReached != null && killsReached > 0 && { killsReached }),
         ...(scoreReached != null && scoreReached > 0 && { scoreReached }),
       },

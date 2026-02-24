@@ -11,6 +11,7 @@ import { isBo4Game, BO4_DIFFICULTIES } from '@/lib/bo4';
 import { isBocwGame } from '@/lib/bocw';
 import { isBo6Game } from '@/lib/bo6';
 import { isBo7Game } from '@/lib/bo7';
+import { isWw2Game } from '@/lib/ww2';
 import type { Bo4Difficulty } from '@prisma/client';
 
 type Params = { params: Promise<{ id: string }> };
@@ -159,6 +160,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       (isBocwGame(gameShortName) || isBo6Game(gameShortName) || isBo7Game(gameShortName))
       ? Boolean(body.rampageInducerUsed)
       : undefined;
+    const ww2ConsumablesUsed = body.ww2ConsumablesUsed !== undefined && isWw2Game(gameShortName)
+      ? Boolean(body.ww2ConsumablesUsed)
+      : undefined;
 
     let difficulty: Bo4Difficulty | undefined;
     if (body.difficulty !== undefined) {
@@ -200,6 +204,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
           verificationRequestedAt: requestVerification ? new Date() : null,
         }),
         ...(rampageInducerUsed !== undefined && { rampageInducerUsed }),
+        ...(ww2ConsumablesUsed !== undefined && { ww2ConsumablesUsed }),
       },
       include: {
         easterEgg: true,

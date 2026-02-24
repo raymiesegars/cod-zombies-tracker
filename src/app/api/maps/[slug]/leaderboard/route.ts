@@ -6,6 +6,7 @@ import { isBo3Game } from '@/lib/bo3';
 import { isBocwGame } from '@/lib/bocw';
 import { isBo6Game } from '@/lib/bo6';
 import { isBo7Game } from '@/lib/bo7';
+import { isWw2Game } from '@/lib/ww2';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 import type { PlayerCount, ChallengeType, Prisma, Bo4Difficulty } from '@prisma/client';
 
@@ -40,6 +41,8 @@ export async function GET(
   const wawNoJug = searchParams.get('wawNoJug'); // 'true' | 'false' | null
   const wawFixedWunderwaffe = searchParams.get('wawFixedWunderwaffe'); // 'true' | 'false' | null
   const bo2BankUsed = searchParams.get('bo2BankUsed'); // 'true' | 'false' | null
+  // WW2: Consumables (gums) — 'true' = With Consumables (default), 'false' = No Consumables
+  const ww2ConsumablesParam = searchParams.get('ww2ConsumablesUsed'); // 'true' | 'false' | null
   // BOCW/BO6/BO7: Rampage Inducer. Default 'false' = No Rampage Inducer; 'true' = Rampage Inducer only.
   const rampageInducerParam = searchParams.get('rampageInducerUsed'); // 'true' | 'false' | null
   const limitParam = Math.min(500, Math.max(1, parseInt(searchParams.get('limit') || '25', 10) || 25));
@@ -163,6 +166,13 @@ export async function GET(
     if (gameShortName === 'BO2' && getBo2MapConfig(slug)?.hasBank) {
       if (bo2BankUsed === 'true') (whereClause as Record<string, unknown>).bo2BankUsed = true;
       else if (bo2BankUsed === 'false') (whereClause as Record<string, unknown>).bo2BankUsed = false;
+    }
+
+    if (isWw2Game(gameShortName)) {
+      if (ww2ConsumablesParam === 'true') (whereClause as Record<string, unknown>).ww2ConsumablesUsed = true;
+      else if (ww2ConsumablesParam === 'false') (whereClause as Record<string, unknown>).ww2ConsumablesUsed = false;
+      if (ww2ConsumablesParam === 'true') (eeWhereClause as Record<string, unknown>).ww2ConsumablesUsed = true;
+      else if (ww2ConsumablesParam === 'false') (eeWhereClause as Record<string, unknown>).ww2ConsumablesUsed = false;
     }
 
     // "Highest Round" (or no filter) = best round from any challenge OR easter egg; specific challenge = only that challenge's logs

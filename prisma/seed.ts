@@ -9,6 +9,7 @@ import { getBo2MapConfig } from '../src/lib/bo2/bo2-map-config';
 import { getBocwMapConfig, getBocwChallengeTypeLabel } from '../src/lib/bocw/bocw-map-config';
 import { getBo6MapConfig, getBo6ChallengeTypeLabel } from '../src/lib/bo6/bo6-map-config';
 import { getBo7MapConfig, getBo7ChallengeTypeLabel } from '../src/lib/bo7/bo7-map-config';
+import { getWw2MapConfig, getWw2ChallengeTypeLabel } from '../src/lib/ww2/ww2-map-config';
 
 // Load .env then .env.local (same order as Next.js) so seed uses the SAME DB as the app
 function loadEnv() {
@@ -149,6 +150,14 @@ async function main() {
         order: 9,
       },
     }),
+    prisma.game.create({
+      data: {
+        name: 'Call of Duty: WWII',
+        shortName: 'WW2',
+        releaseYear: 2017,
+        order: 10,
+      },
+    }),
   ]);
 
   const gameMap = new Map(games.map(g => [g.shortName, g]));
@@ -249,6 +258,17 @@ async function main() {
       { name: 'Zarya Cosmodrome', slug: 'zarya-cosmodrome', isDlc: true, hasEasterEgg: true, order: 5, description: 'Black Ops 7 Zombies DLC. Survival map. A cosmodrome under siege.' },
       { name: 'Mars', slug: 'mars', isDlc: true, hasEasterEgg: false, order: 6, description: 'Black Ops 7 Zombies DLC. Survival map on Mars.', imageUrl: '/images/maps/mars.webp' },
     ],
+    WW2: [
+      { name: 'Prologue', slug: 'prologue', isDlc: false, hasEasterEgg: false, order: 1, imageUrl: '/images/maps/prologue.webp', description: 'WW2 Zombies prologue map. Small survival challenge.' },
+      { name: 'The Final Reich', slug: 'the-final-reich', isDlc: false, hasEasterEgg: true, order: 2, imageUrl: '/images/maps/the-final-reich.webp', description: 'WW2 Zombies. Mittelburg underground bunker and village. Fireworks and Dark Reunion main quests.' },
+      { name: 'Gröesten Haus', slug: 'groesten-haus', isDlc: true, hasEasterEgg: false, order: 3, imageUrl: '/images/maps/groesten-haus.webp', description: 'WW2 Zombies. Classic survival in a small house.' },
+      { name: 'The Darkest Shore', slug: 'the-darkest-shore', isDlc: true, hasEasterEgg: true, order: 4, imageUrl: '/images/maps/the-darkest-shore.webp', description: 'WW2 Zombies. U-boat pen on Heligoland. Making History main quest.' },
+      { name: 'The Shadowed Throne', slug: 'the-shadowed-throne', isDlc: true, hasEasterEgg: true, order: 5, imageUrl: '/images/maps/the-shadowed-throne.webp', description: 'WW2 Zombies. Battle of Berlin. Stadtjäger Down main quest.' },
+      { name: 'Bodega Cervantes', slug: 'bodega-cervantes', isDlc: true, hasEasterEgg: false, order: 6, imageUrl: '/images/maps/bodega-cervantes.webp', description: 'WW2 Zombies. The Tortured Path. Spanish bodega survival.' },
+      { name: 'U.S.S. Mount Olympus', slug: 'uss-mount-olympus', isDlc: true, hasEasterEgg: false, order: 7, imageUrl: '/images/maps/uss-mount-olympus.webp', description: 'WW2 Zombies. The Tortured Path. Naval vessel survival.' },
+      { name: 'Altar of Blood', slug: 'altar-of-blood', isDlc: true, hasEasterEgg: true, order: 8, imageUrl: '/images/maps/altar-of-blood.webp', description: 'WW2 Zombies. The Tortured Path. Blood altar and Raven Lords.' },
+      { name: 'The Frozen Dawn', slug: 'the-frozen-dawn', isDlc: true, hasEasterEgg: true, order: 9, imageUrl: '/images/maps/the-frozen-dawn.webp', description: 'WW2 Zombies. Lost city of Thule. Kingfall main quest.' },
+    ],
   };
 
   // Create maps
@@ -293,6 +313,7 @@ async function main() {
     NO_MAGIC: { type: 'NO_MAGIC', name: 'No Magic', description: 'BO2 Custom Game: Magic disabled' },
     NO_JUG: { type: 'NO_JUG', name: 'No Jug', description: 'No Juggernog' },
     NO_ARMOR: { type: 'NO_ARMOR', name: 'No Armor', description: 'No armor (BOCW)' },
+    NO_BLITZ: { type: 'NO_BLITZ', name: 'No Blitz', description: 'No Blitz (WW2 perks)' },
     PURIST: { type: 'PURIST', name: 'Purist', description: 'Stricter rules, map-specific (BOCW)' },
   };
 
@@ -410,6 +431,27 @@ async function main() {
               mapId: map.id,
               xpReward: 0,
               description: info?.description || `Challenge: ${cType}`,
+            },
+          });
+          challengeCount++;
+        }
+      }
+    } else if (gameShortName === 'WW2') {
+      const ww2Cfg = getWw2MapConfig(map.slug);
+      if (ww2Cfg) {
+        for (const cType of ww2Cfg.challengeTypes) {
+          const info = roundChallengeTypes[cType as keyof typeof roundChallengeTypes];
+          const speedrunInfo = (['ROUND_10_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN', 'SUPER_30_SPEEDRUN', 'EASTER_EGG_SPEEDRUN'] as const).includes(cType as any)
+            ? { name: (cType as string).replace(/_/g, ' '), description: `Reach target as fast as possible` }
+            : null;
+          await prisma.challenge.create({
+            data: {
+              name: getWw2ChallengeTypeLabel(cType) || info?.name || speedrunInfo?.name || (cType as string).replace(/_/g, ' '),
+              slug: (cType as string).toLowerCase().replace(/_/g, '-'),
+              type: cType as any,
+              mapId: map.id,
+              xpReward: 0,
+              description: info?.description || speedrunInfo?.description || `Challenge: ${cType}`,
             },
           });
           challengeCount++;

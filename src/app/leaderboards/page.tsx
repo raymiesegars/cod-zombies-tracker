@@ -21,6 +21,8 @@ import { getBo4MapConfig, getBo4ChallengeTypeLabel } from '@/lib/bo4/bo4-map-con
 import { getBocwMapConfig, getBocwChallengeTypeLabel } from '@/lib/bocw/bocw-map-config';
 import { getBo6MapConfig, getBo6ChallengeTypeLabel } from '@/lib/bo6/bo6-map-config';
 import { getBo7MapConfig, getBo7ChallengeTypeLabel } from '@/lib/bo7/bo7-map-config';
+import { isWw2Game } from '@/lib/ww2';
+import { getWw2MapConfig, getWw2ChallengeTypeLabel } from '@/lib/ww2/ww2-map-config';
 
 const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
 const PAGE_SIZE = 25;
@@ -56,7 +58,9 @@ const challengeTypeLabels: Record<string, string> = {
   INSTAKILL_ROUND_SPEEDRUN: 'Instakill Round Speedrun',
   PURIST: 'Purist',
   NO_ARMOR: 'No Armor',
+  NO_BLITZ: 'No Blitz',
   ROUND_10_SPEEDRUN: 'Round 10 Speedrun',
+  SUPER_30_SPEEDRUN: 'Super 30 Speedrun',
   ROUND_20_SPEEDRUN: 'Round 20 Speedrun',
   ROUND_935_SPEEDRUN: 'Round 935 Speedrun',
   ROUND_999_SPEEDRUN: 'Round 999 Speedrun',
@@ -112,8 +116,10 @@ export default function LeaderboardsPage() {
   const isBo7Map = isBo7Game(selectedMapData?.game?.shortName);
   const isWawMap = selectedMapData?.game?.shortName === 'WAW';
   const isBo2Map = selectedMapData?.game?.shortName === 'BO2';
+  const isWw2Map = isWw2Game(selectedMapData?.game?.shortName);
 
   const [wawNoJugFilter, setWawNoJugFilter] = useState<string>('');
+  const [ww2ConsumablesFilter, setWw2ConsumablesFilter] = useState<string>('true'); // Default: With Consumables
   const [wawFixedWunderwaffeFilter, setWawFixedWunderwaffeFilter] = useState<string>('');
   const [bo2BankUsedFilter, setBo2BankUsedFilter] = useState<string>('');
 
@@ -205,6 +211,7 @@ export default function LeaderboardsPage() {
           if (searchForFetch) params.set('search', searchForFetch);
           if (verifiedOnly) params.set('verified', 'true');
           if ((isBocwMap || isBo6Map || isBo7Map) && rampageInducerFilter) params.set('rampageInducerUsed', rampageInducerFilter);
+          if (isWw2Map && (ww2ConsumablesFilter === 'true' || ww2ConsumablesFilter === 'false')) params.set('ww2ConsumablesUsed', ww2ConsumablesFilter);
           const res = await fetch(`/api/maps/${selectedMap}/easter-egg-leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -254,6 +261,10 @@ export default function LeaderboardsPage() {
             if (wawNoJugFilter === 'true' || wawNoJugFilter === 'false') params.set('wawNoJug', wawNoJugFilter);
             if (wawFixedWunderwaffeFilter === 'true' || wawFixedWunderwaffeFilter === 'false') params.set('wawFixedWunderwaffe', wawFixedWunderwaffeFilter);
           }
+          if (isBo2Map && selectedMap && getBo2MapConfig(selectedMap)?.hasBank) {
+            if (bo2BankUsedFilter === 'true' || bo2BankUsedFilter === 'false') params.set('bo2BankUsed', bo2BankUsedFilter);
+          }
+          if (isWw2Map && (ww2ConsumablesFilter === 'true' || ww2ConsumablesFilter === 'false')) params.set('ww2ConsumablesUsed', ww2ConsumablesFilter);
           if ((isBocwMap || isBo6Map || isBo7Map) && rampageInducerFilter) params.set('rampageInducerUsed', rampageInducerFilter);
           const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
           if (res.ok) {
@@ -276,7 +287,7 @@ export default function LeaderboardsPage() {
     }
 
     fetchLeaderboard();
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, searchForFetch, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, searchForFetch, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter]);
 
   const loadMore = useCallback(async () => {
     if (leaderboard.length >= total || total === 0) return;
@@ -310,6 +321,7 @@ export default function LeaderboardsPage() {
           if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
           if (verifiedOnly) params.set('verified', 'true');
           if ((isBocwMap || isBo6Map || isBo7Map) && rampageInducerFilter) params.set('rampageInducerUsed', rampageInducerFilter);
+          if (isWw2Map && (ww2ConsumablesFilter === 'true' || ww2ConsumablesFilter === 'false')) params.set('ww2ConsumablesUsed', ww2ConsumablesFilter);
           const res = await fetch(`/api/maps/${selectedMap}/easter-egg-leaderboard?${params}`);
           if (res.ok) {
             const data = await res.json();
@@ -351,6 +363,7 @@ export default function LeaderboardsPage() {
           if (isBo2Map && selectedMap && getBo2MapConfig(selectedMap)?.hasBank) {
             if (bo2BankUsedFilter === 'true' || bo2BankUsedFilter === 'false') params.set('bo2BankUsed', bo2BankUsedFilter);
           }
+          if (isWw2Map && (ww2ConsumablesFilter === 'true' || ww2ConsumablesFilter === 'false')) params.set('ww2ConsumablesUsed', ww2ConsumablesFilter);
           if ((isBocwMap || isBo6Map || isBo7Map) && rampageInducerFilter) params.set('rampageInducerUsed', rampageInducerFilter);
           const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
           if (res.ok) {
@@ -370,7 +383,7 @@ export default function LeaderboardsPage() {
     } finally {
       loadingMoreRef.current = false;
     }
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, leaderboard.length, total]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, leaderboard.length, total]);
 
   // Only observe sentinel when search is empty so list stays stable while filtering
   useEffect(() => {
@@ -457,7 +470,9 @@ export default function LeaderboardsPage() {
                 ? (fallbackName ?? challengeTypeLabels[type] ?? getBo6ChallengeTypeLabel(type) ?? type)
                 : selectedMapData?.game?.shortName === 'BO7'
                   ? (fallbackName ?? challengeTypeLabels[type] ?? getBo7ChallengeTypeLabel(type) ?? type)
-                  : (fallbackName ?? challengeTypeLabels[type] ?? type);
+                  : selectedMapData?.game?.shortName === 'WW2'
+                    ? (challengeTypeLabels[type] ?? getWw2ChallengeTypeLabel(type) ?? fallbackName ?? type)
+                    : (fallbackName ?? challengeTypeLabels[type] ?? type);
     let challengeOptions: { value: string; label: string }[];
     if (selectedMapData?.game?.shortName === 'IW') {
       challengeOptions = mapChallenges.length > 0
@@ -514,6 +529,15 @@ export default function LeaderboardsPage() {
     } else if (selectedMapData?.game?.shortName === 'BO7' && selectedMap) {
       const bo7Config = getBo7MapConfig(selectedMap);
       const types = bo7Config?.challengeTypes ?? mapChallenges.map((c) => c.type);
+      challengeOptions = types
+        .filter((t) => t !== 'HIGHEST_ROUND')
+        .map((t) => {
+          const c = mapChallenges.find((ch) => ch.type === t);
+          return { value: t, label: getLabel(t, c?.name) };
+        });
+    } else if (selectedMapData?.game?.shortName === 'WW2' && selectedMap) {
+      const ww2Config = getWw2MapConfig(selectedMap);
+      const types = ww2Config?.challengeTypes ?? mapChallenges.map((c) => c.type);
       challengeOptions = types
         .filter((t) => t !== 'HIGHEST_ROUND')
         .map((t) => {
@@ -885,6 +909,18 @@ export default function LeaderboardsPage() {
                       className="w-full min-w-0 sm:w-40 max-w-full"
                     />
                   )}
+                  {isWw2Map && (
+                    <Select
+                      options={[
+                        { value: '', label: 'All (Consumables)' },
+                        { value: 'true', label: 'With Consumables' },
+                        { value: 'false', label: 'No Consumables' },
+                      ]}
+                      value={ww2ConsumablesFilter}
+                      onChange={(e) => setWw2ConsumablesFilter(e.target.value)}
+                      className="w-full min-w-0 sm:w-40 max-w-full"
+                    />
+                  )}
                 </div>
               )}
             </div>
@@ -973,7 +1009,7 @@ export default function LeaderboardsPage() {
                       {selectedMapData.game.name}
                       {isEeTimeView && eeTimeEasterEggId
                         ? ` • ${mapEasterEggs.find((ee) => ee.id === eeTimeEasterEggId)?.name ?? 'Easter Egg'} (Time)`
-                        : ` • ${selectedChallengeType ? challengeTypeLabels[selectedChallengeType as ChallengeType] ?? selectedChallengeType : 'All Challenges'}`}
+                        : ` • ${selectedChallengeType ? challengeTypeLabels[selectedChallengeType as ChallengeType] ?? getWw2ChallengeTypeLabel(selectedChallengeType) ?? selectedChallengeType : 'All Challenges'}`}
                     </p>
                   </div>
                   <span className="inline-flex items-center px-3 py-1.5 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-sm font-semibold shadow-[0_0_1px_rgba(0,0,0,1),0_0_3px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.8)] [text-shadow:0_0_1px_rgba(0,0,0,1),0_0_2px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">

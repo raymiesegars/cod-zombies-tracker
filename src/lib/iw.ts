@@ -43,6 +43,7 @@ export function isSpeedrunChallengeType(type: string): boolean {
   return isIwSpeedrunChallengeType(type)
     || type === 'ROUND_255_SPEEDRUN'
     || type === 'INSTAKILL_ROUND_SPEEDRUN'
+    || type === 'SUPER_30_SPEEDRUN'
     || (BOCW_SPEEDRUN_TYPES as readonly string[]).includes(type)
     || (BO6_SPEEDRUN_TYPES as readonly string[]).includes(type);
 }
@@ -62,6 +63,7 @@ export function getMinRoundForSpeedrunChallengeType(type: string): number {
     case 'ROUND_255_SPEEDRUN': return 255;
     case 'ROUND_935_SPEEDRUN': return 935;
     case 'ROUND_999_SPEEDRUN': return 999;
+    case 'SUPER_30_SPEEDRUN': return 30; // Multi-map run; display as round 30
     default: return 1;
   }
 }

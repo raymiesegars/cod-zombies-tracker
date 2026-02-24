@@ -40,6 +40,8 @@ import { BO4_OFFICIAL_RULES } from '@/lib/bo4/bo4-official-rules';
 import { BOCW_OFFICIAL_RULES } from '@/lib/bocw/bocw-official-rules';
 import { getBo6OfficialRulesForMap } from '@/lib/bo6/bo6-official-rules';
 import { getBo7OfficialRulesForMap } from '@/lib/bo7/bo7-official-rules';
+import { WW2_OFFICIAL_RULES } from '@/lib/ww2/ww2-official-rules';
+import { isWw2Game } from '@/lib/ww2';
 import { isRuleLink, isRuleInlineLinks } from '@/lib/rules/types';
 import { getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
@@ -121,8 +123,9 @@ function OfficialRulesModal({
   const isBocw = gameShortName === 'BOCW';
   const isBo6 = gameShortName === 'BO6';
   const isBo7 = gameShortName === 'BO7';
-  const hasRules = isWaw || isBo1 || isBo2 || isBo3 || isBo4 || isBocw || isBo6 || isBo7;
-  const rules = isWaw ? WAW_OFFICIAL_RULES : isBo1 ? BO1_OFFICIAL_RULES : isBo2 ? BO2_OFFICIAL_RULES : isBo3 ? BO3_OFFICIAL_RULES : isBo4 ? BO4_OFFICIAL_RULES : isBocw ? BOCW_OFFICIAL_RULES : isBo6 && mapSlug ? getBo6OfficialRulesForMap(mapSlug) : isBo7 && mapSlug ? getBo7OfficialRulesForMap(mapSlug) : null;
+  const isWw2 = gameShortName === 'WW2';
+  const hasRules = isWaw || isBo1 || isBo2 || isBo3 || isBo4 || isBocw || isBo6 || isBo7 || isWw2;
+  const rules = isWaw ? WAW_OFFICIAL_RULES : isBo1 ? BO1_OFFICIAL_RULES : isBo2 ? BO2_OFFICIAL_RULES : isBo3 ? BO3_OFFICIAL_RULES : isBo4 ? BO4_OFFICIAL_RULES : isBocw ? BOCW_OFFICIAL_RULES : isBo6 && mapSlug ? getBo6OfficialRulesForMap(mapSlug) : isBo7 && mapSlug ? getBo7OfficialRulesForMap(mapSlug) : isWw2 ? WW2_OFFICIAL_RULES : null;
 
   const byType = rules && 'challengeRulesByType' in rules ? (rules as { challengeRulesByType: Record<string, string> }).challengeRulesByType : null;
   const typesToShow = (mapChallengeTypes && mapChallengeTypes.length > 0
@@ -142,7 +145,7 @@ function OfficialRulesModal({
       isOpen={isOpen}
       onClose={onClose}
       title="Official Rules"
-      description={hasRules ? `Rules and requirements for ${isWaw ? 'World at War' : isBo1 ? 'Black Ops 1' : isBo2 ? 'Black Ops 2' : isBo3 ? 'Black Ops 3' : isBo4 ? 'Black Ops 4' : isBocw ? 'Black Ops Cold War' : isBo6 ? 'Black Ops 6' : isBo7 ? 'Black Ops 7' : 'submissions'}` : 'Rules and requirements for challenge submissions'}
+      description={hasRules ? `Rules and requirements for ${isWaw ? 'World at War' : isBo1 ? 'Black Ops 1' : isBo2 ? 'Black Ops 2' : isBo3 ? 'Black Ops 3' : isBo4 ? 'Black Ops 4' : isBocw ? 'Black Ops Cold War' : isBo6 ? 'Black Ops 6' : isBo7 ? 'Black Ops 7' : isWw2 ? 'WWII Zombies' : 'submissions'}` : 'Rules and requirements for challenge submissions'}
       size="lg"
     >
       {rules ? (
@@ -298,6 +301,7 @@ export default function EditMapProgressPage() {
     wawFixedWunderwaffe?: boolean;
     bo2BankUsed?: boolean | null;
     bo3AatUsed?: boolean | null;
+    ww2ConsumablesUsed?: boolean;
     killsReached?: string;
     scoreReached?: string;
   }>({
@@ -331,6 +335,7 @@ export default function EditMapProgressPage() {
         teammateNonUserNames: string[];
         requestVerification: boolean;
         rampageInducerUsed?: boolean;
+        ww2ConsumablesUsed?: boolean;
       }
     >
   >({});
@@ -372,6 +377,7 @@ export default function EditMapProgressPage() {
           const isBocw = isBocwGame(data.game?.shortName);
           const isBo6 = isBo6Game(data.game?.shortName);
           const isBo7 = isBo7Game(data.game?.shortName);
+          const isWw2 = isWw2Game(data.game?.shortName);
           setSharedChallengeForm({
             roundReached: '',
             playerCount: 'SOLO',
@@ -382,6 +388,7 @@ export default function EditMapProgressPage() {
             ...(isBo6 && { bo6GobbleGumMode: BO6_GOBBLEGUM_DEFAULT, bo6SupportMode: BO6_SUPPORT_DEFAULT, rampageInducerUsed: false }),
             ...(isBo7 && { bo7SupportMode: BO7_SUPPORT_DEFAULT, bo7IsCursedRun: false, bo7RelicsUsed: [], rampageInducerUsed: false }),
             ...((data.game?.shortName ?? '') === 'BO2' && getBo2MapConfig(data.slug)?.hasBank && { bo2BankUsed: true }),
+            ...(isWw2 && { ww2ConsumablesUsed: true }),
             proofUrls: [],
             notes: '',
             completionTimeSeconds: null,
@@ -422,6 +429,7 @@ export default function EditMapProgressPage() {
               teammateNonUserNames: [],
               requestVerification: false,
               ...((isBocw || isBo6 || isBo7) && { rampageInducerUsed: false }),
+              ...(isWw2Game(data.game?.shortName) && { ww2ConsumablesUsed: true }),
             };
           }
           setEasterEggForms(eeInitial);
@@ -615,6 +623,7 @@ export default function EditMapProgressPage() {
               wawFixedWunderwaffe: form.wawFixedWunderwaffe ?? false,
             }),
             ...(map?.game?.shortName === 'BO2' && getBo2MapConfig(map.slug)?.hasBank && { bo2BankUsed: form.bo2BankUsed ?? true }),
+            ...(isWw2Game(map?.game?.shortName) && { ww2ConsumablesUsed: form.ww2ConsumablesUsed ?? true }),
             proofUrls: normalizeProofUrls(form.proofUrls ?? []),
             notes: form.notes || null,
             completionTimeSeconds: (() => {
@@ -695,6 +704,7 @@ export default function EditMapProgressPage() {
             wawFixedWunderwaffe: sharedChallengeForm.wawFixedWunderwaffe ?? false,
           }),
             ...(map.game?.shortName === 'BO2' && getBo2MapConfig(map.slug)?.hasBank && { bo2BankUsed: sharedChallengeForm.bo2BankUsed ?? true }),
+            ...(isWw2Game(map?.game?.shortName) && { ww2ConsumablesUsed: sharedChallengeForm.ww2ConsumablesUsed ?? true }),
             ...(isBo3Game(map?.game?.shortName) && {
               bo3GobbleGumMode: sharedChallengeForm.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT,
               bo3AatUsed: sharedChallengeForm.bo3AatUsed,
@@ -763,6 +773,7 @@ export default function EditMapProgressPage() {
           teammateNonUserNames: form.teammateNonUserNames ?? [],
           requestVerification: form.requestVerification ?? false,
           ...((isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName)) && { rampageInducerUsed: form.rampageInducerUsed ?? false }),
+          ...(isWw2Game(map.game?.shortName) && { ww2ConsumablesUsed: form.ww2ConsumablesUsed ?? true }),
         }),
       });
       const data = await res.json();
@@ -1094,6 +1105,18 @@ export default function EditMapProgressPage() {
                         ]}
                         value={sharedChallengeForm.bo2BankUsed === true ? 'true' : sharedChallengeForm.bo2BankUsed === false ? 'false' : 'true'}
                         onChange={(e) => handleSharedChallengeChange('bo2BankUsed', e.target.value === 'true')}
+                        className="w-full"
+                      />
+                    )}
+                    {isWw2Game(map?.game?.shortName) && (
+                      <Select
+                        label="Consumables"
+                        options={[
+                          { value: 'true', label: 'With Consumables (default)' },
+                          { value: 'false', label: 'No Consumables' },
+                        ]}
+                        value={sharedChallengeForm.ww2ConsumablesUsed === true ? 'true' : 'false'}
+                        onChange={(e) => handleSharedChallengeChange('ww2ConsumablesUsed', e.target.value === 'true')}
                         className="w-full"
                       />
                     )}
@@ -1430,6 +1453,19 @@ export default function EditMapProgressPage() {
                             value={easterEggForms[ee.id]?.rampageInducerUsed === true ? 'true' : 'false'}
                             onChange={(e) =>
                               handleEasterEggChange(ee.id, 'rampageInducerUsed', e.target.value === 'true')
+                            }
+                          />
+                        )}
+                        {isWw2Game(map?.game?.shortName) && (
+                          <Select
+                            label="Consumables"
+                            options={[
+                              { value: 'true', label: 'With Consumables (default)' },
+                              { value: 'false', label: 'No Consumables' },
+                            ]}
+                            value={easterEggForms[ee.id]?.ww2ConsumablesUsed === true ? 'true' : 'false'}
+                            onChange={(e) =>
+                              handleEasterEggChange(ee.id, 'ww2ConsumablesUsed', e.target.value === 'true')
                             }
                           />
                         )}

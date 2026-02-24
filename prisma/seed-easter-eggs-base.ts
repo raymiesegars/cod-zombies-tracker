@@ -12152,4 +12152,66 @@ export const SPECIFIC_EASTER_EGGS_BASE: SpecificEasterEgg[] = [
       },
     ],
   },
+  // ——— WW2 Zombies ———
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-final-reich',
+    name: 'Dark Reunion',
+    slug: 'dark-reunion',
+    type: 'MAIN_QUEST',
+    xpReward: 2500,
+    description:
+      'The hardcore main quest for The Final Reich. Complete the Dark Reunion Easter Egg by solving the mystery of Mittelburg. Fireworks is the casual path; Dark Reunion is the full quest with the Pest boss fight.',
+    steps: [
+      { order: 1, label: 'Complete the Dark Reunion Easter Egg steps. See guide for full walkthrough.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-darkest-shore',
+    name: 'Making History',
+    slug: 'making-history',
+    type: 'MAIN_QUEST',
+    xpReward: 2500,
+    description: 'The main quest for The Darkest Shore. Complete Making History on the U-boat pen at Heligoland.',
+    steps: [
+      { order: 1, label: 'Complete the Making History Easter Egg. See guide for full walkthrough.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-shadowed-throne',
+    name: 'Stadtjäger Down',
+    slug: 'stadtjager-down',
+    type: 'MAIN_QUEST',
+    xpReward: 2500,
+    description: 'The main quest for The Shadowed Throne. Battle of Berlin main Easter Egg.',
+    steps: [
+      { order: 1, label: 'Complete the Stadtjäger Down Easter Egg. See guide for full walkthrough.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'altar-of-blood',
+    name: 'Sword of Barbarossa',
+    slug: 'sword-of-barbarossa',
+    type: 'MAIN_QUEST',
+    xpReward: 2500,
+    description: 'The main quest for Altar of Blood. Obtain the Sword of Barbarossa and complete the Raven Lords ritual.',
+    steps: [
+      { order: 1, label: 'Complete the Sword of Barbarossa main quest. See guide for full walkthrough.' },
+    ],
+  },
+  {
+    gameShortName: 'WW2',
+    mapSlug: 'the-frozen-dawn',
+    name: 'Kingfall',
+    slug: 'kingfall',
+    type: 'MAIN_QUEST',
+    xpReward: 2500,
+    description: 'The main quest for The Frozen Dawn. Complete Kingfall in the lost city of Thule.',
+    steps: [
+      { order: 1, label: 'Complete the Kingfall Easter Egg. See guide for full walkthrough.' },
+    ],
+  },
 ];
