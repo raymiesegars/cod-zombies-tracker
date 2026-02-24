@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
             FROM "User" u
             WHERE u."isPublic" = true
               AND (u.username ILIKE ${pattern} OR u."displayName" ILIKE ${pattern})
-            ORDER BY u."verifiedTotalXp" DESC
+            ORDER BY u."verifiedTotalXp" DESC, u.id ASC
             LIMIT ${SEARCH_LIMIT}
           `
         : await prisma.$queryRaw<Row[]>`
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
             FROM "User" u
             WHERE u."isPublic" = true
               AND (u.username ILIKE ${pattern} OR u."displayName" ILIKE ${pattern})
-            ORDER BY u."totalXp" DESC
+            ORDER BY u."totalXp" DESC, u.id ASC
             LIMIT ${SEARCH_LIMIT}
           `;
       const total = rows.length;
@@ -78,7 +78,9 @@ export async function GET(request: NextRequest) {
           totalXp: true,
           verifiedTotalXp: true,
         },
-        orderBy: verifiedOnly ? { verifiedTotalXp: 'desc' } : { totalXp: 'desc' },
+        orderBy: verifiedOnly
+          ? [{ verifiedTotalXp: 'desc' }, { id: 'asc' }]
+          : [{ totalXp: 'desc' }, { id: 'asc' }],
         skip: offset,
         take: limit,
       }),
