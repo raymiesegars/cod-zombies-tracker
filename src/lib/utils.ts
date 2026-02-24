@@ -120,6 +120,7 @@ const ALLOWED_PROOF_HOST_SUFFIXES = [
   'cdn.discordapp.com',
   'media.discordapp.net',
   'zwr.gg',
+  'speedrun.com',
 ] as const;
 
 function isAllowedProofHost(hostname: string): boolean {
@@ -141,7 +142,7 @@ export function validateProofUrl(url: string): string | null {
     }
     if (trimmed.length > 2048) return 'URL is too long.';
     if (!isAllowedProofHost(u.hostname)) {
-      return `Proof links must be from a trusted site (e.g. YouTube, Twitch, Imgur, Streamable, zwr.gg). This domain is not allowed.`;
+      return `Proof links must be from a trusted site (e.g. YouTube, Twitch, Imgur, Streamable, speedrun.com, zwr.gg). This domain is not allowed.`;
     }
     return null;
   } catch {
@@ -164,4 +165,4 @@ export function normalizeProofUrls(urls: string[]): string[] {
 }
 
 export const PROOF_URL_FORMAT_HELP =
-  'Add one URL per line. Only links from trusted sites are allowed (YouTube, Twitch, Imgur, Streamable, zwr.gg). Use https://.';
+  'Add one URL per line. Only links from trusted sites are allowed (YouTube, Twitch, Imgur, Streamable, speedrun.com, zwr.gg). Use https://.';
