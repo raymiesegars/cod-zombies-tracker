@@ -452,8 +452,7 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
     worldRecords++;
     if (best.isVerified) verifiedWorldRecords++;
     const [prefix, filterKey] = key.includes('::') ? key.split('::') : [key, ''];
-    const [, mapId, , playerCount, verifiedStr] = prefix.split(':');
-    const isVerified = verifiedStr === 'true';
+    const [, mapId, , playerCount] = prefix.split(':');
     const log = best.log;
     const mapMeta = mapById.get(mapId);
     if (!mapMeta) return;
@@ -464,7 +463,7 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
       challengeLabel,
       playerCount: playerCount as PlayerCount,
       filters: getFilterLabels(filterKey),
-      isVerified,
+      isVerified: best.isVerified,
     });
   };
 
@@ -487,8 +486,7 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
     worldRecords++;
     if (data.isVerified) verifiedWorldRecords++;
     const [prefix, filterKey] = key.includes('::') ? key.split('::') : [key, ''];
-    const [, mapId, , playerCount, verifiedStr] = prefix.split(':');
-    const isVerified = verifiedStr === 'true';
+    const [, mapId, , playerCount] = prefix.split(':');
     const mapMeta = mapById.get(mapId);
     if (mapMeta) {
       details.push({
@@ -497,7 +495,7 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
         challengeLabel: 'Highest Round',
         playerCount: playerCount as PlayerCount,
         filters: getFilterLabels(filterKey),
-        isVerified,
+        isVerified: data.isVerified,
       });
     }
   }
