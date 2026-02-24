@@ -37,6 +37,7 @@ import {
   EasterEggsModal,
   MapsModal,
   AchievementsModal,
+  WorldRecordsModal,
 } from '@/components/game';
 import {
   ACHIEVEMENT_CATEGORY_LABELS,
@@ -497,6 +498,7 @@ export default function UserProfilePage() {
   const [easterEggsModalOpen, setEasterEggsModalOpen] = useState(false);
   const [mapsModalOpen, setMapsModalOpen] = useState(false);
   const [achievementsModalOpen, setAchievementsModalOpen] = useState(false);
+  const [worldRecordsModalOpen, setWorldRecordsModalOpen] = useState(false);
   const [adminMe, setAdminMe] = useState<{ isAdmin: boolean; isSuperAdmin: boolean } | null>(null);
   const [promoteModalOpen, setPromoteModalOpen] = useState(false);
   const [demoteModalOpen, setDemoteModalOpen] = useState(false);
@@ -1086,6 +1088,7 @@ export default function UserProfilePage() {
               const isEasterEggsBlock = blockId === 'easter-eggs';
               const isMapsBlock = blockId === 'maps-played';
               const isAchievementsBlock = blockId === 'achievements';
+              const isWorldRecordsBlock = blockId === 'world-records' || blockId === 'verified-world-records';
               const handleClick = isRunsBlock
                 ? () => setRunsModalOpen(blockId === 'verified-runs' ? 'verified' : 'all')
                 : isEasterEggsBlock
@@ -1094,7 +1097,9 @@ export default function UserProfilePage() {
                     ? () => setMapsModalOpen(true)
                     : isAchievementsBlock
                       ? () => setAchievementsModalOpen(true)
-                      : undefined;
+                      : isWorldRecordsBlock
+                        ? () => setWorldRecordsModalOpen(true)
+                        : undefined;
               const Wrapper = handleClick ? 'button' : 'div';
               return (
                 <div key={blockId} className="group relative">
@@ -1323,6 +1328,12 @@ export default function UserProfilePage() {
       <EasterEggsModal
         isOpen={easterEggsModalOpen}
         onClose={() => setEasterEggsModalOpen(false)}
+        username={username}
+      />
+
+      <WorldRecordsModal
+        isOpen={worldRecordsModalOpen}
+        onClose={() => setWorldRecordsModalOpen(false)}
         username={username}
       />
 
