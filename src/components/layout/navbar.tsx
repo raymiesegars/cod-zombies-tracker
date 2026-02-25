@@ -62,7 +62,7 @@ export function Navbar() {
           </Link>
 
           {/* Desktop Navigation: flex-1 to use available space; centered between logo and right group */}
-          <div className="hidden navbar:flex flex-1 items-center justify-center gap-px min-w-0 overflow-visible">
+          <div className="hidden navbar:flex flex-1 items-center justify-center gap-px min-w-0 overflow-visible ml-1">
             {navLinks.map((link) => {
               const Icon = link.icon;
               return (
@@ -251,6 +251,12 @@ export function Navbar() {
             className="navbar:hidden bg-bunker-900/95 border-b border-bunker-800/50"
           >
             <div className="px-4 py-4 space-y-2">
+              {/* Notifications first (when logged in) — easy to reach, matches bell in desktop nav */}
+              {user && (
+                <div className="flex justify-center py-1">
+                  <NotificationsDropdown />
+                </div>
+              )}
               {/* Primary CTA: Log Progress (when logged in) */}
               {user && openLogProgressModal && (
                 <button
@@ -311,9 +317,6 @@ export function Navbar() {
               {user ? (
                 <>
                   <hr className="border-bunker-700 my-2" />
-                  <div className="px-4 py-2">
-                    <NotificationsDropdown />
-                  </div>
                   {profile?.username && (
                     <Link
                       href={`/users/${profile.username}`}

@@ -19,6 +19,10 @@ export type MapAchievementContext = {
   /** EE completions with time (for EE speedrun tier achievements) */
   easterEggLogsWithTime: { easterEggId: string; completionTimeSeconds: number }[];
   easterEggRoundsOnMap: { round: number; difficulty: Bo4Difficulty | null }[]; // roundCompleted + difficulty for this map
+  /** EE IDs where user checked all steps (unlocks achievement even without EasterEggLog) */
+  eeIdsWithAllStepsChecked?: Set<string>;
+  /** When map has exactly 1 main quest EE with XP and user has EE speedrun, this is that EE's id */
+  eeSpeedrunUnlockEeId?: string | null;
 };
 
 type AchievementChecker = (userId: string, criteria: any, achievement: Achievement) => Promise<boolean>;
@@ -412,7 +416,11 @@ export function checkWithContext(
     }
     case 'EASTER_EGG_COMPLETE': {
       const eeId = achievement.easterEggId;
-      return eeId != null && ctx.easterEggIds.has(eeId);
+      if (eeId == null) return false;
+      if (ctx.easterEggIds.has(eeId)) return true;
+      if (ctx.eeIdsWithAllStepsChecked?.has(eeId)) return true;
+      if (ctx.eeSpeedrunUnlockEeId === eeId) return true;
+      return false;
     }
     default:
       return false;
@@ -426,7 +434,7 @@ export async function processMapAchievements(
   mapId: string,
   dryRun?: boolean
 ): Promise<Achievement[]> {
-  const [achievements, userAchievements, map, challengeLogs, easterEggLogs] =
+  const [achievements, userAchievements, map, challengeLogs, easterEggLogs, stepProgressRaw, mainQuestEe] =
     await Promise.all([
       prisma.achievement.findMany({
         where: {
@@ -455,9 +463,55 @@ export async function processMapAchievements(
         where: { userId },
         select: { easterEggId: true, mapId: true, roundCompleted: true, difficulty: true, completionTimeSeconds: true },
       }),
+      // EE step progress: which EEs on this map have all steps checked (for Fly Trap etc.)
+      prisma.userEasterEggStepProgress.findMany({
+        where: {
+          userId,
+          easterEggStep: { easterEgg: { mapId } },
+        },
+        select: {
+          easterEggStepId: true,
+          easterEggStep: {
+            select: {
+              easterEggId: true,
+              easterEgg: {
+                select: { id: true, steps: { select: { id: true } } },
+              },
+            },
+          },
+        },
+      }),
+      // When map has exactly 1 main quest with XP, EE speedrun unlocks that achievement
+      prisma.easterEgg.findFirst({
+        where: { mapId, type: 'MAIN_QUEST', xpReward: { gt: 0 }, isActive: true },
+        select: { id: true },
+      }),
     ]);
 
   const unlockedIds = new Set(userAchievements.map((ua) => ua.achievementId));
+  const eeIdsWithAllStepsChecked = new Set<string>();
+  const checkedByEe = new Map<string, Set<string>>();
+  for (const p of stepProgressRaw) {
+    const eeId = p.easterEggStep?.easterEggId;
+    if (!eeId) continue;
+    if (!checkedByEe.has(eeId)) checkedByEe.set(eeId, new Set());
+    checkedByEe.get(eeId)!.add(p.easterEggStepId);
+  }
+  for (const p of stepProgressRaw) {
+    const ee = p.easterEggStep?.easterEgg;
+    if (!ee || !ee.steps?.length || eeIdsWithAllStepsChecked.has(ee.id)) continue;
+    const stepIds = new Set(ee.steps.map((s) => s.id));
+    const checked = checkedByEe.get(ee.id);
+    if (checked && checked.size === stepIds.size && Array.from(checked).every((id) => stepIds.has(id))) {
+      eeIdsWithAllStepsChecked.add(ee.id);
+    }
+  }
+  const hasEeSpeedrunOnMap = challengeLogs.some((l) => l.challenge?.type === 'EASTER_EGG_SPEEDRUN');
+  const mainQuestCount = await prisma.easterEgg.count({
+    where: { mapId, type: 'MAIN_QUEST', xpReward: { gt: 0 }, isActive: true },
+  });
+  const eeSpeedrunUnlockEeId =
+    mainQuestCount === 1 && hasEeSpeedrunOnMap && mainQuestEe ? mainQuestEe.id : null;
   const easterEggRoundsOnMap = easterEggLogs
     .filter((e) => e.mapId === mapId && e.roundCompleted != null)
     .map((e) => ({ round: e.roundCompleted!, difficulty: e.difficulty ?? null }));
@@ -466,6 +520,8 @@ export async function processMapAchievements(
     .map((e) => ({ easterEggId: e.easterEggId, completionTimeSeconds: e.completionTimeSeconds! }));
   const ctx: MapAchievementContext = {
     map,
+    eeIdsWithAllStepsChecked,
+    eeSpeedrunUnlockEeId,
     challengeLogs: challengeLogs.map((l) => ({
       challengeType: l.challenge.type,
       roundReached: l.roundReached,

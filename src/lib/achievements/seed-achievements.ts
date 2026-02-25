@@ -1036,7 +1036,7 @@ export function getMapAchievementDefinitions(
       const isCap = mapConfig.roundCap != null && round === mapConfig.roundCap;
       rows.push({
         slug: isCap ? 'round-cap' : `round-${round}`,
-        name: isCap ? `Round ${round} (Cap)` : `Round ${round}`,
+        name: `Round ${round}`,
         type: 'ROUND_MILESTONE',
         criteria: { round, challengeType: 'HIGHEST_ROUND', ...(isCap ? { isCap: true } : {}) },
         xpReward: xp,
@@ -1049,7 +1049,7 @@ export function getMapAchievementDefinitions(
       const isCap = mapConfig.roundCap != null && round === mapConfig.roundCap;
       rows.push({
         slug: isCap ? 'no-downs-cap' : `no-downs-${round}`,
-        name: isCap ? `No Downs Round ${round} (Cap)` : `No Downs Round ${round}`,
+        name: `No Downs Round ${round}`,
         type: 'CHALLENGE_COMPLETE',
         criteria: { round, challengeType: 'NO_DOWNS', ...(isCap ? { isCap: true } : {}) },
         xpReward: xp,
@@ -1116,7 +1116,7 @@ export function getMapAchievementDefinitions(
   if (roundCap != null) {
     rows.push({
       slug: 'round-cap',
-      name: `Round ${roundCap} (Cap)`,
+      name: `Round ${roundCap}`,
       type: 'ROUND_MILESTONE',
       criteria: { round: roundCap, challengeType: 'HIGHEST_ROUND', isCap: true },
       xpReward: getCapXp(),
@@ -1139,7 +1139,7 @@ export function getMapAchievementDefinitions(
   if (roundCap != null) {
     rows.push({
       slug: 'no-downs-cap',
-      name: `No Downs Round ${roundCap} (Cap)`,
+      name: `No Downs Round ${roundCap}`,
       type: 'CHALLENGE_COMPLETE',
       criteria: { round: roundCap, challengeType: 'NO_DOWNS', isCap: true },
       xpReward: getCapXp(),
