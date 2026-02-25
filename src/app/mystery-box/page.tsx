@@ -272,7 +272,7 @@ export default function MysteryBoxPage() {
       lastSpinningRollId.current = null;
     }, remaining);
     return () => clearTimeout(t);
-  }, [data?.lobby?.roll?.id, data?.lobby?.roll?.createdAt]);
+  }, [data?.lobby?.roll]);
 
   // When reroll vote passes: no roll, no vote → auto-spin
   useEffect(() => {

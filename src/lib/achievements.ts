@@ -502,11 +502,11 @@ export async function processMapAchievements(
     if (!ee || !ee.steps?.length || eeIdsWithAllStepsChecked.has(ee.id)) continue;
     const stepIds = new Set(ee.steps.map((s) => s.id));
     const checked = checkedByEe.get(ee.id);
-    if (checked && checked.size === stepIds.size && [...checked].every((id) => stepIds.has(id))) {
+    if (checked && checked.size === stepIds.size && Array.from(checked).every((id) => stepIds.has(id))) {
       eeIdsWithAllStepsChecked.add(ee.id);
     }
   }
-  const hasEeSpeedrunOnMap = challengeLogs.some((l) => l.challengeType === 'EASTER_EGG_SPEEDRUN');
+  const hasEeSpeedrunOnMap = challengeLogs.some((l) => l.challenge?.type === 'EASTER_EGG_SPEEDRUN');
   const mainQuestCount = await prisma.easterEgg.count({
     where: { mapId, type: 'MAIN_QUEST', xpReward: { gt: 0 }, isActive: true },
   });
