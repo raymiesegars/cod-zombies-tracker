@@ -1,3 +1,4 @@
+import { ROUND_5_15_WR_BY_GAME_MAP } from './round-5-15-wr-data';
 import { getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { getBo1MapConfig } from '@/lib/bo1/bo1-map-config';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
@@ -302,8 +303,11 @@ export function getAllowedSpeedrunCategoriesForMap(
 ): string[] | null {
   if (!gameShortName || !mapSlug) return null;
   if (gameShortName === 'IW') return SPEEDRUN_CATEGORIES;
+  const mapWrs = ROUND_5_15_WR_BY_GAME_MAP[gameShortName]?.[mapSlug];
+  const hasR5R15 = (mapWrs?.r5 != null || mapWrs?.r15 != null);
   // BO2 and others: only round/EE speedruns, no IW bosses
   const bo2Generic = [
+    ...(hasR5R15 ? ['ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN'] as const : []),
     'ROUND_30_SPEEDRUN',
     'ROUND_50_SPEEDRUN',
     'ROUND_70_SPEEDRUN',
@@ -311,6 +315,14 @@ export function getAllowedSpeedrunCategoriesForMap(
     'ROUND_200_SPEEDRUN',
     'EASTER_EGG_SPEEDRUN',
   ];
+  if (gameShortName === 'WAW') {
+    const cfg = getWaWMapConfig(mapSlug);
+    if (cfg?.challengeTypes) {
+      const fromConfig = cfg.challengeTypes.filter((c) => isSpeedrunCategory(c));
+      return Array.from(new Set([...(hasR5R15 ? ['ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN'] : []), ...fromConfig]));
+    }
+    return bo2Generic;
+  }
   if (gameShortName === 'BO1') {
     const cfg = getBo1MapConfig(mapSlug);
     if (cfg?.challengeTypes) {

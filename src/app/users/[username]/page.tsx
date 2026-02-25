@@ -388,7 +388,7 @@ function AchievementsSection({
                           {sortAchievementsInCategory(byCategory[cat]).map((a) => {
                             const unlocked = unlockedSet.has(a.id);
                             const c = a.criteria as { round?: number; isCap?: boolean; maxTimeSeconds?: number } | undefined;
-                            const subLabel = c?.isCap ? 'Cap' : c?.round != null ? `Round ${c.round}` : null;
+                            const subLabel = c?.round != null ? `Round ${c.round}` : null;
                             const maxTime = c?.maxTimeSeconds != null ? formatCompletionTime(c.maxTimeSeconds) : null;
                             const displayName = a.easterEgg?.name ?? a.name;
                             return (

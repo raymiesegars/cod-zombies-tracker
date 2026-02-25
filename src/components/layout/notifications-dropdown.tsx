@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { dispatchXpToast } from '@/context/xp-toast-context';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -74,7 +75,10 @@ export function NotificationsDropdown() {
   const [actionLoading, setActionLoading] = useState<'read-all' | 'clear' | null>(null);
   const [lobbyRolledModalMessage, setLobbyRolledModalMessage] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [dropdownStyle, setDropdownStyle] = useState<{ top: number; left: number } | null>(null);
   const prevUnreadRef = useRef<number | null>(null);
+  const hasPlayedSoundThisLoad = useRef(false);
 
   const fetchNotifications = () => {
     setLoading(true);
@@ -83,26 +87,25 @@ export function NotificationsDropdown() {
       .then((data) => {
         const list = data.notifications ?? [];
         const newUnread = data.unreadCount ?? 0;
-        if (prevUnreadRef.current !== null && newUnread > prevUnreadRef.current) {
+        if (prevUnreadRef.current === null && newUnread > 0 && !hasPlayedSoundThisLoad.current) {
           playNotificationSound();
+          hasPlayedSoundThisLoad.current = true;
         }
         prevUnreadRef.current = newUnread;
         setUnreadCount(newUnread);
         setNotifications(list);
-        // Show verified XP toast only once per notification (persisted in sessionStorage so it survives remounts/navigation)
-        const verified = list.find(
+        const verifiedWithXp = list.filter(
           (n: NotificationItem) =>
             n.type === 'VERIFICATION_APPROVED' &&
             typeof n.verifiedXpGained === 'number' &&
             n.verifiedXpGained > 0 &&
             !hasShownVerifiedToastFor(n.id)
-        ) as NotificationItem | undefined;
-        if (verified) {
-          markVerifiedToastShown(verified.id);
-          dispatchXpToast(verified.verifiedXpGained!, {
-            totalXp: verified.verifiedTotalXp,
-            verified: true,
-          });
+        ) as NotificationItem[];
+        if (verifiedWithXp.length > 0) {
+          const totalXp = verifiedWithXp.reduce((s, n) => s + (n.verifiedXpGained ?? 0), 0);
+          const lastTotal = verifiedWithXp[verifiedWithXp.length - 1]?.verifiedTotalXp;
+          verifiedWithXp.forEach((n) => markVerifiedToastShown(n.id));
+          dispatchXpToast(totalXp, { totalXp: lastTotal, verified: true });
         }
       })
       .catch(() => {
@@ -133,6 +136,26 @@ export function NotificationsDropdown() {
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || !buttonRef.current) return;
+    const updatePosition = () => {
+      if (buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect();
+        setDropdownStyle({
+          top: rect.bottom + 6,
+          left: Math.min(rect.right - 320, window.innerWidth - 336),
+        });
+      }
+    };
+    updatePosition();
+    window.addEventListener('scroll', updatePosition, true);
+    window.addEventListener('resize', updatePosition);
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+    };
   }, [open]);
 
   const markRead = (id: string) => {
@@ -232,6 +255,7 @@ export function NotificationsDropdown() {
   return (
     <div className="relative" ref={ref}>
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => {
           setOpen(!open);
@@ -249,7 +273,7 @@ export function NotificationsDropdown() {
       </button>
 
       <AnimatePresence>
-        {open && (
+        {open && createPortal(
           <>
             <div className="fixed inset-0 z-[90]" onClick={() => setOpen(false)} aria-hidden />
             <motion.div
@@ -257,7 +281,13 @@ export function NotificationsDropdown() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.15 }}
-              className="absolute top-full right-0 mt-1.5 w-80 max-w-[calc(100vw-2rem)] max-h-[70vh] overflow-hidden flex flex-col bg-bunker-900 border border-bunker-700 rounded-lg shadow-xl z-[100]"
+              style={{
+                position: 'fixed',
+                top: dropdownStyle?.top ?? 64,
+                left: Math.max(8, dropdownStyle?.left ?? (typeof window !== 'undefined' ? window.innerWidth - 336 : 0)),
+                zIndex: 100,
+              }}
+              className="w-80 max-w-[calc(100vw-1rem)] max-h-[70vh] overflow-hidden flex flex-col bg-bunker-900 border border-bunker-700 rounded-lg shadow-xl"
             >
               <div className="flex-shrink-0 px-3 py-2 border-b border-bunker-700 flex items-center justify-between">
                 <span className="text-sm font-semibold text-white">Notifications</span>
@@ -453,7 +483,8 @@ export function NotificationsDropdown() {
                 </div>
               )}
             </motion.div>
-          </>
+          </>,
+          document.body
         )}
       </AnimatePresence>
 
