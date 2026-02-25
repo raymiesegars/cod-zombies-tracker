@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { dispatchXpToast } from '@/context/xp-toast-context';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui';
 import { Bell, ShieldCheck, ShieldOff, Loader2, CheckCheck, Trash2, UserPlus, UserMinus, Check, X, Box } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -24,6 +24,9 @@ function playNotificationSound() {
 
 /** Persists across sessions (localStorage) so verified XP toast shows only once ever per notification. */
 const VERIFIED_TOAST_SHOWN_KEY = 'cod-tracker-verified-xp-toast-shown';
+
+/** sessionStorage: play notification sound only once per "batch" of unread (per tab). Reset when unread goes to 0. */
+const NOTIFICATION_SOUND_PLAYED_KEY = 'cod-tracker-notification-sound-played';
 
 function hasShownVerifiedToastFor(notificationId: string): boolean {
   if (typeof window === 'undefined') return true;
@@ -74,11 +77,10 @@ export function NotificationsDropdown() {
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<'read-all' | 'clear' | null>(null);
   const [lobbyRolledModalMessage, setLobbyRolledModalMessage] = useState<string | null>(null);
-  const ref = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [dropdownStyle, setDropdownStyle] = useState<{ top: number; left: number } | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
   const prevUnreadRef = useRef<number | null>(null);
-  const hasPlayedSoundThisLoad = useRef(false);
 
   const fetchNotifications = () => {
     setLoading(true);
@@ -87,9 +89,11 @@ export function NotificationsDropdown() {
       .then((data) => {
         const list = data.notifications ?? [];
         const newUnread = data.unreadCount ?? 0;
-        if (prevUnreadRef.current === null && newUnread > 0 && !hasPlayedSoundThisLoad.current) {
+        if (newUnread === 0) {
+          if (typeof sessionStorage !== 'undefined') sessionStorage.removeItem(NOTIFICATION_SOUND_PLAYED_KEY);
+        } else if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem(NOTIFICATION_SOUND_PLAYED_KEY) !== '1') {
           playNotificationSound();
-          hasPlayedSoundThisLoad.current = true;
+          sessionStorage.setItem(NOTIFICATION_SOUND_PLAYED_KEY, '1');
         }
         prevUnreadRef.current = newUnread;
         setUnreadCount(newUnread);
@@ -126,36 +130,50 @@ export function NotificationsDropdown() {
     };
   }, []);
 
+  const updatePosition = (): { top: number; left: number } | null => {
+    const btn = buttonRef.current;
+    if (!btn || typeof window === 'undefined') return null;
+    const rect = btn.getBoundingClientRect();
+    const dropdownW = 320;
+    const dropdownH = Math.min(window.innerHeight * 0.7, 400);
+    const gap = 6;
+    const padding = 8;
+    let left = rect.left + rect.width - dropdownW;
+    left = Math.max(padding, Math.min(left, window.innerWidth - dropdownW - padding));
+    const spaceBelow = window.innerHeight - rect.bottom - gap;
+    const spaceAbove = rect.top - gap;
+    const showBelow = spaceBelow >= dropdownH || spaceBelow >= spaceAbove;
+    const top = showBelow ? rect.bottom + gap : Math.max(padding, rect.top - dropdownH - gap);
+    const maxTop = window.innerHeight - dropdownH - padding;
+    const actualTop = Math.max(padding, Math.min(top, maxTop));
+    return { top: actualTop, left };
+  };
+
+  useEffect(() => {
+    if (!open) {
+      setPosition(null);
+      return;
+    }
+    const pos = updatePosition();
+    if (pos) setPosition(pos);
+    const onResize = () => {
+      const p = updatePosition();
+      if (p) setPosition(p);
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as Node;
-      if (ref.current && !ref.current.contains(target)) {
-        setOpen(false);
-      }
+      const inButton = buttonRef.current?.contains(target);
+      const inDropdown = dropdownRef.current?.contains(target);
+      if (!inButton && !inDropdown) setOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [open]);
-
-  useEffect(() => {
-    if (!open || !buttonRef.current) return;
-    const updatePosition = () => {
-      if (buttonRef.current) {
-        const rect = buttonRef.current.getBoundingClientRect();
-        setDropdownStyle({
-          top: rect.bottom + 6,
-          left: Math.min(rect.right - 320, window.innerWidth - 336),
-        });
-      }
-    };
-    updatePosition();
-    window.addEventListener('scroll', updatePosition, true);
-    window.addEventListener('resize', updatePosition);
-    return () => {
-      window.removeEventListener('scroll', updatePosition, true);
-      window.removeEventListener('resize', updatePosition);
-    };
   }, [open]);
 
   const markRead = (id: string) => {
@@ -252,43 +270,17 @@ export function NotificationsDropdown() {
     return <ShieldOff className="w-4 h-4 text-bunker-400 flex-shrink-0 mt-0.5" />;
   };
 
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        ref={buttonRef}
-        type="button"
-        onClick={() => {
-          setOpen(!open);
-          if (!open) fetchNotifications();
-        }}
-        className="inline-flex items-center justify-center p-2.5 rounded-lg border border-transparent text-bunker-200 hover:text-white hover:bg-white/5 hover:border-bunker-600/60 transition-colors shrink-0 relative"
-        aria-label={unreadCount > 0 ? `${unreadCount} unread notifications` : 'Notifications'}
-      >
-        <Bell className="w-5 h-5" />
-        {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-blood-500 px-1 text-[10px] font-bold text-white">
-            {unreadCount > 99 ? '99+' : unreadCount}
-          </span>
-        )}
-      </button>
-
-      <AnimatePresence>
-        {open && createPortal(
-          <>
-            <div className="fixed inset-0 z-[90]" onClick={() => setOpen(false)} aria-hidden />
-            <motion.div
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.15 }}
-              style={{
-                position: 'fixed',
-                top: dropdownStyle?.top ?? 64,
-                left: Math.max(8, dropdownStyle?.left ?? (typeof window !== 'undefined' ? window.innerWidth - 336 : 0)),
-                zIndex: 100,
-              }}
-              className="w-80 max-w-[calc(100vw-1rem)] max-h-[70vh] overflow-hidden flex flex-col bg-bunker-900 border border-bunker-700 rounded-lg shadow-xl"
-            >
+  const dropdownContent = open && position && typeof document !== 'undefined' && createPortal(
+    <div ref={dropdownRef} className="fixed inset-0 z-[90] pointer-events-none" aria-hidden>
+      <div className="fixed inset-0 pointer-events-auto" onClick={() => setOpen(false)} aria-hidden />
+      <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.15 }}
+          style={{ top: position.top, left: position.left }}
+          className="fixed w-80 max-w-[min(20rem,calc(100vw-1rem))] max-h-[70vh] overflow-hidden flex flex-col bg-bunker-900 border border-bunker-700 rounded-lg shadow-xl z-[100] pointer-events-auto"
+        >
               <div className="flex-shrink-0 px-3 py-2 border-b border-bunker-700 flex items-center justify-between">
                 <span className="text-sm font-semibold text-white">Notifications</span>
                 {unreadCount > 0 && (
@@ -482,11 +474,37 @@ export function NotificationsDropdown() {
                   </button>
                 </div>
               )}
-            </motion.div>
-          </>,
-          document.body
+      </motion.div>
+    </div>,
+    document.body
+  );
+
+  return (
+    <>
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={() => {
+          if (open) {
+            setOpen(false);
+          } else {
+            fetchNotifications();
+            const pos = updatePosition();
+            if (pos) setPosition(pos);
+            setOpen(true);
+          }
+        }}
+        className="inline-flex items-center justify-center p-2.5 rounded-lg border border-transparent text-bunker-200 hover:text-white hover:bg-white/5 hover:border-bunker-600/60 transition-colors shrink-0 relative"
+        aria-label={unreadCount > 0 ? `${unreadCount} unread notifications` : 'Notifications'}
+      >
+        <Bell className="w-5 h-5" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-blood-500 px-1 text-[10px] font-bold text-white">
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
         )}
-      </AnimatePresence>
+      </button>
+      {dropdownContent}
 
       {/* Modal: Cannot join lobby - already rolled */}
       {lobbyRolledModalMessage && (
@@ -504,6 +522,6 @@ export function NotificationsDropdown() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
