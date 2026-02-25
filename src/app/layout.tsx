@@ -22,8 +22,11 @@ export const metadata: Metadata = {
     template: '%s | CoD Zombies Tracker',
   },
   description:
-    'Free CoD Zombies tracker: Easter egg guides, challenges, speedruns, leaderboards, co-op logging, verified runs, XP and ranks. WW2, IW, AW, Vanguard, MW2. Find group, friends, messaging. No ads.',
+    'CZT - Free CoD Zombies tracker: Easter egg guides, challenges, speedruns, leaderboards, co-op logging, verified runs, XP and ranks. WW2, IW, AW, Vanguard, MW2. Find group, friends, messaging. No ads.',
   keywords: [
+    'CZT',
+    'CZT CoD Zombies',
+    'CZT Zombies Tracker',
     'Call of Duty Zombies',
     'CoD Zombies',
     'Zombies tracker',
@@ -60,7 +63,7 @@ export const metadata: Metadata = {
     title: 'CoD Zombies Tracker – Easter Egg Guides, Leaderboards, Co-op & Verified Runs',
     description: 'Free CoD Zombies tracker. Easter egg guides, challenges, speedruns, leaderboards, co-op logging, verified runs. WW2, IW, AW, Vanguard, MW2. No ads.',
     url: BASE,
-    images: [{ url: '/images/og-default.png', width: 1200, height: 630, alt: 'CoD Zombies Tracker' }],
+    images: [{ url: `${BASE}/opengraph-image`, width: 1200, height: 630, alt: 'CoD Zombies Tracker' }],
   },
   twitter: {
     card: 'summary_large_image',
@@ -101,6 +104,7 @@ const jsonLd = {
       '@id': `${BASE}/#website`,
       url: BASE,
       name: 'CoD Zombies Tracker',
+      alternateName: 'CZT',
       description: 'Free CoD Zombies tracker. Easter egg guides, challenges, speedruns, leaderboards, co-op logging, verified runs, XP and ranks. WW2, IW, AW, Vanguard, MW2. No ads.',
       potentialAction: [
         { '@type': 'SearchAction', target: { '@type': 'EntryPoint', urlTemplate: `${BASE}/maps?search={search_term_string}` }, 'query-input': 'required name=search_term_string' },
@@ -112,12 +116,14 @@ const jsonLd = {
     {
       '@type': 'Organization',
       name: 'CoD Zombies Tracker',
+      alternateName: 'CZT',
       url: BASE,
       description: 'Free CoD Zombies tracker. Easter egg guides, challenges, speedruns, leaderboards, co-op, verified runs. No ads.',
     },
     {
       '@type': 'WebApplication',
       name: 'CoD Zombies Tracker',
+      alternateName: 'CZT',
       url: BASE,
       applicationCategory: 'GameApplication',
       description: 'Free CoD Zombies tracker. Easter egg guides, challenges, speedruns, co-op logging, verified runs, XP and ranks. No ads.',

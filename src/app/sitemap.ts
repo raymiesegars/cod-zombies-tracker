@@ -16,9 +16,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const BASE_URL = getBaseUrl();
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: BASE_URL, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
-    { url: `${BASE_URL}/maps`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${BASE_URL}/leaderboards`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${BASE_URL}/find-group`, lastModified: new Date(), changeFrequency: 'hourly', priority: 0.8 },
+    { url: `${BASE_URL}/maps`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.95 },
+    { url: `${BASE_URL}/leaderboards`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.95 },
+    { url: `${BASE_URL}/find-group`, lastModified: new Date(), changeFrequency: 'hourly', priority: 0.85 },
+    { url: `${BASE_URL}/mystery-box`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${BASE_URL}/about`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${BASE_URL}/tools`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
   ];
 
   try {
