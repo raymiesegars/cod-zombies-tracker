@@ -41,6 +41,8 @@
     "db:verify-user-xp": "tsx scripts/verify-user-xp.ts",
     "db:reunlock-achievements": "node scripts/run-reunlock-with-direct.js",
     "db:sync-achievements": "tsx scripts/sync-achievements.ts",
+    "db:sync-level-thresholds": "tsx scripts/sync-level-thresholds.ts",
+    "db:compute-total-xp": "tsx scripts/compute-total-obtainable-xp.ts",
     "db:update-der-riese-fly-trap": "tsx scripts/update-der-riese-fly-trap.ts",
     "db:add-round-5-15-speedrun": "tsx scripts/add-round-5-15-speedrun.ts",
     "db:import-skrine-csv": "tsx scripts/import-skrine-csv/run.ts"

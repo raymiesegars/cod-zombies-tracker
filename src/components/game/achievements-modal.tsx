@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Modal } from '@/components/ui';
 import Link from 'next/link';
-import { Award, ExternalLink, Loader2, ListChecks } from 'lucide-react';
+import { Award, ExternalLink, Loader2, ListChecks, ShieldCheck } from 'lucide-react';
 
 type MapSummary = {
   mapId: string;
@@ -17,18 +17,25 @@ type MapSummary = {
 type AchievementsOverviewData = {
   summaryByMap?: MapSummary[];
   completionByGame?: { gameId: string; gameName: string; shortName: string; total: number; unlocked: number; percentage: number }[];
+  verifiedSummaryByMap?: MapSummary[];
+  verifiedCompletionByGame?: { gameId: string; gameName: string; shortName: string; total: number; unlocked: number; percentage: number }[];
 };
+
+const MAP_ACHIEVEMENTS_LINK = (mapSlug: string) => `/maps/${mapSlug}?tab=achievements`;
 
 export function AchievementsModal({
   isOpen,
   onClose,
   username,
   isOwnProfile = true,
+  variant = 'all',
 }: {
   isOpen: boolean;
   onClose: () => void;
   username: string;
   isOwnProfile?: boolean;
+  /** 'verified' = show only verified achievement counts (breakdown per game + per map) */
+  variant?: 'all' | 'verified';
 }) {
   const [data, setData] = useState<AchievementsOverviewData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -44,17 +51,23 @@ export function AchievementsModal({
     }
   }, [isOpen, username]);
 
-  const summaryByMap = data?.summaryByMap ?? [];
-  const completionByGame = data?.completionByGame ?? [];
+  const isVerified = variant === 'verified';
+  const summaryByMap = (isVerified ? data?.verifiedSummaryByMap : data?.summaryByMap) ?? [];
+  const completionByGame = (isVerified ? data?.verifiedCompletionByGame : data?.completionByGame) ?? [];
   const totalUnlocked = summaryByMap.reduce((s, m) => s + m.unlocked, 0);
   const totalAchievements = summaryByMap.reduce((s, m) => s + m.total, 0);
+
+  const title = isVerified ? 'Verified achievements' : 'Achievements';
+  const description = isVerified
+    ? `${totalUnlocked}/${totalAchievements} verified achievements unlocked by map`
+    : `${totalUnlocked}/${totalAchievements} achievements unlocked by map`;
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Achievements"
-      description={`${totalUnlocked}/${totalAchievements} achievements unlocked by map`}
+      title={title}
+      description={description}
       size="lg"
     >
       <div className="max-h-[60vh] overflow-y-auto">
@@ -64,9 +77,11 @@ export function AchievementsModal({
           </div>
         ) : (
           <>
-            {!isOwnProfile && completionByGame.length > 0 && (
+            {(completionByGame.length > 0 && (isVerified || !isOwnProfile)) && (
               <div className="mb-4">
-                <p className="text-xs font-medium text-bunker-400 uppercase tracking-wider mb-2">View runs by game</p>
+                <p className="text-xs font-medium text-bunker-400 uppercase tracking-wider mb-2">
+                  {isVerified ? 'Verified achievements by game' : 'View runs by game'}
+                </p>
                 <ul className="space-y-1.5">
                   {completionByGame.map((g) => (
                     <li key={g.gameId}>
@@ -75,9 +90,13 @@ export function AchievementsModal({
                         onClick={onClose}
                         className="flex items-center gap-3 p-2.5 rounded-lg border border-bunker-700 bg-bunker-800/50 hover:border-blood-800 hover:bg-bunker-800 transition-colors group"
                       >
-                        <ListChecks className="w-4 h-4 text-element-400 shrink-0" />
+                        {isVerified ? (
+                          <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0" />
+                        ) : (
+                          <ListChecks className="w-4 h-4 text-blue-400 shrink-0" />
+                        )}
                         <span className="font-medium text-white truncate flex-1">{g.shortName}</span>
-                        <span className="text-sm text-bunker-400">{g.unlocked}/{g.total} achievements</span>
+                        <span className="text-sm text-bunker-400">{g.unlocked}/{g.total} {isVerified ? 'verified ' : ''}achievements</span>
                         <ExternalLink className="w-4 h-4 text-bunker-500 group-hover:text-blood-400 shrink-0" />
                       </Link>
                     </li>
@@ -86,16 +105,23 @@ export function AchievementsModal({
               </div>
             )}
             {summaryByMap.length === 0 ? (
-              <p className="text-sm text-bunker-500 py-8 text-center">No achievement data.</p>
+              <p className="text-sm text-bunker-500 py-8 text-center">
+                {isVerified ? 'No verified achievement data.' : 'No achievement data.'}
+              </p>
             ) : (
               <ul className="space-y-1.5">
                 {summaryByMap.map((m) => (
                   <li key={m.mapId}>
                     <Link
-                      href={isOwnProfile ? `/maps/${m.mapSlug}` : `/users/${username}/maps/${m.mapSlug}/runs`}
+                      href={MAP_ACHIEVEMENTS_LINK(m.mapSlug)}
+                      onClick={onClose}
                       className="flex items-center gap-3 p-2.5 rounded-lg border border-bunker-700 bg-bunker-800/50 hover:border-blood-800 hover:bg-bunker-800 transition-colors group"
                     >
-                      <Award className="w-4 h-4 text-yellow-400 shrink-0" />
+                      {isVerified ? (
+                        <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0" />
+                      ) : (
+                        <Award className="w-4 h-4 text-yellow-400 shrink-0" />
+                      )}
                       <span className="font-medium text-white truncate flex-1">{m.mapName}</span>
                       {m.gameShortName && (
                         <span className="text-xs text-bunker-400">{m.gameShortName}</span>

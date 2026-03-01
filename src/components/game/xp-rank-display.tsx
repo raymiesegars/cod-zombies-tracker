@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { getLevelFromXp } from '@/lib/ranks';
+import { getLevelFromXp, MAX_LEVEL } from '@/lib/ranks';
 import { ProgressBar } from '@/components/ui';
 import { CheckCircle2 } from 'lucide-react';
 
@@ -84,7 +84,7 @@ function SingleXpBar({
             )}
           </div>
           <span className="text-xs text-bunker-400 shrink-0">
-            {level >= 20 ? 'Max rank' : `${xpForNext.toLocaleString()} XP to next`}
+            {level >= MAX_LEVEL ? 'Max rank' : `${xpForNext.toLocaleString()} XP to next`}
           </span>
         </div>
         <ProgressBar value={progress} variant="xp" size={size === 'lg' ? 'lg' : 'md'} />

@@ -21,7 +21,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { PrismaClient } from '@prisma/client';
-import { getMapAchievementDefinitions, getSpeedrunAchievementDefinitions } from '../src/lib/achievements/seed-achievements';
+import { getMapAchievementDefinitions, getSpeedrunAchievementDefinitions, ACHIEVEMENT_TYPES_NEVER_DEACTIVATE } from '../src/lib/achievements/seed-achievements';
 
 const root = path.resolve(__dirname, '..');
 for (const file of ['.env', '.env.local']) {
@@ -145,10 +145,15 @@ async function main() {
       }
     }
 
-    // Prune: deactivate achievements for this map that are no longer in defs (removes obsolete bands)
+    // Prune: deactivate achievements for this map that are no longer in defs (removes obsolete bands).
+    // Never deactivate EASTER_EGG_COMPLETE etc. – they are created by seed-easter-eggs, not by getMapAchievementDefinitions.
     if (!DRY_RUN && currentKeys.size > 0) {
       const existingAchievements = await prisma.achievement.findMany({
-        where: { mapId: map.id, isActive: true },
+        where: {
+          mapId: map.id,
+          isActive: true,
+          type: { notIn: [...ACHIEVEMENT_TYPES_NEVER_DEACTIVATE] },
+        },
         select: { id: true, slug: true, difficulty: true },
       });
       for (const a of existingAchievements) {

@@ -28,6 +28,7 @@ import { getVanguardMapConfig, getVanguardChallengeTypeLabel } from '@/lib/vangu
 import { getAwMapConfig, getAwChallengeTypeLabel } from '@/lib/aw/aw-map-config';
 import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap, hasFirstRoomGumMachineBo3 } from '@/lib/first-room-variants';
 import { hasNoJugSupport } from '@/lib/no-jug-support';
+import { getStoredLeaderboardVerifiedOnly, setStoredLeaderboardVerifiedOnly } from '@/lib/achievements-verified-prefs';
 
 const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
 const PAGE_SIZE = 25;
@@ -100,8 +101,15 @@ export default function LeaderboardsPage() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('NORMAL');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchForFetch, setSearchForFetch] = useState(''); // Debounced; drives server-side search
-  const [verifiedOnly, setVerifiedOnly] = useState(true); // Default to verified when available
+  const [verifiedOnly, setVerifiedOnly] = useState(true);
   const [rankVerifiedXpOnly, setRankVerifiedXpOnly] = useState(true);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const stored = getStoredLeaderboardVerifiedOnly();
+    setVerifiedOnly(stored);
+    setRankVerifiedXpOnly(stored);
+  }, []);
+
   const [fortuneCardsFilter, setFortuneCardsFilter] = useState<string>('false');
   const [directorsCutFilter, setDirectorsCutFilter] = useState(false);
   // BO3
@@ -239,6 +247,8 @@ export default function LeaderboardsPage() {
             const unverifiedTotal = data.unverifiedTotal ?? 0;
             if (verifiedTotal === 0 && unverifiedTotal > 0 && verifiedOnly) {
               setVerifiedOnly(false);
+              setRankVerifiedXpOnly(false);
+              setStoredLeaderboardVerifiedOnly(false);
               return;
             }
             setTotal(data.total ?? 0);
@@ -300,6 +310,8 @@ export default function LeaderboardsPage() {
             const unverifiedTotal = data.unverifiedTotal ?? 0;
             if (verifiedTotal === 0 && unverifiedTotal > 0 && verifiedOnly) {
               setVerifiedOnly(false);
+              setRankVerifiedXpOnly(false);
+              setStoredLeaderboardVerifiedOnly(false);
               return;
             }
             setTotal(data.total ?? 0);
@@ -755,7 +767,11 @@ export default function LeaderboardsPage() {
                   <div className="inline-flex rounded-lg border border-bunker-600 p-1 bg-bunker-800/80 w-fit">
                     <button
                       type="button"
-                      onClick={() => setRankVerifiedXpOnly(false)}
+                      onClick={() => {
+                        setRankVerifiedXpOnly(false);
+                        setVerifiedOnly(false);
+                        setStoredLeaderboardVerifiedOnly(false);
+                      }}
                       className={cn(
                         'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
                         !rankVerifiedXpOnly
@@ -768,7 +784,11 @@ export default function LeaderboardsPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setRankVerifiedXpOnly(true)}
+                      onClick={() => {
+                        setRankVerifiedXpOnly(true);
+                        setVerifiedOnly(true);
+                        setStoredLeaderboardVerifiedOnly(true);
+                      }}
                       className={cn(
                         'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
                         rankVerifiedXpOnly
@@ -787,7 +807,12 @@ export default function LeaderboardsPage() {
                 <div className="flex flex-wrap items-center gap-2 col-span-2 sm:col-span-4">
                   <button
                     type="button"
-                    onClick={() => setVerifiedOnly((v) => !v)}
+                    onClick={() => {
+                      const next = !verifiedOnly;
+                      setVerifiedOnly(next);
+                      setRankVerifiedXpOnly(next);
+                      setStoredLeaderboardVerifiedOnly(next);
+                    }}
                     className={cn(
                       'flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors min-h-[40px] w-fit flex-shrink-0',
                       verifiedOnly

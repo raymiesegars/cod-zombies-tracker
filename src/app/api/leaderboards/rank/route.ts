@@ -43,21 +43,24 @@ export async function GET(request: NextRequest) {
             LIMIT ${SEARCH_LIMIT}
           `;
       const total = rows.length;
-      const entries = rows.map((user) => ({
-        rank: user.rank,
-        user: {
-          id: user.id,
-          username: user.username,
-          displayName: user.displayName,
-          avatarUrl: user.avatarUrl,
-          avatarPreset: user.avatarPreset,
-          level: verifiedOnly ? getLevelFromXp(user.verifiedTotalXp ?? 0).level : (user.level ?? 1),
-        },
-        value: verifiedOnly ? (user.verifiedTotalXp ?? 0) : user.totalXp,
+      const entries = rows.map((user) => {
+        const xp = verifiedOnly ? (user.verifiedTotalXp ?? 0) : user.totalXp;
+        return {
+          rank: user.rank,
+          user: {
+            id: user.id,
+            username: user.username,
+            displayName: user.displayName,
+            avatarUrl: user.avatarUrl,
+            avatarPreset: user.avatarPreset,
+            level: getLevelFromXp(xp).level,
+          },
+          value: verifiedOnly ? (user.verifiedTotalXp ?? 0) : user.totalXp,
         playerCount: 'SOLO' as PlayerCount,
         proofUrl: null as string | null,
         completedAt: new Date(0),
-      }));
+      };
+      });
       return NextResponse.json(
         { total, entries },
         { headers: { 'Cache-Control': 'private, no-store, max-age=0' } }
@@ -88,7 +91,7 @@ export async function GET(request: NextRequest) {
 
     const entries = users.map((user, i) => {
       const xp = verifiedOnly ? (user.verifiedTotalXp ?? 0) : user.totalXp;
-      const level = verifiedOnly ? getLevelFromXp(xp).level : (user.level ?? 1);
+      const level = getLevelFromXp(xp).level;
       return {
         rank: offset + i + 1,
         user: {

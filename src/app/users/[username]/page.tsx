@@ -172,9 +172,17 @@ function AchievementsSection({
   isMapAchievementsLoading?: boolean;
   currentUserId?: string;
 }) {
-  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(() => getStoredVerifiedOnly(currentUserId));
-  const [verifiedWarningSeen, setVerifiedWarningSeen] = useState<boolean>(() => getStoredVerifiedWarningSeen(currentUserId));
+  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(true);
+  const [verifiedWarningSeen, setVerifiedWarningSeen] = useState<boolean>(false);
+  const [hasSyncedWarningFromStorage, setHasSyncedWarningFromStorage] = useState(false);
   const [showVerifiedWarning, setShowVerifiedWarning] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    setVerifiedOnly(getStoredVerifiedOnly(currentUserId));
+    setVerifiedWarningSeen(getStoredVerifiedWarningSeen(currentUserId));
+    setHasSyncedWarningFromStorage(true);
+  }, [currentUserId]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -186,10 +194,10 @@ function AchievementsSection({
   }, [currentUserId, verifiedOnly]);
 
   useEffect(() => {
-    if (verifiedOnly && !verifiedWarningSeen && currentUserId && filterMap) {
+    if (hasSyncedWarningFromStorage && verifiedOnly && !verifiedWarningSeen && currentUserId && filterMap) {
       setShowVerifiedWarning(true);
     }
-  }, [verifiedOnly, verifiedWarningSeen, currentUserId, filterMap]);
+  }, [hasSyncedWarningFromStorage, verifiedOnly, verifiedWarningSeen, currentUserId, filterMap]);
 
   const dismissVerifiedWarning = useCallback(() => {
     setShowVerifiedWarning(false);
@@ -259,16 +267,12 @@ function AchievementsSection({
 
   const filteredAchievements = useMemo(() => {
     if (!overview?.achievements || !filterMap) return [];
-    let list = overview.achievements
+    return overview.achievements
       .filter((a) => a.map?.id === filterMap)
       .filter((a) => !filterCategory || getAchievementCategory(a) === filterCategory)
       .filter((a) => !filterSpeedrun || getAchievementCategory(a) === filterSpeedrun)
       .filter((a) => !filterRestricted || isRestrictedAchievement(a));
-    if (verifiedOnly && currentUserId && overview.verifiedUnlockedAchievementIds?.length) {
-      list = list.filter((a) => verifiedSet.has(a.id));
-    }
-    return list;
-  }, [overview?.achievements, overview?.verifiedUnlockedAchievementIds, filterMap, filterCategory, filterSpeedrun, filterRestricted, verifiedOnly, currentUserId, verifiedSet]);
+  }, [overview?.achievements, filterMap, filterCategory, filterSpeedrun, filterRestricted]);
 
   const groupedByMapThenCategory = useMemo(() => {
     const byMap = new Map<
@@ -330,7 +334,7 @@ function AchievementsSection({
           isOpen
           onClose={dismissVerifiedWarning}
           title="Verified achievements"
-          description="Achievements are set to &quot;Verified&quot; by default. Only achievements unlocked by verified runs are shown. Turn off the toggle below to see all achievements."
+          description="Achievements are set to &quot;Verified&quot; by default. You see all achievements; only those unlocked by verified runs show as unlocked. Turn off the toggle to show all your unlocks (including unverified)."
           size="sm"
         >
           <div className="flex justify-end pt-2">
@@ -367,13 +371,13 @@ function AchievementsSection({
             />
             <span
               className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border border-bunker-500 bg-bunker-800 transition-colors ${
-                verifiedOnly ? 'bg-element-600/30' : ''
+                verifiedOnly ? 'bg-blue-600/30' : ''
               }`}
               aria-hidden
             >
               <span
                 className={`pointer-events-none absolute top-0.5 block h-5 w-5 rounded-full shadow ring-0 transition-transform ${
-                  verifiedOnly ? 'translate-x-5 bg-element-400 left-0.5' : 'translate-x-0 left-0.5 bg-bunker-400'
+                  verifiedOnly ? 'translate-x-5 bg-blue-400 left-0.5' : 'translate-x-0 left-0.5 bg-bunker-400'
                 }`}
               />
             </span>
@@ -477,9 +481,7 @@ function AchievementsSection({
           <div className="py-12 sm:py-16 text-center">
             <Award className="w-10 h-10 sm:w-12 sm:h-12 text-bunker-600 mx-auto mb-4" />
             <p className="text-sm sm:text-base text-bunker-400">
-              {verifiedOnly && currentUserId
-                ? 'No verified achievements on this map. Turn off "Verified only" to see all achievements.'
-                : (filterCategory || filterSpeedrun || filterRestricted)
+              {(filterCategory || filterSpeedrun || filterRestricted)
                   ? (filterRestricted
                       ? `No ${getRestrictedFilterLabel(selectedMapData?.game?.shortName, filterCategory || filterSpeedrun || null).toLowerCase()} achievements for this map.`
                       : `No ${(ACHIEVEMENT_CATEGORY_LABELS[filterCategory || filterSpeedrun] ?? (filterCategory || filterSpeedrun)).toLowerCase()} achievements found for this map.`)
@@ -515,7 +517,7 @@ function AchievementsSection({
                         </p>
                         <ul className="space-y-2">
                           {sortAchievementsInCategory(byCategory[cat]).map((a) => {
-                            const unlocked = unlockedSet.has(a.id);
+                            const unlocked = (verifiedOnly && currentUserId) ? verifiedSet.has(a.id) : unlockedSet.has(a.id);
                             const c = a.criteria as { round?: number; isCap?: boolean; maxTimeSeconds?: number } | undefined;
                             const subLabel = c?.round != null ? `Round ${c.round}` : null;
                             const maxTime = c?.maxTimeSeconds != null ? formatCompletionTime(c.maxTimeSeconds) : null;
@@ -532,7 +534,7 @@ function AchievementsSection({
                                 <div className="flex items-center gap-3 min-w-0 min-h-[2.75rem]">
                                   {unlocked ? (
                                     verifiedOnly && verifiedSet.has(a.id) ? (
-                                      <span className="flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-element-500/90 text-white" title="Verified">
+                                      <span className="flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white" title="Verified">
                                         <ShieldCheck className="w-3.5 h-3.5" />
                                       </span>
                                     ) : (
@@ -637,6 +639,7 @@ export default function UserProfilePage() {
   const [easterEggsModalOpen, setEasterEggsModalOpen] = useState(false);
   const [mapsModalOpen, setMapsModalOpen] = useState(false);
   const [achievementsModalOpen, setAchievementsModalOpen] = useState(false);
+  const [verifiedAchievementsModalOpen, setVerifiedAchievementsModalOpen] = useState(false);
   const [worldRecordsModalOpen, setWorldRecordsModalOpen] = useState(false);
   const [adminMe, setAdminMe] = useState<{ isAdmin: boolean; isSuperAdmin: boolean } | null>(null);
   const [promoteModalOpen, setPromoteModalOpen] = useState(false);
@@ -975,7 +978,7 @@ export default function UserProfilePage() {
   const selectedBlockIds = profileStatBlockSelection.length === 4 ? profileStatBlockSelection : DEFAULT_PROFILE_STAT_BLOCK_IDS;
 
   // Verified-related blocks use element (verified blue) consistently
-  const verifiedIconClass = 'text-element-400';
+  const verifiedIconClass = 'text-blue-400';
 
   const getBlockDisplay = (blockId: ProfileStatBlockId) => {
     const tooltips: Record<ProfileStatBlockId, string> = {
@@ -1003,8 +1006,12 @@ export default function UserProfilePage() {
         return { label: 'Map avg', value: avgRoundDisplay, suffix: null, icon: Trophy, iconClass: 'text-yellow-400', tooltip: tooltips['avg-round'] };
       case 'achievements':
         return { label: 'Achievements', value: `${achievementsUnlocked}/${totalAchievements}`, suffix: `(${achievementsPct}%)`, icon: Award, iconClass: 'text-yellow-400', tooltip: tooltips.achievements };
-      case 'verified-achievements':
-        return { label: 'Verified Achievements', value: String(statsTotals.verifiedAchievements ?? 0), suffix: null, icon: ShieldCheck, iconClass: verifiedIconClass, tooltip: tooltips['verified-achievements'] };
+      case 'verified-achievements': {
+        const verified = statsTotals.verifiedAchievements ?? 0;
+        const total = statsTotals.totalAchievements ?? 0;
+        const pct = total > 0 ? Math.round((verified / total) * 100) : 0;
+        return { label: 'Verified Achievements', value: `${verified}/${total}`, suffix: total > 0 ? `(${pct}%)` : null, icon: ShieldCheck, iconClass: verifiedIconClass, tooltip: tooltips['verified-achievements'] };
+      }
       case 'world-records':
         return { label: "Rank 1's", value: String(statsTotals.worldRecords ?? 0), suffix: null, icon: Crown, iconClass: 'text-yellow-400', tooltip: tooltips['world-records'] };
       case 'verified-world-records':
@@ -1235,6 +1242,7 @@ export default function UserProfilePage() {
               const isEasterEggsBlock = blockId === 'easter-eggs';
               const isMapsBlock = blockId === 'maps-played';
               const isAchievementsBlock = blockId === 'achievements';
+              const isVerifiedAchievementsBlock = blockId === 'verified-achievements';
               const isWorldRecordsBlock = blockId === 'world-records' || blockId === 'verified-world-records';
               const handleClick = isRunsBlock
                 ? () => setRunsModalOpen(blockId === 'verified-runs' ? 'verified' : 'all')
@@ -1244,9 +1252,11 @@ export default function UserProfilePage() {
                     ? () => setMapsModalOpen(true)
                     : isAchievementsBlock
                       ? () => setAchievementsModalOpen(true)
-                      : isWorldRecordsBlock
-                        ? () => setWorldRecordsModalOpen(true)
-                        : undefined;
+                      : isVerifiedAchievementsBlock
+                        ? () => setVerifiedAchievementsModalOpen(true)
+                        : isWorldRecordsBlock
+                          ? () => setWorldRecordsModalOpen(true)
+                          : undefined;
               const Wrapper = handleClick ? 'button' : 'div';
               return (
                 <div key={blockId} className="group relative">
@@ -1293,20 +1303,21 @@ export default function UserProfilePage() {
             }}
             title="Choose 4 dashboard blocks"
             description="Select exactly 4 stats to show on your profile. These will be visible to you and anyone who visits your profile."
+            size="full"
           >
             <div className="space-y-4">
               <p className="text-sm text-bunker-400">
                 Selected: {profileStatBlockSelection.length}/4
                 {profileStatBlockSelection.length !== 4 && ' — pick 4 to save.'}
               </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[50vh] overflow-y-auto pr-1">
+              <div className="grid gap-3 max-h-[55vh] overflow-y-auto overflow-x-hidden pr-1" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}>
                 {PROFILE_STAT_BLOCK_IDS.map((id) => {
                   const { label, tooltip } = getBlockDisplay(id);
                   const checked = profileStatBlockSelection.includes(id);
                   return (
                     <label
                       key={id}
-                      className={`flex items-center gap-2 min-h-[3rem] py-2.5 px-3 rounded-lg border cursor-pointer transition-colors min-w-0 ${
+                      className={`flex items-center gap-2 min-h-[2.75rem] min-w-0 py-2 px-3 rounded-lg border cursor-pointer transition-colors overflow-hidden ${
                         checked ? 'border-blood-500 bg-blood-500/10' : 'border-bunker-600 bg-bunker-800/50 hover:border-bunker-500'
                       }`}
                       onMouseEnter={(e) => {
@@ -1499,6 +1510,14 @@ export default function UserProfilePage() {
         onClose={() => setAchievementsModalOpen(false)}
         username={username}
         isOwnProfile={isOwnProfile}
+      />
+
+      <AchievementsModal
+        isOpen={verifiedAchievementsModalOpen}
+        onClose={() => setVerifiedAchievementsModalOpen(false)}
+        username={username}
+        isOwnProfile={isOwnProfile}
+        variant="verified"
       />
 
       {/* Promote to admin confirmation */}
