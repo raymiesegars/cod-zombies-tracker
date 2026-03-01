@@ -1,15 +1,16 @@
 'use client';
 
 import Image from 'next/image';
-import { RANKS, getRankIconPath } from '@/lib/ranks';
+import { RANKS, getRankIconPath, MAX_LEVEL, TOTAL_OBTAINABLE_XP } from '@/lib/ranks';
 
 export function RankHelpContent() {
+  const rank100Xp = Math.floor(TOTAL_OBTAINABLE_XP * 0.93);
   return (
     <div className="space-y-5 text-sm text-bunker-200">
       <section>
         <h3 className="text-base font-semibold text-white mb-2">How you level up</h3>
         <p className="mb-2">
-          You earn XP by playing and logging your runs. Your total XP decides your level and rank. Hit the next rank’s XP threshold and you level up.
+          You earn XP by playing and logging your runs. Your total XP decides your level and rank (1–{MAX_LEVEL}). Hit the next rank’s XP threshold and you level up.
         </p>
         <p>
           XP is permanent. We don’t remove it when you delete a log, but we do subtract XP if you revoke an achievement or re-lock one.
@@ -26,11 +27,20 @@ export function RankHelpContent() {
       </section>
 
       <section>
-        <h3 className="text-base font-semibold text-white mb-3">All ranks and XP required</h3>
-        <p className="text-bunker-400 text-xs mb-3">Level 1 starts at 0 XP. Each row shows the total XP needed to reach that level.</p>
-        <div className="overflow-x-auto -mx-1">
+        <h3 className="text-base font-semibold text-white mb-2">Rank display: total vs verified</h3>
+        <p className="text-bunker-400 text-xs mb-2">
+          Your <strong className="text-bunker-300">rank</strong> is always computed from XP. On leaderboards you can switch between <strong className="text-bunker-300">total XP</strong> (all runs) and <strong className="text-bunker-300">verified XP</strong> (verified runs only); your level and rank update to match the chosen XP.
+        </p>
+      </section>
+
+      <section>
+        <h3 className="text-base font-semibold text-white mb-3">All ranks and XP required (1–{MAX_LEVEL})</h3>
+        <p className="text-bunker-400 text-xs mb-3">
+          Level 1 starts at 0 XP. Each row shows the total XP needed to reach that level. Rank {MAX_LEVEL} requires {rank100Xp.toLocaleString()} XP (about 93% of all obtainable XP on the site). Badges: rank1.webp through rank99.webp, rank100.png.
+        </p>
+        <div className="overflow-x-auto -mx-1 max-h-[60vh] overflow-y-auto">
           <table className="w-full border-collapse text-left min-w-[320px]">
-            <thead>
+            <thead className="sticky top-0 bg-bunker-900 z-10">
               <tr className="border-b border-bunker-600">
                 <th className="py-2 pr-2 text-bunker-400 font-medium">Lvl</th>
                 <th className="py-2 pr-2 text-bunker-400 font-medium">Rank</th>

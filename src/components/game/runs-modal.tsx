@@ -99,7 +99,7 @@ export function RunsModal({
                         {run.type === 'challenge' ? run.challenge?.name : run.easterEgg?.name}
                       </span>
                       {run.isVerified && (
-                        <ShieldCheck className="w-3.5 h-3.5 text-element-400 shrink-0" aria-label="Verified" />
+                        <ShieldCheck className="w-3.5 h-3.5 text-blue-400 shrink-0" aria-label="Verified" />
                       )}
                     </div>
                     <p className="text-xs text-bunker-400 mt-0.5">

@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { Modal } from '@/components/ui';
 import Link from 'next/link';
 import { Crown, ShieldCheck, ExternalLink, Loader2 } from 'lucide-react';
+import { getStoredLeaderboardVerifiedOnly, setStoredLeaderboardVerifiedOnly } from '@/lib/achievements-verified-prefs';
 
 type WorldRecordDetail = {
   mapSlug: string;
@@ -43,6 +44,12 @@ export function WorldRecordsModal({
   const [hoverTooltip, setHoverTooltip] = useState<{ text: string; x: number; y: number } | null>(null);
 
   useEffect(() => {
+    if (isOpen && typeof window !== 'undefined') {
+      setFilterVerified(getStoredLeaderboardVerifiedOnly() ? 'verified' : 'all');
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
     if (isOpen && username) {
       setLoading(true);
       fetch(`/api/users/${username}/world-records-details`, { cache: 'no-store' })
@@ -70,7 +77,10 @@ export function WorldRecordsModal({
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setFilterVerified('all')}
+              onClick={() => {
+                setFilterVerified('all');
+                setStoredLeaderboardVerifiedOnly(false);
+              }}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 filterVerified === 'all'
                   ? 'bg-bunker-600 text-white'
@@ -81,10 +91,13 @@ export function WorldRecordsModal({
             </button>
             <button
               type="button"
-              onClick={() => setFilterVerified('verified')}
+              onClick={() => {
+                setFilterVerified('verified');
+                setStoredLeaderboardVerifiedOnly(true);
+              }}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
                 filterVerified === 'verified'
-                  ? 'bg-element-600/30 text-element-400 border border-element-500/50'
+                  ? 'bg-blue-600/30 text-blue-400 border border-blue-500/50'
                   : 'bg-bunker-800 text-bunker-400 hover:text-bunker-300 border border-bunker-700'
               }`}
             >
@@ -143,14 +156,14 @@ export function WorldRecordsModal({
                           </span>
                         )}
                         {item.isVerified && (
-                          <span className="inline-flex items-center gap-0.5 text-xs text-element-400">
+                          <span className="inline-flex items-center gap-0.5 text-xs text-blue-400">
                             <ShieldCheck className="w-3 h-3" />
                             Verified
                           </span>
                         )}
                       </div>
                     </div>
-                    <ExternalLink className="w-4 h-4 text-bunker-500 group-hover:text-element-400 shrink-0" />
+                    <ExternalLink className="w-4 h-4 text-bunker-500 group-hover:text-blue-400 shrink-0" />
                   </Link>
                 </li>
               );

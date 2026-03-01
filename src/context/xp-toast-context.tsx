@@ -4,7 +4,7 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { getLevelFromXp } from '@/lib/ranks';
+import { getLevelFromXp, MAX_LEVEL } from '@/lib/ranks';
 import { CheckCircle2 } from 'lucide-react';
 
 export type XpToastOptions = {
@@ -286,7 +286,7 @@ function XpToastContent({ amount, totalXp, verified, label }: ToastState) {
                     }}
                   />
                 </div>
-                {after.level < 20 && (
+                {after.level < MAX_LEVEL && (
                   <p className="text-[11px] text-bunker-500 text-right">
                     {(after.nextLevelXp - totalXp).toLocaleString()} to next
                   </p>

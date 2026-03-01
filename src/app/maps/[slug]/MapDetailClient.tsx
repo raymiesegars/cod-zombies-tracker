@@ -212,8 +212,10 @@ function useBuildablePartProgress(mapSlug: string, buildableId: string | null) {
 import {
   getAchievementsVerifiedOnlyKey,
   getAchievementsWarningSeenKey,
+  getStoredLeaderboardVerifiedOnly,
   getStoredVerifiedOnly,
   getStoredVerifiedWarningSeen,
+  setStoredLeaderboardVerifiedOnly,
 } from '@/lib/achievements-verified-prefs';
 
 function AchievementsTabContent({
@@ -242,9 +244,17 @@ function AchievementsTabContent({
   const [difficultyFilter, setDifficultyFilter] = useState<string>('');
   const [restrictedFilter, setRestrictedFilter] = useState(false);
 
-  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(() => getStoredVerifiedOnly(userId));
-  const [verifiedWarningSeen, setVerifiedWarningSeen] = useState<boolean>(() => getStoredVerifiedWarningSeen(userId));
+  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(true);
+  const [verifiedWarningSeen, setVerifiedWarningSeen] = useState<boolean>(false);
+  const [hasSyncedWarningFromStorage, setHasSyncedWarningFromStorage] = useState(false);
   const [showVerifiedWarning, setShowVerifiedWarning] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    setVerifiedOnly(getStoredVerifiedOnly(userId));
+    setVerifiedWarningSeen(getStoredVerifiedWarningSeen(userId));
+    setHasSyncedWarningFromStorage(true);
+  }, [userId]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -261,10 +271,10 @@ function AchievementsTabContent({
     if (isAchievementsTabActive) setHasEverBeenActive(true);
   }, [isAchievementsTabActive]);
   useEffect(() => {
-    if (verifiedOnly && !verifiedWarningSeen && userId && hasEverBeenActive) {
+    if (hasSyncedWarningFromStorage && verifiedOnly && !verifiedWarningSeen && userId && hasEverBeenActive) {
       setShowVerifiedWarning(true);
     }
-  }, [verifiedOnly, verifiedWarningSeen, userId, hasEverBeenActive]);
+  }, [hasSyncedWarningFromStorage, verifiedOnly, verifiedWarningSeen, userId, hasEverBeenActive]);
 
   const dismissVerifiedWarning = useCallback(() => {
     setShowVerifiedWarning(false);
@@ -295,9 +305,6 @@ function AchievementsTabContent({
   }
 
   const verifiedSet = new Set(verifiedUnlockedIds ?? []);
-  if (verifiedOnly && userId) {
-    achievementsFiltered = achievementsFiltered.filter((a) => verifiedSet.has(a.id));
-  }
 
   if (!achievements || achievements.length === 0) {
     return (
@@ -348,8 +355,7 @@ function AchievementsTabContent({
     (categoryFilter && visibleCount === 0) ||
     (speedrunFilter && visibleCount === 0) ||
     (restrictedFilter && visibleCount === 0) ||
-    (isBo4 && difficultyFilter && achievementsFiltered.length === 0) ||
-    (verifiedOnly && userId && achievementsFiltered.length === 0);
+    (isBo4 && difficultyFilter && achievementsFiltered.length === 0);
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -358,7 +364,7 @@ function AchievementsTabContent({
           isOpen={true}
           onClose={dismissVerifiedWarning}
           title="Verified achievements"
-          description="Achievements are set to &quot;Verified&quot; by default. Only achievements unlocked by verified runs are shown. Turn off the toggle below to see all achievements."
+          description="Achievements are set to &quot;Verified&quot; by default. You see all achievements; only those unlocked by verified runs show as unlocked. Turn off the toggle to show all your unlocks (including unverified)."
           size="sm"
         >
           <div className="flex justify-end pt-2">
@@ -381,13 +387,13 @@ function AchievementsTabContent({
             />
             <span
               className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border border-bunker-500 bg-bunker-800 transition-colors ${
-                verifiedOnly ? 'bg-element-600/30' : ''
+                verifiedOnly ? 'bg-blue-600/30' : ''
               }`}
               aria-hidden
             >
               <span
                 className={`pointer-events-none absolute top-0.5 block h-5 w-5 rounded-full shadow ring-0 transition-transform ${
-                  verifiedOnly ? 'translate-x-5 bg-element-400 left-0.5' : 'translate-x-0 left-0.5 bg-bunker-400'
+                  verifiedOnly ? 'translate-x-5 bg-blue-400 left-0.5' : 'translate-x-0 left-0.5 bg-bunker-400'
                 }`}
               />
             </span>
@@ -465,9 +471,7 @@ function AchievementsTabContent({
         <div className="text-center py-8 sm:py-12">
           <Award className="w-10 h-10 sm:w-12 sm:h-12 text-bunker-600 mx-auto mb-4" />
           <p className="text-bunker-400 text-sm sm:text-base">
-            {verifiedOnly && userId && achievementsFiltered.length === 0
-              ? 'No verified achievements on this map. Turn off "Verified only" to see all achievements.'
-              : isBo4 && difficultyFilter && achievementsFiltered.length === 0
+            {isBo4 && difficultyFilter && achievementsFiltered.length === 0
                 ? `No achievements for ${getBo4DifficultyLabel(difficultyFilter)} yet.`
                 : restrictedFilter
                   ? `No ${getRestrictedFilterLabel(gameShortName, categoryFilter || speedrunFilter || null).toLowerCase()} achievements on this map.`
@@ -486,7 +490,7 @@ function AchievementsTabContent({
           <CardContent className="py-4 pl-6 pr-4">
             <ul className="space-y-2 min-w-0 w-full">
               {(byCategory[cat]!).map((a) => {
-                const unlocked = unlockedSet.has(a.id);
+                const unlocked = (verifiedOnly && userId) ? verifiedSet.has(a.id) : unlockedSet.has(a.id);
                 const isVerified = verifiedSet.has(a.id);
                 const c = a.criteria as { round?: number; isCap?: boolean; maxTimeSeconds?: number };
                 const subLabel = c.round != null ? `Round ${c.round}` : null;
@@ -503,7 +507,7 @@ function AchievementsTabContent({
                     <div className="flex items-center gap-3 min-w-0 min-h-[2.75rem] overflow-hidden">
                       {unlocked ? (
                         verifiedOnly && isVerified ? (
-                          <span className="flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-element-500/90 text-white" title="Verified">
+                          <span className="flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white" title="Verified">
                             <ShieldCheck className="w-3.5 h-3.5" />
                           </span>
                         ) : (
@@ -666,7 +670,16 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   const slug = params.slug as string;
   const { profile, refreshProfile } = useAuth();
   const tabParam = searchParams.get('tab');
-  const initialTab = tabParam === 'your-runs' ? 'your-runs' : 'overview';
+  const initialTab =
+    tabParam === 'your-runs'
+      ? 'your-runs'
+      : tabParam === 'achievements'
+        ? 'achievements'
+        : tabParam === 'easter-eggs'
+          ? 'easter-eggs'
+          : tabParam === 'leaderboard'
+            ? 'leaderboard'
+            : 'overview';
 
   const [map, setMap] = useState<MapWithDetails | null>(initialMap ?? null);
   const [refreshMapCounter, setRefreshMapCounter] = useState(0);
@@ -701,6 +714,10 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   /** Same as Leaderboards page: 'HIGHEST_ROUND', challenge type, or 'ee-time-{easterEggId}' */
   const [selectedLeaderboardCategory, setSelectedLeaderboardCategory] = useState<string>('HIGHEST_ROUND');
   const [leaderboardVerifiedOnly, setLeaderboardVerifiedOnly] = useState(true);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    setLeaderboardVerifiedOnly(getStoredLeaderboardVerifiedOnly());
+  }, []);
   const [leaderboardFortuneCards, setLeaderboardFortuneCards] = useState<string>('false');
   const [leaderboardDirectorsCut, setLeaderboardDirectorsCut] = useState(false);
   // BO3
@@ -818,6 +835,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
             const unverifiedTotal = data.unverifiedTotal ?? 0;
             if (verifiedTotal === 0 && unverifiedTotal > 0 && leaderboardVerifiedOnly) {
               setLeaderboardVerifiedOnly(false);
+              setStoredLeaderboardVerifiedOnly(false);
               return;
             }
             setLeaderboard(data.entries ?? []);
@@ -872,6 +890,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
             const unverifiedTotal = data.unverifiedTotal ?? 0;
             if (verifiedTotal === 0 && unverifiedTotal > 0 && leaderboardVerifiedOnly) {
               setLeaderboardVerifiedOnly(false);
+              setStoredLeaderboardVerifiedOnly(false);
               return;
             }
             setLeaderboard(data.entries ?? []);
@@ -2044,7 +2063,11 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                     )}
                     <button
                       type="button"
-                      onClick={() => setLeaderboardVerifiedOnly((v) => !v)}
+                      onClick={() => {
+                        const next = !leaderboardVerifiedOnly;
+                        setLeaderboardVerifiedOnly(next);
+                        setStoredLeaderboardVerifiedOnly(next);
+                      }}
                       className={cn(
                         'flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors min-h-[40px]',
                         leaderboardVerifiedOnly

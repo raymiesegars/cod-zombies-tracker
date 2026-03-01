@@ -1,6 +1,6 @@
 import { getAssetUrl } from '@/lib/assets';
 
-// Ranks + XP thresholds. Icons live in public/images/ranks/ or on Supabase if ASSETS_BASE_URL is set.
+// Ranks + XP thresholds. Icons: rank1.webp .. rank99.webp, rank100.png in public/images/ranks/
 export type RankDefinition = {
   level: number;
   name: string;
@@ -8,28 +8,56 @@ export type RankDefinition = {
   icon: string;
 };
 
-export const RANKS: RankDefinition[] = [
-  { level: 1, name: 'Outbreak Survivor', xpRequired: 0, icon: 'outbreak-survivor.png' },
-  { level: 2, name: 'Knife Only', xpRequired: 2_500, icon: 'knife-only.png' },
-  { level: 3, name: 'Monkey Bomber', xpRequired: 7_500, icon: 'monkey-bomber.png' },
-  { level: 4, name: 'Carpenter', xpRequired: 17_000, icon: 'carpenter.png' },
-  { level: 5, name: 'Ray Gunner', xpRequired: 32_000, icon: 'ray-gunner.png' },
-  { level: 6, name: "Samantha's Bear", xpRequired: 55_000, icon: 'teddy.png' },
-  { level: 7, name: 'Perkaholic', xpRequired: 85_000, icon: 'perkaholic.png' },
-  { level: 8, name: 'Mystery Box Addict', xpRequired: 125_000, icon: 'mystery-box-addict.png' },
-  { level: 9, name: 'Pack-a-Punch Initiate', xpRequired: 175_000, icon: 'pack-a-punch-initiate.png' },
-  { level: 10, name: 'Hellhound Slayer', xpRequired: 235_000, icon: 'hellhound-slayer.png' },
-  { level: 11, name: 'Nova Crawler', xpRequired: 305_000, icon: 'nova-crawler.png' },
-  { level: 12, name: "Keeper's Mark", xpRequired: 385_000, icon: 'keepers-mark.png' },
-  { level: 13, name: 'Elemental Shard', xpRequired: 480_000, icon: 'elemental-shard.png' },
-  { level: 14, name: 'Staff Bearer', xpRequired: 590_000, icon: 'staff-bearer.png' },
-  { level: 15, name: 'Aether Traveler', xpRequired: 720_000, icon: 'aether-traveler.png' },
-  { level: 16, name: 'Apothicon Bane', xpRequired: 880_000, icon: 'apothicon-bane.png' },
-  { level: 17, name: 'Primis Operative', xpRequired: 1_070_000, icon: 'primis-operative.png' },
-  { level: 18, name: 'Shadowed One', xpRequired: 1_290_000, icon: 'shadowed-one.png' },
-  { level: 19, name: 'Aether Ascendant', xpRequired: 1_550_000, icon: 'aether-ascendant.png' },
-  { level: 20, name: 'Aether Overlord', xpRequired: 1_850_000, icon: 'aether-overlord.png' },
+/** Total XP from all active achievements on the site. Run: pnpm exec tsx scripts/compute-total-obtainable-xp.ts to get current value. */
+export const TOTAL_OBTAINABLE_XP = 15_950_235;
+
+/** XP required to reach rank 100 (93% of total obtainable). */
+const RANK_100_XP = Math.floor(TOTAL_OBTAINABLE_XP * 0.93);
+
+/** Original 20-level curve (scaled to levels 1–80). */
+const OLD_20_XP = [
+  0, 2_500, 7_500, 17_000, 32_000, 55_000, 85_000, 125_000, 175_000, 235_000,
+  305_000, 385_000, 480_000, 590_000, 720_000, 880_000, 1_070_000, 1_290_000,
+  1_550_000, 1_850_000,
 ];
+
+function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}
+
+/** Build XP threshold for level L (1–100). Level 1 = 0, levels 2–80 scaled from old curve, 81–100 curve to 93% total. */
+function xpForLevel(L: number): number {
+  if (L <= 1) return 0;
+  if (L <= 80) {
+    const t = (L - 1) / 79;
+    const oldIndex = t * 19;
+    const i0 = Math.floor(oldIndex);
+    const i1 = Math.min(i0 + 1, 19);
+    const frac = oldIndex - i0;
+    return Math.round(lerp(OLD_20_XP[i0]!, OLD_20_XP[i1]!, frac));
+  }
+  const t = (L - 80) / 20;
+  const power = 1.6;
+  const x = Math.pow(t, power);
+  return Math.round(1_850_000 + (RANK_100_XP - 1_850_000) * x);
+}
+
+function buildRanks(): RankDefinition[] {
+  const ranks: RankDefinition[] = [];
+  for (let L = 1; L <= 100; L++) {
+    const xp = xpForLevel(L);
+    const icon = L <= 99 ? `rank${L}.webp` : 'rank100.png';
+    ranks.push({
+      level: L,
+      name: `Rank ${L}`,
+      xpRequired: xp,
+      icon,
+    });
+  }
+  return ranks;
+}
+
+export const RANKS: RankDefinition[] = buildRanks();
 
 export const MAX_LEVEL = RANKS.length;
 export const MAX_XP = RANKS[RANKS.length - 1]!.xpRequired;

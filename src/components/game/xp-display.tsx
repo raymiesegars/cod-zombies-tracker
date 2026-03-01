@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { getLevelFromXp } from '@/lib/ranks';
+import { getLevelFromXp, MAX_LEVEL } from '@/lib/ranks';
 import { ProgressBar } from '@/components/ui';
 
 interface XpDisplayProps {
@@ -60,7 +60,7 @@ export function XpDisplay({
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
             <span className="text-sm font-medium text-bunker-200">Level {level} · {rankName}</span>
-            <span className="text-xs text-bunker-400">{level >= 20 ? 'Max rank' : `${xpForNext.toLocaleString()} XP to next`}</span>
+            <span className="text-xs text-bunker-400">{level >= MAX_LEVEL ? 'Max rank' : `${xpForNext.toLocaleString()} XP to next`}</span>
           </div>
           <ProgressBar
             value={progress}
