@@ -55,7 +55,7 @@ export interface ChallengeMapping {
 /** Report row for output CSV. */
 export interface ReportRow {
   csvRowIndex: number;
-  status: 'imported' | 'skipped' | 'error';
+  status: 'imported' | 'skipped' | 'updated' | 'error';
   game: string;
   map: string;
   record: string;

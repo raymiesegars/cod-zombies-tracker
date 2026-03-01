@@ -25,7 +25,14 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     const [open, setOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLButtonElement>(null);
-    const [dropdownStyle, setDropdownStyle] = useState<{ top: number; left: number; minWidth: number } | null>(null);
+    const [dropdownStyle, setDropdownStyle] = useState<{
+      top?: number;
+      bottom?: number;
+      left: number;
+      minWidth: number;
+      maxHeight: number;
+      openUpward: boolean;
+    } | null>(null);
 
     const selectedOption = options.find((o) => o.value === value);
     const displayLabel = selectedOption?.label ?? placeholder ?? '';
@@ -33,10 +40,26 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     const updatePosition = () => {
       if (typeof document === 'undefined' || !triggerRef.current) return;
       const rect = triggerRef.current.getBoundingClientRect();
+      const padding = 8;
+      const gap = 4;
+      const spaceBelow = window.innerHeight - rect.bottom - gap - padding;
+      const spaceAbove = rect.top - gap - padding;
+      const maxHeightCap = Math.min(window.innerHeight * 0.7, 32 * 16); // 70vh or 32rem
+      const openUpward = spaceBelow < 200 && spaceAbove > spaceBelow;
+      const maxHeight = openUpward
+        ? Math.min(spaceAbove, maxHeightCap)
+        : Math.min(spaceBelow, maxHeightCap);
+      let left = rect.left;
+      const minWidth = rect.width;
+      const maxWidth = window.innerWidth - padding * 2;
+      if (left + minWidth > window.innerWidth - padding) left = window.innerWidth - padding - minWidth;
+      if (left < padding) left = padding;
       setDropdownStyle({
-        top: rect.bottom + 4,
-        left: rect.left,
-        minWidth: rect.width,
+        ...(openUpward ? { bottom: window.innerHeight - rect.top + gap } : { top: rect.bottom + gap }),
+        left,
+        minWidth: Math.min(minWidth, maxWidth),
+        maxHeight: Math.max(120, maxHeight),
+        openUpward,
       });
     };
 
@@ -80,12 +103,13 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         <div
           data-select-dropdown
           role="listbox"
-          className="fixed z-[9999] py-1 bg-bunker-800 border border-bunker-600 rounded-lg shadow-xl max-h-[min(70vh,32rem)] overflow-auto"
+          className="fixed z-[9999] py-1 bg-bunker-800 border border-bunker-600 rounded-lg shadow-xl overflow-auto"
           style={{
-            top: dropdownStyle.top,
+            ...(dropdownStyle.openUpward ? { bottom: dropdownStyle.bottom } : { top: dropdownStyle.top }),
             left: dropdownStyle.left,
             width: dropdownStyle.minWidth,
-            maxWidth: dropdownStyle.minWidth,
+            minWidth: dropdownStyle.minWidth,
+            maxHeight: dropdownStyle.maxHeight,
           }}
         >
           {options.map((option) => (
