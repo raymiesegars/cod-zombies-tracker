@@ -64,6 +64,8 @@ import {
   getAllowedSpeedrunCategoriesForMap,
   getAllowedNonSpeedrunCategoriesForMap,
   isSpeedrunCategory,
+  isRestrictedAchievement,
+  getRestrictedFilterLabel,
 } from '@/lib/achievements/categories';
 import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { getBo1MapConfig, getBo1ChallengeTypeLabel } from '@/lib/bo1/bo1-map-config';
@@ -225,6 +227,7 @@ function AchievementsTabContent({
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [speedrunFilter, setSpeedrunFilter] = useState<string>('');
   const [difficultyFilter, setDifficultyFilter] = useState<string>('');
+  const [restrictedFilter, setRestrictedFilter] = useState(false);
 
   const isBo4 = gameShortName === 'BO4';
   const achievementsBeforeTypeFilter = isBo4 && difficultyFilter
@@ -237,6 +240,9 @@ function AchievementsTabContent({
   }
   if (speedrunFilter) {
     achievementsFiltered = achievementsFiltered.filter((a) => getAchievementCategory(a) === speedrunFilter);
+  }
+  if (restrictedFilter) {
+    achievementsFiltered = achievementsFiltered.filter((a) => isRestrictedAchievement(a));
   }
 
   if (!achievements || achievements.length === 0) {
@@ -283,9 +289,11 @@ function AchievementsTabContent({
   );
 
   const visibleCount = visibleCategories.reduce((sum, cat) => sum + (byCategory[cat]?.length ?? 0), 0);
+  const hasRestrictedOnMap = (achievements ?? []).some(isRestrictedAchievement);
   const filterEmpty =
     (categoryFilter && visibleCount === 0) ||
     (speedrunFilter && visibleCount === 0) ||
+    (restrictedFilter && visibleCount === 0) ||
     (isBo4 && difficultyFilter && achievementsFiltered.length === 0);
 
   return (
@@ -315,6 +323,33 @@ function AchievementsTabContent({
             />
           </>
         )}
+        {hasRestrictedOnMap && (
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <span className="text-xs font-medium text-bunker-400">Harder only:</span>
+            <input
+              type="checkbox"
+              checked={restrictedFilter}
+              onChange={(e) => setRestrictedFilter(e.target.checked)}
+              className="sr-only"
+              aria-label="Show only harder achievements"
+            />
+            <span
+              className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border border-bunker-500 bg-bunker-800 transition-colors ${
+                restrictedFilter ? 'bg-blood-500/20' : ''
+              }`}
+              aria-hidden
+            >
+              <span
+                className={`pointer-events-none absolute top-0.5 block h-5 w-5 rounded-full bg-bunker-400 shadow ring-0 transition-transform ${
+                  restrictedFilter ? 'translate-x-5 bg-blood-500 left-0.5' : 'translate-x-0 left-0.5'
+                }`}
+              />
+            </span>
+            <span className="text-sm text-bunker-300">
+              {getRestrictedFilterLabel(gameShortName, categoryFilter || speedrunFilter || null)}
+            </span>
+          </label>
+        )}
         {isBo4 && (
           <>
             <span className="text-xs font-medium text-bunker-400 w-full sm:w-auto mt-2 sm:mt-0">Difficulty:</span>
@@ -337,7 +372,9 @@ function AchievementsTabContent({
           <p className="text-bunker-400 text-sm sm:text-base">
             {isBo4 && difficultyFilter && achievementsFiltered.length === 0
               ? `No achievements for ${getBo4DifficultyLabel(difficultyFilter)} yet.`
-              : `No ${(ACHIEVEMENT_CATEGORY_LABELS[categoryFilter || speedrunFilter || ''] ?? (categoryFilter || speedrunFilter || '')).toLowerCase()} achievements on this map.`}
+              : restrictedFilter
+                ? `No ${getRestrictedFilterLabel(gameShortName, categoryFilter || speedrunFilter || null).toLowerCase()} achievements on this map.`
+                : `No ${(ACHIEVEMENT_CATEGORY_LABELS[categoryFilter || speedrunFilter || ''] ?? (categoryFilter || speedrunFilter || '')).toLowerCase()} achievements on this map.`}
           </p>
         </div>
       ) : (
@@ -934,7 +971,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
 
   // Single category dropdown like Leaderboards page: Highest Round, all map challenges (IW/BO2/BO3 in config order), all loggable EEs (Time). NO_JUG is a toggle, not a challenge.
   const mapChallengeOptions = useMemo(() => {
-    const challenges = (map?.challenges ?? []).filter((c) => c.type !== 'HIGHEST_ROUND' && c.type !== 'NO_JUG');
+    const challenges = (map?.challenges ?? []).filter((c) => c.type !== 'HIGHEST_ROUND');
     const getLabel = (type: string, fallbackName?: string | null) =>
       map?.game?.shortName === 'WAW'
         ? (fallbackName || getWaWChallengeTypeLabel(type))
@@ -958,84 +995,84 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                     ? (challengeTypeLabels[type] ?? getAwChallengeTypeLabel(type) ?? fallbackName ?? type)
                     : (fallbackName ?? challengeTypeLabels[type] ?? type);
     if (map?.game?.shortName === 'IW' && challenges.length > 0) {
-      const ordered = IW_CHALLENGE_TYPES_ORDER.filter((t) => t !== 'NO_JUG' && challenges.some((c) => c.type === t));
+      const ordered = IW_CHALLENGE_TYPES_ORDER.filter((t) => challenges.some((c) => c.type === t));
       return ordered.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: c?.name ?? challengeTypeLabels[t] ?? t };
       });
     }
     if (map?.game?.shortName === 'WAW' && map?.slug && getWaWMapConfig(map.slug)) {
-      const types = getWaWMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
+      const types = getWaWMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'BO1' && map?.slug && getBo1MapConfig(map.slug)) {
-      const types = getBo1MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
+      const types = getBo1MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'BO2' && map?.slug && getBo2MapConfig(map.slug)) {
-      const types = getBo2MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
+      const types = getBo2MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'BO3' && map?.slug && getBo3MapConfig(map.slug)) {
-      const types = getBo3MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
+      const types = getBo3MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'BO4' && map?.slug && getBo4MapConfig(map.slug)) {
-      const types = getBo4MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
+      const types = getBo4MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'BOCW' && map?.slug && getBocwMapConfig(map.slug)) {
-      const types = getBocwMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
+      const types = getBocwMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'BO6' && map?.slug && getBo6MapConfig(map.slug)) {
-      const types = getBo6MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
+      const types = getBo6MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'BO7' && map?.slug && getBo7MapConfig(map.slug)) {
-      const types = getBo7MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
+      const types = getBo7MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'WW2' && map?.slug && getWw2MapConfig(map.slug)) {
-      const types = getWw2MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
+      const types = getWw2MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'VANGUARD' && map?.slug && getVanguardMapConfig(map.slug)) {
-      const types = getVanguardMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
+      const types = getVanguardMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
     if (map?.game?.shortName === 'AW' && map?.slug && getAwMapConfig(map.slug)) {
-      const types = getAwMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
+      const types = getAwMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
       return types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };

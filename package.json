@@ -40,8 +40,10 @@
     "db:recompute-verified-xp": "tsx scripts/recompute-verified-xp.ts",
     "db:verify-user-xp": "tsx scripts/verify-user-xp.ts",
     "db:reunlock-achievements": "node scripts/run-reunlock-with-direct.js",
+    "db:sync-achievements": "tsx scripts/sync-achievements.ts",
     "db:update-der-riese-fly-trap": "tsx scripts/update-der-riese-fly-trap.ts",
-    "db:add-round-5-15-speedrun": "tsx scripts/add-round-5-15-speedrun.ts"
+    "db:add-round-5-15-speedrun": "tsx scripts/add-round-5-15-speedrun.ts",
+    "db:import-skrine-csv": "tsx scripts/import-skrine-csv/run.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.9.1",

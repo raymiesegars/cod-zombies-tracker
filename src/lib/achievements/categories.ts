@@ -148,6 +148,61 @@ const CATEGORY_ORDER = [
   'OTHER',
 ];
 
+/** Modifier keys in achievement criteria that indicate "restricted" band (Classic/No support/Fate only/No rampage). */
+const RESTRICTION_CRITERIA_KEYS = [
+  'bo3GobbleGumMode',
+  'bo4ElixirMode',
+  'bocwSupportMode',
+  'bo6GobbleGumMode',
+  'bo6SupportMode',
+  'bo7SupportMode',
+  'useFortuneCards',
+  'useDirectorsCut',
+  'rampageInducerUsed',
+] as const;
+
+/** True if this achievement is in a restricted band (classic gums, no support, fate only, no rampage, etc.). */
+export function isRestrictedAchievement(a: { criteria?: Record<string, unknown> }): boolean {
+  const c = a.criteria;
+  if (!c || typeof c !== 'object') return false;
+  return RESTRICTION_CRITERIA_KEYS.some((key) => c[key] !== undefined && c[key] !== null);
+}
+
+/**
+ * Game-specific label for the "restricted / harder achievements only" filter toggle.
+ * When selectedCategory is set, returns a label that matches what the selected challenge uses
+ * (e.g. "Starting Room" on BO6 → "No Gum / No Support"; speedruns on BO6 → "No Gum / No Rampage").
+ */
+export function getRestrictedFilterLabel(
+  gameShortName: string | null | undefined,
+  selectedCategory?: string | null
+): string {
+  if (!gameShortName) return 'Harder (restricted)';
+  const g = gameShortName;
+  const cat = selectedCategory ?? '';
+
+  if (g === 'BO6') {
+    if (cat === 'STARTING_ROOM' || cat === 'NO_POWER') return 'No Gum / No Support';
+    if (isSpeedrunCategory(cat)) return 'No Gum / No Rampage';
+    return 'No Support';
+  }
+  if (g === 'BO7') {
+    if (isSpeedrunCategory(cat)) return 'No Rampage, No Gums';
+    if (cat === 'STARTING_ROOM' || cat === 'NO_POWER') return 'No Support, No Gums';
+    return 'No Support';
+  }
+  if (g === 'BOCW') {
+    if (isSpeedrunCategory(cat)) return 'No Rampage';
+    return 'No Support';
+  }
+  if (g === 'VANGUARD' && isSpeedrunCategory(cat)) return 'No Rampage';
+  if (g === 'BO3') return 'Classic / No Megas';
+  if (g === 'BO4') return 'Classic Elixirs';
+  if (g === 'IW') return 'Fate Only (no DC)';
+  if (g === 'VANGUARD') return 'No Rampage';
+  return 'Harder (restricted)';
+}
+
 export function getAchievementCategory(a: {
   type?: string;
   criteria?: { challengeType?: string };

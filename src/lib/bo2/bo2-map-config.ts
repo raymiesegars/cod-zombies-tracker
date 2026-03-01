@@ -115,6 +115,7 @@ export const BO2_MAP_CONFIG: Record<Bo2MapSlug, Bo2ChallengeConfig> = {
   tranzit: {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
@@ -184,6 +185,7 @@ export const BO2_MAP_CONFIG: Record<Bo2MapSlug, Bo2ChallengeConfig> = {
   town: {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
@@ -218,6 +220,7 @@ export const BO2_MAP_CONFIG: Record<Bo2MapSlug, Bo2ChallengeConfig> = {
   farm: {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
@@ -250,6 +253,7 @@ export const BO2_MAP_CONFIG: Record<Bo2MapSlug, Bo2ChallengeConfig> = {
   'nuketown-zombies': {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
@@ -282,6 +286,7 @@ export const BO2_MAP_CONFIG: Record<Bo2MapSlug, Bo2ChallengeConfig> = {
   'die-rise': {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
@@ -321,6 +326,7 @@ export const BO2_MAP_CONFIG: Record<Bo2MapSlug, Bo2ChallengeConfig> = {
   'mob-of-the-dead': {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
@@ -359,6 +365,7 @@ export const BO2_MAP_CONFIG: Record<Bo2MapSlug, Bo2ChallengeConfig> = {
   buried: {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
@@ -400,6 +407,7 @@ export const BO2_MAP_CONFIG: Record<Bo2MapSlug, Bo2ChallengeConfig> = {
   origins: {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',

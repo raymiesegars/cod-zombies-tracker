@@ -109,7 +109,7 @@ export function getBo1ChallengeTypeLabel(type: string): string {
 
 export const BO1_MAP_CONFIG: Record<Bo1MapSlug, Bo1ChallengeConfig> = {
   'kino-der-toten': {
-    challengeTypes: ['HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN'],
+    challengeTypes: ['HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN'],
     noDownsSoloAllowed: true,
     noDownsAvailable: true,
     hasFixedWunderwaffeTag: false,
@@ -121,7 +121,7 @@ export const BO1_MAP_CONFIG: Record<Bo1MapSlug, Bo1ChallengeConfig> = {
     noJugWR: 160,
   },
   five: {
-    challengeTypes: ['HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN'],
+    challengeTypes: ['HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN'],
     noDownsSoloAllowed: true,
     noDownsAvailable: true,
     hasFixedWunderwaffeTag: false,
@@ -133,7 +133,7 @@ export const BO1_MAP_CONFIG: Record<Bo1MapSlug, Bo1ChallengeConfig> = {
     noJugWR: 127,
   },
   ascension: {
-    challengeTypes: ['HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN', 'EASTER_EGG_SPEEDRUN'],
+    challengeTypes: ['HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN', 'EASTER_EGG_SPEEDRUN'],
     noDownsSoloAllowed: true,
     noDownsAvailable: true,
     hasFixedWunderwaffeTag: false,
@@ -146,7 +146,7 @@ export const BO1_MAP_CONFIG: Record<Bo1MapSlug, Bo1ChallengeConfig> = {
     noJugWR: 222,
   },
   'call-of-the-dead': {
-    challengeTypes: ['HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'EASTER_EGG_SPEEDRUN'],
+    challengeTypes: ['HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'EASTER_EGG_SPEEDRUN'],
     noDownsSoloAllowed: true,
     noDownsAvailable: true,
     hasFixedWunderwaffeTag: false,
@@ -160,7 +160,7 @@ export const BO1_MAP_CONFIG: Record<Bo1MapSlug, Bo1ChallengeConfig> = {
     noJugWR: 90,
   },
   'shangri-la': {
-    challengeTypes: ['HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN', 'EASTER_EGG_SPEEDRUN'],
+    challengeTypes: ['HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN', 'EASTER_EGG_SPEEDRUN'],
     noDownsSoloAllowed: true,
     noDownsAvailable: true,
     hasFixedWunderwaffeTag: false,
@@ -173,7 +173,7 @@ export const BO1_MAP_CONFIG: Record<Bo1MapSlug, Bo1ChallengeConfig> = {
     noJugWR: 111,
   },
   moon: {
-    challengeTypes: ['HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'NO_MANS_LAND', 'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN', 'EASTER_EGG_SPEEDRUN'],
+    challengeTypes: ['HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'NO_MANS_LAND', 'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN', 'EASTER_EGG_SPEEDRUN'],
     noDownsSoloAllowed: true,
     noDownsAvailable: true,
     hasFixedWunderwaffeTag: false,
@@ -196,7 +196,7 @@ export const BO1_MAP_CONFIG: Record<Bo1MapSlug, Bo1ChallengeConfig> = {
     firstRoomWR: 44,
   },
   'bo1-verruckt': {
-    challengeTypes: ['HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN'],
+    challengeTypes: ['HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN'],
     noDownsSoloAllowed: true,
     noDownsAvailable: true,
     hasFixedWunderwaffeTag: false,
@@ -209,7 +209,7 @@ export const BO1_MAP_CONFIG: Record<Bo1MapSlug, Bo1ChallengeConfig> = {
     noJugWR: 121,
   },
   'bo1-shi-no-numa': {
-    challengeTypes: ['HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN'],
+    challengeTypes: ['HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN'],
     noDownsSoloAllowed: true,
     noDownsAvailable: true,
     hasFixedWunderwaffeTag: false,
@@ -220,7 +220,7 @@ export const BO1_MAP_CONFIG: Record<Bo1MapSlug, Bo1ChallengeConfig> = {
     noJugWR: 125,
   },
   'bo1-der-riese': {
-    challengeTypes: ['HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN', 'EASTER_EGG_SPEEDRUN'],
+    challengeTypes: ['HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN', 'EASTER_EGG_SPEEDRUN'],
     noDownsSoloAllowed: true,
     noDownsAvailable: true,
     hasFixedWunderwaffeTag: false,

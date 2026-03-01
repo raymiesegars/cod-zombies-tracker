@@ -26,7 +26,7 @@ import { getWw2MapConfig, getWw2ChallengeTypeLabel } from '@/lib/ww2/ww2-map-con
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 import { getVanguardMapConfig, getVanguardChallengeTypeLabel } from '@/lib/vanguard/vanguard-map-config';
 import { getAwMapConfig, getAwChallengeTypeLabel } from '@/lib/aw/aw-map-config';
-import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap } from '@/lib/first-room-variants';
+import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap, hasFirstRoomGumMachineBo3 } from '@/lib/first-room-variants';
 import { hasNoJugSupport } from '@/lib/no-jug-support';
 
 const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
@@ -263,7 +263,8 @@ export default function LeaderboardsPage() {
             if (directorsCutFilter) params.set('directorsCut', 'true');
           }
           if (isBo3Map) {
-            if (bo3GobbleGumFilter) params.set('bo3GobbleGumMode', bo3GobbleGumFilter);
+            const showBo3GumFilter = selectedChallengeType !== 'STARTING_ROOM' || !selectedMap || (selectedMap && hasFirstRoomGumMachineBo3(selectedMap));
+            if (showBo3GumFilter && bo3GobbleGumFilter) params.set('bo3GobbleGumMode', bo3GobbleGumFilter);
             if (bo3AatUsedFilter === 'true' || bo3AatUsedFilter === 'false') params.set('bo3AatUsed', bo3AatUsedFilter);
           }
           if (isBo4Map && bo4ElixirFilter) params.set('bo4ElixirMode', bo4ElixirFilter);
@@ -370,7 +371,8 @@ export default function LeaderboardsPage() {
             if (directorsCutFilter) params.set('directorsCut', 'true');
           }
           if (isBo3Map) {
-            if (bo3GobbleGumFilter) params.set('bo3GobbleGumMode', bo3GobbleGumFilter);
+            const showBo3GumFilter = selectedChallengeType !== 'STARTING_ROOM' || !selectedMap || (selectedMap && hasFirstRoomGumMachineBo3(selectedMap));
+            if (showBo3GumFilter && bo3GobbleGumFilter) params.set('bo3GobbleGumMode', bo3GobbleGumFilter);
             if (bo3AatUsedFilter === 'true' || bo3AatUsedFilter === 'false') params.set('bo3AatUsed', bo3AatUsedFilter);
           }
           if (isBo4Map && bo4ElixirFilter) params.set('bo4ElixirMode', bo4ElixirFilter);
@@ -515,7 +517,7 @@ export default function LeaderboardsPage() {
     let challengeOptions: { value: string; label: string }[];
     if (selectedMapData?.game?.shortName === 'IW') {
       challengeOptions = mapChallenges.length > 0
-        ? IW_CHALLENGE_TYPES_ORDER.filter((t) => t !== 'NO_JUG' && mapChallenges.some((c) => c.type === t)).map((t) => {
+        ? IW_CHALLENGE_TYPES_ORDER.filter((t) => mapChallenges.some((c) => c.type === t)).map((t) => {
             const c = mapChallenges.find((ch) => ch.type === t);
             return { value: t, label: c?.name ?? challengeTypeLabels[t] ?? t };
           })
@@ -596,21 +598,20 @@ export default function LeaderboardsPage() {
       const awConfig = getAwMapConfig(selectedMap);
       const types = awConfig?.challengeTypes ?? mapChallenges.map((c) => c.type);
       challengeOptions = types
-        .filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG')
+        .filter((t) => t !== 'HIGHEST_ROUND')
         .map((t) => {
           const c = mapChallenges.find((ch) => ch.type === t);
           return { value: t, label: getLabel(t, c?.name) };
         });
     } else if (selectedMapData?.game?.shortName === 'WAW' && selectedMap) {
       const wawConfig = getWaWMapConfig(selectedMap);
-      const types = (wawConfig?.challengeTypes ?? mapChallenges.map((c) => c.type)).filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
+      const types = (wawConfig?.challengeTypes ?? mapChallenges.map((c) => c.type)).filter((t) => t !== 'HIGHEST_ROUND');
       challengeOptions = types.map((t) => {
         const c = mapChallenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
     } else {
       challengeOptions = mapChallenges
-        .filter((c) => c.type !== 'NO_JUG')
         .map((c) => ({
           value: c.type,
           label: getLabel(c.type, c.name),
@@ -824,7 +825,7 @@ export default function LeaderboardsPage() {
                       />
                     </>
                   )}
-                  {isBo3Map && (
+                  {isBo3Map && (selectedChallengeType !== 'STARTING_ROOM' || !selectedMap || (selectedMap && hasFirstRoomGumMachineBo3(selectedMap))) && (
                     <>
                       <Select
                         options={[{ value: '', label: 'All GobbleGums' }, ...BO3_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo3GobbleGumLabel(m) }))]}

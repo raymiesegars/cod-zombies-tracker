@@ -50,7 +50,7 @@ import { getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { hasNoJugSupport } from '@/lib/no-jug-support';
 import { sortChallengesForDisplay } from '@/lib/challenge-order';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
-import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap } from '@/lib/first-room-variants';
+import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap, hasFirstRoomGumMachineBo3 } from '@/lib/first-room-variants';
 import { ACHIEVEMENT_CATEGORY_LABELS } from '@/lib/achievements/categories';
 
 const challengeTypeLabels: Record<string, string> = {
@@ -406,7 +406,7 @@ export default function EditMapProgressPage() {
 
           const isBo4 = (data.game?.shortName ?? '') === 'BO4';
           const challengeInitial: Record<string, { roundReached: string; playerCount: PlayerCount; difficulty?: string; proofUrls: string[]; notes: string; completionTimeSeconds: number | null; teammateUserIds: string[]; teammateNonUserNames: string[]; requestVerification: boolean }> = {};
-          for (const challenge of (data.challenges ?? []).filter((c: { type: string }) => c.type !== 'NO_JUG')) {
+          for (const challenge of (data.challenges ?? [])) {
             challengeInitial[challenge.id] = {
               roundReached: '',
               playerCount: 'SOLO',
@@ -714,7 +714,7 @@ export default function EditMapProgressPage() {
             }),
             ...((isBocw || isBo6 || isBo7 || (isVanguardGame(map?.game?.shortName) && hasVanguardRampageFilter(map?.slug))) && { rampageInducerUsed: form.rampageInducerUsed ?? false }),
             ...(isVanguardGame(map?.game?.shortName) && hasVanguardVoidFilter(map?.slug) && { vanguardVoidUsed: form.vanguardVoidUsed ?? true }),
-            ...(map?.slug && hasNoJugSupport(map.slug, map.game?.shortName) && { wawNoJug: form.wawNoJug ?? false }),
+            ...(map?.slug && hasNoJugSupport(map.slug, map.game?.shortName) && { wawNoJug: challenge?.type === 'NO_JUG' ? true : (form.wawNoJug ?? false) }),
             ...(map?.game?.shortName === 'WAW' && map?.slug === 'der-riese' && { wawFixedWunderwaffe: form.wawFixedWunderwaffe ?? false }),
             ...(map?.game?.shortName === 'BO2' && getBo2MapConfig(map.slug)?.hasBank && { bo2BankUsed: form.bo2BankUsed ?? true }),
             ...(isWw2Game(map?.game?.shortName) && { ww2ConsumablesUsed: form.ww2ConsumablesUsed ?? true }),
@@ -804,7 +804,7 @@ export default function EditMapProgressPage() {
           roundReached: parseInt(form.roundReached),
           playerCount: form.playerCount,
           ...(map.game?.shortName === 'BO4' && form.difficulty && { difficulty: form.difficulty }),
-          ...(map?.slug && hasNoJugSupport(map.slug, map.game?.shortName) && { wawNoJug: sharedChallengeForm.wawNoJug ?? false }),
+          ...(map?.slug && hasNoJugSupport(map.slug, map.game?.shortName) && { wawNoJug: challenge?.type === 'NO_JUG' ? true : (sharedChallengeForm.wawNoJug ?? false) }),
           ...(map?.game?.shortName === 'WAW' && map?.slug === 'der-riese' && { wawFixedWunderwaffe: sharedChallengeForm.wawFixedWunderwaffe ?? false }),
           ...(challenge?.type === 'STARTING_ROOM' && map?.slug && hasFirstRoomVariantFilter(map.slug) && sharedChallengeForm.firstRoomVariant && { firstRoomVariant: sharedChallengeForm.firstRoomVariant }),
             ...(map.game?.shortName === 'BO2' && getBo2MapConfig(map.slug)?.hasBank && { bo2BankUsed: sharedChallengeForm.bo2BankUsed ?? true }),
@@ -915,8 +915,7 @@ export default function EditMapProgressPage() {
   );
 
   const sortedLoggableChallenges = useMemo(() => {
-    const loggable = (map?.challenges ?? []).filter((c: { type: string }) => c.type !== 'NO_JUG');
-    return sortChallengesForDisplay(loggable, map?.game?.shortName, map?.slug);
+    return sortChallengesForDisplay(map?.challenges ?? [], map?.game?.shortName, map?.slug);
   }, [map?.challenges, map?.game?.shortName, map?.slug]);
 
   if (authLoading || isLoading) {
@@ -1235,18 +1234,6 @@ export default function EditMapProgressPage() {
                         </label>
                       </>
                     )}
-                    {map?.slug && hasNoJugSupport(map.slug, map.game?.shortName) && (
-                      <Select
-                        label="No Jug"
-                        options={[
-                          { value: 'false', label: 'Standard (Jug allowed)' },
-                          { value: 'true', label: 'No Jug' },
-                        ]}
-                        value={sharedChallengeForm.wawNoJug === true ? 'true' : 'false'}
-                        onChange={(e) => handleSharedChallengeChange('wawNoJug', e.target.value === 'true')}
-                        className="w-full"
-                      />
-                    )}
                     {map?.game?.shortName === 'WAW' && (
                       <>
                         {map?.slug === 'der-riese' && (
@@ -1299,7 +1286,8 @@ export default function EditMapProgressPage() {
                         className="w-full"
                       />
                     )}
-                    {isBo3Game(map?.game?.shortName) && (
+                    {isBo3Game(map?.game?.shortName) &&
+                      (!Array.from(selectedChallengeIds).some((cid) => map?.challenges.find((c) => c.id === cid)?.type === 'STARTING_ROOM') || (map?.slug && hasFirstRoomGumMachineBo3(map.slug))) && (
                       <>
                         <Select
                           label="GobbleGums"
