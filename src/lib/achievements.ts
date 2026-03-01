@@ -769,13 +769,11 @@ export async function getAchievementProgress(
       if (!achievement.mapId) return { current: 0, target: 1, percentage: 0 };
       const baseWhere = { userId, mapId: achievement.mapId };
       const difficulty = achievement.difficulty ?? undefined;
-      const bo4AnyDifficulty = { OR: [{ difficulty: null }, { difficulty: { in: ['NORMAL', 'HARDCORE', 'REALISTIC'] } }] as const };
-      const challengeWhere =
-        difficulty != null ? { ...baseWhere, difficulty } : { ...baseWhere, ...bo4AnyDifficulty };
+      const challengeWhere = difficulty != null ? { ...baseWhere, difficulty } : baseWhere;
       const eeWhere =
         difficulty != null
           ? { ...baseWhere, roundCompleted: { not: null }, difficulty }
-          : { ...baseWhere, roundCompleted: { not: null }, ...bo4AnyDifficulty };
+          : { ...baseWhere, roundCompleted: { not: null } };
       const [challengeMax, eeMax] = await Promise.all([
         prisma.challengeLog.aggregate({
           where: challengeWhere,
