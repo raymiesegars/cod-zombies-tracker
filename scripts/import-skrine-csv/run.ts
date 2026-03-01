@@ -283,7 +283,7 @@ async function findExistingChallengeLog(
   roundReached: number,
   completionTimeSeconds: number | null,
   proofUrls: string[]
-): Promise<boolean> {
+): Promise<{ id: string; rampageInducerUsed: boolean | null } | null> {
   const existing = await prisma.challengeLog.findFirst({
     where: {
       userId,
@@ -292,16 +292,12 @@ async function findExistingChallengeLog(
       roundReached,
       ...(completionTimeSeconds != null ? { completionTimeSeconds } : {}),
     },
-    select: { id: true },
+    select: { id: true, rampageInducerUsed: true, proofUrls: true },
   });
-  if (!existing) return false;
-  const log = await prisma.challengeLog.findUnique({
-    where: { id: existing.id },
-    select: { proofUrls: true },
-  });
-  if (!log) return false;
-  const sameProof = log.proofUrls.length === proofUrls.length && proofUrls.every((u, i) => log.proofUrls[i] === u);
-  return sameProof;
+  if (!existing) return null;
+  const sameProof = existing.proofUrls.length === proofUrls.length && proofUrls.every((u, i) => existing.proofUrls[i] === u);
+  if (!sameProof) return null;
+  return { id: existing.id, rampageInducerUsed: existing.rampageInducerUsed };
 }
 
 async function findExistingEasterEggLog(
@@ -349,6 +345,7 @@ async function main() {
   const skippedReasons: { row: number; game: string; map: string; record: string; sub_record: string; reason: string }[] = [];
   let imported = 0;
   let skipped = 0;
+  let updated = 0;
   let errors = 0;
 
   for (const row of rows) {
@@ -459,6 +456,8 @@ async function main() {
     const bo4ElixirMode = (mods.bo4ElixirMode as string) ?? null;
     const bocwSupportMode = (mods.bocwSupportMode as string) ?? DEFAULTS.bocwSupportMode;
     const rampageInducerUsed = mods.rampageInducerUsed as boolean | undefined;
+    const isSpeedrun = (mapping.challengeType as string).includes('SPEEDRUN');
+    const defaultRampage = isSpeedrun ? true : DEFAULTS.rampageInducerUsed;
     const firstRoomVariant = (mods.firstRoomVariant as string) ?? null;
     const bo3AatUsed = mods.bo3AatUsed as boolean | undefined;
     const ww2ConsumablesUsed = mods.ww2ConsumablesUsed as boolean | undefined;
@@ -470,7 +469,7 @@ async function main() {
     const bo7SupportMode = (mods.bo7SupportMode as string) ?? null;
 
     if (skipExisting) {
-      const exists = await findExistingChallengeLog(
+      const existing = await findExistingChallengeLog(
         user.id,
         mapRecord.id,
         challenge.id,
@@ -478,16 +477,34 @@ async function main() {
         completionTimeSeconds,
         proofUrls
       );
-      if (exists) {
-        report.push({
-          csvRowIndex: row._rowIndex,
-          status: 'skipped',
-          game: row.game,
-          map: row.map,
-          record: row.record,
-          sub_record: row.sub_record,
-          message: 'Duplicate: identical log already exists',
-        });
+      if (existing) {
+        if (isSpeedrun && existing.rampageInducerUsed !== true && !dryRun) {
+          await prisma.challengeLog.update({
+            where: { id: existing.id },
+            data: { rampageInducerUsed: true },
+          });
+          report.push({
+            csvRowIndex: row._rowIndex,
+            status: 'updated',
+            game: row.game,
+            map: row.map,
+            record: row.record,
+            sub_record: row.sub_record,
+            message: 'Updated existing log to with rampage',
+            logIds: [existing.id],
+          });
+          updated++;
+        } else {
+          report.push({
+            csvRowIndex: row._rowIndex,
+            status: 'skipped',
+            game: row.game,
+            map: row.map,
+            record: row.record,
+            sub_record: row.sub_record,
+            message: 'Duplicate: identical log already exists',
+          });
+        }
         skipped++;
         continue;
       }
@@ -537,7 +554,7 @@ async function main() {
         bo3GobbleGumMode,
         bo4ElixirMode,
         bocwSupportMode,
-        rampageInducerUsed: rampageInducerUsed ?? DEFAULTS.rampageInducerUsed,
+        rampageInducerUsed: rampageInducerUsed ?? defaultRampage,
         firstRoomVariant,
         bo3AatUsed,
         ww2ConsumablesUsed,
@@ -580,7 +597,7 @@ async function main() {
                 isVerified: true,
                 isSolo: playerCount === 'SOLO',
                 difficulty: difficulty as 'CASUAL' | 'NORMAL' | 'HARDCORE' | 'REALISTIC' | null,
-                rampageInducerUsed: rampageInducerUsed ?? false,
+                rampageInducerUsed: rampageInducerUsed ?? (isSpeedrun ? true : false),
                 ww2ConsumablesUsed,
                 vanguardVoidUsed,
               } as never,
@@ -627,6 +644,7 @@ async function main() {
 
   console.log('\n--- Summary ---');
   console.log('Imported:', imported);
+  console.log('Updated (existing → with rampage):', updated);
   console.log('Skipped:', skipped);
   console.log('Errors:', errors);
 
@@ -639,7 +657,7 @@ async function main() {
 
   if (reportPath) {
     const out = path.isAbsolute(reportPath) ? reportPath : path.resolve(process.cwd(), reportPath);
-    fs.writeFileSync(out, JSON.stringify({ report, skippedReasons, summary: { imported, skipped, errors } }, null, 2));
+    fs.writeFileSync(out, JSON.stringify({ report, skippedReasons, summary: { imported, updated, skipped, errors } }, null, 2));
     console.log('Report written to:', out);
   }
 
