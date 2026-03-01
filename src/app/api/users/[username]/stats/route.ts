@@ -120,7 +120,7 @@ export async function GET(
 
     const mysteryBoxCompletions = user.mysteryBoxCompletionsLifetime ?? 0;
 
-    const [totalMaps, totalMainEasterEggs, totalChallenges, totalAchievements, easterEggAchievementsUnlocked, xpRank, verifiedXpRank, wr] =
+    const [totalMaps, totalMainEasterEggs, totalChallenges, totalAchievements, easterEggAchievementsUnlocked, verifiedAchievementsCount, xpRank, verifiedXpRank, wr] =
       await Promise.all([
         prisma.map.count(),
         prisma.easterEgg.count({ where: { type: 'MAIN_QUEST', isActive: true } }),
@@ -131,6 +131,9 @@ export async function GET(
             userId: user.id,
             achievement: { type: 'EASTER_EGG_COMPLETE', isActive: true },
           },
+        }),
+        prisma.userAchievement.count({
+          where: { userId: user.id, verifiedAt: { not: null } },
         }),
         prisma.user.count({ where: { isPublic: true, totalXp: { gt: user.totalXp ?? 0 } } }),
         prisma.user.count({ where: { isPublic: true, verifiedTotalXp: { gt: user.verifiedTotalXp ?? 0 } } }),
@@ -144,6 +147,7 @@ export async function GET(
       totalChallenges,
       totalAchievements,
       easterEggAchievementsUnlocked,
+      verifiedAchievementsCount,
       totalRuns,
       verifiedRuns,
       highestRound,

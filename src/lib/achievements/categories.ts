@@ -480,7 +480,7 @@ export function isMainEasterEggAchievement(a: { type?: string; criteria?: unknow
   return a.type === 'EASTER_EGG_COMPLETE' && typeof (a.criteria as { maxTimeSeconds?: number })?.maxTimeSeconds !== 'number';
 }
 
-/** Sort achievements within a category: main EE first, then by XP. Use when rendering a category block. */
+/** Sort achievements within a category: main EE first, then round ascending (lowest→highest), then time descending (slowest→fastest), then XP. */
 export function sortAchievementsInCategory<T extends { type?: string; xpReward: number; slug: string; criteria?: unknown }>(
   achievements: T[]
 ): T[] {
@@ -489,6 +489,16 @@ export function sortAchievementsInCategory<T extends { type?: string; xpReward: 
     const bMain = isMainEasterEggAchievement(b);
     if (aMain && !bMain) return -1;
     if (!aMain && bMain) return 1;
+    const critA = a.criteria as { round?: number; maxTimeSeconds?: number } | undefined;
+    const critB = b.criteria as { round?: number; maxTimeSeconds?: number } | undefined;
+    const roundA = typeof critA?.round === 'number' ? critA.round : -1;
+    const roundB = typeof critB?.round === 'number' ? critB.round : -1;
+    if (roundA >= 0 || roundB >= 0) {
+      if (roundA !== roundB) return roundA - roundB; // lowest round first
+    }
+    const timeA = typeof critA?.maxTimeSeconds === 'number' ? critA.maxTimeSeconds : -1;
+    const timeB = typeof critB?.maxTimeSeconds === 'number' ? critB.maxTimeSeconds : -1;
+    if (timeA >= 0 && timeB >= 0 && timeA !== timeB) return timeB - timeA; // slowest (higher time) first
     return a.xpReward - b.xpReward;
   });
 }
@@ -516,7 +526,7 @@ export function deduplicateAchievementsById<T extends { id?: string; type?: stri
   return [...other, ...keptEe];
 }
 
-/** Sort achievements for display: main EE (not timed) first, then by type, speedrun tiers (fastest first), round, slug. */
+/** Sort achievements for display: main EE (not timed) first, then by type, round ascending (lowest→highest), speedrun tiers slowest→fastest, slug. */
 export function sortAchievementsForDisplay<T extends { id?: string; type: string; slug: string; criteria?: unknown }>(
   achievements: T[]
 ): T[] {
@@ -529,13 +539,14 @@ export function sortAchievementsForDisplay<T extends { id?: string; type: string
     if (a.type !== b.type) return a.type.localeCompare(b.type);
     const critA = a.criteria as { round?: number; maxTimeSeconds?: number } | undefined;
     const critB = b.criteria as { round?: number; maxTimeSeconds?: number } | undefined;
-    // Speedrun tiers: fastest first (lowest maxTimeSeconds = hardest = show first)
-    const timeA = typeof critA?.maxTimeSeconds === 'number' ? critA.maxTimeSeconds : -1;
-    const timeB = typeof critB?.maxTimeSeconds === 'number' ? critB.maxTimeSeconds : -1;
-    if (timeA >= 0 && timeB >= 0 && timeA !== timeB) return timeA - timeB;
+    // Round-based: lowest first
     const roundA = typeof critA?.round === 'number' ? critA.round : 999999;
     const roundB = typeof critB?.round === 'number' ? critB.round : 999999;
     if (roundA !== roundB) return roundA - roundB;
+    // Time-based (speedruns): slowest first (highest maxTimeSeconds), then fastest
+    const timeA = typeof critA?.maxTimeSeconds === 'number' ? critA.maxTimeSeconds : -1;
+    const timeB = typeof critB?.maxTimeSeconds === 'number' ? critB.maxTimeSeconds : -1;
+    if (timeA >= 0 && timeB >= 0 && timeA !== timeB) return timeB - timeA;
     return a.slug.localeCompare(b.slug);
   });
 }

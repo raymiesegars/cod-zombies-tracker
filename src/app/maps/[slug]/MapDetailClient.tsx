@@ -209,9 +209,19 @@ function useBuildablePartProgress(mapSlug: string, buildableId: string | null) {
   return { checkedParts: checked, setPartChecked };
 }
 
+import {
+  getAchievementsVerifiedOnlyKey,
+  getAchievementsWarningSeenKey,
+  getStoredVerifiedOnly,
+  getStoredVerifiedWarningSeen,
+} from '@/lib/achievements-verified-prefs';
+
 function AchievementsTabContent({
   achievements,
   unlockedIds,
+  verifiedUnlockedIds,
+  userId,
+  isAchievementsTabActive,
   canRelock,
   onRelock,
   gameShortName,
@@ -219,6 +229,9 @@ function AchievementsTabContent({
 }: {
   achievements?: { id: string; name: string; slug: string; type: string; difficulty?: string | null; criteria: { round?: number; challengeType?: string; isCap?: boolean }; xpReward: number; rarity: string; easterEggId?: string | null; easterEgg?: { id: string; name: string; slug: string } | null }[];
   unlockedIds?: string[];
+  verifiedUnlockedIds?: string[];
+  userId?: string;
+  isAchievementsTabActive?: boolean;
   canRelock?: boolean;
   onRelock?: () => void | Promise<void>;
   gameShortName?: string;
@@ -228,6 +241,42 @@ function AchievementsTabContent({
   const [speedrunFilter, setSpeedrunFilter] = useState<string>('');
   const [difficultyFilter, setDifficultyFilter] = useState<string>('');
   const [restrictedFilter, setRestrictedFilter] = useState(false);
+
+  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(() => getStoredVerifiedOnly(userId));
+  const [verifiedWarningSeen, setVerifiedWarningSeen] = useState<boolean>(() => getStoredVerifiedWarningSeen(userId));
+  const [showVerifiedWarning, setShowVerifiedWarning] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const key = getAchievementsVerifiedOnlyKey(userId);
+    try {
+      localStorage.setItem(key, String(verifiedOnly));
+    } catch {
+      /* ignore */
+    }
+  }, [userId, verifiedOnly]);
+
+  const [hasEverBeenActive, setHasEverBeenActive] = useState(false);
+  useEffect(() => {
+    if (isAchievementsTabActive) setHasEverBeenActive(true);
+  }, [isAchievementsTabActive]);
+  useEffect(() => {
+    if (verifiedOnly && !verifiedWarningSeen && userId && hasEverBeenActive) {
+      setShowVerifiedWarning(true);
+    }
+  }, [verifiedOnly, verifiedWarningSeen, userId, hasEverBeenActive]);
+
+  const dismissVerifiedWarning = useCallback(() => {
+    setShowVerifiedWarning(false);
+    setVerifiedWarningSeen(true);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(getAchievementsWarningSeenKey(userId), 'true');
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [userId]);
 
   const isBo4 = gameShortName === 'BO4';
   const achievementsBeforeTypeFilter = isBo4 && difficultyFilter
@@ -243,6 +292,11 @@ function AchievementsTabContent({
   }
   if (restrictedFilter) {
     achievementsFiltered = achievementsFiltered.filter((a) => isRestrictedAchievement(a));
+  }
+
+  const verifiedSet = new Set(verifiedUnlockedIds ?? []);
+  if (verifiedOnly && userId) {
+    achievementsFiltered = achievementsFiltered.filter((a) => verifiedSet.has(a.id));
   }
 
   if (!achievements || achievements.length === 0) {
@@ -294,11 +348,52 @@ function AchievementsTabContent({
     (categoryFilter && visibleCount === 0) ||
     (speedrunFilter && visibleCount === 0) ||
     (restrictedFilter && visibleCount === 0) ||
-    (isBo4 && difficultyFilter && achievementsFiltered.length === 0);
+    (isBo4 && difficultyFilter && achievementsFiltered.length === 0) ||
+    (verifiedOnly && userId && achievementsFiltered.length === 0);
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {showVerifiedWarning && (
+        <Modal
+          isOpen={true}
+          onClose={dismissVerifiedWarning}
+          title="Verified achievements"
+          description="Achievements are set to &quot;Verified&quot; by default. Only achievements unlocked by verified runs are shown. Turn off the toggle below to see all achievements."
+          size="sm"
+        >
+          <div className="flex justify-end pt-2">
+            <Button variant="primary" size="sm" onClick={dismissVerifiedWarning}>
+              Got it
+            </Button>
+          </div>
+        </Modal>
+      )}
       <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        {userId != null && (
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <span className="text-xs font-medium text-bunker-400">Verified only:</span>
+            <input
+              type="checkbox"
+              checked={verifiedOnly}
+              onChange={(e) => setVerifiedOnly(e.target.checked)}
+              className="sr-only"
+              aria-label="Show only verified achievements"
+            />
+            <span
+              className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border border-bunker-500 bg-bunker-800 transition-colors ${
+                verifiedOnly ? 'bg-element-600/30' : ''
+              }`}
+              aria-hidden
+            >
+              <span
+                className={`pointer-events-none absolute top-0.5 block h-5 w-5 rounded-full shadow ring-0 transition-transform ${
+                  verifiedOnly ? 'translate-x-5 bg-element-400 left-0.5' : 'translate-x-0 left-0.5 bg-bunker-400'
+                }`}
+              />
+            </span>
+            <span className="text-sm text-bunker-300">{verifiedOnly ? 'Verified' : 'All'}</span>
+          </label>
+        )}
         <span className="text-xs font-medium text-bunker-400 w-full sm:w-auto">Filter by type:</span>
         <Select
           options={categoryOptions}
@@ -370,11 +465,13 @@ function AchievementsTabContent({
         <div className="text-center py-8 sm:py-12">
           <Award className="w-10 h-10 sm:w-12 sm:h-12 text-bunker-600 mx-auto mb-4" />
           <p className="text-bunker-400 text-sm sm:text-base">
-            {isBo4 && difficultyFilter && achievementsFiltered.length === 0
-              ? `No achievements for ${getBo4DifficultyLabel(difficultyFilter)} yet.`
-              : restrictedFilter
-                ? `No ${getRestrictedFilterLabel(gameShortName, categoryFilter || speedrunFilter || null).toLowerCase()} achievements on this map.`
-                : `No ${(ACHIEVEMENT_CATEGORY_LABELS[categoryFilter || speedrunFilter || ''] ?? (categoryFilter || speedrunFilter || '')).toLowerCase()} achievements on this map.`}
+            {verifiedOnly && userId && achievementsFiltered.length === 0
+              ? 'No verified achievements on this map. Turn off "Verified only" to see all achievements.'
+              : isBo4 && difficultyFilter && achievementsFiltered.length === 0
+                ? `No achievements for ${getBo4DifficultyLabel(difficultyFilter)} yet.`
+                : restrictedFilter
+                  ? `No ${getRestrictedFilterLabel(gameShortName, categoryFilter || speedrunFilter || null).toLowerCase()} achievements on this map.`
+                  : `No ${(ACHIEVEMENT_CATEGORY_LABELS[categoryFilter || speedrunFilter || ''] ?? (categoryFilter || speedrunFilter || '')).toLowerCase()} achievements on this map.`}
           </p>
         </div>
       ) : (
@@ -390,6 +487,7 @@ function AchievementsTabContent({
             <ul className="space-y-2 min-w-0 w-full">
               {(byCategory[cat]!).map((a) => {
                 const unlocked = unlockedSet.has(a.id);
+                const isVerified = verifiedSet.has(a.id);
                 const c = a.criteria as { round?: number; isCap?: boolean; maxTimeSeconds?: number };
                 const subLabel = c.round != null ? `Round ${c.round}` : null;
                 const maxTime = c.maxTimeSeconds != null ? formatCompletionTime(c.maxTimeSeconds) : null;
@@ -404,7 +502,13 @@ function AchievementsTabContent({
                   >
                     <div className="flex items-center gap-3 min-w-0 min-h-[2.75rem] overflow-hidden">
                       {unlocked ? (
-                        <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-military-400" />
+                        verifiedOnly && isVerified ? (
+                          <span className="flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-element-500/90 text-white" title="Verified">
+                            <ShieldCheck className="w-3.5 h-3.5" />
+                          </span>
+                        ) : (
+                          <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-military-400" />
+                        )
                       ) : (
                         <Lock className="w-5 h-5 flex-shrink-0 text-bunker-500" />
                       )}
@@ -1373,8 +1477,11 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           {/* Achievements Tab */}
           <TabsContent value="achievements" forceMount>
             <AchievementsTabContent
-              achievements={(map as MapWithDetails & { achievements?: Array<{ id: string; name: string; slug: string; type: string; difficulty?: string | null; criteria: { round?: number; challengeType?: string; isCap?: boolean }; xpReward: number; rarity: string; easterEggId?: string | null; easterEgg?: { id: string; name: string; slug: string } | null }>; unlockedAchievementIds?: string[] } | null)?.achievements ?? []}
+              achievements={(map as MapWithDetails & { achievements?: Array<{ id: string; name: string; slug: string; type: string; difficulty?: string | null; criteria: { round?: number; challengeType?: string; isCap?: boolean }; xpReward: number; rarity: string; easterEggId?: string | null; easterEgg?: { id: string; name: string; slug: string } | null }>; unlockedAchievementIds?: string[]; verifiedUnlockedAchievementIds?: string[] } | null)?.achievements ?? []}
               unlockedIds={(map as MapWithDetails & { unlockedAchievementIds?: string[] } | null)?.unlockedAchievementIds}
+              verifiedUnlockedIds={(map as MapWithDetails & { verifiedUnlockedAchievementIds?: string[] } | null)?.verifiedUnlockedAchievementIds}
+              userId={profile?.id}
+              isAchievementsTabActive={activeTab === 'achievements'}
               canRelock={!!profile}
               onRelock={async () => {
                 setRefreshMapCounter((c) => c + 1);

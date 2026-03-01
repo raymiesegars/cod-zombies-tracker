@@ -60,10 +60,11 @@ export async function GET(
       );
     }
 
-    achievements = sortAchievementsForDisplay(achievements);
+    achievements = sortAchievementsForDisplay(achievements.filter((a) => a.isActive !== false));
 
     const supabaseUser = await getUser();
     let unlockedAchievementIds: string[] = [];
+    let verifiedUnlockedAchievementIds: string[] = [];
     if (supabaseUser) {
       const user = await prisma.user.findUnique({
         where: { supabaseId: supabaseUser.id },
@@ -77,9 +78,10 @@ export async function GET(
               OR: [{ mapId: map.id }, { easterEgg: { mapId: map.id } }],
             },
           },
-          select: { achievementId: true },
+          select: { achievementId: true, verifiedAt: true },
         });
         unlockedAchievementIds = unlocked.map((u) => u.achievementId);
+        verifiedUnlockedAchievementIds = unlocked.filter((u) => u.verifiedAt != null).map((u) => u.achievementId);
       }
     }
 
@@ -87,6 +89,7 @@ export async function GET(
       ...map,
       achievements,
       unlockedAchievementIds,
+      verifiedUnlockedAchievementIds,
     });
   } catch (error) {
     console.error('Error fetching map:', error);

@@ -104,19 +104,24 @@ export async function GET(
         total: Number(r.total),
         unlocked: Number(r.unlocked),
       }));
-      return NextResponse.json({
-        completionByGame,
-        summaryByMap,
-        mapsByGame: Object.fromEntries(
-          Array.from(mapsByGameMap.entries()).map(([gameId, maps]) => [
-            gameId,
-            maps.map((m) => ({ id: m.id, name: m.name, slug: m.slug, order: m.order, game: m.game })),
-          ])
-        ),
-        achievements: [],
-        unlockedAchievementIds: [],
-      });
-    }
+    const verifiedAchievementsTotal = await prisma.userAchievement.count({
+      where: { userId: user.id, verifiedAt: { not: null } },
+    });
+
+    return NextResponse.json({
+      completionByGame,
+      summaryByMap,
+      mapsByGame: Object.fromEntries(
+        Array.from(mapsByGameMap.entries()).map(([gameId, maps]) => [
+          gameId,
+          maps.map((m) => ({ id: m.id, name: m.name, slug: m.slug, order: m.order, game: m.game })),
+        ])
+      ),
+      achievements: [],
+      unlockedAchievementIds: [],
+      verifiedAchievementsTotal,
+    });
+  }
 
     // They picked a map – only that map’s achievements
     const [rawAchievements, unlocked] = await Promise.all([
@@ -146,11 +151,12 @@ export async function GET(
             OR: [{ mapId }, { easterEgg: { mapId } }],
           },
         },
-        select: { achievementId: true },
+        select: { achievementId: true, verifiedAt: true },
       }),
     ]);
 
     const unlockedIds = unlocked.map((u) => u.achievementId);
+    const verifiedUnlockedAchievementIds = unlocked.filter((u) => u.verifiedAt != null).map((u) => u.achievementId);
 
     // EE achievements may have mapId null (linked only via easterEgg); attach map so profile filter works
     let achievements = rawAchievements;
@@ -184,7 +190,7 @@ export async function GET(
       );
     }
 
-    achievements = sortAchievementsForDisplay(achievements);
+    achievements = sortAchievementsForDisplay(achievements.filter((a) => a.isActive !== false));
 
     return NextResponse.json({
       completionByGame,
@@ -196,6 +202,7 @@ export async function GET(
       ),
       achievements,
       unlockedAchievementIds: unlockedIds,
+      verifiedUnlockedAchievementIds,
     });
   } catch (error) {
     console.error('Error fetching achievements overview:', error);

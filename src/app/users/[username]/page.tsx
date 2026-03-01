@@ -86,6 +86,12 @@ import {
   DEFAULT_PROFILE_STAT_BLOCK_IDS,
   type ProfileStatBlockId,
 } from '@/lib/profile-stat-blocks';
+import {
+  getAchievementsVerifiedOnlyKey,
+  getAchievementsWarningSeenKey,
+  getStoredVerifiedOnly,
+  getStoredVerifiedWarningSeen,
+} from '@/lib/achievements-verified-prefs';
 
 type AchievementWithMap = {
   id: string;
@@ -117,6 +123,8 @@ type MapForFilter = {
 type AchievementsOverview = {
   achievements: AchievementWithMap[];
   unlockedAchievementIds: string[];
+  verifiedUnlockedAchievementIds?: string[];
+  verifiedAchievementsTotal?: number;
   completionByGame: {
     gameId: string;
     gameName: string;
@@ -145,6 +153,7 @@ function AchievementsSection({
   isOwnProfile,
   onRelock,
   isMapAchievementsLoading = false,
+  currentUserId,
 }: {
   overview: AchievementsOverview | null;
   totalAchievementsFallback: number; // e.g. 2081 when overview is empty so we show 0/2081 not 0/0
@@ -161,10 +170,46 @@ function AchievementsSection({
   isOwnProfile: boolean;
   onRelock?: () => void | Promise<void>;
   isMapAchievementsLoading?: boolean;
+  currentUserId?: string;
 }) {
+  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(() => getStoredVerifiedOnly(currentUserId));
+  const [verifiedWarningSeen, setVerifiedWarningSeen] = useState<boolean>(() => getStoredVerifiedWarningSeen(currentUserId));
+  const [showVerifiedWarning, setShowVerifiedWarning] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(getAchievementsVerifiedOnlyKey(currentUserId), String(verifiedOnly));
+    } catch {
+      /* ignore */
+    }
+  }, [currentUserId, verifiedOnly]);
+
+  useEffect(() => {
+    if (verifiedOnly && !verifiedWarningSeen && currentUserId && filterMap) {
+      setShowVerifiedWarning(true);
+    }
+  }, [verifiedOnly, verifiedWarningSeen, currentUserId, filterMap]);
+
+  const dismissVerifiedWarning = useCallback(() => {
+    setShowVerifiedWarning(false);
+    setVerifiedWarningSeen(true);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(getAchievementsWarningSeenKey(currentUserId), 'true');
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [currentUserId]);
+
   const unlockedSet = useMemo(
     () => new Set(overview?.unlockedAchievementIds ?? []),
     [overview?.unlockedAchievementIds]
+  );
+  const verifiedSet = useMemo(
+    () => new Set(overview?.verifiedUnlockedAchievementIds ?? []),
+    [overview?.verifiedUnlockedAchievementIds]
   );
 
   const games = useMemo(() => overview?.completionByGame ?? [], [overview]);
@@ -214,12 +259,16 @@ function AchievementsSection({
 
   const filteredAchievements = useMemo(() => {
     if (!overview?.achievements || !filterMap) return [];
-    return overview.achievements
+    let list = overview.achievements
       .filter((a) => a.map?.id === filterMap)
       .filter((a) => !filterCategory || getAchievementCategory(a) === filterCategory)
       .filter((a) => !filterSpeedrun || getAchievementCategory(a) === filterSpeedrun)
       .filter((a) => !filterRestricted || isRestrictedAchievement(a));
-  }, [overview?.achievements, filterMap, filterCategory, filterSpeedrun, filterRestricted]);
+    if (verifiedOnly && currentUserId && overview.verifiedUnlockedAchievementIds?.length) {
+      list = list.filter((a) => verifiedSet.has(a.id));
+    }
+    return list;
+  }, [overview?.achievements, overview?.verifiedUnlockedAchievementIds, filterMap, filterCategory, filterSpeedrun, filterRestricted, verifiedOnly, currentUserId, verifiedSet]);
 
   const groupedByMapThenCategory = useMemo(() => {
     const byMap = new Map<
@@ -268,12 +317,29 @@ function AchievementsSection({
     ? (overview.achievements.length || 0)
     : games.reduce((s, g) => s + g.total, 0) || totalAchievementsFallback;
   const totalUnlocked = filterMap
-    ? overview.unlockedAchievementIds.length
+    ? (verifiedOnly && currentUserId && overview.verifiedUnlockedAchievementIds
+        ? overview.verifiedUnlockedAchievementIds.length
+        : overview.unlockedAchievementIds.length)
     : games.reduce((s, g) => s + g.unlocked, 0);
   const overallPct = totalAchievements > 0 ? Math.round((totalUnlocked / totalAchievements) * 100) : 0;
 
   return (
     <section>
+      {showVerifiedWarning && (
+        <Modal
+          isOpen
+          onClose={dismissVerifiedWarning}
+          title="Verified achievements"
+          description="Achievements are set to &quot;Verified&quot; by default. Only achievements unlocked by verified runs are shown. Turn off the toggle below to see all achievements."
+          size="sm"
+        >
+          <div className="flex justify-end pt-2">
+            <Button variant="primary" size="sm" onClick={dismissVerifiedWarning}>
+              Got it
+            </Button>
+          </div>
+        </Modal>
+      )}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
         <h2 className="text-lg sm:text-xl font-zombies text-white tracking-wide">
           Achievements
@@ -289,6 +355,31 @@ function AchievementsSection({
 
       {/* Filters: game, map, then achievement type (lazy loads achievements when map selected) */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
+        {currentUserId != null && filterMap && (
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <span className="text-xs font-medium text-bunker-400">Verified only:</span>
+            <input
+              type="checkbox"
+              checked={verifiedOnly}
+              onChange={(e) => setVerifiedOnly(e.target.checked)}
+              className="sr-only"
+              aria-label="Show only verified achievements"
+            />
+            <span
+              className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border border-bunker-500 bg-bunker-800 transition-colors ${
+                verifiedOnly ? 'bg-element-600/30' : ''
+              }`}
+              aria-hidden
+            >
+              <span
+                className={`pointer-events-none absolute top-0.5 block h-5 w-5 rounded-full shadow ring-0 transition-transform ${
+                  verifiedOnly ? 'translate-x-5 bg-element-400 left-0.5' : 'translate-x-0 left-0.5 bg-bunker-400'
+                }`}
+              />
+            </span>
+            <span className="text-sm text-bunker-300">{verifiedOnly ? 'Verified' : 'All'}</span>
+          </label>
+        )}
         <Filter className="w-4 h-4 text-bunker-500 flex-shrink-0" />
         <Select
           options={[{ value: '', label: 'Select game…' }, ...gameOptions]}
@@ -386,11 +477,13 @@ function AchievementsSection({
           <div className="py-12 sm:py-16 text-center">
             <Award className="w-10 h-10 sm:w-12 sm:h-12 text-bunker-600 mx-auto mb-4" />
             <p className="text-sm sm:text-base text-bunker-400">
-              {(filterCategory || filterSpeedrun || filterRestricted)
-                ? (filterRestricted
-                    ? `No ${getRestrictedFilterLabel(selectedMapData?.game?.shortName, filterCategory || filterSpeedrun || null).toLowerCase()} achievements for this map.`
-                    : `No ${(ACHIEVEMENT_CATEGORY_LABELS[filterCategory || filterSpeedrun] ?? (filterCategory || filterSpeedrun)).toLowerCase()} achievements found for this map.`)
-                : 'No achievements found for this map.'}
+              {verifiedOnly && currentUserId
+                ? 'No verified achievements on this map. Turn off "Verified only" to see all achievements.'
+                : (filterCategory || filterSpeedrun || filterRestricted)
+                  ? (filterRestricted
+                      ? `No ${getRestrictedFilterLabel(selectedMapData?.game?.shortName, filterCategory || filterSpeedrun || null).toLowerCase()} achievements for this map.`
+                      : `No ${(ACHIEVEMENT_CATEGORY_LABELS[filterCategory || filterSpeedrun] ?? (filterCategory || filterSpeedrun)).toLowerCase()} achievements found for this map.`)
+                  : 'No achievements found for this map.'}
             </p>
           </div>
         ) : (
@@ -403,7 +496,7 @@ function AchievementsSection({
                     <div className="flex items-center justify-between gap-2 flex-wrap">
                       <CardTitle className="text-base sm:text-lg flex items-center gap-2">
                         <Link
-                          href={`/maps/${mapSlug}`}
+                          href={isOwnProfile ? `/maps/${mapSlug}?tab=your-runs` : `/maps/${mapSlug}`}
                           className="hover:text-blood-400 transition-colors"
                         >
                           {mapName}
@@ -438,7 +531,13 @@ function AchievementsSection({
                               >
                                 <div className="flex items-center gap-3 min-w-0 min-h-[2.75rem]">
                                   {unlocked ? (
-                                    <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-military-400" />
+                                    verifiedOnly && verifiedSet.has(a.id) ? (
+                                      <span className="flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-element-500/90 text-white" title="Verified">
+                                        <ShieldCheck className="w-3.5 h-3.5" />
+                                      </span>
+                                    ) : (
+                                      <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-military-400" />
+                                    )
                                   ) : (
                                     <Lock className="w-5 h-5 flex-shrink-0 text-bunker-500" />
                                   )}
@@ -502,6 +601,7 @@ export default function UserProfilePage() {
     totalChallenges: number;
     totalAchievements: number;
     easterEggAchievementsUnlocked?: number;
+    verifiedAchievements?: number;
     totalRuns?: number;
     verifiedRuns?: number;
     highestRound?: number;
@@ -754,6 +854,7 @@ export default function UserProfilePage() {
             totalChallenges: statsData.totalChallenges ?? 0,
             totalAchievements: statsData.totalAchievements ?? 0,
             easterEggAchievementsUnlocked: statsData.easterEggAchievementsUnlocked ?? 0,
+            verifiedAchievements: statsData.verifiedAchievementsCount ?? 0,
             totalRuns: statsData.totalRuns ?? 0,
             verifiedRuns: statsData.verifiedRuns ?? 0,
             highestRound: statsData.highestRound ?? 0,
@@ -786,7 +887,7 @@ export default function UserProfilePage() {
     if (!achievementFilterMap) {
       setAchievementMapLoading(false);
       setAchievementsOverview((prev) =>
-        prev ? { ...prev, achievements: [], unlockedAchievementIds: [] } : null
+        prev ? { ...prev, achievements: [], unlockedAchievementIds: [], verifiedUnlockedAchievementIds: [] } : null
       );
       return;
     }
@@ -882,6 +983,7 @@ export default function UserProfilePage() {
       'easter-eggs': 'Main-quest Easter eggs you’ve completed (unlocked the achievement), out of all main-quest EEs.',
       'avg-round': "Your average best round across all maps; maps you haven't played count as 0.",
       achievements: 'Map achievements you’ve unlocked, out of all available achievements.',
+      'verified-achievements': 'Achievements unlocked by verified runs only.',
       'world-records': 'Leaderboard combinations across the site where you’re ranked #1.',
       'verified-world-records': 'Verified leaderboard combinations where you’re ranked #1.',
       'total-runs': 'Total challenge and Easter egg runs you’ve logged.',
@@ -901,6 +1003,8 @@ export default function UserProfilePage() {
         return { label: 'Map avg', value: avgRoundDisplay, suffix: null, icon: Trophy, iconClass: 'text-yellow-400', tooltip: tooltips['avg-round'] };
       case 'achievements':
         return { label: 'Achievements', value: `${achievementsUnlocked}/${totalAchievements}`, suffix: `(${achievementsPct}%)`, icon: Award, iconClass: 'text-yellow-400', tooltip: tooltips.achievements };
+      case 'verified-achievements':
+        return { label: 'Verified Achievements', value: String(statsTotals.verifiedAchievements ?? 0), suffix: null, icon: ShieldCheck, iconClass: verifiedIconClass, tooltip: tooltips['verified-achievements'] };
       case 'world-records':
         return { label: "Rank 1's", value: String(statsTotals.worldRecords ?? 0), suffix: null, icon: Crown, iconClass: 'text-yellow-400', tooltip: tooltips['world-records'] };
       case 'verified-world-records':
@@ -1195,14 +1299,14 @@ export default function UserProfilePage() {
                 Selected: {profileStatBlockSelection.length}/4
                 {profileStatBlockSelection.length !== 4 && ' — pick 4 to save.'}
               </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[50vh] overflow-y-auto">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[50vh] overflow-y-auto pr-1">
                 {PROFILE_STAT_BLOCK_IDS.map((id) => {
                   const { label, tooltip } = getBlockDisplay(id);
                   const checked = profileStatBlockSelection.includes(id);
                   return (
                     <label
                       key={id}
-                      className={`flex items-center gap-2 min-h-[2.75rem] py-2 px-3 rounded-lg border cursor-pointer transition-colors ${
+                      className={`flex items-center gap-2 min-h-[3rem] py-2.5 px-3 rounded-lg border cursor-pointer transition-colors min-w-0 ${
                         checked ? 'border-blood-500 bg-blood-500/10' : 'border-bunker-600 bg-bunker-800/50 hover:border-bunker-500'
                       }`}
                       onMouseEnter={(e) => {
@@ -1223,7 +1327,7 @@ export default function UserProfilePage() {
                         }}
                         className="sr-only"
                       />
-                      <span className="text-sm font-medium text-white flex-1 break-words">{label}</span>
+                      <span className="text-sm font-medium text-white flex-1 min-w-0 truncate" title={label}>{label}</span>
                       {checked && <Check className="w-4 h-4 text-blood-400 shrink-0" />}
                     </label>
                   );
@@ -1269,7 +1373,7 @@ export default function UserProfilePage() {
               {mapStats.map((stats) => (
                 <Link
                   key={stats.mapId}
-                  href={isOwnProfile ? `/maps/${stats.mapSlug}` : `/users/${profile?.username ?? username}/maps/${stats.mapSlug}/runs`}
+                  href={isOwnProfile ? `/maps/${stats.mapSlug}?tab=your-runs` : `/users/${profile?.username ?? username}/maps/${stats.mapSlug}/runs`}
                 >
                   <Card variant="bordered" interactive className="h-full">
                     <CardContent className="p-3 sm:py-4">
@@ -1358,6 +1462,7 @@ export default function UserProfilePage() {
           isOwnProfile={isOwnProfile}
           onRelock={refetchAchievementsAfterRelock}
           isMapAchievementsLoading={achievementMapLoading}
+          currentUserId={currentProfile?.id}
         />
       </div>
 
@@ -1393,6 +1498,7 @@ export default function UserProfilePage() {
         isOpen={achievementsModalOpen}
         onClose={() => setAchievementsModalOpen(false)}
         username={username}
+        isOwnProfile={isOwnProfile}
       />
 
       {/* Promote to admin confirmation */}
