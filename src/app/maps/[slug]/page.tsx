@@ -95,8 +95,9 @@ export default async function MapSlugPage({ params }: Props) {
 
   if (!map) notFound();
 
-  // Sort achievements by round (numeric) so Round 5, 10, 15
-  const sortedAchievements = sortAchievementsForDisplay(map.achievements ?? []);
+  // Only active achievements (earnable, count for XP); sort lowest round → highest, slowest time → fastest
+  const activeAchievements = (map.achievements ?? []).filter((a) => a.isActive !== false);
+  const sortedAchievements = sortAchievementsForDisplay(activeAchievements);
 
   const [stats, supabaseUser] = await Promise.all([
     getMapStats(map.id),
@@ -104,6 +105,7 @@ export default async function MapSlugPage({ params }: Props) {
   ]);
 
   let unlockedAchievementIds: string[] = [];
+  let verifiedUnlockedAchievementIds: string[] = [];
   if (supabaseUser) {
     const user = await prisma.user.findUnique({
       where: { supabaseId: supabaseUser.id },
@@ -111,10 +113,16 @@ export default async function MapSlugPage({ params }: Props) {
     });
     if (user) {
       const unlocked = await prisma.userAchievement.findMany({
-        where: { userId: user.id, achievement: { mapId: map.id } },
-        select: { achievementId: true },
+        where: {
+          userId: user.id,
+          achievement: {
+            OR: [{ mapId: map.id }, { easterEgg: { mapId: map.id } }],
+          },
+        },
+        select: { achievementId: true, verifiedAt: true },
       });
       unlockedAchievementIds = unlocked.map((u) => u.achievementId);
+      verifiedUnlockedAchievementIds = unlocked.filter((u) => u.verifiedAt != null).map((u) => u.achievementId);
     }
   }
 
@@ -122,6 +130,7 @@ export default async function MapSlugPage({ params }: Props) {
     ...map,
     achievements: sortedAchievements,
     unlockedAchievementIds,
+    verifiedUnlockedAchievementIds,
   };
 
   return (

@@ -16,6 +16,7 @@ export async function GET(
     const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') ?? '25', 10) || 25));
     const offset = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10) || 0);
     const verifiedParam = searchParams.get('verified'); // 'all' | 'true' | 'false'
+    const gameId = searchParams.get('gameId') || undefined;
 
     const user = await prisma.user.findUnique({
       where: { username },
@@ -34,8 +35,12 @@ export async function GET(
       return NextResponse.json({ error: 'Profile is private' }, { status: 403 });
     }
 
-    const challengeWhere: { userId: string; isVerified?: boolean } = { userId: user.id };
-    const eeWhere: { userId: string; isVerified?: boolean } = { userId: user.id };
+    const challengeWhere: { userId: string; isVerified?: boolean; map?: { gameId: string } } = { userId: user.id };
+    const eeWhere: { userId: string; isVerified?: boolean; map?: { gameId: string } } = { userId: user.id };
+    if (gameId) {
+      challengeWhere.map = { gameId };
+      eeWhere.map = { gameId };
+    }
     if (verifiedParam === 'true') {
       challengeWhere.isVerified = true;
       eeWhere.isVerified = true;

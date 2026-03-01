@@ -4,6 +4,7 @@ export const PROFILE_STAT_BLOCK_IDS = [
   'easter-eggs',
   'avg-round',
   'achievements',
+  'verified-achievements',
   'world-records',
   'verified-world-records',
   'total-runs',
