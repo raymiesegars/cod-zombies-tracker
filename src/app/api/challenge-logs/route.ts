@@ -283,7 +283,9 @@ export async function POST(request: NextRequest) {
         : []
       : undefined;
 
-    const wawNoJug = map && hasNoJugSupport(map.slug, gameShortName) ? Boolean(body.wawNoJug ?? false) : undefined;
+    const wawNoJug = map && hasNoJugSupport(map.slug, gameShortName)
+      ? (challenge?.type === 'NO_JUG' ? true : Boolean(body.wawNoJug ?? false))
+      : undefined;
     const wawFixedWunderwaffe = isWaw ? Boolean(body.wawFixedWunderwaffe ?? false) : undefined;
 
     const firstRoomVariant =

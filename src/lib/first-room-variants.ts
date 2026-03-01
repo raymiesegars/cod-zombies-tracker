@@ -54,3 +54,10 @@ export function getFirstRoomVariantLabel(mapSlug: string, value: string): string
   const options = getFirstRoomVariantsForMap(mapSlug);
   return options?.find((o) => o.value === value)?.label ?? value;
 }
+
+/** BO3 maps with no gum machine in first room (SoE, Giant) – do not show gum mode filter for first room. */
+const BO3_FIRST_ROOM_NO_GUM_MAP_SLUGS = ['shadows-of-evil', 'the-giant'] as const;
+
+export function hasFirstRoomGumMachineBo3(mapSlug: string): boolean {
+  return !BO3_FIRST_ROOM_NO_GUM_MAP_SLUGS.includes(mapSlug as (typeof BO3_FIRST_ROOM_NO_GUM_MAP_SLUGS)[number]);
+}

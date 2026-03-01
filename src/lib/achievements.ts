@@ -3,10 +3,24 @@ import type { AchievementType, Achievement, ChallengeType, Bo4Difficulty } from 
 import { getLevelFromXp } from './ranks';
 import { getBo4DifficultiesBelow, BO4_DIFFICULTY_ORDER } from './bo4';
 
+/** Modifier fields on ChallengeLog used to filter which runs count for an achievement (e.g. CLASSIC_ONLY vs MEGA). */
+export type ChallengeLogModifiers = {
+  firstRoomVariant?: string | null;
+  bo3GobbleGumMode?: string | null;
+  bo4ElixirMode?: string | null;
+  bocwSupportMode?: string | null;
+  bo6GobbleGumMode?: string | null;
+  bo6SupportMode?: string | null;
+  bo7SupportMode?: string | null;
+  useFortuneCards?: boolean | null;
+  useDirectorsCut?: boolean | null;
+  rampageInducerUsed?: boolean | null;
+};
+
 // Pre-fetched so we avoid N+1 when checking a bunch of achievements
 export type MapAchievementContext = {
   map: { id: string; roundCap: number | null } | null;
-  challengeLogs: {
+  challengeLogs: ({
     challengeType: string;
     roundReached: number;
     killsReached?: number | null;
@@ -14,7 +28,7 @@ export type MapAchievementContext = {
     difficulty?: Bo4Difficulty | null;
     completionTimeSeconds?: number | null;
     wawNoJug?: boolean | null;
-  }[];
+  } & ChallengeLogModifiers)[];
   easterEggIds: Set<string>;
   /** EE completions with time (for EE speedrun tier achievements) */
   easterEggLogsWithTime: { easterEggId: string; completionTimeSeconds: number }[];
@@ -100,13 +114,15 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
       return !!log;
     }
 
-    // NO_JUG is a run modifier (wawNoJug), not a challenge type. Achievements with challengeType NO_JUG check for HIGHEST_ROUND + wawNoJug.
+    // NO_JUG: match logs that are either NO_JUG challenge type or HIGHEST_ROUND + wawNoJug (legacy).
     if (challengeType === 'NO_JUG') {
       const noJugWhere: any = {
         userId,
         mapId: achievement.mapId,
-        wawNoJug: true,
-        challenge: { type: 'HIGHEST_ROUND' },
+        OR: [
+          { challenge: { type: 'NO_JUG' } },
+          { wawNoJug: true, challenge: { type: 'HIGHEST_ROUND' } },
+        ],
       };
       if (achievement.difficulty != null) noJugWhere.difficulty = achievement.difficulty;
       if (targetRound != null) noJugWhere.roundReached = { gte: targetRound };
@@ -122,6 +138,11 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
     if (achievement.difficulty != null) baseWhere.difficulty = achievement.difficulty;
     if (firstRoomVariant != null && firstRoomVariant !== '') {
       (baseWhere as Record<string, unknown>).firstRoomVariant = firstRoomVariant;
+    }
+    for (const key of MODIFIER_CRITERIA_KEYS) {
+      if (key === 'firstRoomVariant') continue;
+      const v = (criteria as Record<string, unknown>)[key];
+      if (v !== undefined && v !== null) (baseWhere as Record<string, unknown>)[key] = v;
     }
 
     // Speedrun tier: qualify if user has a run with completionTimeSeconds <= maxTimeSeconds
@@ -317,6 +338,37 @@ export type AchievementForContextCheck = Pick<
   'type' | 'criteria' | 'difficulty' | 'easterEggId'
 >;
 
+const MODIFIER_CRITERIA_KEYS = [
+  'firstRoomVariant',
+  'bo3GobbleGumMode',
+  'bo4ElixirMode',
+  'bocwSupportMode',
+  'bo6GobbleGumMode',
+  'bo6SupportMode',
+  'bo7SupportMode',
+  'useFortuneCards',
+  'useDirectorsCut',
+  'rampageInducerUsed',
+] as const;
+
+/** True if the log satisfies any modifier constraints in criteria. If criteria has no modifier keys, returns true. */
+function logMatchesModifierCriteria(
+  log: MapAchievementContext['challengeLogs'][number],
+  criteria: Record<string, unknown>
+): boolean {
+  for (const key of MODIFIER_CRITERIA_KEYS) {
+    const critVal = criteria[key];
+    if (critVal === undefined || critVal === null) continue;
+    const logVal = log[key as keyof typeof log];
+    if (typeof critVal === 'boolean') {
+      if (logVal !== critVal) return false;
+    } else {
+      if (String(logVal) !== String(critVal)) return false;
+    }
+  }
+  return true;
+}
+
 // Uses pre-fetched context only (no DB). ROUND_MILESTONE, CHALLENGE_COMPLETE, EASTER_EGG_COMPLETE.
 export function checkWithContext(
   achievement: AchievementForContextCheck,
@@ -353,10 +405,11 @@ export function checkWithContext(
       const targetScore = score != null ? Number(score) : undefined;
       const type = challengeType as string;
       if (!type) return false;
-      const logs =
+      const logsByDifficulty =
         achDifficulty != null
           ? ctx.challengeLogs.filter((l) => l.difficulty === achDifficulty)
           : ctx.challengeLogs;
+      const logs = logsByDifficulty.filter((l) => logMatchesModifierCriteria(l, criteria));
       const maxTime = maxTimeSeconds != null ? Number(maxTimeSeconds) : undefined;
       // EE speedrun tier (e.g. Call of the Dead Stand-in vs Ensemble Cast): check EasterEggLog
       if (
@@ -397,14 +450,13 @@ export function checkWithContext(
             l.scoreReached >= targetScore
         );
       }
-      // NO_JUG: run modifier; match HIGHEST_ROUND + wawNoJug
+      // NO_JUG: match NO_JUG challenge type or HIGHEST_ROUND + wawNoJug (legacy)
       if (type === 'NO_JUG') {
         const capRaw = isCap && ctx.map?.roundCap != null ? ctx.map.roundCap : targetRound;
         const cap = capRaw != null ? Number(capRaw) : undefined;
         return logs.some(
           (l) =>
-            l.challengeType === 'HIGHEST_ROUND' &&
-            l.wawNoJug === true &&
+            (l.challengeType === 'NO_JUG' || (l.challengeType === 'HIGHEST_ROUND' && l.wawNoJug === true)) &&
             (cap == null || (!Number.isNaN(cap) && l.roundReached >= cap))
         );
       }
@@ -457,6 +509,16 @@ export async function processMapAchievements(
           difficulty: true,
           completionTimeSeconds: true,
           wawNoJug: true,
+          firstRoomVariant: true,
+          bo3GobbleGumMode: true,
+          bo4ElixirMode: true,
+          bocwSupportMode: true,
+          bo6GobbleGumMode: true,
+          bo6SupportMode: true,
+          bo7SupportMode: true,
+          useFortuneCards: true,
+          useDirectorsCut: true,
+          rampageInducerUsed: true,
         },
       }),
       prisma.easterEggLog.findMany({
@@ -530,6 +592,16 @@ export async function processMapAchievements(
       difficulty: l.difficulty ?? undefined,
       completionTimeSeconds: l.completionTimeSeconds ?? undefined,
       wawNoJug: l.wawNoJug ?? undefined,
+      firstRoomVariant: l.firstRoomVariant ?? undefined,
+      bo3GobbleGumMode: l.bo3GobbleGumMode ?? undefined,
+      bo4ElixirMode: l.bo4ElixirMode ?? undefined,
+      bocwSupportMode: l.bocwSupportMode ?? undefined,
+      bo6GobbleGumMode: l.bo6GobbleGumMode ?? undefined,
+      bo6SupportMode: l.bo6SupportMode ?? undefined,
+      bo7SupportMode: l.bo7SupportMode ?? undefined,
+      useFortuneCards: l.useFortuneCards ?? undefined,
+      useDirectorsCut: l.useDirectorsCut ?? undefined,
+      rampageInducerUsed: l.rampageInducerUsed ?? undefined,
     })),
     easterEggIds: new Set(easterEggLogs.map((e) => e.easterEggId)),
     easterEggLogsWithTime,
@@ -630,6 +702,16 @@ export async function isAchievementSatisfiedByVerifiedRun(
         difficulty: true,
         completionTimeSeconds: true,
         wawNoJug: true,
+        firstRoomVariant: true,
+        bo3GobbleGumMode: true,
+        bo4ElixirMode: true,
+        bocwSupportMode: true,
+        bo6GobbleGumMode: true,
+        bo6SupportMode: true,
+        bo7SupportMode: true,
+        useFortuneCards: true,
+        useDirectorsCut: true,
+        rampageInducerUsed: true,
       },
     }),
     prisma.easterEggLog.findMany({
@@ -655,6 +737,16 @@ export async function isAchievementSatisfiedByVerifiedRun(
       difficulty: l.difficulty ?? undefined,
       completionTimeSeconds: l.completionTimeSeconds ?? undefined,
       wawNoJug: l.wawNoJug ?? undefined,
+      firstRoomVariant: l.firstRoomVariant ?? undefined,
+      bo3GobbleGumMode: l.bo3GobbleGumMode ?? undefined,
+      bo4ElixirMode: l.bo4ElixirMode ?? undefined,
+      bocwSupportMode: l.bocwSupportMode ?? undefined,
+      bo6GobbleGumMode: l.bo6GobbleGumMode ?? undefined,
+      bo6SupportMode: l.bo6SupportMode ?? undefined,
+      bo7SupportMode: l.bo7SupportMode ?? undefined,
+      useFortuneCards: l.useFortuneCards ?? undefined,
+      useDirectorsCut: l.useDirectorsCut ?? undefined,
+      rampageInducerUsed: l.rampageInducerUsed ?? undefined,
     })),
     easterEggIds: new Set(easterEggLogs.map((e) => e.easterEggId)),
     easterEggLogsWithTime,
@@ -773,6 +865,16 @@ export async function revokeAchievementsForMapAfterDelete(
           difficulty: true,
           completionTimeSeconds: true,
           wawNoJug: true,
+          firstRoomVariant: true,
+          bo3GobbleGumMode: true,
+          bo4ElixirMode: true,
+          bocwSupportMode: true,
+          bo6GobbleGumMode: true,
+          bo6SupportMode: true,
+          bo7SupportMode: true,
+          useFortuneCards: true,
+          useDirectorsCut: true,
+          rampageInducerUsed: true,
         },
       }),
       prisma.easterEggLog.findMany({
@@ -797,6 +899,16 @@ export async function revokeAchievementsForMapAfterDelete(
       difficulty: l.difficulty ?? undefined,
       completionTimeSeconds: l.completionTimeSeconds ?? undefined,
       wawNoJug: l.wawNoJug ?? undefined,
+      firstRoomVariant: l.firstRoomVariant ?? undefined,
+      bo3GobbleGumMode: l.bo3GobbleGumMode ?? undefined,
+      bo4ElixirMode: l.bo4ElixirMode ?? undefined,
+      bocwSupportMode: l.bocwSupportMode ?? undefined,
+      bo6GobbleGumMode: l.bo6GobbleGumMode ?? undefined,
+      bo6SupportMode: l.bo6SupportMode ?? undefined,
+      bo7SupportMode: l.bo7SupportMode ?? undefined,
+      useFortuneCards: l.useFortuneCards ?? undefined,
+      useDirectorsCut: l.useDirectorsCut ?? undefined,
+      rampageInducerUsed: l.rampageInducerUsed ?? undefined,
     })),
     easterEggIds: new Set(easterEggLogs.map((e) => e.easterEggId)),
     easterEggLogsWithTime,

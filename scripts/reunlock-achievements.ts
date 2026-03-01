@@ -14,7 +14,7 @@
  * Usage (use pnpm db:reunlock-achievements - it uses DIRECT_URL to avoid connection limits):
  *   pnpm db:reunlock-achievements           # Run and create unlocks
  *   pnpm db:reunlock-achievements --dry-run # Report only, no changes
- *   BACKFILL_USER_ID=xxx pnpm db:reunlock-achievements  # Single user
+ *   BACKFILL_USER_ID=userId pnpm db:reunlock-achievements [--dry-run]  # Only that user (faster on large DBs)
  */
 
 import * as fs from 'fs';

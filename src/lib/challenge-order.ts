@@ -17,30 +17,33 @@ import { getWw2MapConfig } from '@/lib/ww2/ww2-map-config';
 import { getVanguardMapConfig } from '@/lib/vanguard/vanguard-map-config';
 import { getAwMapConfig } from '@/lib/aw/aw-map-config';
 
-/** Get ordered challenge types for a map (excludes HIGHEST_ROUND and NO_JUG for log-view use). */
+/** Get ordered challenge types for a map. Highest Round is always first; rest follow config order. */
 export function getChallengeTypeOrderForMap(
   gameShortName: string | null | undefined,
   mapSlug: string | null | undefined
 ): string[] {
   if (!gameShortName || !mapSlug) return [];
-  if (gameShortName === 'IW') {
-    return IW_CHALLENGE_TYPES_ORDER.filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
-  }
-  const cfg =
-    gameShortName === 'WAW' ? getWaWMapConfig(mapSlug)
-    : gameShortName === 'BO1' ? getBo1MapConfig(mapSlug)
-    : gameShortName === 'BO2' ? getBo2MapConfig(mapSlug)
-    : gameShortName === 'BO3' ? getBo3MapConfig(mapSlug)
-    : gameShortName === 'BO4' ? getBo4MapConfig(mapSlug)
-    : gameShortName === 'BOCW' ? getBocwMapConfig(mapSlug)
-    : gameShortName === 'BO6' ? getBo6MapConfig(mapSlug)
-    : gameShortName === 'BO7' ? getBo7MapConfig(mapSlug)
-    : gameShortName === 'WW2' ? getWw2MapConfig(mapSlug)
-    : gameShortName === 'VANGUARD' ? getVanguardMapConfig(mapSlug)
-    : gameShortName === 'AW' ? getAwMapConfig(mapSlug)
-    : null;
-  if (!cfg?.challengeTypes) return [];
-  return (cfg.challengeTypes as string[]).filter((t) => t !== 'HIGHEST_ROUND' && t !== 'NO_JUG');
+  const rest =
+    gameShortName === 'IW'
+      ? IW_CHALLENGE_TYPES_ORDER.filter((t) => t !== 'HIGHEST_ROUND')
+      : (() => {
+          const cfg =
+            gameShortName === 'WAW' ? getWaWMapConfig(mapSlug)
+            : gameShortName === 'BO1' ? getBo1MapConfig(mapSlug)
+            : gameShortName === 'BO2' ? getBo2MapConfig(mapSlug)
+            : gameShortName === 'BO3' ? getBo3MapConfig(mapSlug)
+            : gameShortName === 'BO4' ? getBo4MapConfig(mapSlug)
+            : gameShortName === 'BOCW' ? getBocwMapConfig(mapSlug)
+            : gameShortName === 'BO6' ? getBo6MapConfig(mapSlug)
+            : gameShortName === 'BO7' ? getBo7MapConfig(mapSlug)
+            : gameShortName === 'WW2' ? getWw2MapConfig(mapSlug)
+            : gameShortName === 'VANGUARD' ? getVanguardMapConfig(mapSlug)
+            : gameShortName === 'AW' ? getAwMapConfig(mapSlug)
+            : null;
+          if (!cfg?.challengeTypes) return [];
+          return (cfg.challengeTypes as string[]).filter((t) => t !== 'HIGHEST_ROUND');
+        })();
+  return ['HIGHEST_ROUND', ...rest];
 }
 
 /** Sort challenges for log view / dropdowns using config order. Unknown types go at end. */

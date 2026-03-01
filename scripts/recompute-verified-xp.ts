@@ -13,6 +13,7 @@
  * Usage:
  *   pnpm db:recompute-verified-xp           # Run against .env.local (dev)
  *   pnpm db:recompute-verified-xp --dry-run # Preview without writing
+ *   BACKFILL_USER_ID=userId pnpm db:recompute-verified-xp [--dry-run]  # Only that user (clear/grant/recalc for them only)
  */
 
 import * as fs from 'fs';
@@ -38,6 +39,7 @@ import { grantVerifiedAchievementsForMap } from '../src/lib/verified-xp';
 import { getLevelFromXp } from '../src/lib/ranks';
 
 const DRY_RUN = process.argv.includes('--dry-run');
+const filterUserId = process.env.BACKFILL_USER_ID?.trim();
 
 async function main() {
   const dbUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
@@ -50,15 +52,21 @@ async function main() {
     console.log('*** DRY RUN – no changes will be written ***\n');
   }
 
-  console.log('1. Finding all (userId, mapId) pairs with verified runs...');
+  if (filterUserId) {
+    console.log(`Filtering to userId=${filterUserId}\n`);
+  }
+
+  const baseWhere = filterUserId ? { isVerified: true, userId: filterUserId } : { isVerified: true };
+
+  console.log('1. Finding (userId, mapId) pairs with verified runs...');
   const [challengePairs, eePairs] = await Promise.all([
     prisma.challengeLog.findMany({
-      where: { isVerified: true },
+      where: baseWhere,
       select: { userId: true, mapId: true },
       distinct: ['userId', 'mapId'],
     }),
     prisma.easterEggLog.findMany({
-      where: { isVerified: true },
+      where: baseWhere,
       select: { userId: true, mapId: true },
       distinct: ['userId', 'mapId'],
     }),
@@ -71,16 +79,20 @@ async function main() {
   const verifiedPairs = Array.from(verifiedPairSet.values());
   console.log(`   Found ${verifiedPairs.length} (userId, mapId) pairs with verified runs.\n`);
 
+  const clearWhere = filterUserId
+    ? { userId: filterUserId, verifiedAt: { not: null } }
+    : { verifiedAt: { not: null } };
+
   if (!DRY_RUN) {
-    console.log('2. Clearing all verifiedAt on UserAchievement...');
+    console.log('2. Clearing verifiedAt on UserAchievement...');
     const cleared = await prisma.userAchievement.updateMany({
-      where: { verifiedAt: { not: null } },
+      where: clearWhere,
       data: { verifiedAt: null },
     });
     console.log(`   Cleared ${cleared.count} records.\n`);
   } else {
     const count = await prisma.userAchievement.count({
-      where: { verifiedAt: { not: null } },
+      where: clearWhere,
     });
     console.log(`   [DRY] Would clear verifiedAt on ${count} records.\n`);
   }
@@ -102,8 +114,10 @@ async function main() {
     console.log(`   Granted for ${granted} pairs.\n`);
   }
 
-  console.log('4. Recalculating totalXp, level, verifiedTotalXp for all users...');
-  const users = await prisma.user.findMany({ select: { id: true } });
+  console.log('4. Recalculating totalXp, level, verifiedTotalXp...');
+  const users = filterUserId
+    ? await prisma.user.findMany({ where: { id: filterUserId }, select: { id: true } })
+    : await prisma.user.findMany({ select: { id: true } });
   let usersUpdated = 0;
 
   for (const user of users) {

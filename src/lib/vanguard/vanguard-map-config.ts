@@ -29,6 +29,20 @@ export type VanguardMapConfig = {
     r100?: number;
     r200?: number;
   } | null;
+  /** No-rampage WR times (seconds) for speedrun split when number_ones has no variant-specific board. Slower than megas/ALL. */
+  speedrunWRsNoRampage?: {
+    r5?: number;
+    r15?: number;
+    r30?: number;
+    r50?: number;
+    r70?: number;
+    r100?: number;
+    r200?: number;
+    exfilR10WR?: number;
+    exfilR20WR?: number;
+    eeSpeedrunWR?: number;
+    buildEeSpeedrunWR?: number;
+  } | null;
   exfilR5WR?: number;
   exfilR10WR?: number;
   exfilR20WR?: number;
@@ -45,7 +59,7 @@ export type VanguardMapConfig = {
 export const VANGUARD_MAP_CONFIG: Record<VanguardMapSlug, VanguardMapConfig> = {
   'der-anfang': {
     challengeTypes: [
-      'HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_ARMOR',
+      'HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_ARMOR',
       'ROUND_10_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'EXFIL_R5_SPEEDRUN', 'EXFIL_R10_SPEEDRUN',
       'EASTER_EGG_SPEEDRUN',
     ],
@@ -65,7 +79,7 @@ export const VANGUARD_MAP_CONFIG: Record<VanguardMapSlug, VanguardMapConfig> = {
   },
   'terra-maledicta': {
     challengeTypes: [
-      'HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_ARMOR',
+      'HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_ARMOR',
       'ROUND_10_SPEEDRUN', 'ROUND_20_SPEEDRUN', 'EXFIL_R5_SPEEDRUN', 'EXFIL_R10_SPEEDRUN',
       'EASTER_EGG_SPEEDRUN',
     ],
@@ -85,7 +99,7 @@ export const VANGUARD_MAP_CONFIG: Record<VanguardMapSlug, VanguardMapConfig> = {
   },
   'shi-no-numa-reborn': {
     challengeTypes: [
-      'HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_ARMOR',
+      'HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_ARMOR',
       'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN',
       'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN',
       'EXFIL_R10_SPEEDRUN', 'EXFIL_R20_SPEEDRUN',
@@ -100,6 +114,17 @@ export const VANGUARD_MAP_CONFIG: Record<VanguardMapSlug, VanguardMapConfig> = {
       r100: h(2),
       r200: h(6),
     },
+    speedrunWRsNoRampage: {
+      r30: min(19) + 2,
+      r50: min(43) + 42,
+      r70: hms(1, 12, 12),
+      r100: h(2) + min(18),
+      r200: h(6) + min(54),
+      exfilR10WR: min(5) + 17,
+      exfilR20WR: min(10) + 50,
+      eeSpeedrunWR: min(19) + 2,
+      buildEeSpeedrunWR: min(28) + 20,
+    },
     exfilR10WR: min(4) + 30,
     exfilR20WR: min(9) + 30,
     eeSpeedrunWR: min(16) + 30,
@@ -113,7 +138,7 @@ export const VANGUARD_MAP_CONFIG: Record<VanguardMapSlug, VanguardMapConfig> = {
   },
   'the-archon': {
     challengeTypes: [
-      'HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_ARMOR',
+      'HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_ARMOR',
       'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN',
       'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN',
       'EXFIL_R10_SPEEDRUN', 'EXFIL_R20_SPEEDRUN',
@@ -127,6 +152,17 @@ export const VANGUARD_MAP_CONFIG: Record<VanguardMapSlug, VanguardMapConfig> = {
       r70: min(49),
       r100: hms(1, 35, 40),
       r200: hms(3, 20, 40),
+    },
+    speedrunWRsNoRampage: {
+      r15: Math.round(353 * 1.15),
+      r30: min(18) + 3,
+      r50: min(39) + 6,
+      r70: min(56) + 24,
+      r100: hms(1, 50, 30),
+      r200: hms(3, 51, 0),
+      exfilR10WR: min(4) + 53,
+      exfilR20WR: min(11) + 20,
+      eeSpeedrunWR: min(27) + 36,
     },
     exfilR10WR: min(4) + 20,
     exfilR20WR: min(9) + 40,

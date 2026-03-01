@@ -1,0 +1,7849 @@
+{
+  "report": [
+    {
+      "csvRowIndex": 2,
+      "status": "imported",
+      "game": "aw",
+      "map": "outbreak",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ohf6000110owzira5xv3"
+      ]
+    },
+    {
+      "csvRowIndex": 3,
+      "status": "imported",
+      "game": "aw",
+      "map": "descent",
+      "record": "high-round",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ohld000310owk5zddrdn"
+      ]
+    },
+    {
+      "csvRowIndex": 4,
+      "status": "imported",
+      "game": "aw",
+      "map": "outbreak",
+      "record": "no-power",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ohon000510owzqz393r8"
+      ]
+    },
+    {
+      "csvRowIndex": 5,
+      "status": "imported",
+      "game": "aw",
+      "map": "descent",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ohre000710owlhqdpwtc"
+      ]
+    },
+    {
+      "csvRowIndex": 6,
+      "status": "imported",
+      "game": "aw",
+      "map": "descent",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ohvc000910ow57dm9iyk"
+      ]
+    },
+    {
+      "csvRowIndex": 7,
+      "status": "imported",
+      "game": "aw",
+      "map": "carrier",
+      "record": "no-power",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ohy2000b10owmt06w4n7"
+      ]
+    },
+    {
+      "csvRowIndex": 8,
+      "status": "imported",
+      "game": "aw",
+      "map": "infection",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oi0z000d10owc24zpkkq"
+      ]
+    },
+    {
+      "csvRowIndex": 9,
+      "status": "imported",
+      "game": "aw",
+      "map": "outbreak",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oi3p000f10ows2i04a2a"
+      ]
+    },
+    {
+      "csvRowIndex": 10,
+      "status": "imported",
+      "game": "aw",
+      "map": "outbreak",
+      "record": "flawless",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oi6d000h10owwm7k7xqu"
+      ]
+    },
+    {
+      "csvRowIndex": 11,
+      "status": "imported",
+      "game": "aw",
+      "map": "outbreak",
+      "record": "high-round",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oi94000j10owqfd5xwku"
+      ]
+    },
+    {
+      "csvRowIndex": 12,
+      "status": "imported",
+      "game": "aw",
+      "map": "carrier",
+      "record": "high-round",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oic1000l10owq60frghp"
+      ]
+    },
+    {
+      "csvRowIndex": 13,
+      "status": "imported",
+      "game": "aw",
+      "map": "carrier",
+      "record": "flawless",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oiet000n10ow1x3cem01"
+      ]
+    },
+    {
+      "csvRowIndex": 14,
+      "status": "imported",
+      "game": "aw",
+      "map": "carrier",
+      "record": "50-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oii3000p10ow80246zst"
+      ]
+    },
+    {
+      "csvRowIndex": 15,
+      "status": "imported",
+      "game": "aw",
+      "map": "carrier",
+      "record": "ee-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog + EasterEggLog",
+      "logIds": [
+        "cmm54oikt000r10own27ct39x",
+        "cmm54oio7000t10owm7eig00j"
+      ]
+    },
+    {
+      "csvRowIndex": 16,
+      "status": "imported",
+      "game": "aw",
+      "map": "infection",
+      "record": "high-round",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ois4000v10ow7i2nkpaw"
+      ]
+    },
+    {
+      "csvRowIndex": 17,
+      "status": "imported",
+      "game": "aw",
+      "map": "outbreak",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oiuy000x10ow58z3zhh2"
+      ]
+    },
+    {
+      "csvRowIndex": 18,
+      "status": "imported",
+      "game": "aw",
+      "map": "infection",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oixo000z10owocuw77gd"
+      ]
+    },
+    {
+      "csvRowIndex": 19,
+      "status": "imported",
+      "game": "aw",
+      "map": "descent",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oj0c001110ow0n18xgmd"
+      ]
+    },
+    {
+      "csvRowIndex": 20,
+      "status": "imported",
+      "game": "aw",
+      "map": "carrier",
+      "record": "first-room",
+      "sub_record": "mk14-side",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oj32001310owid57ifxx"
+      ]
+    },
+    {
+      "csvRowIndex": 21,
+      "status": "imported",
+      "game": "aw",
+      "map": "carrier",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oj62001510ow6qdflsap"
+      ]
+    },
+    {
+      "csvRowIndex": 22,
+      "status": "imported",
+      "game": "aw",
+      "map": "carrier",
+      "record": "first-room",
+      "sub_record": "mixed",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oj8v001710ow5kvvf9pd"
+      ]
+    },
+    {
+      "csvRowIndex": 23,
+      "status": "imported",
+      "game": "aw",
+      "map": "carrier",
+      "record": "first-room",
+      "sub_record": "mixed",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ojbt001910owonwmfan6"
+      ]
+    },
+    {
+      "csvRowIndex": 24,
+      "status": "imported",
+      "game": "aw",
+      "map": "descent",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ojel001b10owz5dz7wr3"
+      ]
+    },
+    {
+      "csvRowIndex": 25,
+      "status": "imported",
+      "game": "aw",
+      "map": "carrier",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ojhc001d10ow9ehg6psv"
+      ]
+    },
+    {
+      "csvRowIndex": 26,
+      "status": "imported",
+      "game": "aw",
+      "map": "descent",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ojk3001f10owpgxojc9m"
+      ]
+    },
+    {
+      "csvRowIndex": 27,
+      "status": "imported",
+      "game": "aw",
+      "map": "carrier",
+      "record": "first-room",
+      "sub_record": "mixed",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ojnn001h10owef0omakv"
+      ]
+    },
+    {
+      "csvRowIndex": 28,
+      "status": "imported",
+      "game": "aw",
+      "map": "outbreak",
+      "record": "high-round",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ojqk001j10owtrkw7ogr"
+      ]
+    },
+    {
+      "csvRowIndex": 29,
+      "status": "imported",
+      "game": "aw",
+      "map": "infection",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ojt9001l10owejvpcm6e"
+      ]
+    },
+    {
+      "csvRowIndex": 30,
+      "status": "imported",
+      "game": "aw",
+      "map": "infection",
+      "record": "no-power",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ojw4001n10owqi23nwwi"
+      ]
+    },
+    {
+      "csvRowIndex": 31,
+      "status": "imported",
+      "game": "aw",
+      "map": "infection",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ojyt001p10ownx9mf333"
+      ]
+    },
+    {
+      "csvRowIndex": 32,
+      "status": "imported",
+      "game": "aw",
+      "map": "carrier",
+      "record": "no-power",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ok1q001r10ow5oxp6fb5"
+      ]
+    },
+    {
+      "csvRowIndex": 33,
+      "status": "imported",
+      "game": "aw",
+      "map": "descent",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ok4n001t10owk7md111c"
+      ]
+    },
+    {
+      "csvRowIndex": 34,
+      "status": "imported",
+      "game": "aw",
+      "map": "outbreak",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ok7i001v10owk5ctbss4"
+      ]
+    },
+    {
+      "csvRowIndex": 35,
+      "status": "imported",
+      "game": "aw",
+      "map": "infection",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54okah001x10ow0fl1kqbt"
+      ]
+    },
+    {
+      "csvRowIndex": 36,
+      "status": "imported",
+      "game": "aw",
+      "map": "carrier",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54okdf001z10ow8hoqot04"
+      ]
+    },
+    {
+      "csvRowIndex": 37,
+      "status": "imported",
+      "game": "aw",
+      "map": "outbreak",
+      "record": "ee-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog + EasterEggLog",
+      "logIds": [
+        "cmm54okga002110owccf31425",
+        "cmm54okhx002310ow9ri0cm3o"
+      ]
+    },
+    {
+      "csvRowIndex": 38,
+      "status": "imported",
+      "game": "aw",
+      "map": "infection",
+      "record": "ee-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog + EasterEggLog",
+      "logIds": [
+        "cmm54okkl002510owujis077w",
+        "cmm54okm6002710ow7f4sgafu"
+      ]
+    },
+    {
+      "csvRowIndex": 39,
+      "status": "imported",
+      "game": "aw",
+      "map": "outbreak",
+      "record": "50-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54okox002910owsj038gdh"
+      ]
+    },
+    {
+      "csvRowIndex": 40,
+      "status": "imported",
+      "game": "aw",
+      "map": "descent",
+      "record": "ee-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog + EasterEggLog",
+      "logIds": [
+        "cmm54okrm002b10owwppo8khh",
+        "cmm54okte002d10owhpzkm36a"
+      ]
+    },
+    {
+      "csvRowIndex": 41,
+      "status": "imported",
+      "game": "bo",
+      "map": "shi-no-numa",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54okw9002f10owztdyxldp"
+      ]
+    },
+    {
+      "csvRowIndex": 42,
+      "status": "imported",
+      "game": "bo",
+      "map": "verruckt",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54okz2002h10ow93takqxp"
+      ]
+    },
+    {
+      "csvRowIndex": 43,
+      "status": "imported",
+      "game": "bo",
+      "map": "five",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ol1s002j10ow8972zawy"
+      ]
+    },
+    {
+      "csvRowIndex": 44,
+      "status": "imported",
+      "game": "bo2",
+      "map": "die-rise",
+      "record": "50-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ol4m002l10owayi1437o"
+      ]
+    },
+    {
+      "csvRowIndex": 45,
+      "status": "imported",
+      "game": "bo3",
+      "map": "zetsubou-no-shima",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ol7g002n10owuxv5qxdq"
+      ]
+    },
+    {
+      "csvRowIndex": 46,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "zetsubou-no-shima",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 47,
+      "status": "imported",
+      "game": "bo3",
+      "map": "zetsubou-no-shima",
+      "record": "50-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54old3002p10owiptxins5"
+      ]
+    },
+    {
+      "csvRowIndex": 48,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shangri-la",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54olg1002r10owcl5m1n0t"
+      ]
+    },
+    {
+      "csvRowIndex": 49,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shangri-la",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54olj2002t10ow5y6b0bga"
+      ]
+    },
+    {
+      "csvRowIndex": 50,
+      "status": "imported",
+      "game": "bo3",
+      "map": "gorod-krovi",
+      "record": "first-room",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54olmg002v10owis1e858j"
+      ]
+    },
+    {
+      "csvRowIndex": 51,
+      "status": "imported",
+      "game": "bo3",
+      "map": "der-eisendrache",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54olp6002x10owvc1wxmo5"
+      ]
+    },
+    {
+      "csvRowIndex": 52,
+      "status": "imported",
+      "game": "bo3",
+      "map": "nacht-der-untoten",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ols0002z10owft72bi5r"
+      ]
+    },
+    {
+      "csvRowIndex": 53,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "der-eisendrache",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 54,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "nacht-der-untoten",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 55,
+      "status": "imported",
+      "game": "bo3",
+      "map": "nacht-der-untoten",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54om0c003110ow5t2tt5kt"
+      ]
+    },
+    {
+      "csvRowIndex": 56,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "nacht-der-untoten",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 57,
+      "status": "imported",
+      "game": "bo3",
+      "map": "revelations",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54om5t003310owjazriph1"
+      ]
+    },
+    {
+      "csvRowIndex": 58,
+      "status": "imported",
+      "game": "bo3",
+      "map": "zetsubou-no-shima",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54om8k003510ownnchf9dl"
+      ]
+    },
+    {
+      "csvRowIndex": 59,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "zetsubou-no-shima",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 60,
+      "status": "imported",
+      "game": "bo3",
+      "map": "kino-der-toten",
+      "record": "50-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ome3003710owqa6hpcdh"
+      ]
+    },
+    {
+      "csvRowIndex": 61,
+      "status": "imported",
+      "game": "bo3",
+      "map": "gorod-krovi",
+      "record": "30-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54omgy003910owmyitwa4o"
+      ]
+    },
+    {
+      "csvRowIndex": 62,
+      "status": "imported",
+      "game": "bo3",
+      "map": "gorod-krovi",
+      "record": "30-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54omjs003b10owv403kyi8"
+      ]
+    },
+    {
+      "csvRowIndex": 63,
+      "status": "imported",
+      "game": "bo3",
+      "map": "revelations",
+      "record": "30-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ommg003d10owsrgjefxf"
+      ]
+    },
+    {
+      "csvRowIndex": 64,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shadows-of-evil",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54omp2003f10owbh750yga"
+      ]
+    },
+    {
+      "csvRowIndex": 65,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "shadows-of-evil",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 66,
+      "status": "imported",
+      "game": "bo3",
+      "map": "zetsubou-no-shima",
+      "record": "50-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54omuk003h10ow3rc3zw5v"
+      ]
+    },
+    {
+      "csvRowIndex": 67,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "zetsubou-no-shima",
+      "record": "50-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 68,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shangri-la",
+      "record": "50-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54on03003j10owyzm6q8c1"
+      ]
+    },
+    {
+      "csvRowIndex": 69,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shangri-la",
+      "record": "50-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54on2z003l10owjccvn3tr"
+      ]
+    },
+    {
+      "csvRowIndex": 70,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "shangri-la",
+      "record": "50-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 71,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shangri-la",
+      "record": "50-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54on8i003n10owj7x0i0xo"
+      ]
+    },
+    {
+      "csvRowIndex": 72,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "shangri-la",
+      "record": "50-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 73,
+      "status": "imported",
+      "game": "bo3",
+      "map": "moon",
+      "record": "50-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ondx003p10owyd2jv8ri"
+      ]
+    },
+    {
+      "csvRowIndex": 74,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "moon",
+      "record": "50-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 75,
+      "status": "imported",
+      "game": "bo3",
+      "map": "moon",
+      "record": "no-power",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54onk7003r10ow6xiiz7v7"
+      ]
+    },
+    {
+      "csvRowIndex": 76,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shadows-of-evil",
+      "record": "no-jug",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54onmx003t10owtakpkft6"
+      ]
+    },
+    {
+      "csvRowIndex": 77,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shadows-of-evil",
+      "record": "no-perks",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54onq8003v10owcsu44wsg"
+      ]
+    },
+    {
+      "csvRowIndex": 78,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shadows-of-evil",
+      "record": "no-power",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54onth003x10owta47h8w9"
+      ]
+    },
+    {
+      "csvRowIndex": 79,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shadows-of-evil",
+      "record": "70-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54onwe003z10owjlyuza2c"
+      ]
+    },
+    {
+      "csvRowIndex": 80,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "shadows-of-evil",
+      "record": "70-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 81,
+      "status": "imported",
+      "game": "bo3",
+      "map": "origins",
+      "record": "no-power",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oo2i004110owiydep7w2"
+      ]
+    },
+    {
+      "csvRowIndex": 82,
+      "status": "imported",
+      "game": "bo3",
+      "map": "der-eisendrache",
+      "record": "no-aat",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oo5a004310ow3ltxre4o"
+      ]
+    },
+    {
+      "csvRowIndex": 83,
+      "status": "imported",
+      "game": "bo3",
+      "map": "der-eisendrache",
+      "record": "no-aat",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oo8l004510ows3ginfuw"
+      ]
+    },
+    {
+      "csvRowIndex": 84,
+      "status": "imported",
+      "game": "bo3",
+      "map": "origins",
+      "record": "no-aat",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oobd004710ow77omzwih"
+      ]
+    },
+    {
+      "csvRowIndex": 85,
+      "status": "imported",
+      "game": "bo3",
+      "map": "der-eisendrache",
+      "record": "no-perks",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ooej004910owtlzxswgd"
+      ]
+    },
+    {
+      "csvRowIndex": 86,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shangri-la",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oohb004b10owpbead23l"
+      ]
+    },
+    {
+      "csvRowIndex": 87,
+      "status": "imported",
+      "game": "bo3",
+      "map": "nacht-der-untoten",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ook5004d10owdks356sa"
+      ]
+    },
+    {
+      "csvRowIndex": 88,
+      "status": "imported",
+      "game": "bo3",
+      "map": "moon",
+      "record": "30-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oon0004f10ow1se3bfzv"
+      ]
+    },
+    {
+      "csvRowIndex": 89,
+      "status": "imported",
+      "game": "bo3",
+      "map": "origins",
+      "record": "no-jug",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oopv004h10ow3xrhez2h"
+      ]
+    },
+    {
+      "csvRowIndex": 90,
+      "status": "imported",
+      "game": "bo3",
+      "map": "ascension",
+      "record": "no-perks",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oot4004j10owxoogms06"
+      ]
+    },
+    {
+      "csvRowIndex": 91,
+      "status": "imported",
+      "game": "bo3",
+      "map": "moon",
+      "record": "50-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oovu004l10owgb5v710s"
+      ]
+    },
+    {
+      "csvRowIndex": 92,
+      "status": "imported",
+      "game": "bo3",
+      "map": "moon",
+      "record": "flawless",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ooyi004n10owmzdy35yl"
+      ]
+    },
+    {
+      "csvRowIndex": 93,
+      "status": "imported",
+      "game": "bo3",
+      "map": "origins",
+      "record": "30-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54op17004p10ow1ukznsfe"
+      ]
+    },
+    {
+      "csvRowIndex": 94,
+      "status": "imported",
+      "game": "bo3",
+      "map": "moon",
+      "record": "30-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54op43004r10ow84fgy130"
+      ]
+    },
+    {
+      "csvRowIndex": 95,
+      "status": "imported",
+      "game": "bo3",
+      "map": "moon",
+      "record": "30-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54op6v004t10owhkejqes5"
+      ]
+    },
+    {
+      "csvRowIndex": 96,
+      "status": "imported",
+      "game": "bo3",
+      "map": "moon",
+      "record": "50-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54op9n004v10ownm5dgdxi"
+      ]
+    },
+    {
+      "csvRowIndex": 97,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shangri-la",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54opch004x10ow6fgtmw0n"
+      ]
+    },
+    {
+      "csvRowIndex": 98,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shangri-la",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54opfc004z10owzaj8s2qj"
+      ]
+    },
+    {
+      "csvRowIndex": 99,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shangri-la",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54opi3005110ow6o5x3x5l"
+      ]
+    },
+    {
+      "csvRowIndex": 100,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shangri-la",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54opko005310owrl7yetth"
+      ]
+    },
+    {
+      "csvRowIndex": 101,
+      "status": "imported",
+      "game": "bo3",
+      "map": "moon",
+      "record": "30-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54opnj005510owauakcp99"
+      ]
+    },
+    {
+      "csvRowIndex": 102,
+      "status": "imported",
+      "game": "bo3",
+      "map": "moon",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54opqh005710owukdycyz3"
+      ]
+    },
+    {
+      "csvRowIndex": 103,
+      "status": "imported",
+      "game": "bo3",
+      "map": "kino-der-toten",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54opta005910owbul9gaj5"
+      ]
+    },
+    {
+      "csvRowIndex": 104,
+      "status": "imported",
+      "game": "bo3",
+      "map": "ascension",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54opw4005b10owuvuzr4i4"
+      ]
+    },
+    {
+      "csvRowIndex": 105,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shi-no-numa",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54opyw005d10owqvct3x29"
+      ]
+    },
+    {
+      "csvRowIndex": 106,
+      "status": "imported",
+      "game": "bo3",
+      "map": "ascension",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oq1q005f10owksbdymhg"
+      ]
+    },
+    {
+      "csvRowIndex": 107,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shi-no-numa",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oq4i005h10owi3zoolws"
+      ]
+    },
+    {
+      "csvRowIndex": 108,
+      "status": "imported",
+      "game": "bo3",
+      "map": "ascension",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oq77005j10owkrzu904p"
+      ]
+    },
+    {
+      "csvRowIndex": 109,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shangri-la",
+      "record": "30-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oqa6005l10owd40xgk5t"
+      ]
+    },
+    {
+      "csvRowIndex": 110,
+      "status": "imported",
+      "game": "bo3",
+      "map": "zetsubou-no-shima",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oqd2005n10owodiprwfp"
+      ]
+    },
+    {
+      "csvRowIndex": 111,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shangri-la",
+      "record": "30-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oqfy005p10ow0xqg5fcm"
+      ]
+    },
+    {
+      "csvRowIndex": 112,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shadows-of-evil",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oqip005r10ow50e588yr"
+      ]
+    },
+    {
+      "csvRowIndex": 113,
+      "status": "imported",
+      "game": "bo3",
+      "map": "kino-der-toten",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oqlc005t10owm93dq6m7"
+      ]
+    },
+    {
+      "csvRowIndex": 114,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shadows-of-evil",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oqo1005v10owquuj2xpn"
+      ]
+    },
+    {
+      "csvRowIndex": 115,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shadows-of-evil",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oqqo005x10ow7yonxxof"
+      ]
+    },
+    {
+      "csvRowIndex": 116,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shadows-of-evil",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oqtg005z10owpnjvc7h5"
+      ]
+    },
+    {
+      "csvRowIndex": 117,
+      "status": "imported",
+      "game": "bo3",
+      "map": "origins",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oqwc006110owr9mni6h7"
+      ]
+    },
+    {
+      "csvRowIndex": 118,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shadows-of-evil",
+      "record": "70-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oqz7006310owe5zrcjvv"
+      ]
+    },
+    {
+      "csvRowIndex": 119,
+      "status": "imported",
+      "game": "bo3",
+      "map": "the-giant",
+      "record": "30-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54or28006510owq8fd57pj"
+      ]
+    },
+    {
+      "csvRowIndex": 120,
+      "status": "imported",
+      "game": "bo3",
+      "map": "nacht-der-untoten",
+      "record": "50-speedrun",
+      "sub_record": "no-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54or57006710owu2cntihl"
+      ]
+    },
+    {
+      "csvRowIndex": 121,
+      "status": "imported",
+      "game": "bo3",
+      "map": "ascension",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54or7y006910ow7xeu0qml"
+      ]
+    },
+    {
+      "csvRowIndex": 122,
+      "status": "imported",
+      "game": "bo3",
+      "map": "the-giant",
+      "record": "30-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oray006b10owy8ydz4zs"
+      ]
+    },
+    {
+      "csvRowIndex": 123,
+      "status": "imported",
+      "game": "bo3",
+      "map": "gorod-krovi",
+      "record": "30-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ordv006d10ow4ybisph7"
+      ]
+    },
+    {
+      "csvRowIndex": 124,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shadows-of-evil",
+      "record": "30-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54orgq006f10owmt2rrf3i"
+      ]
+    },
+    {
+      "csvRowIndex": 125,
+      "status": "imported",
+      "game": "bo3",
+      "map": "shangri-la",
+      "record": "30-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54orjk006h10owekb5sdlj"
+      ]
+    },
+    {
+      "csvRowIndex": 126,
+      "status": "imported",
+      "game": "bo3",
+      "map": "gorod-krovi",
+      "record": "30-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ormg006j10owxhxmzjq7"
+      ]
+    },
+    {
+      "csvRowIndex": 127,
+      "status": "imported",
+      "game": "bo3",
+      "map": "the-giant",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54orpb006l10ow9w0j84w9"
+      ]
+    },
+    {
+      "csvRowIndex": 128,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "shi-no-numa",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 129,
+      "status": "imported",
+      "game": "bo3",
+      "map": "nacht-der-untoten",
+      "record": "30-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54orv1006n10owilv63ckp"
+      ]
+    },
+    {
+      "csvRowIndex": 130,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "moon",
+      "record": "30-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 131,
+      "status": "imported",
+      "game": "bo3",
+      "map": "moon",
+      "record": "50-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54os0o006p10owp7bi7djp"
+      ]
+    },
+    {
+      "csvRowIndex": 132,
+      "status": "imported",
+      "game": "bo3",
+      "map": "moon",
+      "record": "50-speedrun",
+      "sub_record": "classic-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54os3j006r10owmayv1vh4"
+      ]
+    },
+    {
+      "csvRowIndex": 133,
+      "status": "imported",
+      "game": "bo3",
+      "map": "the-giant",
+      "record": "30-speedrun",
+      "sub_record": "all-gobblegum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54os6l006t10owncmwwl24"
+      ]
+    },
+    {
+      "csvRowIndex": 134,
+      "status": "imported",
+      "game": "bo4",
+      "map": "blood-of-the-dead",
+      "record": "30-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54os9e006v10owd50ux7xa"
+      ]
+    },
+    {
+      "csvRowIndex": 135,
+      "status": "imported",
+      "game": "bo4",
+      "map": "dead-of-the-night",
+      "record": "30-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54osc7006x10ow83k376xe"
+      ]
+    },
+    {
+      "csvRowIndex": 136,
+      "status": "imported",
+      "game": "bo4",
+      "map": "blood-of-the-dead",
+      "record": "30-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54osf3006z10own2c48ag4"
+      ]
+    },
+    {
+      "csvRowIndex": 137,
+      "status": "imported",
+      "game": "bo4",
+      "map": "dead-of-the-night",
+      "record": "30-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oshy007110ow6jugiral"
+      ]
+    },
+    {
+      "csvRowIndex": 138,
+      "status": "imported",
+      "game": "bo4",
+      "map": "alpha-omega",
+      "record": "30-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oskt007310owulgmcu1s"
+      ]
+    },
+    {
+      "csvRowIndex": 139,
+      "status": "imported",
+      "game": "bo4",
+      "map": "ancient-evil",
+      "record": "30-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54osno007510ow0lhhmu7r"
+      ]
+    },
+    {
+      "csvRowIndex": 140,
+      "status": "imported",
+      "game": "bo4",
+      "map": "classified",
+      "record": "30-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54osqj007710ow432io8em"
+      ]
+    },
+    {
+      "csvRowIndex": 141,
+      "status": "imported",
+      "game": "bo4",
+      "map": "ix",
+      "record": "30-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ostq007910owddrnkwd8"
+      ]
+    },
+    {
+      "csvRowIndex": 142,
+      "status": "imported",
+      "game": "bo4",
+      "map": "voyage-of-despair",
+      "record": "30-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oswl007b10ownf9w0bfu"
+      ]
+    },
+    {
+      "csvRowIndex": 143,
+      "status": "imported",
+      "game": "bo4",
+      "map": "ancient-evil",
+      "record": "50-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54osze007d10owc41miyi1"
+      ]
+    },
+    {
+      "csvRowIndex": 144,
+      "status": "imported",
+      "game": "bo4",
+      "map": "dead-of-the-night",
+      "record": "50-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ot28007f10ow44lzfvys"
+      ]
+    },
+    {
+      "csvRowIndex": 145,
+      "status": "imported",
+      "game": "bo4",
+      "map": "tag-der-toten",
+      "record": "30-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ot51007h10owoh6fxqy5"
+      ]
+    },
+    {
+      "csvRowIndex": 146,
+      "status": "imported",
+      "game": "bo4",
+      "map": "tag-der-toten",
+      "record": "50-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ot7q007j10owtdv611ps"
+      ]
+    },
+    {
+      "csvRowIndex": 147,
+      "status": "imported",
+      "game": "bo4",
+      "map": "alpha-omega",
+      "record": "50-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54otal007l10owomgx27d5"
+      ]
+    },
+    {
+      "csvRowIndex": 148,
+      "status": "imported",
+      "game": "bo4",
+      "map": "alpha-omega",
+      "record": "30-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54otdb007n10ow8b40dk1a"
+      ]
+    },
+    {
+      "csvRowIndex": 149,
+      "status": "imported",
+      "game": "bo4",
+      "map": "classified",
+      "record": "30-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54otfx007p10oww87gvhcl"
+      ]
+    },
+    {
+      "csvRowIndex": 150,
+      "status": "imported",
+      "game": "bo4",
+      "map": "ix",
+      "record": "50-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54otio007r10owl4hpjycl"
+      ]
+    },
+    {
+      "csvRowIndex": 151,
+      "status": "imported",
+      "game": "bo4",
+      "map": "voyage-of-despair",
+      "record": "30-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54otlj007t10ow3jgz78zb"
+      ]
+    },
+    {
+      "csvRowIndex": 152,
+      "status": "imported",
+      "game": "bo4",
+      "map": "alpha-omega",
+      "record": "50-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54otoe007v10owfa4wven3"
+      ]
+    },
+    {
+      "csvRowIndex": 153,
+      "status": "imported",
+      "game": "bo4",
+      "map": "classified",
+      "record": "50-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54otr8007x10owsecvp2d6"
+      ]
+    },
+    {
+      "csvRowIndex": 154,
+      "status": "imported",
+      "game": "bo4",
+      "map": "dead-of-the-night",
+      "record": "50-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54otty007z10ow7e8vbm3x"
+      ]
+    },
+    {
+      "csvRowIndex": 155,
+      "status": "imported",
+      "game": "bo4",
+      "map": "classified",
+      "record": "50-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54otwp008110owtayr9kkp"
+      ]
+    },
+    {
+      "csvRowIndex": 156,
+      "status": "imported",
+      "game": "bo4",
+      "map": "blood-of-the-dead",
+      "record": "50-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54otzi008310owr6vmkbq7"
+      ]
+    },
+    {
+      "csvRowIndex": 157,
+      "status": "imported",
+      "game": "bo4",
+      "map": "voyage-of-despair",
+      "record": "50-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ou29008510owsodqfexc"
+      ]
+    },
+    {
+      "csvRowIndex": 158,
+      "status": "imported",
+      "game": "bo4",
+      "map": "blood-of-the-dead",
+      "record": "50-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ou52008710owk9o9j8p3"
+      ]
+    },
+    {
+      "csvRowIndex": 159,
+      "status": "imported",
+      "game": "bo4",
+      "map": "voyage-of-despair",
+      "record": "50-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ou7w008910owln0aax1r"
+      ]
+    },
+    {
+      "csvRowIndex": 160,
+      "status": "imported",
+      "game": "bo4",
+      "map": "super-blood-wolf-moon",
+      "record": "gauntlet",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ouaq008b10owdy6lk46x"
+      ]
+    },
+    {
+      "csvRowIndex": 161,
+      "status": "imported",
+      "game": "bo4",
+      "map": "super-blood-wolf-moon",
+      "record": "gauntlet",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oudo008d10owdoqmxi2f"
+      ]
+    },
+    {
+      "csvRowIndex": 162,
+      "status": "imported",
+      "game": "bo4",
+      "map": "veni-vidi-zombie",
+      "record": "gauntlet",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ougi008f10ow97voju63"
+      ]
+    },
+    {
+      "csvRowIndex": 163,
+      "status": "imported",
+      "game": "bo4",
+      "map": "hellcatraz",
+      "record": "gauntlet",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ouj7008h10ow0s4wk9h2"
+      ]
+    },
+    {
+      "csvRowIndex": 164,
+      "status": "imported",
+      "game": "bo4",
+      "map": "an-ice-day-in-hell",
+      "record": "gauntlet",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oulv008j10ow223pglzw"
+      ]
+    },
+    {
+      "csvRowIndex": 165,
+      "status": "imported",
+      "game": "bo4",
+      "map": "voyage-of-despair",
+      "record": "30-speedrun",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ouol008l10ow0ws7ghjt"
+      ]
+    },
+    {
+      "csvRowIndex": 166,
+      "status": "imported",
+      "game": "bo4",
+      "map": "classified",
+      "record": "50-speedrun",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54our8008n10ow1kkbol4l"
+      ]
+    },
+    {
+      "csvRowIndex": 167,
+      "status": "imported",
+      "game": "bo4",
+      "map": "ix",
+      "record": "50-speedrun",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54outx008p10own538ihzq"
+      ]
+    },
+    {
+      "csvRowIndex": 168,
+      "status": "imported",
+      "game": "bo4",
+      "map": "dead-of-the-night",
+      "record": "50-speedrun",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ouwu008r10oweyxungko"
+      ]
+    },
+    {
+      "csvRowIndex": 169,
+      "status": "imported",
+      "game": "bo4",
+      "map": "voyage-of-despair",
+      "record": "50-speedrun",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ouzp008t10owyr8mlil3"
+      ]
+    },
+    {
+      "csvRowIndex": 170,
+      "status": "imported",
+      "game": "bo4",
+      "map": "ancient-evil",
+      "record": "50-speedrun",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ov2h008v10owu3y6y4ld"
+      ]
+    },
+    {
+      "csvRowIndex": 171,
+      "status": "imported",
+      "game": "bo4",
+      "map": "blood-of-the-dead",
+      "record": "50-speedrun",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ov55008x10owwwrpq899"
+      ]
+    },
+    {
+      "csvRowIndex": 172,
+      "status": "imported",
+      "game": "bo4",
+      "map": "blood-of-the-dead",
+      "record": "30-speedrun",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ov7z008z10owuh0lw91o"
+      ]
+    },
+    {
+      "csvRowIndex": 173,
+      "status": "skipped",
+      "game": "bo4",
+      "map": "ix",
+      "record": "high-round",
+      "sub_record": "classic-elixirs-only",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 174,
+      "status": "skipped",
+      "game": "bo4",
+      "map": "ix",
+      "record": "high-round",
+      "sub_record": "classic-elixirs-only",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 175,
+      "status": "imported",
+      "game": "bo4",
+      "map": "alpha-omega",
+      "record": "ee-speedrun",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog + EasterEggLog",
+      "logIds": [
+        "cmm54ovg2009110owq20ygekp",
+        "cmm54ovhv009310owqjw9jw4r"
+      ]
+    },
+    {
+      "csvRowIndex": 176,
+      "status": "skipped",
+      "game": "bo4",
+      "map": "ancient-evil",
+      "record": "flawless-hc",
+      "sub_record": "classic-elixirs-only",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 177,
+      "status": "imported",
+      "game": "bo4",
+      "map": "ix",
+      "record": "no-power",
+      "sub_record": "hc-all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ovnw009510ow99zgucd5"
+      ]
+    },
+    {
+      "csvRowIndex": 178,
+      "status": "imported",
+      "game": "bo4",
+      "map": "ix",
+      "record": "first-room",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ovr5009710owecq04hs1"
+      ]
+    },
+    {
+      "csvRowIndex": 179,
+      "status": "imported",
+      "game": "bo4",
+      "map": "alpha-omega",
+      "record": "flawless-hc",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ovue009910ow645xtffv"
+      ]
+    },
+    {
+      "csvRowIndex": 180,
+      "status": "imported",
+      "game": "bo4",
+      "map": "alpha-omega",
+      "record": "high-round-hc",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ovy9009b10owoq9tror4"
+      ]
+    },
+    {
+      "csvRowIndex": 181,
+      "status": "imported",
+      "game": "bo4",
+      "map": "alpha-omega",
+      "record": "first-room",
+      "sub_record": "hc-all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ow1m009d10ow0wmkl3bv"
+      ]
+    },
+    {
+      "csvRowIndex": 182,
+      "status": "imported",
+      "game": "bo4",
+      "map": "alpha-omega",
+      "record": "no-power",
+      "sub_record": "hc-all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ow4v009f10ow8kw4v3yc"
+      ]
+    },
+    {
+      "csvRowIndex": 183,
+      "status": "imported",
+      "game": "bo4",
+      "map": "ix",
+      "record": "50-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ow7l009h10owkoiyrr84"
+      ]
+    },
+    {
+      "csvRowIndex": 184,
+      "status": "imported",
+      "game": "bo4",
+      "map": "ancient-evil",
+      "record": "first-room",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54owax009j10owddbjlxtr"
+      ]
+    },
+    {
+      "csvRowIndex": 185,
+      "status": "imported",
+      "game": "bo4",
+      "map": "ix",
+      "record": "flawless-hc",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54owe7009l10owg8qg58xe"
+      ]
+    },
+    {
+      "csvRowIndex": 186,
+      "status": "imported",
+      "game": "bo4",
+      "map": "an-ice-day-in-hell",
+      "record": "gauntlet",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54owgz009n10owbn48tkcn"
+      ]
+    },
+    {
+      "csvRowIndex": 187,
+      "status": "imported",
+      "game": "bo4",
+      "map": "deathcon-five",
+      "record": "gauntlet",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54owjz009p10owedo4u5ny"
+      ]
+    },
+    {
+      "csvRowIndex": 188,
+      "status": "imported",
+      "game": "bo4",
+      "map": "alpha-omega",
+      "record": "30-speedrun",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54owmq009r10ow863xdm6f"
+      ]
+    },
+    {
+      "csvRowIndex": 189,
+      "status": "imported",
+      "game": "bo4",
+      "map": "ancient-evil",
+      "record": "30-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54owph009t10owbwa5h9ry"
+      ]
+    },
+    {
+      "csvRowIndex": 190,
+      "status": "imported",
+      "game": "bo4",
+      "map": "ix",
+      "record": "30-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54owsa009v10owf9deafze"
+      ]
+    },
+    {
+      "csvRowIndex": 191,
+      "status": "imported",
+      "game": "bo4",
+      "map": "ix",
+      "record": "50-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54owv5009x10owgyn91807"
+      ]
+    },
+    {
+      "csvRowIndex": 192,
+      "status": "imported",
+      "game": "bo4",
+      "map": "tag-der-toten",
+      "record": "30-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54owy2009z10ow7ol6l269"
+      ]
+    },
+    {
+      "csvRowIndex": 193,
+      "status": "imported",
+      "game": "bo4",
+      "map": "tag-der-toten",
+      "record": "50-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ox0x00a110owunuf3vtl"
+      ]
+    },
+    {
+      "csvRowIndex": 194,
+      "status": "imported",
+      "game": "bo4",
+      "map": "ancient-evil",
+      "record": "50-speedrun",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ox3m00a310ow6vogp29p"
+      ]
+    },
+    {
+      "csvRowIndex": 195,
+      "status": "imported",
+      "game": "bo4",
+      "map": "duck-and-cover",
+      "record": "gauntlet",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ox6g00a510owsniz2n3i"
+      ]
+    },
+    {
+      "csvRowIndex": 196,
+      "status": "imported",
+      "game": "bo4",
+      "map": "hellcatraz",
+      "record": "gauntlet",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ox9b00a710owxeywqvvq"
+      ]
+    },
+    {
+      "csvRowIndex": 197,
+      "status": "imported",
+      "game": "bo4",
+      "map": "labours-of-hercules",
+      "record": "gauntlet",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oxc200a910owsrifqrwt"
+      ]
+    },
+    {
+      "csvRowIndex": 198,
+      "status": "imported",
+      "game": "bo4",
+      "map": "deathcon-five",
+      "record": "gauntlet",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oxep00ab10ows5ucy5nd"
+      ]
+    },
+    {
+      "csvRowIndex": 199,
+      "status": "imported",
+      "game": "bo4",
+      "map": "labours-of-hercules",
+      "record": "gauntlet",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oxhf00ad10owolt6vkvh"
+      ]
+    },
+    {
+      "csvRowIndex": 200,
+      "status": "imported",
+      "game": "bo4",
+      "map": "veni-vidi-zombie",
+      "record": "gauntlet",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oxk700af10owtv6tphqs"
+      ]
+    },
+    {
+      "csvRowIndex": 201,
+      "status": "imported",
+      "game": "bo4",
+      "map": "voyage-of-despair",
+      "record": "30-speedrun",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oxn100ah10owfu29b25b"
+      ]
+    },
+    {
+      "csvRowIndex": 202,
+      "status": "imported",
+      "game": "bo4",
+      "map": "ix",
+      "record": "30-speedrun",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oxpx00aj10owlrvqmh42"
+      ]
+    },
+    {
+      "csvRowIndex": 203,
+      "status": "imported",
+      "game": "bo4",
+      "map": "blood-of-the-dead",
+      "record": "30-speedrun",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oxsh00al10owuuo5urcx"
+      ]
+    },
+    {
+      "csvRowIndex": 204,
+      "status": "imported",
+      "game": "bo4",
+      "map": "ancient-evil",
+      "record": "30-speedrun",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oxv900an10ownvppf6x5"
+      ]
+    },
+    {
+      "csvRowIndex": 205,
+      "status": "imported",
+      "game": "bo4",
+      "map": "dead-of-the-night",
+      "record": "30-speedrun",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oxy000ap10owcg0z2338"
+      ]
+    },
+    {
+      "csvRowIndex": 206,
+      "status": "imported",
+      "game": "bo4",
+      "map": "classified",
+      "record": "30-speedrun",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oy0t00ar10ow8fixod9i"
+      ]
+    },
+    {
+      "csvRowIndex": 207,
+      "status": "imported",
+      "game": "bo4",
+      "map": "an-ice-day-in-hell",
+      "record": "gauntlet",
+      "sub_record": "all-elixirs",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oy3l00at10owevkv006e"
+      ]
+    },
+    {
+      "csvRowIndex": 208,
+      "status": "imported",
+      "game": "bo4",
+      "map": "blood-of-the-dead",
+      "record": "first-room",
+      "sub_record": "classic-elixirs-only",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oy6z00av10ownax0n6lk"
+      ]
+    },
+    {
+      "csvRowIndex": 209,
+      "status": "imported",
+      "game": "bo6",
+      "map": "liberty-falls",
+      "record": "30-speedrun",
+      "sub_record": "rage-inducer-n-gum",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oy9y00ax10owe95wa8qp"
+      ]
+    },
+    {
+      "csvRowIndex": 210,
+      "status": "imported",
+      "game": "bo6",
+      "map": "liberty-falls",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11-no-gums",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oycm00az10ow8mz8rj4x"
+      ]
+    },
+    {
+      "csvRowIndex": 211,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "exfil-speedrun",
+      "sub_record": "round-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oyf900b110ow3uw91wkx"
+      ]
+    },
+    {
+      "csvRowIndex": 212,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "30-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oyi300b310owg3lf4hfx"
+      ]
+    },
+    {
+      "csvRowIndex": 213,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "30-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oykz00b510owwfz7fcyl"
+      ]
+    },
+    {
+      "csvRowIndex": 214,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "30-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oynq00b710owmuzt1fxv"
+      ]
+    },
+    {
+      "csvRowIndex": 215,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "30-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oyqk00b910ow23agqz8q"
+      ]
+    },
+    {
+      "csvRowIndex": 216,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "50-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oyth00bb10ow7peheuwg"
+      ]
+    },
+    {
+      "csvRowIndex": 217,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "30-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oywf00bd10ow5kmng1wh"
+      ]
+    },
+    {
+      "csvRowIndex": 218,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "50-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oyz600bf10owsl8g0eov"
+      ]
+    },
+    {
+      "csvRowIndex": 219,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "30-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oz1w00bh10ow5462qf2g"
+      ]
+    },
+    {
+      "csvRowIndex": 220,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "50-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oz4n00bj10ow266df4ep"
+      ]
+    },
+    {
+      "csvRowIndex": 221,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oz7b00bl10owetfoxbra"
+      ]
+    },
+    {
+      "csvRowIndex": 222,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "30-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oza400bn10owhqwtfdfi"
+      ]
+    },
+    {
+      "csvRowIndex": 223,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "exfil-speedrun",
+      "sub_record": "round-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ozd300bp10owm3al34ct"
+      ]
+    },
+    {
+      "csvRowIndex": 224,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ozfx00br10owxjududv1"
+      ]
+    },
+    {
+      "csvRowIndex": 225,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ozim00bt10owkw59mn17"
+      ]
+    },
+    {
+      "csvRowIndex": 226,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ozle00bv10owsr0x5ewo"
+      ]
+    },
+    {
+      "csvRowIndex": 227,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ozo600bx10owcsi2jy1w"
+      ]
+    },
+    {
+      "csvRowIndex": 228,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ozr000bz10owbitmum6c"
+      ]
+    },
+    {
+      "csvRowIndex": 229,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54oztx00c110owr87fdmcb"
+      ]
+    },
+    {
+      "csvRowIndex": 230,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ozwq00c310owt14tl5sv"
+      ]
+    },
+    {
+      "csvRowIndex": 231,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ozzm00c510owfp34m9wm"
+      ]
+    },
+    {
+      "csvRowIndex": 232,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p02x00c710ownjot6xvn"
+      ]
+    },
+    {
+      "csvRowIndex": 233,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p05m00c910ow671zxbsn"
+      ]
+    },
+    {
+      "csvRowIndex": 234,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p08e00cb10owyr6nxwjb"
+      ]
+    },
+    {
+      "csvRowIndex": 235,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "50-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p0b600cd10owoolyq3k7"
+      ]
+    },
+    {
+      "csvRowIndex": 236,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "exfil-speedrun",
+      "sub_record": "round-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p0dz00cf10oww8kmbxuq"
+      ]
+    },
+    {
+      "csvRowIndex": 237,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p0gu00ch10ow8nk7s82d"
+      ]
+    },
+    {
+      "csvRowIndex": 238,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p0jl00cj10owuje7uoew"
+      ]
+    },
+    {
+      "csvRowIndex": 239,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p0mb00cl10owbv9oxq5f"
+      ]
+    },
+    {
+      "csvRowIndex": 240,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "exfil-speedrun",
+      "sub_record": "round-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p0p200cn10owelia8rr4"
+      ]
+    },
+    {
+      "csvRowIndex": 241,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "exfil-speedrun",
+      "sub_record": "round-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p0rr00cp10owilo8oald"
+      ]
+    },
+    {
+      "csvRowIndex": 242,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "exfil-speedrun",
+      "sub_record": "round-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p0uf00cr10owmbz56e37"
+      ]
+    },
+    {
+      "csvRowIndex": 243,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "exfil-speedrun",
+      "sub_record": "round-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p0x800ct10owhr1cilfb"
+      ]
+    },
+    {
+      "csvRowIndex": 244,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "exfil-speedrun",
+      "sub_record": "round-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p10100cv10ownqaiige7"
+      ]
+    },
+    {
+      "csvRowIndex": 245,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p12s00cx10ow1g0hxac5"
+      ]
+    },
+    {
+      "csvRowIndex": 246,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "30-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p15d00cz10owg3rgnxle"
+      ]
+    },
+    {
+      "csvRowIndex": 247,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "30-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p18100d110owdn70zy2i"
+      ]
+    },
+    {
+      "csvRowIndex": 248,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p1ao00d310owjoksi9f5"
+      ]
+    },
+    {
+      "csvRowIndex": 249,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "ee-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog + EasterEggLog",
+      "logIds": [
+        "cmm54p1dh00d510owpetip1wp",
+        "cmm54p1fg00d710ownr05v8na"
+      ]
+    },
+    {
+      "csvRowIndex": 250,
+      "status": "skipped",
+      "game": "bocw",
+      "map": "bocw-super-ee",
+      "record": "Super-ee-speedrun",
+      "sub_record": "",
+      "message": "Map not found"
+    },
+    {
+      "csvRowIndex": 251,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "50-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p1if00d910owc7x2wtr6"
+      ]
+    },
+    {
+      "csvRowIndex": 252,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "50-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p1l600db10owpxcrh654"
+      ]
+    },
+    {
+      "csvRowIndex": 253,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p1nw00dd10owse42qaa5"
+      ]
+    },
+    {
+      "csvRowIndex": 254,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "30-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p1qm00df10ow08bjsqxf"
+      ]
+    },
+    {
+      "csvRowIndex": 255,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "50-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p1ti00dh10ow4kurxntu"
+      ]
+    },
+    {
+      "csvRowIndex": 256,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "50-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p1wb00dj10ow072s5h3x"
+      ]
+    },
+    {
+      "csvRowIndex": 257,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p1z200dl10ow3q93raxj"
+      ]
+    },
+    {
+      "csvRowIndex": 258,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "30-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p21w00dn10owtvwaau2t"
+      ]
+    },
+    {
+      "csvRowIndex": 259,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p24q00dp10owe2o11vr8"
+      ]
+    },
+    {
+      "csvRowIndex": 260,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p27d00dr10owf5ihqs4h"
+      ]
+    },
+    {
+      "csvRowIndex": 261,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "exfil-speedrun",
+      "sub_record": "round-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p29z00dt10owuxyv6g0c"
+      ]
+    },
+    {
+      "csvRowIndex": 262,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "first-room",
+      "sub_record": "no-support",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p2da00dv10owxc2qzlkb"
+      ]
+    },
+    {
+      "csvRowIndex": 263,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p2g400dx10owh9v5igt0"
+      ]
+    },
+    {
+      "csvRowIndex": 264,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "100-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p2iy00dz10ow6cvzc3uw"
+      ]
+    },
+    {
+      "csvRowIndex": 265,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "30-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p2ls00e110owgg20rkle"
+      ]
+    },
+    {
+      "csvRowIndex": 266,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "70-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p2ol00e310owbida596r"
+      ]
+    },
+    {
+      "csvRowIndex": 267,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "50-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p2s300e510owg8omipjx"
+      ]
+    },
+    {
+      "csvRowIndex": 268,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p2uu00e710owxafzoi2l"
+      ]
+    },
+    {
+      "csvRowIndex": 269,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "exfil-speedrun",
+      "sub_record": "round-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p2xt00e910owib9ky8iq"
+      ]
+    },
+    {
+      "csvRowIndex": 270,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "30-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p30o00eb10owbs1kj3jp"
+      ]
+    },
+    {
+      "csvRowIndex": 271,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "50-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p33f00ed10ow7jcnlr7w"
+      ]
+    },
+    {
+      "csvRowIndex": 272,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "30-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p36a00ef10owtir1q51j"
+      ]
+    },
+    {
+      "csvRowIndex": 273,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p39000eh10owd0b1gyol"
+      ]
+    },
+    {
+      "csvRowIndex": 274,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "exfil-speedrun",
+      "sub_record": "round-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p3br00ej10ow035b6x3c"
+      ]
+    },
+    {
+      "csvRowIndex": 275,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "50-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p3ek00el10owvspxbtl3"
+      ]
+    },
+    {
+      "csvRowIndex": 276,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p3h600en10owfsoy2obd"
+      ]
+    },
+    {
+      "csvRowIndex": 277,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p3jw00ep10owritpva0q"
+      ]
+    },
+    {
+      "csvRowIndex": 278,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p3mq00er10ow54x5vwup"
+      ]
+    },
+    {
+      "csvRowIndex": 279,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p3pm00et10ow0fpvtpwf"
+      ]
+    },
+    {
+      "csvRowIndex": 280,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "exfil-speedrun",
+      "sub_record": "round-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p3sc00ev10owuro0ulkt"
+      ]
+    },
+    {
+      "csvRowIndex": 281,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p3v500ex10owgjmlno3o"
+      ]
+    },
+    {
+      "csvRowIndex": 282,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "50-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p3xt00ez10ow28auwzi9"
+      ]
+    },
+    {
+      "csvRowIndex": 283,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p40p00f110ow9gryyraq"
+      ]
+    },
+    {
+      "csvRowIndex": 284,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p43h00f310owjgpf50qe"
+      ]
+    },
+    {
+      "csvRowIndex": 285,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "30-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p46c00f510owigt059il"
+      ]
+    },
+    {
+      "csvRowIndex": 286,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "50-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p49300f710owzib0urt8"
+      ]
+    },
+    {
+      "csvRowIndex": 287,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "70-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p4gi00f910owp67aobqi"
+      ]
+    },
+    {
+      "csvRowIndex": 288,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "100-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p4na00fb10ow3vfw1mur"
+      ]
+    },
+    {
+      "csvRowIndex": 289,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "30-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p4q200fd10owcw53z7db"
+      ]
+    },
+    {
+      "csvRowIndex": 290,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "50-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p4sx00ff10owcpgd4pqy"
+      ]
+    },
+    {
+      "csvRowIndex": 291,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "100-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p4vw00fh10owvzhswtd5"
+      ]
+    },
+    {
+      "csvRowIndex": 292,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p4yw00fj10owrone495p"
+      ]
+    },
+    {
+      "csvRowIndex": 293,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p51t00fl10owawmo79ly"
+      ]
+    },
+    {
+      "csvRowIndex": 294,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "exfil-speedrun",
+      "sub_record": "rage-inducer-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p54m00fn10ow6vrh4dgd"
+      ]
+    },
+    {
+      "csvRowIndex": 295,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p57n00fp10owag3a78lo"
+      ]
+    },
+    {
+      "csvRowIndex": 296,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "30-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p5am00fr10owwvjrdele"
+      ]
+    },
+    {
+      "csvRowIndex": 297,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "70-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p5de00ft10owt7fdtgf1"
+      ]
+    },
+    {
+      "csvRowIndex": 298,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "exfil-speedrun",
+      "sub_record": "round-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p5gf00fv10ow6te4si41"
+      ]
+    },
+    {
+      "csvRowIndex": 299,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p5j700fx10ow3lctx1gl"
+      ]
+    },
+    {
+      "csvRowIndex": 300,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p5lw00fz10owwo1d7bni"
+      ]
+    },
+    {
+      "csvRowIndex": 301,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p5ow00g110ownhe088ss"
+      ]
+    },
+    {
+      "csvRowIndex": 302,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "exfil-speedrun",
+      "sub_record": "round-21",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p5rs00g310oweg786hxv"
+      ]
+    },
+    {
+      "csvRowIndex": 303,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p5vx00g510owq3e3dls7"
+      ]
+    },
+    {
+      "csvRowIndex": 304,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p5ys00g710owbjso92hi"
+      ]
+    },
+    {
+      "csvRowIndex": 305,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "exfil-speedrun",
+      "sub_record": "round-11",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p61i00g910owozhr2zkf"
+      ]
+    },
+    {
+      "csvRowIndex": 306,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "30-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p64800gb10owhylxq1mi"
+      ]
+    },
+    {
+      "csvRowIndex": 307,
+      "status": "imported",
+      "game": "bocw",
+      "map": "mauer-der-toten",
+      "record": "50-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p66w00gd10owgabjswu1"
+      ]
+    },
+    {
+      "csvRowIndex": 308,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "30-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p69t00gf10owao22h9vd"
+      ]
+    },
+    {
+      "csvRowIndex": 309,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "50-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p6ct00gh10ow2knl7s3p"
+      ]
+    },
+    {
+      "csvRowIndex": 310,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "50-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p6fo00gj10owj2507gn4"
+      ]
+    },
+    {
+      "csvRowIndex": 311,
+      "status": "imported",
+      "game": "bocw",
+      "map": "firebase",
+      "record": "50-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p6jo00gl10ow9oxeywo2"
+      ]
+    },
+    {
+      "csvRowIndex": 312,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "50-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p6md00gn10ow1vnp14f4"
+      ]
+    },
+    {
+      "csvRowIndex": 313,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "70-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p6p100gp10owhkwsi18c"
+      ]
+    },
+    {
+      "csvRowIndex": 314,
+      "status": "imported",
+      "game": "bocw",
+      "map": "forsaken",
+      "record": "100-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p6ru00gr10owczf4i9yh"
+      ]
+    },
+    {
+      "csvRowIndex": 315,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "100-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p6uq00gt10ow51vw9xdy"
+      ]
+    },
+    {
+      "csvRowIndex": 316,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "70-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p6xn00gv10ow00g5vei9"
+      ]
+    },
+    {
+      "csvRowIndex": 317,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "50-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p70m00gx10owuc74124b"
+      ]
+    },
+    {
+      "csvRowIndex": 318,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "30-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p73g00gz10owsg9xkxxv"
+      ]
+    },
+    {
+      "csvRowIndex": 319,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "50-speedrun",
+      "sub_record": "inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p76b00h110ow2pupfd6d"
+      ]
+    },
+    {
+      "csvRowIndex": 320,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "30-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p78z00h310ow24y911v8"
+      ]
+    },
+    {
+      "csvRowIndex": 321,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "50-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p7br00h510ow2450udt8"
+      ]
+    },
+    {
+      "csvRowIndex": 322,
+      "status": "imported",
+      "game": "bocw",
+      "map": "die-maschine",
+      "record": "30-speedrun",
+      "sub_record": "non-inducer",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p7er00h710owwjv5ehl3"
+      ]
+    },
+    {
+      "csvRowIndex": 323,
+      "status": "skipped",
+      "game": "community",
+      "map": "die-rise",
+      "record": "com-no-buildables",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 324,
+      "status": "skipped",
+      "game": "community",
+      "map": "der-riese",
+      "record": "com-fg42",
+      "sub_record": "black-ops",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 325,
+      "status": "skipped",
+      "game": "community",
+      "map": "der-riese",
+      "record": "com-fg42",
+      "sub_record": "world-at-war",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 326,
+      "status": "skipped",
+      "game": "community",
+      "map": "der-riese",
+      "record": "com-fg42",
+      "sub_record": "world-at-war",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 327,
+      "status": "skipped",
+      "game": "community",
+      "map": "buried",
+      "record": "com-no-kill",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 328,
+      "status": "skipped",
+      "game": "community",
+      "map": "die-rise",
+      "record": "com-no-buildables",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 329,
+      "status": "skipped",
+      "game": "community",
+      "map": "die-rise",
+      "record": "com-no-buildables",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 330,
+      "status": "skipped",
+      "game": "community",
+      "map": "origins",
+      "record": "com-no-buildables",
+      "sub_record": "black-ops-2",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 331,
+      "status": "skipped",
+      "game": "community",
+      "map": "town",
+      "record": "com-mp5",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 332,
+      "status": "skipped",
+      "game": "community",
+      "map": "town",
+      "record": "com-mp5",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 333,
+      "status": "skipped",
+      "game": "community",
+      "map": "origins",
+      "record": "com-no-buildables",
+      "sub_record": "black-ops-2",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 334,
+      "status": "skipped",
+      "game": "community",
+      "map": "five",
+      "record": "com-lab",
+      "sub_record": "black-ops",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 335,
+      "status": "skipped",
+      "game": "community",
+      "map": "origins",
+      "record": "com-no-buildables",
+      "sub_record": "black-ops-3-megas",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 336,
+      "status": "skipped",
+      "game": "community",
+      "map": "five",
+      "record": "com-lab",
+      "sub_record": "black-ops-4-all",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 337,
+      "status": "skipped",
+      "game": "community",
+      "map": "five",
+      "record": "com-lab",
+      "sub_record": "black-ops-4-classics",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 338,
+      "status": "skipped",
+      "game": "community",
+      "map": "five",
+      "record": "com-lab",
+      "sub_record": "black-ops-4-classics",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 339,
+      "status": "skipped",
+      "game": "community",
+      "map": "der-riese",
+      "record": "com-fg42",
+      "sub_record": "world-at-war",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 340,
+      "status": "skipped",
+      "game": "community",
+      "map": "der-riese",
+      "record": "com-fg42",
+      "sub_record": "world-at-war",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 341,
+      "status": "skipped",
+      "game": "community",
+      "map": "origins",
+      "record": "com-no-buildables",
+      "sub_record": "black-ops-3-classics",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 342,
+      "status": "skipped",
+      "game": "community",
+      "map": "der-riese",
+      "record": "com-fg42",
+      "sub_record": "black-ops",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 343,
+      "status": "skipped",
+      "game": "community",
+      "map": "alpha-omega",
+      "record": "com-burst-modifier",
+      "sub_record": "hc-classic-elixirs-only",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 344,
+      "status": "skipped",
+      "game": "custom",
+      "map": "sponge-house",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 345,
+      "status": "skipped",
+      "game": "custom",
+      "map": "custom-mcdonalds",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 346,
+      "status": "skipped",
+      "game": "custom",
+      "map": "fabrik-der-untoten",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 347,
+      "status": "skipped",
+      "game": "custom",
+      "map": "custom-atrox",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 348,
+      "status": "skipped",
+      "game": "custom",
+      "map": "krusty-krab",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 349,
+      "status": "skipped",
+      "game": "custom",
+      "map": "custom-mori",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 350,
+      "status": "skipped",
+      "game": "custom",
+      "map": "extinct-the-last-compound",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 351,
+      "status": "skipped",
+      "game": "custom",
+      "map": "custom-nuketown",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 352,
+      "status": "skipped",
+      "game": "custom",
+      "map": "fnaf3",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 353,
+      "status": "skipped",
+      "game": "custom",
+      "map": "sandy-tree-dome",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 354,
+      "status": "skipped",
+      "game": "custom",
+      "map": "custom-saburra",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 355,
+      "status": "skipped",
+      "game": "custom",
+      "map": "custom-europa",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 356,
+      "status": "skipped",
+      "game": "custom",
+      "map": "custom-winchester",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 357,
+      "status": "skipped",
+      "game": "custom",
+      "map": "custom-full-circle",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 358,
+      "status": "skipped",
+      "game": "custom",
+      "map": "custom-henge",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 359,
+      "status": "skipped",
+      "game": "custom",
+      "map": "custom-felon",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 360,
+      "status": "skipped",
+      "game": "custom",
+      "map": "town-reimagined",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 361,
+      "status": "skipped",
+      "game": "custom",
+      "map": "fnaf3",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "message": "Game is community/custom"
+    },
+    {
+      "csvRowIndex": 362,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "30-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p7hn00h910ow2l7straq"
+      ]
+    },
+    {
+      "csvRowIndex": 363,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "30-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p7l900hb10owu4eoyi1p"
+      ]
+    },
+    {
+      "csvRowIndex": 364,
+      "status": "imported",
+      "game": "iw",
+      "map": "shaolin-shuffle",
+      "record": "iw-no-perks",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p7ps00hd10owp5p7s952"
+      ]
+    },
+    {
+      "csvRowIndex": 365,
+      "status": "imported",
+      "game": "iw",
+      "map": "shaolin-shuffle",
+      "record": "no-tuff-nuff",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p7t500hf10owdodems50"
+      ]
+    },
+    {
+      "csvRowIndex": 366,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "high-round",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p7wl00hh10owjsmzv2kb"
+      ]
+    },
+    {
+      "csvRowIndex": 367,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "100-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p7zf00hj10owaepmmlfy"
+      ]
+    },
+    {
+      "csvRowIndex": 368,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "no-power",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p82w00hl10owfm4vn6o9"
+      ]
+    },
+    {
+      "csvRowIndex": 369,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "high-round",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p86e00hn10ow8fuuak8k"
+      ]
+    },
+    {
+      "csvRowIndex": 370,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "100-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p89700hp10owhpufat23"
+      ]
+    },
+    {
+      "csvRowIndex": 371,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "30-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p8c000hr10owi6x0kzfb"
+      ]
+    },
+    {
+      "csvRowIndex": 372,
+      "status": "imported",
+      "game": "iw",
+      "map": "shaolin-shuffle",
+      "record": "30-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p8ev00ht10owkd990dba"
+      ]
+    },
+    {
+      "csvRowIndex": 373,
+      "status": "imported",
+      "game": "iw",
+      "map": "shaolin-shuffle",
+      "record": "30-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p8hl00hv10owz1kbuxoi"
+      ]
+    },
+    {
+      "csvRowIndex": 374,
+      "status": "imported",
+      "game": "iw",
+      "map": "shaolin-shuffle",
+      "record": "30-speedrun",
+      "sub_record": "dc-all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p8kd00hx10owtxczsvn6"
+      ]
+    },
+    {
+      "csvRowIndex": 375,
+      "status": "imported",
+      "game": "iw",
+      "map": "beast-from-beyond",
+      "record": "no-tuff-nuff",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p8n900hz10owu7hfm2xn"
+      ]
+    },
+    {
+      "csvRowIndex": 376,
+      "status": "imported",
+      "game": "iw",
+      "map": "rave-in-the-redwoods",
+      "record": "30-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p8q200i110owx2fa0w3n"
+      ]
+    },
+    {
+      "csvRowIndex": 377,
+      "status": "imported",
+      "game": "iw",
+      "map": "shaolin-shuffle",
+      "record": "first-room",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p8sv00i310ow5oup651x"
+      ]
+    },
+    {
+      "csvRowIndex": 378,
+      "status": "imported",
+      "game": "iw",
+      "map": "beast-from-beyond",
+      "record": "high-round",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p8w700i510owgjrkgub2"
+      ]
+    },
+    {
+      "csvRowIndex": 379,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "30-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p8z000i710owl48ois5n"
+      ]
+    },
+    {
+      "csvRowIndex": 380,
+      "status": "imported",
+      "game": "iw",
+      "map": "shaolin-shuffle",
+      "record": "30-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p91w00i910ow4rlwi244"
+      ]
+    },
+    {
+      "csvRowIndex": 381,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "30-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p94r00ib10ow2k4frnv0"
+      ]
+    },
+    {
+      "csvRowIndex": 382,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "30-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p97p00id10ow2lvovagy"
+      ]
+    },
+    {
+      "csvRowIndex": 383,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "30-speedrun",
+      "sub_record": "dc-all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p9al00if10owgpnboa0q"
+      ]
+    },
+    {
+      "csvRowIndex": 384,
+      "status": "imported",
+      "game": "iw",
+      "map": "rave-in-the-redwoods",
+      "record": "30-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p9de00ih10owep6ja6fz"
+      ]
+    },
+    {
+      "csvRowIndex": 385,
+      "status": "imported",
+      "game": "iw",
+      "map": "rave-in-the-redwoods",
+      "record": "30-speedrun",
+      "sub_record": "dc-all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p9g300ij10owcmit8yqv"
+      ]
+    },
+    {
+      "csvRowIndex": 386,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "30-speedrun",
+      "sub_record": "dc-all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p9iv00il10owv2yn3fpq"
+      ]
+    },
+    {
+      "csvRowIndex": 387,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "first-room",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p9ma00in10owce1l59qb"
+      ]
+    },
+    {
+      "csvRowIndex": 388,
+      "status": "imported",
+      "game": "iw",
+      "map": "rave-in-the-redwoods",
+      "record": "30-speedrun",
+      "sub_record": "dc-all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p9p400ip10owb06q2986"
+      ]
+    },
+    {
+      "csvRowIndex": 389,
+      "status": "imported",
+      "game": "iw",
+      "map": "shaolin-shuffle",
+      "record": "no-power",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p9rv00ir10owgfcm4wub"
+      ]
+    },
+    {
+      "csvRowIndex": 390,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "first-room",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p9ut00it10owbxg8fsfv"
+      ]
+    },
+    {
+      "csvRowIndex": 391,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "no-power",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54p9xm00iv10ow9d0h2mew"
+      ]
+    },
+    {
+      "csvRowIndex": 392,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "flawless",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pa0c00ix10owcmujlbhk"
+      ]
+    },
+    {
+      "csvRowIndex": 393,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "50-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pa3200iz10ownanuitee"
+      ]
+    },
+    {
+      "csvRowIndex": 394,
+      "status": "imported",
+      "game": "iw",
+      "map": "rave-in-the-redwoods",
+      "record": "30-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pa5s00j110owjsb7sbn4"
+      ]
+    },
+    {
+      "csvRowIndex": 395,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "30-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pa8h00j310owufdn3i5j"
+      ]
+    },
+    {
+      "csvRowIndex": 396,
+      "status": "imported",
+      "game": "iw",
+      "map": "rave-in-the-redwoods",
+      "record": "30-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pab900j510owa0u6oet0"
+      ]
+    },
+    {
+      "csvRowIndex": 397,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "first-room",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54padx00j710owgypcssxe"
+      ]
+    },
+    {
+      "csvRowIndex": 398,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "30-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pagq00j910owzo11lukl"
+      ]
+    },
+    {
+      "csvRowIndex": 399,
+      "status": "imported",
+      "game": "iw",
+      "map": "rave-in-the-redwoods",
+      "record": "30-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pajf00jb10owqhbjpsgt"
+      ]
+    },
+    {
+      "csvRowIndex": 400,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "50-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pama00jd10owvl8a5gh8"
+      ]
+    },
+    {
+      "csvRowIndex": 401,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "high-round",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54papt00jf10owkh0ol26f"
+      ]
+    },
+    {
+      "csvRowIndex": 402,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "50-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pasn00jh10ownmn5mmxc"
+      ]
+    },
+    {
+      "csvRowIndex": 403,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "50-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pave00jj10owccmp494a"
+      ]
+    },
+    {
+      "csvRowIndex": 404,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "50-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pay600jl10owuy4ryu0q"
+      ]
+    },
+    {
+      "csvRowIndex": 405,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "50-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pb0v00jn10owso0no9pj"
+      ]
+    },
+    {
+      "csvRowIndex": 406,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "50-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pb3q00jp10ow7wfx4ktp"
+      ]
+    },
+    {
+      "csvRowIndex": 407,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "50-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pb6i00jr10own6egl4w9"
+      ]
+    },
+    {
+      "csvRowIndex": 408,
+      "status": "imported",
+      "game": "iw",
+      "map": "beast-from-beyond",
+      "record": "50-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pb9a00jt10owrcy92zte"
+      ]
+    },
+    {
+      "csvRowIndex": 409,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "50-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pbc000jv10owksuwc81t"
+      ]
+    },
+    {
+      "csvRowIndex": 410,
+      "status": "imported",
+      "game": "iw",
+      "map": "beast-from-beyond",
+      "record": "50-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pbet00jx10owqtvoh7k9"
+      ]
+    },
+    {
+      "csvRowIndex": 411,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "flawless",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pbi100jz10owshv4hgav"
+      ]
+    },
+    {
+      "csvRowIndex": 412,
+      "status": "imported",
+      "game": "iw",
+      "map": "beast-from-beyond",
+      "record": "30-speedrun",
+      "sub_record": "dc-all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pbku00k110ow98gjw3rs"
+      ]
+    },
+    {
+      "csvRowIndex": 413,
+      "status": "imported",
+      "game": "iw",
+      "map": "rave-in-the-redwoods",
+      "record": "no-power",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pbo200k310owe9aztply"
+      ]
+    },
+    {
+      "csvRowIndex": 414,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "30-speedrun",
+      "sub_record": "dc-all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pbqu00k510owsu157uwn"
+      ]
+    },
+    {
+      "csvRowIndex": 415,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "30-speedrun",
+      "sub_record": "dc-all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pbtp00k710owvk7pnz9j"
+      ]
+    },
+    {
+      "csvRowIndex": 416,
+      "status": "imported",
+      "game": "iw",
+      "map": "rave-in-the-redwoods",
+      "record": "50-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pbwk00k910owkmon781i"
+      ]
+    },
+    {
+      "csvRowIndex": 417,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "30-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pbzf00kb10owlyq2fth7"
+      ]
+    },
+    {
+      "csvRowIndex": 418,
+      "status": "imported",
+      "game": "iw",
+      "map": "beast-from-beyond",
+      "record": "30-speedrun",
+      "sub_record": "dc-all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pc2b00kd10ow16z1un3b"
+      ]
+    },
+    {
+      "csvRowIndex": 419,
+      "status": "imported",
+      "game": "iw",
+      "map": "shaolin-shuffle",
+      "record": "first-room",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pc5n00kf10ow1vgra31a"
+      ]
+    },
+    {
+      "csvRowIndex": 420,
+      "status": "imported",
+      "game": "iw",
+      "map": "shaolin-shuffle",
+      "record": "50-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pc8900kh10owrqol5bbk"
+      ]
+    },
+    {
+      "csvRowIndex": 421,
+      "status": "imported",
+      "game": "iw",
+      "map": "shaolin-shuffle",
+      "record": "30-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pcb100kj10owk5916y9r"
+      ]
+    },
+    {
+      "csvRowIndex": 422,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "30-speedrun",
+      "sub_record": "dc-all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pcdu00kl10ow4m69ssu1"
+      ]
+    },
+    {
+      "csvRowIndex": 423,
+      "status": "imported",
+      "game": "iw",
+      "map": "rave-in-the-redwoods",
+      "record": "30-speedrun",
+      "sub_record": "dc-all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pcgl00kn10owvik5lx2e"
+      ]
+    },
+    {
+      "csvRowIndex": 424,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "30-speedrun",
+      "sub_record": "dc-all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pcjh00kp10owjdpils3s"
+      ]
+    },
+    {
+      "csvRowIndex": 425,
+      "status": "imported",
+      "game": "iw",
+      "map": "rave-in-the-redwoods",
+      "record": "30-speedrun",
+      "sub_record": "dc-all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pcm900kr10owxi7i33pk"
+      ]
+    },
+    {
+      "csvRowIndex": 426,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "70-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pcp700kt10owhagyj0q5"
+      ]
+    },
+    {
+      "csvRowIndex": 427,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "iw-no-perks",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pcsd00kv10owk70fb6n9"
+      ]
+    },
+    {
+      "csvRowIndex": 428,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "no-tuff-nuff",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pcvn00kx10owbdpo3oqs"
+      ]
+    },
+    {
+      "csvRowIndex": 429,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "iw-no-perks",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pcye00kz10owp1z3ruh7"
+      ]
+    },
+    {
+      "csvRowIndex": 430,
+      "status": "skipped",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "no-tuff-nuff",
+      "sub_record": "fate-cards",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 431,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "70-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pd3x00l110owvt66urz7"
+      ]
+    },
+    {
+      "csvRowIndex": 432,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "50-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pd6u00l310owyu2yqms2"
+      ]
+    },
+    {
+      "csvRowIndex": 433,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "50-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pd9n00l510ow9vphupyr"
+      ]
+    },
+    {
+      "csvRowIndex": 434,
+      "status": "imported",
+      "game": "iw",
+      "map": "shaolin-shuffle",
+      "record": "30-speedrun",
+      "sub_record": "dc-all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pdcd00l710owfzc45d4w"
+      ]
+    },
+    {
+      "csvRowIndex": 435,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "70-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pdf500l910ow1fzvw23v"
+      ]
+    },
+    {
+      "csvRowIndex": 436,
+      "status": "imported",
+      "game": "iw",
+      "map": "shaolin-shuffle",
+      "record": "30-speedrun",
+      "sub_record": "dc-all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pdhu00lb10owmzm6rg6l"
+      ]
+    },
+    {
+      "csvRowIndex": 437,
+      "status": "imported",
+      "game": "iw",
+      "map": "shaolin-shuffle",
+      "record": "first-room",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pdkg00ld10owws508tdr"
+      ]
+    },
+    {
+      "csvRowIndex": 438,
+      "status": "imported",
+      "game": "iw",
+      "map": "beast-from-beyond",
+      "record": "high-round",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pdns00lf10owbq28l7xx"
+      ]
+    },
+    {
+      "csvRowIndex": 439,
+      "status": "imported",
+      "game": "iw",
+      "map": "shaolin-shuffle",
+      "record": "30-speedrun",
+      "sub_record": "dc-all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pdqh00lh10owamnnjkk4"
+      ]
+    },
+    {
+      "csvRowIndex": 440,
+      "status": "imported",
+      "game": "iw",
+      "map": "beast-from-beyond",
+      "record": "ee-speedrun",
+      "sub_record": "dc-all-cards",
+      "message": "Created ChallengeLog + EasterEggLog",
+      "logIds": [
+        "cmm54pdt500lj10owsy29m0kk",
+        "cmm54pdvv00ll10owr6l6jo9g"
+      ]
+    },
+    {
+      "csvRowIndex": 441,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "first-room",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pdzq00ln10ow9ittwu7t"
+      ]
+    },
+    {
+      "csvRowIndex": 442,
+      "status": "imported",
+      "game": "iw",
+      "map": "rave-in-the-redwoods",
+      "record": "first-room",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pe2f00lp10owsard94cy"
+      ]
+    },
+    {
+      "csvRowIndex": 443,
+      "status": "imported",
+      "game": "iw",
+      "map": "beast-from-beyond",
+      "record": "iw-no-perks",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pe5t00lr10owyeokna1h"
+      ]
+    },
+    {
+      "csvRowIndex": 444,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "no-power",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pe8i00lt10owbnn42h4t"
+      ]
+    },
+    {
+      "csvRowIndex": 445,
+      "status": "imported",
+      "game": "iw",
+      "map": "beast-from-beyond",
+      "record": "ee-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog + EasterEggLog",
+      "logIds": [
+        "cmm54peba00lv10owdiypexqm",
+        "cmm54ped000lx10owwub87zvl"
+      ]
+    },
+    {
+      "csvRowIndex": 446,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "no-power",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pefo00lz10ownzwa5jzm"
+      ]
+    },
+    {
+      "csvRowIndex": 447,
+      "status": "imported",
+      "game": "iw",
+      "map": "shaolin-shuffle",
+      "record": "no-power",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54peie00m110owpegdwdyk"
+      ]
+    },
+    {
+      "csvRowIndex": 448,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "high-round",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pel500m310ow3fizuann"
+      ]
+    },
+    {
+      "csvRowIndex": 449,
+      "status": "imported",
+      "game": "iw",
+      "map": "spaceland",
+      "record": "first-room",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54penx00m510owsius726o"
+      ]
+    },
+    {
+      "csvRowIndex": 450,
+      "status": "imported",
+      "game": "iw",
+      "map": "rave-in-the-redwoods",
+      "record": "50-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54peqs00m710owu85tfkho"
+      ]
+    },
+    {
+      "csvRowIndex": 451,
+      "status": "skipped",
+      "game": "iw",
+      "map": "rave-in-the-redwoods",
+      "record": "flawless",
+      "sub_record": "fate-cards",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 452,
+      "status": "imported",
+      "game": "iw",
+      "map": "rave-in-the-redwoods",
+      "record": "high-round",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pewh00m910owjexqhrn8"
+      ]
+    },
+    {
+      "csvRowIndex": 453,
+      "status": "imported",
+      "game": "iw",
+      "map": "rave-in-the-redwoods",
+      "record": "50-speedrun",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pez800mb10ow0pk5b7l9"
+      ]
+    },
+    {
+      "csvRowIndex": 454,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "no-power",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pf2000md10ow68cmf7q4"
+      ]
+    },
+    {
+      "csvRowIndex": 455,
+      "status": "imported",
+      "game": "iw",
+      "map": "beast-from-beyond",
+      "record": "high-round",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pf4p00mf10owjfr8p4n6"
+      ]
+    },
+    {
+      "csvRowIndex": 456,
+      "status": "imported",
+      "game": "iw",
+      "map": "attack-of-the-radioactive-thing",
+      "record": "high-round",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pf7d00mh10owf9yjoxrx"
+      ]
+    },
+    {
+      "csvRowIndex": 457,
+      "status": "imported",
+      "game": "iw",
+      "map": "beast-from-beyond",
+      "record": "30-speedrun",
+      "sub_record": "all-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pfa300mj10owd5mtb7z9"
+      ]
+    },
+    {
+      "csvRowIndex": 458,
+      "status": "imported",
+      "game": "iw",
+      "map": "rave-in-the-redwoods",
+      "record": "first-room",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pfcq00ml10ow5z32ml0p"
+      ]
+    },
+    {
+      "csvRowIndex": 459,
+      "status": "imported",
+      "game": "iw",
+      "map": "rave-in-the-redwoods",
+      "record": "first-room",
+      "sub_record": "fate-cards",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pfg000mn10ow3vydijde"
+      ]
+    },
+    {
+      "csvRowIndex": 460,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pfiq00mp10owmo7h1xv4"
+      ]
+    },
+    {
+      "csvRowIndex": 461,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pflg00mr10owxa3a2o3l"
+      ]
+    },
+    {
+      "csvRowIndex": 462,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pfo600mt10owoxkjyzmb"
+      ]
+    },
+    {
+      "csvRowIndex": 463,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "50-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pfqy00mv10owekk0ua2h"
+      ]
+    },
+    {
+      "csvRowIndex": 464,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "70-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pftt00mx10ow6a0afhzd"
+      ]
+    },
+    {
+      "csvRowIndex": 465,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "100-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pfwk00mz10ow3kbv1b77"
+      ]
+    },
+    {
+      "csvRowIndex": 466,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "100-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pfze00n110ow5j26np32"
+      ]
+    },
+    {
+      "csvRowIndex": 467,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "50-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pg2m00n310owfh1qan2f"
+      ]
+    },
+    {
+      "csvRowIndex": 468,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "70-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pg5i00n510owmomzf47s"
+      ]
+    },
+    {
+      "csvRowIndex": 469,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "100-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pg8700n710owbvvdf2wz"
+      ]
+    },
+    {
+      "csvRowIndex": 470,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "high-round",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pgb100n910owznm7ommc"
+      ]
+    },
+    {
+      "csvRowIndex": 471,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "no-armor",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pgdw00nb10ow5t3fwh26"
+      ]
+    },
+    {
+      "csvRowIndex": 472,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "no-perks",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pggn00nd10owt5qf5sor"
+      ]
+    },
+    {
+      "csvRowIndex": 473,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "no-jug",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pgjk00nf10owni4ig715"
+      ]
+    },
+    {
+      "csvRowIndex": 474,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "50-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pgmh00nh10owmnq45lh1"
+      ]
+    },
+    {
+      "csvRowIndex": 475,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "70-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pgp900nj10owi84jn54k"
+      ]
+    },
+    {
+      "csvRowIndex": 476,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "100-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pgs100nl10ow71o5rf0q"
+      ]
+    },
+    {
+      "csvRowIndex": 477,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "no-perks",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pguy00nn10owgsh3zq59"
+      ]
+    },
+    {
+      "csvRowIndex": 478,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "no-jug",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pgyb00np10ownzvxe0uh"
+      ]
+    },
+    {
+      "csvRowIndex": 479,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "200-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ph1100nr10owl8xmwqds"
+      ]
+    },
+    {
+      "csvRowIndex": 480,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "200-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ph3u00nt10owx7s2kbhi"
+      ]
+    },
+    {
+      "csvRowIndex": 481,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ph6l00nv10ow0rjwjlcc"
+      ]
+    },
+    {
+      "csvRowIndex": 482,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ph9c00nx10ow0j530tt2"
+      ]
+    },
+    {
+      "csvRowIndex": 483,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54phc700nz10owk1ilq9zh"
+      ]
+    },
+    {
+      "csvRowIndex": 484,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "50-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54phez00o110owl907qxew"
+      ]
+    },
+    {
+      "csvRowIndex": 485,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54phht00o310ow1c94ec5x"
+      ]
+    },
+    {
+      "csvRowIndex": 486,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54phki00o510owhq4hwmfg"
+      ]
+    },
+    {
+      "csvRowIndex": 487,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54phna00o710owhhor0t3w"
+      ]
+    },
+    {
+      "csvRowIndex": 488,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "exfil-speedrun",
+      "sub_record": "round-20",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54phq500o910oww952sya7"
+      ]
+    },
+    {
+      "csvRowIndex": 489,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54phsv00ob10owhq952k7h"
+      ]
+    },
+    {
+      "csvRowIndex": 490,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "exfil-speedrun",
+      "sub_record": "round-20",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54phvl00od10ow8gb0labq"
+      ]
+    },
+    {
+      "csvRowIndex": 491,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "50-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54phyc00of10owmehsgqd4"
+      ]
+    },
+    {
+      "csvRowIndex": 492,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pi1800oh10oweq4qd03o"
+      ]
+    },
+    {
+      "csvRowIndex": 493,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "50-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pi3v00oj10owfz9el3cg"
+      ]
+    },
+    {
+      "csvRowIndex": 494,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pi6m00ol10ow3rr7uyi5"
+      ]
+    },
+    {
+      "csvRowIndex": 495,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "50-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pi9g00on10owbxfz4e4v"
+      ]
+    },
+    {
+      "csvRowIndex": 496,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pic700op10owoymx67jy"
+      ]
+    },
+    {
+      "csvRowIndex": 497,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pifg00or10owqjg4cx98"
+      ]
+    },
+    {
+      "csvRowIndex": 498,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "10-speedrun",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54piia00ot10ow961yme1d"
+      ]
+    },
+    {
+      "csvRowIndex": 499,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pikx00ov10ow3lpeh730"
+      ]
+    },
+    {
+      "csvRowIndex": 500,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "10-speedrun",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pinr00ox10owje9bvk0p"
+      ]
+    },
+    {
+      "csvRowIndex": 501,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54piqk00oz10ow0a8zvned"
+      ]
+    },
+    {
+      "csvRowIndex": 502,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "exfil-speedrun",
+      "sub_record": "round-5",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54piti00p110ow2hy0y6sm"
+      ]
+    },
+    {
+      "csvRowIndex": 503,
+      "status": "skipped",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "20-speedrun",
+      "sub_record": "with-void",
+      "message": "Challenge type ROUND_20_SPEEDRUN not on map"
+    },
+    {
+      "csvRowIndex": 504,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "exfil-speedrun",
+      "sub_record": "round-5",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pixw00p310ow8i9pb3jn"
+      ]
+    },
+    {
+      "csvRowIndex": 505,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "10-speedrun",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pj0n00p510ows42vju8u"
+      ]
+    },
+    {
+      "csvRowIndex": 506,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pj3f00p710owubjnzt3k"
+      ]
+    },
+    {
+      "csvRowIndex": 507,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "exfil-speedrun",
+      "sub_record": "round-20",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pj6a00p910owicyxq006"
+      ]
+    },
+    {
+      "csvRowIndex": 508,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pj8y00pb10owkmu392fq"
+      ]
+    },
+    {
+      "csvRowIndex": 509,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pjbq00pd10owh3muys38"
+      ]
+    },
+    {
+      "csvRowIndex": 510,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "10-speedrun",
+      "sub_record": "without-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pjei00pf10ow2pmvrwj7"
+      ]
+    },
+    {
+      "csvRowIndex": 511,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "20-speedrun",
+      "sub_record": "without-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pjh700ph10ow6fb9pn1u"
+      ]
+    },
+    {
+      "csvRowIndex": 512,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "exfil-speedrun",
+      "sub_record": "round-20",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pjjz00pj10ow83hi9zjk"
+      ]
+    },
+    {
+      "csvRowIndex": 513,
+      "status": "skipped",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "20-speedrun",
+      "sub_record": "with-void",
+      "message": "Challenge type ROUND_20_SPEEDRUN not on map"
+    },
+    {
+      "csvRowIndex": 514,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "exfil-speedrun",
+      "sub_record": "round-5",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pjoa00pl10owvrgaa0hc"
+      ]
+    },
+    {
+      "csvRowIndex": 515,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "exfil-speedrun",
+      "sub_record": "round-5",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pjrv00pn10ow3n00aziw"
+      ]
+    },
+    {
+      "csvRowIndex": 516,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pjup00pp10owgiuna6pw"
+      ]
+    },
+    {
+      "csvRowIndex": 517,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "exfil-speedrun",
+      "sub_record": "round-20",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pjxg00pr10owc5m3vukv"
+      ]
+    },
+    {
+      "csvRowIndex": 518,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pk0400pt10owkjfn7okm"
+      ]
+    },
+    {
+      "csvRowIndex": 519,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "exfil-speedrun",
+      "sub_record": "round-20",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pk2v00pv10ow7eacetia"
+      ]
+    },
+    {
+      "csvRowIndex": 520,
+      "status": "skipped",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "20-speedrun",
+      "sub_record": "with-void",
+      "message": "Challenge type ROUND_20_SPEEDRUN not on map"
+    },
+    {
+      "csvRowIndex": 521,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "10-speedrun",
+      "sub_record": "without-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pk7a00px10owyrsit13b"
+      ]
+    },
+    {
+      "csvRowIndex": 522,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "10-speedrun",
+      "sub_record": "without-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pka700pz10ow51q1a2rg"
+      ]
+    },
+    {
+      "csvRowIndex": 523,
+      "status": "skipped",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "20-speedrun",
+      "sub_record": "without-void",
+      "message": "Challenge type ROUND_20_SPEEDRUN not on map"
+    },
+    {
+      "csvRowIndex": 524,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "20-speedrun",
+      "sub_record": "without-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pkep00q110owhollu4za"
+      ]
+    },
+    {
+      "csvRowIndex": 525,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "exfil-speedrun",
+      "sub_record": "round-5",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pkhe00q310owbbeofx56"
+      ]
+    },
+    {
+      "csvRowIndex": 526,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "10-speedrun",
+      "sub_record": "without-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pkk300q510ow5rma43vv"
+      ]
+    },
+    {
+      "csvRowIndex": 527,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pkmv00q710owrzlocgyj"
+      ]
+    },
+    {
+      "csvRowIndex": 528,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "10-speedrun",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pkps00q910owkv4tbh4i"
+      ]
+    },
+    {
+      "csvRowIndex": 529,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "20-speedrun",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pksn00qb10owwzoc8yvy"
+      ]
+    },
+    {
+      "csvRowIndex": 530,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "10-speedrun",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pkvi00qd10owikqmroc9"
+      ]
+    },
+    {
+      "csvRowIndex": 531,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "20-speedrun",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pkyf00qf10owqtls5bts"
+      ]
+    },
+    {
+      "csvRowIndex": 532,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "no-armor",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pl1800qh10owr21wbwhq"
+      ]
+    },
+    {
+      "csvRowIndex": 533,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "ee-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog + EasterEggLog",
+      "logIds": [
+        "cmm54pl4200qj10ow9ytk4fdd"
+      ]
+    },
+    {
+      "csvRowIndex": 534,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "no-jug",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pl7d00ql10own2auihnh"
+      ]
+    },
+    {
+      "csvRowIndex": 535,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "no-perks",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pla100qn10owi3swjms9"
+      ]
+    },
+    {
+      "csvRowIndex": 536,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "no-jug",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54plcr00qp10ow2jx7phn0"
+      ]
+    },
+    {
+      "csvRowIndex": 537,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "no-perks",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54plfg00qr10owfdnh1o4q"
+      ]
+    },
+    {
+      "csvRowIndex": 538,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "high-round",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54plie00qt10owe0d0zose"
+      ]
+    },
+    {
+      "csvRowIndex": 539,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "no-perks",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54plla00qv10owvoo3fm2u"
+      ]
+    },
+    {
+      "csvRowIndex": 540,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "no-armor",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54plnw00qx10ow43yst1qb"
+      ]
+    },
+    {
+      "csvRowIndex": 541,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "no-jug",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54plqn00qz10owalsvav2s"
+      ]
+    },
+    {
+      "csvRowIndex": 542,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "ee-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog + EasterEggLog",
+      "logIds": [
+        "cmm54plte00r110owp9cjknlk",
+        "cmm54plv200r310owjt2dy2pz"
+      ]
+    },
+    {
+      "csvRowIndex": 543,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "no-perks",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54plxv00r510ow76qsjhhb"
+      ]
+    },
+    {
+      "csvRowIndex": 544,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "ee-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog + EasterEggLog",
+      "logIds": [
+        "cmm54pm0v00r710ow1brvvm7u",
+        "cmm54pm2j00r910owftfc9hzk"
+      ]
+    },
+    {
+      "csvRowIndex": 545,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "ee-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog + EasterEggLog",
+      "logIds": [
+        "cmm54pm5e00rb10owpjjdtl1t",
+        "cmm54pm7100rd10owfo47whtq"
+      ]
+    },
+    {
+      "csvRowIndex": 546,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "100-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pm9t00rf10owgzky1pg3"
+      ]
+    },
+    {
+      "csvRowIndex": 547,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "70-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pmci00rh10ow5psbdcvp"
+      ]
+    },
+    {
+      "csvRowIndex": 548,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "100-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pmfk00rj10ow6nkhr0wi"
+      ]
+    },
+    {
+      "csvRowIndex": 549,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "70-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pmid00rl10owx4y1orjq"
+      ]
+    },
+    {
+      "csvRowIndex": 550,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pml700rn10oww3b3e4vn"
+      ]
+    },
+    {
+      "csvRowIndex": 551,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pmo300rp10owgtaylrzk"
+      ]
+    },
+    {
+      "csvRowIndex": 552,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pmqx00rr10owvqf5kz5r"
+      ]
+    },
+    {
+      "csvRowIndex": 553,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "exfil-speedrun",
+      "sub_record": "round-20",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pmtp00rt10owwov0kvpd"
+      ]
+    },
+    {
+      "csvRowIndex": 554,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pmwg00rv10owmxjv4ccs"
+      ]
+    },
+    {
+      "csvRowIndex": 555,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "exfil-speedrun",
+      "sub_record": "round-20",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pmz900rx10owyfg0996z"
+      ]
+    },
+    {
+      "csvRowIndex": 556,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "exfil-speedrun",
+      "sub_record": "round-20",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pn2100rz10owrg2fxvjy"
+      ]
+    },
+    {
+      "csvRowIndex": 557,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pn4v00s110owfsq8ve0c"
+      ]
+    },
+    {
+      "csvRowIndex": 558,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "exfil-speedrun",
+      "sub_record": "round-20",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pn7q00s310owdikyhpa5"
+      ]
+    },
+    {
+      "csvRowIndex": 559,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pnac00s510ow18tndgfj"
+      ]
+    },
+    {
+      "csvRowIndex": 560,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pncx00s710ow6x3cdere"
+      ]
+    },
+    {
+      "csvRowIndex": 561,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pnfo00s910ow4tjtfjnj"
+      ]
+    },
+    {
+      "csvRowIndex": 562,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pnis00sb10owby76yv3l"
+      ]
+    },
+    {
+      "csvRowIndex": 563,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "exfil-speedrun",
+      "sub_record": "round-20",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pnlm00sd10ow68mhh9qm"
+      ]
+    },
+    {
+      "csvRowIndex": 564,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "exfil-speedrun",
+      "sub_record": "round-20",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pnoj00sf10ow6wt8x0nr"
+      ]
+    },
+    {
+      "csvRowIndex": 565,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pnrc00sh10owjhkgmcmd"
+      ]
+    },
+    {
+      "csvRowIndex": 566,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "exfil-speedrun",
+      "sub_record": "round-20",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pnu100sj10owugprucwz"
+      ]
+    },
+    {
+      "csvRowIndex": 567,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pnwt00sl10owjlu8yto5"
+      ]
+    },
+    {
+      "csvRowIndex": 568,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "exfil-speedrun",
+      "sub_record": "round-20",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pnzj00sn10oww7db973m"
+      ]
+    },
+    {
+      "csvRowIndex": 569,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54po2a00sp10owvmauorg9"
+      ]
+    },
+    {
+      "csvRowIndex": 570,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54po5100sr10owgrqbjvxx"
+      ]
+    },
+    {
+      "csvRowIndex": 571,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "ee-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog + EasterEggLog",
+      "logIds": [
+        "cmm54po7v00st10owputpp1kk",
+        "cmm54po9q00sv10owy7tm1660"
+      ]
+    },
+    {
+      "csvRowIndex": 572,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54poci00sx10ow14snk2fl"
+      ]
+    },
+    {
+      "csvRowIndex": 573,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pof900sz10ownvbrpg8f"
+      ]
+    },
+    {
+      "csvRowIndex": 574,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "exfil-speedrun",
+      "sub_record": "round-20",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pohy00t110ow2lmol2bp"
+      ]
+    },
+    {
+      "csvRowIndex": 575,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pokq00t310owm17zc9m0"
+      ]
+    },
+    {
+      "csvRowIndex": 576,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "exfil-speedrun",
+      "sub_record": "round-20",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pont00t510owjjj5ayqv"
+      ]
+    },
+    {
+      "csvRowIndex": 577,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54poqh00t710owpve19l3k"
+      ]
+    },
+    {
+      "csvRowIndex": 578,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "ee-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog + EasterEggLog",
+      "logIds": [
+        "cmm54pot500t910owe900j4uk",
+        "cmm54pour00tb10ow2l28nuy4"
+      ]
+    },
+    {
+      "csvRowIndex": 579,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54poxg00td10owuxvqwkpx"
+      ]
+    },
+    {
+      "csvRowIndex": 580,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pp0600tf10ow61frm5ku"
+      ]
+    },
+    {
+      "csvRowIndex": 581,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "50-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pp2u00th10owv83c2qqk"
+      ]
+    },
+    {
+      "csvRowIndex": 582,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "50-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pp5j00tj10ow23j6qi44"
+      ]
+    },
+    {
+      "csvRowIndex": 583,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "50-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pp8900tl10owsyb8lfk0"
+      ]
+    },
+    {
+      "csvRowIndex": 584,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "50-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ppay00tn10ow9tormq40"
+      ]
+    },
+    {
+      "csvRowIndex": 585,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ppdp00tp10ow8hv4b05m"
+      ]
+    },
+    {
+      "csvRowIndex": 586,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "50-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ppgg00tr10owk4zsgmjk"
+      ]
+    },
+    {
+      "csvRowIndex": 587,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "70-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ppj500tt10ow1tevg48e"
+      ]
+    },
+    {
+      "csvRowIndex": 588,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pplx00tv10owpnwjww00"
+      ]
+    },
+    {
+      "csvRowIndex": 589,
+      "status": "skipped",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "20-speedrun",
+      "sub_record": "with-void",
+      "message": "Challenge type ROUND_20_SPEEDRUN not on map"
+    },
+    {
+      "csvRowIndex": 590,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "exfil-speedrun",
+      "sub_record": "round-5",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ppqe00tx10ow02zhuglc"
+      ]
+    },
+    {
+      "csvRowIndex": 591,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ppt100tz10owpxt2pge1"
+      ]
+    },
+    {
+      "csvRowIndex": 592,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "exfil-speedrun",
+      "sub_record": "round-5",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ppvz00u110owgaxsk4he"
+      ]
+    },
+    {
+      "csvRowIndex": 593,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "10-speedrun",
+      "sub_record": "without-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ppyp00u310ow8cbm8o4k"
+      ]
+    },
+    {
+      "csvRowIndex": 594,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pq1d00u510ow661atr8f"
+      ]
+    },
+    {
+      "csvRowIndex": 595,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "20-speedrun",
+      "sub_record": "without-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pq3z00u710owp7zze2o8"
+      ]
+    },
+    {
+      "csvRowIndex": 596,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "10-speedrun",
+      "sub_record": "without-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pq6l00u910owcbwkbkr4"
+      ]
+    },
+    {
+      "csvRowIndex": 597,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pq9a00ub10owvv7154gw"
+      ]
+    },
+    {
+      "csvRowIndex": 598,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pqbz00ud10ownc6btjx9"
+      ]
+    },
+    {
+      "csvRowIndex": 599,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "10-speedrun",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pqes00uf10owimzlevin"
+      ]
+    },
+    {
+      "csvRowIndex": 600,
+      "status": "skipped",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "20-speedrun",
+      "sub_record": "with-void",
+      "message": "Challenge type ROUND_20_SPEEDRUN not on map"
+    },
+    {
+      "csvRowIndex": 601,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "20-speedrun",
+      "sub_record": "without-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pqjd00uh10owd44fd8tb"
+      ]
+    },
+    {
+      "csvRowIndex": 602,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "10-speedrun",
+      "sub_record": "without-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pqly00uj10owv2tmc2h6"
+      ]
+    },
+    {
+      "csvRowIndex": 603,
+      "status": "skipped",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "20-speedrun",
+      "sub_record": "without-void",
+      "message": "Challenge type ROUND_20_SPEEDRUN not on map"
+    },
+    {
+      "csvRowIndex": 604,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "10-speedrun",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pqq700ul10ow1kmpml6z"
+      ]
+    },
+    {
+      "csvRowIndex": 605,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "20-speedrun",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pqsx00un10owmqfn3r7e"
+      ]
+    },
+    {
+      "csvRowIndex": 606,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "10-speedrun",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pqvn00up10owkcrkngxk"
+      ]
+    },
+    {
+      "csvRowIndex": 607,
+      "status": "skipped",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "20-speedrun",
+      "sub_record": "with-void",
+      "message": "Challenge type ROUND_20_SPEEDRUN not on map"
+    },
+    {
+      "csvRowIndex": 608,
+      "status": "skipped",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "20-speedrun",
+      "sub_record": "with-void",
+      "message": "Challenge type ROUND_20_SPEEDRUN not on map"
+    },
+    {
+      "csvRowIndex": 609,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "10-speedrun",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pr2a00ur10ow4cyww21g"
+      ]
+    },
+    {
+      "csvRowIndex": 610,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "terra-maledicta",
+      "record": "20-speedrun",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pr4v00ut10owxxe4l4gv"
+      ]
+    },
+    {
+      "csvRowIndex": 611,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pr7r00uv10owdnxah62k"
+      ]
+    },
+    {
+      "csvRowIndex": 612,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "exfil-speedrun",
+      "sub_record": "round-10",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54prak00ux10owf920b1ad"
+      ]
+    },
+    {
+      "csvRowIndex": 613,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "high-round",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54prdd00uz10own7t8ivfg"
+      ]
+    },
+    {
+      "csvRowIndex": 614,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "30-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54prg700v110ow9ln7zmgb"
+      ]
+    },
+    {
+      "csvRowIndex": 615,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "10-speedrun",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54prj200v310owicc3l24g"
+      ]
+    },
+    {
+      "csvRowIndex": 616,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "no-jug",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54prlt00v510oweh30125i"
+      ]
+    },
+    {
+      "csvRowIndex": 617,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "no-perks",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54prp100v710owpgw3wyjd"
+      ]
+    },
+    {
+      "csvRowIndex": 618,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "no-armor",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54prrq00v910owgp77qn3a"
+      ]
+    },
+    {
+      "csvRowIndex": 619,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "ee-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog + EasterEggLog",
+      "logIds": [
+        "cmm54prue00vb10ow12flgrk4",
+        "cmm54prw200vd10owagvx9xkd"
+      ]
+    },
+    {
+      "csvRowIndex": 620,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "van-archon",
+      "record": "ee-speedrun",
+      "sub_record": "",
+      "message": "Created ChallengeLog + EasterEggLog",
+      "logIds": [
+        "cmm54prys00vf10ow7pzvs7ed",
+        "cmm54ps0i00vh10owatkybm5g"
+      ]
+    },
+    {
+      "csvRowIndex": 621,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "high-round",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ps3a00vj10owb2p6fjzg"
+      ]
+    },
+    {
+      "csvRowIndex": 622,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "shi-no-numa-van",
+      "record": "flawless",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ps6200vl10owdxythxbi"
+      ]
+    },
+    {
+      "csvRowIndex": 623,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "no-jug",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ps9l00vn10owc89x8jni"
+      ]
+    },
+    {
+      "csvRowIndex": 624,
+      "status": "imported",
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "no-perks",
+      "sub_record": "with-void",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54psca00vp10owfjo6rxqa"
+      ]
+    },
+    {
+      "csvRowIndex": 625,
+      "status": "imported",
+      "game": "wwii",
+      "map": "groesten-haus",
+      "record": "30-speedrun",
+      "sub_record": "with-cons",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54psey00vr10owgdlso6pr"
+      ]
+    },
+    {
+      "csvRowIndex": 626,
+      "status": "imported",
+      "game": "wwii",
+      "map": "the-shadowed-throne",
+      "record": "no-blitz",
+      "sub_record": "with-cons",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54psid00vt10owkmtlt8rn"
+      ]
+    },
+    {
+      "csvRowIndex": 627,
+      "status": "imported",
+      "game": "wwii",
+      "map": "the-shadowed-throne",
+      "record": "wwii-no-armor",
+      "sub_record": "with-cons",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54psl900vv10owtwt8ncbw"
+      ]
+    },
+    {
+      "csvRowIndex": 628,
+      "status": "imported",
+      "game": "wwii",
+      "map": "uss-mount-olympus",
+      "record": "70-speedrun",
+      "sub_record": "no-cons",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pso000vx10owen2k1oc4"
+      ]
+    },
+    {
+      "csvRowIndex": 629,
+      "status": "imported",
+      "game": "wwii",
+      "map": "frozen-dawn",
+      "record": "flawless",
+      "sub_record": "",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54psqo00vz10ow4i52w01i"
+      ]
+    },
+    {
+      "csvRowIndex": 630,
+      "status": "imported",
+      "game": "wwii",
+      "map": "the-darkest-shore",
+      "record": "70-speedrun",
+      "sub_record": "with-cons",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54psti00w110ow9au0cbzi"
+      ]
+    },
+    {
+      "csvRowIndex": 631,
+      "status": "imported",
+      "game": "wwii",
+      "map": "altar-of-blood",
+      "record": "wwii-no-armor",
+      "sub_record": "no-cons",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54psw900w310owru3ggrqh"
+      ]
+    },
+    {
+      "csvRowIndex": 632,
+      "status": "imported",
+      "game": "wwii",
+      "map": "altar-of-blood",
+      "record": "no-blitz",
+      "sub_record": "no-cons",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54psz100w510owglyfyfwa"
+      ]
+    },
+    {
+      "csvRowIndex": 633,
+      "status": "imported",
+      "game": "wwii",
+      "map": "the-darkest-shore",
+      "record": "wwii-no-armor",
+      "sub_record": "no-cons",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pt1u00w710owr5v630f0"
+      ]
+    },
+    {
+      "csvRowIndex": 634,
+      "status": "imported",
+      "game": "wwii",
+      "map": "the-darkest-shore",
+      "record": "no-blitz",
+      "sub_record": "no-cons",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pt4m00w910ow97uywlpk"
+      ]
+    },
+    {
+      "csvRowIndex": 635,
+      "status": "imported",
+      "game": "wwii",
+      "map": "the-final-reich",
+      "record": "first-room",
+      "sub_record": "no-cons",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54pt7h00wb10owwcj2puqc"
+      ]
+    },
+    {
+      "csvRowIndex": 636,
+      "status": "imported",
+      "game": "wwii",
+      "map": "the-darkest-shore",
+      "record": "first-room",
+      "sub_record": "no-cons",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ptad00wd10owr7psn83k"
+      ]
+    },
+    {
+      "csvRowIndex": 637,
+      "status": "imported",
+      "game": "wwii",
+      "map": "groesten-haus",
+      "record": "50-speedrun",
+      "sub_record": "with-cons",
+      "message": "Created ChallengeLog",
+      "logIds": [
+        "cmm54ptd000wf10owjgmz20ig"
+      ]
+    }
+  ],
+  "skippedReasons": [
+    {
+      "row": 250,
+      "game": "bocw",
+      "map": "bocw-super-ee",
+      "record": "Super-ee-speedrun",
+      "sub_record": "",
+      "reason": "Map not found: game=bocw, map=bocw-super-ee"
+    },
+    {
+      "row": 323,
+      "game": "community",
+      "map": "die-rise",
+      "record": "com-no-buildables",
+      "sub_record": "",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 324,
+      "game": "community",
+      "map": "der-riese",
+      "record": "com-fg42",
+      "sub_record": "black-ops",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 325,
+      "game": "community",
+      "map": "der-riese",
+      "record": "com-fg42",
+      "sub_record": "world-at-war",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 326,
+      "game": "community",
+      "map": "der-riese",
+      "record": "com-fg42",
+      "sub_record": "world-at-war",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 327,
+      "game": "community",
+      "map": "buried",
+      "record": "com-no-kill",
+      "sub_record": "",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 328,
+      "game": "community",
+      "map": "die-rise",
+      "record": "com-no-buildables",
+      "sub_record": "",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 329,
+      "game": "community",
+      "map": "die-rise",
+      "record": "com-no-buildables",
+      "sub_record": "",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 330,
+      "game": "community",
+      "map": "origins",
+      "record": "com-no-buildables",
+      "sub_record": "black-ops-2",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 331,
+      "game": "community",
+      "map": "town",
+      "record": "com-mp5",
+      "sub_record": "",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 332,
+      "game": "community",
+      "map": "town",
+      "record": "com-mp5",
+      "sub_record": "",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 333,
+      "game": "community",
+      "map": "origins",
+      "record": "com-no-buildables",
+      "sub_record": "black-ops-2",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 334,
+      "game": "community",
+      "map": "five",
+      "record": "com-lab",
+      "sub_record": "black-ops",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 335,
+      "game": "community",
+      "map": "origins",
+      "record": "com-no-buildables",
+      "sub_record": "black-ops-3-megas",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 336,
+      "game": "community",
+      "map": "five",
+      "record": "com-lab",
+      "sub_record": "black-ops-4-all",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 337,
+      "game": "community",
+      "map": "five",
+      "record": "com-lab",
+      "sub_record": "black-ops-4-classics",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 338,
+      "game": "community",
+      "map": "five",
+      "record": "com-lab",
+      "sub_record": "black-ops-4-classics",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 339,
+      "game": "community",
+      "map": "der-riese",
+      "record": "com-fg42",
+      "sub_record": "world-at-war",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 340,
+      "game": "community",
+      "map": "der-riese",
+      "record": "com-fg42",
+      "sub_record": "world-at-war",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 341,
+      "game": "community",
+      "map": "origins",
+      "record": "com-no-buildables",
+      "sub_record": "black-ops-3-classics",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 342,
+      "game": "community",
+      "map": "der-riese",
+      "record": "com-fg42",
+      "sub_record": "black-ops",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 343,
+      "game": "community",
+      "map": "alpha-omega",
+      "record": "com-burst-modifier",
+      "sub_record": "hc-classic-elixirs-only",
+      "reason": "Game \"community\" is skipped (community/custom)"
+    },
+    {
+      "row": 344,
+      "game": "custom",
+      "map": "sponge-house",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "reason": "Game \"custom\" is skipped (community/custom)"
+    },
+    {
+      "row": 345,
+      "game": "custom",
+      "map": "custom-mcdonalds",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "reason": "Game \"custom\" is skipped (community/custom)"
+    },
+    {
+      "row": 346,
+      "game": "custom",
+      "map": "fabrik-der-untoten",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "reason": "Game \"custom\" is skipped (community/custom)"
+    },
+    {
+      "row": 347,
+      "game": "custom",
+      "map": "custom-atrox",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "reason": "Game \"custom\" is skipped (community/custom)"
+    },
+    {
+      "row": 348,
+      "game": "custom",
+      "map": "krusty-krab",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "reason": "Game \"custom\" is skipped (community/custom)"
+    },
+    {
+      "row": 349,
+      "game": "custom",
+      "map": "custom-mori",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "reason": "Game \"custom\" is skipped (community/custom)"
+    },
+    {
+      "row": 350,
+      "game": "custom",
+      "map": "extinct-the-last-compound",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "reason": "Game \"custom\" is skipped (community/custom)"
+    },
+    {
+      "row": 351,
+      "game": "custom",
+      "map": "custom-nuketown",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "reason": "Game \"custom\" is skipped (community/custom)"
+    },
+    {
+      "row": 352,
+      "game": "custom",
+      "map": "fnaf3",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "reason": "Game \"custom\" is skipped (community/custom)"
+    },
+    {
+      "row": 353,
+      "game": "custom",
+      "map": "sandy-tree-dome",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "reason": "Game \"custom\" is skipped (community/custom)"
+    },
+    {
+      "row": 354,
+      "game": "custom",
+      "map": "custom-saburra",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "reason": "Game \"custom\" is skipped (community/custom)"
+    },
+    {
+      "row": 355,
+      "game": "custom",
+      "map": "custom-europa",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "reason": "Game \"custom\" is skipped (community/custom)"
+    },
+    {
+      "row": 356,
+      "game": "custom",
+      "map": "custom-winchester",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "reason": "Game \"custom\" is skipped (community/custom)"
+    },
+    {
+      "row": 357,
+      "game": "custom",
+      "map": "custom-full-circle",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "reason": "Game \"custom\" is skipped (community/custom)"
+    },
+    {
+      "row": 358,
+      "game": "custom",
+      "map": "custom-henge",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "reason": "Game \"custom\" is skipped (community/custom)"
+    },
+    {
+      "row": 359,
+      "game": "custom",
+      "map": "custom-felon",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "reason": "Game \"custom\" is skipped (community/custom)"
+    },
+    {
+      "row": 360,
+      "game": "custom",
+      "map": "town-reimagined",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "reason": "Game \"custom\" is skipped (community/custom)"
+    },
+    {
+      "row": 361,
+      "game": "custom",
+      "map": "fnaf3",
+      "record": "custom-30-speedrun-bo3",
+      "sub_record": "",
+      "reason": "Game \"custom\" is skipped (community/custom)"
+    },
+    {
+      "row": 503,
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "20-speedrun",
+      "sub_record": "with-void",
+      "reason": "Challenge not found on map: type=ROUND_20_SPEEDRUN"
+    },
+    {
+      "row": 513,
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "20-speedrun",
+      "sub_record": "with-void",
+      "reason": "Challenge not found on map: type=ROUND_20_SPEEDRUN"
+    },
+    {
+      "row": 520,
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "20-speedrun",
+      "sub_record": "with-void",
+      "reason": "Challenge not found on map: type=ROUND_20_SPEEDRUN"
+    },
+    {
+      "row": 523,
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "20-speedrun",
+      "sub_record": "without-void",
+      "reason": "Challenge not found on map: type=ROUND_20_SPEEDRUN"
+    },
+    {
+      "row": 589,
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "20-speedrun",
+      "sub_record": "with-void",
+      "reason": "Challenge not found on map: type=ROUND_20_SPEEDRUN"
+    },
+    {
+      "row": 600,
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "20-speedrun",
+      "sub_record": "with-void",
+      "reason": "Challenge not found on map: type=ROUND_20_SPEEDRUN"
+    },
+    {
+      "row": 603,
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "20-speedrun",
+      "sub_record": "without-void",
+      "reason": "Challenge not found on map: type=ROUND_20_SPEEDRUN"
+    },
+    {
+      "row": 607,
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "20-speedrun",
+      "sub_record": "with-void",
+      "reason": "Challenge not found on map: type=ROUND_20_SPEEDRUN"
+    },
+    {
+      "row": 608,
+      "game": "vanguard",
+      "map": "der-anfang",
+      "record": "20-speedrun",
+      "sub_record": "with-void",
+      "reason": "Challenge not found on map: type=ROUND_20_SPEEDRUN"
+    }
+  ],
+  "summary": {
+    "imported": 569,
+    "skipped": 67,
+    "errors": 0
+  }
+}

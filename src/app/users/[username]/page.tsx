@@ -50,6 +50,8 @@ import {
   getSortedCategoryKeys,
   sortAchievementsInCategory,
   isSpeedrunCategory,
+  isRestrictedAchievement,
+  getRestrictedFilterLabel,
 } from '@/lib/achievements/categories';
 import { getAssetUrl } from '@/lib/assets';
 import { getDisplayAvatarUrl } from '@/lib/avatar';
@@ -134,10 +136,12 @@ function AchievementsSection({
   filterMap,
   filterCategory,
   filterSpeedrun,
+  filterRestricted,
   onFilterGameChange,
   onFilterMapChange,
   onFilterCategoryChange,
   onFilterSpeedrunChange,
+  onFilterRestrictedChange,
   isOwnProfile,
   onRelock,
   isMapAchievementsLoading = false,
@@ -148,10 +152,12 @@ function AchievementsSection({
   filterMap: string;
   filterCategory: string;
   filterSpeedrun: string;
+  filterRestricted: boolean;
   onFilterGameChange: (v: string) => void;
   onFilterMapChange: (v: string) => void;
   onFilterCategoryChange: (v: string) => void;
   onFilterSpeedrunChange: (v: string) => void;
+  onFilterRestrictedChange: (v: boolean) => void;
   isOwnProfile: boolean;
   onRelock?: () => void | Promise<void>;
   isMapAchievementsLoading?: boolean;
@@ -211,8 +217,9 @@ function AchievementsSection({
     return overview.achievements
       .filter((a) => a.map?.id === filterMap)
       .filter((a) => !filterCategory || getAchievementCategory(a) === filterCategory)
-      .filter((a) => !filterSpeedrun || getAchievementCategory(a) === filterSpeedrun);
-  }, [overview?.achievements, filterMap, filterCategory, filterSpeedrun]);
+      .filter((a) => !filterSpeedrun || getAchievementCategory(a) === filterSpeedrun)
+      .filter((a) => !filterRestricted || isRestrictedAchievement(a));
+  }, [overview?.achievements, filterMap, filterCategory, filterSpeedrun, filterRestricted]);
 
   const groupedByMapThenCategory = useMemo(() => {
     const byMap = new Map<
@@ -333,6 +340,33 @@ function AchievementsSection({
             />
           </>
         )}
+        {filterMap && mapAchievementsForFilterOptions.some(isRestrictedAchievement) && (
+          <label className="flex items-center gap-2 w-full sm:w-auto cursor-pointer select-none">
+            <span className="text-xs font-medium text-bunker-400">Harder only:</span>
+            <input
+              type="checkbox"
+              checked={filterRestricted}
+              onChange={(e) => onFilterRestrictedChange(e.target.checked)}
+              className="sr-only"
+              aria-label="Show only harder achievements"
+            />
+            <span
+              className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border border-bunker-500 bg-bunker-800 transition-colors ${
+                filterRestricted ? 'bg-blood-500/20' : ''
+              }`}
+              aria-hidden
+            >
+              <span
+                className={`pointer-events-none absolute top-0.5 block h-5 w-5 rounded-full bg-bunker-400 shadow ring-0 transition-transform ${
+                  filterRestricted ? 'translate-x-5 bg-blood-500 left-0.5' : 'translate-x-0 left-0.5'
+                }`}
+              />
+            </span>
+            <span className="text-sm text-bunker-300">
+              {getRestrictedFilterLabel(selectedMapData?.game?.shortName, filterCategory || filterSpeedrun || null)}
+            </span>
+          </label>
+        )}
       </div>
 
       {/* Scrollable list - only shown when map selected (achievements lazy-loaded) */}
@@ -352,8 +386,10 @@ function AchievementsSection({
           <div className="py-12 sm:py-16 text-center">
             <Award className="w-10 h-10 sm:w-12 sm:h-12 text-bunker-600 mx-auto mb-4" />
             <p className="text-sm sm:text-base text-bunker-400">
-              {(filterCategory || filterSpeedrun)
-                ? `No ${(ACHIEVEMENT_CATEGORY_LABELS[filterCategory || filterSpeedrun] ?? (filterCategory || filterSpeedrun)).toLowerCase()} achievements found for this map.`
+              {(filterCategory || filterSpeedrun || filterRestricted)
+                ? (filterRestricted
+                    ? `No ${getRestrictedFilterLabel(selectedMapData?.game?.shortName, filterCategory || filterSpeedrun || null).toLowerCase()} achievements for this map.`
+                    : `No ${(ACHIEVEMENT_CATEGORY_LABELS[filterCategory || filterSpeedrun] ?? (filterCategory || filterSpeedrun)).toLowerCase()} achievements found for this map.`)
                 : 'No achievements found for this map.'}
             </p>
           </div>
@@ -493,6 +529,7 @@ export default function UserProfilePage() {
   const [achievementFilterMap, setAchievementFilterMap] = useState('');
   const [achievementFilterCategory, setAchievementFilterCategory] = useState('');
   const [achievementFilterSpeedrun, setAchievementFilterSpeedrun] = useState('');
+  const [achievementFilterRestricted, setAchievementFilterRestricted] = useState(false);
   const [achievementMapLoading, setAchievementMapLoading] = useState(false);
   const [profileRefreshTrigger, setProfileRefreshTrigger] = useState(0);
 
@@ -1312,10 +1349,12 @@ export default function UserProfilePage() {
           filterMap={achievementFilterMap}
           filterCategory={achievementFilterCategory}
           filterSpeedrun={achievementFilterSpeedrun}
+          filterRestricted={achievementFilterRestricted}
           onFilterGameChange={setAchievementFilterGame}
           onFilterMapChange={setAchievementFilterMap}
           onFilterCategoryChange={setAchievementFilterCategory}
           onFilterSpeedrunChange={setAchievementFilterSpeedrun}
+          onFilterRestrictedChange={setAchievementFilterRestricted}
           isOwnProfile={isOwnProfile}
           onRelock={refetchAchievementsAfterRelock}
           isMapAchievementsLoading={achievementMapLoading}

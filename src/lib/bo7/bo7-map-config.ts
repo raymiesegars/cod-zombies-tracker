@@ -49,6 +49,7 @@ export const BO7_MAP_CONFIG: Record<Bo7MapSlug, Bo7MapConfig> = {
   'ashes-of-the-damned': {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
@@ -89,6 +90,7 @@ export const BO7_MAP_CONFIG: Record<Bo7MapSlug, Bo7MapConfig> = {
   'vandorn-farm': {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
@@ -127,6 +129,7 @@ export const BO7_MAP_CONFIG: Record<Bo7MapSlug, Bo7MapConfig> = {
   'astra-malorum': {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
@@ -167,6 +170,7 @@ export const BO7_MAP_CONFIG: Record<Bo7MapSlug, Bo7MapConfig> = {
   'exit-115': {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
@@ -203,6 +207,7 @@ export const BO7_MAP_CONFIG: Record<Bo7MapSlug, Bo7MapConfig> = {
   'zarya-cosmodrome': {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
@@ -239,10 +244,10 @@ export const BO7_MAP_CONFIG: Record<Bo7MapSlug, Bo7MapConfig> = {
   mars: {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
-      'STARTING_ROOM',
       'ONE_BOX',
       'PISTOL_ONLY',
       'ROUND_5_SPEEDRUN',
@@ -258,7 +263,6 @@ export const BO7_MAP_CONFIG: Record<Bo7MapSlug, Bo7MapConfig> = {
     ],
     highRoundWR: 999,
     noDownsWR: 999,
-    firstRoomWR: 610,
     noPerksWR: 70,
     noJugWR: 100,
     speedrunWRs: {

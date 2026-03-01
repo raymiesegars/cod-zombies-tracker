@@ -92,7 +92,7 @@ export const WAW_MAP_CONFIG: Record<WaWMapSlug, WaWChallengeConfig> = {
     noPerksWR: undefined, // Not on map
   },
   verruckt: {
-    challengeTypes: ['HIGHEST_ROUND', 'NO_PERKS', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER'],
+    challengeTypes: ['HIGHEST_ROUND', 'NO_JUG', 'NO_PERKS', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER'],
     noDownsSoloAllowed: false,
     noDownsAvailable: false, // Duo+ only, no duo+ achievements — remove category
     hasFixedWunderwaffeTag: false,
@@ -105,7 +105,7 @@ export const WAW_MAP_CONFIG: Record<WaWMapSlug, WaWChallengeConfig> = {
     noJugWR: 419,
   },
   'shi-no-numa': {
-    challengeTypes: ['HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY'],
+    challengeTypes: ['HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY'],
     noDownsSoloAllowed: false,
     noDownsAvailable: true,
     hasFixedWunderwaffeTag: false,
@@ -117,7 +117,7 @@ export const WAW_MAP_CONFIG: Record<WaWMapSlug, WaWChallengeConfig> = {
     noJugWR: 5749,
   },
   'der-riese': {
-    challengeTypes: ['HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER'],
+    challengeTypes: ['HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER'],
     noDownsSoloAllowed: false,
     noDownsAvailable: true,
     hasFixedWunderwaffeTag: true, // WR 87, no achievements

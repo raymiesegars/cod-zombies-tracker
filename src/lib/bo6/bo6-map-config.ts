@@ -48,13 +48,13 @@ export const BO6_MAP_CONFIG: Record<Bo6MapSlug, Bo6MapConfig> = {
   terminus: {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
       'STARTING_ROOM',
       'ONE_BOX',
       'PISTOL_ONLY',
-      'NO_POWER',
       'ROUND_5_SPEEDRUN',
       'ROUND_15_SPEEDRUN',
       'ROUND_30_SPEEDRUN',
@@ -89,13 +89,13 @@ export const BO6_MAP_CONFIG: Record<Bo6MapSlug, Bo6MapConfig> = {
   'liberty-falls': {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
       'STARTING_ROOM',
       'ONE_BOX',
       'PISTOL_ONLY',
-      'NO_POWER',
       'ROUND_5_SPEEDRUN',
       'ROUND_15_SPEEDRUN',
       'ROUND_30_SPEEDRUN',
@@ -130,13 +130,13 @@ export const BO6_MAP_CONFIG: Record<Bo6MapSlug, Bo6MapConfig> = {
   'citadelle-des-morts': {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
       'STARTING_ROOM',
       'ONE_BOX',
       'PISTOL_ONLY',
-      'NO_POWER',
       'ROUND_5_SPEEDRUN',
       'ROUND_15_SPEEDRUN',
       'ROUND_30_SPEEDRUN',
@@ -169,13 +169,13 @@ export const BO6_MAP_CONFIG: Record<Bo6MapSlug, Bo6MapConfig> = {
   'the-tomb': {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
       'STARTING_ROOM',
       'ONE_BOX',
       'PISTOL_ONLY',
-      'NO_POWER',
       'ROUND_5_SPEEDRUN',
       'ROUND_15_SPEEDRUN',
       'ROUND_30_SPEEDRUN',
@@ -210,13 +210,13 @@ export const BO6_MAP_CONFIG: Record<Bo6MapSlug, Bo6MapConfig> = {
   'shattered-veil': {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
       'STARTING_ROOM',
       'ONE_BOX',
       'PISTOL_ONLY',
-      'NO_POWER',
       'ROUND_5_SPEEDRUN',
       'ROUND_15_SPEEDRUN',
       'ROUND_30_SPEEDRUN',
@@ -251,13 +251,13 @@ export const BO6_MAP_CONFIG: Record<Bo6MapSlug, Bo6MapConfig> = {
   reckoning: {
     challengeTypes: [
       'HIGHEST_ROUND',
+      'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
       'NO_PACK',
       'STARTING_ROOM',
       'ONE_BOX',
       'PISTOL_ONLY',
-      'NO_POWER',
       'ROUND_5_SPEEDRUN',
       'ROUND_15_SPEEDRUN',
       'ROUND_30_SPEEDRUN',
