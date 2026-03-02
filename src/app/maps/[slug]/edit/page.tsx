@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
+import { useShowLoadingAfter } from '@/hooks/use-show-loading-after';
 import {
   Button,
   Card,
@@ -279,6 +280,7 @@ export default function EditMapProgressPage() {
   /** When navigating from mystery box, roll's filterSettings for XP preview */
   const [mysteryBoxFilterSettings, setMysteryBoxFilterSettings] = useState<MysteryBoxFilterSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const showLoadingUI = useShowLoadingAfter(authLoading || isLoading, 250);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [saveErrorMessage, setSaveErrorMessage] = useState<string | null>(null);
@@ -919,6 +921,9 @@ export default function EditMapProgressPage() {
   }, [map?.challenges, map?.game?.shortName, map?.slug]);
 
   if (authLoading || isLoading) {
+    if (!showLoadingUI) {
+      return <div className="min-h-screen bg-bunker-950" aria-hidden />;
+    }
     return (
       <div className="min-h-screen bg-bunker-950 flex items-center justify-center">
         <PageLoader message="Loading..." fullScreen />

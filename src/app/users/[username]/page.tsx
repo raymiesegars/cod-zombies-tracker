@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/context/auth-context';
+import { useShowLoadingAfter } from '@/hooks/use-show-loading-after';
 import {
   Card,
   CardHeader,
@@ -621,6 +622,7 @@ export default function UserProfilePage() {
   const [modalBlockTooltip, setModalBlockTooltip] = useState<{ text: string; x: number; y: number } | null>(null);
   const [achievementsOverview, setAchievementsOverview] = useState<AchievementsOverview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const showLoadingUI = useShowLoadingAfter(isLoading, 250);
 
   const [achievementFilterGame, setAchievementFilterGame] = useState('');
   const [achievementFilterMap, setAchievementFilterMap] = useState('');
@@ -917,6 +919,9 @@ export default function UserProfilePage() {
     currentUser && !currentProfile && isProfileSettingUp && params.username === currentUser.id;
 
   if (isLoading || isViewingOwnProfileDuringSetup) {
+    if (!showLoadingUI) {
+      return <div className="min-h-screen bg-bunker-950" aria-hidden />;
+    }
     return (
       <div className="min-h-screen bg-bunker-950 flex items-center justify-center">
         <PageLoader

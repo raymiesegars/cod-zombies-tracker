@@ -55,7 +55,9 @@
     "db:import-user-drainbb": "tsx scripts/import-user-drainbb.ts",
     "db:import-user-grimoire": "tsx scripts/import-user-grimoire.ts",
     "db:import-user-lostfeeling": "tsx scripts/import-user-lostfeeling.ts",
-    "db:import-user-rde": "tsx scripts/import-user-rde.ts"
+    "db:import-user-rde": "tsx scripts/import-user-rde.ts",
+    "db:import-user-dallasnation04": "tsx scripts/import-user-dallasnation04.ts",
+    "db:import-user-whiteboypl4ys": "tsx scripts/import-user-whiteboypl4ys.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.9.1",

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/auth-context';
+import { useShowLoadingAfter } from '@/hooks/use-show-loading-after';
 import { Button, Logo, MapIcon, MysteryBoxIcon } from '@/components/ui';
 import { UserWithRank } from '@/components/game';
 import { NotificationsDropdown } from '@/components/layout/notifications-dropdown';
@@ -25,8 +26,11 @@ const DiscordIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const AUTH_LOADING_DELAY_MS = 250;
+
 export function Navbar() {
   const { user, profile, isLoading, signInWithGoogle, signOut } = useAuth();
+  const showAuthLoading = useShowLoadingAfter(isLoading, AUTH_LOADING_DELAY_MS);
   const { openLogProgressModal } = useLogProgressModal() ?? {};
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
@@ -145,8 +149,10 @@ export function Navbar() {
                 <span className="leading-none pt-0.5">Log</span>
               </button>
             )}
-            {isLoading ? (
-              <div className="w-8 h-8 rounded-full bg-bunker-800 animate-pulse shrink-0" />
+            {isLoading && !showAuthLoading ? (
+              <div className="w-8 h-8 shrink-0" aria-hidden />
+            ) : showAuthLoading ? (
+              <div className="w-8 h-8 rounded-full bg-bunker-800 animate-pulse shrink-0" aria-hidden />
             ) : user && profile ? (
               <>
                 <NotificationsDropdown />
@@ -264,9 +270,10 @@ export function Navbar() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="navbar:hidden bg-bunker-900/95 border-b border-bunker-800/50 relative z-50"
+              transition={{ duration: 0.2 }}
+              className="navbar:hidden bg-bunker-900/95 border-b border-bunker-800/50 relative z-50 max-h-[85vh] flex flex-col"
             >
-            <div className="px-4 py-4 space-y-2">
+            <div className="overflow-y-auto overflow-x-hidden overscroll-contain flex-1 min-h-0 px-4 py-4 pb-6 space-y-2 touch-pan-y">
               {/* Notifications first (when logged in) — easy to reach, matches bell in desktop nav */}
               {user && (
                 <div className="flex justify-center py-1">

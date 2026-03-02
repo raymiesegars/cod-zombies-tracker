@@ -42,7 +42,7 @@ const statsConfig: { label: string; value?: string; key?: 'maps' }[] = [
 ];
 
 export default function HomePage() {
-  const { user, profile, signInWithGoogle } = useAuth();
+  const { user, profile, isLoading: authLoading, signInWithGoogle } = useAuth();
   const { openLogProgressModal } = useLogProgressModal() ?? {};
   const [mapCount, setMapCount] = useState<number | null>(null);
 
@@ -52,6 +52,9 @@ export default function HomePage() {
       .then((data) => setMapCount(Array.isArray(data) ? data.length : 0))
       .catch(() => setMapCount(0));
   }, []);
+
+  // Don't show user-dependent CTAs until auth has resolved — avoids "Get Started" flashing to "Log Progress" for logged-in users
+  const authReady = !authLoading;
 
   return (
     <div className="relative noise-overlay">
@@ -91,7 +94,16 @@ export default function HomePage() {
             </p>
 
             <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-              {user ? (
+              {!authReady ? (
+                <>
+                  <div className="w-full sm:w-auto h-12 sm:h-11 rounded-lg bg-bunker-800/60 border border-bunker-700/60 min-w-[140px]" aria-hidden />
+                  <Link href="/maps" className="w-full sm:w-auto">
+                    <Button size="lg" rightIcon={<ChevronRight className="w-5 h-5" />} variant="secondary" className="w-full sm:w-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]">
+                      Browse Maps
+                    </Button>
+                  </Link>
+                </>
+              ) : user ? (
                 <>
                   {openLogProgressModal && (
                     <Button
@@ -193,7 +205,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          {user && openLogProgressModal && (
+          {authReady && user && openLogProgressModal && (
             <div className="mb-8 sm:mb-12">
               <button
                 type="button"
@@ -320,7 +332,16 @@ export default function HomePage() {
               Free account. Easter egg guides, challenges, speedruns, XP and ranks. Log runs with squad, get verified, customize your maps and profile.
             </p>
             <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-              {user ? (
+              {!authReady ? (
+                <>
+                  <div className="h-12 sm:h-11 rounded-lg bg-bunker-800/60 border border-bunker-700/60 min-w-[160px]" aria-hidden />
+                  <Link href="/maps">
+                    <Button size="lg" variant="secondary" rightIcon={<ChevronRight className="w-5 h-5" />} className="[text-shadow:0_1px_2px_rgba(0,0,0,0.6)]">
+                      Browse Maps
+                    </Button>
+                  </Link>
+                </>
+              ) : user ? (
                 <>
                   {openLogProgressModal && (
                     <Button

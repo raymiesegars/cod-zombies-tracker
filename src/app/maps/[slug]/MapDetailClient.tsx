@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
+import { useShowLoadingAfter } from '@/hooks/use-show-loading-after';
 import { dispatchXpToast } from '@/context/xp-toast-context';
 import {
   Button,
@@ -692,6 +693,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     highestRound: number;
   } | null>(initialMapStats ?? null);
   const [isLoading, setIsLoading] = useState(!initialMap);
+  const showLoadingUI = useShowLoadingAfter(isLoading, 250);
   const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(false);
 
   // EE step checkboxes (synced when logged in)
@@ -1216,6 +1218,9 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   ];
 
   if (isLoading) {
+    if (!showLoadingUI) {
+      return <div className="min-h-screen bg-bunker-950" aria-hidden />;
+    }
     return (
       <div className="min-h-screen bg-bunker-950 flex items-center justify-center">
         <PageLoader message="Loading map..." fullScreen />
