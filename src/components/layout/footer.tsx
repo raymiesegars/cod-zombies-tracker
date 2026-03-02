@@ -38,7 +38,6 @@ export function Footer() {
         <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs sm:text-sm text-bunker-400 mb-4" aria-label="Footer navigation">
           <Link href="/maps" className="hover:text-blood-400 transition-colors">Maps</Link>
           <Link href="/leaderboards" className="hover:text-blood-400 transition-colors">Leaderboards</Link>
-          <Link href="/about" className="hover:text-blood-400 transition-colors">About</Link>
           <span className="text-bunker-600">·</span>
           <a href={DISCORD_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-bunker-400 hover:text-[#5865F2] transition-colors group" aria-label="Join our Discord">
             <span className="inline-flex text-[#5865F2] group-hover:brightness-125 transition-[filter]" aria-hidden>

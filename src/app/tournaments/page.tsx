@@ -618,7 +618,7 @@ export default function TournamentsPage() {
               <li>Tipping does not increase your chances of winning.</li>
               <li>Tipping does not grant special advantages.</li>
               <li>95% of tips go to the tournament prize pool; 5% is held back for tax purposes.</li>
-              <li>The winner receives 100% of the total prize pool (after the 5% holdback).</li>
+              <li>Of the 95% that goes to the prize pool: 1st place receives 65%, 2nd place 25%, and 3rd place 10%.</li>
               <li>All tips are posted in Discord for full transparency.</li>
               <li>This is a skill-based competition — no element of chance determines outcomes.</li>
               <li>By participating, you confirm you meet your local legal requirements for skill-based competitions.</li>

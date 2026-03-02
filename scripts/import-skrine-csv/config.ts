@@ -135,12 +135,13 @@ function applySubRecordModifiers(record: string, subRecord: string, mods: Record
   else if (subRecord === 'no-aat') mods.bo3AatUsed = false;
 
   // BO4
-  if (subRecord === 'all-elixirs') mods.bo4ElixirMode = 'ALL_ELIXIRS_TALISMANS';
+  if (subRecord === 'all-elixirs' || subRecord.startsWith('all-elixirs-talismans')) mods.bo4ElixirMode = 'ALL_ELIXIRS_TALISMANS';
   else if (subRecord === 'classic-elixirs-only') mods.bo4ElixirMode = 'CLASSIC_ONLY';
   else if (subRecord === 'hc-all-elixirs' || subRecord === 'hc-classic-elixirs-only') mods.bo4ElixirMode = 'CLASSIC_ONLY'; // HC = hardcore, use classic
-  else if (subRecord === 'realistic' || subRecord.includes('realistic')) mods.difficulty = 'REALISTIC';
-  else if (subRecord === 'hardcore') mods.difficulty = 'HARDCORE';
-  else if (subRecord === 'casual') mods.difficulty = 'CASUAL';
+  else if (subRecord === 'no-elixirs') mods.bo4ElixirMode = 'CLASSIC_ONLY';
+  if (subRecord === 'realistic' || subRecord.includes('realistic')) mods.difficulty = 'REALISTIC';
+  else if (subRecord === 'hardcore' || subRecord.includes('hardcore')) mods.difficulty = 'HARDCORE';
+  else if (subRecord === 'casual' || subRecord.includes('casual')) mods.difficulty = 'CASUAL';
 
   // BOCW
   if (subRecord === 'inducer') mods.rampageInducerUsed = true;

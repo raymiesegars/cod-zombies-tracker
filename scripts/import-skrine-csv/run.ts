@@ -48,7 +48,7 @@ const prisma = new PrismaClient({
   datasources: { db: { url: process.env.DIRECT_URL || process.env.DATABASE_URL } },
 });
 
-const CSV_HEADERS = [
+export const CSV_HEADERS = [
   'game', 'map', 'record', 'sub_record', 'platform', 'main_video', 'other_links',
   'game_type', 'achieved', 'player_count', 'player_1', 'player_2', 'player_3', 'player_4',
   'is_world_record', 'added',
@@ -66,7 +66,7 @@ function parsePlayerCount(n: string): PlayerCount {
 }
 
 /** Parse "achieved" — round number or time (HH:MM:SS or MM:SS) to seconds. */
-function parseAchieved(achieved: string): { round: number | null; completionTimeSeconds: number | null } {
+export function parseAchieved(achieved: string): { round: number | null; completionTimeSeconds: number | null } {
   const s = (achieved || '').trim();
   if (!s) return { round: null, completionTimeSeconds: null };
 
@@ -86,7 +86,7 @@ function parseAchieved(achieved: string): { round: number | null; completionTime
   return { round: null, completionTimeSeconds: null };
 }
 
-function parseCsv(content: string): ParsedCsvRow[] {
+export function parseCsv(content: string): ParsedCsvRow[] {
   const lines = content.split(/\r?\n/).filter((l) => l.trim());
   if (lines.length < 2) return [];
   const header = lines[0]!.toLowerCase();
@@ -146,7 +146,7 @@ function parseCsv(content: string): ParsedCsvRow[] {
   return rows;
 }
 
-function parseProofUrls(row: ParsedCsvRow): string[] {
+export function parseProofUrls(row: ParsedCsvRow): string[] {
   const urls: string[] = [];
   if (row.main_video) urls.push(row.main_video.trim());
   if (row.other_links) {
@@ -290,7 +290,7 @@ async function findExistingChallengeLog(
   roundReached: number,
   completionTimeSeconds: number | null,
   proofUrls: string[]
-): Promise<{ id: string; rampageInducerUsed: boolean | null } | null> {
+): Promise<{ id: string; rampageInducerUsed: boolean | null; difficulty: string | null } | null> {
   const existing = await prisma.challengeLog.findFirst({
     where: {
       userId,
@@ -299,12 +299,12 @@ async function findExistingChallengeLog(
       roundReached,
       ...(completionTimeSeconds != null ? { completionTimeSeconds } : {}),
     },
-    select: { id: true, rampageInducerUsed: true, proofUrls: true },
+    select: { id: true, rampageInducerUsed: true, proofUrls: true, difficulty: true },
   });
   if (!existing) return null;
   const sameProof = existing.proofUrls.length === proofUrls.length && proofUrls.every((u, i) => existing.proofUrls[i] === u);
   if (!sameProof) return null;
-  return { id: existing.id, rampageInducerUsed: existing.rampageInducerUsed };
+  return { id: existing.id, rampageInducerUsed: existing.rampageInducerUsed, difficulty: existing.difficulty };
 }
 
 async function findExistingEasterEggLog(
@@ -458,7 +458,8 @@ async function main() {
     const { teammateUserIds, teammateNonUserNames } = getTeammateUserIdsAndNames(row, sourcePlayerId);
 
     const mods = mapping.modifiers as Record<string, unknown>;
-    const difficulty = (mods.difficulty as string) ?? null;
+    let difficulty = (mods.difficulty as string) ?? null;
+    if (gameCode === 'bo4' && difficulty == null) difficulty = DEFAULTS.bo4Difficulty;
     const bo3GobbleGumMode = (mods.bo3GobbleGumMode as string) ?? DEFAULTS.bo3GobbleGumMode;
     const bo4ElixirMode = (mods.bo4ElixirMode as string) ?? null;
     const bocwSupportMode = (mods.bocwSupportMode as string) ?? DEFAULTS.bocwSupportMode;
@@ -485,11 +486,19 @@ async function main() {
         proofUrls
       );
       if (existing) {
-        if (isSpeedrun && existing.rampageInducerUsed !== true && !dryRun) {
+        const updates: { rampageInducerUsed?: boolean; difficulty?: string } = {};
+        if (isSpeedrun && existing.rampageInducerUsed !== true) updates.rampageInducerUsed = true;
+        if (gameCode === 'bo4' && existing.difficulty == null && difficulty != null) {
+          updates.difficulty = difficulty as 'NORMAL' | 'HARDCORE' | 'CASUAL' | 'REALISTIC';
+        }
+        if (Object.keys(updates).length > 0 && !dryRun) {
           await prisma.challengeLog.update({
             where: { id: existing.id },
-            data: { rampageInducerUsed: true },
+            data: updates as never,
           });
+          const messages = [];
+          if (updates.rampageInducerUsed) messages.push('with rampage');
+          if (updates.difficulty) messages.push(`difficulty=${updates.difficulty}`);
           report.push({
             csvRowIndex: row._rowIndex,
             status: 'updated',
@@ -497,7 +506,7 @@ async function main() {
             map: row.map,
             record: row.record,
             sub_record: row.sub_record,
-            message: 'Updated existing log to with rampage',
+            message: 'Updated existing log: ' + messages.join(', '),
             logIds: [existing.id],
           });
           updated++;
@@ -511,8 +520,8 @@ async function main() {
             sub_record: row.sub_record,
             message: 'Duplicate: identical log already exists',
           });
+          skipped++;
         }
-        skipped++;
         continue;
       }
     }
@@ -671,10 +680,12 @@ async function main() {
   if (errors > 0) process.exit(1);
 }
 
-main()
-  .then(() => prisma.$disconnect())
-  .catch((e) => {
-    console.error(e);
-    prisma.$disconnect();
-    process.exit(1);
-  });
+if (process.argv[1]?.includes('run.ts') || process.argv[1]?.includes('import-skrine-csv/run')) {
+  main()
+    .then(() => prisma.$disconnect())
+    .catch((e) => {
+      console.error(e);
+      prisma.$disconnect();
+      process.exit(1);
+    });
+}
