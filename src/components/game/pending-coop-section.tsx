@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Card, CardContent, Button, Avatar } from '@/components/ui';
+import { Card, CardContent, Button, Avatar, Input } from '@/components/ui';
 import { getAssetUrl } from '@/lib/assets';
 import { Logo } from '@/components/ui';
-import { RoundCounter } from '@/components/game/round-counter';
+import { RoundCounter, ProofUrlsInput } from '@/components/game';
 import { useAuth } from '@/context/auth-context';
 import { dispatchXpToast } from '@/context/xp-toast-context';
-import { Users, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { normalizeProofUrls } from '@/lib/utils';
+import { Users, CheckCircle, XCircle, Loader2, CheckSquare, Square, Pencil } from 'lucide-react';
 
 export type PendingCoOpItem = {
   id: string;
@@ -38,6 +39,8 @@ const PLAYER_COUNT_LABEL: Record<string, string> = {
   SQUAD: 'Squad',
 };
 
+type ProofOverride = { proofUrls: string[]; screenshotUrl?: string | null };
+
 export function PendingCoOpSection() {
   const { profile, refreshProfile } = useAuth();
   const [pendings, setPendings] = useState<PendingCoOpItem[]>([]);
@@ -45,6 +48,11 @@ export function PendingCoOpSection() {
   const [actingId, setActingId] = useState<string | null>(null);
   const [confirmModal, setConfirmModal] = useState<PendingCoOpItem | null>(null);
   const [denyModal, setDenyModal] = useState<PendingCoOpItem | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [proofOverrides, setProofOverrides] = useState<Record<string, ProofOverride>>({});
+  const [editProofModal, setEditProofModal] = useState<PendingCoOpItem | null>(null);
+  const [editProofUrls, setEditProofUrls] = useState<string[]>([]);
+  const [editProofScreenshot, setEditProofScreenshot] = useState<string>('');
 
   useEffect(() => {
     fetch('/api/me/pending-coop', { credentials: 'same-origin' })
@@ -54,22 +62,64 @@ export function PendingCoOpSection() {
       .finally(() => setLoading(false));
   }, []);
 
+  const openEditProof = (item: PendingCoOpItem) => {
+    const over = proofOverrides[item.id];
+    setEditProofUrls(over?.proofUrls ?? []);
+    setEditProofScreenshot(over?.screenshotUrl ?? '');
+    setEditProofModal(item);
+  };
+
+  const saveEditProof = () => {
+    if (!editProofModal) return;
+    const urls = normalizeProofUrls(editProofUrls);
+    setProofOverrides((prev) => ({
+      ...prev,
+      [editProofModal.id]: {
+        proofUrls: urls,
+        screenshotUrl: editProofScreenshot.trim() || null,
+      },
+    }));
+    setEditProofModal(null);
+  };
+
+  const postConfirm = async (pendingId: string, override: ProofOverride | undefined) => {
+    const body =
+      override && (override.proofUrls.length > 0 || override.screenshotUrl)
+        ? {
+            proofUrls: override.proofUrls,
+            ...(override.screenshotUrl !== undefined && { screenshotUrl: override.screenshotUrl }),
+          }
+        : undefined;
+    const res = await fetch(`/api/me/pending-coop/${pendingId}/confirm`, {
+      method: 'POST',
+      headers: body ? { 'Content-Type': 'application/json' } : undefined,
+      credentials: 'same-origin',
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    return res;
+  };
+
   const handleConfirm = async (item: PendingCoOpItem) => {
     setActingId(item.id);
     try {
-      const res = await fetch(`/api/me/pending-coop/${item.id}/confirm`, {
-        method: 'POST',
-        credentials: 'same-origin',
-      });
+      const res = await postConfirm(item.id, proofOverrides[item.id]);
       if (res.ok) {
         const data = await res.json().catch(() => ({}));
         setPendings((prev) => prev.filter((p) => p.id !== item.id));
+        setSelected((prev) => {
+          const next = new Set(prev);
+          next.delete(item.id);
+          return next;
+        });
+        setProofOverrides((prev) => {
+          const { [item.id]: _, ...rest } = prev;
+          return rest;
+        });
         setConfirmModal(null);
         await refreshProfile?.();
         if (typeof data.xpGained === 'number' && data.xpGained > 0) {
           const mysteryBoxXp = typeof data.mysteryBoxXp === 'number' ? data.mysteryBoxXp : 0;
           const achievementXp = data.xpGained - mysteryBoxXp;
-          // Show mystery box and achievement toasts separately (same order as host logging)
           if (mysteryBoxXp > 0) {
             dispatchXpToast(mysteryBoxXp, {
               totalXp: typeof data.mysteryBoxTotalXp === 'number' ? data.mysteryBoxTotalXp : data.totalXp,
@@ -89,6 +139,53 @@ export function PendingCoOpSection() {
     } finally {
       setActingId(null);
     }
+  };
+
+  const handleAcceptSelected = async () => {
+    if (selected.size === 0) return;
+    const toAccept = pendings.filter((p) => selected.has(p.id));
+    setActingId('bulk');
+    try {
+      let xpTotal = 0;
+      for (const item of toAccept) {
+        const res = await postConfirm(item.id, proofOverrides[item.id]);
+        if (res.ok) {
+          const data = await res.json().catch(() => ({}));
+          if (typeof data.xpGained === 'number') xpTotal += data.xpGained;
+          setPendings((prev) => prev.filter((p) => p.id !== item.id));
+          setProofOverrides((prev) => {
+            const { [item.id]: _, ...rest } = prev;
+            return rest;
+          });
+        }
+      }
+      setSelected(new Set());
+      await refreshProfile?.();
+      if (xpTotal > 0) {
+        dispatchXpToast(xpTotal, undefined);
+      }
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('cod-tracker-profile-refresh-requested', { detail: { username: profile?.username } })
+        );
+      }
+    } finally {
+      setActingId(null);
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    if (selected.size === pendings.length) setSelected(new Set());
+    else setSelected(new Set(pendings.map((p) => p.id)));
   };
 
   const handleDeny = async (item: PendingCoOpItem) => {
@@ -134,14 +231,44 @@ export function PendingCoOpSection() {
             </CardContent>
           </Card>
         ) : (
+        <>
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={selectAll}
+            disabled={actingId !== null}
+            leftIcon={selected.size === pendings.length ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
+            className="border-bunker-600"
+          >
+            {selected.size === pendings.length ? 'Deselect all' : 'Select all'}
+          </Button>
+          {selected.size > 0 && (
+            <Button
+              size="sm"
+              onClick={handleAcceptSelected}
+              disabled={actingId !== null}
+              leftIcon={actingId === 'bulk' ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+            >
+              {actingId === 'bulk' ? 'Accepting…' : `Accept selected (${selected.size})`}
+            </Button>
+          )}
+        </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {pendings.map((item) => {
             const roundNum = item.roundReached ?? item.roundCompleted ?? null;
             const creatorName = item.creator.displayName || item.creator.username;
             const playerLabel = PLAYER_COUNT_LABEL[item.playerCount] || item.playerCount;
             const imageSrc = item.mapImageUrl ? getAssetUrl(item.mapImageUrl) : null;
+            const isSelected = selected.has(item.id);
+            const hasProofOverride = !!proofOverrides[item.id] && (proofOverrides[item.id].proofUrls.length > 0 || proofOverrides[item.id].screenshotUrl);
             return (
-              <Card key={item.id} variant="bordered" className="border-bunker-700 overflow-hidden">
+              <Card
+                key={item.id}
+                variant="bordered"
+                className={`overflow-hidden cursor-pointer transition-colors ${isSelected ? 'border-blood-500 ring-1 ring-blood-500/50' : 'border-bunker-700'}`}
+                onClick={() => toggleSelect(item.id)}
+              >
                 <div className="relative aspect-video overflow-hidden bg-bunker-900">
                   {imageSrc ? (
                     <Image
@@ -187,32 +314,60 @@ export function PendingCoOpSection() {
                       <RoundCounter round={roundNum} size="sm" animated={false} className="hidden sm:flex" />
                     </div>
                   )}
+                  <div className="absolute top-2 right-2 flex items-center gap-1">
+                    <span className={`inline-flex items-center justify-center w-6 h-6 rounded border ${isSelected ? 'border-blood-400 bg-blood-500/30 text-white' : 'border-bunker-500 bg-bunker-800/80 text-bunker-400'}`}>
+                      {isSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
+                    </span>
+                  </div>
                 </div>
-                <CardContent className="p-3 flex flex-row gap-2">
+                <CardContent className="p-3 flex flex-col gap-2">
                   <Button
                     size="sm"
                     variant="secondary"
-                    onClick={() => setDenyModal(item)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEditProof(item);
+                    }}
                     disabled={actingId !== null}
-                    leftIcon={<XCircle className="w-4 h-4" />}
-                    className="flex-1 border-bunker-600"
+                    leftIcon={<Pencil className="w-4 h-4" />}
+                    className="w-full border-bunker-600 justify-center"
                   >
-                    Deny
+                    Edit proof
+                    {hasProofOverride && <span className="ml-1 text-blood-400">•</span>}
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => setConfirmModal(item)}
-                    disabled={actingId !== null}
-                    leftIcon={<CheckCircle className="w-4 h-4" />}
-                    className="flex-1"
-                  >
-                    Confirm
-                  </Button>
+                  <div className="flex flex-row gap-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDenyModal(item);
+                      }}
+                      disabled={actingId !== null}
+                      leftIcon={<XCircle className="w-4 h-4" />}
+                      className="flex-1 border-bunker-600"
+                    >
+                      Deny
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConfirmModal(item);
+                      }}
+                      disabled={actingId !== null}
+                      leftIcon={<CheckCircle className="w-4 h-4" />}
+                      className="flex-1"
+                    >
+                      Confirm
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             );
           })}
         </div>
+        </>
         )}
       </section>
 
@@ -277,6 +432,53 @@ export function PendingCoOpSection() {
                 >
                   {actingId === denyModal.id ? 'Removing…' : 'Yes, remove me'}
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {editProofModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="edit-proof-title"
+          onClick={() => setEditProofModal(null)}
+        >
+          <Card
+            variant="bordered"
+            className="w-full max-w-lg border-bunker-600 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <CardContent className="p-4 sm:p-6">
+              <h3 id="edit-proof-title" className="text-lg font-semibold text-white mb-1">
+                Add your proof before accepting
+              </h3>
+              <p className="text-sm text-bunker-400 mb-4">
+                {editProofModal.runLabel} on {editProofModal.mapName}. This proof will be saved on your copy when you accept.
+              </p>
+              <ProofUrlsInput
+                value={editProofUrls}
+                onChange={setEditProofUrls}
+                label="Proof URLs"
+                placeholder="YouTube, Twitch, or image link"
+              />
+              <div className="mt-3">
+                <label className="block text-sm font-medium text-bunker-200 mb-1.5">Screenshot URL (optional)</label>
+                <Input
+                  type="url"
+                  value={editProofScreenshot}
+                  onChange={(e) => setEditProofScreenshot(e.target.value)}
+                  placeholder="https://..."
+                  className="bg-bunker-800 border-bunker-600 text-white"
+                />
+              </div>
+              <div className="flex flex-col-reverse sm:flex-row gap-2 mt-4">
+                <Button variant="secondary" onClick={() => setEditProofModal(null)} className="sm:mr-auto">
+                  Cancel
+                </Button>
+                <Button onClick={saveEditProof}>Save proof</Button>
               </div>
             </CardContent>
           </Card>

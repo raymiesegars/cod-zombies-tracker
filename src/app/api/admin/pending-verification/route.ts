@@ -30,17 +30,26 @@ export async function GET(request: NextRequest) {
       isVerified: false,
       userId: { not: me.id },
       ...(game && { map: { game: { shortName: game } } }),
-      ...(runType === 'speedrun' && { challenge: { type: { contains: 'SPEEDRUN' } } }),
     };
     const eeWhere = {
       verificationRequestedAt: { not: null },
       isVerified: false,
       userId: { not: me.id },
       ...(game && { map: { game: { shortName: game } } }),
-      // When runType=speedrun we only show challenge speedruns; EE logs are excluded
     };
 
-    const [challengeLogs, easterEggLogs] = await Promise.all([
+    const eeLogsQuery = prisma.easterEggLog.findMany({
+      where: eeWhere,
+      include: {
+        user: { select: { id: true, username: true, displayName: true, avatarUrl: true, avatarPreset: true } },
+        easterEgg: { select: { name: true, type: true } },
+        map: { select: { name: true, slug: true, imageUrl: true, game: { select: { shortName: true } } } },
+      },
+      orderBy: { verificationRequestedAt: 'desc' },
+    });
+    type EELogWithInclude = Awaited<typeof eeLogsQuery>[number];
+
+    const [rawChallengeLogs, easterEggLogs] = await Promise.all([
       prisma.challengeLog.findMany({
         where: challengeWhere,
         include: {
@@ -50,18 +59,13 @@ export async function GET(request: NextRequest) {
         },
         orderBy: { verificationRequestedAt: 'desc' },
       }),
-      runType === 'speedrun'
-        ? Promise.resolve([] as Awaited<ReturnType<typeof prisma.easterEggLog.findMany>>)
-        : prisma.easterEggLog.findMany({
-            where: eeWhere,
-            include: {
-              user: { select: { id: true, username: true, displayName: true, avatarUrl: true, avatarPreset: true } },
-              easterEgg: { select: { name: true, type: true } },
-              map: { select: { name: true, slug: true, imageUrl: true, game: { select: { shortName: true } } } },
-            },
-            orderBy: { verificationRequestedAt: 'desc' },
-          }),
+      runType === 'speedrun' ? Promise.resolve([] as EELogWithInclude[]) : eeLogsQuery,
     ]);
+
+    const challengeLogs =
+      runType === 'speedrun'
+        ? rawChallengeLogs.filter((log) => String(log.challenge.type).includes('SPEEDRUN'))
+        : rawChallengeLogs;
 
     const challengeItems = challengeLogs.map((log) => ({
       logType: 'challenge' as const,
