@@ -62,7 +62,7 @@ export function Footer() {
         </nav>
 
         <p className="text-xs text-bunker-500 text-center mb-1">
-          <Link href="/about" className="hover:text-bunker-400 underline underline-offset-2">Rank icons</Link> are AI-generated; this site does not condone AI art. See About for details.
+          This website uses no AI.
         </p>
         <div className="text-center text-xs text-bunker-500">
           <p>© {year} CoD Zombies Tracker. Not affiliated with Activision or Treyarch.</p>

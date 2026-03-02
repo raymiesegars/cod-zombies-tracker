@@ -19,7 +19,9 @@ export async function GET() {
         endsAt: true,
       },
     });
-    return NextResponse.json(polls);
+    return NextResponse.json(polls, {
+      headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
+    });
   } catch (error) {
     console.error('Error listing tournament polls:', error);
     return NextResponse.json({ error: 'Failed to list polls' }, { status: 500 });

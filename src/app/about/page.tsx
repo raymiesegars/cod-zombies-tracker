@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent, Logo } from '@/components/ui';
-import { Heart, Palette, ExternalLink } from 'lucide-react';
+import { Heart, ExternalLink } from 'lucide-react';
 
 export default function AboutPage() {
   return (
@@ -28,26 +28,6 @@ export default function AboutPage() {
               Server and database costs are paid out of pocket. I&apos;m not rich, so any support via a 
               tip on Ko-fi in the footer is appreciated and goes directly toward keeping the site running. 
               No pressure—use the site either way.
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card variant="bordered">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Palette className="w-5 h-5 text-element-400" />
-              Rank icon artwork
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm sm:text-base text-bunker-300">
-            <p>
-              This site <strong className="text-bunker-200">does not condone the use of AI-generated art</strong>. 
-              The rank icons you see are AI-generated. I couldn&apos;t afford to hire an artist and I&apos;m not an artist myself, 
-              so I used AI as a stopgap for now.
-            </p>
-            <p>
-              If you want to create proper rank icons or fund someone to make them, I&apos;d be glad to replace the 
-              current set. Get in touch via my portfolio below—I&apos;d welcome real artwork or help paying for it.
             </p>
           </CardContent>
         </Card>

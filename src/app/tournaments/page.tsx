@@ -107,6 +107,8 @@ export default function TournamentsPage() {
   const [voting, setVoting] = useState(false);
   const [adminMe, setAdminMe] = useState<{ isSuperAdmin: boolean } | null>(null);
   const [pollModalOpen, setPollModalOpen] = useState(false);
+  /** When non-null, we're editing this poll; when null, we're creating a new poll. Used so "New poll" doesn't accidentally edit the currently selected poll. */
+  const [pollModalEditingPoll, setPollModalEditingPoll] = useState<Poll | null>(null);
   const [pollModalTitle, setPollModalTitle] = useState('');
   const [pollModalOptions, setPollModalOptions] = useState<string[]>(['', '']);
   const [pollModalSaving, setPollModalSaving] = useState(false);
@@ -143,14 +145,16 @@ export default function TournamentsPage() {
   const tournamentCountdown = useCountdown(tournamentEndsAt);
   const tournamentEnded = tournamentCountdown !== null && tournamentCountdown <= 0;
 
-  const fetchPolls = useCallback(() => {
-    fetch('/api/tournaments/polls')
+  const fetchPolls = useCallback((keepSelection?: boolean) => {
+    const url = `/api/tournaments/polls?t=${Date.now()}`;
+    fetch(url, { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {
-        setPolls(Array.isArray(data) ? data : []);
-        if (Array.isArray(data) && data.length > 0 && !pollId) {
-          const current = data.find((p: { status: string }) => p.status === 'ACTIVE') ?? data[0];
-          setPollId(current?.id ?? data[0]?.id);
+        const list = Array.isArray(data) ? data : [];
+        setPolls(list);
+        if (!keepSelection && list.length > 0 && !pollId) {
+          const current = list.find((p: { status: string }) => p.status === 'ACTIVE') ?? list[0];
+          setPollId(current?.id ?? list[0]?.id);
         }
       })
       .catch(() => setPolls([]));
@@ -235,6 +239,7 @@ export default function TournamentsPage() {
       .then((r) => r.json())
       .then((list) => setGames(Array.isArray(list) ? list : []))
       .catch(() => setGames([]));
+    fetchPolls();
     setCreateForm({ title: '', gameId: '', mapId: '', challengeId: '', easterEggId: '', pollId: '', config: {} });
     setMapsByGame([]);
     setMapDetail(null);
@@ -299,6 +304,7 @@ export default function TournamentsPage() {
   const tournamentLocked = tournament && (tournament.status === 'LOCKED' || (tournament.endsAt && new Date(tournament.endsAt) < new Date()));
 
   const openPollModal = (editPoll?: Poll | null) => {
+    setPollModalEditingPoll(editPoll ?? null);
     if (editPoll) {
       setPollModalTitle(editPoll.title);
       setPollModalOptions(editPoll.options?.length ? editPoll.options.map((o) => o.label) : ['', '']);
@@ -309,23 +315,27 @@ export default function TournamentsPage() {
     setPollModalOpen(true);
   };
 
-  const savePoll = async (isEdit: boolean) => {
+  const savePoll = async () => {
     const options = pollModalOptions.map((o) => o.trim()).filter(Boolean);
     if (options.length < 2 || options.length > 8) {
       alert('Between 2 and 8 options required.');
       return;
     }
+    const isEdit = !!pollModalEditingPoll;
     setPollModalSaving(true);
     try {
-      if (isEdit && pollId) {
-        const r = await fetch(`/api/tournaments/polls/${pollId}`, {
+      if (isEdit && pollModalEditingPoll?.id) {
+        const r = await fetch(`/api/tournaments/polls/${pollModalEditingPoll.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ title: pollModalTitle.trim() || undefined, options }),
           credentials: 'same-origin',
         });
         if (!r.ok) throw new Error((await r.json()).error);
-        fetch(`/api/tournaments/polls/${pollId}`).then((res) => res.json()).then(setPoll);
+        if (pollId === pollModalEditingPoll.id) {
+          fetch(`/api/tournaments/polls/${pollModalEditingPoll.id}`).then((res) => res.json()).then(setPoll);
+        }
+        fetchPolls();
       } else {
         const r = await fetch('/api/tournaments/polls', {
           method: 'POST',
@@ -335,9 +345,9 @@ export default function TournamentsPage() {
         });
         if (!r.ok) throw new Error((await r.json()).error);
         const data = await r.json();
-        setPolls((prev) => [data, ...prev]);
         setPollId(data.id);
         setPoll(data);
+        fetchPolls(true);
       }
       setPollModalOpen(false);
     } catch (e) {
@@ -1297,7 +1307,7 @@ export default function TournamentsPage() {
           <Modal
             isOpen={pollModalOpen}
             onClose={() => !pollModalSaving && setPollModalOpen(false)}
-            title={poll ? 'Edit poll' : 'Create poll'}
+            title={pollModalEditingPoll ? 'Edit poll' : 'Create poll'}
             description="2–8 options. Poll runs 5 days from creation."
             size="sm"
           >
@@ -1336,9 +1346,9 @@ export default function TournamentsPage() {
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <Button variant="secondary" onClick={() => setPollModalOpen(false)} disabled={pollModalSaving}>Cancel</Button>
-                <Button onClick={() => savePoll(!!poll)} disabled={pollModalSaving || !pollModalTitle.trim()}>
+                <Button onClick={() => savePoll()} disabled={pollModalSaving || !pollModalTitle.trim()}>
                   {pollModalSaving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
-                  {poll ? 'Save' : 'Create'}
+                  {pollModalEditingPoll ? 'Save' : 'Create'}
                 </Button>
               </div>
             </div>
