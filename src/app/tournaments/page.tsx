@@ -866,9 +866,9 @@ export default function TournamentsPage() {
                         <li key={e.user.id} className="flex items-center gap-2 py-2 text-sm border-b border-bunker-800/50 last:border-0">
                           {/* Trophy on far left when awarded */}
                           <span className="w-6 shrink-0 flex items-center justify-center">
-                            {e.trophyPlace === 1 && <Medal className="w-4 h-4 text-amber-400" title="Gold" />}
-                            {e.trophyPlace === 2 && <Medal className="w-4 h-4 text-bunker-400" title="Silver" />}
-                            {e.trophyPlace === 3 && <Medal className="w-4 h-4 text-amber-700" title="Bronze" />}
+                            {e.trophyPlace === 1 && <span title="Gold"><Medal className="w-4 h-4 text-amber-400" /></span>}
+                            {e.trophyPlace === 2 && <span title="Silver"><Medal className="w-4 h-4 text-bunker-400" /></span>}
+                            {e.trophyPlace === 3 && <span title="Bronze"><Medal className="w-4 h-4 text-amber-700" /></span>}
                           </span>
                           <span className="text-bunker-500 w-6 shrink-0 tabular-nums">#{e.rank}</span>
                           <span className="text-white font-medium min-w-0 truncate">{e.user.displayName || e.user.username}</span>

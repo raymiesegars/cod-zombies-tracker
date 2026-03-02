@@ -62,7 +62,7 @@ export function SiteUpdatesModal() {
             <h3 className="text-base sm:text-lg font-semibold text-element-100">Mystery Box</h3>
           </div>
           <p className="text-sm text-bunker-300 mb-4">
-            Track which box hits you've logged and view your progress across maps. Log weapons and see how your collection grows.
+            Track which box hits you&apos;ve logged and view your progress across maps. Log weapons and see how your collection grows.
           </p>
           <Link
             href="/mystery-box"
@@ -94,7 +94,7 @@ export function SiteUpdatesModal() {
             <MessageCircle className="w-5 h-5 text-military-400 shrink-0 mt-0.5" />
             <div>
               <h4 className="text-sm font-medium text-white">Friends & messaging</h4>
-              <p className="text-xs text-bunker-400">Add friends, see who's online, and DM anyone from the Chat & Friends hub (bottom-left).</p>
+              <p className="text-xs text-bunker-400">Add friends, see who&apos;s online, and DM anyone from the Chat & Friends hub (bottom-left).</p>
             </div>
           </div>
           <div className="flex gap-3 rounded-lg bg-bunker-800/50 p-3 border border-bunker-700/50">
