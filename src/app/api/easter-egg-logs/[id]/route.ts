@@ -154,6 +154,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       ? (Array.isArray(body.teammateNonUserNames) ? body.teammateNonUserNames.filter((n: unknown) => typeof n === 'string').slice(0, 10) : [])
       : undefined;
     const requestVerification = body.requestVerification === undefined ? undefined : Boolean(body.requestVerification);
+    const resendToCoopMembers = body.resendToCoopMembers === undefined ? true : Boolean(body.resendToCoopMembers);
 
     const mapWithGame = log.map ?? await prisma.map.findUnique({ where: { id: log.mapId }, select: { game: { select: { shortName: true } }, slug: true } });
     const gameShortName = (mapWithGame as { game?: { shortName?: string } })?.game?.shortName;
@@ -217,7 +218,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         map: { include: { game: true } },
       },
     });
-    if (teammateUserIds !== undefined && teammateUserIds.length > 0) {
+    if (resendToCoopMembers && teammateUserIds !== undefined && teammateUserIds.length > 0) {
       await createCoOpRunPendingsForEasterEggLog(id, user.id, teammateUserIds);
     }
     return NextResponse.json(updated);

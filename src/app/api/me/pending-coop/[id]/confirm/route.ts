@@ -39,6 +39,7 @@ export async function POST(
       completionTimeSeconds: true,
       difficulty: true,
       mysteryBoxRollId: true,
+      verificationRequestedAt: true,
       wawNoJug: true,
       wawFixedWunderwaffe: true,
       firstRoomVariant: true,
@@ -95,6 +96,10 @@ export async function POST(
             completionTimeSeconds: log.completionTimeSeconds,
             teammateUserIds: copyTeammateUserIds,
             teammateNonUserNames: copyTeammateNonUserNames,
+            // If the original run was submitted for verification, submit the accepted copy for verification too
+            ...((log as { verificationRequestedAt?: Date | null }).verificationRequestedAt != null && {
+              verificationRequestedAt: new Date(),
+            }),
             ...(log.difficulty != null && { difficulty: log.difficulty }),
             ...(log.wawNoJug != null && { wawNoJug: log.wawNoJug }),
             ...(log.wawFixedWunderwaffe != null && { wawFixedWunderwaffe: log.wawFixedWunderwaffe }),
@@ -259,6 +264,10 @@ export async function POST(
             completionTimeSeconds: log.completionTimeSeconds,
             teammateUserIds: copyTeammateUserIds,
             teammateNonUserNames: copyTeammateNonUserNames,
+            // If the original run was submitted for verification, submit the accepted copy for verification too
+            ...((log as { verificationRequestedAt?: Date | null }).verificationRequestedAt != null && {
+              verificationRequestedAt: new Date(),
+            }),
             ...(log.difficulty != null && { difficulty: log.difficulty }),
           },
         });
