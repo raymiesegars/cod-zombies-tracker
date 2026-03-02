@@ -211,17 +211,17 @@ export default function HomePage() {
         >
           <div className="flex items-center gap-4 sm:gap-6">
             <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-blood-900/50 border-2 border-blood-600/50 flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
-              <Medal className="w-10 h-10 sm:w-12 sm:h-12 text-blood-400" />
+              <Medal className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-zombies text-blood-100 tracking-wide">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-zombies text-white tracking-wide">
                 Tournaments
               </h2>
-              <p className="mt-1 sm:mt-2 text-sm sm:text-base text-blood-200/80">
+              <p className="mt-1 sm:mt-2 text-sm sm:text-base text-white/90">
                 Vote on the next category, submit your run, and compete for gold, silver, and bronze. Top 3 get trophy XP.
               </p>
             </div>
-            <ChevronRight className="w-8 h-8 text-blood-500 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+            <ChevronRight className="w-8 h-8 text-white group-hover:translate-x-1 transition-transform flex-shrink-0" />
           </div>
         </Link>
       </section>
