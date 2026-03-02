@@ -184,7 +184,11 @@ function parseAddedDate(added: string): Date {
   return new Date();
 }
 
-/** Split teammates into CZT user IDs (from zwr-to-czt-users.ts) and placeholder names for non-site users. */
+/**
+ * Split teammates into CZT user IDs (from zwr-to-czt-users.ts) and names for non-site users.
+ * Any co-op member whose ZWR ID/username is in ZWR_TO_CZT_USERS is stored in teammateUserIds
+ * (linked CZT user); others go to teammateNonUserNames (display name only, "offline" teammate).
+ */
 function getTeammateUserIdsAndNames(row: ParsedCsvRow, sourcePlayerId: string): { teammateUserIds: string[]; teammateNonUserNames: string[] } {
   const ids = [row.player_1, row.player_2, row.player_3, row.player_4]
     .map((p) => (p || '').trim())
@@ -195,9 +199,12 @@ function getTeammateUserIdsAndNames(row: ParsedCsvRow, sourcePlayerId: string): 
   for (const id of unique) {
     const cztId = getCztUserIdForZwrId(id);
     if (cztId) teammateUserIds.push(cztId);
-    else teammateNonUserNames.push(`Player ${id}`);
+    else teammateNonUserNames.push(id);
   }
-  return { teammateUserIds, teammateNonUserNames };
+  return {
+    teammateUserIds: [...new Set(teammateUserIds)],
+    teammateNonUserNames: [...new Set(teammateNonUserNames)],
+  };
 }
 
 function parseArgs(): {

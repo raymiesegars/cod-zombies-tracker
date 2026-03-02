@@ -45,7 +45,17 @@
     "db:compute-total-xp": "tsx scripts/compute-total-obtainable-xp.ts",
     "db:update-der-riese-fly-trap": "tsx scripts/update-der-riese-fly-trap.ts",
     "db:add-round-5-15-speedrun": "tsx scripts/add-round-5-15-speedrun.ts",
-    "db:import-skrine-csv": "tsx scripts/import-skrine-csv/run.ts"
+    "db:import-skrine-csv": "tsx scripts/import-skrine-csv/run.ts",
+    "db:import-user-sm0k3y": "tsx scripts/import-user-sm0k3y.ts",
+    "db:import-user-lebron-james": "tsx scripts/import-user-lebron-james.ts",
+    "db:import-user-bradley0104": "tsx scripts/import-user-bradley0104.ts",
+    "db:import-user-gardningtools": "tsx scripts/import-user-gardningtools.ts",
+    "db:import-user-that-guy": "tsx scripts/import-user-that-guy.ts",
+    "db:import-user-fnlizardking": "tsx scripts/import-user-fnlizardking.ts",
+    "db:import-user-drainbb": "tsx scripts/import-user-drainbb.ts",
+    "db:import-user-grimoire": "tsx scripts/import-user-grimoire.ts",
+    "db:import-user-lostfeeling": "tsx scripts/import-user-lostfeeling.ts",
+    "db:import-user-rde": "tsx scripts/import-user-rde.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.9.1",

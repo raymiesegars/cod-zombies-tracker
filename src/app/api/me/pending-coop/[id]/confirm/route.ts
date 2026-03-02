@@ -5,9 +5,9 @@ import { processMapAchievements } from '@/lib/achievements';
 import { getLevelFromXp } from '@/lib/ranks';
 import { computeMysteryBoxXp, type MysteryBoxFilterSettings } from '@/lib/mystery-box';
 
-/** Confirm pending co-op: copy log to current user, award XP. Copy keeps same squad for display; no new pendings. */
+/** Confirm pending co-op: copy log to current user, award XP. Copy keeps same squad for display; no new pendings. Optional body: { proofUrls?: string[], screenshotUrl?: string | null } to use your own proof on the copy. */
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -22,6 +22,28 @@ export async function POST(
     });
     if (!me) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    let proofOverride: { proofUrls?: string[]; screenshotUrl?: string | null } | null = null;
+    try {
+      const body = await request.json().catch(() => ({}));
+      const hasProofUrls = Array.isArray(body.proofUrls);
+      const hasScreenshot = body.screenshotUrl !== undefined;
+      if (hasProofUrls || hasScreenshot) {
+        const proofUrls: string[] = hasProofUrls
+          ? (body.proofUrls as unknown[])
+              .filter((u: unknown): u is string => typeof u === 'string' && u.trim().length > 0)
+              .slice(0, 10)
+          : [];
+        proofOverride = {
+          ...(hasProofUrls && { proofUrls }),
+          ...(hasScreenshot && {
+            screenshotUrl: typeof body.screenshotUrl === 'string' ? body.screenshotUrl : null,
+          }),
+        };
+      }
+    } catch {
+      // no body or invalid JSON
     }
 
     const { id: pendingId } = await params;
@@ -39,6 +61,7 @@ export async function POST(
       completionTimeSeconds: true,
       difficulty: true,
       mysteryBoxRollId: true,
+      verificationRequestedAt: true,
       wawNoJug: true,
       wawFixedWunderwaffe: true,
       firstRoomVariant: true,
@@ -81,6 +104,8 @@ export async function POST(
         : originalTeammateIds.filter((id) => id !== me.id);
       const rawNonUserNames = Array.isArray(log.teammateNonUserNames) ? log.teammateNonUserNames : [];
       const copyTeammateNonUserNames = rawNonUserNames.filter((n): n is string => typeof n === 'string');
+      const proofUrls = proofOverride?.proofUrls ?? log.proofUrls;
+      const screenshotUrl = proofOverride?.screenshotUrl !== undefined ? proofOverride.screenshotUrl : log.screenshotUrl;
       const createdLog = await prisma.$transaction(async (tx) => {
         const newLog = await tx.challengeLog.create({
           data: {
@@ -89,12 +114,16 @@ export async function POST(
             mapId: log.mapId,
             roundReached: log.roundReached,
             playerCount: log.playerCount,
-            proofUrls: log.proofUrls,
-            screenshotUrl: log.screenshotUrl,
+            proofUrls,
+            screenshotUrl,
             notes: log.notes,
             completionTimeSeconds: log.completionTimeSeconds,
             teammateUserIds: copyTeammateUserIds,
             teammateNonUserNames: copyTeammateNonUserNames,
+            // If the original run was submitted for verification, submit the accepted copy for verification too
+            ...((log as { verificationRequestedAt?: Date | null }).verificationRequestedAt != null && {
+              verificationRequestedAt: new Date(),
+            }),
             ...(log.difficulty != null && { difficulty: log.difficulty }),
             ...(log.wawNoJug != null && { wawNoJug: log.wawNoJug }),
             ...(log.wawFixedWunderwaffe != null && { wawFixedWunderwaffe: log.wawFixedWunderwaffe }),
@@ -243,6 +272,8 @@ export async function POST(
         : originalTeammateIds.filter((id) => id !== me.id);
       const rawNonUserNames = Array.isArray(log.teammateNonUserNames) ? log.teammateNonUserNames : [];
       const copyTeammateNonUserNames = rawNonUserNames.filter((n): n is string => typeof n === 'string');
+      const eeProofUrls = proofOverride?.proofUrls ?? log.proofUrls;
+      const eeScreenshotUrl = proofOverride?.screenshotUrl !== undefined ? proofOverride.screenshotUrl : log.screenshotUrl;
       await prisma.$transaction(async (tx) => {
         await tx.easterEggLog.create({
           data: {
@@ -253,12 +284,16 @@ export async function POST(
             playerCount: log.playerCount,
             isSolo: log.isSolo,
             isNoGuide: log.isNoGuide,
-            proofUrls: log.proofUrls,
-            screenshotUrl: log.screenshotUrl,
+            proofUrls: eeProofUrls,
+            screenshotUrl: eeScreenshotUrl,
             notes: log.notes,
             completionTimeSeconds: log.completionTimeSeconds,
             teammateUserIds: copyTeammateUserIds,
             teammateNonUserNames: copyTeammateNonUserNames,
+            // If the original run was submitted for verification, submit the accepted copy for verification too
+            ...((log as { verificationRequestedAt?: Date | null }).verificationRequestedAt != null && {
+              verificationRequestedAt: new Date(),
+            }),
             ...(log.difficulty != null && { difficulty: log.difficulty }),
           },
         });

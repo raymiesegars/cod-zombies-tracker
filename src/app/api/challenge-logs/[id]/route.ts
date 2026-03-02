@@ -161,6 +161,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       ? (Array.isArray(body.teammateNonUserNames) ? body.teammateNonUserNames.filter((n: unknown) => typeof n === 'string').slice(0, 10) : [])
       : undefined;
     const requestVerification = body.requestVerification === undefined ? undefined : Boolean(body.requestVerification);
+    const resendToCoopMembers = body.resendToCoopMembers === undefined ? true : Boolean(body.resendToCoopMembers);
     const useFortuneCards = body.useFortuneCards !== undefined ? (body.useFortuneCards === true || body.useFortuneCards === false ? body.useFortuneCards : undefined) : undefined;
     const useDirectorsCut = body.useDirectorsCut !== undefined ? Boolean(body.useDirectorsCut) : undefined;
 
@@ -306,7 +307,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         map: { include: { game: true } },
       },
     });
-    if (teammateUserIds !== undefined && teammateUserIds.length > 0) {
+    if (resendToCoopMembers && teammateUserIds !== undefined && teammateUserIds.length > 0) {
       await createCoOpRunPendingsForChallengeLog(id, user.id, teammateUserIds);
     }
     return NextResponse.json(updated);

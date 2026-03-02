@@ -116,6 +116,8 @@ export default function EditRunPage() {
   const [difficulty, setDifficulty] = useState<string>('NORMAL');
   const [requestVerification, setRequestVerification] = useState(false);
   const [errorModalMessage, setErrorModalMessage] = useState<string | null>(null);
+  const [showCoopResendModal, setShowCoopResendModal] = useState(false);
+  const [pendingSubmitType, setPendingSubmitType] = useState<'challenge' | 'easter_egg' | null>(null);
   // Game-specific state
   const [useFortuneCards, setUseFortuneCards] = useState<boolean | null>(null);
   const [useDirectorsCut, setUseDirectorsCut] = useState(false);
@@ -252,8 +254,24 @@ export default function EditRunPage() {
       setErrorModalMessage('First room challenge on this map requires selecting a room variant.');
       return;
     }
+    const hasCoopMembers = teammateUserIds.length > 0 || teammateNonUserNames.length > 0;
+    if (hasCoopMembers) {
+      setPendingSubmitType('challenge');
+      setShowCoopResendModal(true);
+      return;
+    }
+    doSubmitChallenge(true);
+  };
+
+  const doSubmitChallenge = async (resendToCoopMembers: boolean) => {
+    if (!log || !isChallenge) return;
+    const chalType = (log as ChallengeLog)?.challenge?.type;
+    const isNoMansLand = chalType === 'NO_MANS_LAND';
+    const isRush = chalType === 'RUSH';
     setSaving(true);
     setError(null);
+    setShowCoopResendModal(false);
+    setPendingSubmitType(null);
     try {
       const res = await fetch(`/api/challenge-logs/${logId}`, {
         method: 'PATCH',
@@ -278,11 +296,11 @@ export default function EditRunPage() {
           ...(log?.map?.slug && chalType === 'STARTING_ROOM' && hasFirstRoomVariantFilter(log.map.slug) && { firstRoomVariant: firstRoomVariant || undefined }),
           proofUrls: normalizeProofUrls(proofUrls),
           notes: notes || null,
-          // Always send explicitly (JSON.stringify omits undefined, which would skip the API update)
           completionTimeSeconds: completionTimeSeconds != null ? completionTimeSeconds : null,
           teammateUserIds,
           teammateNonUserNames,
           requestVerification,
+          resendToCoopMembers,
         }),
         credentials: 'same-origin',
       });
@@ -304,8 +322,21 @@ export default function EditRunPage() {
         return;
       }
     }
+    const hasCoopMembers = teammateUserIds.length > 0 || teammateNonUserNames.length > 0;
+    if (hasCoopMembers) {
+      setPendingSubmitType('easter_egg');
+      setShowCoopResendModal(true);
+      return;
+    }
+    doSubmitEasterEgg(true);
+  };
+
+  const doSubmitEasterEgg = async (resendToCoopMembers: boolean) => {
+    if (!log || isChallenge) return;
     setSaving(true);
     setError(null);
+    setShowCoopResendModal(false);
+    setPendingSubmitType(null);
     try {
       const res = await fetch(`/api/easter-egg-logs/${logId}`, {
         method: 'PATCH',
@@ -321,11 +352,11 @@ export default function EditRunPage() {
           ...(isWw2Game(log?.map?.game?.shortName) && { ww2ConsumablesUsed }),
           proofUrls: normalizeProofUrls(proofUrls),
           notes: notes || null,
-          // Always send explicitly (JSON.stringify omits undefined, which would skip the API update)
           completionTimeSeconds: completionTimeSeconds != null ? completionTimeSeconds : null,
           teammateUserIds,
           teammateNonUserNames,
           requestVerification,
+          resendToCoopMembers,
         }),
         credentials: 'same-origin',
       });
@@ -791,6 +822,37 @@ export default function EditRunPage() {
       >
         <div className="flex justify-end pt-2">
           <Button onClick={() => setErrorModalMessage(null)}>OK</Button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showCoopResendModal}
+        onClose={() => {
+          setShowCoopResendModal(false);
+          setPendingSubmitType(null);
+        }}
+        title="Re-send to co-op members?"
+        description="Do you want to send the updated run to everyone you've tagged? They will get a new pending run to accept. Choose No to save for yourself only."
+        size="sm"
+      >
+        <div className="flex flex-wrap gap-3 justify-end pt-2">
+          <Button
+            variant="secondary"
+            onClick={() => {
+              if (pendingSubmitType === 'challenge') doSubmitChallenge(false);
+              else if (pendingSubmitType === 'easter_egg') doSubmitEasterEgg(false);
+            }}
+          >
+            No — save for me only
+          </Button>
+          <Button
+            onClick={() => {
+              if (pendingSubmitType === 'challenge') doSubmitChallenge(true);
+              else if (pendingSubmitType === 'easter_egg') doSubmitEasterEgg(true);
+            }}
+          >
+            Yes — save and re-send to all
+          </Button>
         </div>
       </Modal>
     </div>

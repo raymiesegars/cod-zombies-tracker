@@ -41,6 +41,66 @@ export const ZWR_TO_CZT_USERS: Record<string, ZwrToCztEntry> = {
     displayName: 'Skrine',
     note: 'First ZWR→CZT import. Use this CZT user when importing CSVs where source player ID is 17046.',
   },
+  // SM0k3Y — top-178 import; CSV uses display names in player_1..player_4
+  'SM0k3Y': {
+    cztUserId: 'cmlyp3llo000020vwc0ucyu88',
+    displayName: 'SM0k3Y',
+    note: 'Import from top-178-csv/SM0k3Y.csv with --source-player-id=SM0k3Y --czt-user=cmlyp3llo000020vwc0ucyu88.',
+  },
+  // LeBron James — top-178 import
+  'LeBron James': {
+    cztUserId: 'cmlvocpbj0006ar6ml9vz7hsm',
+    displayName: 'LeBron James',
+    note: 'Import from top-178-csv/LeBron James.csv with --source-player-id="LeBron James" --czt-user=cmlvocpbj0006ar6ml9vz7hsm.',
+  },
+  // Bradley0104 — top-178 import
+  'Bradley0104': {
+    cztUserId: 'cmlqtmbgx00059uzbkloqjiyi',
+    displayName: 'Bradley0104',
+    note: 'Import from top-178-csv/Bradley0104.csv with --source-player-id=Bradley0104 --czt-user=cmlqtmbgx00059uzbkloqjiyi.',
+  },
+  // Gardningtools — top-178 import
+  'Gardningtools': {
+    cztUserId: 'cmlvf1ikw000097igho2zsb3d',
+    displayName: 'Gardningtools',
+    note: 'Import from top-178-csv/Gardningtools.csv with --source-player-id=Gardningtools --czt-user=cmlvf1ikw000097igho2zsb3d.',
+  },
+  // THAT GUY — top-178 import
+  'THAT GUY': {
+    cztUserId: 'cmlqtjqng000cu994seq1kii3',
+    displayName: 'THAT GUY',
+    note: 'Import from top-178-csv/THAT GUY.csv with --source-player-id="THAT GUY" --czt-user=cmlqtjqng000cu994seq1kii3.',
+  },
+  // FnLizardKing — top-178 import
+  'FnLizardKing': {
+    cztUserId: 'cmlshnpj800009tz5vszjegw7',
+    displayName: 'FnLizardKing',
+    note: 'Import from top-178-csv/FnLizardKing.csv with --source-player-id=FnLizardKing --czt-user=cmlshnpj800009tz5vszjegw7.',
+  },
+  // drainbb — top-178 import
+  'drainbb': {
+    cztUserId: 'cmlr2i8cu0000kzag9nem5br8',
+    displayName: 'drainbb',
+    note: 'Import from top-178-csv/drainbb.csv with --source-player-id=drainbb --czt-user=cmlr2i8cu0000kzag9nem5br8.',
+  },
+  // grimoire — top-178 import
+  'grimoire': {
+    cztUserId: 'cmlqsbyyn000165x6j5zxcm0z',
+    displayName: 'grimoire',
+    note: 'Import from top-178-csv/grimoire.csv with --source-player-id=grimoire --czt-user=cmlqsbyyn000165x6j5zxcm0z.',
+  },
+  // LostFeeling — top-178 import
+  'LostFeeling': {
+    cztUserId: 'cmm2bpdwj0003ca7mqne4vmqf',
+    displayName: 'LostFeeling',
+    note: 'Import from top-178-csv/LostFeeling.csv with --source-player-id=LostFeeling --czt-user=cmm2bpdwj0003ca7mqne4vmqf.',
+  },
+  // rde — top-178 import
+  'rde': {
+    cztUserId: 'cmm8kxhkv0000142wfjoz8hxf',
+    displayName: 'rde',
+    note: 'Import from top-178-csv/rde.csv with --source-player-id=rde --czt-user=cmm8kxhkv0000142wfjoz8hxf.',
+  },
 };
 
 /**
