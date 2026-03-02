@@ -163,7 +163,7 @@ export async function GET(
       if (rampageInducerParam === 'true') {
         (whereClause as Record<string, unknown>).rampageInducerUsed = true;
         (eeWhereClause as Record<string, unknown>).rampageInducerUsed = true;
-      } else {
+      } else if (rampageInducerParam === 'false') {
         (whereClause as Record<string, unknown>).rampageInducerUsed = { not: true };
         (eeWhereClause as Record<string, unknown>).rampageInducerUsed = { not: true };
       }
@@ -183,11 +183,14 @@ export async function GET(
       else if (bo2BankUsed === 'false') (whereClause as Record<string, unknown>).bo2BankUsed = false;
     }
 
-    if (isWw2Game(gameShortName)) {
-      if (ww2ConsumablesParam === 'true') (whereClause as Record<string, unknown>).ww2ConsumablesUsed = true;
-      else if (ww2ConsumablesParam === 'false') (whereClause as Record<string, unknown>).ww2ConsumablesUsed = false;
-      if (ww2ConsumablesParam === 'true') (eeWhereClause as Record<string, unknown>).ww2ConsumablesUsed = true;
-      else if (ww2ConsumablesParam === 'false') (eeWhereClause as Record<string, unknown>).ww2ConsumablesUsed = false;
+    if (isWw2Game(gameShortName) && (ww2ConsumablesParam === 'true' || ww2ConsumablesParam === 'false')) {
+      if (ww2ConsumablesParam === 'true') {
+        (whereClause as Record<string, unknown>).ww2ConsumablesUsed = true;
+        (eeWhereClause as Record<string, unknown>).ww2ConsumablesUsed = true;
+      } else {
+        (whereClause as Record<string, unknown>).ww2ConsumablesUsed = false;
+        (eeWhereClause as Record<string, unknown>).ww2ConsumablesUsed = false;
+      }
     }
 
     // "Highest Round" (or no filter) = best round from any challenge OR easter egg; specific challenge = only that challenge's logs

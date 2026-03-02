@@ -19,6 +19,7 @@ import { BO4_DIFFICULTIES, getBo4DifficultyLabel } from '@/lib/bo4';
 import { BOCW_SUPPORT_MODES, BOCW_SUPPORT_DEFAULT, getBocwSupportLabel } from '@/lib/bocw';
 import { BO6_GOBBLEGUM_MODES, BO6_GOBBLEGUM_DEFAULT, BO6_SUPPORT_MODES, BO6_SUPPORT_DEFAULT, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
 import { BO7_SUPPORT_MODES, BO7_SUPPORT_DEFAULT, getBo7SupportLabel } from '@/lib/bo7';
+import { formatCompletionTime } from '@/components/ui/time-input';
 
 type PollOption = { id: string; label: string; order: number; voteCount?: number };
 type Poll = {
@@ -883,8 +884,8 @@ export default function TournamentsPage() {
                           <span className="text-bunker-500 w-6 shrink-0 tabular-nums">#{e.rank}</span>
                           <span className="text-white font-medium min-w-0 truncate">{e.user.displayName || e.user.username}</span>
                           {e.completionTimeSeconds != null && (
-                            <span className="text-military-400 ml-auto shrink-0 tabular-nums">
-                              {Math.floor(e.completionTimeSeconds / 60)}:{(e.completionTimeSeconds % 60).toString().padStart(2, '0')}
+                            <span className="text-military-400 ml-auto shrink-0 tabular-nums whitespace-nowrap min-w-[5rem] text-right" title="Completion time">
+                              {formatCompletionTime(e.completionTimeSeconds)}
                             </span>
                           )}
                           {e.killsReached != null && e.completionTimeSeconds == null && (

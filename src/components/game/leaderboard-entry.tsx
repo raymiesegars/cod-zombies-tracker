@@ -58,6 +58,8 @@ export function LeaderboardEntry({
   /** For RUSH leaderboards, value is score */
   const scoreValue = valueKind === 'score' ? Number(entry.value) : null;
   const showTime = valueKind === 'time' && timeSeconds != null && Number.isFinite(timeSeconds) && timeSeconds >= 0;
+  /** Time leaderboards: value column needs min width so "1:23:45" is never truncated; use 7rem min */
+  const valueColWidth = valueKind === 'time' ? 'minmax(7rem,1fr)' : '5.5rem';
 
   // <400px: 4 cols. 400–768px: 5 cols. 771px+: 6 cols. lg: +full value. Fixed/min widths on value columns so Solo/Duo/Trio/Squad and round digits align vertically.
   const gridClass = cn(
@@ -69,7 +71,7 @@ export function LeaderboardEntry({
     hidePlayerCount
       ? 'grid-cols-[2rem_1.5rem_minmax(0,1fr)_minmax(0,5.5rem)] min-[400px]:grid-cols-[2rem_1.5rem_1.75rem_minmax(0,1fr)_minmax(0,5.5rem)] md:grid-cols-[2rem_2rem_2rem_minmax(0,1fr)_minmax(0,5.5rem)] min-[771px]:grid-cols-[2rem_auto_2rem_2rem_minmax(0,1fr)_minmax(0,5.5rem)] lg:grid-cols-[2.5rem_auto_2.5rem_2.25rem_minmax(0,1fr)_minmax(0,6.5rem)]'
       : hasRightSlots
-        ? 'grid-cols-[2rem_1.5rem_minmax(0,1fr)_5.5rem] min-[400px]:grid-cols-[2rem_1.5rem_1.75rem_minmax(0,1fr)_5.5rem] md:grid-cols-[2rem_2rem_2rem_minmax(0,1fr)_5.5rem] min-[771px]:grid-cols-[2rem_auto_2rem_2rem_minmax(0,1fr)_5.5rem] lg:grid-cols-[2.5rem_auto_2.5rem_2.25rem_minmax(0,1fr)_minmax(0,1fr)]'
+        ? `grid-cols-[2rem_1.5rem_minmax(0,1fr)_${valueColWidth}] min-[400px]:grid-cols-[2rem_1.5rem_1.75rem_minmax(0,1fr)_${valueColWidth}] md:grid-cols-[2rem_2rem_2rem_minmax(0,1fr)_${valueColWidth}] min-[771px]:grid-cols-[2rem_auto_2rem_2rem_minmax(0,1fr)_${valueColWidth}] lg:grid-cols-[2.5rem_auto_2.5rem_2.25rem_minmax(0,1fr)_minmax(0,1fr)]`
         : 'grid-cols-[2rem_1.5rem_minmax(0,1fr)_5.5rem] min-[400px]:grid-cols-[2rem_1.5rem_1.75rem_minmax(0,1fr)_5.5rem] md:grid-cols-[2rem_2rem_2rem_minmax(0,1fr)_5.5rem] min-[771px]:grid-cols-[2rem_auto_2rem_2rem_minmax(0,1fr)_5.5rem] lg:grid-cols-[2.5rem_auto_2.5rem_2.25rem_minmax(0,1fr)_auto_5.5rem]'
   );
 
@@ -186,11 +188,11 @@ export function LeaderboardEntry({
             </>
           ) : hasRightSlots ? (
             <>
-              {/* Single value below lg: tabular-nums so digit columns align */}
+              {/* Single value below lg: time fully shown (no truncate), right-aligned */}
               <div className="min-w-0 flex items-center justify-end lg:hidden">
                 {valueKind === 'time' ? (
                   showTime ? (
-                    <span className="text-xs sm:text-sm font-zombies font-semibold text-element-400 tabular-nums leading-none truncate" title="Completion time">
+                    <span className="text-xs sm:text-sm font-zombies font-semibold text-element-400 tabular-nums leading-none whitespace-nowrap" title="Completion time">
                       {formatCompletionTime(timeSeconds)}
                     </span>
                   ) : null
@@ -202,15 +204,8 @@ export function LeaderboardEntry({
                   <RoundCounter round={entry.value} size="xs" animated={false} className="shrink-0 tabular-nums" />
                 )}
               </div>
-              {/* Full: Time | Proof | Players | Round from lg; fixed widths so Solo/Duo/round digits align vertically */}
-              <div className="hidden lg:grid grid-cols-[minmax(0,4.5rem)_2rem_4.5rem_5rem] gap-x-3 w-max max-w-full min-w-0 ml-auto">
-                <div className="flex items-center justify-start min-w-0 tabular-nums">
-                  {valueKind === 'time' && showTime ? (
-                    <span className="text-sm font-zombies font-semibold text-element-400 tabular-nums leading-none truncate" title="Completion time">
-                      {formatCompletionTime(timeSeconds)}
-                    </span>
-                  ) : null}
-                </div>
+              {/* Full from lg: Proof | Players | Round | Time (time far right, fully shown); minmax(0,...) lets columns shrink so time stays in container */}
+              <div className="hidden lg:grid grid-cols-[minmax(0,2rem)_minmax(0,4.5rem)_minmax(0,5rem)_minmax(6.5rem,1fr)] gap-x-3 min-w-0 max-w-full items-center">
                 <div className="flex items-center justify-center w-8 shrink-0">
                   {entry.proofUrl ? (
                     <a
@@ -242,6 +237,13 @@ export function LeaderboardEntry({
                       <RoundCounter round={entry.value} size="sm" animated={false} className="shrink-0" />
                       {invertRanking && <span className="text-xs text-bunker-400 ml-0.5">rnd</span>}
                     </>
+                  ) : null}
+                </div>
+                <div className="flex items-center justify-end min-w-0 tabular-nums">
+                  {valueKind === 'time' && showTime ? (
+                    <span className="text-sm font-zombies font-semibold text-element-400 tabular-nums leading-none whitespace-nowrap" title="Completion time">
+                      {formatCompletionTime(timeSeconds)}
+                    </span>
                   ) : null}
                 </div>
               </div>

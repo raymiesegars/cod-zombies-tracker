@@ -457,7 +457,7 @@ function AchievementsTabContent({
             <span className="text-xs font-medium text-bunker-400 w-full sm:w-auto mt-2 sm:mt-0">Difficulty:</span>
             <Select
               options={[
-                { value: '', label: 'All' },
+                { value: '', label: 'All (Difficulty)' },
                 ...BO4_DIFFICULTIES.map((d) => ({ value: d, label: getBo4DifficultyLabel(d) })),
               ]}
               value={difficultyFilter}
@@ -729,7 +729,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   const [lbBo4ElixirMode, setLbBo4ElixirMode] = useState<string>('');
   // BOCW
   const [lbBocwSupportMode, setLbBocwSupportMode] = useState<string>('');
-  const [lbRampageInducerFilter, setLbRampageInducerFilter] = useState<string>('false'); // Default: No Rampage Inducer
+  const [lbRampageInducerFilter, setLbRampageInducerFilter] = useState<string>(''); // '' = All (combined)
   // BO6
   const [lbBo6GobbleGumMode, setLbBo6GobbleGumMode] = useState<string>('');
   const [lbBo6SupportMode, setLbBo6SupportMode] = useState<string>('');
@@ -743,8 +743,8 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   // BO2 (bank/storage filter for Tranzit, Die Rise, Buried)
   const [lbBo2BankUsed, setLbBo2BankUsed] = useState<string>('');
   // WW2 consumables filter
-  const [lbWw2Consumables, setLbWw2Consumables] = useState<string>('true');
-  const [lbVanguardVoidFilter, setLbVanguardVoidFilter] = useState<string>('true'); // Default: With Void (der-anfang, terra-maledicta only)
+  const [lbWw2Consumables, setLbWw2Consumables] = useState<string>(''); // '' = All (combined)
+  const [lbVanguardVoidFilter, setLbVanguardVoidFilter] = useState<string>(''); // '' = All (combined)
   const [lbFirstRoomVariant, setLbFirstRoomVariant] = useState<string>('');
   const leaderboardSlugRef = useRef<string | null>(null);
 
@@ -828,7 +828,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
           if (map.game?.shortName === 'BO4' && selectedDifficulty) params.set('difficulty', selectedDifficulty);
           if (leaderboardVerifiedOnly) params.set('verified', 'true');
-          if ((isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName) || (isVanguardGame(map.game?.shortName) && hasVanguardRampageFilter(slug))) && lbRampageInducerFilter) params.set('rampageInducerUsed', lbRampageInducerFilter);
+          if ((isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName) || (isVanguardGame(map.game?.shortName) && hasVanguardRampageFilter(slug))) && (lbRampageInducerFilter === 'true' || lbRampageInducerFilter === 'false')) params.set('rampageInducerUsed', lbRampageInducerFilter);
           if (isVanguardGame(map.game?.shortName) && hasVanguardVoidFilter(slug) && (lbVanguardVoidFilter === 'true' || lbVanguardVoidFilter === 'false')) params.set('vanguardVoidUsed', lbVanguardVoidFilter);
           const res = await fetch(`/api/maps/${slug}/easter-egg-leaderboard?${params}`);
           if (res.ok) {
@@ -883,7 +883,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
             if (lbBo2BankUsed === 'true' || lbBo2BankUsed === 'false') params.set('bo2BankUsed', lbBo2BankUsed);
           }
           if (isWw2Game(map.game?.shortName) && (lbWw2Consumables === 'true' || lbWw2Consumables === 'false')) params.set('ww2ConsumablesUsed', lbWw2Consumables);
-          if ((isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName) || (isVanguardGame(map.game?.shortName) && hasVanguardRampageFilter(slug))) && lbRampageInducerFilter) params.set('rampageInducerUsed', lbRampageInducerFilter);
+          if ((isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName) || (isVanguardGame(map.game?.shortName) && hasVanguardRampageFilter(slug))) && (lbRampageInducerFilter === 'true' || lbRampageInducerFilter === 'false')) params.set('rampageInducerUsed', lbRampageInducerFilter);
           if (isVanguardGame(map.game?.shortName) && hasVanguardVoidFilter(slug) && (lbVanguardVoidFilter === 'true' || lbVanguardVoidFilter === 'false')) params.set('vanguardVoidUsed', lbVanguardVoidFilter);
           const res = await fetch(`/api/maps/${slug}/leaderboard?${params}`);
           if (res.ok) {
@@ -2154,6 +2154,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                         />
                         <Select
                           options={[
+                            { value: '', label: 'All (Rampage Inducer)' },
                             { value: 'false', label: 'No Rampage Inducer' },
                             { value: 'true', label: 'Rampage Inducer' },
                           ]}
@@ -2179,6 +2180,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                         />
                         <Select
                           options={[
+                            { value: '', label: 'All (Rampage Inducer)' },
                             { value: 'false', label: 'No Rampage Inducer' },
                             { value: 'true', label: 'Rampage Inducer' },
                           ]}
@@ -2198,6 +2200,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                         />
                         <Select
                           options={[
+                            { value: '', label: 'All (Rampage Inducer)' },
                             { value: 'false', label: 'No Rampage Inducer' },
                             { value: 'true', label: 'Rampage Inducer' },
                           ]}
@@ -2297,6 +2300,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                     {isVanguardGame(map?.game?.shortName) && hasVanguardRampageFilter(slug) && (
                       <Select
                         options={[
+                          { value: '', label: 'All (Rampage Inducer)' },
                           { value: 'false', label: 'No Rampage Inducer' },
                           { value: 'true', label: 'Rampage Inducer' },
                         ]}

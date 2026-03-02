@@ -68,7 +68,7 @@ export async function GET(
     if (isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName) || (isVanguardGame(map.game?.shortName) && hasVanguardRampageFilter(slug))) {
       if (rampageInducerParam === 'true') {
         (whereClause as Record<string, unknown>).rampageInducerUsed = true;
-      } else {
+      } else if (rampageInducerParam === 'false') {
         (whereClause as Record<string, unknown>).rampageInducerUsed = { not: true };
       }
     }
