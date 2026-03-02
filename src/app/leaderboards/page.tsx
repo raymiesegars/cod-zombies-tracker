@@ -110,7 +110,7 @@ export default function LeaderboardsPage() {
     setRankVerifiedXpOnly(stored);
   }, []);
 
-  const [fortuneCardsFilter, setFortuneCardsFilter] = useState<string>('false');
+  const [fortuneCardsFilter, setFortuneCardsFilter] = useState<string>(''); // '' = All (combined)
   const [directorsCutFilter, setDirectorsCutFilter] = useState(false);
   // BO3
   const [bo3GobbleGumFilter, setBo3GobbleGumFilter] = useState<string>('');
@@ -119,7 +119,7 @@ export default function LeaderboardsPage() {
   const [bo4ElixirFilter, setBo4ElixirFilter] = useState<string>('');
   // BOCW
   const [bocwSupportFilter, setBocwSupportFilter] = useState<string>('');
-  const [rampageInducerFilter, setRampageInducerFilter] = useState<string>('false'); // Default: No Rampage Inducer
+  const [rampageInducerFilter, setRampageInducerFilter] = useState<string>(''); // '' = All (combined)
   // BO6
   const [bo6GobbleGumFilter, setBo6GobbleGumFilter] = useState<string>('');
   const [bo6SupportFilter, setBo6SupportFilter] = useState<string>('');
@@ -144,8 +144,8 @@ export default function LeaderboardsPage() {
   const hasVanguardRampage = isVanguardMap && selectedMap && hasVanguardRampageFilter(selectedMap);
 
   const [wawNoJugFilter, setWawNoJugFilter] = useState<string>('');
-  const [vanguardVoidFilter, setVanguardVoidFilter] = useState<string>('true'); // Default: With Void
-  const [ww2ConsumablesFilter, setWw2ConsumablesFilter] = useState<string>('true'); // Default: With Consumables
+  const [vanguardVoidFilter, setVanguardVoidFilter] = useState<string>(''); // '' = All (combined)
+  const [ww2ConsumablesFilter, setWw2ConsumablesFilter] = useState<string>(''); // '' = All (combined)
   const [wawFixedWunderwaffeFilter, setWawFixedWunderwaffeFilter] = useState<string>('');
   const [bo2BankUsedFilter, setBo2BankUsedFilter] = useState<string>('');
   const [firstRoomVariantFilter, setFirstRoomVariantFilter] = useState<string>('');
@@ -237,7 +237,7 @@ export default function LeaderboardsPage() {
           if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
           if (searchForFetch) params.set('search', searchForFetch);
           if (verifiedOnly) params.set('verified', 'true');
-          if ((isBocwMap || isBo6Map || isBo7Map || hasVanguardRampage) && rampageInducerFilter) params.set('rampageInducerUsed', rampageInducerFilter);
+          if ((isBocwMap || isBo6Map || isBo7Map || hasVanguardRampage) && (rampageInducerFilter === 'true' || rampageInducerFilter === 'false')) params.set('rampageInducerUsed', rampageInducerFilter);
           if (hasVanguardVoid && (vanguardVoidFilter === 'true' || vanguardVoidFilter === 'false')) params.set('vanguardVoidUsed', vanguardVoidFilter);
           if (isWw2Map && (ww2ConsumablesFilter === 'true' || ww2ConsumablesFilter === 'false')) params.set('ww2ConsumablesUsed', ww2ConsumablesFilter);
           const res = await fetch(`/api/maps/${selectedMap}/easter-egg-leaderboard?${params}`);
@@ -301,7 +301,7 @@ export default function LeaderboardsPage() {
             if (bo2BankUsedFilter === 'true' || bo2BankUsedFilter === 'false') params.set('bo2BankUsed', bo2BankUsedFilter);
           }
           if (isWw2Map && (ww2ConsumablesFilter === 'true' || ww2ConsumablesFilter === 'false')) params.set('ww2ConsumablesUsed', ww2ConsumablesFilter);
-          if ((isBocwMap || isBo6Map || isBo7Map || hasVanguardRampage) && rampageInducerFilter) params.set('rampageInducerUsed', rampageInducerFilter);
+          if ((isBocwMap || isBo6Map || isBo7Map || hasVanguardRampage) && (rampageInducerFilter === 'true' || rampageInducerFilter === 'false')) params.set('rampageInducerUsed', rampageInducerFilter);
           if (hasVanguardVoid && (vanguardVoidFilter === 'true' || vanguardVoidFilter === 'false')) params.set('vanguardVoidUsed', vanguardVoidFilter);
           const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
           if (res.ok) {
@@ -360,7 +360,7 @@ export default function LeaderboardsPage() {
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
           if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
           if (verifiedOnly) params.set('verified', 'true');
-          if ((isBocwMap || isBo6Map || isBo7Map || hasVanguardRampage) && rampageInducerFilter) params.set('rampageInducerUsed', rampageInducerFilter);
+          if ((isBocwMap || isBo6Map || isBo7Map || hasVanguardRampage) && (rampageInducerFilter === 'true' || rampageInducerFilter === 'false')) params.set('rampageInducerUsed', rampageInducerFilter);
           if (hasVanguardVoid && (vanguardVoidFilter === 'true' || vanguardVoidFilter === 'false')) params.set('vanguardVoidUsed', vanguardVoidFilter);
           if (isWw2Map && (ww2ConsumablesFilter === 'true' || ww2ConsumablesFilter === 'false')) params.set('ww2ConsumablesUsed', ww2ConsumablesFilter);
           const res = await fetch(`/api/maps/${selectedMap}/easter-egg-leaderboard?${params}`);
@@ -411,7 +411,7 @@ export default function LeaderboardsPage() {
             if (bo2BankUsedFilter === 'true' || bo2BankUsedFilter === 'false') params.set('bo2BankUsed', bo2BankUsedFilter);
           }
           if (isWw2Map && (ww2ConsumablesFilter === 'true' || ww2ConsumablesFilter === 'false')) params.set('ww2ConsumablesUsed', ww2ConsumablesFilter);
-          if ((isBocwMap || isBo6Map || isBo7Map || hasVanguardRampage) && rampageInducerFilter) params.set('rampageInducerUsed', rampageInducerFilter);
+          if ((isBocwMap || isBo6Map || isBo7Map || hasVanguardRampage) && (rampageInducerFilter === 'true' || rampageInducerFilter === 'false')) params.set('rampageInducerUsed', rampageInducerFilter);
           if (hasVanguardVoid && (vanguardVoidFilter === 'true' || vanguardVoidFilter === 'false')) params.set('vanguardVoidUsed', vanguardVoidFilter);
           const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
           if (res.ok) {
@@ -841,6 +841,7 @@ export default function LeaderboardsPage() {
                       </button>
                       <Select
                         options={[
+                          { value: '', label: 'All (Fate & Fortune)' },
                           { value: 'false', label: 'Fate only' },
                           { value: 'true', label: 'Fate & Fortune' },
                         ]}
@@ -894,6 +895,7 @@ export default function LeaderboardsPage() {
                       />
                       <Select
                         options={[
+                          { value: '', label: 'All (Rampage Inducer)' },
                           { value: 'false', label: 'No Rampage Inducer' },
                           { value: 'true', label: 'Rampage Inducer' },
                         ]}
@@ -919,6 +921,7 @@ export default function LeaderboardsPage() {
                       />
                       <Select
                         options={[
+                          { value: '', label: 'All (Rampage Inducer)' },
                           { value: 'false', label: 'No Rampage Inducer' },
                           { value: 'true', label: 'Rampage Inducer' },
                         ]}
@@ -938,6 +941,7 @@ export default function LeaderboardsPage() {
                       />
                       <Select
                         options={[
+                          { value: '', label: 'All (Rampage Inducer)' },
                           { value: 'false', label: 'No Rampage Inducer' },
                           { value: 'true', label: 'Rampage Inducer' },
                         ]}
@@ -1027,7 +1031,8 @@ export default function LeaderboardsPage() {
                   {hasVanguardVoid && (
                     <Select
                       options={[
-                        { value: 'true', label: 'With Void (default)' },
+                        { value: '', label: 'All (Void)' },
+                        { value: 'true', label: 'With Void' },
                         { value: 'false', label: 'Without Void' },
                       ]}
                       value={vanguardVoidFilter}
@@ -1038,6 +1043,7 @@ export default function LeaderboardsPage() {
                   {hasVanguardRampage && (
                     <Select
                       options={[
+                        { value: '', label: 'All (Rampage Inducer)' },
                         { value: 'false', label: 'No Rampage Inducer' },
                         { value: 'true', label: 'Rampage Inducer' },
                       ]}

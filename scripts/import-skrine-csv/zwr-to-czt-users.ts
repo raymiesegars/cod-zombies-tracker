@@ -119,6 +119,12 @@ export const ZWR_TO_CZT_USERS: Record<string, ZwrToCztEntry> = {
     displayName: 'GannonSnipes',
     note: 'Import from top-178-csv/GannonSnipes.csv with --source-player-id=GannonSnipes --czt-user=cmm9gh5he0004lqtuml1qlhqp.',
   },
+  // SuperChubbs_NTC — top-178 import
+  'SuperChubbs_NTC': {
+    cztUserId: 'cmm9llf5a0006aaf6wopuumqg',
+    displayName: 'SuperChubbs_NTC',
+    note: 'Import from top-178-csv/SuperChubbs_NTC.csv with --source-player-id=SuperChubbs_NTC --czt-user=cmm9llf5a0006aaf6wopuumqg.',
+  },
 };
 
 /**
