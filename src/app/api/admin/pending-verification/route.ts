@@ -1,12 +1,12 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { getDisplayAvatarUrl } from '@/lib/avatar';
 
 export const dynamic = 'force-dynamic';
 
-/** List all runs pending verification (challenge + easter egg). Admin only. */
-export async function GET() {
+/** List all runs pending verification (challenge + easter egg). Admin only. Query: game (shortName), runType (all | speedrun). */
+export async function GET(request: NextRequest) {
   try {
     const supabaseUser = await getUser();
     if (!supabaseUser) {
@@ -21,13 +21,28 @@ export async function GET() {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    const { searchParams } = new URL(request.url);
+    const game = searchParams.get('game')?.trim() || null;
+    const runType = searchParams.get('runType') === 'speedrun' ? 'speedrun' : 'all';
+
+    const challengeWhere = {
+      verificationRequestedAt: { not: null },
+      isVerified: false,
+      userId: { not: me.id },
+      ...(game && { map: { game: { shortName: game } } }),
+      ...(runType === 'speedrun' && { challenge: { type: { contains: 'SPEEDRUN' } } }),
+    };
+    const eeWhere = {
+      verificationRequestedAt: { not: null },
+      isVerified: false,
+      userId: { not: me.id },
+      ...(game && { map: { game: { shortName: game } } }),
+      // When runType=speedrun we only show challenge speedruns; EE logs are excluded
+    };
+
     const [challengeLogs, easterEggLogs] = await Promise.all([
       prisma.challengeLog.findMany({
-        where: {
-          verificationRequestedAt: { not: null },
-          isVerified: false,
-          userId: { not: me.id },
-        },
+        where: challengeWhere,
         include: {
           user: { select: { id: true, username: true, displayName: true, avatarUrl: true, avatarPreset: true } },
           challenge: { select: { name: true, type: true } },
@@ -35,19 +50,17 @@ export async function GET() {
         },
         orderBy: { verificationRequestedAt: 'desc' },
       }),
-      prisma.easterEggLog.findMany({
-        where: {
-          verificationRequestedAt: { not: null },
-          isVerified: false,
-          userId: { not: me.id },
-        },
-        include: {
-          user: { select: { id: true, username: true, displayName: true, avatarUrl: true, avatarPreset: true } },
-          easterEgg: { select: { name: true, type: true } },
-          map: { select: { name: true, slug: true, imageUrl: true, game: { select: { shortName: true } } } },
-        },
-        orderBy: { verificationRequestedAt: 'desc' },
-      }),
+      runType === 'speedrun'
+        ? Promise.resolve([] as Awaited<ReturnType<typeof prisma.easterEggLog.findMany>>)
+        : prisma.easterEggLog.findMany({
+            where: eeWhere,
+            include: {
+              user: { select: { id: true, username: true, displayName: true, avatarUrl: true, avatarPreset: true } },
+              easterEgg: { select: { name: true, type: true } },
+              map: { select: { name: true, slug: true, imageUrl: true, game: { select: { shortName: true } } } },
+            },
+            orderBy: { verificationRequestedAt: 'desc' },
+          }),
     ]);
 
     const challengeItems = challengeLogs.map((log) => ({
