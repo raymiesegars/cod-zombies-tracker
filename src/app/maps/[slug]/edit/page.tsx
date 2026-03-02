@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
@@ -272,7 +272,20 @@ export default function EditMapProgressPage() {
   const slug = params.slug as string;
   const preselectedChallengeId = searchParams.get('challengeId');
   const mysteryBoxRollId = searchParams.get('mysteryBoxRollId');
+  const tournamentId = searchParams.get('tournamentId');
+  const tournamentIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    tournamentIdRef.current = searchParams.get('tournamentId');
+  }, [searchParams]);
   const { profile, isLoading: authLoading } = useAuth();
+  const [tournament, setTournament] = useState<{
+    id: string;
+    mapId: string;
+    challengeId: string | null;
+    easterEggId: string | null;
+    config: Record<string, unknown> | null;
+    isOpen?: boolean;
+  } | null>(null);
   const { showXpToast } = useXpToast();
 
   const [map, setMap] = useState<(MapWithDetails & { achievements?: AchievementForPreview[]; unlockedAchievementIds?: string[] }) | null>(null);
@@ -367,6 +380,24 @@ export default function EditMapProgressPage() {
       router.push(`/maps/${slug}`);
     }
   }, [authLoading, profile, router, slug]);
+
+  useEffect(() => {
+    if (!tournamentId) {
+      setTournament(null);
+      return;
+    }
+    fetch(`/api/tournaments/${tournamentId}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((t) => (t?.id ? setTournament({
+        id: t.id,
+        mapId: t.mapId,
+        challengeId: t.challengeId ?? null,
+        easterEggId: t.easterEggId ?? null,
+        config: (t.config && typeof t.config === 'object' ? t.config : null) as Record<string, unknown> | null,
+        isOpen: t.isOpen,
+      }) : setTournament(null)))
+      .catch(() => setTournament(null));
+  }, [tournamentId]);
 
   useEffect(() => {
     async function fetchMap() {
@@ -531,6 +562,27 @@ export default function EditMapProgressPage() {
   }, [slug, preselectedChallengeId, mysteryBoxRollId]);
 
   useEffect(() => {
+    if (!map || !tournament || tournament.mapId !== map.id) return;
+    if (tournament.challengeId) {
+      setSelectedChallengeIds(new Set([tournament.challengeId]));
+      setEeTabValue('ee-none');
+      if (tournament.config && typeof tournament.config === 'object') {
+        setSharedChallengeForm((prev) => ({ ...prev, ...(tournament.config as Record<string, unknown>) }));
+      }
+    } else if (tournament.easterEggId) {
+      setSelectedChallengeIds(new Set());
+      setEeTabValue(`ee-${tournament.easterEggId}`);
+      if (tournament.config && typeof tournament.config === 'object') {
+        setEasterEggForms((prev) => {
+          const eeId = tournament.easterEggId!;
+          const current = prev[eeId];
+          return { ...prev, [eeId]: current ? { ...current, ...(tournament.config as Record<string, unknown>) } : { ...(prev[eeId] || {}), ...(tournament.config as Record<string, unknown>) } };
+        });
+      }
+    }
+  }, [map, tournament]);
+
+  useEffect(() => {
     const wawCfg = map?.game?.shortName === 'WAW' ? getWaWMapConfig(map?.slug ?? '') : null;
     const hasNoDowns = map && Array.from(selectedChallengeIds).some((cid) =>
       map.challenges.find((ch) => ch.id === cid)?.type === 'NO_DOWNS'
@@ -554,7 +606,10 @@ export default function EditMapProgressPage() {
     }));
   };
 
+  const tournamentLocked = !!tournamentId && !!tournament && tournament.mapId === map?.id;
+
   const toggleChallenge = (challengeId: string) => {
+    if (tournamentLocked) return;
     const isAdding = !selectedChallengeIds.has(challengeId);
     const challenge = map?.challenges.find((c) => c.id === challengeId);
     const isNoMansLand = challenge?.type === 'NO_MANS_LAND';
@@ -746,6 +801,24 @@ export default function EditMapProgressPage() {
             label: 'Mystery Box Challenge Complete',
           });
         }
+        const tid = tournamentId ?? tournamentIdRef.current;
+        if (tid && data.id) {
+          const subRes = await fetch(`/api/tournaments/${tid}/submit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ challengeLogId: data.id }),
+            credentials: 'same-origin',
+          });
+          const subData = await subRes.json().catch(() => ({}));
+          if (!subRes.ok) {
+            const msg = subData.error || 'Run saved but could not be added to the tournament.';
+            if (subRes.status === 400 && typeof msg === 'string' && msg.toLowerCase().includes('already submitted')) {
+              // Idempotent: already linked is success
+            } else {
+              throw new Error(msg);
+            }
+          }
+        }
       }
       const achievementXp = totalXpGained - totalMysteryBoxXp;
       if (achievementXp > 0) {
@@ -897,6 +970,24 @@ export default function EditMapProgressPage() {
 
       if (!res.ok) throw new Error(data.error || 'Failed to save');
 
+      const tid = tournamentId ?? tournamentIdRef.current;
+      if (tid && data.id) {
+        const subRes = await fetch(`/api/tournaments/${tid}/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ easterEggLogId: data.id }),
+          credentials: 'same-origin',
+        });
+        const subData = await subRes.json().catch(() => ({}));
+        if (!subRes.ok) {
+          const msg = subData.error || 'Run saved but could not be added to the tournament.';
+          if (subRes.status === 400 && typeof msg === 'string' && msg.toLowerCase().includes('already submitted')) {
+            // Idempotent: already linked is success
+          } else {
+            throw new Error(msg);
+          }
+        }
+      }
       if (typeof data.xpGained === 'number' && data.xpGained > 0) {
         showXpToast(data.xpGained, typeof data.totalXp === 'number' ? { totalXp: data.totalXp } : undefined);
       }
@@ -986,6 +1077,7 @@ export default function EditMapProgressPage() {
                       key={challenge.id}
                       type="button"
                       onClick={() => toggleChallenge(challenge.id)}
+                      disabled={tournamentLocked}
                       className={cn(
                         'w-full min-w-0 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all duration-200 text-center',
                         'focus:outline-none focus-visible:ring-2 focus-visible:ring-blood-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bunker-900',
@@ -1182,6 +1274,7 @@ export default function EditMapProgressPage() {
                     })()}
                     <Select
                       label="Player Count"
+                      disabled={tournamentLocked}
                       options={(() => {
                         const wawCfg = map?.game?.shortName === 'WAW' ? getWaWMapConfig(map.slug) : null;
                         const hasNoDownsSelected = Array.from(selectedChallengeIds).some((cid) => {
@@ -1199,6 +1292,7 @@ export default function EditMapProgressPage() {
                     {map?.slug && hasFirstRoomVariantFilter(map.slug) && Array.from(selectedChallengeIds).some((cid) => map.challenges.find((c) => c.id === cid)?.type === 'STARTING_ROOM') && (
                       <Select
                         label="Room Variant (required)"
+                        disabled={tournamentLocked}
                         options={[
                           { value: '', label: 'Select variant…' },
                           ...(getFirstRoomVariantsForMap(map.slug) ?? []).map((o) => ({ value: o.value, label: o.label })),
@@ -1211,6 +1305,7 @@ export default function EditMapProgressPage() {
                     {map?.game?.shortName === 'BO4' && (
                       <Select
                         label="Difficulty"
+                        disabled={tournamentLocked}
                         options={BO4_DIFFICULTIES.map((d) => ({ value: d, label: getBo4DifficultyLabel(d) }))}
                         value={sharedChallengeForm.difficulty || 'NORMAL'}
                         onChange={(e) => handleSharedChallengeChange('difficulty', e.target.value)}
@@ -1220,6 +1315,7 @@ export default function EditMapProgressPage() {
                       <>
                         <Select
                           label="Fortune Cards"
+                          disabled={tournamentLocked}
                           options={[
                             { value: 'false', label: 'Fate cards only' },
                             { value: 'true', label: 'Fate & Fortune cards' },
@@ -1228,11 +1324,12 @@ export default function EditMapProgressPage() {
                           onChange={(e) => handleSharedChallengeChange('useFortuneCards', e.target.value === 'true' ? true : e.target.value === 'false' ? false : null)}
                           placeholder="Required"
                         />
-                        <label className="flex items-center gap-2 cursor-pointer self-end pb-2 sm:pb-0">
+                        <label className={cn('flex items-center gap-2 cursor-pointer self-end pb-2 sm:pb-0', tournamentLocked && 'pointer-events-none opacity-70')}>
                           <input
                             type="checkbox"
                             checked={sharedChallengeForm.useDirectorsCut ?? false}
                             onChange={(e) => handleSharedChallengeChange('useDirectorsCut', e.target.checked)}
+                            disabled={tournamentLocked}
                             className="w-4 h-4 rounded border-bunker-600 bg-bunker-800 text-blood-500"
                           />
                           <span className="text-sm text-bunker-300">Directors Cut</span>
@@ -1244,6 +1341,7 @@ export default function EditMapProgressPage() {
                         {map?.slug === 'der-riese' && (
                           <Select
                             label="Fixed Wunderwaffe"
+                            disabled={tournamentLocked}
                             options={[
                               { value: 'false', label: 'Standard' },
                               { value: 'true', label: 'Fixed Wunderwaffe' },
@@ -1258,6 +1356,7 @@ export default function EditMapProgressPage() {
                     {map?.game?.shortName === 'BO2' && getBo2MapConfig(map.slug)?.hasBank && (
                       <Select
                         label={getBo2MapConfig(map.slug)?.bankIncludesStorage ? 'Bank & Storage' : 'Bank'}
+                        disabled={tournamentLocked}
                         options={[
                           { value: 'true', label: getBo2MapConfig(map.slug)?.bankIncludesStorage ? 'Bank+Storage (default)' : 'Bank Used (default)' },
                           { value: 'false', label: getBo2MapConfig(map.slug)?.bankIncludesStorage ? 'No Bank No Storage' : 'No Bank' },
@@ -1270,6 +1369,7 @@ export default function EditMapProgressPage() {
                     {isWw2Game(map?.game?.shortName) && (
                       <Select
                         label="Consumables"
+                        disabled={tournamentLocked}
                         options={[
                           { value: 'true', label: 'With Consumables (default)' },
                           { value: 'false', label: 'No Consumables' },
@@ -1282,6 +1382,7 @@ export default function EditMapProgressPage() {
                     {isVanguardGame(map?.game?.shortName) && hasVanguardVoidFilter(map?.slug) && (
                       <Select
                         label="Void"
+                        disabled={tournamentLocked}
                         options={[
                           { value: 'true', label: 'With Void (default)' },
                           { value: 'false', label: 'Without Void' },
@@ -1296,6 +1397,7 @@ export default function EditMapProgressPage() {
                       <>
                         <Select
                           label="GobbleGums"
+                          disabled={tournamentLocked}
                           options={BO3_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo3GobbleGumLabel(m) }))}
                           value={sharedChallengeForm.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT}
                           onChange={(e) => handleSharedChallengeChange('bo3GobbleGumMode', e.target.value)}
@@ -1305,6 +1407,7 @@ export default function EditMapProgressPage() {
                         ) && (
                           <Select
                             label="AATs"
+                            disabled={tournamentLocked}
                             options={[
                               { value: '', label: 'Any' },
                               { value: 'true', label: 'AATs Used' },
@@ -1342,6 +1445,7 @@ export default function EditMapProgressPage() {
                     {isBocwGame(map?.game?.shortName) && (
                       <Select
                         label="Support"
+                        disabled={tournamentLocked}
                         options={BOCW_SUPPORT_MODES.map((m) => ({ value: m, label: getBocwSupportLabel(m) }))}
                         value={sharedChallengeForm.bocwSupportMode ?? BOCW_SUPPORT_DEFAULT}
                         onChange={(e) => handleSharedChallengeChange('bocwSupportMode', e.target.value)}
@@ -1351,12 +1455,14 @@ export default function EditMapProgressPage() {
                       <>
                         <Select
                           label="GobbleGums"
+                          disabled={tournamentLocked}
                           options={BO6_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo6GobbleGumLabel(m) }))}
                           value={sharedChallengeForm.bo6GobbleGumMode ?? BO6_GOBBLEGUM_DEFAULT}
                           onChange={(e) => handleSharedChallengeChange('bo6GobbleGumMode', e.target.value)}
                         />
                         <Select
                           label="Support"
+                          disabled={tournamentLocked}
                           options={BO6_SUPPORT_MODES.map((m) => ({ value: m, label: getBo6SupportLabel(m) }))}
                           value={sharedChallengeForm.bo6SupportMode ?? BO6_SUPPORT_DEFAULT}
                           onChange={(e) => handleSharedChallengeChange('bo6SupportMode', e.target.value)}
@@ -1366,6 +1472,7 @@ export default function EditMapProgressPage() {
                     {((isBocwGame(map?.game?.shortName) || isBo6Game(map?.game?.shortName) || isBo7Game(map?.game?.shortName) || (isVanguardGame(map?.game?.shortName) && hasVanguardRampageFilter(map?.slug))) && (
                       <Select
                         label="Rampage Inducer"
+                        disabled={tournamentLocked}
                         options={[
                           { value: 'false', label: 'No Rampage Inducer' },
                           { value: 'true', label: 'Rampage Inducer' },
@@ -1378,14 +1485,16 @@ export default function EditMapProgressPage() {
                       <>
                         <Select
                           label="Support"
+                          disabled={tournamentLocked}
                           options={BO7_SUPPORT_MODES.map((m) => ({ value: m, label: getBo7SupportLabel(m) }))}
                           value={sharedChallengeForm.bo7SupportMode ?? BO7_SUPPORT_DEFAULT}
                           onChange={(e) => handleSharedChallengeChange('bo7SupportMode', e.target.value)}
                         />
-                        <label className="flex items-center gap-2 cursor-pointer self-end pb-2 sm:pb-0">
+                        <label className={cn('flex items-center gap-2 cursor-pointer self-end pb-2 sm:pb-0', tournamentLocked && 'pointer-events-none opacity-70')}>
                           <input
                             type="checkbox"
                             checked={sharedChallengeForm.bo7IsCursedRun ?? false}
+                            disabled={tournamentLocked}
                             onChange={(e) => {
                               handleSharedChallengeChange('bo7IsCursedRun', e.target.checked);
                               if (!e.target.checked) handleSharedChallengeChange('bo7RelicsUsed', []);

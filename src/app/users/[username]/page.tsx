@@ -76,6 +76,7 @@ import {
   TrendingUp,
   Timer,
   LayoutGrid,
+  Medal,
 } from 'lucide-react';
 import {
   PROFILE_STAT_BLOCK_IDS,
@@ -638,6 +639,8 @@ export default function UserProfilePage() {
   const [achievementsModalOpen, setAchievementsModalOpen] = useState(false);
   const [verifiedAchievementsModalOpen, setVerifiedAchievementsModalOpen] = useState(false);
   const [worldRecordsModalOpen, setWorldRecordsModalOpen] = useState(false);
+  const [tournamentTrophiesModalOpen, setTournamentTrophiesModalOpen] = useState(false);
+  const [tournamentTrophies, setTournamentTrophies] = useState<{ gold: number; silver: number; bronze: number; tournaments: { tournamentId: string; title: string; place: number; xpAwarded: number }[] } | null>(null);
   const [adminMe, setAdminMe] = useState<{ isAdmin: boolean; isSuperAdmin: boolean } | null>(null);
   const [promoteModalOpen, setPromoteModalOpen] = useState(false);
   const [demoteModalOpen, setDemoteModalOpen] = useState(false);
@@ -657,6 +660,14 @@ export default function UserProfilePage() {
     window.addEventListener('cod-tracker-profile-refresh-requested', handler);
     return () => window.removeEventListener('cod-tracker-profile-refresh-requested', handler);
   }, [username]);
+
+  useEffect(() => {
+    if (!username) return;
+    fetch(`/api/users/${username}/tournament-trophies`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setTournamentTrophies)
+      .catch(() => setTournamentTrophies(null));
+  }, [username, profileRefreshTrigger]);
 
   // Admin: can current user promote/demote? Only fetch when logged in.
   useEffect(() => {
@@ -996,6 +1007,7 @@ export default function UserProfilePage() {
       'highest-round': 'Average round across every run you’ve logged (each run counts once).',
       speedruns: 'Speedrun challenge runs you’ve completed (time-based).',
       'mystery-box': "Mystery Box challenges you've completed for bonus XP.",
+      'tournament-trophies': 'Gold, silver, and bronze trophies from CZT tournaments. Click to see which tournaments.',
     };
     switch (blockId) {
       case 'maps-played':
@@ -1037,6 +1049,13 @@ export default function UserProfilePage() {
         return { label: 'Speedruns', value: String(statsTotals.speedrunCompletions ?? 0), suffix: null, icon: Timer, iconClass: 'text-yellow-400', tooltip: tooltips.speedruns };
       case 'mystery-box':
         return { label: 'Box Challenges', value: String(statsTotals.mysteryBoxCompletions ?? 0), suffix: null, icon: MysteryBoxIcon, iconClass: 'text-amber-400', tooltip: tooltips['mystery-box'] };
+      case 'tournament-trophies': {
+        const g = tournamentTrophies?.gold ?? 0;
+        const s = tournamentTrophies?.silver ?? 0;
+        const b = tournamentTrophies?.bronze ?? 0;
+        const value = [g && `🥇${g}`, s && `🥈${s}`, b && `🥉${b}`].filter(Boolean).join(' ') || '0';
+        return { label: 'Tournament Trophies', value, suffix: null, icon: Medal, iconClass: 'text-amber-400', tooltip: tooltips['tournament-trophies'] };
+      }
       default:
         return { label: blockId, value: '—', suffix: null, icon: Award, iconClass: 'text-bunker-400', tooltip: 'Stat block.' };
     }
@@ -1229,6 +1248,7 @@ export default function UserProfilePage() {
               const isAchievementsBlock = blockId === 'achievements';
               const isVerifiedAchievementsBlock = blockId === 'verified-achievements';
               const isWorldRecordsBlock = blockId === 'world-records' || blockId === 'verified-world-records';
+              const isTournamentTrophiesBlock = blockId === 'tournament-trophies';
               const handleClick = isRunsBlock
                 ? () => setRunsModalOpen(blockId === 'verified-runs' ? 'verified' : 'all')
                 : isEasterEggsBlock
@@ -1241,7 +1261,9 @@ export default function UserProfilePage() {
                         ? () => setVerifiedAchievementsModalOpen(true)
                         : isWorldRecordsBlock
                           ? () => setWorldRecordsModalOpen(true)
-                          : undefined;
+                          : isTournamentTrophiesBlock
+                            ? () => setTournamentTrophiesModalOpen(true)
+                            : undefined;
               const Wrapper = handleClick ? 'button' : 'div';
               return (
                 <div key={blockId} className="group relative">
@@ -1482,6 +1504,35 @@ export default function UserProfilePage() {
         onClose={() => setWorldRecordsModalOpen(false)}
         username={username}
       />
+
+      <Modal
+        isOpen={tournamentTrophiesModalOpen}
+        onClose={() => setTournamentTrophiesModalOpen(false)}
+        title="Tournament Trophies"
+        description={tournamentTrophies ? `${tournamentTrophies.gold} gold, ${tournamentTrophies.silver} silver, ${tournamentTrophies.bronze} bronze` : ''}
+        size="sm"
+      >
+        <div className="space-y-2 max-h-64 overflow-y-auto">
+          {tournamentTrophies?.tournaments?.length ? (
+            tournamentTrophies.tournaments.map((t) => (
+              <div key={t.tournamentId} className="flex items-center justify-between py-2 border-b border-bunker-700 last:border-0">
+                <span className="text-sm text-white font-medium">{t.title}</span>
+                <span className="text-sm text-bunker-300">
+                  {t.place === 1 ? '🥇 Gold' : t.place === 2 ? '🥈 Silver' : '🥉 Bronze'}
+                  {t.xpAwarded > 0 && ` · +${t.xpAwarded.toLocaleString()} XP`}
+                </span>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-bunker-400">No tournament trophies yet.</p>
+          )}
+        </div>
+        <div className="mt-4 flex justify-end">
+          <Link href="/tournaments" onClick={() => setTournamentTrophiesModalOpen(false)}>
+            <Button variant="secondary" size="sm">View Tournaments</Button>
+          </Link>
+        </div>
+      </Modal>
 
       <MapsModal
         isOpen={mapsModalOpen}

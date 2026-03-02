@@ -80,6 +80,14 @@ model User {
   mysteryBoxLobbyMembers   MysteryBoxLobbyMember[]
   mysteryBoxCompletions    MysteryBoxCompletion[]
 
+  // Tournaments
+  tournamentPollsCreated   TournamentPoll[]
+  tournamentPollVotes      TournamentPollVote[]
+  tournamentsCreated      Tournament[]
+  tournamentLogs          TournamentLog[]
+  tournamentTrophiesWon   TournamentTrophy[]  @relation("TrophyWinner")
+  tournamentTrophiesAwarded TournamentTrophy[] @relation("TrophyAwardedBy")
+
   @@index([username])
   @@index([supabaseId])
 }
@@ -157,7 +165,8 @@ model Game {
   order         Int      // For sorting games chronologically
   
   maps          Map[]
-  
+  tournaments   Tournament[]
+
   @@index([order])
 }
 
@@ -185,6 +194,7 @@ model Map {
   easterEggLogs     EasterEggLog[]
   achievements      Achievement[]
   groupListings     GroupListing[]
+  tournaments       Tournament[]
 
   @@unique([gameId, name])
   @@index([slug])
@@ -219,7 +229,8 @@ model Challenge {
   // Relations
   logs          ChallengeLog[]
   achievements  Achievement[]
-  
+  tournaments   Tournament[]
+
   @@unique([mapId, slug])
   @@index([type])
   @@index([mapId])
@@ -321,6 +332,7 @@ model EasterEgg {
   achievements  Achievement[]
   mainEeXpAwards MainEasterEggXpAwarded[]
   groupListings GroupListing[]
+  tournaments   Tournament[]
 
   @@unique([mapId, slug])
   @@index([mapId])
@@ -486,7 +498,8 @@ model ChallengeLog {
   
   coOpRunPendings  CoOpRunPending[]
   notifications    Notification[]
-  
+  tournamentLogs   TournamentLog[]
+
   @@index([userId])
   @@index([challengeId])
   @@index([mapId])
@@ -552,7 +565,8 @@ model EasterEggLog {
   
   coOpRunPendings  CoOpRunPending[]
   notifications    Notification[]
-  
+  tournamentLogs   TournamentLog[]
+
   @@index([userId])
   @@index([easterEggId])
   @@index([mapId])
@@ -853,4 +867,135 @@ model Notification {
   @@index([userId])
   @@index([userId, read])
   @@index([createdAt(sort: Desc)])
+}
+
+// ============================================================================
+// TOURNAMENTS – Polls, Leaderboards, Trophies
+// ============================================================================
+
+model TournamentPoll {
+  id           String   @id @default(cuid())
+  title        String   // e.g. "CZT Tournament 1"
+  status       TournamentPollStatus @default(DRAFT) // DRAFT | ACTIVE | ENDED
+  startsAt     DateTime
+  endsAt       DateTime // 5 days from start; no votes after, results revealed
+  createdAt    DateTime @default(now())
+  createdById  String
+  createdBy    User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  options      TournamentPollOption[]
+  votes        TournamentPollVote[]
+  tournaments  Tournament[]
+
+  @@index([status])
+  @@index([endsAt])
+}
+
+model TournamentPollOption {
+  id        String         @id @default(cuid())
+  pollId    String
+  poll      TournamentPoll @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  label     String
+  order     Int            // 0-based display order
+  votes     TournamentPollVote[]
+
+  @@index([pollId])
+}
+
+model TournamentPollVote {
+  id        String               @id @default(cuid())
+  pollId    String
+  poll      TournamentPoll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  optionId  String
+  option    TournamentPollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  createdAt DateTime             @default(now())
+
+  @@unique([pollId, userId])
+  @@index([pollId])
+  @@index([userId])
+}
+
+model Tournament {
+  id           String            @id @default(cuid())
+  title        String            // e.g. "CZT Tournament 1"
+  pollId       String?           // optional: which poll decided the category
+  poll         TournamentPoll?   @relation(fields: [pollId], references: [id], onDelete: SetNull)
+  gameId       String
+  game         Game              @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  mapId        String
+  map          Map               @relation(fields: [mapId], references: [id], onDelete: Cascade)
+  challengeId  String?           // challenge-based leaderboard
+  challenge    Challenge?        @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  easterEggId  String?           // or easter-egg-based
+  easterEgg    EasterEgg?        @relation(fields: [easterEggId], references: [id], onDelete: Cascade)
+  config       Json?             // tags: difficulty, playerCount, bo3GobbleGumMode, etc.
+  startsAt     DateTime
+  endsAt       DateTime          // 7 days from start; then locked, no more runs
+  status       TournamentStatus  @default(UPCOMING) // UPCOMING | OPEN | LOCKED
+  createdAt    DateTime          @default(now())
+  createdById  String
+  createdBy    User              @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  logs         TournamentLog[]
+  trophies     TournamentTrophy[]
+
+  @@index([status])
+  @@index([endsAt])
+  @@index([createdAt(sort: Desc)])
+}
+
+model TournamentLog {
+  id              String   @id @default(cuid())
+  tournamentId    String
+  tournament      Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challengeLogId  String?
+  challengeLog    ChallengeLog? @relation(fields: [challengeLogId], references: [id], onDelete: Cascade)
+  easterEggLogId  String?
+  easterEggLog    EasterEggLog? @relation(fields: [easterEggLogId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+
+  @@unique([tournamentId, challengeLogId])
+  @@unique([tournamentId, easterEggLogId])
+  @@index([tournamentId])
+  @@index([userId])
+}
+
+model TournamentTrophy {
+  id           String     @id @default(cuid())
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User       @relation("TrophyWinner", fields: [userId], references: [id], onDelete: Cascade)
+  place        Int        // 1=gold, 2=silver, 3=bronze
+  xpAwarded    Int        // 30000, 15000, 7500
+  awardedAt    DateTime   @default(now())
+  awardedById  String
+  awardedBy    User       @relation("TrophyAwardedBy", fields: [awardedById], references: [id], onDelete: Cascade)
+
+  @@unique([tournamentId, place])
+  @@index([userId])
+  @@index([tournamentId])
+}
+
+// Singleton: one row for current tournament prize pool (USD cents). Super admin updates via API.
+model TournamentPrizePool {
+  id          String   @id @default(cuid())
+  amountCents Int      @default(0)
+  updatedAt   DateTime @updatedAt
+}
+
+enum TournamentPollStatus {
+  DRAFT
+  ACTIVE
+  ENDED
+}
+
+enum TournamentStatus {
+  UPCOMING
+  OPEN
+  LOCKED
 }

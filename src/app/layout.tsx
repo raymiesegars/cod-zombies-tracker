@@ -3,6 +3,7 @@ import { AuthProvider } from '@/context/auth-context';
 import { XpToastProvider } from '@/context/xp-toast-context';
 import { LogProgressModalProvider } from '@/context/log-progress-modal-context';
 import { Navbar, Footer, BackToTop, TVRoomBackground, MusicPlayer, AuthLayoutWrapper, MessagingWidget } from '@/components/layout';
+import { SiteUpdatesModal } from '@/components/site-updates-modal';
 import './globals.css';
 
 export const viewport: Viewport = {
@@ -151,6 +152,7 @@ export default function RootLayout({
                 <Footer />
                 <BackToTop />
                 <MessagingWidget />
+                <SiteUpdatesModal />
               </AuthLayoutWrapper>
               </LogProgressModalProvider>
             </XpToastProvider>

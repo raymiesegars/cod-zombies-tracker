@@ -14,6 +14,7 @@ export const PROFILE_STAT_BLOCK_IDS = [
   'highest-round',
   'speedruns',
   'mystery-box',
+  'tournament-trophies',
 ] as const;
 
 export type ProfileStatBlockId = (typeof PROFILE_STAT_BLOCK_IDS)[number];
