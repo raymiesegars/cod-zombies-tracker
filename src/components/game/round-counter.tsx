@@ -40,7 +40,7 @@ export function RoundCounter({
         className
       )}
       style={{
-        color: '#b91c1c',
+        color: '#dc2626',
         WebkitTextStroke: '2px rgba(22, 6, 8, 0.92)',
         paintOrder: 'stroke fill',
       }}

@@ -5,11 +5,11 @@ const BASE = (process.env.NEXT_PUBLIC_APP_URL || 'https://codzombiestracker.com'
 export const metadata: Metadata = {
   title: 'About',
   description:
-    'CoD Zombies Tracker is a free, open source project with no ads or paywalls. Tips help keep the site running. Rank icon disclaimer and contact.',
+    'CoD Zombies Tracker is a free, open source project with no ads or paywalls. Tips help keep the site running. Contact.',
   openGraph: {
     title: 'About | CoD Zombies Tracker',
     description:
-      'Free, open source CoD Zombies tracker. No monetization, no ads. Rank icon disclaimer and how to support the project.',
+      'Free, open source CoD Zombies tracker. No monetization, no ads. How to support the project and contact.',
     url: `${BASE}/about`,
   },
 };

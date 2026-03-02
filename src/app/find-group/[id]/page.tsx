@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
+import { useShowLoadingAfter } from '@/hooks/use-show-loading-after';
 import {
   Card,
   CardContent,
@@ -65,6 +66,7 @@ export default function FindGroupListingPage() {
   const { user: authUser, profile } = useAuth();
   const [listing, setListing] = useState<ListingDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const showLoadingUI = useShowLoadingAfter(isLoading, 250);
   const [messageText, setMessageText] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
   const [updatingSlots, setUpdatingSlots] = useState(false);
@@ -158,6 +160,9 @@ export default function FindGroupListingPage() {
   };
 
   if (isLoading) {
+    if (!showLoadingUI) {
+      return <div className="min-h-screen bg-bunker-950" aria-hidden />;
+    }
     return (
       <div className="min-h-screen bg-bunker-950 flex items-center justify-center">
         <PageLoader message="Loading listing…" />

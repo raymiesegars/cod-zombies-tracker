@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
+import { useShowLoadingAfter } from '@/hooks/use-show-loading-after';
 import { Logo, PageLoader } from '@/components/ui';
 
 function DashboardLoadingScreen({ message }: { message: string }) {
@@ -21,9 +22,12 @@ function DashboardLoadingScreen({ message }: { message: string }) {
   );
 }
 
+const LOADING_DELAY_MS = 250;
+
 export default function DashboardPage() {
   const router = useRouter();
   const { user, profile, isLoading, isProfileSettingUp } = useAuth();
+  const showLoadingUI = useShowLoadingAfter(isLoading || !user, LOADING_DELAY_MS);
 
   useEffect(() => {
     if (isLoading) return;
@@ -37,6 +41,9 @@ export default function DashboardPage() {
   }, [user, profile, isLoading, router]);
 
   if (isLoading || !user) {
+    if (!showLoadingUI) {
+      return <div className="fixed inset-0 z-30 bg-bunker-950" aria-hidden />;
+    }
     return <DashboardLoadingScreen message="Loading…" />;
   }
   if (isProfileSettingUp || !profile?.username) {

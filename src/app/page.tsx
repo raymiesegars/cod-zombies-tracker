@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button, Card, CardContent, Logo, EasterEggIcon, MapIcon, MysteryBoxIcon } from '@/components/ui';
 import { useAuth } from '@/context/auth-context';
-import { Trophy, Target, Users, ChevronRight, Wrench, ExternalLink, PenLine } from 'lucide-react';
+import { Trophy, Target, Users, ChevronRight, Wrench, ExternalLink, PenLine, Medal } from 'lucide-react';
 import { useLogProgressModal } from '@/context/log-progress-modal-context';
 
 const features = [
@@ -35,23 +35,49 @@ const features = [
   },
 ];
 
-const statsConfig: { label: string; value?: string; key?: 'maps' }[] = [
-  { label: 'Maps', key: 'maps' },
-  { label: 'Games', value: '12+' },
-  { label: 'Achievements', value: '5,000+' },
-];
+/** Format number for hero: compact, 2 decimals when under 10k (e.g. 1.84k), 1 decimal 10k–100k (11.8k), then whole k/M. */
+function formatCompact(n: number): string {
+  if (n < 1000) return n.toLocaleString();
+  if (n < 10_000) {
+    const s = (n / 1000).toFixed(2);
+    return (s.endsWith('00') ? s.slice(0, -3) : s.replace(/0+$/, '').replace(/\.$/, '')) + 'k';
+  }
+  if (n < 100_000) {
+    const s = (n / 1000).toFixed(1);
+    return (s.endsWith('.0') ? s.slice(0, -2) : s) + 'k';
+  }
+  if (n < 1_000_000) return Math.round(n / 1000) + 'k';
+  return (n / 1_000_000).toFixed(2).replace(/\.?0+$/, '') + 'M';
+}
 
 export default function HomePage() {
-  const { user, profile, signInWithGoogle } = useAuth();
+  const { user, profile, isLoading: authLoading, signInWithGoogle } = useAuth();
   const { openLogProgressModal } = useLogProgressModal() ?? {};
-  const [mapCount, setMapCount] = useState<number | null>(null);
+  const [homeStats, setHomeStats] = useState<{
+    maps: number;
+    users: number;
+    achievements: number;
+    runs: number;
+  } | null>(null);
 
   useEffect(() => {
-    fetch('/api/maps')
+    fetch('/api/home-stats')
       .then((res) => res.json())
-      .then((data) => setMapCount(Array.isArray(data) ? data.length : 0))
-      .catch(() => setMapCount(0));
+      .then((data) => {
+        if (data?.maps != null && data?.users != null && data?.achievements != null && data?.runs != null) {
+          setHomeStats({
+            maps: data.maps,
+            users: data.users,
+            achievements: data.achievements,
+            runs: data.runs,
+          });
+        }
+      })
+      .catch(() => setHomeStats(null));
   }, []);
+
+  // Don't show user-dependent CTAs until auth has resolved — avoids "Get Started" flashing to "Log Progress" for logged-in users
+  const authReady = !authLoading;
 
   return (
     <div className="relative noise-overlay">
@@ -91,7 +117,16 @@ export default function HomePage() {
             </p>
 
             <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-              {user ? (
+              {!authReady ? (
+                <>
+                  <div className="w-full sm:w-auto h-12 sm:h-11 rounded-lg bg-bunker-800/60 border border-bunker-700/60 min-w-[140px]" aria-hidden />
+                  <Link href="/maps" className="w-full sm:w-auto">
+                    <Button size="lg" rightIcon={<ChevronRight className="w-5 h-5" />} variant="secondary" className="w-full sm:w-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]">
+                      Browse Maps
+                    </Button>
+                  </Link>
+                </>
+              ) : user ? (
                 <>
                   {openLogProgressModal && (
                     <Button
@@ -137,16 +172,26 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Stats - 3 only: Maps (actual count), Challenge Types, Achievements */}
+          {/* Stats: Runs (truncated), Users, Achievements (truncated, actual total) */}
           <div className="mt-16 sm:mt-20 grid grid-cols-3 gap-1 sm:gap-3">
-            {statsConfig.map((stat) => (
-              <div key={stat.label} className="text-center">
-                <p className="text-2xl sm:text-3xl md:text-4xl font-zombies text-blood-400">
-                  {stat.key === 'maps' ? (mapCount ?? '—') : (stat.value ?? '')}
-                </p>
-                <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-bunker-400">{stat.label}</p>
-              </div>
-            ))}
+            <div className="text-center">
+              <p className="text-2xl sm:text-3xl md:text-4xl font-zombies text-blood-400">
+                {homeStats != null ? formatCompact(homeStats.runs) : '—'}
+              </p>
+              <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-bunker-400">Runs Logged</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl sm:text-3xl md:text-4xl font-zombies text-blood-400">
+                {homeStats != null ? homeStats.users.toLocaleString() : '—'}
+              </p>
+              <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-bunker-400">Users</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl sm:text-3xl md:text-4xl font-zombies text-blood-400">
+                {homeStats != null ? formatCompact(homeStats.achievements) : '—'}
+              </p>
+              <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-bunker-400">Achievements</p>
+            </div>
           </div>
         </div>
 
@@ -156,6 +201,29 @@ export default function HomePage() {
             <div className="w-1.5 h-3 bg-blood-700 rounded-full" />
           </div>
         </div>
+      </section>
+
+      {/* Tournaments — Promo */}
+      <section className="py-8 sm:py-12 px-4 border-y border-blood-900/40 bg-gradient-to-b from-blood-950/30 to-bunker-950">
+        <Link
+          href="/tournaments"
+          className="block max-w-4xl mx-auto p-6 sm:p-8 rounded-2xl border-2 border-blood-700/50 bg-blood-950/60 hover:bg-blood-900/50 hover:border-blood-600/70 transition-all text-left group"
+        >
+          <div className="flex items-center gap-4 sm:gap-6">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-blood-900/50 border-2 border-blood-600/50 flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
+              <Medal className="w-10 h-10 sm:w-12 sm:h-12 text-blood-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-zombies text-blood-100 tracking-wide">
+                Tournaments
+              </h2>
+              <p className="mt-1 sm:mt-2 text-sm sm:text-base text-blood-200/80">
+                Vote on the next category, submit your run, and compete for gold, silver, and bronze. Top 3 get trophy XP.
+              </p>
+            </div>
+            <ChevronRight className="w-8 h-8 text-blood-500 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+          </div>
+        </Link>
       </section>
 
       {/* Mystery Box — Big Promo */}
@@ -193,7 +261,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          {user && openLogProgressModal && (
+          {authReady && user && openLogProgressModal && (
             <div className="mb-8 sm:mb-12">
               <button
                 type="button"
@@ -320,7 +388,16 @@ export default function HomePage() {
               Free account. Easter egg guides, challenges, speedruns, XP and ranks. Log runs with squad, get verified, customize your maps and profile.
             </p>
             <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-              {user ? (
+              {!authReady ? (
+                <>
+                  <div className="h-12 sm:h-11 rounded-lg bg-bunker-800/60 border border-bunker-700/60 min-w-[160px]" aria-hidden />
+                  <Link href="/maps">
+                    <Button size="lg" variant="secondary" rightIcon={<ChevronRight className="w-5 h-5" />} className="[text-shadow:0_1px_2px_rgba(0,0,0,0.6)]">
+                      Browse Maps
+                    </Button>
+                  </Link>
+                </>
+              ) : user ? (
                 <>
                   {openLogProgressModal && (
                     <Button

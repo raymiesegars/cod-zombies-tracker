@@ -126,7 +126,7 @@ export function AchievementsModal({
                       {m.gameShortName && (
                         <span className="text-xs text-bunker-400">{m.gameShortName}</span>
                       )}
-                      <span className="text-sm font-zombies text-blood-400 tabular-nums">
+                      <span className="text-sm font-zombies text-blood-300 tabular-nums">
                         {m.unlocked}/{m.total}
                       </span>
                       <ExternalLink className="w-4 h-4 text-bunker-500 group-hover:text-blood-400 shrink-0" />

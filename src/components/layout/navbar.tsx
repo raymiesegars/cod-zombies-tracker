@@ -4,10 +4,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/auth-context';
+import { useShowLoadingAfter } from '@/hooks/use-show-loading-after';
 import { Button, Logo, MapIcon, MysteryBoxIcon } from '@/components/ui';
 import { UserWithRank } from '@/components/game';
 import { NotificationsDropdown } from '@/components/layout/notifications-dropdown';
-import { Menu, X, LogOut, User, Settings, Trophy, LayoutDashboard, Users, PenLine, ChevronDown, ShieldCheck } from 'lucide-react';
+import { Menu, X, LogOut, User, Settings, Trophy, Medal, Users, PenLine, ChevronDown, ShieldCheck } from 'lucide-react';
 import { useLogProgressModal } from '@/context/log-progress-modal-context';
 
 const DISCORD_URL = 'https://discord.gg/Gc6Cnt7XxT';
@@ -25,24 +26,26 @@ const DiscordIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const AUTH_LOADING_DELAY_MS = 250;
+
 export function Navbar() {
   const { user, profile, isLoading, signInWithGoogle, signOut } = useAuth();
+  const showAuthLoading = useShowLoadingAfter(isLoading, AUTH_LOADING_DELAY_MS);
   const { openLogProgressModal } = useLogProgressModal() ?? {};
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const dashboardHref = user && profile?.username ? `/users/${profile.username}` : null;
   const linkClass =
     'py-2 px-2 sm:px-2.5 text-sm font-medium font-zombies text-bunker-200 hover:text-white hover:bg-white/5 transition-colors rounded-lg border border-transparent hover:border-bunker-600/60 tracking-wide whitespace-nowrap shrink-0';
   const iconOnlyClass =
     'inline-flex items-center justify-center p-2 rounded-lg border border-transparent text-bunker-200 hover:text-white hover:bg-white/5 hover:border-bunker-600/60 transition-colors shrink-0';
 
-  const navLinks: { href: string; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    ...(dashboardHref ? [{ href: dashboardHref, label: 'Dashboard', icon: LayoutDashboard }] : []),
-    { href: '/maps', label: 'Maps', icon: MapIcon },
-    { href: '/leaderboards', label: 'Leaderboards', icon: Trophy },
-    { href: '/find-group', label: 'LFG', icon: Users },
+  const navLinks: { href: string; label: string; icon: React.ComponentType<{ className?: string }>; iconClass: string }[] = [
+    { href: '/maps', label: 'Maps', icon: MapIcon, iconClass: 'text-blood-400' },
+    { href: '/leaderboards', label: 'Leaderboards', icon: Trophy, iconClass: 'text-amber-400' },
+    { href: '/tournaments', label: 'Tourney', icon: Medal, iconClass: 'text-amber-500' },
+    { href: '/find-group', label: 'LFG', icon: Users, iconClass: 'text-element-400' },
   ];
 
   return (
@@ -67,7 +70,7 @@ export function Navbar() {
               const Icon = link.icon;
               return (
                 <Link key={link.href} href={link.href} className={`${linkClass} inline-flex items-center gap-1`} aria-label={link.href === '/find-group' ? 'Find Group' : link.label}>
-                  <Icon className="w-4 h-4 flex-shrink-0 text-current" />
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${link.iconClass}`} />
                   <span className="hidden min-[1230px]:inline">{link.label}</span>
                 </Link>
               );
@@ -145,8 +148,10 @@ export function Navbar() {
                 <span className="leading-none pt-0.5">Log</span>
               </button>
             )}
-            {isLoading ? (
-              <div className="w-8 h-8 rounded-full bg-bunker-800 animate-pulse shrink-0" />
+            {isLoading && !showAuthLoading ? (
+              <div className="w-8 h-8 shrink-0" aria-hidden />
+            ) : showAuthLoading ? (
+              <div className="w-8 h-8 rounded-full bg-bunker-800 animate-pulse shrink-0" aria-hidden />
             ) : user && profile ? (
               <>
                 <NotificationsDropdown />
@@ -264,9 +269,10 @@ export function Navbar() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="navbar:hidden bg-bunker-900/95 border-b border-bunker-800/50 relative z-50"
+              transition={{ duration: 0.2 }}
+              className="navbar:hidden bg-bunker-900/95 border-b border-bunker-800/50 relative z-50 max-h-[85vh] flex flex-col"
             >
-            <div className="px-4 py-4 space-y-2">
+            <div className="overflow-y-auto overflow-x-hidden overscroll-contain flex-1 min-h-0 px-4 py-4 pb-6 space-y-2 touch-pan-y">
               {/* Notifications first (when logged in) — easy to reach, matches bell in desktop nav */}
               {user && (
                 <div className="flex justify-center py-1">
@@ -287,7 +293,7 @@ export function Navbar() {
                   Log Progress
                 </button>
               )}
-              {/* Main nav: Dashboard, Maps, Leaderboards, Find Group */}
+              {/* Main nav: Maps, Leaderboards, Tourney, LFG */}
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -295,7 +301,7 @@ export function Navbar() {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center gap-3 px-4 py-3 min-h-[44px] text-base font-zombies text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors tracking-wide touch-manipulation"
                 >
-                  <link.icon className="w-5 h-5 flex-shrink-0 text-current" />
+                  <link.icon className={`w-5 h-5 flex-shrink-0 ${link.iconClass}`} />
                   {link.label}
                 </Link>
               ))}
