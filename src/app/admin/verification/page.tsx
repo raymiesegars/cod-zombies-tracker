@@ -82,8 +82,15 @@ export default function AdminVerificationPage() {
     if (selected.size === 0) return;
     setApproving(true);
     const toApprove = runs.filter((r) => selected.has(runKey(r)));
+    const seen = new Set<string>();
+    const unique = toApprove.filter((r) => {
+      const k = runKey(r);
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
     let done = 0;
-    for (const item of toApprove) {
+    for (const item of unique) {
       try {
         const res = await fetch('/api/admin/verify/approve', {
           method: 'POST',

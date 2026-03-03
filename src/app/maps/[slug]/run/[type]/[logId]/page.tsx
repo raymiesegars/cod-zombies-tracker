@@ -869,7 +869,7 @@ export default function RunDetailPage() {
                   </Button>
                 </div>
               )}
-              {!isOwner && adminMe?.isAdmin && isPendingVerification && (
+              {adminMe?.isAdmin && isPendingVerification && (!isOwner || adminMe?.isSuperAdmin) && (
                 <div className="flex flex-col gap-2 pt-3 border-t border-bunker-700 mt-3">
                   <p className="text-bunker-400 text-xs">Admin: approve or deny verification</p>
                   <div className="flex flex-wrap gap-2">
@@ -896,7 +896,7 @@ export default function RunDetailPage() {
                   </div>
                 </div>
               )}
-              {!isOwner && adminMe?.isSuperAdmin && !isVerified && (
+              {adminMe?.isSuperAdmin && !isVerified && (
                 <div className="flex flex-col gap-2 pt-3 border-t border-bunker-700 mt-3">
                   <p className="text-bunker-400 text-xs">Super admin: add verification to this run</p>
                   <Button

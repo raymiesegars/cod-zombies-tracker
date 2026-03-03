@@ -104,11 +104,13 @@ export default function LeaderboardsPage() {
   const [searchForFetch, setSearchForFetch] = useState(''); // Debounced; drives server-side search
   const [verifiedOnly, setVerifiedOnly] = useState(true);
   const [rankVerifiedXpOnly, setRankVerifiedXpOnly] = useState(true);
+  const [leaderboardStorageHydrated, setLeaderboardStorageHydrated] = useState(false);
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const stored = getStoredLeaderboardVerifiedOnly();
     setVerifiedOnly(stored);
     setRankVerifiedXpOnly(stored);
+    setLeaderboardStorageHydrated(true);
   }, []);
 
   const [fortuneCardsFilter, setFortuneCardsFilter] = useState<string>(''); // '' = All (combined)
@@ -196,6 +198,10 @@ export default function LeaderboardsPage() {
 
   useEffect(() => {
     async function fetchLeaderboard() {
+      if (!leaderboardStorageHydrated) {
+        if (isRankView) setIsLoading(true);
+        return;
+      }
       if (isRankView) {
         setIsLoading(true);
         try {
@@ -328,7 +334,7 @@ export default function LeaderboardsPage() {
 
     fetchLeaderboard();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- selectedMapData?.game?.shortName derived from selectedMap
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, isVanguardMap, hasVanguardVoid, hasVanguardRampage, searchForFetch, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, isVanguardMap, hasVanguardVoid, hasVanguardRampage, searchForFetch, verifiedOnly, rankVerifiedXpOnly, leaderboardStorageHydrated, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter]);
 
   const loadMore = useCallback(async () => {
     if (leaderboard.length >= total || total === 0) return;
@@ -987,7 +993,8 @@ export default function LeaderboardsPage() {
                     <>
                       <Select
                         options={[
-                          { value: '', label: 'Jug Allowed' },
+                          { value: '', label: 'Any Jug' },
+                          { value: 'false', label: 'Jug Allowed' },
                           { value: 'true', label: 'No Jug' },
                         ]}
                         value={wawNoJugFilter}

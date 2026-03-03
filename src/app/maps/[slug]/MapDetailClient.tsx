@@ -2242,7 +2242,8 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                     {map?.slug && hasNoJugSupport(map.slug, map.game?.shortName) && (
                       <Select
                         options={[
-                          { value: '', label: 'Jug Allowed' },
+                          { value: '', label: 'Any Jug' },
+                          { value: 'false', label: 'Jug Allowed' },
                           { value: 'true', label: 'No Jug' },
                         ]}
                         value={lbWawNoJug}

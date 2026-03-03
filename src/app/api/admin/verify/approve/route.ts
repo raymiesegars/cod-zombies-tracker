@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
+import { isSuperAdmin } from '@/lib/admin';
 import { grantVerifiedAchievementsForMap } from '@/lib/verified-xp';
 import { NotificationType } from '@prisma/client';
 
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
       if (!log || !log.verificationRequestedAt || log.isVerified) {
         return NextResponse.json({ error: 'Run not found or not pending verification' }, { status: 400 });
       }
-      if (log.userId === me.id) {
+      if (log.userId === me.id && !isSuperAdmin(me.id)) {
         return NextResponse.json({ error: 'You cannot verify your own run' }, { status: 400 });
       }
       await prisma.challengeLog.update({
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
       if (!log || !log.verificationRequestedAt || log.isVerified) {
         return NextResponse.json({ error: 'Run not found or not pending verification' }, { status: 400 });
       }
-      if (log.userId === me.id) {
+      if (log.userId === me.id && !isSuperAdmin(me.id)) {
         return NextResponse.json({ error: 'You cannot verify your own run' }, { status: 400 });
       }
       await prisma.easterEggLog.update({
