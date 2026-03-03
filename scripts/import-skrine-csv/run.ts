@@ -65,7 +65,21 @@ function parsePlayerCount(n: string): PlayerCount {
   return 'SOLO';
 }
 
-/** Parse "achieved" — round number or time (HH:MM:SS or MM:SS) to seconds. */
+/**
+ * Parse a time segment, stripping any milliseconds (e.g. "50.123" → 50, "00.456" → 0).
+ * ZWR sometimes has MM:SS.ms or MM:SS:00 which we must not treat as hours.
+ */
+function parseTimeSegment(seg: string): number {
+  const t = seg.trim();
+  const num = t.includes('.') ? Math.floor(parseFloat(t)) : parseInt(t, 10);
+  return Number.isNaN(num) ? 0 : num;
+}
+
+/**
+ * Parse "achieved" — round number or time to seconds.
+ * Supports: plain round number; MM:SS; MM:SS.ms (milliseconds stripped); HH:MM:SS; MM:SS:00 (ZWR export where :00 is subseconds — treat as MM:SS).
+ * ZWR can export e.g. "34:50:00" meaning 34 min 50 sec (with trailing :00); we must not interpret that as 34 hours.
+ */
 export function parseAchieved(achieved: string): { round: number | null; completionTimeSeconds: number | null } {
   const s = (achieved || '').trim();
   if (!s) return { round: null, completionTimeSeconds: null };
@@ -73,6 +87,30 @@ export function parseAchieved(achieved: string): { round: number | null; complet
   const round = parseInt(s, 10);
   if (!Number.isNaN(round) && s === String(round)) return { round, completionTimeSeconds: null };
 
+  const rawParts = s.split(':').map((p) => p.trim());
+  const parts = rawParts.map(parseTimeSegment);
+  if (parts.some((n) => Number.isNaN(n))) return { round: null, completionTimeSeconds: null };
+  if (parts.length === 2) {
+    const [min, sec] = parts;
+    return { round: null, completionTimeSeconds: (min ?? 0) * 60 + (sec ?? 0) };
+  }
+  if (parts.length === 3) {
+    const [a, b, c] = parts;
+    // ZWR often exports MM:SS with trailing :00 (e.g. "34:50:00" = 34 min 50 sec). Treat as MM:SS when third segment is 0.
+    if (c === 0) {
+      return { round: null, completionTimeSeconds: (a ?? 0) * 60 + (b ?? 0) };
+    }
+    return { round: null, completionTimeSeconds: (a ?? 0) * 3600 + (b ?? 0) * 60 + (c ?? 0) };
+  }
+  return { round: null, completionTimeSeconds: null };
+}
+
+/** Legacy parser (buggy): 3 parts always as HH:MM:SS. Used only by backfill to detect wrong DB values. */
+export function parseAchievedLegacy(achieved: string): { round: number | null; completionTimeSeconds: number | null } {
+  const s = (achieved || '').trim();
+  if (!s) return { round: null, completionTimeSeconds: null };
+  const round = parseInt(s, 10);
+  if (!Number.isNaN(round) && s === String(round)) return { round, completionTimeSeconds: null };
   const parts = s.split(':').map((p) => parseInt(p.trim(), 10));
   if (parts.some(Number.isNaN)) return { round: null, completionTimeSeconds: null };
   if (parts.length === 2) {

@@ -62,6 +62,7 @@
     "db:import-user-superchubbs-ntc": "tsx scripts/import-user-superchubbs-ntc.ts",
     "db:fix-bo4-null-difficulty": "tsx scripts/fix-bo4-null-difficulty.ts",
     "db:backfill-bo4-difficulty-from-csv": "tsx scripts/import-skrine-csv/backfill-bo4-difficulty-from-csv.ts",
+    "db:backfill-speedrun-times-from-csv": "tsx scripts/import-skrine-csv/backfill-speedrun-times-from-csv.ts",
     "db:revalidate-bo4-backfill-users": "tsx scripts/revalidate-bo4-backfill-users.ts"
   },
   "dependencies": {
