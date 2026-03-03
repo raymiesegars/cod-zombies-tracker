@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Card, CardHeader, CardTitle, CardContent, Select, Input, Logo, PageLoader, HelpTrigger } from '@/components/ui';
+import { Card, CardHeader, CardTitle, CardContent, Select, Input, Logo, PageLoader, HelpTrigger, Button } from '@/components/ui';
 import { LeaderboardEntry, LeaderboardsHelpContent, Bo7RelicPicker } from '@/components/game';
 import type { LeaderboardEntry as LeaderboardEntryType, Game, MapWithGame, PlayerCount, ChallengeType } from '@/types';
 import { cn } from '@/lib/utils';
@@ -12,7 +12,7 @@ import { isBo3Game, BO3_GOBBLEGUM_MODES, getBo3GobbleGumLabel } from '@/lib/bo3'
 import { isBocwGame, BOCW_SUPPORT_MODES, getBocwSupportLabel } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
 import { isBo7Game, BO7_SUPPORT_MODES, getBo7SupportLabel } from '@/lib/bo7';
-import { Trophy, Medal, Filter, Search, X, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Trophy, Medal, Filter, Search, X, ShieldCheck, CheckCircle2, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { getBo2MapConfig, getBo2ChallengeTypeLabel } from '@/lib/bo2/bo2-map-config';
@@ -91,6 +91,7 @@ export default function LeaderboardsPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntryType[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadMoreLoading, setLoadMoreLoading] = useState(false);
   const loadMoreSentinelRef = useRef<HTMLDivElement>(null);
   const loadingMoreRef = useRef(false);
 
@@ -333,6 +334,7 @@ export default function LeaderboardsPage() {
     if (leaderboard.length >= total || total === 0) return;
     if (loadingMoreRef.current) return;
     loadingMoreRef.current = true;
+    setLoadMoreLoading(true);
     const offset = leaderboard.length;
     try {
       if (isRankView) {
@@ -430,20 +432,21 @@ export default function LeaderboardsPage() {
       console.error('Error loading more leaderboard entries:', error);
     } finally {
       loadingMoreRef.current = false;
+      setLoadMoreLoading(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps -- selectedMapData?.game?.shortName derived from selectedMap
   }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, hasVanguardVoid, hasVanguardRampage, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter, leaderboard.length, total]);
 
-  // Only observe sentinel when search is empty so list stays stable while filtering
+  // Observe sentinel when search is empty and more entries exist; trigger well before sentinel is visible
   useEffect(() => {
-    if (isSearchActive || leaderboard.length === 0 || leaderboard.length >= total) return;
+    if (isSearchActive || leaderboard.length === 0 || total === 0 || leaderboard.length >= total) return;
     const sentinel = loadMoreSentinelRef.current;
     if (!sentinel) return;
     const observer = new IntersectionObserver(
       (observed) => {
-        if (observed[0]?.isIntersecting) loadMore();
+        if (observed[0]?.isIntersecting && !loadingMoreRef.current) loadMore();
       },
-      { rootMargin: '0px 0px 400px 0px', threshold: 0 }
+      { root: null, rootMargin: '0px 0px 600px 0px', threshold: 0 }
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
@@ -1103,7 +1106,28 @@ export default function LeaderboardsPage() {
                       />
                     ))}
                     {!isSearchActive && leaderboard.length < total && (
-                      <div ref={loadMoreSentinelRef} className="h-px" aria-hidden />
+                      <>
+                        <div ref={loadMoreSentinelRef} className="min-h-[40px] py-4" aria-hidden />
+                        <div className="flex justify-center pt-2 pb-2">
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => loadMore()}
+                            disabled={loadMoreLoading}
+                            className="border-bunker-600 text-bunker-200 hover:bg-white/5 hover:border-bunker-500"
+                          >
+                            {loadMoreLoading ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin mr-2 inline" aria-hidden />
+                                Loading…
+                              </>
+                            ) : (
+                              `Load more (${leaderboard.length} of ${total})`
+                            )}
+                          </Button>
+                        </div>
+                      </>
                     )}
                   </>
                 ) : searchQuery.trim() ? (
@@ -1168,7 +1192,28 @@ export default function LeaderboardsPage() {
                       />
                     ))}
                     {!isSearchActive && leaderboard.length < total && (
-                      <div ref={loadMoreSentinelRef} className="h-px" aria-hidden />
+                      <>
+                        <div ref={loadMoreSentinelRef} className="min-h-[40px] py-4" aria-hidden />
+                        <div className="flex justify-center pt-2 pb-2">
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => loadMore()}
+                            disabled={loadMoreLoading}
+                            className="border-bunker-600 text-bunker-200 hover:bg-white/5 hover:border-bunker-500"
+                          >
+                            {loadMoreLoading ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin mr-2 inline" aria-hidden />
+                                Loading…
+                              </>
+                            ) : (
+                              `Load more (${leaderboard.length} of ${total})`
+                            )}
+                          </Button>
+                        </div>
+                      </>
                     )}
                   </>
                 ) : searchQuery.trim() ? (
