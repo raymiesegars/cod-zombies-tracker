@@ -15,6 +15,7 @@
  *   pnpm db:reunlock-achievements           # Run and create unlocks
  *   pnpm db:reunlock-achievements --dry-run # Report only, no changes
  *   BACKFILL_USER_ID=userId pnpm db:reunlock-achievements [--dry-run]  # Only that user (faster on large DBs)
+ *   BACKFILL_GAMES=BO4,BOCW,BO6,BO7 pnpm db:reunlock-achievements     # Only (userId, mapId) for these games (faster, targeted)
  */
 
 import * as fs from 'fs';
@@ -42,6 +43,10 @@ import { grantVerifiedAchievementsForMap } from '../src/lib/verified-xp';
 
 const DRY_RUN = process.argv.includes('--dry-run');
 const filterUserId = process.env.BACKFILL_USER_ID?.trim();
+/** Optional: comma-separated game shortNames — only process (userId, mapId) where map is in these games. */
+const backfillGames = process.env.BACKFILL_GAMES?.trim()
+  ? new Set(process.env.BACKFILL_GAMES.split(',').map((g) => g.trim()).filter(Boolean))
+  : null;
 
 async function main() {
   const dbUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
@@ -57,17 +62,31 @@ async function main() {
   if (filterUserId) {
     console.log(`Filtering to userId=${filterUserId}\n`);
   }
+  if (backfillGames) {
+    console.log(`Filtering to games: ${Array.from(backfillGames).join(', ')}\n`);
+  }
+
+  let allowedMapIds: Set<string> | null = null;
+  if (backfillGames) {
+    const maps = await prisma.map.findMany({
+      where: { game: { shortName: { in: Array.from(backfillGames) } } },
+      select: { id: true },
+    });
+    allowedMapIds = new Set(maps.map((m) => m.id));
+    console.log(`  ${allowedMapIds.size} maps in selected games.\n`);
+  }
 
   const baseWhere = filterUserId ? { userId: filterUserId } : {};
+  const mapWhere = allowedMapIds ? { mapId: { in: Array.from(allowedMapIds) } } : {};
 
   const [challengePairs, eePairs] = await Promise.all([
     prisma.challengeLog.findMany({
-      where: baseWhere,
+      where: { ...baseWhere, ...mapWhere },
       select: { userId: true, mapId: true },
       distinct: ['userId', 'mapId'],
     }),
     prisma.easterEggLog.findMany({
-      where: baseWhere,
+      where: { ...baseWhere, ...mapWhere },
       select: { userId: true, mapId: true },
       distinct: ['userId', 'mapId'],
     }),

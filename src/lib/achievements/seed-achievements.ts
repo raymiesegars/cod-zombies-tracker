@@ -836,6 +836,16 @@ export function getMapAchievementDefinitions(
           }
         }
       }
+      if (bo4Cfg.challengeTypes.includes('ONE_BOX')) {
+        rows.push({
+          slug: 'one-box-30',
+          name: 'One Box Round 30',
+          type: 'CHALLENGE_COMPLETE',
+          criteria: { round: 30, challengeType: 'ONE_BOX' },
+          xpReward: 600,
+          rarity: 'RARE',
+        });
+      }
       if (bo4Cfg.rushWR != null && bo4Cfg.rushWR > 0) {
         const rushWr = bo4Cfg.rushWR;
         const scoreMilestones = [Math.floor(rushWr * 0.1), Math.floor(rushWr * 0.25), Math.floor(rushWr * 0.5), Math.floor(rushWr * 0.75), rushWr];
@@ -934,6 +944,16 @@ export function getMapAchievementDefinitions(
             rarity: rarityForRound(round, noSupportCap),
           });
         }
+      }
+      if (bocwCfg.challengeTypes.includes('ONE_BOX')) {
+        rows.push({
+          slug: 'one-box-30',
+          name: 'One Box Round 30',
+          type: 'CHALLENGE_COMPLETE',
+          criteria: { round: 30, challengeType: 'ONE_BOX' },
+          xpReward: 600,
+          rarity: 'RARE',
+        });
       }
       return rows;
     }
@@ -1040,6 +1060,16 @@ export function getMapAchievementDefinitions(
             rarity: rarityForRound(round, noSupportCap),
           });
         }
+      }
+      if (bo6Cfg.challengeTypes.includes('ONE_BOX')) {
+        rows.push({
+          slug: 'one-box-30',
+          name: 'One Box Round 30',
+          type: 'CHALLENGE_COMPLETE',
+          criteria: { round: 30, challengeType: 'ONE_BOX' },
+          xpReward: 600,
+          rarity: 'RARE',
+        });
       }
       return rows;
     }
@@ -1304,6 +1334,16 @@ export function getMapAchievementDefinitions(
             rarity: rarityForRound(round, noSupportCap),
           });
         }
+      }
+      if (bo7Cfg.challengeTypes.includes('ONE_BOX')) {
+        rows.push({
+          slug: 'one-box-30',
+          name: 'One Box Round 30',
+          type: 'CHALLENGE_COMPLETE',
+          criteria: { round: 30, challengeType: 'ONE_BOX' },
+          xpReward: 600,
+          rarity: 'RARE',
+        });
       }
       return rows;
     }

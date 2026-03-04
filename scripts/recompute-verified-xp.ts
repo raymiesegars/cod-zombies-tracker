@@ -14,6 +14,7 @@
  *   pnpm db:recompute-verified-xp           # Run against .env.local (dev)
  *   pnpm db:recompute-verified-xp --dry-run # Preview without writing
  *   BACKFILL_USER_ID=userId pnpm db:recompute-verified-xp [--dry-run]  # Only that user (clear/grant/recalc for them only)
+ *   BACKFILL_GAMES=BO4,BOCW,BO6,BO7 pnpm db:recompute-verified-xp     # Only maps in these games + recalc only affected users (faster)
  */
 
 import * as fs from 'fs';
@@ -40,6 +41,10 @@ import { getLevelFromXp } from '../src/lib/ranks';
 
 const DRY_RUN = process.argv.includes('--dry-run');
 const filterUserId = process.env.BACKFILL_USER_ID?.trim();
+/** Optional: comma-separated game shortNames — only process maps in these games and recalc only affected users. */
+const backfillGames = process.env.BACKFILL_GAMES?.trim()
+  ? new Set(process.env.BACKFILL_GAMES.split(',').map((g) => g.trim()).filter(Boolean))
+  : null;
 
 async function main() {
   const dbUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
@@ -55,18 +60,32 @@ async function main() {
   if (filterUserId) {
     console.log(`Filtering to userId=${filterUserId}\n`);
   }
+  if (backfillGames) {
+    console.log(`Filtering to games: ${Array.from(backfillGames).join(', ')}\n`);
+  }
+
+  let allowedMapIds: Set<string> | null = null;
+  if (backfillGames) {
+    const maps = await prisma.map.findMany({
+      where: { game: { shortName: { in: Array.from(backfillGames) } } },
+      select: { id: true },
+    });
+    allowedMapIds = new Set(maps.map((m) => m.id));
+    console.log(`  ${allowedMapIds.size} maps in selected games.\n`);
+  }
 
   const baseWhere = filterUserId ? { isVerified: true, userId: filterUserId } : { isVerified: true };
+  const mapWhere = allowedMapIds ? { mapId: { in: Array.from(allowedMapIds) } } : {};
 
   console.log('1. Finding (userId, mapId) pairs with verified runs...');
   const [challengePairs, eePairs] = await Promise.all([
     prisma.challengeLog.findMany({
-      where: baseWhere,
+      where: { ...baseWhere, ...mapWhere },
       select: { userId: true, mapId: true },
       distinct: ['userId', 'mapId'],
     }),
     prisma.easterEggLog.findMany({
-      where: baseWhere,
+      where: { ...baseWhere, ...mapWhere },
       select: { userId: true, mapId: true },
       distinct: ['userId', 'mapId'],
     }),
@@ -79,9 +98,15 @@ async function main() {
   const verifiedPairs = Array.from(verifiedPairSet.values());
   console.log(`   Found ${verifiedPairs.length} (userId, mapId) pairs with verified runs.\n`);
 
-  const clearWhere = filterUserId
-    ? { userId: filterUserId, verifiedAt: { not: null } }
-    : { verifiedAt: { not: null } };
+  const clearWhere = allowedMapIds
+    ? {
+        verifiedAt: { not: null },
+        achievement: { mapId: { in: Array.from(allowedMapIds) } },
+        ...(filterUserId ? { userId: filterUserId } : {}),
+      }
+    : filterUserId
+      ? { userId: filterUserId, verifiedAt: { not: null } }
+      : { verifiedAt: { not: null } };
 
   if (!DRY_RUN) {
     console.log('2. Clearing verifiedAt on UserAchievement...');
@@ -115,9 +140,18 @@ async function main() {
   }
 
   console.log('4. Recalculating totalXp, level, verifiedTotalXp...');
-  const users = filterUserId
-    ? await prisma.user.findMany({ where: { id: filterUserId }, select: { id: true } })
+  const affectedUserIds =
+    filterUserId
+      ? new Set([filterUserId])
+      : allowedMapIds && verifiedPairs.length > 0
+        ? new Set(verifiedPairs.map((p) => p.userId))
+        : null;
+  const users = affectedUserIds
+    ? await prisma.user.findMany({ where: { id: { in: Array.from(affectedUserIds) } }, select: { id: true } })
     : await prisma.user.findMany({ select: { id: true } });
+  if (affectedUserIds) {
+    console.log(`   Recalculating for ${users.length} affected users only.\n`);
+  }
   let usersUpdated = 0;
 
   for (const user of users) {

@@ -155,8 +155,6 @@ export const BO2_MAP_CONFIG: Record<Bo2MapSlug, Bo2ChallengeConfig> = {
   'bus-depot': {
     challengeTypes: [
       'HIGHEST_ROUND',
-      'NO_PERKS',
-      'NO_PACK',
       'STARTING_ROOM',
       'ONE_BOX',
       'PISTOL_ONLY',
@@ -223,7 +221,6 @@ export const BO2_MAP_CONFIG: Record<Bo2MapSlug, Bo2ChallengeConfig> = {
       'NO_JUG',
       'NO_DOWNS',
       'NO_PERKS',
-      'NO_PACK',
       'STARTING_ROOM',
       'ONE_BOX',
       'PISTOL_ONLY',

@@ -16,6 +16,7 @@
  * Usage:
  *   pnpm db:sync-achievements           # Run and upsert
  *   pnpm db:sync-achievements --dry-run # Log what would be created/updated, no writes
+ *   GAMES=BO4,BOCW,BO6,BO7 pnpm db:sync-achievements   # Only sync maps for these games (faster, targeted)
  */
 
 import * as fs from 'fs';
@@ -45,6 +46,10 @@ const prisma = new PrismaClient({
 });
 
 const DRY_RUN = process.argv.includes('--dry-run');
+/** Optional: comma-separated game shortNames, e.g. GAMES=BO4,BOCW,BO6,BO7 — only sync these games (faster). */
+const GAMES_FILTER = process.env.GAMES?.trim()
+  ? new Set(process.env.GAMES.split(',').map((g) => g.trim()).filter(Boolean))
+  : null;
 
 async function main() {
   const dbUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
@@ -56,6 +61,9 @@ async function main() {
   if (DRY_RUN) {
     console.log('*** DRY RUN – no changes will be written ***\n');
   }
+  if (GAMES_FILTER) {
+    console.log(`Filtering to games: ${Array.from(GAMES_FILTER).join(', ')}\n`);
+  }
 
   const allMaps = await prisma.map.findMany({
     include: {
@@ -64,12 +72,24 @@ async function main() {
     },
   });
 
+  const maps = GAMES_FILTER
+    ? allMaps.filter((m) => m.game && GAMES_FILTER.has(m.game.shortName))
+    : allMaps;
+  if (GAMES_FILTER && maps.length === 0) {
+    console.log('No maps match the GAMES filter.');
+    await prisma.$disconnect();
+    return;
+  }
+  if (GAMES_FILTER) {
+    console.log(`Processing ${maps.length} maps (of ${allMaps.length} total).\n`);
+  }
+
   let created = 0;
   let updated = 0;
 
   let pruned = 0;
 
-  for (const map of allMaps) {
+  for (const map of maps) {
     const gameShortName = map.game?.shortName ?? '';
     const mapDefs = getMapAchievementDefinitions(map.slug, map.roundCap, gameShortName);
     const speedrunDefs = getSpeedrunAchievementDefinitions(map.slug, gameShortName);
