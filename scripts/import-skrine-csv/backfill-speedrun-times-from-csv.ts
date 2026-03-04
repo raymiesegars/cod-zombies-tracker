@@ -90,7 +90,7 @@ async function findChallengeLogByWrongTime(
   roundReached: number,
   wrongTimeSeconds: number,
   proofUrls: string[]
-): Promise<{ id: string } | null> {
+): Promise<{ id: string; completionTimeSeconds: number | null } | null> {
   const normalizedProof = normalizeProofUrls(proofUrls);
   const candidates = await prisma.challengeLog.findMany({
     where: {
@@ -100,7 +100,7 @@ async function findChallengeLogByWrongTime(
       roundReached,
       completionTimeSeconds: wrongTimeSeconds,
     },
-    select: { id: true, proofUrls: true },
+    select: { id: true, proofUrls: true, completionTimeSeconds: true },
   });
   if (candidates.length === 0) return null;
   const match = candidates.find(
@@ -108,7 +108,39 @@ async function findChallengeLogByWrongTime(
       c.proofUrls.length === normalizedProof.length &&
       normalizedProof.every((u, i) => c.proofUrls[i] === u)
   );
-  return match ? { id: match.id } : candidates[0] ? { id: candidates[0].id } : null;
+  const log = match ?? candidates[0]!;
+  return { id: log.id, completionTimeSeconds: log.completionTimeSeconds };
+}
+
+/** Find log by user/map/challenge/round + proof (no filter on time). Used when CSV has correct 2-part time but DB has wrong hours. */
+async function findChallengeLogByProof(
+  userId: string,
+  mapId: string,
+  challengeId: string,
+  roundReached: number,
+  proofUrls: string[]
+): Promise<{ id: string; completionTimeSeconds: number | null } | null> {
+  const normalizedProof = normalizeProofUrls(proofUrls);
+  const candidates = await prisma.challengeLog.findMany({
+    where: { userId, mapId, challengeId, roundReached },
+    select: { id: true, proofUrls: true, completionTimeSeconds: true },
+  });
+  if (candidates.length === 0) return null;
+  const match = candidates.find(
+    (c) =>
+      c.proofUrls.length === normalizedProof.length &&
+      normalizedProof.every((u, i) => c.proofUrls[i] === u)
+  );
+  const log = match ?? candidates[0]!;
+  return { id: log.id, completionTimeSeconds: log.completionTimeSeconds };
+}
+
+/** True if stored seconds look like hours bug (e.g. 28:00 min stored as 28*3600 = 100800). */
+function looksLikeHoursBug(storedSeconds: number | null, correctSeconds: number): boolean {
+  if (storedSeconds == null || storedSeconds === correctSeconds) return false;
+  if (correctSeconds <= 0) return false;
+  const ratio = storedSeconds / correctSeconds;
+  return ratio >= 55 && ratio <= 65; // ~60x (min→hour)
 }
 
 async function findEasterEggLogByWrongTime(
@@ -158,8 +190,11 @@ async function main() {
 
     const content = fs.readFileSync(csvPath, 'utf-8');
     const allRows = parseCsv(content);
-    const rows = allRows.filter((r) => rowHasPlayer(r, sourcePlayerId));
+    const rows = allRows.filter(
+      (r) => rowHasPlayer(r, sourcePlayerId) || rowHasPlayer(r, entry.displayName)
+    );
 
+    const isSpeedrun = (ct: string) => (ct || '').includes('SPEEDRUN');
     let userFixed = 0;
     for (const row of rows) {
       const mapping = getRecordMapping(row.record, row.sub_record);
@@ -167,31 +202,58 @@ async function main() {
 
       const correct = parseAchieved(row.achieved);
       const legacy = parseAchievedLegacy(row.achieved);
+      const correctSeconds = correct.completionTimeSeconds ?? legacy.completionTimeSeconds;
+      if (correctSeconds == null) continue;
 
-      if (correct.completionTimeSeconds == null || legacy.completionTimeSeconds == null) continue;
-      if (correct.completionTimeSeconds === legacy.completionTimeSeconds) continue;
-
-      const wrongSeconds = legacy.completionTimeSeconds;
-      const correctSeconds = correct.completionTimeSeconds;
       const roundReached = correct.round ?? legacy.round ?? 0;
-
       const mapRecord = await resolveMap(row.game.toLowerCase().trim(), row.map.toLowerCase().trim());
       if (!mapRecord) continue;
       const challenge = await resolveChallenge(mapRecord.id, mapping.challengeType as string);
       if (!challenge) continue;
 
       const proofUrls = parseProofUrls(row);
+      let challengeLog: { id: string; completionTimeSeconds: number | null } | null = null;
+      let wrongSeconds: number | null = null;
 
-      const challengeLog = await findChallengeLogByWrongTime(
-        cztUserId,
-        mapRecord.id,
-        challenge.id,
-        roundReached,
-        wrongSeconds,
-        proofUrls
-      );
+      if (
+        correct.completionTimeSeconds != null &&
+        legacy.completionTimeSeconds != null &&
+        correct.completionTimeSeconds !== legacy.completionTimeSeconds
+      ) {
+        wrongSeconds = legacy.completionTimeSeconds;
+        challengeLog = await findChallengeLogByWrongTime(
+          cztUserId,
+          mapRecord.id,
+          challenge.id,
+          roundReached,
+          wrongSeconds,
+          proofUrls
+        );
+      }
 
-      if (challengeLog) {
+      if (!challengeLog && isSpeedrun(mapping.challengeType as string)) {
+        challengeLog = await findChallengeLogByProof(
+          cztUserId,
+          mapRecord.id,
+          challenge.id,
+          roundReached,
+          proofUrls
+        );
+        if (
+          challengeLog &&
+          challengeLog.completionTimeSeconds != null &&
+          challengeLog.completionTimeSeconds !== correctSeconds &&
+          looksLikeHoursBug(challengeLog.completionTimeSeconds, correctSeconds)
+        ) {
+          wrongSeconds = challengeLog.completionTimeSeconds;
+        } else if (challengeLog && challengeLog.completionTimeSeconds === correctSeconds) {
+          challengeLog = null;
+        } else if (challengeLog && !looksLikeHoursBug(challengeLog.completionTimeSeconds, correctSeconds)) {
+          challengeLog = null;
+        }
+      }
+
+      if (challengeLog && wrongSeconds != null) {
         if (dryRun) {
           console.log(
             `  [DRY] ${row.record}|${row.sub_record} achieved="${row.achieved}" → would fix ChallengeLog ${challengeLog.id}: ${wrongSeconds}s → ${correctSeconds}s`
@@ -210,27 +272,25 @@ async function main() {
         affectedUserIds.add(cztUserId);
       }
 
-      if (mapping.createEasterEggLog) {
+      if (mapping.createEasterEggLog && (challengeLog || wrongSeconds != null)) {
         const mainEe = await resolveMainQuestEasterEgg(mapRecord.id);
         if (mainEe) {
-          const eeLog = await findEasterEggLogByWrongTime(
+          const eeByWrong = wrongSeconds != null ? await findEasterEggLogByWrongTime(
             cztUserId,
             mapRecord.id,
             mainEe.id,
             wrongSeconds,
             proofUrls
-          );
-          if (eeLog) {
+          ) : null;
+          if (eeByWrong) {
             if (dryRun) {
-              console.log(
-                `  [DRY] would fix EasterEggLog ${eeLog.id}: ${wrongSeconds}s → ${correctSeconds}s`
-              );
+              console.log(`  [DRY] would fix EasterEggLog ${eeByWrong.id}: ${wrongSeconds}s → ${correctSeconds}s`);
             } else {
               await prisma.easterEggLog.update({
-                where: { id: eeLog.id },
+                where: { id: eeByWrong.id },
                 data: { completionTimeSeconds: correctSeconds },
               });
-              console.log(`  Fixed EasterEggLog ${eeLog.id}: ${wrongSeconds}s → ${correctSeconds}s`);
+              console.log(`  Fixed EasterEggLog ${eeByWrong.id}: ${wrongSeconds}s → ${correctSeconds}s`);
             }
             if (!challengeLog) {
               userFixed++;

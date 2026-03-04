@@ -137,7 +137,10 @@ async function main() {
 
     console.log('\nRecalculating totalXp and level for affected users...');
     let usersUpdated = 0;
-    for (const userId of Array.from(usersWithNewUnlocks)) {
+    const userIdsToRecalc = filterUserId
+      ? Array.from(usersWithNewUnlocks).concat(filterUserId).filter((id, i, a) => a.indexOf(id) === i)
+      : Array.from(usersWithNewUnlocks);
+    for (const userId of userIdsToRecalc) {
       const uas = await prisma.userAchievement.findMany({
         where: { userId },
         include: { achievement: { select: { xpReward: true, isActive: true } } },
@@ -149,8 +152,10 @@ async function main() {
         where: { id: userId },
         select: { totalXp: true, level: true },
       });
-      if (current && (current.totalXp !== totalXp || current.level !== getLevelFromXp(totalXp).level)) {
-        const { level } = getLevelFromXp(totalXp);
+      const { level } = getLevelFromXp(totalXp);
+      const needsUpdate = current && (current.totalXp !== totalXp || current.level !== level);
+      const forceUpdateSingleUser = !!filterUserId && userId === filterUserId;
+      if ((needsUpdate || forceUpdateSingleUser) && current) {
         await prisma.user.update({
           where: { id: userId },
           data: { totalXp, level },

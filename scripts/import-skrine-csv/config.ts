@@ -14,6 +14,7 @@ export const GAME_CODES: Record<string, string> = {
   bo4: 'BO4',
   bocw: 'BOCW',
   bo6: 'BO6',
+  bo7: 'BO7',
   iw: 'IW',
   vanguard: 'VANGUARD',
   wwii: 'WW2',
@@ -79,6 +80,15 @@ export const MAP_SLUG_BY_GAME: Record<string, Record<string, string | null>> = {
   // WW2: CSV "frozen-dawn" → CZT "the-frozen-dawn"
   wwii: {
     'frozen-dawn': 'the-frozen-dawn',
+  },
+  // BO7: all 6 maps. ZWR "farm" → CZT "vandorn-farm"; others use same slug.
+  bo7: {
+    'ashes-of-the-damned': 'ashes-of-the-damned',
+    farm: 'vandorn-farm',
+    'exit-115': 'exit-115',
+    'astra-malorum': 'astra-malorum',
+    'zarya-cosmodrome': 'zarya-cosmodrome',
+    mars: 'mars',
   },
 };
 
@@ -147,7 +157,14 @@ function applySubRecordModifiers(record: string, subRecord: string, mods: Record
   if (subRecord === 'inducer') mods.rampageInducerUsed = true;
   else if (subRecord === 'non-inducer') mods.rampageInducerUsed = false;
   else if (subRecord === 'without-support') mods.bocwSupportMode = 'WITHOUT_SUPPORT';
-  else if (subRecord === 'with-support') mods.bocwSupportMode = 'WITH_SUPPORT';
+  else if (subRecord === 'with-support') {
+    mods.bocwSupportMode = 'WITH_SUPPORT';
+    mods.bo7SupportMode = 'WITH_SUPPORT';
+  }
+  if (subRecord === 'no-support') mods.bo7SupportMode = 'NO_SUPPORT';
+  // BO7 / BO6 ZWR: rampage in sub_record (e.g. with-gobblegums-rampage-allowed, no-gobblegums-with-rampage, no-gobblegums-no-rampage)
+  if (subRecord.includes('rampage-allowed') || subRecord.includes('with-rampage')) mods.rampageInducerUsed = true;
+  else if (subRecord.includes('no-rampage')) mods.rampageInducerUsed = false;
 
   // IW
   if (subRecord === 'fate-cards') mods.useFortuneCards = false;
@@ -242,6 +259,14 @@ const RECORD_MAPPINGS: Record<string, RecordMappingResult> = {
   // ---- BO6 / other ----
   'exfil-speedrun|round-11-no-gums': { challengeType: 'EXFIL_SPEEDRUN', modifiers: { bo6GobbleGumMode: 'NO_GOBBLEGUMS' } },
   'exfil-speedrun|rage-inducer-n-gum': { challengeType: 'EXFIL_SPEEDRUN', modifiers: { rampageInducerUsed: true } },
+
+  // ---- BO7 exfil (ZWR sub_record variants) ----
+  'exfil-speedrun|round-11-with-gobblegums-rampage-allowed': { challengeType: 'EXFIL_SPEEDRUN', modifiers: { rampageInducerUsed: true } },
+  'exfil-speedrun|round-11-no-gobblegums-with-rampage': { challengeType: 'EXFIL_SPEEDRUN', modifiers: { rampageInducerUsed: true } },
+  'exfil-speedrun|round-11-no-gobblegums-no-rampage': { challengeType: 'EXFIL_SPEEDRUN', modifiers: { rampageInducerUsed: false } },
+  'exfil-speedrun|round-21-with-gobblegums-rampage-allowed': { challengeType: 'EXFIL_R21_SPEEDRUN', modifiers: { rampageInducerUsed: true } },
+  'exfil-speedrun|round-21-no-gobblegums-with-rampage': { challengeType: 'EXFIL_R21_SPEEDRUN', modifiers: { rampageInducerUsed: true } },
+  'exfil-speedrun|round-21-no-gobblegums-no-rampage': { challengeType: 'EXFIL_R21_SPEEDRUN', modifiers: { rampageInducerUsed: false } },
 };
 
 // ---------------------------------------------------------------------------
@@ -260,4 +285,6 @@ export const DEFAULTS = {
   rampageInducerUsed: false,
   /** BO6 support mode when not inferred. */
   bo6SupportMode: 'NO_SUPPORT' as const,
+  /** BO7 support mode when not inferred. */
+  bo7SupportMode: 'WITH_SUPPORT' as const,
 };

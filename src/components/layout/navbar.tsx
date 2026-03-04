@@ -8,7 +8,7 @@ import { useShowLoadingAfter } from '@/hooks/use-show-loading-after';
 import { Button, Logo, MapIcon, MysteryBoxIcon } from '@/components/ui';
 import { UserWithRank } from '@/components/game';
 import { NotificationsDropdown } from '@/components/layout/notifications-dropdown';
-import { Menu, X, LogOut, User, Settings, Trophy, Medal, Users, PenLine, ChevronDown, ShieldCheck } from 'lucide-react';
+import { Menu, X, LogOut, User, Settings, Trophy, Medal, Users, PenLine, ChevronDown, ShieldCheck, MessageSquare } from 'lucide-react';
 import { useLogProgressModal } from '@/context/log-progress-modal-context';
 
 const DISCORD_URL = 'https://discord.gg/Gc6Cnt7XxT';
@@ -211,6 +211,14 @@ export function Navbar() {
                           <Settings className="w-4 h-4" />
                           Settings
                         </Link>
+                        <Link
+                          href="/feedback"
+                          onClick={() => setIsMenuOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-white hover:text-blood-400 hover:bg-bunker-800/50"
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                          Feedback
+                        </Link>
                         {(profile as { isAdmin?: boolean })?.isAdmin && (
                           <Link
                             href="/admin/verification"
@@ -334,6 +342,14 @@ export function Navbar() {
               >
                 <WrenchIcon className="w-5 h-5 flex-shrink-0 text-current" />
                 Tools
+              </Link>
+              <Link
+                href="/feedback"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 min-h-[44px] text-base font-zombies text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors tracking-wide touch-manipulation"
+              >
+                <MessageSquare className="w-5 h-5 flex-shrink-0 text-current" />
+                Feedback
               </Link>
               {/* Account section (when logged in) */}
               {user ? (
