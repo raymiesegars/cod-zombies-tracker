@@ -503,7 +503,13 @@ async function main() {
     const bocwSupportMode = (mods.bocwSupportMode as string) ?? DEFAULTS.bocwSupportMode;
     const rampageInducerUsed = mods.rampageInducerUsed as boolean | undefined;
     const isSpeedrun = (mapping.challengeType as string).includes('SPEEDRUN');
-    const defaultRampage = isSpeedrun ? true : DEFAULTS.rampageInducerUsed;
+    // BO6/BO7 round and exfil: if ZWR doesn't say anything, treat as no rampage (per community rule)
+    const defaultRampage =
+      gameCode === 'bo6' || gameCode === 'bo7'
+        ? false
+        : isSpeedrun
+          ? true
+          : DEFAULTS.rampageInducerUsed;
     const firstRoomVariant = (mods.firstRoomVariant as string) ?? null;
     const bo3AatUsed = mods.bo3AatUsed as boolean | undefined;
     const ww2ConsumablesUsed = mods.ww2ConsumablesUsed as boolean | undefined;
@@ -512,7 +518,7 @@ async function main() {
     const useDirectorsCut = mods.useDirectorsCut as boolean | undefined;
     const bo6GobbleGumMode = (mods.bo6GobbleGumMode as string) ?? null;
     const bo6SupportMode = (mods.bo6SupportMode as string) ?? null;
-    const bo7SupportMode = (mods.bo7SupportMode as string) ?? null;
+    const bo7SupportMode = (mods.bo7SupportMode as string) ?? (gameCode === 'bo7' ? DEFAULTS.bo7SupportMode : null);
 
     if (skipExisting) {
       const existing = await findExistingChallengeLog(
@@ -651,7 +657,7 @@ async function main() {
                 isVerified: true,
                 isSolo: playerCount === 'SOLO',
                 difficulty: difficulty as 'CASUAL' | 'NORMAL' | 'HARDCORE' | 'REALISTIC' | null,
-                rampageInducerUsed: rampageInducerUsed ?? (isSpeedrun ? true : false),
+                rampageInducerUsed: rampageInducerUsed ?? defaultRampage,
                 ww2ConsumablesUsed,
                 vanguardVoidUsed,
               } as never,

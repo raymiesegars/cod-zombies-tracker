@@ -57,12 +57,15 @@
     "db:import-user-lostfeeling": "tsx scripts/import-user-lostfeeling.ts",
     "db:import-user-rde": "tsx scripts/import-user-rde.ts",
     "db:import-user-dallasnation04": "tsx scripts/import-user-dallasnation04.ts",
+    "db:import-user-philosophy": "tsx scripts/import-user-philosophy.ts",
     "db:import-user-whiteboypl4ys": "tsx scripts/import-user-whiteboypl4ys.ts",
     "db:import-user-gannonsnipes": "tsx scripts/import-user-gannonsnipes.ts",
     "db:import-user-superchubbs-ntc": "tsx scripts/import-user-superchubbs-ntc.ts",
     "db:fix-bo4-null-difficulty": "tsx scripts/fix-bo4-null-difficulty.ts",
     "db:backfill-bo4-difficulty-from-csv": "tsx scripts/import-skrine-csv/backfill-bo4-difficulty-from-csv.ts",
     "db:backfill-speedrun-times-from-csv": "tsx scripts/import-skrine-csv/backfill-speedrun-times-from-csv.ts",
+    "db:backfill-bo6-bo7-rampage-from-csv": "tsx scripts/import-skrine-csv/backfill-bo6-bo7-rampage-from-csv.ts",
+    "db:reimport-all-zwr-users": "tsx scripts/import-skrine-csv/reimport-all-zwr-users.ts",
     "db:revalidate-bo4-backfill-users": "tsx scripts/revalidate-bo4-backfill-users.ts"
   },
   "dependencies": {

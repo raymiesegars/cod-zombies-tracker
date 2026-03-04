@@ -140,8 +140,9 @@ async function main() {
       current &&
       ((current.totalXp ?? 0) !== totalXp ||
         (current.verifiedTotalXp ?? 0) !== verifiedTotalXp);
+    const forceUpdateSingleUser = !!filterUserId && users.length === 1;
 
-    if (needsUpdate && !DRY_RUN) {
+    if ((needsUpdate || forceUpdateSingleUser) && !DRY_RUN) {
       const { level } = getLevelFromXp(totalXp);
       await prisma.user.update({
         where: { id: user.id },

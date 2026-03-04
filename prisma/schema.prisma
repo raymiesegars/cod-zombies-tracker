@@ -87,9 +87,26 @@ model User {
   tournamentLogs          TournamentLog[]
   tournamentTrophiesWon   TournamentTrophy[]  @relation("TrophyWinner")
   tournamentTrophiesAwarded TournamentTrophy[] @relation("TrophyAwardedBy")
+  feedbacks               Feedback[]
 
   @@index([username])
   @@index([supabaseId])
+}
+
+// ============================================================================
+// FEEDBACK (bugs / general feedback from users; visible in admin dashboard)
+// ============================================================================
+
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String   @db.Text
+  type      String   @default("feedback")  // "bug" | "feedback"
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
 }
 
 // ============================================================================

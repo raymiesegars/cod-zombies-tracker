@@ -125,6 +125,18 @@ export const ZWR_TO_CZT_USERS: Record<string, ZwrToCztEntry> = {
     displayName: 'SuperChubbs_NTC',
     note: 'Import from top-178-csv/SuperChubbs_NTC.csv with --source-player-id=SuperChubbs_NTC --czt-user=cmm9llf5a0006aaf6wopuumqg.',
   },
+  // Plasmid Jeff — top-178 import
+  'Plasmid Jeff': {
+    cztUserId: 'cmlsxy6t6000088pk4nt3u7cr',
+    displayName: 'Plasmid Jeff',
+    note: 'Import from top-178-csv/Plasmid Jeff.csv with --source-player-id="Plasmid Jeff" --czt-user=cmlsxy6t6000088pk4nt3u7cr.',
+  },
+  // philosophy — top-178 import (Origins no-power only; Shadows of Evil removed)
+  'philosophy': {
+    cztUserId: 'cmmb4aayf0000ttvy2habnb5b',
+    displayName: 'philosophy',
+    note: 'Run pnpm db:import-user-philosophy. CSV: top-178-csv/philosophy.csv (Origins no-power only).',
+  },
 };
 
 /**
