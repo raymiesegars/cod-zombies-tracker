@@ -9,6 +9,7 @@ export const FIRST_ROOM_VARIANT_MAP_SLUGS = [
   'bo3-verruckt',
   'buried',
   'aw-carrier',
+  'town',
 ] as const;
 
 export type FirstRoomVariantMapSlug = (typeof FIRST_ROOM_VARIANT_MAP_SLUGS)[number];
@@ -39,6 +40,10 @@ export const FIRST_ROOM_VARIANTS_BY_MAP: Record<FirstRoomVariantMapSlug, FirstRo
     { value: 'MK14_SIDE', label: 'MK14 Side' },
     { value: 'BULLDOG_SIDE', label: 'Bulldog Side' },
     { value: 'MIXED', label: 'Mixed' },
+  ],
+  town: [
+    { value: 'CLASSIC', label: 'Classic' },
+    { value: 'SEMTEXT_AREA', label: 'Semtext Area' },
   ],
 };
 
