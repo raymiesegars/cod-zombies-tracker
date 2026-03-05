@@ -7,7 +7,8 @@ export async function GET() {
     return NextResponse.json({ ok: true, database: 'connected' });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('[api/health]', error);
+    // Log briefly; full error is noisy during Vercel build when DB is unavailable
+    console.error('[api/health] DB check failed:', message);
     return NextResponse.json(
       { ok: false, database: 'error', error: message },
       { status: 500 }
