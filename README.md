@@ -11,9 +11,9 @@ Track Treyarch Zombies progress: rounds, challenges, Easter eggs, and leaderboar
 3. `pnpm db:generate` and `pnpm db:push`, then `pnpm db:seed`.
 4. `pnpm dev` and open http://localhost:3000.
 
-**Vercel:** Set `DATABASE_URL` with the Supabase pooler URL (port 6543) and append `?pgbouncer=true&connection_limit=1&pool_timeout=20`. Example:
-`postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1&pool_timeout=20`
-Use `connection_limit=1` to avoid exhausting the pool when many serverless instances run in parallel. `pool_timeout=20` gives more time to acquire a connection under load. Set `CI=true` in Vercel build env so the sitemap skips DB during build.
+**Vercel:** Set `DATABASE_URL` with the Supabase pooler URL (port 6543) and append `?pgbouncer=true&connection_limit=2&pool_timeout=45`. Example:
+`postgresql://postgres.PROJECT_REF:PASSWORD@aws-0-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=2&pool_timeout=45`
+Use `connection_limit=2` to avoid exhausting the Supabase pool (default ~15 connections). Each Vercel instance holds 2 connections; higher values multiply across instances and cause "Unable to check out connection from the pool" errors. `pool_timeout=45` gives more time to acquire a connection under load. If you see P2024 timeouts, consider increasing Supabase pool size in Database Settings. Set `CI=true` in Vercel build env so the sitemap skips DB during build.
 
 Supabase: create a project, get the API keys and DB URLs from project settings, and turn on Google OAuth under Authentication. Use the direct DB URL for Prisma (or add `?pgbouncer=true` to the pooled URL so prepared statements are disabled). There’s a longer setup guide in `SETUP.md` if you need step-by-step.
 

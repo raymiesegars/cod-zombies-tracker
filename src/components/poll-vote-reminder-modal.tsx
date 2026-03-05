@@ -38,7 +38,7 @@ export function PollVoteReminderModal() {
         setOpen(true);
       })
       .catch(() => setOpen(false));
-    }, 10000);
+    }, 30000);
     return () => clearTimeout(t);
   }, []);
 
