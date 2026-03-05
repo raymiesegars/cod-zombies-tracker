@@ -80,7 +80,7 @@ export default function HomePage() {
         }
       })
       .catch(() => setHomeStats(null));
-    }, 300);
+    }, 500);
     return () => clearTimeout(t);
   }, []);
 
