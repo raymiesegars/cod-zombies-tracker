@@ -204,7 +204,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       fetch('/api/me/heartbeat', { method: 'PATCH', credentials: 'same-origin' }).catch(() => {});
     };
     const onVisible = () => beat();
-    const initialDelay = setTimeout(beat, 4000);
+    const initialDelay = setTimeout(beat, 5000);
     const interval = setInterval(beat, 2 * 60 * 1000);
     document.addEventListener('visibilitychange', onVisible);
     return () => {

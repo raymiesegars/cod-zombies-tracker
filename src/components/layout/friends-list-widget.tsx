@@ -23,12 +23,13 @@ type Props = {
 export function FriendsListWidget({ variant = 'floating' }: Props) {
   const { profile } = useAuth();
   const [friends, setFriends] = useState<Friend[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [deleteModal, setDeleteModal] = useState<{ friend: Friend } | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const fetchFriends = useCallback(() => {
+    setLoading(true);
     fetch('/api/me/friends', { credentials: 'same-origin', cache: 'no-store' })
       .then((res) => (res.ok ? res.json() : { friends: [] }))
       .then((data) => setFriends(data.friends ?? []))
@@ -37,18 +38,16 @@ export function FriendsListWidget({ variant = 'floating' }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!profile?.id) return;
-    setLoading(true);
-    const t = setTimeout(fetchFriends, 2000);
+    if (!profile?.id || !expanded) return;
+    fetchFriends();
     const interval = setInterval(fetchFriends, 60 * 1000);
     const onUpdate = () => fetchFriends();
     window.addEventListener('cod-tracker-friends-updated', onUpdate);
     return () => {
-      clearTimeout(t);
       clearInterval(interval);
       window.removeEventListener('cod-tracker-friends-updated', onUpdate);
     };
-  }, [profile?.id, fetchFriends]);
+  }, [profile?.id, expanded, fetchFriends]);
 
   const handleRemoveFriend = async (friendId: string) => {
     setDeleteLoading(true);

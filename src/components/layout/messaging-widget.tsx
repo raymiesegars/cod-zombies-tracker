@@ -174,7 +174,7 @@ export function MessagingWidget() {
         })
         .catch(() => {});
     };
-    const t = setTimeout(doFetch, 1500);
+    const t = setTimeout(doFetch, 6000);
     const i = setInterval(doFetch, 60 * 1000);
     const onUpdate = () => doFetch();
     window.addEventListener('cod-tracker-friends-updated', onUpdate);
@@ -195,7 +195,7 @@ export function MessagingWidget() {
 
   useEffect(() => {
     if (!profile?.id) return;
-    const t = setTimeout(fetchUnreadCount, 2500);
+    const t = setTimeout(fetchUnreadCount, 7000);
     const i = setInterval(fetchUnreadCount, 20 * 1000);
     return () => { clearTimeout(t); clearInterval(i); };
   }, [profile?.id, fetchUnreadCount]);

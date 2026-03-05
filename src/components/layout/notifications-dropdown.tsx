@@ -120,7 +120,7 @@ export function NotificationsDropdown() {
   };
 
   useEffect(() => {
-    const t = setTimeout(fetchNotifications, 3000);
+    const t = setTimeout(fetchNotifications, 8000);
     const interval = setInterval(fetchNotifications, 60 * 1000);
     const onRefresh = () => fetchNotifications();
     window.addEventListener('cod-tracker-notifications-refresh', onRefresh);
@@ -130,6 +130,10 @@ export function NotificationsDropdown() {
       window.removeEventListener('cod-tracker-notifications-refresh', onRefresh);
     };
   }, []);
+
+  useEffect(() => {
+    if (open) fetchNotifications();
+  }, [open]);
 
   const updatePosition = (): { top: number; left: number } | null => {
     const btn = buttonRef.current;
