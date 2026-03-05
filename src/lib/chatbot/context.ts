@@ -62,9 +62,20 @@ async function buildLeaderboardContext(): Promise<string> {
     }
   }
 
+  const [verifiedXpTop] = await prisma.user.findMany({
+    where: { isPublic: true },
+    orderBy: { verifiedTotalXp: 'desc' },
+    take: 1,
+    select: { username: true, displayName: true, verifiedTotalXp: true },
+  });
+
   const lines: string[] = [];
   lines.push('## Verified high round #1 per map');
   lines.push('Use this to answer "who is #1 on [map]" or "top verified round for [map]". Link to full leaderboard: /leaderboards or /maps/[slug].');
+  if (verifiedXpTop && (verifiedXpTop.verifiedTotalXp ?? 0) > 0) {
+    const name = verifiedXpTop.displayName ?? verifiedXpTop.username;
+    lines.push(`Verified XP leaderboard #1: ${name} (${verifiedXpTop.username}), ${verifiedXpTop.verifiedTotalXp} verified XP. Full list: /leaderboards (filter by verified).`);
+  }
   lines.push('');
   let len = lines.join('\n').length;
   for (const map of maps) {

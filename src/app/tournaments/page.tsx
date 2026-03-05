@@ -192,12 +192,24 @@ export default function TournamentsPage() {
   useEffect(() => {
     if (!pollId) return setPoll(null);
     setLoading(true);
-    fetch(`/api/tournaments/polls/${pollId}`)
+    fetch(`/api/tournaments/polls/${pollId}`, { credentials: 'same-origin', cache: 'no-store' })
       .then((r) => r.json())
       .then(setPoll)
       .catch(() => setPoll(null))
       .finally(() => setLoading(false));
   }, [pollId]);
+
+  // Super admin: refetch poll so options include vote counts (GET returns them only when session is admin)
+  useEffect(() => {
+    if (!adminMe?.isSuperAdmin || !pollId || !poll) return;
+    const opts = poll.options as PollOption[] | undefined;
+    if (opts?.length && opts.every((o) => o.voteCount === undefined)) {
+      fetch(`/api/tournaments/polls/${pollId}`, { credentials: 'same-origin', cache: 'no-store' })
+        .then((r) => r.json())
+        .then(setPoll)
+        .catch(() => {});
+    }
+  }, [adminMe?.isSuperAdmin, pollId, poll]);
 
   useEffect(() => {
     if (!tournamentId) return setTournament(null);

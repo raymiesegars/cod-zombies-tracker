@@ -2,10 +2,46 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Loader2, AlertCircle } from 'lucide-react';
 import { getAssetUrl } from '@/lib/assets';
 import { Button, Input, Modal } from '@/components/ui';
+
+type ContentPart = { type: 'text'; value: string } | { type: 'link'; href: string; label: string };
+
+function parseChatbotContent(content: string): ContentPart[] {
+  const parts: ContentPart[] = [];
+  const pathLabel = (path: string): string => {
+    if (path === '/leaderboards') return 'Leaderboards';
+    if (path === '/maps') return 'Maps';
+    if (path.startsWith('/maps/')) return 'map page';
+    if (path === '/rules') return 'Rules';
+    if (path === '/tournaments') return 'Tournaments';
+    return path;
+  };
+  const regex = /\[([^\]]+)\]\((\/[^)]*)\)|(\/leaderboards|\/maps(?:\/[a-zA-Z0-9-]+)?|\/rules|\/tournaments)|(\bZombacus\b)/gi;
+  let lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while ((m = regex.exec(content)) !== null) {
+    if (m.index > lastIndex) {
+      parts.push({ type: 'text', value: content.slice(lastIndex, m.index) });
+    }
+    if (m[1] !== undefined && m[2] !== undefined) {
+      parts.push({ type: 'link', href: m[2].startsWith('/') ? m[2] : '/', label: m[1] });
+    } else if (m[3] !== undefined) {
+      const path = m[3];
+      parts.push({ type: 'link', href: path, label: pathLabel(path) });
+    } else if (m[4] !== undefined) {
+      parts.push({ type: 'link', href: '/', label: 'Zombacus' });
+    }
+    lastIndex = regex.lastIndex;
+  }
+  if (lastIndex < content.length) {
+    parts.push({ type: 'text', value: content.slice(lastIndex) });
+  }
+  return parts.length ? parts : [{ type: 'text', value: content }];
+}
 
 const GET_MORE_TOKENS_MESSAGE = (
   <>
@@ -207,7 +243,27 @@ export function ChatbotPanel({ onClose }: ChatbotPanelProps) {
                     : 'bg-bunker-800 text-bunker-200'
                 }`}
               >
-                <p className="whitespace-pre-wrap break-words">{m.content}</p>
+                {m.role === 'user' ? (
+                  <p className="whitespace-pre-wrap break-words">{m.content}</p>
+                ) : (
+                  <p className="whitespace-pre-wrap break-words">
+                    {parseChatbotContent(m.content).map((part, j) =>
+                      part.type === 'text' ? (
+                        <span key={j}>{part.value}</span>
+                      ) : (
+                        <Link
+                          key={j}
+                          href={part.href}
+                          className="text-blood-400 hover:text-blood-300 underline"
+                          target={part.href.startsWith('/') ? undefined : '_blank'}
+                          rel={part.href.startsWith('/') ? undefined : 'noopener noreferrer'}
+                        >
+                          {part.label}
+                        </Link>
+                      )
+                    )}
+                  </p>
+                )}
               </div>
             </div>
           ))}

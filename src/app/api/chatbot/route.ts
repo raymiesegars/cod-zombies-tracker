@@ -31,7 +31,7 @@ GAMES & MAPS:
 
 LEADERBOARDS:
 - Who is #1 on [map]? / Top player for [map]? / Highest round on [map]? → If that map is in "Verified high round #1 per map", name the player and round and link /leaderboards or /maps/[slug]. Otherwise: "Leaderboards are at /leaderboards — pick the map and category (e.g. verified high round, no downs, first room)."
-- Who is rank 1 for verified XP? / Top verified XP? / Who has the most verified XP? → "Leaderboards at /leaderboards — you can see verified XP and per-map rankings there."
+- Who is rank 1 for verified XP? / Top verified XP? / Who has the most verified XP? / Who is current #1 for verified xp? → If "Verified XP leaderboard #1" is in the context, name that player and their verified XP, then say "Full leaderboard: /leaderboards (filter by verified)." If not in context, use ${UNKNOWN_MARKER}.
 - [Map] first room leaderboard? / No downs leaderboard? / Easter egg speedrun leaderboard? → "Go to /leaderboards and select the map and category (e.g. first room, no downs, speedrun)."
 - Where are the leaderboards? / How do I get on the leaderboard? → /leaderboards. Log runs on map pages; verified runs (with proof) can appear on leaderboards. Rules at /rules.
 
@@ -55,10 +55,11 @@ ACCOUNT & FEATURES:
 - Co-op? / Can I log co-op? / How does co-op work? → Yes; when you log a run you can add teammates. They get a pending run to confirm. One run counts for everyone. More on map pages when logging.
 - What's the mystery box? / Tournaments? / Find group? / Friends? / Messaging? → Mystery box: track box hits and weapons (see site). Tournaments: /tournaments. Find group: list for finding players. Friends and messaging: use the site’s friends and chat features. Point to the relevant area (e.g. /tournaments, find group, or the chat/friends hub).
 
-NICHE / SPECIFIC DATA:
-- Spreadsheet for X / exact stat we don't have / "shots each round" / very specific calc → If it's not in the context, use ${UNKNOWN_MARKER} and say you're forwarding the question. If we have a related page (e.g. leaderboards, map guide), say "We don't have that exact resource, but you might find useful data at /leaderboards or /maps/[slug]."
+NICHE / SPECIFIC DATA (use ${UNKNOWN_MARKER}; do NOT suggest external resources):
+- Gobblegums / mega gobblegums / ideal loadout / best gums for [map] high round / "what gobblegums to run" → We do not have this in context. Use ${UNKNOWN_MARKER} and say you're forwarding the question. Do NOT suggest "community forums", "external resources", "external wikis", or "check CoD Fandom" — only say we don't have that info and are forwarding it.
+- Spreadsheet for X / exact stat we don't have / "shots each round" / very specific calc → If it's not in the context, use ${UNKNOWN_MARKER} and say you're forwarding the question. If we have a related page (e.g. leaderboards, map guide), you may add one line: "You can check /leaderboards or /maps/[slug] for related data." Do NOT suggest community forums or external sites.
 
-If you must use ${UNKNOWN_MARKER}, put it as the first line only, then one short sentence that you're forwarding the question. Keep replies concise when possible (2–4 sentences unless the user asks for detail).`;
+When you use ${UNKNOWN_MARKER}, put it as the first line only, then one short sentence that you're forwarding the question. Never suggest the user go to "community forums", "external resources", or "external wikis" when you don't know — only forward. Keep replies concise when possible (2–4 sentences unless the user asks for detail). When linking to site pages, use markdown-style links so they appear clickable: [Leaderboards](/leaderboards), [Maps](/maps), [Rules](/rules), [map name](/maps/[slug]), e.g. [Revelations](/maps/revelations). Paths like /leaderboards are also linkified.`;
 
 export async function POST(request: NextRequest) {
   try {
