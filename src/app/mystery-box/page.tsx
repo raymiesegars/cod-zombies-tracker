@@ -214,7 +214,11 @@ export default function MysteryBoxPage() {
   };
 
   const pollFailuresRef = useRef(0);
+  const fetchInFlightRef = useRef(false);
   const fetchData = () => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+    if (fetchInFlightRef.current) return;
+    fetchInFlightRef.current = true;
     fetch('/api/mystery-box/me', { credentials: 'same-origin', cache: 'no-store' })
       .then((res) => {
         if (res.ok) {
@@ -229,11 +233,23 @@ export default function MysteryBoxPage() {
         pollFailuresRef.current += 1;
         setData(null);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        fetchInFlightRef.current = false;
+        setLoading(false);
+      });
   };
 
   useEffect(() => {
-    fetchData();
+    if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+      fetchData();
+    } else {
+      setLoading(false);
+    }
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') fetchData();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
   }, []);
 
   // Auto-create solo lobby when none, or refetch if already in one (e.g. after accepting invite)
@@ -259,12 +275,13 @@ export default function MysteryBoxPage() {
   }, [authLoading, loading, profile, data?.lobby]);
 
   // Poll when in lobby so all members see host actions (spin, discard vote, etc.) within a few seconds.
-  // Stop polling after 3 consecutive failures (e.g. 500s) to avoid hammering when DB is down.
+  // Only poll when tab is visible so multiple tabs don't multiply load. Stop after 3 consecutive failures.
   useEffect(() => {
     if (!data?.lobby) return;
     if (pollFailuresRef.current >= 3) return;
     const interval = setInterval(() => {
       if (pollFailuresRef.current >= 3) return;
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
       fetchData();
     }, 6000);
     return () => clearInterval(interval);
