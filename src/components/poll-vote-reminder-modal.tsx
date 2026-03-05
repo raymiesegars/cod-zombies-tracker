@@ -15,7 +15,8 @@ export function PollVoteReminderModal() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    fetch('/api/tournaments/polls/active-for-reminder', { credentials: 'same-origin', cache: 'no-store' })
+    const t = setTimeout(() => {
+      fetch('/api/tournaments/polls/active-for-reminder', { credentials: 'same-origin', cache: 'no-store' })
       .then((res) => {
         if (res.status === 401) {
           setOpen(false);
@@ -37,6 +38,8 @@ export function PollVoteReminderModal() {
         setOpen(true);
       })
       .catch(() => setOpen(false));
+    }, 2500);
+    return () => clearTimeout(t);
   }, []);
 
   const handleOkay = () => {

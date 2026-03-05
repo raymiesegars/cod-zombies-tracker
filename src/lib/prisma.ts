@@ -4,16 +4,18 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// Use DATABASE_URL (pooled) for runtime so serverless/build can reach DB.
-// DIRECT_URL is only for Prisma migrations in schema.prisma; do not use it for the client.
-// connection_limit=1: critical for Vercel serverless — each instance uses 1 connection instead of 5, avoiding pool exhaustion when many logged-in users hit profile/friends/notifications/messages/heartbeat in parallel.
+// Use DATABASE_URL (pooled) for runtime. DIRECT_URL is for migrations only.
+// connection_limit: with limit=1, concurrent requests in the same serverless instance queue for one connection and timeout (P2024).
+// Use a small pool per instance (e.g. 5) so profile/me/notifications/messages/poll/mystery-box can run in parallel.
+// The database pooler (Supabase Supavisor, Neon, etc.) multiplexes these; set DATABASE_URL to your pooler URL.
 function getDatabaseUrl(): string {
   const url = process.env.DATABASE_URL;
   if (!url) return '';
   const sep = url.includes('?') ? '&' : '?';
   let out = url;
   if (!url.includes('pgbouncer=true')) out = `${out}${sep}pgbouncer=true`;
-  if (!out.includes('connection_limit=')) out = `${out}${out.includes('?') ? '&' : '?'}connection_limit=1`;
+  if (!out.includes('connection_limit=')) out = `${out}${out.includes('?') ? '&' : '?'}connection_limit=5`;
+  if (!out.includes('connect_timeout=')) out = `${out}${out.includes('?') ? '&' : '?'}connect_timeout=15`;
   return out;
 }
 

@@ -177,10 +177,18 @@ function getFilterLabels(filterKey: string): string[] {
   return labels;
 }
 
-/** Compute world records across all leaderboard combinations (player count, game filters, verified) and optional details */
+const WR_CACHE_TTL_MS = 60_000; // 1 minute
+const wrCache = new Map<string, { result: WorldRecordsResult; expiresAt: number }>();
+
+/** Compute world records across all leaderboard combinations (player count, game filters, verified) and optional details. Cached per user for 1 minute. */
 export async function computeWorldRecords(userId: string): Promise<WorldRecordsResult> {
+  const now = Date.now();
+  const cached = wrCache.get(userId);
+  if (cached && cached.expiresAt > now) return cached.result;
   const r = await computeWorldRecordsDetailed(userId);
-  return { worldRecords: r.worldRecords, verifiedWorldRecords: r.verifiedWorldRecords };
+  const result: WorldRecordsResult = { worldRecords: r.worldRecords, verifiedWorldRecords: r.verifiedWorldRecords };
+  wrCache.set(userId, { result, expiresAt: now + WR_CACHE_TTL_MS });
+  return result;
 }
 
 export async function computeWorldRecordsDetailed(userId: string): Promise<WorldRecordsDetailedResult> {

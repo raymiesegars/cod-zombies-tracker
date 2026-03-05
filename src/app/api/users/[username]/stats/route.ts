@@ -3,7 +3,6 @@ import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { isBo4Game } from '@/lib/bo4';
 import { isSpeedrunCategory } from '@/lib/achievements/categories';
-import { computeWorldRecords } from '@/lib/world-records';
 import type { UserMapStats } from '@/types';
 
 // Per-map stats (highest round, main EE done) + totals for the profile dashboard.
@@ -120,7 +119,7 @@ export async function GET(
 
     const mysteryBoxCompletions = user.mysteryBoxCompletionsLifetime ?? 0;
 
-    const [totalMaps, totalMainEasterEggs, totalChallenges, totalAchievements, easterEggAchievementsUnlocked, verifiedAchievementsCount, xpRank, verifiedXpRank, wr] =
+    const [totalMaps, totalMainEasterEggs, totalChallenges, totalAchievements, easterEggAchievementsUnlocked, verifiedAchievementsCount, xpRank, verifiedXpRank] =
       await Promise.all([
         prisma.map.count(),
         prisma.easterEgg.count({ where: { type: 'MAIN_QUEST', isActive: true } }),
@@ -137,7 +136,6 @@ export async function GET(
         }),
         prisma.user.count({ where: { isPublic: true, totalXp: { gt: user.totalXp ?? 0 } } }),
         prisma.user.count({ where: { isPublic: true, verifiedTotalXp: { gt: user.verifiedTotalXp ?? 0 } } }),
-        computeWorldRecords(user.id),
       ]);
 
     return NextResponse.json({
@@ -156,8 +154,8 @@ export async function GET(
       mysteryBoxCompletions,
       xpRank: xpRank + 1,
       verifiedXpRank: verifiedXpRank + 1,
-      worldRecords: wr.worldRecords,
-      verifiedWorldRecords: wr.verifiedWorldRecords,
+      worldRecords: 0,
+      verifiedWorldRecords: 0,
     });
   } catch (error) {
     console.error('Error fetching user stats:', error);
