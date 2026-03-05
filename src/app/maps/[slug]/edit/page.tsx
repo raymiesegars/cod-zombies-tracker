@@ -47,6 +47,7 @@ import { VANGUARD_OFFICIAL_RULES } from '@/lib/vanguard/vanguard-official-rules'
 import { isWw2Game } from '@/lib/ww2';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 import { isRuleLink, isRuleInlineLinks } from '@/lib/rules/types';
+import { splitGeneralRules, type RulesSection } from '@/lib/rules/index';
 import { getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { hasNoJugSupport } from '@/lib/no-jug-support';
 import { sortChallengesForDisplay } from '@/lib/challenge-order';
@@ -141,6 +142,9 @@ function OfficialRulesModal({
   const rules = isWaw ? WAW_OFFICIAL_RULES : isBo1 ? BO1_OFFICIAL_RULES : isBo2 ? BO2_OFFICIAL_RULES : isBo3 ? BO3_OFFICIAL_RULES : isBo4 ? BO4_OFFICIAL_RULES : isBocw ? BOCW_OFFICIAL_RULES : isBo6 && mapSlug ? getBo6OfficialRulesForMap(mapSlug) : isBo7 && mapSlug ? getBo7OfficialRulesForMap(mapSlug) : isWw2 ? WW2_OFFICIAL_RULES : isVanguard ? VANGUARD_OFFICIAL_RULES : null;
 
   const byType = rules && 'challengeRulesByType' in rules ? (rules as { challengeRulesByType: Record<string, string> }).challengeRulesByType : null;
+  const { generalSections, challengeSections } = rules && gameShortName
+    ? splitGeneralRules(gameShortName, rules.generalRules)
+    : { generalSections: [] as RulesSection[], challengeSections: [] as RulesSection[] };
   const typesToShow = (mapChallengeTypes && mapChallengeTypes.length > 0
     ? Array.from(new Set(mapChallengeTypes))
     : byType ? Object.keys(byType) : []
@@ -169,7 +173,7 @@ function OfficialRulesModal({
           </TabsList>
           <div className="max-h-[60vh] min-h-[12rem] overflow-y-auto overflow-x-hidden pr-2">
             <TabsContent value="general" className="mt-0 space-y-4">
-              {rules.generalRules.map((section) => (
+              {generalSections.map((section) => (
                 <div key={section.title}>
                   <h4 className="text-sm font-semibold text-bunker-100 mb-2">{section.title}</h4>
                   <ul className="list-disc list-inside space-y-1 text-sm text-bunker-300">
@@ -199,6 +203,38 @@ function OfficialRulesModal({
               ))}
             </TabsContent>
             <TabsContent value="challenges" className="mt-0 space-y-4">
+              {challengeSections.length > 0 && (
+                <>
+                  {challengeSections.map((section) => (
+                    <div key={section.title}>
+                      <h4 className="text-sm font-semibold text-bunker-100 mb-2">{section.title}</h4>
+                      <ul className="list-disc list-inside space-y-1 text-sm text-bunker-300">
+                        {section.items.map((item, i) => (
+                          <li key={i}>
+                            {isRuleInlineLinks(item)
+                              ? item.parts.map((part, j) =>
+                                  typeof part === 'string' ? (
+                                    part
+                                  ) : (
+                                    <a key={j} href={part.href} target="_blank" rel="noopener noreferrer" className="text-military-400 hover:underline">
+                                      {part.text}
+                                    </a>
+                                  )
+                                )
+                              : isRuleLink(item) ? (
+                                  <a href={item.href} target="_blank" rel="noopener noreferrer" className="text-military-400 hover:underline">
+                                    {item.text}
+                                  </a>
+                                ) : (
+                                  item
+                                )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </>
+              )}
               {typesToShow.map((type) => {
                 const label = ACHIEVEMENT_CATEGORY_LABELS[type] ?? type.replace(/_/g, ' ');
                 const desc = byType?.[type] ?? 'Official rules coming soon.';

@@ -268,7 +268,7 @@ export default function MysteryBoxPage() {
       fetchData();
     }, 3000);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- poll keyed by lobby id only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.lobby?.id]);
 
   // When anyone receives a fresh roll (created < 6s ago), show spinning animation so members see it too
@@ -299,7 +299,7 @@ export default function MysteryBoxPage() {
       setPendingRerollAfterVote(false);
       doSpin();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- doSpin stable, data.lobby rolled into roll/discardVote
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingRerollAfterVote, data?.lobby?.roll, data?.lobby?.discardVote]);
 
   useEffect(() => {

@@ -8,7 +8,7 @@ import { useShowLoadingAfter } from '@/hooks/use-show-loading-after';
 import { Button, Logo, MapIcon, MysteryBoxIcon } from '@/components/ui';
 import { UserWithRank } from '@/components/game';
 import { NotificationsDropdown } from '@/components/layout/notifications-dropdown';
-import { Menu, X, LogOut, User, Settings, Trophy, Medal, Users, PenLine, ChevronDown, ShieldCheck, MessageSquare } from 'lucide-react';
+import { Menu, X, LogOut, User, Settings, Trophy, Medal, Users, PenLine, ChevronDown, ShieldCheck, MessageSquare, BookOpen } from 'lucide-react';
 import { useLogProgressModal } from '@/context/log-progress-modal-context';
 
 const DISCORD_URL = 'https://discord.gg/Gc6Cnt7XxT';
@@ -219,6 +219,14 @@ export function Navbar() {
                           <MessageSquare className="w-4 h-4" />
                           Feedback
                         </Link>
+                        <Link
+                          href="/rules"
+                          onClick={() => setIsMenuOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-white hover:text-blood-400 hover:bg-bunker-800/50"
+                        >
+                          <BookOpen className="w-4 h-4" />
+                          Rules
+                        </Link>
                         {(profile as { isAdmin?: boolean })?.isAdmin && (
                           <Link
                             href="/admin/verification"
@@ -280,7 +288,7 @@ export function Navbar() {
               transition={{ duration: 0.2 }}
               className="navbar:hidden bg-bunker-900/95 border-b border-bunker-800/50 relative z-50 max-h-[85vh] flex flex-col"
             >
-            <div className="overflow-y-auto overflow-x-hidden overscroll-contain flex-1 min-h-0 px-4 py-4 pb-6 space-y-2 touch-pan-y">
+            <div className="overflow-y-auto overflow-x-hidden overscroll-contain flex-1 min-h-0 px-4 py-4 pb-16 space-y-2 touch-pan-y">
               {/* Notifications first (when logged in) — easy to reach, matches bell in desktop nav */}
               {user && (
                 <div className="flex justify-center py-1">
@@ -350,6 +358,14 @@ export function Navbar() {
               >
                 <MessageSquare className="w-5 h-5 flex-shrink-0 text-current" />
                 Feedback
+              </Link>
+              <Link
+                href="/rules"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 min-h-[44px] text-base font-zombies text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors tracking-wide touch-manipulation"
+              >
+                <BookOpen className="w-5 h-5 flex-shrink-0 text-current" />
+                Rules
               </Link>
               {/* Account section (when logged in) */}
               {user ? (

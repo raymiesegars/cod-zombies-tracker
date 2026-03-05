@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Button, Card, CardContent, Logo, EasterEggIcon, MapIcon, MysteryBoxIcon } from '@/components/ui';
 import { useAuth } from '@/context/auth-context';
-import { Trophy, Target, Users, ChevronRight, Wrench, ExternalLink, PenLine, Medal } from 'lucide-react';
+import { Trophy, Target, Users, ChevronRight, ChevronDown, Wrench, ExternalLink, PenLine, Medal, BookOpen } from 'lucide-react';
 import { useLogProgressModal } from '@/context/log-progress-modal-context';
 
 const features = [
@@ -115,6 +116,12 @@ export default function HomePage() {
             <p className="mt-4 sm:mt-6 text-base sm:text-lg md:text-xl text-bunker-300 max-w-2xl mx-auto px-4">
               Easter egg guides, challenges, speedruns, and leaderboards for every CoD Zombies map. Log runs with your squad, get verified, earn XP and ranks. Find teammates, message friends, and climb the boards.
             </p>
+            <p className="mt-3 text-sm text-bunker-500">
+              <Link href="/rules" className="inline-flex items-center gap-1.5 text-blood-500 hover:text-blood-400 transition-colors">
+                <BookOpen className="w-4 h-4" />
+                Rules & verification
+              </Link>
+            </p>
 
             <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
               {!authReady ? (
@@ -143,12 +150,13 @@ export default function HomePage() {
                       Browse Maps
                     </Button>
                   </Link>
-                  <Link href="/mystery-box" className="w-full sm:w-auto">
+                  <Link href="/rules" className="w-full sm:w-auto">
                     <Button
                       size="lg"
-                      className="w-full sm:w-auto bg-[#fbbf24] hover:bg-amber-300 text-white border-amber-500/40 shadow-lg shadow-black/25 [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]"
+                      variant="secondary"
+                      className="w-full sm:w-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]"
                     >
-                      Mystery Box
+                      Rules
                     </Button>
                   </Link>
                 </>
@@ -173,7 +181,7 @@ export default function HomePage() {
           </div>
 
           {/* Stats: Runs (truncated), Users, Achievements (truncated, actual total) */}
-          <div className="mt-16 sm:mt-20 grid grid-cols-3 gap-1 sm:gap-3">
+          <div className="mt-16 sm:mt-20 mb-12 sm:mb-14 grid grid-cols-3 gap-1 sm:gap-3">
             <div className="text-center">
               <p className="text-2xl sm:text-3xl md:text-4xl font-zombies text-blood-400">
                 {homeStats != null ? formatCompact(homeStats.runs) : '—'}
@@ -195,11 +203,17 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Scroll indicator */}
+        {/* Scroll indicator: red down arrow with bounce */}
         <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 hidden sm:block">
-          <div className="w-6 h-10 border-2 border-blood-800/40 rounded-full flex justify-center pt-2">
-            <div className="w-1.5 h-3 bg-blood-700 rounded-full" />
-          </div>
+          <a href="#features" className="block text-blood-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blood-400 rounded-full" aria-label="Scroll down">
+            <motion.div
+              animate={{ y: [0, 6, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+              className="drop-shadow-[0_0_8px_rgba(185,28,28,0.6)]"
+            >
+              <ChevronDown className="w-10 h-10 text-blood-500" strokeWidth={2.5} />
+            </motion.div>
+          </a>
         </div>
       </section>
 
@@ -250,7 +264,7 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 sm:py-24 bg-bunker-950 px-4">
+      <section id="features" className="py-16 sm:py-24 bg-bunker-950 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-10 sm:mb-16">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-zombies text-white tracking-wide">
