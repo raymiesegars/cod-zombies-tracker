@@ -23,6 +23,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/tools`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
   ];
 
+  if (process.env.CI) {
+    return staticRoutes;
+  }
+
   try {
     const mapSlugs = await prisma.map.findMany({ select: { slug: true } });
     const mapRoutes: MetadataRoute.Sitemap = mapSlugs.map((m) => ({
