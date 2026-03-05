@@ -116,7 +116,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          setIsProfileSettingUp(true);
+          const alreadyFetched = profileFetchedRef.current;
+          if (!alreadyFetched) setIsProfileSettingUp(true);
           try {
             const existingProfile = await fetchProfile(session.user.id);
             if (!existingProfile && mounted) {
@@ -190,15 +191,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     profileFetchedRef.current = false;
   };
 
-  // Heartbeat for online presence (lastSeenAt)
+  // Heartbeat for online presence (lastSeenAt) — only when tab is visible so multiple tabs don't multiply load
   useEffect(() => {
     if (!profile?.id) return;
     const beat = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
       fetch('/api/me/heartbeat', { method: 'PATCH', credentials: 'same-origin' }).catch(() => {});
+    };
+    const onVisible = () => {
+      beat();
     };
     beat();
     const interval = setInterval(beat, 2 * 60 * 1000); // every 2 min
-    return () => clearInterval(interval);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }, [profile?.id]);
 
   return (

@@ -9,7 +9,7 @@ const SETUP_OVERLAY_MAX_MS = 22_000; // If still "setting up" after this, treat 
 
 export function AuthLayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { isProfileSettingUp, signOut } = useAuth();
+  const { isProfileSettingUp, profile, signOut } = useAuth();
   const [forceHideSetup, setForceHideSetup] = useState(false);
 
   useEffect(() => {
@@ -25,9 +25,9 @@ export function AuthLayoutWrapper({ children }: { children: React.ReactNode }) {
     return () => clearTimeout(t);
   }, [isProfileSettingUp, signOut]);
 
-  // Dashboard has its own loading state; avoid double overlay and flicker
+  // Only show overlay when we're actually setting up and don't have a profile yet (avoids flash on every navigation)
   const showProfileSetupOverlay =
-    isProfileSettingUp && pathname !== '/dashboard' && !forceHideSetup;
+    isProfileSettingUp && !profile && pathname !== '/dashboard' && !forceHideSetup;
 
   return (
     <>
