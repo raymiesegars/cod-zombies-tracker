@@ -19,7 +19,13 @@ export async function GET() {
 
     const seen = (me.adminDashboardSeen as { feedbackAt?: string; verifiedHistoryAt?: string } | null) ?? {};
 
-    const [pendingChallenge, pendingEe, feedbackUnread, verifiedHistoryUnread] = await Promise.all([
+    const [
+      pendingChallenge,
+      pendingEe,
+      feedbackUnread,
+      verifiedHistoryChallenge,
+      verifiedHistoryEe,
+    ] = await Promise.all([
       prisma.challengeLog.count({
         where: { verificationRequestedAt: { not: null }, isVerified: false, userId: { not: me.id } },
       }),
@@ -30,12 +36,14 @@ export async function GET() {
         ? prisma.feedback.count({ where: { createdAt: { gt: new Date(seen.feedbackAt) } } })
         : prisma.feedback.count(),
       seen.verifiedHistoryAt
-        ? prisma.challengeLog.count({ where: { isVerified: true, verifiedAt: { gt: new Date(seen.verifiedHistoryAt) } } }) +
-          prisma.easterEggLog.count({ where: { isVerified: true, verifiedAt: { gt: new Date(seen.verifiedHistoryAt) } } })
-        : prisma.challengeLog.count({ where: { isVerified: true, verifiedAt: { not: null } } }) +
-          prisma.easterEggLog.count({ where: { isVerified: true, verifiedAt: { not: null } } }),
+        ? prisma.challengeLog.count({ where: { isVerified: true, verifiedAt: { gt: new Date(seen.verifiedHistoryAt) } } })
+        : prisma.challengeLog.count({ where: { isVerified: true, verifiedAt: { not: null } } }),
+      seen.verifiedHistoryAt
+        ? prisma.easterEggLog.count({ where: { isVerified: true, verifiedAt: { gt: new Date(seen.verifiedHistoryAt) } } })
+        : prisma.easterEggLog.count({ where: { isVerified: true, verifiedAt: { not: null } } }),
     ]);
     const pending = pendingChallenge + pendingEe;
+    const verifiedHistoryUnread = verifiedHistoryChallenge + verifiedHistoryEe;
 
     return NextResponse.json({
       pending,
