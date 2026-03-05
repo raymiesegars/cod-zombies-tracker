@@ -206,7 +206,7 @@ export default function RunDetailPage() {
   const [runOwnerDisplayName, setRunOwnerDisplayName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [adminMe, setAdminMe] = useState<{ isAdmin: boolean; isSuperAdmin: boolean } | null>(null);
+  const [adminMe, setAdminMe] = useState<{ isSuperAdmin: boolean } | null>(null);
   const [denyModalOpen, setDenyModalOpen] = useState(false);
   const [denyMessage, setDenyMessage] = useState('');
   const [adminActionLoading, setAdminActionLoading] = useState(false);
@@ -255,8 +255,8 @@ export default function RunDetailPage() {
   useEffect(() => {
     if (!log?.id) return;
     fetch('/api/admin/me', { cache: 'no-store' })
-      .then((res) => (res.ok ? res.json() : { isAdmin: false, isSuperAdmin: false }))
-      .then(setAdminMe)
+      .then((res) => (res.ok ? res.json() : { admin: null }))
+      .then((data) => setAdminMe(data?.admin ?? null))
       .catch(() => setAdminMe(null));
   }, [log?.id]);
 
@@ -805,7 +805,7 @@ export default function RunDetailPage() {
                   </div>
                 );
               })()}
-              {(isOwner || adminMe?.isSuperAdmin || (adminMe?.isAdmin && isPendingVerification)) && (
+              {(isOwner || adminMe?.isSuperAdmin || (adminMe && !isVerified)) && (
                 <div className="flex flex-col gap-2 pt-3 border-t border-bunker-700 mt-3">
                   {/* Verified lock notice for owners */}
                   {isOwner && isVerified && !adminMe?.isSuperAdmin && (
@@ -816,7 +816,7 @@ export default function RunDetailPage() {
                   )}
                   <div className="flex flex-wrap gap-2">
                     {/* Edit: owner when not verified; super admin always; admin when pending verification (edit but not delete) */}
-                    {((isOwner && !isVerified) || adminMe?.isSuperAdmin || (adminMe?.isAdmin && isPendingVerification && !isVerified)) && (
+                    {((isOwner && !isVerified) || adminMe?.isSuperAdmin || (adminMe && !isVerified)) && (
                       <Link href={`/maps/${map.slug}/run/${type}/${logId}/edit`} className="flex-1 min-w-0">
                         <Button variant="secondary" size="sm" className="w-full" leftIcon={<Pencil className="w-3.5 h-3.5" />}>
                           Edit
@@ -854,7 +854,7 @@ export default function RunDetailPage() {
                   {adminActionSuccess === 'submitted' && 'Run submitted for verification. It will appear in the pending queue.'}
                 </p>
               )}
-              {adminMe?.isAdmin && !isVerified && !isPendingVerification && (
+              {adminMe && !isVerified && !isPendingVerification && (
                 <div className="flex flex-col gap-2 pt-3 border-t border-bunker-700 mt-3">
                   <p className="text-bunker-400 text-xs">Admin: submit this run for verification</p>
                   <Button
@@ -869,7 +869,7 @@ export default function RunDetailPage() {
                   </Button>
                 </div>
               )}
-              {adminMe?.isAdmin && isPendingVerification && (!isOwner || adminMe?.isSuperAdmin) && (
+              {adminMe && isPendingVerification && (!isOwner || adminMe?.isSuperAdmin) && (
                 <div className="flex flex-col gap-2 pt-3 border-t border-bunker-700 mt-3">
                   <p className="text-bunker-400 text-xs">Admin: approve or deny verification</p>
                   <div className="flex flex-wrap gap-2">

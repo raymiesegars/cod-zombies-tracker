@@ -307,7 +307,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         map: { include: { game: true } },
       },
     });
-    if (resendToCoopMembers && teammateUserIds !== undefined && teammateUserIds.length > 0) {
+    const isOwner = log.userId === user.id;
+    if (isOwner && resendToCoopMembers && teammateUserIds !== undefined && teammateUserIds.length > 0) {
       await createCoOpRunPendingsForChallengeLog(id, user.id, teammateUserIds);
     }
     return NextResponse.json(updated);
