@@ -66,7 +66,8 @@ export default function HomePage() {
   } | null>(null);
 
   useEffect(() => {
-    fetch('/api/home-stats')
+    const t = setTimeout(() => {
+      fetch('/api/home-stats')
       .then((res) => res.json())
       .then((data) => {
         if (data?.maps != null && data?.users != null && data?.achievements != null && data?.runs != null) {
@@ -79,6 +80,8 @@ export default function HomePage() {
         }
       })
       .catch(() => setHomeStats(null));
+    }, 300);
+    return () => clearTimeout(t);
   }, []);
 
   // Don't show user-dependent CTAs until auth has resolved — avoids "Get Started" flashing to "Log Progress" for logged-in users

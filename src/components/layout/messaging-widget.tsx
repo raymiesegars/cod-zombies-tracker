@@ -161,7 +161,7 @@ export function MessagingWidget() {
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // ── Background friends count (always, for button badge) ───────────────────
+  // ── Background friends count (always, for button badge). Defer to avoid connection spike on sign-in.
   useEffect(() => {
     if (!profile?.id) return;
     const doFetch = () => {
@@ -174,11 +174,11 @@ export function MessagingWidget() {
         })
         .catch(() => {});
     };
-    doFetch();
-    const t = setInterval(doFetch, 60 * 1000);
+    const t = setTimeout(doFetch, 1500);
+    const i = setInterval(doFetch, 60 * 1000);
     const onUpdate = () => doFetch();
     window.addEventListener('cod-tracker-friends-updated', onUpdate);
-    return () => { clearInterval(t); window.removeEventListener('cod-tracker-friends-updated', onUpdate); };
+    return () => { clearTimeout(t); clearInterval(i); window.removeEventListener('cod-tracker-friends-updated', onUpdate); };
   }, [profile?.id]);
 
   // ── Unread count polling (always) ──────────────────────────────────────────
@@ -195,9 +195,9 @@ export function MessagingWidget() {
 
   useEffect(() => {
     if (!profile?.id) return;
-    fetchUnreadCount();
-    const t = setInterval(fetchUnreadCount, 20 * 1000);
-    return () => clearInterval(t);
+    const t = setTimeout(fetchUnreadCount, 2500);
+    const i = setInterval(fetchUnreadCount, 20 * 1000);
+    return () => { clearTimeout(t); clearInterval(i); };
   }, [profile?.id, fetchUnreadCount]);
 
   // ── Conversations tab ──────────────────────────────────────────────────────
