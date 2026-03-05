@@ -3,7 +3,6 @@ import prisma from '@/lib/prisma';
 import { getLevelFromXp } from '@/lib/ranks';
 import type { PlayerCount } from '@prisma/client';
 
-// Always fresh: XP and ranks change frequently
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 

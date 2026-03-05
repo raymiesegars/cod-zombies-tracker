@@ -193,7 +193,7 @@ export default function LeaderboardsPage() {
     }
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only run on mount; selectedGame is intentionally read once for initial state
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -333,7 +333,7 @@ export default function LeaderboardsPage() {
     }
 
     fetchLeaderboard();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- selectedMapData?.game?.shortName derived from selectedMap
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, isVanguardMap, hasVanguardVoid, hasVanguardRampage, searchForFetch, verifiedOnly, rankVerifiedXpOnly, leaderboardStorageHydrated, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter]);
 
   const loadMore = useCallback(async () => {
@@ -440,7 +440,7 @@ export default function LeaderboardsPage() {
       loadingMoreRef.current = false;
       setLoadMoreLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- selectedMapData?.game?.shortName derived from selectedMap
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, hasVanguardVoid, hasVanguardRampage, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter, leaderboard.length, total]);
 
   // Observe sentinel when search is empty and more entries exist; trigger well before sentinel is visible

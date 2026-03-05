@@ -64,10 +64,8 @@ type LogWithMeta = {
   ww2ConsumablesUsed?: boolean | null;
 };
 
-/** Serialize game filters for a run into a key fragment. Returns all key fragments this run belongs to (exact + no-filter). */
 function getFilterKeyVariants(log: LogWithMeta, gameShortName: string, mapSlug?: string): string[] {
   const variants: string[] = [];
-  // Always include "no filter" (empty) - run appears in the base leaderboard
   variants.push('');
 
   if (isBo3Game(gameShortName)) {

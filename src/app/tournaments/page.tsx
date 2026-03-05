@@ -244,7 +244,7 @@ export default function TournamentsPage() {
     setCreateForm({ title: '', gameId: '', mapId: '', challengeId: '', easterEggId: '', pollId: '', config: {} });
     setMapsByGame([]);
     setMapDetail(null);
-  }, [createLeaderboardOpen]);
+  }, [createLeaderboardOpen, fetchPolls]);
 
   useEffect(() => {
     if (!createForm.gameId) {

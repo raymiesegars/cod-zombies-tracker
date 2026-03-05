@@ -185,12 +185,10 @@ export function getMinRoundForChallengeType(type: string): number {
   return speedrunRounds[type] ?? 1;
 }
 
-/** @internal Used by pickRandomRoll */
 function getMinRoundForType(type: string): number {
   return getMinRoundForChallengeType(type);
 }
 
-/** Human-readable round range for a challenge type (lowest-highest, for mystery box roll display). */
 export function getChallengeRangeDisplay(type: string): string {
   if (isSpeedrunType(type)) {
     const round = getMinRoundForChallengeType(type);
