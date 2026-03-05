@@ -39,12 +39,11 @@ export function FriendsListWidget({ variant = 'floating' }: Props) {
   useEffect(() => {
     if (!profile?.id) return;
     setLoading(true);
-    const t = setTimeout(() => fetchFriends(), 800);
+    fetchFriends();
     const interval = setInterval(fetchFriends, 60 * 1000);
     const onUpdate = () => fetchFriends();
     window.addEventListener('cod-tracker-friends-updated', onUpdate);
     return () => {
-      clearTimeout(t);
       clearInterval(interval);
       window.removeEventListener('cod-tracker-friends-updated', onUpdate);
     };

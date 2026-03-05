@@ -109,15 +109,13 @@ export default function FindGroupPage() {
 
   useEffect(() => {
     let cancelled = false;
-    const t = setTimeout(() => {
-      async function load() {
-        setIsLoading(true);
-        await Promise.all([fetchListings(), fetchGamesAndMaps()]);
-        if (!cancelled) setIsLoading(false);
-      }
-      load();
-    }, 1000);
-    return () => { cancelled = true; clearTimeout(t); };
+    async function load() {
+      setIsLoading(true);
+      await Promise.all([fetchListings(), fetchGamesAndMaps()]);
+      if (!cancelled) setIsLoading(false);
+    }
+    load();
+    return () => { cancelled = true; };
   }, [fetchListings, fetchGamesAndMaps]);
 
   useEffect(() => {

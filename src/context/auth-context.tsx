@@ -49,7 +49,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         profileFetchedRef.current = true;
         return data;
       }
-      // 500 or other server error: don't retry, avoid hanging
+      // 500: retry once after delay (e.g. pool timeout on first attempt)
+      if (response.status >= 500 && retryCount < 1) {
+        await new Promise((r) => setTimeout(r, 4000));
+        fetchingRef.current = false;
+        return fetchProfile(supabaseId, retryCount + 1);
+      }
       if (response.status >= 500) return null;
       if (response.status === 404 && retryCount < 4) {
         // New OAuth user – profile might not exist yet, retry with backoff
