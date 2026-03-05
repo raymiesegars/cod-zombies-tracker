@@ -213,11 +213,22 @@ export default function MysteryBoxPage() {
     }
   };
 
+  const pollFailuresRef = useRef(0);
   const fetchData = () => {
     fetch('/api/mystery-box/me', { credentials: 'same-origin', cache: 'no-store' })
-      .then((res) => (res.ok ? res.json() : null))
+      .then((res) => {
+        if (res.ok) {
+          pollFailuresRef.current = 0;
+          return res.json();
+        }
+        pollFailuresRef.current += 1;
+        return null;
+      })
       .then(setData)
-      .catch(() => setData(null))
+      .catch(() => {
+        pollFailuresRef.current += 1;
+        setData(null);
+      })
       .finally(() => setLoading(false));
   };
 
@@ -247,10 +258,15 @@ export default function MysteryBoxPage() {
       .catch(() => { hasTriedAutoCreate.current = false; });
   }, [authLoading, loading, profile, data?.lobby]);
 
-  // Poll when in lobby so all members see host actions (spin, discard vote, etc.) within a few seconds
+  // Poll when in lobby so all members see host actions (spin, discard vote, etc.) within a few seconds.
+  // Stop polling after 3 consecutive failures (e.g. 500s) to avoid hammering when DB is down.
   useEffect(() => {
     if (!data?.lobby) return;
-    const interval = setInterval(fetchData, 3000);
+    if (pollFailuresRef.current >= 3) return;
+    const interval = setInterval(() => {
+      if (pollFailuresRef.current >= 3) return;
+      fetchData();
+    }, 3000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- poll keyed by lobby id only
   }, [data?.lobby?.id]);

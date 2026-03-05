@@ -28,21 +28,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const profileFetchedRef = useRef(false);
   const fetchingRef = useRef(false);
 
+  const PROFILE_FETCH_TIMEOUT_MS = 15000; // 15s so we don't hang when DB is unreachable
+
   const fetchProfile = useCallback(async (supabaseId: string, retryCount = 0): Promise<User | null> => {
     if (fetchingRef.current) return null;
     fetchingRef.current = true;
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), PROFILE_FETCH_TIMEOUT_MS);
       const response = await fetch(`/api/users/profile?supabaseId=${supabaseId}`, {
         cache: 'no-store',
+        signal: controller.signal,
       });
-      
+      clearTimeout(timeoutId);
+
       if (response.ok) {
         const data = await response.json();
         setProfile(data);
         profileFetchedRef.current = true;
         return data;
-      } else if (response.status === 404 && retryCount < 4) {
+      }
+      // 500 or other server error: don't retry, avoid hanging
+      if (response.status >= 500) return null;
+      if (response.status === 404 && retryCount < 4) {
         // New OAuth user – profile might not exist yet, retry with backoff
         const delay = 200 * Math.pow(2, retryCount);
         await new Promise(resolve => setTimeout(resolve, delay));
@@ -51,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       return null;
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      if ((error as Error)?.name !== 'AbortError') console.error('Error fetching profile:', error);
       return null;
     } finally {
       fetchingRef.current = false;
@@ -108,11 +117,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (session?.user) {
           setIsProfileSettingUp(true);
-          const existingProfile = await fetchProfile(session.user.id);
-          if (!existingProfile && mounted) {
-            await createProfile(session.user);
+          try {
+            const existingProfile = await fetchProfile(session.user.id);
+            if (!existingProfile && mounted) {
+              await createProfile(session.user);
+            }
+          } finally {
+            if (mounted) setIsProfileSettingUp(false);
           }
-          if (mounted) setIsProfileSettingUp(false);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
@@ -138,11 +150,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         profileFetchedRef.current = false;
         fetchingRef.current = false;
         setIsProfileSettingUp(true);
-        const existingProfile = await fetchProfile(session.user.id);
-        if (!existingProfile && mounted) {
-          await createProfile(session.user);
+        try {
+          const existingProfile = await fetchProfile(session.user.id);
+          if (!existingProfile && mounted) {
+            await createProfile(session.user);
+          }
+        } finally {
+          if (mounted) setIsProfileSettingUp(false);
         }
-        if (mounted) setIsProfileSettingUp(false);
       }
 
       if (event === 'SIGNED_OUT') {
