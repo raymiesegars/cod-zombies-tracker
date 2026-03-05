@@ -105,12 +105,12 @@ export default function AdminChatbotPage() {
         credentials: 'same-origin',
         body: JSON.stringify({ username }),
       });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok) {
+      const data = (await res.json().catch(() => null)) as { username?: string; error?: string } | null;
+      if (res.ok && data?.username) {
         setContributorUsername('');
         alert(`Granted contributor status to @${data.username}`);
       } else {
-        alert(data.error || 'Failed');
+        alert(data?.error || (res.status === 404 ? 'Grant contributor API not found. Deploy the latest code.' : 'Failed'));
       }
     } catch {
       alert('Failed');
