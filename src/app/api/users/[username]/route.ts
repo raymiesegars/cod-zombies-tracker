@@ -26,40 +26,6 @@ export async function GET(
     const user = await prisma.user.findUnique({
       where: { username },
       include: {
-        challengeLogs: {
-          include: {
-            challenge: true,
-            map: {
-              include: {
-                game: true,
-              },
-            },
-          },
-          orderBy: {
-            roundReached: 'desc',
-          },
-        },
-        easterEggLogs: {
-          include: {
-            easterEgg: true,
-            map: {
-              include: {
-                game: true,
-              },
-            },
-          },
-          orderBy: {
-            completedAt: 'desc',
-          },
-        },
-        userAchievements: {
-          include: {
-            achievement: true,
-          },
-          orderBy: {
-            unlockedAt: 'desc',
-          },
-        },
         _count: {
           select: {
             challengeLogs: true,

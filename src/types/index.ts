@@ -65,15 +65,20 @@ export type UserWithStats = User & {
 };
 
 export type UserProfile = User & {
-  challengeLogs: (ChallengeLog & {
+  _count?: {
+    challengeLogs: number;
+    easterEggLogs: number;
+    userAchievements: number;
+  };
+  challengeLogs?: (ChallengeLog & {
     map: Map;
     challenge: Challenge;
   })[];
-  easterEggLogs: (EasterEggLog & {
+  easterEggLogs?: (EasterEggLog & {
     map: Map;
     easterEgg: EasterEgg;
   })[];
-  userAchievements: (UserAchievement & {
+  userAchievements?: (UserAchievement & {
     achievement: Achievement;
   })[];
 };

@@ -913,6 +913,18 @@ export default function UserProfilePage() {
             worldRecords: statsData.worldRecords ?? 0,
             verifiedWorldRecords: statsData.verifiedWorldRecords ?? 0,
           });
+          fetch(`/api/users/${username}/world-records-summary`, { cache: 'no-store' })
+            .then((r) => (r.ok ? r.json() : null))
+            .then((wr) => {
+              if (wr && (wr.worldRecords != null || wr.verifiedWorldRecords != null)) {
+                setStatsTotals((prev) => ({
+                  ...prev,
+                  worldRecords: wr.worldRecords ?? prev.worldRecords ?? 0,
+                  verifiedWorldRecords: wr.verifiedWorldRecords ?? prev.verifiedWorldRecords ?? 0,
+                }));
+              }
+            })
+            .catch(() => {});
         }
 
         if (overviewRes.ok) {
