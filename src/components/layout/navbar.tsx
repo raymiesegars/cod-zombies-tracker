@@ -83,6 +83,7 @@ export function Navbar() {
             <ChatbotTrigger className="p-2 shrink-0" size={32} label="Ask LeKronorium — site & zombies Q&A" />
             <Link
               href="/mystery-box"
+              prefetch={false}
               className={`${iconOnlyClass} inline-flex items-center`}
               aria-label="Mystery Box"
             >
@@ -346,6 +347,7 @@ export function Navbar() {
               </button>
               <Link
                 href="/mystery-box"
+                prefetch={false}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="flex items-center gap-3 px-4 py-3 min-h-[44px] text-base font-zombies text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors tracking-wide touch-manipulation"
                 aria-label="Mystery Box"

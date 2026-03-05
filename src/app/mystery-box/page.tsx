@@ -266,7 +266,7 @@ export default function MysteryBoxPage() {
     const interval = setInterval(() => {
       if (pollFailuresRef.current >= 3) return;
       fetchData();
-    }, 3000);
+    }, 6000);
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.lobby?.id]);

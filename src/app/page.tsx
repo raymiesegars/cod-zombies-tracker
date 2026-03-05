@@ -295,6 +295,7 @@ export default function HomePage() {
       <section className="py-8 sm:py-12 px-4 border-y border-amber-900/40 bg-gradient-to-b from-amber-950/40 to-bunker-950">
         <Link
           href="/mystery-box"
+          prefetch={false}
           className="block max-w-4xl mx-auto p-6 sm:p-8 rounded-2xl border-2 border-amber-700/50 bg-amber-950/60 hover:bg-amber-900/50 hover:border-amber-600/70 transition-all text-left group"
         >
           <div className="flex items-center gap-4 sm:gap-6">

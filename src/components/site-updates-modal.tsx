@@ -66,6 +66,7 @@ export function SiteUpdatesModal() {
           </p>
           <Link
             href="/mystery-box"
+            prefetch={false}
             onClick={handleDismiss}
             className="flex items-center justify-center gap-2 w-full sm:w-auto min-h-[48px] px-6 py-3 rounded-xl bg-element-600 hover:bg-element-500 text-white font-bold text-base shadow-lg hover:shadow-element-900/30 transition-all border-2 border-element-500/60 hover:scale-[1.02] active:scale-[0.98]"
           >
