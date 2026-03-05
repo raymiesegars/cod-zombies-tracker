@@ -66,19 +66,22 @@ export default function HomePage() {
   } | null>(null);
 
   useEffect(() => {
-    fetch('/api/home-stats')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.maps != null && data?.users != null && data?.achievements != null && data?.runs != null) {
-          setHomeStats({
-            maps: data.maps,
-            users: data.users,
-            achievements: data.achievements,
-            runs: data.runs,
-          });
-        }
-      })
-      .catch(() => setHomeStats(null));
+    const t = setTimeout(() => {
+      fetch('/api/home-stats')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.maps != null && data?.users != null && data?.achievements != null && data?.runs != null) {
+            setHomeStats({
+              maps: data.maps,
+              users: data.users,
+              achievements: data.achievements,
+              runs: data.runs,
+            });
+          }
+        })
+        .catch(() => setHomeStats(null));
+    }, 2000);
+    return () => clearTimeout(t);
   }, []);
 
   // Don't show user-dependent CTAs until auth has resolved — avoids "Get Started" flashing to "Log Progress" for logged-in users

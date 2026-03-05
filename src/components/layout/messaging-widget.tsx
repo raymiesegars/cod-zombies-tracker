@@ -174,11 +174,11 @@ export function MessagingWidget() {
         })
         .catch(() => {});
     };
-    doFetch();
+    const start = setTimeout(doFetch, 2000);
     const t = setInterval(doFetch, 60 * 1000);
     const onUpdate = () => doFetch();
     window.addEventListener('cod-tracker-friends-updated', onUpdate);
-    return () => { clearInterval(t); window.removeEventListener('cod-tracker-friends-updated', onUpdate); };
+    return () => { clearTimeout(start); clearInterval(t); window.removeEventListener('cod-tracker-friends-updated', onUpdate); };
   }, [profile?.id]);
 
   // ── Unread count polling (always) ──────────────────────────────────────────
@@ -195,9 +195,9 @@ export function MessagingWidget() {
 
   useEffect(() => {
     if (!profile?.id) return;
-    fetchUnreadCount();
+    const start = setTimeout(fetchUnreadCount, 2500);
     const t = setInterval(fetchUnreadCount, 20 * 1000);
-    return () => clearInterval(t);
+    return () => { clearTimeout(start); clearInterval(t); };
   }, [profile?.id, fetchUnreadCount]);
 
   // ── Conversations tab ──────────────────────────────────────────────────────
