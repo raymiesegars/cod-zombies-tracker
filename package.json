@@ -61,6 +61,8 @@
     "db:import-user-whiteboypl4ys": "tsx scripts/import-user-whiteboypl4ys.ts",
     "db:import-user-gannonsnipes": "tsx scripts/import-user-gannonsnipes.ts",
     "db:import-user-superchubbs-ntc": "tsx scripts/import-user-superchubbs-ntc.ts",
+    "db:import-user-phobos": "tsx scripts/import-user-phobos.ts",
+    "db:import-user-yappereu": "tsx scripts/import-user-yappereu.ts",
     "db:fix-bo4-null-difficulty": "tsx scripts/fix-bo4-null-difficulty.ts",
     "db:backfill-bo4-difficulty-from-csv": "tsx scripts/import-skrine-csv/backfill-bo4-difficulty-from-csv.ts",
     "db:backfill-speedrun-times-from-csv": "tsx scripts/import-skrine-csv/backfill-speedrun-times-from-csv.ts",

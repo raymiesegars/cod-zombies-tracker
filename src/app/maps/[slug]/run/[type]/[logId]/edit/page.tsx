@@ -136,14 +136,15 @@ export default function EditRunPage() {
   // Admin / verified status
   const [isVerified, setIsVerified] = useState(false);
   const [isSuperAdminUser, setIsSuperAdminUser] = useState(false);
+  const [isOwner, setIsOwner] = useState(true);
 
   const isChallenge = type === 'challenge';
   const apiUrl = isChallenge ? `/api/challenge-logs/${logId}` : `/api/easter-egg-logs/${logId}`;
 
   useEffect(() => {
     fetch('/api/admin/me', { cache: 'no-store' })
-      .then((res) => (res.ok ? res.json() : { isAdmin: false, isSuperAdmin: false }))
-      .then((data) => setIsSuperAdminUser(data.isSuperAdmin === true))
+      .then((res) => (res.ok ? res.json() : { admin: null }))
+      .then((data) => setIsSuperAdminUser(data?.admin?.isSuperAdmin === true))
       .catch(() => {});
   }, []);
 
@@ -171,6 +172,7 @@ export default function EditRunPage() {
           return;
         }
         setLog(data);
+        setIsOwner(data.isOwner !== false);
         setIsVerified(Boolean(data.isVerified));
         setPlayerCount(data.playerCount || 'SOLO');
         // Coerce to number for TimeInput (API/Prisma may return string in edge cases)
@@ -255,12 +257,12 @@ export default function EditRunPage() {
       return;
     }
     const hasCoopMembers = teammateUserIds.length > 0 || teammateNonUserNames.length > 0;
-    if (hasCoopMembers) {
+    if (hasCoopMembers && isOwner) {
       setPendingSubmitType('challenge');
       setShowCoopResendModal(true);
       return;
     }
-    doSubmitChallenge(true);
+    doSubmitChallenge(hasCoopMembers && isOwner);
   };
 
   const doSubmitChallenge = async (resendToCoopMembers: boolean) => {
@@ -323,12 +325,12 @@ export default function EditRunPage() {
       }
     }
     const hasCoopMembers = teammateUserIds.length > 0 || teammateNonUserNames.length > 0;
-    if (hasCoopMembers) {
+    if (hasCoopMembers && isOwner) {
       setPendingSubmitType('easter_egg');
       setShowCoopResendModal(true);
       return;
     }
-    doSubmitEasterEgg(true);
+    doSubmitEasterEgg(hasCoopMembers && isOwner);
   };
 
   const doSubmitEasterEgg = async (resendToCoopMembers: boolean) => {

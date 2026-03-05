@@ -137,6 +137,18 @@ export const ZWR_TO_CZT_USERS: Record<string, ZwrToCztEntry> = {
     displayName: 'philosophy',
     note: 'Run pnpm db:import-user-philosophy. CSV: top-178-csv/philosophy.csv (Origins no-power only).',
   },
+  // Phobos — top-178 import
+  'Phobos': {
+    cztUserId: 'cmmdqzv9i0000114dhvjtj6ny',
+    displayName: 'Phobos',
+    note: 'Import from top-178-csv/Phobos.csv with --source-player-id=Phobos --czt-user=cmmdqzv9i0000114dhvjtj6ny.',
+  },
+  // YapperEU — top-178 import
+  'YapperEU': {
+    cztUserId: 'cmmdsenoj0000ggpql3txjvz4',
+    displayName: 'YapperEU',
+    note: 'Import from top-178-csv/YapperEU.csv with --source-player-id=YapperEU --czt-user=cmmdsenoj0000ggpql3txjvz4.',
+  },
 };
 
 /**
