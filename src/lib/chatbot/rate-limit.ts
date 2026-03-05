@@ -120,3 +120,28 @@ export async function consumeChatbotToken(userId: string): Promise<{ consumed: b
   });
   return { consumed: true, remaining: newRemaining };
 }
+
+/** Refund 1 token (e.g. when the bot responded "I don't know"). Caps at user's limit. */
+export async function refundChatbotToken(userId: string): Promise<{ remaining: number }> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { isAdmin: true, isContributor: true },
+  });
+  const { cap } = getCapAndRefill(user);
+  const row = await prisma.chatbotToken.findUnique({ where: { userId } });
+  const current = row?.tokensRemaining ?? 0;
+  const newRemaining = Math.min(current + 1, cap);
+  if (newRemaining === current) return { remaining: current };
+
+  if (row) {
+    await prisma.chatbotToken.update({
+      where: { userId },
+      data: { tokensRemaining: newRemaining },
+    });
+  } else {
+    await prisma.chatbotToken.create({
+      data: { userId, tokensRemaining: newRemaining, lastRefillAt: new Date() },
+    });
+  }
+  return { remaining: newRemaining };
+}

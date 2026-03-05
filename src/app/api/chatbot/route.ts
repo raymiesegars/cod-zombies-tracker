@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUser } from '@/lib/supabase/server';
 import prisma from '@/lib/prisma';
-import { getChatbotTokens, consumeChatbotToken } from '@/lib/chatbot/rate-limit';
+import { getChatbotTokens, consumeChatbotToken, refundChatbotToken } from '@/lib/chatbot/rate-limit';
 import { buildChatbotContext } from '@/lib/chatbot/context';
 import { looksLikeAbuse } from '@/lib/chatbot/abuse-check';
 import OpenAI from 'openai';
@@ -16,9 +16,11 @@ const UNKNOWN_MARKER = '[LEKRONORIUM_UNKNOWN]';
 
 const systemPromptPrefix = `You are LeKronorium, the official chatbot for this Call of Duty Zombies tracker site. You have exclusive high-level zombies knowledge and strats that general AI assistants do not have.
 
-CRITICAL: You MUST answer ONLY from the CONTEXT below. If the user's question cannot be answered from the context, you MUST respond with EXACTLY this line first (no other text before it):
+CRITICAL: Answer ONLY from the CONTEXT below.
+- If the answer IS in the context (maps list, easter eggs, verified high round #1 per map, or other knowledge blocks): answer helpfully and include the exact links from the context (e.g. /maps/shadows-of-evil for Shadows of Evil, /maps/the-tomb for The Tomb). For "main easter egg on [map]" or "where to complete [ee]", give the EE name and description from the list, then say the full step-by-step guide is on the map page at /maps/[slug] (Easter Eggs tab). For "who is #1 on [map]" or "top verified round for [map]", use the "Verified high round #1 per map" section and name the player and round, and link to /leaderboards or /maps/[slug].
+- If the user's question CANNOT be answered from the context (the specific map, EE, or leaderboard data is not in the context), you MUST respond with EXACTLY this line first (no other text before it):
 ${UNKNOWN_MARKER}
-Then add one short sentence: that you don't have that information yet but are forwarding their question to the team to learn for the future. Do NOT make up answers, map names, strategies, or stats. If the answer is in the context, answer normally and do NOT use the ${UNKNOWN_MARKER} line.`;
+Then add one short sentence that you don't have that information yet but are forwarding their question to the team. Do NOT make up map names, player names, rounds, or strategies. When in doubt, if the context contains the map name and slug or the leaderboard #1 for that map, answer from it—do not use ${UNKNOWN_MARKER}.`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -97,7 +99,12 @@ export async function POST(request: NextRequest) {
         { status: 429 }
       );
     }
-    return NextResponse.json({ reply, tokensRemaining: newRemaining, wasUnknown });
+    let tokensRemaining = newRemaining;
+    if (wasUnknown) {
+      const refunded = await refundChatbotToken(userId);
+      tokensRemaining = refunded.remaining;
+    }
+    return NextResponse.json({ reply, tokensRemaining, wasUnknown });
   } catch (err) {
     console.error('Chatbot API error:', err);
     return NextResponse.json(
