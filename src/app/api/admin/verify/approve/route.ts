@@ -3,11 +3,11 @@ import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { isSuperAdmin } from '@/lib/admin';
 import { grantVerifiedAchievementsForMap } from '@/lib/verified-xp';
+import { adminXpForRun } from '@/lib/admin-levels';
 import { NotificationType } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
-/** Approve verification for a run. Admin only. Creates VERIFICATION_APPROVED notification for the run owner. */
 export async function POST(request: NextRequest) {
   try {
     const supabaseUser = await getUser();
@@ -30,10 +30,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'logId is required' }, { status: 400 });
     }
 
+    const now = new Date();
+
     if (logType === 'challenge') {
       const log = await prisma.challengeLog.findUnique({
         where: { id: logId },
-        select: { id: true, userId: true, mapId: true, verificationRequestedAt: true, isVerified: true },
+        select: { id: true, userId: true, mapId: true, verificationRequestedAt: true, isVerified: true, roundReached: true },
       });
       if (!log || !log.verificationRequestedAt || log.isVerified) {
         return NextResponse.json({ error: 'Run not found or not pending verification' }, { status: 400 });
@@ -43,7 +45,7 @@ export async function POST(request: NextRequest) {
       }
       await prisma.challengeLog.update({
         where: { id: logId },
-        data: { isVerified: true, verificationRequestedAt: null },
+        data: { isVerified: true, verificationRequestedAt: null, verifiedById: me.id, verifiedAt: now },
       });
       const { verifiedTotalXp, xpGained } = await grantVerifiedAchievementsForMap(log.userId, log.mapId);
       await prisma.notification.create({
@@ -56,35 +58,50 @@ export async function POST(request: NextRequest) {
           verifiedTotalXp: xpGained > 0 ? verifiedTotalXp : null,
         },
       });
-    } else {
-      const log = await prisma.easterEggLog.findUnique({
-        where: { id: logId },
-        select: { id: true, userId: true, mapId: true, verificationRequestedAt: true, isVerified: true },
-      });
-      if (!log || !log.verificationRequestedAt || log.isVerified) {
-        return NextResponse.json({ error: 'Run not found or not pending verification' }, { status: 400 });
+      const adminXp = adminXpForRun(log.roundReached);
+      if (adminXp > 0) {
+        await prisma.user.update({
+          where: { id: me.id },
+          data: { adminXp: { increment: adminXp } },
+        });
       }
-      if (log.userId === me.id && !isSuperAdmin(me.id)) {
-        return NextResponse.json({ error: 'You cannot verify your own run' }, { status: 400 });
-      }
-      await prisma.easterEggLog.update({
-        where: { id: logId },
-        data: { isVerified: true, verificationRequestedAt: null },
-      });
-      const { verifiedTotalXp, xpGained } = await grantVerifiedAchievementsForMap(log.userId, log.mapId);
-      await prisma.notification.create({
-        data: {
-          userId: log.userId,
-          type: NotificationType.VERIFICATION_APPROVED,
-          easterEggLogId: log.id,
-          read: false,
-          verifiedXpGained: xpGained > 0 ? xpGained : null,
-          verifiedTotalXp: xpGained > 0 ? verifiedTotalXp : null,
-        },
-      });
+      return NextResponse.json({ ok: true, adminXpGained: adminXp });
     }
 
-    return NextResponse.json({ ok: true });
+    const log = await prisma.easterEggLog.findUnique({
+      where: { id: logId },
+      select: { id: true, userId: true, mapId: true, verificationRequestedAt: true, isVerified: true, roundCompleted: true },
+    });
+    if (!log || !log.verificationRequestedAt || log.isVerified) {
+      return NextResponse.json({ error: 'Run not found or not pending verification' }, { status: 400 });
+    }
+    if (log.userId === me.id && !isSuperAdmin(me.id)) {
+      return NextResponse.json({ error: 'You cannot verify your own run' }, { status: 400 });
+    }
+    await prisma.easterEggLog.update({
+      where: { id: logId },
+      data: { isVerified: true, verificationRequestedAt: null, verifiedById: me.id, verifiedAt: now },
+    });
+    const { verifiedTotalXp, xpGained } = await grantVerifiedAchievementsForMap(log.userId, log.mapId);
+    await prisma.notification.create({
+      data: {
+        userId: log.userId,
+        type: NotificationType.VERIFICATION_APPROVED,
+        easterEggLogId: log.id,
+        read: false,
+        verifiedXpGained: xpGained > 0 ? xpGained : null,
+        verifiedTotalXp: xpGained > 0 ? verifiedTotalXp : null,
+      },
+    });
+    const rounds = log.roundCompleted ?? 1;
+    const adminXp = adminXpForRun(rounds);
+    if (adminXp > 0) {
+      await prisma.user.update({
+        where: { id: me.id },
+        data: { adminXp: { increment: adminXp } },
+      });
+    }
+    return NextResponse.json({ ok: true, adminXpGained: adminXp });
   } catch (error) {
     console.error('Error approving verification:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

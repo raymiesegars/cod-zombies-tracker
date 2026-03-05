@@ -1,32 +1,45 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
-import { isSuperAdmin } from '@/lib/admin';
+import { getAdminLevelFromXp, getAdminLevelIconPath } from '@/lib/admin-levels';
 
 export const dynamic = 'force-dynamic';
 
-/** Returns whether the current user is an admin and whether they are a super admin. */
 export async function GET() {
   try {
     const supabaseUser = await getUser();
-    if (!supabaseUser) {
-      return NextResponse.json({ isAdmin: false, isSuperAdmin: false });
-    }
+    if (!supabaseUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const user = await prisma.user.findUnique({
+    const me = await prisma.user.findUnique({
       where: { supabaseId: supabaseUser.id },
-      select: { id: true, isAdmin: true },
+      select: {
+        id: true,
+        isAdmin: true,
+        adminXp: true,
+        adminDashboardSeen: true,
+        _count: {
+          select: { verifiedChallengeLogs: true, verifiedEasterEggLogs: true },
+        },
+      },
     });
-    if (!user) {
-      return NextResponse.json({ isAdmin: false, isSuperAdmin: false });
+
+    if (!me || !me.isAdmin) {
+      return NextResponse.json({ admin: null });
     }
 
+    const levelInfo = getAdminLevelFromXp(me.adminXp);
     return NextResponse.json({
-      isAdmin: user.isAdmin ?? false,
-      isSuperAdmin: isSuperAdmin(user.id),
+      admin: {
+        id: me.id,
+        adminXp: me.adminXp,
+        adminDashboardSeen: me.adminDashboardSeen as { feedbackAt?: string; verifiedHistoryAt?: string } | null,
+        totalVerified: me._count.verifiedChallengeLogs + me._count.verifiedEasterEggLogs,
+        ...levelInfo,
+        levelIconPath: getAdminLevelIconPath(levelInfo.level),
+      },
     });
   } catch (error) {
     console.error('Error fetching admin me:', error);
-    return NextResponse.json({ isAdmin: false, isSuperAdmin: false });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

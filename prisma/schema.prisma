@@ -49,7 +49,9 @@ model User {
   
   // Admin: only set via secure admin APIs; super admin (env) can demote, any admin can promote
   isAdmin       Boolean   @default(false)
-  
+  adminXp       Int       @default(0)  // XP from verifying runs; drives admin level (1–20)
+  adminDashboardSeen Json? // { feedbackAt?: string, verifiedHistoryAt?: string } ISO dates for unread badges
+
   // Presence: updated on heartbeat; "online" = lastSeenAt within last ~5 min
   lastSeenAt    DateTime?
 
@@ -88,6 +90,8 @@ model User {
   tournamentTrophiesWon   TournamentTrophy[]  @relation("TrophyWinner")
   tournamentTrophiesAwarded TournamentTrophy[] @relation("TrophyAwardedBy")
   feedbacks               Feedback[]
+  verifiedChallengeLogs   ChallengeLog[]  @relation("VerifiedBy")
+  verifiedEasterEggLogs   EasterEggLog[]  @relation("VerifiedBy")
 
   @@index([username])
   @@index([supabaseId])
@@ -456,6 +460,9 @@ model ChallengeLog {
   // Verification: user can request; admin approves or denies (denial creates notification)
   isVerified              Boolean     @default(false)
   verificationRequestedAt DateTime?   // when set and !isVerified = pending verification
+  verifiedById            String?     // admin who approved
+  verifiedAt              DateTime?
+  verifiedBy              User?       @relation("VerifiedBy", fields: [verifiedById], references: [id])
 
   // IW only: fortune cards (required for all IW maps); directors cut (optional)
   useFortuneCards         Boolean?    // true = fate + fortune cards; false = fate cards only
@@ -563,7 +570,10 @@ model EasterEggLog {
   // Verification: user can request; admin approves or denies
   isVerified              Boolean     @default(false)
   verificationRequestedAt DateTime?
-  
+  verifiedById            String?
+  verifiedAt              DateTime?
+  verifiedBy              User?       @relation("VerifiedBy", fields: [verifiedById], references: [id])
+
   // Co-op: site users (user ids) and display names for non-users
   teammateUserIds      String[]   @default([])
   teammateNonUserNames String[]   @default([])

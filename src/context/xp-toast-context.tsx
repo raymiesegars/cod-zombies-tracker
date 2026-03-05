@@ -5,12 +5,15 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { getLevelFromXp, MAX_LEVEL } from '@/lib/ranks';
+import { getAdminLevelFromXp, ADMIN_MAX_LEVEL } from '@/lib/admin-levels';
 import { CheckCircle2 } from 'lucide-react';
 
 export type XpToastOptions = {
-  totalXp?: number; // So we can show rank + bar
-  verified?: boolean; // Verified XP variant: blue outline, checkmark
-  label?: string; // e.g. "Mystery Box Challenge Complete"
+  totalXp?: number;
+  verified?: boolean;
+  label?: string;
+  admin?: boolean;
+  adminTotalXp?: number;
 };
 
 type ToastState = {
@@ -18,6 +21,8 @@ type ToastState = {
   totalXp: number | null;
   verified: boolean;
   label?: string;
+  admin?: boolean;
+  adminTotalXp?: number;
 };
 
 type XpToastContextValue = {
@@ -92,6 +97,8 @@ export function XpToastProvider({ children }: { children: React.ReactNode }) {
           totalXp: next.options?.totalXp ?? null,
           verified: next.options?.verified ?? false,
           label: next.options?.label,
+          admin: next.options?.admin ?? false,
+          adminTotalXp: next.options?.adminTotalXp,
         });
         timeoutRef.current = setTimeout(showNextInQueue, TOAST_DURATION_MS);
       } else {
@@ -116,6 +123,8 @@ export function XpToastProvider({ children }: { children: React.ReactNode }) {
       totalXp: options?.totalXp ?? null,
       verified: options?.verified ?? false,
       label: options?.label,
+      admin: options?.admin ?? false,
+      adminTotalXp: options?.adminTotalXp,
     });
     timeoutRef.current = setTimeout(showNextInQueue, TOAST_DURATION_MS);
   }, [showNextInQueue]);
@@ -159,6 +168,8 @@ export function XpToastProvider({ children }: { children: React.ReactNode }) {
             totalXp={toast.totalXp}
             verified={toast.verified}
             label={toast.label}
+            admin={toast.admin}
+            adminTotalXp={toast.adminTotalXp}
           />
         )}
       </AnimatePresence>
@@ -166,12 +177,14 @@ export function XpToastProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-function XpToastContent({ amount, totalXp, verified, label }: ToastState) {
-  const hasRankAndBar = totalXp != null && totalXp >= 0;
-  const totalXpBefore = hasRankAndBar ? Math.max(0, totalXp - amount) : 0;
-  const after = hasRankAndBar ? getLevelFromXp(totalXp) : null;
-  const before = hasRankAndBar ? getLevelFromXp(totalXpBefore) : null;
+function XpToastContent({ amount, totalXp, verified, label, admin, adminTotalXp }: ToastState) {
+  const isAdmin = admin === true && adminTotalXp != null && adminTotalXp >= 0;
+  const totalXpBefore = isAdmin ? Math.max(0, adminTotalXp - amount) : totalXp != null && totalXp >= 0 ? Math.max(0, totalXp - amount) : 0;
+  const hasRankAndBar = !isAdmin && totalXp != null && totalXp >= 0;
+  const after = isAdmin ? getAdminLevelFromXp(adminTotalXp) : hasRankAndBar ? getLevelFromXp(totalXp!) : null;
+  const before = isAdmin ? getAdminLevelFromXp(totalXpBefore) : hasRankAndBar ? getLevelFromXp(totalXpBefore) : null;
   const leveledUp = Boolean(before && after && after.level > before.level);
+  const showBar = hasRankAndBar || isAdmin;
 
   // Play level-up sound once on mount; component is re-keyed per toast
   useEffect(() => {
@@ -191,64 +204,69 @@ function XpToastContent({ amount, totalXp, verified, label }: ToastState) {
         <div
           className={cn(
             'rounded-xl border shadow-xl overflow-hidden',
-            verified
-              ? 'border-blue-500/70 bg-bunker-900 ring-2 ring-blue-500/40'
-              : label === 'Mystery Box Challenge Complete'
-                ? 'border-amber-500/80 bg-bunker-900 ring-2 ring-amber-400/60 shadow-[0_0_20px_rgba(251,191,36,0.35)]'
-                : 'border-bunker-600 bg-bunker-900'
+            isAdmin
+              ? 'border-amber-500/80 bg-bunker-900 ring-2 ring-amber-400/50 shadow-[0_0_24px_rgba(251,191,36,0.4)]'
+              : verified
+                ? 'border-blue-500/70 bg-bunker-900 ring-2 ring-blue-500/40'
+                : label === 'Mystery Box Challenge Complete'
+                  ? 'border-amber-500/80 bg-bunker-900 ring-2 ring-amber-400/60 shadow-[0_0_20px_rgba(251,191,36,0.35)]'
+                  : 'border-bunker-600 bg-bunker-900'
           )}
         >
-          {/* +N XP row */}
           <div
             className={cn(
               'px-4 py-3',
-              verified
-                ? 'border-b border-blue-900/50'
-                : label === 'Mystery Box Challenge Complete'
-                  ? 'border-b border-amber-900/40'
-                  : 'border-b border-bunker-700'
+              isAdmin
+                ? 'border-b border-amber-900/50'
+                : verified
+                  ? 'border-b border-blue-900/50'
+                  : label === 'Mystery Box Challenge Complete'
+                    ? 'border-b border-amber-900/40'
+                    : 'border-b border-bunker-700'
             )}
           >
-            {label && (
-              <p className="text-center text-xs font-semibold uppercase tracking-wider text-amber-400 mb-2">
-                {label}
+            {(label || isAdmin) && (
+              <p className={cn(
+                'text-center text-xs font-semibold uppercase tracking-wider mb-2',
+                isAdmin ? 'text-amber-400' : 'text-amber-400'
+              )}>
+                {isAdmin ? 'Admin XP' : label}
               </p>
             )}
             {leveledUp && (
               <p className={cn(
                 'text-center text-xs font-black uppercase tracking-widest mb-2',
-                verified ? 'text-blue-400' : 'text-blood-400'
+                isAdmin ? 'text-amber-400' : verified ? 'text-blue-400' : 'text-blood-400'
               )}>
-                {verified ? '⬆ Verified Rank Up!' : '⬆ Level Up!'}
+                {isAdmin ? '⬆ Admin Rank Up!' : verified ? '⬆ Verified Rank Up!' : '⬆ Level Up!'}
               </p>
             )}
             <p className="text-center flex items-center justify-center gap-2">
-              {verified && (
+              {verified && !isAdmin && (
                 <CheckCircle2 className="w-5 h-5 text-blue-400 shrink-0" strokeWidth={2.5} aria-hidden />
               )}
-              <span className={verified ? 'text-blue-400 font-medium' : 'text-military-400 font-medium'}>+</span>
+              <span className={isAdmin ? 'text-amber-400 font-medium' : verified ? 'text-blue-400 font-medium' : 'text-military-400 font-medium'}>+</span>
               <span className="tabular-nums text-lg font-bold text-white mx-0.5">
                 {amount.toLocaleString()}
               </span>
-              <span className={verified ? 'text-blue-400/90 font-medium' : 'text-military-500 font-medium'}>
-                {verified ? ' Verified' : ''} XP
+              <span className={isAdmin ? 'text-amber-400/90 font-medium' : verified ? 'text-blue-400/90 font-medium' : 'text-military-500 font-medium'}>
+                {isAdmin ? ' Admin' : verified ? ' Verified' : ''} XP
               </span>
             </p>
           </div>
 
-          {hasRankAndBar && after && before && (
+          {showBar && after && before && (
             <div className="px-4 py-3 space-y-3">
-              {/* Rank: icon + level + name + total */}
               <div className="flex items-center gap-3">
                 <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
-                  {verified && (
+                  {verified && !isAdmin && (
                     <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center" aria-hidden>
                       <CheckCircle2 className="w-4 h-4 text-blue-500" strokeWidth={2.5} />
                     </span>
                   )}
                   <Image
-                    src={after.rankIcon}
-                    alt={after.rankName}
+                    src={isAdmin ? (after as { levelIcon: string }).levelIcon : (after as { rankIcon: string }).rankIcon}
+                    alt={isAdmin ? `Admin level ${after.level}` : (after as { rankName: string }).rankName}
                     width={40}
                     height={40}
                     className="object-contain"
@@ -257,8 +275,8 @@ function XpToastContent({ amount, totalXp, verified, label }: ToastState) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-white truncate flex items-center gap-1.5 flex-wrap">
-                    Level {after.level} · {after.rankName}
-                    {verified && (
+                    Level {after.level} · {isAdmin ? 'Admin Rank' : (after as ReturnType<typeof getLevelFromXp>).rankName}
+                    {verified && !isAdmin && (
                       <span className="inline-flex items-center gap-0.5 text-blue-400 text-xs shrink-0">
                         <CheckCircle2 className="w-3.5 h-3.5" aria-hidden />
                         Verified
@@ -266,17 +284,19 @@ function XpToastContent({ amount, totalXp, verified, label }: ToastState) {
                     )}
                   </p>
                   <p className="text-xs text-bunker-400">
-                    {totalXp.toLocaleString()} {verified ? 'verified' : 'total'} XP
+                    {(isAdmin ? adminTotalXp : totalXp)?.toLocaleString()} {isAdmin ? 'admin' : verified ? 'verified' : 'total'} XP
                   </p>
                 </div>
               </div>
-              {/* XP bar */}
               <div className="space-y-1">
-                <div className="w-full h-2 bg-bunker-800 rounded-full overflow-hidden border border-bunker-700">
+                <div className={cn(
+                  'w-full h-2 rounded-full overflow-hidden border',
+                  isAdmin ? 'bg-bunker-800 border-amber-800/50' : 'bg-bunker-800 border-bunker-700'
+                )}>
                   <motion.div
                     className={cn(
                       'h-full rounded-full',
-                      verified ? 'bg-gradient-to-r from-blue-600 to-blue-500' : 'bg-gradient-to-r from-blood-600 to-blood-500'
+                      isAdmin ? 'bg-gradient-to-r from-amber-600 to-amber-500 shadow-[0_0_8px_rgba(251,191,36,0.5)]' : verified ? 'bg-gradient-to-r from-blue-600 to-blue-500' : 'bg-gradient-to-r from-blood-600 to-blood-500'
                     )}
                     initial={{ width: `${before.progress}%` }}
                     animate={{ width: `${after.progress}%` }}
@@ -286,9 +306,9 @@ function XpToastContent({ amount, totalXp, verified, label }: ToastState) {
                     }}
                   />
                 </div>
-                {after.level < MAX_LEVEL && (
+                {after.level < (isAdmin ? ADMIN_MAX_LEVEL : MAX_LEVEL) && (
                   <p className="text-[11px] text-bunker-500 text-right">
-                    {(after.nextLevelXp - totalXp).toLocaleString()} to next
+                    {((after as { nextLevelXp: number }).nextLevelXp - (isAdmin ? adminTotalXp! : totalXp!)).toLocaleString()} to next
                   </p>
                 )}
               </div>

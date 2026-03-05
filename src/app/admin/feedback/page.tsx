@@ -39,6 +39,11 @@ export default function AdminFeedbackPage() {
     fetchFeedback();
   }, [fetchFeedback]);
 
+  useEffect(() => {
+    const t = setInterval(fetchFeedback, 12000);
+    return () => clearInterval(t);
+  }, [fetchFeedback]);
+
   if (forbidden) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

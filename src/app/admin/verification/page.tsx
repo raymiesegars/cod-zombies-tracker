@@ -3,11 +3,33 @@
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Card, CardContent, Avatar, Logo, Button, Select } from '@/components/ui';
+import { Card, CardContent, Avatar, Logo, Button, Select, Modal } from '@/components/ui';
 import { RoundCounter } from '@/components/game';
 import { getAssetUrl } from '@/lib/assets';
-import { ShieldCheck, CheckSquare, Square, Loader2, CheckCircle2 } from 'lucide-react';
+import { useXpToast } from '@/context/xp-toast-context';
+import { formatCompletionTime } from '@/components/ui/time-input';
+import { ShieldCheck, CheckSquare, Square, Loader2, CheckCircle2, FileText, ExternalLink } from 'lucide-react';
 import type { PendingVerificationRun } from '@/components/game/pending-verification-section';
+
+type RunDetails = {
+  logType: 'challenge' | 'easter_egg';
+  mapName: string;
+  gameShortName: string;
+  runLabel: string;
+  roundReached?: number;
+  roundCompleted?: number | null;
+  playerCount: string;
+  user: { id: string; username: string; displayName: string | null; avatarUrl: string | null };
+  createdAt: string;
+  proofUrls: string[];
+  notes: string | null;
+  completionTimeSeconds: number | null;
+  teammateUserIds: string[];
+  teammateNonUserNames: string[];
+  extra: Record<string, unknown>;
+};
+
+const POLL_MS = 12000;
 
 const PLAYER_COUNT_LABEL: Record<string, string> = {
   SOLO: 'Solo',
@@ -23,6 +45,7 @@ function runKey(item: PendingVerificationRun) {
 }
 
 export default function AdminVerificationPage() {
+  const { showXpToast } = useXpToast();
   const [runs, setRuns] = useState<PendingVerificationRun[]>([]);
   const [games, setGames] = useState<GameOption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +54,9 @@ export default function AdminVerificationPage() {
   const [filterRunType, setFilterRunType] = useState<string>('all');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [approving, setApproving] = useState(false);
+  const [quickReviewRun, setQuickReviewRun] = useState<PendingVerificationRun | null>(null);
+  const [runDetails, setRunDetails] = useState<RunDetails | null>(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
 
   const fetchRuns = useCallback(() => {
     const params = new URLSearchParams();
@@ -55,12 +81,38 @@ export default function AdminVerificationPage() {
   }, [fetchRuns]);
 
   useEffect(() => {
+    const t = setInterval(fetchRuns, POLL_MS);
+    return () => clearInterval(t);
+  }, [fetchRuns]);
+
+  useEffect(() => {
     fetch('/api/games', { cache: 'no-store' })
       .then((res) => (res.ok ? res.json() : []))
       .then((list: { id: string; shortName: string; name: string }[]) =>
         setGames(list.map((g) => ({ id: g.id, shortName: g.shortName, name: g.name })))
       )
       .catch(() => setGames([]));
+  }, []);
+
+  useEffect(() => {
+    if (!quickReviewRun) {
+      setRunDetails(null);
+      return;
+    }
+    setDetailsLoading(true);
+    const params = new URLSearchParams({ logType: quickReviewRun.logType, logId: quickReviewRun.logId });
+    fetch(`/api/admin/run-details?${params}`, { credentials: 'same-origin', cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : { run: null }))
+      .then((data) => {
+        setRunDetails(data.run ?? null);
+      })
+      .catch(() => setRunDetails(null))
+      .finally(() => setDetailsLoading(false));
+  }, [quickReviewRun]);
+
+  const closeQuickReview = useCallback(() => {
+    setQuickReviewRun(null);
+    setRunDetails(null);
   }, []);
 
   const toggleSelect = (item: PendingVerificationRun) => {
@@ -99,6 +151,16 @@ export default function AdminVerificationPage() {
           body: JSON.stringify({ logType: item.logType, logId: item.logId }),
         });
         if (res.ok) {
+          const data = await res.json().catch(() => ({}));
+          const adminXpGained = typeof data.adminXpGained === 'number' ? data.adminXpGained : 0;
+          if (adminXpGained > 0) {
+            const meRes = await fetch('/api/admin/me', { credentials: 'same-origin', cache: 'no-store' });
+            const meData = await meRes.json().catch(() => ({}));
+            const adminTotalXp = meData.admin?.adminXp;
+            if (typeof adminTotalXp === 'number') {
+              showXpToast(adminXpGained, { admin: true, adminTotalXp });
+            }
+          }
           setSelected((prev) => {
             const next = new Set(prev);
             next.delete(runKey(item));
@@ -272,7 +334,19 @@ export default function AdminVerificationPage() {
                         )}
                       </div>
                     </Link>
-                    <CardContent className="p-2">
+                    <CardContent className="p-2 space-y-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full justify-center"
+                        leftIcon={<FileText className="w-4 h-4" />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setQuickReviewRun(item);
+                        }}
+                      >
+                        Quick review
+                      </Button>
                       <p className="text-xs text-bunker-500">Click to select · link opens in new tab</p>
                     </CardContent>
                   </Card>
@@ -281,6 +355,121 @@ export default function AdminVerificationPage() {
             })}
           </div>
         )}
+
+        <Modal
+          isOpen={quickReviewRun != null}
+          onClose={closeQuickReview}
+          title="Quick review"
+          description={quickReviewRun ? `${quickReviewRun.runLabel} · ${quickReviewRun.mapName}` : undefined}
+          size="lg"
+        >
+          {detailsLoading ? (
+            <div className="py-8 flex items-center justify-center">
+              <Loader2 className="w-8 h-8 text-blood-500 animate-spin" />
+            </div>
+          ) : runDetails ? (
+            <div className="space-y-4 text-sm">
+              <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+                <dt className="text-bunker-500">Game</dt>
+                <dd className="text-white">{runDetails.gameShortName}</dd>
+                <dt className="text-bunker-500">Map</dt>
+                <dd className="text-white">{runDetails.mapName}</dd>
+                <dt className="text-bunker-500">Run</dt>
+                <dd className="text-white">{runDetails.runLabel}</dd>
+                {(runDetails.roundReached != null || runDetails.roundCompleted != null) && (
+                  <>
+                    <dt className="text-bunker-500">Round</dt>
+                    <dd className="text-white">
+                      {runDetails.roundReached ?? runDetails.roundCompleted ?? '—'}
+                    </dd>
+                  </>
+                )}
+                <dt className="text-bunker-500">Player count</dt>
+                <dd className="text-white">{PLAYER_COUNT_LABEL[runDetails.playerCount] ?? runDetails.playerCount}</dd>
+                <dt className="text-bunker-500">Player</dt>
+                <dd className="text-white">
+                  {runDetails.user.displayName || runDetails.user.username}
+                  <span className="text-bunker-500 ml-1">@{runDetails.user.username}</span>
+                </dd>
+                <dt className="text-bunker-500">Submitted</dt>
+                <dd className="text-white">
+                  {new Date(runDetails.createdAt).toLocaleString(undefined, {
+                    dateStyle: 'medium',
+                    timeStyle: 'short',
+                  })}
+                </dd>
+                {runDetails.completionTimeSeconds != null && runDetails.completionTimeSeconds > 0 && (
+                  <>
+                    <dt className="text-bunker-500">Completion time</dt>
+                    <dd className="text-white">{formatCompletionTime(runDetails.completionTimeSeconds)}</dd>
+                  </>
+                )}
+              </dl>
+              {Object.keys(runDetails.extra).length > 0 && (
+                <div>
+                  <h3 className="text-xs font-semibold text-bunker-400 uppercase tracking-wider mb-2">Options</h3>
+                  <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
+                    {Object.entries(runDetails.extra).map(([k, v]) => (
+                      <span key={k} className="col-span-2 flex justify-between gap-2">
+                        <dt className="text-bunker-500">{k}</dt>
+                        <dd className="text-white text-right">{String(v)}</dd>
+                      </span>
+                    ))}
+                  </dl>
+                </div>
+              )}
+              {(runDetails.teammateUserIds?.length > 0 || runDetails.teammateNonUserNames?.length > 0) && (
+                <div>
+                  <h3 className="text-xs font-semibold text-bunker-400 uppercase tracking-wider mb-1">Teammates</h3>
+                  <p className="text-bunker-300">
+                    {[...(runDetails.teammateNonUserNames ?? []), ...(runDetails.teammateUserIds ?? [])].filter(Boolean).join(', ') || '—'}
+                  </p>
+                </div>
+              )}
+              {runDetails.proofUrls && runDetails.proofUrls.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-semibold text-bunker-400 uppercase tracking-wider mb-2">Proof</h3>
+                  <ul className="space-y-1">
+                    {runDetails.proofUrls.map((url, i) => (
+                      <li key={i}>
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blood-400 hover:text-blood-300 break-all flex items-center gap-1"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                          {url}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {runDetails.notes && (
+                <div>
+                  <h3 className="text-xs font-semibold text-bunker-400 uppercase tracking-wider mb-1">Notes</h3>
+                  <p className="text-bunker-300 whitespace-pre-wrap">{runDetails.notes}</p>
+                </div>
+              )}
+              {quickReviewRun && (
+                <div className="pt-2 border-t border-bunker-700">
+                  <Link
+                    href={`/maps/${quickReviewRun.mapSlug}/run/${quickReviewRun.logType === 'challenge' ? 'challenge' : 'easter-egg'}/${quickReviewRun.logId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-blood-400 hover:text-blood-300 font-medium"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Open full run page
+                  </Link>
+                </div>
+              )}
+            </div>
+          ) : quickReviewRun ? (
+            <p className="text-bunker-400 py-4">Could not load run details.</p>
+          ) : null}
+        </Modal>
       </div>
     </div>
   );
