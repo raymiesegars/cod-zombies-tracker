@@ -51,6 +51,7 @@ model User {
   isAdmin       Boolean   @default(false)
   adminXp       Int       @default(0)  // XP from verifying runs; drives admin level (1–20)
   adminDashboardSeen Json? // { feedbackAt?: string, verifiedHistoryAt?: string } ISO dates for unread badges
+  isContributor Boolean   @default(false)  // Granted by super admin; +25 chatbot tokens per 24h
 
   // Presence: updated on heartbeat; "online" = lastSeenAt within last ~5 min
   lastSeenAt    DateTime?
@@ -92,6 +93,10 @@ model User {
   feedbacks               Feedback[]
   verifiedChallengeLogs   ChallengeLog[]  @relation("VerifiedBy")
   verifiedEasterEggLogs   EasterEggLog[]  @relation("VerifiedBy")
+  chatbotKnowledgeSubmitted ChatbotKnowledge[] @relation("ChatbotSubmittedBy")
+  chatbotKnowledgeReviewed  ChatbotKnowledge[] @relation("ChatbotReviewedBy")
+  chatbotToken            ChatbotToken?
+  chatbotUnansweredQuestions ChatbotUnansweredQuestion[]
 
   @@index([username])
   @@index([supabaseId])
@@ -107,6 +112,48 @@ model Feedback {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   message   String   @db.Text
   type      String   @default("feedback")  // "bug" | "feedback"
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
+}
+
+// ============================================================================
+// LEKRONORIUM CHATBOT
+// ============================================================================
+
+model ChatbotKnowledge {
+  id          String    @id @default(cuid())
+  title       String?   // optional short label
+  category    String?   // e.g. "easter_eggs" | "rules" | "strats" | "general"
+  content     String    @db.Text
+  status      String    @default("PENDING")  // PENDING | APPROVED | REJECTED
+  submittedById String
+  submittedBy User      @relation("ChatbotSubmittedBy", fields: [submittedById], references: [id], onDelete: Cascade)
+  reviewedById String?
+  reviewedBy  User?     @relation("ChatbotReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([status])
+  @@index([submittedById])
+}
+
+model ChatbotToken {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokensRemaining Int      @default(0)
+  lastRefillAt    DateTime @default(now())
+
+  @@index([userId])
+}
+
+model ChatbotUnansweredQuestion {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question  String   @db.Text
   createdAt DateTime @default(now())
 
   @@index([userId])

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { ShieldCheck, MessageSquare, History, Trophy } from 'lucide-react';
+import { ShieldCheck, MessageSquare, History, Trophy, Bot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const tabs = [
@@ -12,6 +12,7 @@ const tabs = [
   { href: '/admin/feedback', label: 'Feedback', icon: MessageSquare, badgeKey: 'feedbackUnread' as const },
   { href: '/admin/verified-history', label: 'Verified history', icon: History, badgeKey: 'verifiedHistoryUnread' as const },
   { href: '/admin/leaderboard', label: 'Leaderboard', icon: Trophy, badgeKey: null },
+  { href: '/admin/chatbot', label: 'LeKronorium', icon: Bot, badgeKey: null },
 ];
 
 type Badges = { pending: number; feedbackUnread: number; verifiedHistoryUnread: number };
@@ -69,31 +70,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-bunker-950">
       {adminMe && (
         <div className="border-b border-amber-900/50 bg-bunker-900/90 sticky top-0 z-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div className="flex items-center gap-4">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
               <div className="flex items-center gap-2 shrink-0">
                 <Image
                   src={adminMe.levelIconPath}
                   alt={`Admin rank ${adminMe.level}`}
-                  width={32}
-                  height={32}
-                  className="object-contain"
+                  width={28}
+                  height={28}
+                  className="object-contain sm:w-8 sm:h-8"
                   unoptimized
                 />
-                <div>
-                  <p className="text-xs font-semibold text-amber-400/90 uppercase tracking-wider">Admin Rank</p>
-                  <p className="text-sm font-bold text-white">Level {adminMe.level}</p>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-xs font-semibold text-amber-400/90 uppercase tracking-wider truncate">Admin Rank</p>
+                  <p className="text-xs sm:text-sm font-bold text-white">Level {adminMe.level}</p>
                 </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-amber-400/90 uppercase tracking-wider mb-1">Admin XP</p>
-                <div className="h-2.5 bg-bunker-800 rounded-full overflow-hidden border border-amber-800/50 shadow-[inset_0_0_10px_rgba(251,191,36,0.15)]">
+              <div className="flex-1 min-w-0 w-full sm:w-auto sm:min-w-[12rem]">
+                <p className="text-[10px] sm:text-xs font-semibold text-amber-400/90 uppercase tracking-wider mb-0.5 sm:mb-1">Admin XP</p>
+                <div className="h-2 sm:h-2.5 bg-bunker-800 rounded-full overflow-hidden border border-amber-800/50 shadow-[inset_0_0_10px_rgba(251,191,36,0.15)]">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-amber-600 to-amber-500 shadow-[0_0_12px_rgba(251,191,36,0.5)]"
                     style={{ width: `${Math.min(100, adminMe.progress)}%` }}
                   />
                 </div>
-                <p className="text-[11px] text-bunker-500 mt-0.5">
+                <p className="text-[10px] sm:text-[11px] text-bunker-500 mt-0.5 truncate">
                   {adminMe.adminXp.toLocaleString()} / {(adminMe.nextLevelXp ?? adminMe.adminXp).toLocaleString()} XP
                   {adminMe.totalVerified > 0 && ` · ${adminMe.totalVerified} verified`}
                 </p>
@@ -104,8 +105,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       <nav className="border-b border-bunker-800 bg-bunker-900/80 sticky top-0 z-10" aria-label="Admin sections">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-1">
+        <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
+          <div className="flex gap-0 overflow-x-auto overflow-y-hidden overscroll-x-contain px-2 sm:px-0 sm:gap-1 sm:overflow-visible" style={{ WebkitOverflowScrolling: 'touch' }}>
             {tabs.map(({ href, label, icon: Icon, badgeKey }) => {
               const isActive = pathname === href || (href !== '/admin' && pathname.startsWith(href));
               const count = badgeKey != null ? badges[badgeKey] : 0;
@@ -114,16 +115,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   key={href}
                   href={href}
                   className={cn(
-                    'relative flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors',
+                    'relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap shrink-0 min-h-[44px] touch-manipulation',
                     isActive
                       ? 'border-blood-500 text-blood-400'
-                      : 'border-transparent text-bunker-400 hover:text-bunker-200 hover:border-bunker-600'
+                      : 'border-transparent text-bunker-400 hover:text-bunker-200 hover:border-bunker-600 active:bg-bunker-800/50'
                   )}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                   {label}
                   {badgeKey != null && count > 0 && (
-                    <span className="flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-blood-600 text-white text-xs font-bold">
+                    <span className="flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-blood-600 text-white text-[10px] sm:text-xs font-bold">
                       {count > 99 ? '99+' : count}
                     </span>
                   )}

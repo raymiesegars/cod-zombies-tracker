@@ -65,6 +65,7 @@ import {
   Filter,
   ShieldPlus,
   ShieldOff,
+  Gift,
   Loader2,
   UserPlus,
   Check,
@@ -644,12 +645,14 @@ export default function UserProfilePage() {
   const [adminMe, setAdminMe] = useState<{ isAdmin: boolean; isSuperAdmin: boolean } | null>(null);
   const [promoteModalOpen, setPromoteModalOpen] = useState(false);
   const [demoteModalOpen, setDemoteModalOpen] = useState(false);
+  const [contributorModalOpen, setContributorModalOpen] = useState(false);
   const [adminActionLoading, setAdminActionLoading] = useState(false);
   const [friendActionLoading, setFriendActionLoading] = useState<'add' | 'accept' | 'deny' | null>(null);
 
   // so "Your runs" vs "Back to runs" and map links point the right place
   const isOwnProfile = Boolean(profile && currentProfile && profile.id === currentProfile.id);
   const viewedUserIsAdmin = Boolean(profile && 'isAdmin' in profile && (profile as { isAdmin?: boolean }).isAdmin);
+  const viewedUserIsContributor = Boolean(profile && 'isContributor' in profile && (profile as { isContributor?: boolean }).isContributor);
 
   // when they confirm a coop run we refetch so XP and map highs update without a full reload
   useEffect(() => {
@@ -678,9 +681,9 @@ export default function UserProfilePage() {
     }
     let cancelled = false;
     fetch('/api/admin/me', { cache: 'no-store' })
-      .then((res) => (res.ok ? res.json() : { isAdmin: false, isSuperAdmin: false }))
+      .then((res) => (res.ok ? res.json() : { admin: null }))
       .then((data) => {
-        if (!cancelled) setAdminMe(data);
+        if (!cancelled) setAdminMe(data?.admin ?? { isAdmin: false, isSuperAdmin: false });
       })
       .catch(() => {
         if (!cancelled) setAdminMe(null);
@@ -715,7 +718,10 @@ export default function UserProfilePage() {
       setPromoteModalOpen(false);
       setProfileRefreshTrigger((t) => t + 1);
       const meRes = await fetch('/api/admin/me', { cache: 'no-store' });
-      if (meRes.ok) setAdminMe(await meRes.json());
+      if (meRes.ok) {
+        const d = await meRes.json();
+        setAdminMe(d?.admin ?? null);
+      }
     } catch (e) {
       alert(e instanceof Error ? e.message : 'Something went wrong');
     } finally {
@@ -737,13 +743,36 @@ export default function UserProfilePage() {
       setDemoteModalOpen(false);
       setProfileRefreshTrigger((t) => t + 1);
       const meRes = await fetch('/api/admin/me', { cache: 'no-store' });
-      if (meRes.ok) setAdminMe(await meRes.json());
+      if (meRes.ok) {
+        const d = await meRes.json();
+        setAdminMe(d?.admin ?? null);
+      }
     } catch (e) {
       alert(e instanceof Error ? e.message : 'Something went wrong');
     } finally {
       setAdminActionLoading(false);
     }
   }, [profile?.id]);
+
+  const handleGrantContributor = useCallback(async () => {
+    if (!profile?.username) return;
+    setAdminActionLoading(true);
+    try {
+      const res = await fetch('/api/admin/grant-contributor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: profile.username }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? 'Failed to grant contributor');
+      setContributorModalOpen(false);
+      setProfileRefreshTrigger((t) => t + 1);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Something went wrong');
+    } finally {
+      setAdminActionLoading(false);
+    }
+  }, [profile?.username]);
 
   const friendshipStatus = (profile as { friendshipStatus?: 'friends' | 'pending_sent' | 'pending_received' | null })?.friendshipStatus ?? null;
   const friendRequestId = (profile as { friendRequestId?: string })?.friendRequestId as string | undefined;
@@ -1105,6 +1134,16 @@ export default function UserProfilePage() {
                       leftIcon={<ShieldOff className="w-4 h-4" />}
                     >
                       Remove admin
+                    </Button>
+                  )}
+                  {!isOwnProfile && adminMe?.isSuperAdmin && !viewedUserIsContributor && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setContributorModalOpen(true)}
+                      leftIcon={<Gift className="w-4 h-4" />}
+                    >
+                      Grant contributor
                     </Button>
                   )}
                 </div>
@@ -1598,6 +1637,29 @@ export default function UserProfilePage() {
             leftIcon={adminActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldOff className="w-4 h-4" />}
           >
             {adminActionLoading ? 'Removing…' : 'Remove admin'}
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Grant contributor confirmation */}
+      <Modal
+        isOpen={contributorModalOpen}
+        onClose={() => !adminActionLoading && setContributorModalOpen(false)}
+        title="Grant contributor status?"
+        description={`${profile?.displayName || profile?.username || 'This user'} will get 25 extra LeKronorium chatbot tokens per 24 hours.`}
+        size="sm"
+      >
+        <div className="flex justify-end gap-2 pt-2">
+          <Button variant="secondary" onClick={() => setContributorModalOpen(false)} disabled={adminActionLoading}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleGrantContributor}
+            disabled={adminActionLoading}
+            leftIcon={adminActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Gift className="w-4 h-4" />}
+          >
+            {adminActionLoading ? 'Granting…' : 'Grant contributor'}
           </Button>
         </div>
       </Modal>
