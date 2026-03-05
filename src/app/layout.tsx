@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { AuthProvider } from '@/context/auth-context';
 import { XpToastProvider } from '@/context/xp-toast-context';
 import { LogProgressModalProvider } from '@/context/log-progress-modal-context';
+import { ChatbotProvider } from '@/context/chatbot-context';
 import { Navbar, Footer, BackToTop, TVRoomBackground, MusicPlayer, AuthLayoutWrapper, MessagingWidget } from '@/components/layout';
 import { SiteUpdatesModal } from '@/components/site-updates-modal';
 import './globals.css';
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
     template: '%s | CoD Zombies Tracker',
   },
   description:
-    'CZT - Free CoD Zombies tracker: Easter egg guides, challenges, speedruns, leaderboards, co-op logging, verified runs, XP and ranks. WW2, IW, AW, Vanguard, MW2. Find group, friends, messaging. No ads.',
+    'CZT - Free CoD Zombies tracker: Easter egg guides, challenges, speedruns, leaderboards, co-op logging, verified runs, XP and ranks. Ask LeKronorium—our AI with exclusive zombies knowledge and strats. WW2, IW, AW, Vanguard, MW2. Find group, friends, messaging. No ads.',
   keywords: [
     'CZT',
     'CZT CoD Zombies',
@@ -49,6 +50,9 @@ export const metadata: Metadata = {
     'MW2 Zombies',
     'Zombies progress tracker',
     'Zombies achievements',
+    'LeKronorium',
+    'Zombies chatbot',
+    'Zombies AI',
     'Easter egg speedrun',
     'No Downs',
     'Pistol Only',
@@ -146,6 +150,7 @@ export default function RootLayout({
           <AuthProvider>
             <XpToastProvider>
               <LogProgressModalProvider>
+                <ChatbotProvider>
                 <AuthLayoutWrapper>
                   <Navbar />
                   <main className="flex-1">{children}</main>
@@ -154,6 +159,7 @@ export default function RootLayout({
                 <MessagingWidget />
                 <SiteUpdatesModal />
               </AuthLayoutWrapper>
+                </ChatbotProvider>
               </LogProgressModalProvider>
             </XpToastProvider>
           </AuthProvider>

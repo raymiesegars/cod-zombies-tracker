@@ -91,7 +91,7 @@ export async function GET(
         verifiedLevel,
         verifiedTotalXp,
         isPublic: false,
-        ...(viewerIsAdmin && { isAdmin: user.isAdmin }),
+        ...(viewerIsAdmin && { isAdmin: user.isAdmin, isContributor: user.isContributor }),
       };
       return NextResponse.json(privatePayload);
     }
@@ -99,6 +99,7 @@ export async function GET(
     const payload = { ...user, level, totalXp, verifiedLevel, verifiedTotalXp } as Record<string, unknown>;
     if (!viewerIsAdmin) {
       delete payload.isAdmin;
+      delete payload.isContributor;
     }
 
     const friendCount = await prisma.friendRequest.count({

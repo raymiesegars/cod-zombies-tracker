@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button, Card, CardContent, Logo, EasterEggIcon, MapIcon, MysteryBoxIcon } from '@/components/ui';
+import { getAssetUrl } from '@/lib/assets';
 import { useAuth } from '@/context/auth-context';
+import { useChatbot } from '@/context/chatbot-context';
 import { Trophy, Target, Users, ChevronRight, ChevronDown, Wrench, ExternalLink, PenLine, Medal, BookOpen } from 'lucide-react';
 import { useLogProgressModal } from '@/context/log-progress-modal-context';
 
@@ -54,6 +57,7 @@ function formatCompact(n: number): string {
 export default function HomePage() {
   const { user, profile, isLoading: authLoading, signInWithGoogle } = useAuth();
   const { openLogProgressModal } = useLogProgressModal() ?? {};
+  const chatbot = useChatbot();
   const [homeStats, setHomeStats] = useState<{
     maps: number;
     users: number;
@@ -159,6 +163,23 @@ export default function HomePage() {
                       Rules
                     </Button>
                   </Link>
+                  {chatbot && (
+                    <Button
+                      size="lg"
+                      variant="secondary"
+                      onClick={chatbot.openChatbot}
+                      className="w-full sm:w-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.6)] inline-flex items-center gap-2.5"
+                    >
+                      <span className="relative w-7 h-7 rounded overflow-hidden bg-bunker-800 border border-bunker-600 shrink-0 mr-0.5">
+                        {getAssetUrl('/images/ranks/chatbot.png') ? (
+                          <Image src={getAssetUrl('/images/ranks/chatbot.png')} alt="" fill className="object-cover" sizes="28px" unoptimized />
+                        ) : (
+                          <span className="block w-full h-full bg-blood-900/50" />
+                        )}
+                      </span>
+                      Ask LeKronorium
+                    </Button>
+                  )}
                 </>
               ) : (
                 <>
@@ -216,6 +237,36 @@ export default function HomePage() {
           </a>
         </div>
       </section>
+
+      {/* LeKronorium — Promo (opens chatbot) */}
+      {chatbot && (
+        <section className="py-8 sm:py-12 px-4 border-y border-element-900/40 bg-gradient-to-b from-element-950/30 to-bunker-950">
+          <button
+            type="button"
+            onClick={chatbot.openChatbot}
+            className="block w-full max-w-4xl mx-auto p-6 sm:p-8 rounded-2xl border-2 border-element-700/50 bg-element-950/60 hover:bg-element-900/50 hover:border-element-600/70 transition-all text-left group touch-manipulation"
+          >
+            <div className="flex items-center gap-4 sm:gap-6">
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-element-900/50 border-2 border-element-600/50 flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0 overflow-hidden">
+                {getAssetUrl('/images/ranks/chatbot.png') ? (
+                  <Image src={getAssetUrl('/images/ranks/chatbot.png')} alt="" fill className="object-cover" sizes="80px" unoptimized />
+                ) : (
+                  <span className="block w-full h-full bg-element-800/50" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-zombies text-white tracking-wide">
+                  LeKronorium
+                </h2>
+                <p className="mt-1 sm:mt-2 text-sm sm:text-base text-white/90">
+                  Ask our AI anything about the site, maps, rules, easter eggs, and strats. Exclusive zombies knowledge—answers only from what we&apos;ve trained it on.
+                </p>
+              </div>
+              <ChevronRight className="w-8 h-8 text-element-400 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+            </div>
+          </button>
+        </section>
+      )}
 
       {/* Tournaments — Promo */}
       <section className="py-8 sm:py-12 px-4 border-y border-blood-900/40 bg-gradient-to-b from-blood-950/30 to-bunker-950">

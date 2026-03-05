@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { getAdminLevelFromXp, getAdminLevelIconPath } from '@/lib/admin-levels';
+import { isSuperAdmin } from '@/lib/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +33,7 @@ export async function GET() {
       admin: {
         id: me.id,
         adminXp: me.adminXp,
+        isSuperAdmin: isSuperAdmin(me.id),
         adminDashboardSeen: me.adminDashboardSeen as { feedbackAt?: string; verifiedHistoryAt?: string } | null,
         totalVerified: me._count.verifiedChallengeLogs + me._count.verifiedEasterEggLogs,
         ...levelInfo,

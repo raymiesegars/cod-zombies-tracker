@@ -2,12 +2,16 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getAssetUrl } from '@/lib/assets';
 import { useAuth } from '@/context/auth-context';
 import { useShowLoadingAfter } from '@/hooks/use-show-loading-after';
 import { Button, Logo, MapIcon, MysteryBoxIcon } from '@/components/ui';
 import { UserWithRank } from '@/components/game';
 import { NotificationsDropdown } from '@/components/layout/notifications-dropdown';
+import { ChatbotTrigger } from '@/components/chatbot/chatbot-trigger';
+import { useChatbot } from '@/context/chatbot-context';
 import { Menu, X, LogOut, User, Settings, Trophy, Medal, Users, PenLine, ChevronDown, ShieldCheck, MessageSquare, BookOpen } from 'lucide-react';
 import { useLogProgressModal } from '@/context/log-progress-modal-context';
 
@@ -32,6 +36,7 @@ export function Navbar() {
   const { user, profile, isLoading, signInWithGoogle, signOut } = useAuth();
   const showAuthLoading = useShowLoadingAfter(isLoading, AUTH_LOADING_DELAY_MS);
   const { openLogProgressModal } = useLogProgressModal() ?? {};
+  const chatbot = useChatbot();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -75,7 +80,7 @@ export function Navbar() {
                 </Link>
               );
             })}
-            {/* Mystery Box icon link - left of Discord */}
+            <ChatbotTrigger className="p-2 shrink-0" size={32} label="Ask LeKronorium — site & zombies Q&A" />
             <Link
               href="/mystery-box"
               className={`${iconOnlyClass} inline-flex items-center`}
@@ -321,7 +326,24 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              {/* Mystery Box */}
+              <button
+                type="button"
+                onClick={() => {
+                  chatbot?.openChatbot();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="flex items-center gap-3 w-full px-4 py-3 min-h-[44px] text-left text-base font-zombies text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors tracking-wide touch-manipulation"
+                aria-label="Open LeKronorium chatbot"
+              >
+                <span className="relative w-6 h-6 rounded overflow-hidden bg-bunker-800 border border-bunker-600 shrink-0">
+                  {getAssetUrl('/images/ranks/chatbot.png') ? (
+                    <Image src={getAssetUrl('/images/ranks/chatbot.png')} alt="" fill className="object-cover" sizes="24px" unoptimized />
+                  ) : (
+                    <span className="block w-full h-full bg-blood-900/50" />
+                  )}
+                </span>
+                LeKronorium
+              </button>
               <Link
                 href="/mystery-box"
                 onClick={() => setIsMobileMenuOpen(false)}
