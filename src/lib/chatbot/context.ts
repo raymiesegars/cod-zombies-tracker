@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 const MAX_CONTEXT_CHARS = 32_000;
 const MAX_SITE_DATA_CHARS = 14_000;
 const MAX_LEADERBOARD_CHARS = 6_000;
+const MAX_WIKI_CHARS = 10_000;
 const CONTEXT_CACHE_TTL_MS = 90_000;
 
 let cachedContext: { value: string; expiresAt: number } | null = null;
@@ -100,7 +101,7 @@ async function buildSiteDataContext(): Promise<string> {
   lines.push('- Rules and verification: /rules (filter by game; includes general rules and challenge rules).');
   lines.push('');
   lines.push('## Maps and Easter Eggs');
-  lines.push('When users ask "what is the main easter egg on [map]" or "where can I complete [ee]": use the list below. Give the EE name and a short description, then tell them the full step-by-step guide is on the map page at /maps/[slug] (open the Easter Eggs tab). Map names and slugs are listed so you can match e.g. "Shadows of Evil" → /maps/shadows-of-evil, "The Tomb" → /maps/the-tomb.');
+  lines.push('Wonder weapons and buildables (e.g. Apothicon Servant, Estoom-oth, Thundergun) are listed below under their map. Apothicon Servant is on Revelations: /maps/revelations (Easter Eggs tab has the guide and upgrade steps). When users ask about any weapon/buildable, use this list and link /maps/[slug].');
   lines.push('');
 
   let len = lines.join('\n').length;
@@ -115,7 +116,7 @@ async function buildSiteDataContext(): Promise<string> {
     if (map.easterEggs.length > 0) {
       for (const ee of map.easterEggs) {
         const desc = ee.description?.trim();
-        const eeLine = `  - ${ee.name}${desc ? `: ${desc.slice(0, 120)}${desc.length > 120 ? '…' : ''}` : ''}. Full step-by-step guide on map page: /maps/${slug}.`;
+        const eeLine = `  - ${ee.name}${desc ? `: ${desc.slice(0, 200)}${desc.length > 200 ? '…' : ''}` : ''}. Full step-by-step guide on map page: /maps/${slug}.`;
         if (len + eeLine.length + 2 > MAX_SITE_DATA_CHARS) {
           lines.push(`  - ${ee.name}. Full guide: /maps/${slug}.`);
         } else {
@@ -131,15 +132,39 @@ async function buildSiteDataContext(): Promise<string> {
   return lines.join('\n');
 }
 
+async function buildWikiContext(): Promise<string> {
+  const rows = await prisma.chatbotWikiImport.findMany({
+    orderBy: [{ source: 'asc' }, { title: 'asc' }],
+    select: { source: true, title: true, content: true, url: true },
+  });
+  const lines: string[] = [];
+  lines.push('## External wiki knowledge (CoD Fandom, ZWR)');
+  lines.push('Use this to answer questions about zombies maps, story, mechanics, and community info. Prefer our site links when relevant.');
+  lines.push('');
+  let len = lines.join('\n').length;
+  for (const row of rows) {
+    const block = `[${row.source}: ${row.title}]${row.url ? ` ${row.url}` : ''}\n${row.content}`;
+    if (len + block.length + 4 > MAX_WIKI_CHARS) {
+      const remaining = MAX_WIKI_CHARS - len - 50;
+      if (remaining > 0) lines.push(block.slice(0, remaining) + '\n...[truncated]');
+      break;
+    }
+    lines.push(block);
+    len += block.length + 4;
+  }
+  return lines.join('\n\n');
+}
+
 export async function buildChatbotContext(): Promise<string> {
   const now = Date.now();
   if (cachedContext && cachedContext.expiresAt > now) {
     return cachedContext.value;
   }
 
-  const [siteData, leaderboardData, approved] = await Promise.all([
+  const [siteData, leaderboardData, wikiData, approved] = await Promise.all([
     buildSiteDataContext(),
     buildLeaderboardContext(),
+    buildWikiContext(),
     prisma.chatbotKnowledge.findMany({
       where: { status: 'APPROVED' },
       orderBy: { createdAt: 'asc' },
@@ -152,11 +177,18 @@ export async function buildChatbotContext(): Promise<string> {
     'You only answer from the CONTEXT below. If the answer is not in the context, say you do not have that information.'
   );
   parts.push('');
+  parts.push('SITE IDENTITY: This is CoD Zombies Tracker (CZT), a Call of Duty Zombies progress tracker. Leaderboards at /leaderboards, maps and easter egg guides at /maps/[slug], rules at /rules.');
+  parts.push('');
   parts.push('[Site data – maps, easter eggs, links, leaderboard #1s]');
   parts.push(siteData);
   parts.push('');
   parts.push(leaderboardData);
   parts.push('');
+  if (wikiData.trim()) {
+    parts.push('[External wiki – CoD Fandom, ZWR]');
+    parts.push(wikiData);
+    parts.push('');
+  }
 
   let total = parts.join('\n\n---\n\n').length;
   for (const row of approved) {

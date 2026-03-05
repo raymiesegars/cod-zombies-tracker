@@ -761,10 +761,17 @@ export default function UserProfilePage() {
       const res = await fetch('/api/admin/grant-contributor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify({ username: profile.username }),
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? 'Failed to grant contributor');
+      let data: { error?: string } | null = null;
+      try {
+        const text = await res.text();
+        data = text ? (JSON.parse(text) as { error?: string }) : null;
+      } catch {
+        data = null;
+      }
+      if (!res.ok) throw new Error(data?.error ?? (res.status === 404 ? 'Grant contributor API not available. Deploy the latest code.' : 'Failed to grant contributor'));
       setContributorModalOpen(false);
       setProfileRefreshTrigger((t) => t + 1);
     } catch (e) {

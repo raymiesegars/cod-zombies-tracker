@@ -68,7 +68,8 @@
     "db:backfill-speedrun-times-from-csv": "tsx scripts/import-skrine-csv/backfill-speedrun-times-from-csv.ts",
     "db:backfill-bo6-bo7-rampage-from-csv": "tsx scripts/import-skrine-csv/backfill-bo6-bo7-rampage-from-csv.ts",
     "db:reimport-all-zwr-users": "tsx scripts/import-skrine-csv/reimport-all-zwr-users.ts",
-    "db:revalidate-bo4-backfill-users": "tsx scripts/revalidate-bo4-backfill-users.ts"
+    "db:revalidate-bo4-backfill-users": "tsx scripts/revalidate-bo4-backfill-users.ts",
+    "db:fetch-wiki-for-chatbot": "tsx scripts/fetch-wiki-for-chatbot.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.9.1",

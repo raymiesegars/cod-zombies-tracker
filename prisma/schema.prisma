@@ -160,6 +160,19 @@ model ChatbotUnansweredQuestion {
   @@index([createdAt(sort: Desc)])
 }
 
+model ChatbotWikiImport {
+  id         String   @id @default(cuid())
+  source     String   // "cod_fandom" | "zwr"
+  externalId String?  // e.g. Fandom pageid for upserts
+  title      String
+  url        String?
+  content    String   @db.Text
+  fetchedAt  DateTime @default(now())
+
+  @@unique([source, externalId])
+  @@index([source])
+}
+
 // ============================================================================
 // DIRECT MESSAGES & BLOCKS
 // ============================================================================
