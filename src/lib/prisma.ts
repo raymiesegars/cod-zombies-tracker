@@ -4,17 +4,15 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// Use DATABASE_URL (pooled) for runtime. DIRECT_URL is for migrations only.
-// connection_limit: with limit=1, concurrent requests in the same serverless instance queue for one connection and timeout (P2024).
-// Use a small pool per instance (e.g. 5) so profile/me/notifications/messages/poll/mystery-box can run in parallel.
-// The database pooler (Supabase Supavisor, Neon, etc.) multiplexes these; set DATABASE_URL to your pooler URL.
+// Use DATABASE_URL for runtime. Must use your provider's connection pooler URL to avoid "Max client connections reached".
+// Supabase: use Connection pooling URI (port 6543). Neon: use the pooler endpoint. Each serverless instance uses 1 connection.
 function getDatabaseUrl(): string {
   const url = process.env.DATABASE_URL;
   if (!url) return '';
   const sep = url.includes('?') ? '&' : '?';
   let out = url;
   if (!url.includes('pgbouncer=true')) out = `${out}${sep}pgbouncer=true`;
-  if (!out.includes('connection_limit=')) out = `${out}${out.includes('?') ? '&' : '?'}connection_limit=5`;
+  if (!out.includes('connection_limit=')) out = `${out}${out.includes('?') ? '&' : '?'}connection_limit=1`;
   if (!out.includes('connect_timeout=')) out = `${out}${out.includes('?') ? '&' : '?'}connect_timeout=15`;
   return out;
 }
