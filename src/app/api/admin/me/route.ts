@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getUser } from '@/lib/supabase/server';
+import { getOptionalUserFromSession } from '@/lib/supabase/server';
 import { getAdminLevelFromXp, getAdminLevelIconPath } from '@/lib/admin-levels';
 import { isSuperAdmin } from '@/lib/admin';
 
@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const supabaseUser = await getUser();
+    const supabaseUser = await getOptionalUserFromSession();
     if (!supabaseUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const me = await prisma.user.findUnique({

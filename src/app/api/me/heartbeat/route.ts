@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getUser } from '@/lib/supabase/server';
+import { getOptionalUserFromSession } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
 /** Update lastSeenAt for online presence. Called periodically when user is active. */
 export async function PATCH() {
   try {
-    const supabaseUser = await getUser();
+    const supabaseUser = await getOptionalUserFromSession();
     if (!supabaseUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

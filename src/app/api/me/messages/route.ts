@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getUser } from '@/lib/supabase/server';
+import { getOptionalUserFromSession } from '@/lib/supabase/server';
 
 // Temporary until `prisma migrate deploy && prisma generate` adds DirectMessage to the client
 type RawMsg = { id: string; fromUserId: string; toUserId: string; content: string; readAt: string | null; createdAt: Date };
@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const supabaseUser = await getUser();
+    const supabaseUser = await getOptionalUserFromSession();
     if (!supabaseUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const user = await prisma.user.findUnique({ where: { supabaseId: supabaseUser.id }, select: { id: true } });
