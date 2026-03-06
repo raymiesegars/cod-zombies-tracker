@@ -80,7 +80,7 @@ export function Navbar() {
                 </Link>
               );
             })}
-            <ChatbotTrigger className="p-2 shrink-0" size={32} label="Ask LeKronorium — site & zombies Q&A" />
+            {chatbot && <ChatbotTrigger className="p-2 shrink-0" size={32} label="Ask LeKronorium — site & zombies Q&A" />}
             <Link
               href="/mystery-box"
               prefetch={false}
@@ -327,24 +327,26 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              <button
-                type="button"
-                onClick={() => {
-                  chatbot?.openChatbot();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="flex items-center gap-3 w-full px-4 py-3 min-h-[44px] text-left text-base font-zombies text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors tracking-wide touch-manipulation"
-                aria-label="Open LeKronorium chatbot"
-              >
-                <span className="relative w-6 h-6 rounded overflow-hidden bg-bunker-800 border border-bunker-600 shrink-0">
-                  {getAssetUrl('/images/ranks/chatbot.png') ? (
-                    <Image src={getAssetUrl('/images/ranks/chatbot.png')} alt="" fill className="object-cover" sizes="24px" unoptimized />
-                  ) : (
-                    <span className="block w-full h-full bg-blood-900/50" />
-                  )}
-                </span>
-                LeKronorium
-              </button>
+              {chatbot && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    chatbot.openChatbot();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 w-full px-4 py-3 min-h-[44px] text-left text-base font-zombies text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors tracking-wide touch-manipulation"
+                  aria-label="Open LeKronorium chatbot"
+                >
+                  <span className="relative w-6 h-6 rounded overflow-hidden bg-bunker-800 border border-bunker-600 shrink-0">
+                    {getAssetUrl('/images/ranks/chatbot.png') ? (
+                      <Image src={getAssetUrl('/images/ranks/chatbot.png')} alt="" fill className="object-cover" sizes="24px" unoptimized />
+                    ) : (
+                      <span className="block w-full h-full bg-blood-900/50" />
+                    )}
+                  </span>
+                  LeKronorium
+                </button>
+              )}
               <Link
                 href="/mystery-box"
                 prefetch={false}
