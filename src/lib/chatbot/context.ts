@@ -1,9 +1,9 @@
 import prisma from '@/lib/prisma';
 
-const MAX_CONTEXT_CHARS = 40_000;
+const MAX_CONTEXT_CHARS = 80_000;
 const MAX_SITE_DATA_CHARS = 14_000;
 const MAX_LEADERBOARD_CHARS = 6_000;
-const MAX_WIKI_CHARS = 28_000;
+const MAX_WIKI_CHARS = 38_000;
 const CONTEXT_CACHE_TTL_MS = 90_000;
 
 let cachedContext: { value: string; expiresAt: number } | null = null;
@@ -143,17 +143,35 @@ async function buildSiteDataContext(): Promise<string> {
   return lines.join('\n');
 }
 
+const ZWR_PRIORITY_IDS = [
+  'how-to-setup-the-boiii-client',
+  'plutonium-anticheat-setup-and-breakdown',
+  'how-to-bypass-the-25-day-freeze-black-screen',
+  'how-to-open-the-console-on-plutonium-boiii-etc',
+  'beginners-guide-on-how-to-speedrun-the-shadows-of-evil-easter-egg',
+];
+
 async function buildWikiContext(): Promise<string> {
   const rows = await prisma.chatbotWikiImport.findMany({
     orderBy: [{ source: 'desc' }, { title: 'asc' }],
-    select: { source: true, title: true, content: true, url: true },
+    select: { source: true, externalId: true, title: true, content: true, url: true },
+  });
+  const priority = (r: { source: string; externalId: string | null }) =>
+    r.source === 'zwr' && r.externalId ? ZWR_PRIORITY_IDS.indexOf(r.externalId) : -1;
+  const sorted = [...rows].sort((a, b) => {
+    const pa = priority(a);
+    const pb = priority(b);
+    if (pa >= 0 && pb >= 0) return pa - pb;
+    if (pa >= 0) return -1;
+    if (pb >= 0) return 1;
+    return 0;
   });
   const lines: string[] = [];
   lines.push('## External wiki knowledge (CoD Fandom, ZWR The Rift)');
   lines.push('Use this to answer questions. ZWR wiki has EE speedrun guides, setup guides, and more — when relevant, summarize and link the specific zwr.gg/wiki page. Prefer our site links for CZT-specific content.');
   lines.push('');
   let len = lines.join('\n').length;
-  for (const row of rows) {
+  for (const row of sorted) {
     const block = `[${row.source}: ${row.title}]${row.url ? ` ${row.url}` : ''}\n${row.content}`;
     if (len + block.length + 4 > MAX_WIKI_CHARS) {
       const remaining = MAX_WIKI_CHARS - len - 50;
