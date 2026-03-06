@@ -55,15 +55,15 @@ export function Navbar() {
     <nav className="navbar-creative sticky top-0 z-50 backdrop-blur-md">
       <div className="max-w-7xl mx-auto pl-4 sm:pl-5 lg:pl-6 pr-4 sm:pr-6 lg:pr-8">
         <div className="flex items-center justify-between gap-2 h-14 sm:h-16 min-w-0 overflow-visible">
-          {/* Logo + text: CZT when narrow, Zombies Tracker mid, CoD Zombies Tracker when wide */}
+          {/* Logo + text: CZT when narrow, Zombies Tracker mid, CoD Zombies Tracker when very wide */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 min-h-[2.5rem] shrink-0">
             <span className="flex flex-shrink-0 items-center justify-center w-8 h-8 self-center">
               <Logo size="sm" animated={false} className="block w-full h-full" />
             </span>
             <span className="text-lg sm:text-xl font-zombies text-white tracking-wide self-center">
               <span className="min-[600px]:hidden">CZT</span>
-              <span className="hidden min-[600px]:inline min-[950px]:hidden">Zombies Tracker</span>
-              <span className="hidden min-[950px]:inline">CoD Zombies Tracker</span>
+              <span className="hidden min-[600px]:inline min-[1350px]:hidden">Zombies Tracker</span>
+              <span className="hidden min-[1350px]:inline">CoD Zombies Tracker</span>
             </span>
           </Link>
 
