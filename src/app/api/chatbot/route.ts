@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUser } from '@/lib/supabase/server';
-import prisma from '@/lib/prisma';
-import { getChatbotTokens, consumeChatbotToken, refundChatbotToken } from '@/lib/chatbot/rate-limit';
-import { buildChatbotContext } from '@/lib/chatbot/context';
-import { looksLikeAbuse } from '@/lib/chatbot/abuse-check';
-import OpenAI from 'openai';
+// CHATBOT DISABLED: Uncomment imports and remove early return below to re-enable.
+// import { getUser } from '@/lib/supabase/server';
+// import prisma from '@/lib/prisma';
+// import { getChatbotTokens, consumeChatbotToken, refundChatbotToken } from '@/lib/chatbot/rate-limit';
+// import { buildChatbotContext } from '@/lib/chatbot/context';
+// import { looksLikeAbuse } from '@/lib/chatbot/abuse-check';
+// import OpenAI from 'openai';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
+export async function POST(_request: NextRequest) {
+  return NextResponse.json({ error: 'Chatbot temporarily disabled' }, { status: 503 });
+}
+
+/* CHATBOT DISABLED - restore the handler below and remove this early return to re-enable
 const MAX_MESSAGE_LENGTH = 2000;
 const OPENAI_MODEL = 'gpt-4o-mini';
 const MAX_RESPONSE_TOKENS = 600;
@@ -61,8 +67,9 @@ NICHE / SPECIFIC DATA (use ${UNKNOWN_MARKER}; do NOT suggest external resources)
 
 When you use ${UNKNOWN_MARKER}, put it as the first line only, then one short sentence that you're forwarding the question. Never suggest the user go to "community forums", "external resources", or "external wikis" when you don't know — only forward. Keep replies concise when possible (2–4 sentences unless the user asks for detail). When linking to site pages, use markdown-style links so they appear clickable: [Leaderboards](/leaderboards), [Maps](/maps), [Rules](/rules), [map name](/maps/[slug]), e.g. [Revelations](/maps/revelations). Paths like /leaderboards are also linkified.`;
 
-export async function POST(request: NextRequest) {
+async function _postHandler(request: NextRequest) {
   try {
+    const { getUser } = await import('@/lib/supabase/server');
     const supabaseUser = await getUser();
     if (!supabaseUser) {
       return NextResponse.json({ error: 'Sign in to use the chatbot' }, { status: 401 });
@@ -152,3 +159,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+*/
