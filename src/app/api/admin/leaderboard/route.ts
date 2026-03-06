@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { getAdminLevelFromXp, getAdminLevelIconPath } from '@/lib/admin-levels';
+import { getDisplayAvatarUrl } from '@/lib/avatar';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,7 +39,7 @@ export async function GET() {
       id: u.id,
       username: u.username,
       displayName: u.displayName,
-      avatarUrl: u.avatarUrl,
+      avatarUrl: getDisplayAvatarUrl(u),
       avatarPreset: u.avatarPreset,
       adminXp: u.adminXp,
       totalVerified: u._count.verifiedChallengeLogs + u._count.verifiedEasterEggLogs,

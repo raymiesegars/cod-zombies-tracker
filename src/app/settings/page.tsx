@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { PublicProfileHelpContent } from '@/components/game';
 import { Avatar } from '@/components/ui';
-import { AVATAR_PRESETS, AVATAR_PRESET_LABELS, getPresetAvatarUrl, isAvatarPreset, type AvatarPreset } from '@/lib/avatar';
+import { AVATAR_PRESETS, AVATAR_PRESET_LABELS, getDisplayAvatarUrl, getPresetAvatarUrl, isAvatarPreset, type AvatarPreset } from '@/lib/avatar';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -190,7 +190,7 @@ export default function SettingsPage() {
               <div className="flex flex-wrap gap-4">
                 {[
                   { id: null as string | null, label: 'Google', render: () => (
-                    <Avatar src={profile.avatarUrl} fallback={displayName || username} size="lg" className="shrink-0 w-14 h-14" />
+                    <Avatar src={getDisplayAvatarUrl(profile)} fallback={displayName || username} size="lg" className="shrink-0 w-14 h-14" />
                   ) },
                   ...AVATAR_PRESETS.map((preset) => ({
                     id: preset as string,
