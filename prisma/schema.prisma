@@ -47,6 +47,9 @@ model User {
   // Profile dashboard: which 4 stat blocks to show. Json: { selectedBlockIds: string[] } — exactly 4 ids from PROFILE_STAT_BLOCK_IDS.
   profileStatBlocks Json?
   
+  // Maps section on profile: default filters on load. Json: { defaultGameId?: string, defaultMapId?: string, defaultCategory?: string }
+  mapsSectionPreferences Json?
+  
   // Admin: only set via secure admin APIs; super admin (env) can demote, any admin can promote
   isAdmin       Boolean   @default(false)
   adminXp       Int       @default(0)  // XP from verifying runs; drives admin level (1–20)

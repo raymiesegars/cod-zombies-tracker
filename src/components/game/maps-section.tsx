@@ -3,13 +3,13 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Badge, Card, CardContent, EasterEggIcon, Logo, PageLoader, Select } from '@/components/ui';
+import { Badge, Button, Card, CardContent, EasterEggIcon, Logo, Modal, PageLoader, Select } from '@/components/ui';
 import { RoundCounter, RunCard } from '@/components/game';
 import { getAssetUrl } from '@/lib/assets';
 import { ACHIEVEMENT_CATEGORY_LABELS, challengeTypeToCategory, isSpeedrunCategory } from '@/lib/achievements/categories';
 import { getBo4DifficultyLabel } from '@/lib/bo4';
 import type { UserMapStats, UserProfile } from '@/types';
-import { Filter, ChevronLeft } from 'lucide-react';
+import { Filter, ChevronLeft, Loader2, Settings } from 'lucide-react';
 
 type ChallengeLog = {
   id: string;
@@ -53,24 +53,52 @@ function getRunSortValue(run: RunItem): number {
   return log.roundCompleted ?? 0;
 }
 
+type MapsSectionPrefs = { defaultGameId?: string; defaultMapId?: string; defaultCategory?: string } | null;
+
+function getPrefsFromProfile(profile: UserProfile | null | undefined): MapsSectionPrefs {
+  const raw = (profile as { mapsSectionPreferences?: unknown } | null)?.mapsSectionPreferences;
+  if (raw == null || typeof raw !== 'object') return null;
+  const o = raw as Record<string, unknown>;
+  const defaultGameId = typeof o.defaultGameId === 'string' ? o.defaultGameId : undefined;
+  const defaultMapId = typeof o.defaultMapId === 'string' ? o.defaultMapId : undefined;
+  const defaultCategory = typeof o.defaultCategory === 'string' ? o.defaultCategory : undefined;
+  if (!defaultGameId && !defaultMapId && !defaultCategory) return null;
+  return { defaultGameId, defaultMapId, defaultCategory };
+}
+
 export function MapsSection({
   mapStats,
   username,
   isOwnProfile,
   profile,
+  onPreferencesSaved,
 }: {
   mapStats: UserMapStats[];
   username: string;
   isOwnProfile: boolean;
   profile?: UserProfile | null;
+  onPreferencesSaved?: () => void;
 }) {
-  const [filterGame, setFilterGame] = useState('');
-  const [filterMap, setFilterMap] = useState('');
-  const [filterCategory, setFilterCategory] = useState('');
+  const prefs = getPrefsFromProfile(profile);
+  const [filterGame, setFilterGame] = useState(prefs?.defaultGameId ?? '');
+  const [filterMap, setFilterMap] = useState(prefs?.defaultMapId ?? '');
+  const [filterCategory, setFilterCategory] = useState(prefs?.defaultCategory ?? '');
   const [mapRuns, setMapRuns] = useState<{ challengeLogs: ChallengeLog[]; easterEggLogs: EasterEggLog[] } | null>(null);
   const [runsLoading, setRunsLoading] = useState(false);
+  const [prefsModalOpen, setPrefsModalOpen] = useState(false);
+  const [prefsSaving, setPrefsSaving] = useState(false);
+  const [prefsDraft, setPrefsDraft] = useState({ game: '', map: '', category: '' });
 
   const displayUsername = profile?.username ?? username;
+
+  useEffect(() => {
+    const p = getPrefsFromProfile(profile);
+    if (p) {
+      setFilterGame(p.defaultGameId ?? '');
+      setFilterMap(p.defaultMapId ?? '');
+      setFilterCategory(p.defaultCategory ?? '');
+    }
+  }, [profile]);
 
   const games = useMemo(() => {
     const byId = new Map<string, { gameId: string; gameShortName: string; gameOrder: number }>();
@@ -172,11 +200,69 @@ export function MapsSection({
     setFilterCategory('');
   }, []);
 
+  const mapsForPrefsModal = useMemo(() => {
+    if (!prefsDraft.game) return [];
+    const mOrder = (m: UserMapStats) => m.mapOrder ?? 999;
+    const gOrder = (m: UserMapStats) => m.gameOrder ?? 999;
+    return [...mapStats]
+      .filter((m) => m.gameId === prefsDraft.game)
+      .sort((a, b) => gOrder(a) - gOrder(b) || mOrder(a) - mOrder(b) || a.mapName.localeCompare(b.mapName));
+  }, [mapStats, prefsDraft.game]);
+
+  const categoryOptionsForModal = useMemo(
+    () => Object.entries(ACHIEVEMENT_CATEGORY_LABELS).map(([value, label]) => ({ value, label })),
+    []
+  );
+
+  const handleOpenPrefsModal = useCallback(() => {
+    setPrefsDraft({ game: filterGame, map: filterMap, category: filterCategory });
+    setPrefsModalOpen(true);
+  }, [filterGame, filterMap, filterCategory]);
+
+  const handleSavePrefs = useCallback(async () => {
+    setPrefsSaving(true);
+    try {
+      const res = await fetch('/api/me/maps-section-preferences', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+          defaultGameId: prefsDraft.game,
+          defaultMapId: prefsDraft.map,
+          defaultCategory: prefsDraft.category,
+        }),
+      });
+      if (!res.ok) throw new Error('Failed to save');
+      setFilterGame(prefsDraft.game);
+      setFilterMap(prefsDraft.map);
+      setFilterCategory(prefsDraft.category);
+      setPrefsModalOpen(false);
+      onPreferencesSaved?.();
+    } catch {
+      alert('Failed to save preferences');
+    } finally {
+      setPrefsSaving(false);
+    }
+  }, [prefsDraft, onPreferencesSaved]);
+
   return (
     <section className="mb-6 sm:mb-8">
-      <h2 className="text-lg sm:text-xl font-zombies text-white mb-3 sm:mb-4 tracking-wide">
-        Maps Played
-      </h2>
+      <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
+        <h2 className="text-lg sm:text-xl font-zombies text-white tracking-wide">
+          Maps Played
+        </h2>
+        {isOwnProfile && mapStats.length > 0 && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleOpenPrefsModal}
+            leftIcon={<Settings className="w-4 h-4" />}
+            aria-label="Maps section preferences"
+          >
+            Preferences
+          </Button>
+        )}
+      </div>
 
       {mapStats.length > 0 ? (
         <>
@@ -328,6 +414,63 @@ export function MapsSection({
           </CardContent>
         </Card>
       )}
+
+      <Modal
+        isOpen={prefsModalOpen}
+        onClose={() => !prefsSaving && setPrefsModalOpen(false)}
+        title="Maps section defaults"
+        description="Choose which filters to apply when your profile loads. Visitors will see these defaults too."
+        size="sm"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-bunker-400 mb-1.5">Default game</label>
+            <Select
+              options={[{ value: '', label: 'None' }, ...games.map((g) => ({ value: g.gameId, label: g.gameShortName }))]}
+              value={prefsDraft.game}
+              onChange={(e) => setPrefsDraft((d) => ({ ...d, game: e.target.value, map: '', category: '' }))}
+              className="w-full"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-bunker-400 mb-1.5">Default map</label>
+            <Select
+              options={[
+                { value: '', label: prefsDraft.game ? 'None' : 'Select game first' },
+                ...mapsForPrefsModal.map((m) => ({ value: m.mapId, label: m.mapName })),
+              ]}
+              value={prefsDraft.map}
+              onChange={(e) => setPrefsDraft((d) => ({ ...d, map: e.target.value, category: '' }))}
+              className="w-full"
+              disabled={!prefsDraft.game}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-bunker-400 mb-1.5">Default category</label>
+            <Select
+              options={[{ value: '', label: 'Best per challenge' }, ...categoryOptionsForModal]}
+              value={prefsDraft.category}
+              onChange={(e) => setPrefsDraft((d) => ({ ...d, category: e.target.value }))}
+              className="w-full"
+              disabled={!prefsDraft.map}
+            />
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="secondary" size="sm" onClick={() => setPrefsModalOpen(false)} disabled={prefsSaving}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleSavePrefs}
+              disabled={prefsSaving}
+              leftIcon={prefsSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}
+            >
+              {prefsSaving ? 'Saving…' : 'Save'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </section>
   );
 }

@@ -1468,6 +1468,7 @@ export default function UserProfilePage() {
           username={username}
           isOwnProfile={isOwnProfile}
           profile={profile}
+          onPreferencesSaved={() => setProfileRefreshTrigger((t) => t + 1)}
         />
 
         {/* Achievements Section - full list with filters and completion by game */}
