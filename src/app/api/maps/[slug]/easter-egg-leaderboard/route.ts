@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { assignCompetitionRanks } from '@/lib/leaderboard-ranks';
 import { isBo4Game } from '@/lib/bo4';
 import { BO4_DIFFICULTIES } from '@/lib/bo4';
 import { isBocwGame } from '@/lib/bocw';
@@ -114,25 +115,30 @@ export async function GET(
         },
       },
       orderBy: { completionTimeSeconds: 'asc' },
-      skip: offsetParam,
-      take: limitParam,
     });
 
-    const total = await prisma.easterEggLog.count({ where: whereClause });
+    const total = logs.length;
+    const ranked = assignCompetitionRanks(
+      logs,
+      (log) => log.completionTimeSeconds ?? Infinity,
+      true
+    );
 
-    const entries = logs.map((log, index) => ({
-      rank: offsetParam + index + 1,
-      user: log.user,
-      value: log.completionTimeSeconds!,
-      roundCompleted: log.roundCompleted ?? undefined,
-      playerCount: log.playerCount,
-      proofUrls: log.proofUrls ?? [],
-      proofUrl: (log.proofUrls && log.proofUrls.length > 0) ? log.proofUrls[0]! : null,
-      completedAt: log.completedAt,
-      logId: log.id,
-      runType: 'easter-egg' as const,
-      isVerified: log.isVerified ?? false,
-    }));
+    const entries = ranked
+      .slice(offsetParam, offsetParam + limitParam)
+      .map((log) => ({
+        rank: log.rank,
+        user: log.user,
+        value: log.completionTimeSeconds!,
+        roundCompleted: log.roundCompleted ?? undefined,
+        playerCount: log.playerCount,
+        proofUrls: log.proofUrls ?? [],
+        proofUrl: (log.proofUrls && log.proofUrls.length > 0) ? log.proofUrls[0]! : null,
+        completedAt: log.completedAt,
+        logId: log.id,
+        runType: 'easter-egg' as const,
+        isVerified: log.isVerified ?? false,
+      }));
 
     const out: Record<string, unknown> = { total, entries, easterEggName: ee.name };
     if (includeCounts) {

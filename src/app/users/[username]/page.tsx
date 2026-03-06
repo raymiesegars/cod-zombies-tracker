@@ -31,6 +31,7 @@ import {
   RelockAchievementButton,
   RankHelpContent,
   PendingCoOpSection,
+  MapsSection,
 } from '@/components/game';
 
 const RunsModal = dynamic(
@@ -1462,88 +1463,13 @@ export default function UserProfilePage() {
           </Modal>
         )}
 
-        {/* Maps Played Section */}
-        <section className="mb-6 sm:mb-8">
-          <h2 className="text-lg sm:text-xl font-zombies text-white mb-3 sm:mb-4 tracking-wide">
-            Maps Played
-          </h2>
-          {mapStats.length > 0 ? (
-            <div className="max-h-[380px] overflow-y-auto rounded-lg">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
-              {mapStats.map((stats) => (
-                <Link
-                  key={stats.mapId}
-                  href={isOwnProfile ? `/maps/${stats.mapSlug}?tab=your-runs` : `/users/${profile?.username ?? username}/maps/${stats.mapSlug}/runs`}
-                >
-                  <Card variant="bordered" interactive className="h-full">
-                    <CardContent className="p-3 sm:py-4">
-                      <div className="relative aspect-[4/3] mb-2 sm:mb-3 rounded-lg overflow-hidden bg-bunker-800">
-                        {stats.mapImageUrl ? (
-                          <Image
-                            src={getAssetUrl(stats.mapImageUrl)}
-                            alt={stats.mapName}
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <Logo size="md" animated={false} className="opacity-30" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-bunker-950/80 via-transparent to-transparent" />
-                        {/* Bottom-left: round at bottom, Easter egg above it */}
-                        {(stats.hasCompletedMainEE || stats.highestRound > 0) && (
-                          <div className="absolute bottom-2 left-2 flex flex-col items-start gap-1">
-                            {stats.hasCompletedMainEE && (
-                              <div className="flex items-center justify-center p-1.5 rounded-lg bg-bunker-950/90 border border-element-600/50 shadow-lg">
-                                <EasterEggIcon className="w-4 h-4 sm:w-5 sm:h-5 text-element-400" />
-                              </div>
-                            )}
-                            <RoundCounter round={stats.highestRound} size="xs" animated={false} />
-                          </div>
-                        )}
-                        {/* Bottom-right: BO4 difficulty */}
-                        {stats.gameShortName === 'BO4' && stats.highestRoundDifficulty && (
-                          <div className="absolute bottom-2 right-2">
-                            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded border border-bunker-500/80 bg-bunker-900/90 text-bunker-300">
-                              {getBo4DifficultyLabel(stats.highestRoundDifficulty)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <h3 className="font-medium text-xs sm:text-sm text-white truncate">
-                        {stats.mapName}
-                      </h3>
-                      <div className="flex items-center justify-between mt-1 sm:mt-2">
-                        <Badge variant="default" size="sm">
-                          {stats.gameShortName}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-              </div>
-            </div>
-          ) : (
-            <Card variant="bordered">
-              <CardContent className="py-8 sm:py-12 text-center">
-                <Logo size="lg" animated={false} className="mx-auto mb-4 opacity-50" />
-                <p className="text-sm sm:text-base text-bunker-400">
-                  {isOwnProfile ? "You haven't logged any progress yet." : "No maps played yet."}
-                </p>
-                {isOwnProfile && (
-                  <Link
-                    href="/maps"
-                    className="inline-block mt-4 text-blood-400 hover:text-blood-300 text-sm"
-                  >
-                    Start tracking your progress →
-                  </Link>
-                )}
-              </CardContent>
-            </Card>
-          )}
-        </section>
+        <MapsSection
+          mapStats={mapStats}
+          username={username}
+          isOwnProfile={isOwnProfile}
+          profile={profile}
+          onPreferencesSaved={() => setProfileRefreshTrigger((t) => t + 1)}
+        />
 
         {/* Achievements Section - full list with filters and completion by game */}
         <AchievementsSection

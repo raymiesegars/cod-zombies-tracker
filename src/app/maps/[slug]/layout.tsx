@@ -19,6 +19,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = `${map.name} (${map.game.shortName}) - Easter Egg Guide & Leaderboard`;
   const description = `${map.name} - ${map.game.name}. Step-by-step Easter egg guide, challenges, high round leaderboard, and progress tracking. CoD Zombies Tracker.`;
 
+  const mapUrl = `${baseUrl}/maps/${map.slug}`;
+  const ogImage = map.imageUrl
+    ? `${baseUrl}${map.imageUrl.startsWith('/') ? map.imageUrl : `/${map.imageUrl}`}`
+    : `${baseUrl}/opengraph-image`;
+
   return {
     title,
     description,
@@ -26,10 +31,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${map.name} | CoD Zombies Tracker`,
       description,
       type: 'website',
-      url: `${baseUrl}/maps/${map.slug}`,
+      url: mapUrl,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: `${map.name} - CoD Zombies Tracker` }],
     },
     twitter: { card: 'summary_large_image', title: `${map.name} - CoD Zombies Tracker` },
-    alternates: { canonical: `${baseUrl}/maps/${map.slug}` },
+    alternates: { canonical: mapUrl },
   };
 }
 
@@ -47,6 +53,7 @@ export default async function MapSlugLayout({ children, params }: Props) {
     },
   });
 
+  const mapUrl = map ? `${baseUrl}/maps/${map.slug}` : '';
   const jsonLd = map
     ? {
         '@context': 'https://schema.org',
@@ -55,8 +62,16 @@ export default async function MapSlugLayout({ children, params }: Props) {
             '@type': 'VideoGame',
             name: map.name,
             description: `${map.name} - ${map.game.name}. Easter egg guide, high round leaderboard, and challenges on CoD Zombies Tracker.`,
-            url: `${baseUrl}/maps/${map.slug}`,
+            url: mapUrl,
             gamePlatform: 'PC, PlayStation, Xbox',
+          },
+          {
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: baseUrl },
+              { '@type': 'ListItem', position: 2, name: 'Maps', item: `${baseUrl}/maps` },
+              { '@type': 'ListItem', position: 3, name: map.name, item: mapUrl },
+            ],
           },
           ...(map.easterEggs[0]?.steps.length
             ? [
@@ -64,7 +79,7 @@ export default async function MapSlugLayout({ children, params }: Props) {
                   '@type': 'HowTo',
                   name: `${map.name} Main Quest Easter Egg Guide`,
                   description: `Step-by-step guide to complete the main Easter egg on ${map.name}.`,
-                  url: `${baseUrl}/maps/${map.slug}`,
+                  url: mapUrl,
                   step: map.easterEggs[0].steps.slice(0, 15).map((s, i) => ({
                     '@type': 'HowToStep',
                     position: i + 1,

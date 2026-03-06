@@ -2,7 +2,7 @@ import type { ChallengeType } from '@prisma/client';
 
 // Default round tiers for HR / no downs (20–100, 30% max step) when a map has no round config
 export const BASE_ROUNDS = [20, 26, 34, 35, 44, 50, 57, 70, 74, 96, 100] as const;
-export const BASE_XP = [50, 90, 150, 160, 260, 320, 400, 580, 640, 1000, 1000] as const;
+export const BASE_XP = [50, 90, 150, 160, 260, 320, 400, 580, 760, 1000, 1000] as const;
 export const CAP_XP_BONUS = 500;
 
 export const NO_PERKS_ROUNDS = [10, 20, 30, 40, 50] as const;

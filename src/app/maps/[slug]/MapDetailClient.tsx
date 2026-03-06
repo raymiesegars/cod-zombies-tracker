@@ -60,6 +60,7 @@ import {
   ACHIEVEMENT_CATEGORY_LABELS,
   getAchievementCategory,
   getSortedCategoryKeys,
+  sortAchievementsInCategory,
   getNonSpeedrunCategoryFilterOptions,
   getSpeedrunCategoryFilterOptions,
   getAllowedSpeedrunCategoriesForMap,
@@ -490,7 +491,7 @@ function AchievementsTabContent({
           </CardHeader>
           <CardContent className="py-4 pl-6 pr-4">
             <ul className="space-y-2 min-w-0 w-full">
-              {(byCategory[cat]!).map((a) => {
+              {sortAchievementsInCategory(byCategory[cat]!).map((a) => {
                 const unlocked = (verifiedOnly && userId) ? verifiedSet.has(a.id) : unlockedSet.has(a.id);
                 const isVerified = verifiedSet.has(a.id);
                 const c = a.criteria as { round?: number; isCap?: boolean; maxTimeSeconds?: number };

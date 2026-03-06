@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { isSpeedrunChallengeType } from '@/lib/iw';
+import { assignCompetitionRanks } from '@/lib/leaderboard-ranks';
 
 export const dynamic = 'force-dynamic';
 
@@ -158,6 +159,14 @@ export async function GET(
       entries.sort((a, b) => (b.roundReached ?? 0) - (a.roundReached ?? 0));
     }
 
+    const getValue = (e: (typeof entries)[0]) => {
+      if (isSpeedrun) return e.completionTimeSeconds ?? 1e9;
+      if (isNoMansLand) return e.killsReached ?? 0;
+      if (isRush) return e.scoreReached ?? 0;
+      return e.roundReached ?? 0;
+    };
+    const rankedEntries = assignCompetitionRanks(entries, getValue, isSpeedrun);
+
     const trophies = await prisma.tournamentTrophy.findMany({
       where: { tournamentId },
       select: { userId: true, place: true },
@@ -167,8 +176,8 @@ export async function GET(
       trophyByUser.set(t.userId, t.place);
     }
 
-    const ranked = entries.map((e, i) => ({
-      rank: i + 1,
+    const ranked = rankedEntries.map((e) => ({
+      rank: e.rank,
       user: e.user,
       roundReached: e.roundReached,
       completionTimeSeconds: e.completionTimeSeconds,

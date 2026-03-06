@@ -32,6 +32,7 @@ export async function GET() {
 
     const highestByMap = new Map<string, number>();
     const highestDifficultyByMap = new Map<string, string>();
+    const challengesCompletedByMap = new Map<string, number>();
     const mainEEByMap = new Set<string>();
 
     for (const log of user.challengeLogs) {
@@ -66,16 +67,24 @@ export async function GET() {
       include: { game: true },
     });
 
+    const challengesByMap = new Map<string, number>();
+    for (const log of user.challengeLogs) {
+      challengesByMap.set(log.mapId, (challengesByMap.get(log.mapId) ?? 0) + 1);
+    }
+
     const mapStats: UserMapStats[] = maps.map((map) => ({
       mapId: map.id,
       mapSlug: map.slug,
       mapName: map.name,
       mapImageUrl: map.imageUrl,
       gameShortName: map.game.shortName,
+      gameId: map.game.id,
+      gameOrder: map.game.order,
+      mapOrder: map.order ?? 0,
       highestRound: highestByMap.get(map.id) ?? 0,
       ...(isBo4Game(map.game.shortName) && highestDifficultyByMap.has(map.id) && { highestRoundDifficulty: highestDifficultyByMap.get(map.id) }),
       hasCompletedMainEE: mainEEByMap.has(map.id),
-      challengesCompleted: 0,
+      challengesCompleted: challengesByMap.get(map.id) ?? 0,
     }));
 
     return NextResponse.json({ mapStats });
