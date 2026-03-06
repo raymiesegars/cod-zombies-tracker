@@ -680,7 +680,7 @@ export default function UserProfilePage() {
       return;
     }
     let cancelled = false;
-    fetch('/api/admin/me', { cache: 'no-store' })
+    fetch('/api/admin/me', { credentials: 'same-origin', cache: 'no-store' })
       .then((res) => (res.ok ? res.json() : { admin: null }))
       .then((data) => {
         if (!cancelled) setAdminMe(data?.admin ?? { isAdmin: false, isSuperAdmin: false });
@@ -711,13 +711,14 @@ export default function UserProfilePage() {
       const res = await fetch('/api/admin/promote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify({ userId: profile.id }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? 'Failed to promote');
       setPromoteModalOpen(false);
       setProfileRefreshTrigger((t) => t + 1);
-      const meRes = await fetch('/api/admin/me', { cache: 'no-store' });
+      const meRes = await fetch('/api/admin/me', { credentials: 'same-origin', cache: 'no-store' });
       if (meRes.ok) {
         const d = await meRes.json();
         setAdminMe(d?.admin ?? null);
@@ -736,13 +737,14 @@ export default function UserProfilePage() {
       const res = await fetch('/api/admin/demote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify({ userId: profile.id }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? 'Failed to remove admin');
       setDemoteModalOpen(false);
       setProfileRefreshTrigger((t) => t + 1);
-      const meRes = await fetch('/api/admin/me', { cache: 'no-store' });
+      const meRes = await fetch('/api/admin/me', { credentials: 'same-origin', cache: 'no-store' });
       if (meRes.ok) {
         const d = await meRes.json();
         setAdminMe(d?.admin ?? null);
@@ -851,6 +853,7 @@ export default function UserProfilePage() {
     setProfileStatBlocksSaving(true);
     try {
       const res = await fetch('/api/users/profile/update', {
+        credentials: 'same-origin',
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1183,6 +1186,7 @@ export default function UserProfilePage() {
                             try {
                               const res = await fetch('/api/users/profile/update', {
                                 method: 'PATCH',
+                                credentials: 'same-origin',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ preferredRankView: view }),
                               });

@@ -178,9 +178,9 @@ export default function TournamentsPage() {
   useEffect(() => {
     fetchPolls();
     fetchTournaments();
-    fetch('/api/admin/me')
-      .then((r) => r.json())
-      .then((d) => setAdminMe({ isSuperAdmin: d.isSuperAdmin === true }))
+    fetch('/api/admin/me', { credentials: 'same-origin', cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : { admin: null }))
+      .then((d) => setAdminMe(d?.admin ? { isSuperAdmin: d.admin.isSuperAdmin === true } : null))
       .catch(() => setAdminMe(null));
     fetch('/api/tournaments/prize-pool')
       .then((r) => r.json())

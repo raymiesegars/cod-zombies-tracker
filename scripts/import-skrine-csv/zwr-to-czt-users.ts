@@ -149,6 +149,12 @@ export const ZWR_TO_CZT_USERS: Record<string, ZwrToCztEntry> = {
     displayName: 'YapperEU',
     note: 'Import from top-178-csv/YapperEU.csv with --source-player-id=YapperEU --czt-user=cmmdsenoj0000ggpql3txjvz4.',
   },
+  // silence — top-178 import
+  silence: {
+    cztUserId: 'cmmdyvrwa000112xe1llrhnmj',
+    displayName: 'silence',
+    note: 'Import from top-178-csv/silence.csv with --source-player-id=silence --czt-user=cmmdyvrwa000112xe1llrhnmj.',
+  },
 };
 
 /**
