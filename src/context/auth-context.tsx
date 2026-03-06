@@ -198,7 +198,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     profileFetchedRef.current = false;
   };
 
-  // Heartbeat for online presence (lastSeenAt) — only when tab is visible so multiple tabs don't multiply load. Defer initial beat to avoid connection spike on sign-in.
+  // Heartbeat for online presence (lastSeenAt) — only when tab is visible. Brief defer to avoid connection spike on sign-in.
   useEffect(() => {
     if (!profile?.id) return;
     const beat = () => {
@@ -206,11 +206,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       fetch('/api/me/heartbeat', { method: 'PATCH', credentials: 'same-origin' }).catch(() => {});
     };
     const onVisible = () => beat();
-    const initialDelay = setTimeout(beat, 4000);
-    const interval = setInterval(beat, 2 * 60 * 1000);
+    const t = setTimeout(beat, 3000);
     document.addEventListener('visibilitychange', onVisible);
+    const interval = setInterval(beat, 2 * 60 * 1000);
     return () => {
-      clearTimeout(initialDelay);
+      clearTimeout(t);
       clearInterval(interval);
       document.removeEventListener('visibilitychange', onVisible);
     };
