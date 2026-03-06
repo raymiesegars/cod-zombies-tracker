@@ -8,10 +8,6 @@ type Props = { params: Promise<{ slug: string }> };
 
 export const revalidate = 300;
 
-export function generateStaticParams() {
-  return [];
-}
-
 async function getMapStats(mapId: string) {
     const [easterEggStats, challengeUsers, eeUsers, highestFromChallenges, highestFromEE] =
       await Promise.all([
