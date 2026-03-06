@@ -125,12 +125,12 @@ export default function HomePage() {
               </Link>
             </p>
 
-            <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+            <div className="mt-8 sm:mt-10 flex flex-col min-[780px]:flex-row items-center justify-center gap-3 sm:gap-4">
               {!authReady ? (
                 <>
-                  <div className="w-full sm:w-auto h-12 sm:h-11 rounded-lg bg-bunker-800/60 border border-bunker-700/60 min-w-[140px]" aria-hidden />
-                  <Link href="/maps" className="w-full sm:w-auto">
-                    <Button size="lg" rightIcon={<ChevronRight className="w-5 h-5" />} variant="secondary" className="w-full sm:w-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]">
+                  <div className="w-full min-[780px]:w-auto h-12 min-[780px]:h-11 rounded-lg bg-bunker-800/60 border border-bunker-700/60 min-w-[140px]" aria-hidden />
+                  <Link href="/maps" className="w-full min-[780px]:w-auto">
+                    <Button size="lg" rightIcon={<ChevronRight className="w-5 h-5" />} variant="secondary" className="w-full min-[780px]:w-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]">
                       Browse Maps
                     </Button>
                   </Link>
@@ -142,21 +142,21 @@ export default function HomePage() {
                       size="lg"
                       onClick={openLogProgressModal}
                       rightIcon={<PenLine className="w-5 h-5" />}
-                      className="w-full sm:w-auto bg-blood-600 hover:bg-blood-500 text-white border-blood-500/50 shadow-lg shadow-blood-900/40 [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]"
+                      className="w-full min-[780px]:w-auto bg-blood-600 hover:bg-blood-500 text-white border-blood-500/50 shadow-lg shadow-blood-900/40 [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]"
                     >
                       Log Progress
                     </Button>
                   )}
-                  <Link href="/maps" className="w-full sm:w-auto">
-                    <Button size="lg" rightIcon={<ChevronRight className="w-5 h-5" />} variant="secondary" className="w-full sm:w-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]">
+                  <Link href="/maps" className="w-full min-[780px]:w-auto">
+                    <Button size="lg" rightIcon={<ChevronRight className="w-5 h-5" />} variant="secondary" className="w-full min-[780px]:w-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]">
                       Browse Maps
                     </Button>
                   </Link>
-                  <Link href="/rules" className="w-full sm:w-auto">
+                  <Link href="/rules" className="w-full min-[780px]:w-auto">
                     <Button
                       size="lg"
                       variant="secondary"
-                      className="w-full sm:w-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]"
+                      className="w-full min-[780px]:w-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]"
                     >
                       Rules
                     </Button>
@@ -166,7 +166,7 @@ export default function HomePage() {
                       size="lg"
                       variant="secondary"
                       onClick={chatbot.openChatbot}
-                      className="w-full sm:w-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.6)] inline-flex items-center gap-2.5"
+                      className="w-full min-[780px]:w-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.6)] inline-flex items-center gap-2.5"
                     >
                       <span className="w-7 h-7 rounded flex items-center justify-center bg-bunker-800 border border-bunker-600 shrink-0 mr-0.5 text-element-400">
                         <Bot className="w-4 h-4" strokeWidth={2} />
@@ -181,12 +181,12 @@ export default function HomePage() {
                     size="lg"
                     onClick={signInWithGoogle}
                     rightIcon={<ChevronRight className="w-5 h-5" />}
-                    className="w-full sm:w-auto"
+                    className="w-full min-[780px]:w-auto"
                   >
                     Get Started
                   </Button>
-                  <Link href="/maps" className="w-full sm:w-auto">
-                    <Button variant="secondary" size="lg" className="w-full sm:w-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.4)]">
+                  <Link href="/maps" className="w-full min-[780px]:w-auto">
+                    <Button variant="secondary" size="lg" className="w-full min-[780px]:w-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.4)]">
                       Browse Maps
                     </Button>
                   </Link>
@@ -443,7 +443,7 @@ export default function HomePage() {
             <p className="mt-3 sm:mt-4 text-base sm:text-lg text-bunker-400">
               Free account. Easter egg guides, challenges, speedruns, XP and ranks. Log runs with squad, get verified, customize your maps and profile.
             </p>
-            <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <div className="mt-6 sm:mt-8 flex flex-col min-[780px]:flex-row items-center justify-center gap-3">
               {!authReady ? (
                 <>
                   <div className="h-12 sm:h-11 rounded-lg bg-bunker-800/60 border border-bunker-700/60 min-w-[160px]" aria-hidden />
