@@ -666,7 +666,7 @@ export default function UserProfilePage() {
 
   useEffect(() => {
     if (!username) return;
-    fetch(`/api/users/${username}/tournament-trophies`)
+    fetch(`/api/users/${username}/tournament-trophies`, { credentials: 'same-origin', cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
       .then(setTournamentTrophies)
       .catch(() => setTournamentTrophies(null));
@@ -880,9 +880,9 @@ export default function UserProfilePage() {
     async function fetchProfile() {
       try {
         const [profileRes, statsRes, overviewRes] = await Promise.all([
-          fetch(`/api/users/${username}`),
-          fetch(`/api/users/${username}/stats`),
-          fetch(`/api/users/${username}/achievements-overview`),
+          fetch(`/api/users/${username}`, { credentials: 'same-origin', cache: 'no-store' }),
+          fetch(`/api/users/${username}/stats`, { credentials: 'same-origin', cache: 'no-store' }),
+          fetch(`/api/users/${username}/achievements-overview`, { credentials: 'same-origin', cache: 'no-store' }),
         ]);
 
         if (profileRes.ok) {
@@ -916,7 +916,7 @@ export default function UserProfilePage() {
             worldRecords: statsData.worldRecords ?? 0,
             verifiedWorldRecords: statsData.verifiedWorldRecords ?? 0,
           });
-          fetch(`/api/users/${username}/world-records-summary`, { cache: 'no-store' })
+          fetch(`/api/users/${username}/world-records-summary`, { credentials: 'same-origin', cache: 'no-store' })
             .then((r) => (r.ok ? r.json() : null))
             .then((wr) => {
               if (wr && (wr.worldRecords != null || wr.verifiedWorldRecords != null)) {

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getUser } from '@/lib/supabase/server';
+import { getOptionalUserFromSession } from '@/lib/supabase/server';
 import { getDisplayAvatarUrl } from '@/lib/avatar';
 
 export const dynamic = 'force-dynamic';
@@ -10,7 +10,7 @@ const ONLINE_THRESHOLD_MS = 5 * 60 * 1000; // 5 min
 /** List current user's friends with online status. */
 export async function GET() {
   try {
-    const supabaseUser = await getUser();
+    const supabaseUser = await getOptionalUserFromSession();
     if (!supabaseUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

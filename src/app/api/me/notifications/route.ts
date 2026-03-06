@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getUser } from '@/lib/supabase/server';
+import { getOptionalUserFromSession, getUser } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
 /** List notifications for the current user. Returns unreadCount and notifications (newest first). */
 export async function GET() {
   try {
-    const supabaseUser = await getUser();
+    const supabaseUser = await getOptionalUserFromSession();
     if (!supabaseUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

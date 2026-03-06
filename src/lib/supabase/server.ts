@@ -44,6 +44,7 @@ export async function getSession() {
   }
 }
 
+/** Server-verified user (network call to Supabase Auth). Use for writes or when revocation must be checked. */
 export async function getUser() {
   const supabase = createServerSupabaseClient();
   try {
@@ -55,4 +56,10 @@ export async function getUser() {
     console.error('Error getting user:', error);
     return null;
   }
+}
+
+/** Session-based user (no network). Faster for read-only routes. Does not detect server-side logout. */
+export async function getOptionalUserFromSession() {
+  const session = await getSession();
+  return session?.user ?? null;
 }
