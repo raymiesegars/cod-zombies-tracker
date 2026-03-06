@@ -1,3 +1,20 @@
+const OFF_TOPIC_PATTERNS = [
+  /how\s+(cool|awesome|great|good|bad)\s+(is|are)\s+/i,
+  /(rate|what\s+do\s+you\s+think\s+about)\s+(me|this\s+person|this\s+user)/i,
+  /^(tell\s+me\s+a\s+joke|what'?s?\s+the\s+weather|who'?s?\s+the\s+president)/i,
+  /^(recipe\s+for|write\s+me\s+a\s+poem|compose\s+a\s+song)/i,
+  /^(what\s+is\s+\d+\s*[\+\-\*\/x]\s+\d+|calculate\s+)/i,
+];
+
+export function isOffTopic(message: string): boolean {
+  const trimmed = message.trim();
+  if (trimmed.length < 3) return false;
+  for (const re of OFF_TOPIC_PATTERNS) {
+    if (re.test(trimmed)) return true;
+  }
+  return false;
+}
+
 const SUSPICIOUS_PATTERNS = [
   /ignore\s+(all\s+)?(previous|above|prior)\s+instructions?/i,
   /disregard\s+(all\s+)?(previous|above|context)/i,
