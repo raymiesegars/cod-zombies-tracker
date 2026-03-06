@@ -161,7 +161,7 @@ export function MessagingWidget() {
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // ── Background friends count (always, for button badge). Brief defer to smooth connection spike on sign-in.
+  // ── Background friends count (always, for button badge). Brief stagger to avoid connection spike when profile just loaded.
   useEffect(() => {
     if (!profile?.id) return;
     const doFetch = () => {
@@ -174,7 +174,7 @@ export function MessagingWidget() {
         })
         .catch(() => {});
     };
-    const t = setTimeout(doFetch, 1500);
+    const t = setTimeout(doFetch, 1000);
     const i = setInterval(doFetch, 60 * 1000);
     const onUpdate = () => doFetch();
     window.addEventListener('cod-tracker-friends-updated', onUpdate);
@@ -195,7 +195,7 @@ export function MessagingWidget() {
 
   useEffect(() => {
     if (!profile?.id) return;
-    const t = setTimeout(fetchUnreadCount, 2500);
+    const t = setTimeout(fetchUnreadCount, 1500);
     const i = setInterval(fetchUnreadCount, 20 * 1000);
     return () => { clearTimeout(t); clearInterval(i); };
   }, [profile?.id, fetchUnreadCount]);

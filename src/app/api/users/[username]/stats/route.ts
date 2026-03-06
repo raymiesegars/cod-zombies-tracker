@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getOptionalUserFromSession } from '@/lib/supabase/server';
+import { getUser } from '@/lib/supabase/server';
 import { isBo4Game } from '@/lib/bo4';
 import { isSpeedrunCategory } from '@/lib/achievements/categories';
 import type { UserMapStats } from '@/types';
@@ -35,7 +35,7 @@ export async function GET(
     }
 
     if (!user.isPublic) {
-      const supabaseUser = await getOptionalUserFromSession();
+      const supabaseUser = await getUser();
       if (!supabaseUser) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
       }
