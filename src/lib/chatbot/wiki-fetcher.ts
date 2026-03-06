@@ -161,21 +161,26 @@ export async function fetchAndStoreCodFandom(): Promise<{ fetched: number; error
 
 const ZWR_WIKI_BASE = 'https://zwr.gg/wiki';
 
-async function discoverZwrWikiPaths(): Promise<string[]> {
+const ZWR_WIKI_SEED_PATHS = [
+  '/wiki',
+  '/wiki/how-to-bypass-the-25-day-freeze-black-screen',
+  '/wiki/how-to-setup-the-boiii-client',
+  '/wiki/beginners-guide-on-how-to-speedrun-the-shadows-of-evil-easter-egg',
+];
+
+function extractWikiPathsFromHtml(html: string): string[] {
   const paths: string[] = [];
-  const res = await fetch(ZWR_WIKI_BASE, {
-    headers: { 'User-Agent': 'CZT-LeKronorium/1.0 (wiki context)' },
-  });
-  const html = await res.text();
-  const hrefRegex = /href="(\/wiki\/[^"]+)"/g;
+  const seen = new Set<string>();
+  const hrefRegex = /href=["'](\/wiki\/[^"']+)["']/g;
   let m: RegExpExecArray | null;
   while ((m = hrefRegex.exec(html)) !== null) {
     const path = m[1].replace(/#.*$/, '').replace(/\/$/, '') || '/wiki';
-    if (path.startsWith('/wiki') && path.length > 5 && !paths.includes(path)) {
+    if (path.startsWith('/wiki') && path.length > 5 && !seen.has(path)) {
+      seen.add(path);
       paths.push(path);
     }
   }
-  return paths.length > 0 ? paths : ['/wiki'];
+  return paths;
 }
 
 function extractTextFromHtml(html: string): string {
@@ -186,21 +191,35 @@ function extractTextFromHtml(html: string): string {
 }
 
 export async function fetchAndStoreZwrWiki(): Promise<{ fetched: number; errors: number }> {
-  const paths = await discoverZwrWikiPaths();
+  const toVisit = [...ZWR_WIKI_SEED_PATHS];
+  const visited = new Set<string>();
   let fetched = 0;
   let errors = 0;
-  for (const path of paths) {
+
+  while (toVisit.length > 0) {
+    const path = toVisit.pop()!;
+    const normPath = path.replace(/#.*$/, '').replace(/\/$/, '') || '/wiki';
+    if (visited.has(normPath)) continue;
+    visited.add(normPath);
+
     await delay(DELAY_MS);
     try {
-      const url = path.startsWith('http') ? path : `https://zwr.gg${path}`;
+      const url = normPath.startsWith('http') ? normPath : `https://zwr.gg${normPath}`;
       const res = await fetch(url, {
         headers: { 'User-Agent': 'CZT-LeKronorium/1.0 (wiki context)' },
       });
       const html = await res.text();
+
+      for (const linkPath of extractWikiPathsFromHtml(html)) {
+        if (!visited.has(linkPath)) toVisit.push(linkPath);
+      }
+
       const content = extractTextFromHtml(html);
-      const title = path === '/wiki' ? 'The Rift' : path.replace(/^\/wiki\/?/, '').replace(/-/g, ' ') || 'Wiki';
       if (!content.trim() || content.length < 100) continue;
-      const externalId = path.replace(/^\/wiki\/?/, '') || 'index';
+      if (/page\s+not\s+found|does\s+not\s+exist/i.test(content)) continue;
+
+      const title = normPath === '/wiki' ? 'The Rift' : normPath.replace(/^\/wiki\/?/, '').replace(/-/g, ' ') || 'Wiki';
+      const externalId = normPath.replace(/^\/wiki\/?/, '') || 'index';
       await prisma.chatbotWikiImport.upsert({
         where: {
           source_externalId: { source: 'zwr', externalId },
@@ -209,12 +228,12 @@ export async function fetchAndStoreZwrWiki(): Promise<{ fetched: number; errors:
           source: 'zwr',
           externalId,
           title,
-          url: `https://zwr.gg${path}`,
+          url: `https://zwr.gg${normPath}`,
           content,
         },
         update: {
           title,
-          url: `https://zwr.gg${path}`,
+          url: `https://zwr.gg${normPath}`,
           content,
           fetchedAt: new Date(),
         },

@@ -1,9 +1,9 @@
 import prisma from '@/lib/prisma';
 
-const MAX_CONTEXT_CHARS = 32_000;
+const MAX_CONTEXT_CHARS = 40_000;
 const MAX_SITE_DATA_CHARS = 14_000;
 const MAX_LEADERBOARD_CHARS = 6_000;
-const MAX_WIKI_CHARS = 10_000;
+const MAX_WIKI_CHARS = 18_000;
 const CONTEXT_CACHE_TTL_MS = 90_000;
 
 let cachedContext: { value: string; expiresAt: number } | null = null;
@@ -145,12 +145,12 @@ async function buildSiteDataContext(): Promise<string> {
 
 async function buildWikiContext(): Promise<string> {
   const rows = await prisma.chatbotWikiImport.findMany({
-    orderBy: [{ source: 'asc' }, { title: 'asc' }],
+    orderBy: [{ source: 'desc' }, { title: 'asc' }],
     select: { source: true, title: true, content: true, url: true },
   });
   const lines: string[] = [];
-  lines.push('## External wiki knowledge (CoD Fandom, ZWR)');
-  lines.push('Use this to answer questions about zombies maps, story, mechanics, and community info. Prefer our site links when relevant.');
+  lines.push('## External wiki knowledge (CoD Fandom, ZWR The Rift)');
+  lines.push('Use this to answer questions. ZWR wiki has EE speedrun guides, setup guides, and more — when relevant, summarize and link the specific zwr.gg/wiki page. Prefer our site links for CZT-specific content.');
   lines.push('');
   let len = lines.join('\n').length;
   for (const row of rows) {
