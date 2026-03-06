@@ -1,16 +1,7 @@
 'use client';
 
-// CHATBOT DISABLED: Commented out for speed testing. Restore ChatbotProvider/useChatbot to re-enable.
-import React, { createContext, useContext } from 'react';
-
-// const ChatbotPanel = dynamic(() => import('@/components/chatbot/chatbot-panel').then((m) => m.ChatbotPanel), {
-//   ssr: false,
-//   loading: () => (
-//     <div className="flex items-center justify-center min-h-[200px] p-4" aria-hidden>
-//       <div className="w-6 h-6 border-2 border-blood-500 border-t-transparent rounded-full animate-spin" />
-//     </div>
-//   ),
-// });
+import dynamic from 'next/dynamic';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 
 type ChatbotContextValue = {
   isOpen: boolean;
@@ -20,11 +11,20 @@ type ChatbotContextValue = {
 
 const ChatbotContext = createContext<ChatbotContextValue | null>(null);
 
+const ChatbotPanel = dynamic(
+  () => import('@/components/chatbot/chatbot-panel').then((m) => m.ChatbotPanel),
+  { ssr: false, loading: () => null }
+);
+
 export function ChatbotProvider({ children }: { children: React.ReactNode }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const openChatbot = useCallback(() => setIsOpen(true), []);
+  const closeChatbot = useCallback(() => setIsOpen(false), []);
+
   return (
-    <ChatbotContext.Provider value={null}>
+    <ChatbotContext.Provider value={{ isOpen, openChatbot, closeChatbot }}>
       {children}
-      {/* {isOpen && <ChatbotPanel onClose={closeChatbot} />} */}
+      {isOpen && <ChatbotPanel onClose={closeChatbot} />}
     </ChatbotContext.Provider>
   );
 }

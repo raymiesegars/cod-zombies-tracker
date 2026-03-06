@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button, Card, CardContent, Logo, EasterEggIcon, MapIcon, MysteryBoxIcon } from '@/components/ui';
-import { getAssetUrl } from '@/lib/assets';
 import { useAuth } from '@/context/auth-context';
 import { useChatbot } from '@/context/chatbot-context';
-import { Trophy, Target, Users, ChevronRight, ChevronDown, Wrench, ExternalLink, PenLine, Medal, BookOpen } from 'lucide-react';
+import { Trophy, Target, Users, ChevronRight, ChevronDown, Wrench, ExternalLink, PenLine, Medal, BookOpen, Bot } from 'lucide-react';
 import { useLogProgressModal } from '@/context/log-progress-modal-context';
 
 const features = [
@@ -170,12 +168,8 @@ export default function HomePage() {
                       onClick={chatbot.openChatbot}
                       className="w-full sm:w-auto [text-shadow:0_1px_2px_rgba(0,0,0,0.6)] inline-flex items-center gap-2.5"
                     >
-                      <span className="relative w-7 h-7 rounded overflow-hidden bg-bunker-800 border border-bunker-600 shrink-0 mr-0.5">
-                        {getAssetUrl('/images/ranks/chatbot.png') ? (
-                          <Image src={getAssetUrl('/images/ranks/chatbot.png')} alt="" fill className="object-cover" sizes="28px" unoptimized />
-                        ) : (
-                          <span className="block w-full h-full bg-blood-900/50" />
-                        )}
+                      <span className="w-7 h-7 rounded flex items-center justify-center bg-bunker-800 border border-bunker-600 shrink-0 mr-0.5 text-element-400">
+                        <Bot className="w-4 h-4" strokeWidth={2} />
                       </span>
                       Ask LeKronorium
                     </Button>
@@ -247,12 +241,8 @@ export default function HomePage() {
             className="block w-full max-w-4xl mx-auto p-6 sm:p-8 rounded-2xl border-2 border-element-700/50 bg-element-950/60 hover:bg-element-900/50 hover:border-element-600/70 transition-all text-left group touch-manipulation"
           >
             <div className="flex items-center gap-4 sm:gap-6">
-              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-element-900/50 border-2 border-element-600/50 flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0 overflow-hidden">
-                {getAssetUrl('/images/ranks/chatbot.png') ? (
-                  <Image src={getAssetUrl('/images/ranks/chatbot.png')} alt="" fill className="object-cover" sizes="80px" unoptimized />
-                ) : (
-                  <span className="block w-full h-full bg-element-800/50" />
-                )}
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-element-900/50 border-2 border-element-600/50 flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0 text-element-400">
+                <Bot className="w-10 h-10 sm:w-12 sm:h-12" strokeWidth={2} />
               </div>
               <div className="flex-1 min-w-0">
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-zombies text-white tracking-wide">

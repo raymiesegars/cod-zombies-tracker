@@ -2,9 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getAssetUrl } from '@/lib/assets';
 import { useAuth } from '@/context/auth-context';
 import { useShowLoadingAfter } from '@/hooks/use-show-loading-after';
 import { Button, Logo, MapIcon, MysteryBoxIcon } from '@/components/ui';
@@ -12,7 +10,7 @@ import { UserWithRank } from '@/components/game';
 import { NotificationsDropdown } from '@/components/layout/notifications-dropdown';
 import { ChatbotTrigger } from '@/components/chatbot/chatbot-trigger';
 import { useChatbot } from '@/context/chatbot-context';
-import { Menu, X, LogOut, User, Settings, Trophy, Medal, Users, PenLine, ChevronDown, ShieldCheck, MessageSquare, BookOpen } from 'lucide-react';
+import { Menu, X, LogOut, User, Settings, Trophy, Medal, Users, PenLine, ChevronDown, ShieldCheck, MessageSquare, BookOpen, Bot } from 'lucide-react';
 import { useLogProgressModal } from '@/context/log-progress-modal-context';
 
 const DISCORD_URL = 'https://discord.gg/Gc6Cnt7XxT';
@@ -337,12 +335,8 @@ export function Navbar() {
                   className="flex items-center gap-3 w-full px-4 py-3 min-h-[44px] text-left text-base font-zombies text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors tracking-wide touch-manipulation"
                   aria-label="Open LeKronorium chatbot"
                 >
-                  <span className="relative w-6 h-6 rounded overflow-hidden bg-bunker-800 border border-bunker-600 shrink-0">
-                    {getAssetUrl('/images/ranks/chatbot.png') ? (
-                      <Image src={getAssetUrl('/images/ranks/chatbot.png')} alt="" fill className="object-cover" sizes="24px" unoptimized />
-                    ) : (
-                      <span className="block w-full h-full bg-blood-900/50" />
-                    )}
+                  <span className="w-6 h-6 rounded flex items-center justify-center bg-bunker-800 border border-bunker-600 shrink-0 text-element-400">
+                    <Bot className="w-3.5 h-3.5" strokeWidth={2} />
                   </span>
                   LeKronorium
                 </button>

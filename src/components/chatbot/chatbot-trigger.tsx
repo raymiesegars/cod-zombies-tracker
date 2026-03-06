@@ -1,20 +1,16 @@
 'use client';
 
-import Image from 'next/image';
+import { MessageSquare } from 'lucide-react';
 import { useChatbot } from '@/context/chatbot-context';
-import { getAssetUrl } from '@/lib/assets';
-
-const CHATBOT_IMAGE = getAssetUrl('/images/ranks/chatbot.png');
 
 type ChatbotTriggerProps = {
   className?: string;
   size?: number;
-  /** Shown on hover (tooltip) and used for aria-label; e.g. "Ask LeKronorium — site & zombies Q&A" */
   label?: string;
   showLabel?: boolean;
 };
 
-const DEFAULT_LABEL = 'Ask LeKronorium — get answers about the site, maps, rules & zombies';
+const DEFAULT_LABEL = 'Ask LeKronorium — site & zombies Q&A';
 
 export function ChatbotTrigger({
   className = '',
@@ -25,6 +21,7 @@ export function ChatbotTrigger({
   const chatbot = useChatbot();
   if (!chatbot) return null;
 
+  const iconSize = Math.round(size * 0.55);
   return (
     <button
       type="button"
@@ -34,14 +31,10 @@ export function ChatbotTrigger({
       title={label}
     >
       <span
-        className="relative flex shrink-0 overflow-hidden rounded-md bg-bunker-800 border border-bunker-600"
+        className="flex shrink-0 items-center justify-center rounded-md bg-bunker-800 border border-bunker-600 text-element-400"
         style={{ width: size, height: size }}
       >
-        {CHATBOT_IMAGE ? (
-          <Image src={CHATBOT_IMAGE} alt="" fill className="object-cover" sizes={`${size}px`} unoptimized />
-        ) : (
-          <span className="block w-full h-full bg-blood-900/50" />
-        )}
+        <MessageSquare className="text-element-400" style={{ width: iconSize, height: iconSize }} strokeWidth={2} />
       </span>
       {showLabel && <span className="text-sm font-medium">{label}</span>}
     </button>
