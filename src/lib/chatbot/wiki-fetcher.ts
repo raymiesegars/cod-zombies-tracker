@@ -1,3 +1,4 @@
+import { chromium } from 'playwright';
 import prisma from '@/lib/prisma';
 
 const COD_FANDOM_API = 'https://callofduty.fandom.com/api.php';
@@ -159,89 +160,83 @@ export async function fetchAndStoreCodFandom(): Promise<{ fetched: number; error
   return { fetched, errors };
 }
 
-const ZWR_WIKI_BASE = 'https://zwr.gg/wiki';
-
-const ZWR_WIKI_SEED_PATHS = [
-  '/wiki',
-  '/wiki/how-to-bypass-the-25-day-freeze-black-screen',
-  '/wiki/how-to-setup-the-boiii-client',
-  '/wiki/beginners-guide-on-how-to-speedrun-the-shadows-of-evil-easter-egg',
+const ZWR_WIKI_URLS = [
+  'https://zwr.gg/wiki/bo2-origins-high-round-strategy-guide-100-rounds',
+  'https://zwr.gg/wiki/der-eisendrache-no-power-strategy-guide-using-mega-gobblegums',
+  'https://zwr.gg/wiki/terminus-inside-boat-high-round-strategy',
+  'https://zwr.gg/wiki/waterfront-5and5-high-round-strategy',
+  'https://zwr.gg/wiki/beginners-guide-on-how-to-speedrun-the-shadows-of-evil-easter-egg',
+  "https://zwr.gg/wiki/speedrunning-with-director's-cut-solo",
+  'https://zwr.gg/wiki/terminus-build-no-gums-easter-egg-speedrun-guide',
+  "https://zwr.gg/wiki/speedrunning-rave-with-director's-cut-solo",
+  'https://zwr.gg/wiki/world-at-war-verruckt-30-speedrun-guide',
+  'https://zwr.gg/wiki/how-to-setup-the-boiii-client',
+  'https://zwr.gg/wiki/plutonium-anticheat-setup-and-breakdown',
+  'https://zwr.gg/wiki/how-to-bypass-the-25-day-freeze-black-screen',
+  'https://zwr.gg/wiki/how-to-open-the-console-on-plutonium-boiii-etc',
+  'https://zwr.gg/wiki/zombies-terminology-glossary',
+  'https://zwr.gg/wiki/bo2-movement-resources-and-information-',
+  'https://zwr.gg/wiki/world-war-ii-specialists-and-mods',
+  'https://zwr.gg/wiki/combating-descent-zombie-types',
+  'https://zwr.gg/wiki/combating-carrier-zombie-types',
+  'https://zwr.gg/wiki/combating-infection-zombie-types',
+  'https://zwr.gg/wiki/combating-outbreak-zombie-types',
+  'https://zwr.gg/wiki/terminus-first-room',
+  'https://zwr.gg/wiki/ix-first-room-solo-guide',
 ];
 
-function extractWikiPathsFromHtml(html: string): string[] {
-  const paths: string[] = [];
-  const seen = new Set<string>();
-  const hrefRegex = /href=["'](\/wiki\/[^"']+)["']/g;
-  let m: RegExpExecArray | null;
-  while ((m = hrefRegex.exec(html)) !== null) {
-    const path = m[1].replace(/#.*$/, '').replace(/\/$/, '') || '/wiki';
-    if (path.startsWith('/wiki') && path.length > 5 && !seen.has(path)) {
-      seen.add(path);
-      paths.push(path);
-    }
-  }
-  return paths;
-}
-
-function extractTextFromHtml(html: string): string {
-  const stripTags = (s: string) => s.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-  const mainMatch = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i) ?? html.match(/<article[^>]*>([\s\S]*?)<\/article>/i) ?? html.match(/<div[^>]*class="[^"]*content[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
-  const raw = mainMatch ? mainMatch[1] : html;
-  return stripTags(raw).slice(0, MAX_CONTENT_CHARS);
-}
-
-export async function fetchAndStoreZwrWiki(): Promise<{ fetched: number; errors: number }> {
-  const toVisit = [...ZWR_WIKI_SEED_PATHS];
-  const visited = new Set<string>();
+export async function fetchAndStoreZwrWiki(verbose = false): Promise<{ fetched: number; errors: number }> {
+  const browser = await chromium.launch({ headless: true, channel: 'chrome' });
   let fetched = 0;
   let errors = 0;
+  const storedIds: string[] = [];
 
-  while (toVisit.length > 0) {
-    const path = toVisit.pop()!;
-    const normPath = path.replace(/#.*$/, '').replace(/\/$/, '') || '/wiki';
-    if (visited.has(normPath)) continue;
-    visited.add(normPath);
+  try {
+    for (const url of ZWR_WIKI_URLS) {
+      await delay(DELAY_MS);
+      try {
+        const page = await browser.newPage();
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
+        await page.waitForFunction(() => (document.body?.innerText?.length ?? 0) > 200, { timeout: 10000 }).catch(() => {});
+        const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
+        await page.close();
 
-    await delay(DELAY_MS);
-    try {
-      const url = normPath.startsWith('http') ? normPath : `https://zwr.gg${normPath}`;
-      const res = await fetch(url, {
-        headers: { 'User-Agent': 'CZT-LeKronorium/1.0 (wiki context)' },
-      });
-      const html = await res.text();
+        const content = bodyText.slice(0, MAX_CONTENT_CHARS);
+        if (!content.trim() || content.length < 100) {
+          if (verbose) console.log(`  SKIP (too short): ${url}`);
+          continue;
+        }
+        if (/page\s+not\s+found|does\s+not\s+exist/i.test(content)) {
+          if (verbose) console.log(`  SKIP (not found): ${url}`);
+          continue;
+        }
 
-      for (const linkPath of extractWikiPathsFromHtml(html)) {
-        if (!visited.has(linkPath)) toVisit.push(linkPath);
+        const pathMatch = url.match(/\/wiki\/(.+)$/);
+        const externalId = pathMatch ? decodeURIComponent(pathMatch[1]) : url;
+        const title = externalId.replace(/-/g, ' ');
+        storedIds.push(externalId);
+
+        await prisma.chatbotWikiImport.upsert({
+          where: { source_externalId: { source: 'zwr', externalId } },
+          create: { source: 'zwr', externalId, title, url, content },
+          update: { title, url, content, fetchedAt: new Date() },
+        });
+        fetched++;
+        if (verbose) console.log(`  OK: ${externalId} (${content.length} chars)`);
+      } catch (e) {
+        errors++;
+        if (verbose) console.log(`  ERROR: ${url}`, e);
       }
-
-      const content = extractTextFromHtml(html);
-      if (!content.trim() || content.length < 100) continue;
-      if (/page\s+not\s+found|does\s+not\s+exist/i.test(content)) continue;
-
-      const title = normPath === '/wiki' ? 'The Rift' : normPath.replace(/^\/wiki\/?/, '').replace(/-/g, ' ') || 'Wiki';
-      const externalId = normPath.replace(/^\/wiki\/?/, '') || 'index';
-      await prisma.chatbotWikiImport.upsert({
-        where: {
-          source_externalId: { source: 'zwr', externalId },
-        },
-        create: {
-          source: 'zwr',
-          externalId,
-          title,
-          url: `https://zwr.gg${normPath}`,
-          content,
-        },
-        update: {
-          title,
-          url: `https://zwr.gg${normPath}`,
-          content,
-          fetchedAt: new Date(),
-        },
-      });
-      fetched++;
-    } catch {
-      errors++;
     }
+
+    if (storedIds.length > 0) {
+      const deleted = await prisma.chatbotWikiImport.deleteMany({
+        where: { source: 'zwr', externalId: { notIn: storedIds } },
+      });
+      if (deleted.count > 0 && verbose) console.log(`  Removed ${deleted.count} stale ZWR entries`);
+    }
+  } finally {
+    await browser.close();
   }
   return { fetched, errors };
 }
