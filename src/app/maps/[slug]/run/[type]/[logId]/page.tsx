@@ -254,7 +254,7 @@ export default function RunDetailPage() {
 
   useEffect(() => {
     if (!log?.id) return;
-    fetch('/api/admin/me', { cache: 'no-store' })
+    fetch('/api/admin/me', { credentials: 'same-origin', cache: 'no-store' })
       .then((res) => (res.ok ? res.json() : { admin: null }))
       .then((data) => setAdminMe(data?.admin ?? null))
       .catch(() => setAdminMe(null));

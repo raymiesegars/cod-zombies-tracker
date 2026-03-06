@@ -39,6 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const timeoutId = setTimeout(() => controller.abort(), PROFILE_FETCH_TIMEOUT_MS);
       const response = await fetch(`/api/users/profile?supabaseId=${supabaseId}`, {
         cache: 'no-store',
+        credentials: 'same-origin',
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
@@ -77,6 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await fetch('/api/users/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify({
           supabaseId: supabaseUser.id,
           email: supabaseUser.email,

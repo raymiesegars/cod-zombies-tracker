@@ -68,6 +68,7 @@ export default function SettingsPage() {
       const res = await fetch('/api/users/profile/update', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify({
           displayName,
           username,
