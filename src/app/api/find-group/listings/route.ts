@@ -71,7 +71,9 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(listings);
+    return NextResponse.json(listings, {
+      headers: { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60' },
+    });
   } catch (error) {
     console.error('GET /api/find-group/listings', error);
     return NextResponse.json({ error: 'Failed to fetch listings' }, { status: 500 });

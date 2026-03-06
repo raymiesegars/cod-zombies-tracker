@@ -3,8 +3,6 @@ import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { isSuperAdmin } from '@/lib/admin';
 
-export const dynamic = 'force-dynamic';
-
 const SINGLETON_ID = 'default-prize-pool';
 
 /** GET: Current prize pool amount in USD cents (public). */
@@ -15,7 +13,10 @@ export async function GET() {
       select: { amountCents: true },
     });
     const amountCents = row?.amountCents ?? 0;
-    return NextResponse.json({ amountCents });
+    return NextResponse.json(
+      { amountCents },
+      { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' } }
+    );
   } catch (error) {
     console.error('Error fetching prize pool:', error);
     return NextResponse.json({ error: 'Failed to fetch prize pool' }, { status: 500 });

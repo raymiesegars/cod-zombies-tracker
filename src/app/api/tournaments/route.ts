@@ -4,7 +4,7 @@ import { getUser } from '@/lib/supabase/server';
 import { isSuperAdmin } from '@/lib/admin';
 import { TournamentStatus } from '@prisma/client';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 /** GET: List tournaments for dropdown/filter. Order: latest first. */
 export async function GET() {
@@ -23,7 +23,9 @@ export async function GET() {
         easterEgg: { select: { name: true } },
       },
     });
-    return NextResponse.json(tournaments);
+    return NextResponse.json(tournaments, {
+      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' },
+    });
   } catch (error) {
     console.error('Error listing tournaments:', error);
     return NextResponse.json({ error: 'Failed to list tournaments' }, { status: 500 });

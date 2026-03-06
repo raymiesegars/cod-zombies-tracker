@@ -1,20 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-// CHATBOT DISABLED: Uncomment imports and remove early return below to re-enable.
-// import { getUser } from '@/lib/supabase/server';
-// import prisma from '@/lib/prisma';
-// import { getChatbotTokens, consumeChatbotToken, refundChatbotToken } from '@/lib/chatbot/rate-limit';
-// import { buildChatbotContext } from '@/lib/chatbot/context';
-// import { looksLikeAbuse } from '@/lib/chatbot/abuse-check';
-// import OpenAI from 'openai';
+import prisma from '@/lib/prisma';
+import { getUser } from '@/lib/supabase/server';
+import { getChatbotTokens, consumeChatbotToken, refundChatbotToken } from '@/lib/chatbot/rate-limit';
+import { buildChatbotContext } from '@/lib/chatbot/context';
+import { looksLikeAbuse } from '@/lib/chatbot/abuse-check';
+import OpenAI from 'openai';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
-export async function POST(_request: NextRequest) {
-  return NextResponse.json({ error: 'Chatbot temporarily disabled' }, { status: 503 });
-}
-
-/* CHATBOT DISABLED - restore the handler below and remove this early return to re-enable
 const MAX_MESSAGE_LENGTH = 2000;
 const OPENAI_MODEL = 'gpt-4o-mini';
 const MAX_RESPONSE_TOKENS = 600;
@@ -59,7 +53,7 @@ ACCOUNT & FEATURES:
 - Where's my profile? / How does XP work? / What are ranks? / How do I level up? → Profile and stats are on your profile page. XP and ranks come from logging runs, completing challenges, and easter eggs; verified runs give verified XP. Details on your profile and /leaderboards.
 - How do I get more chatbot uses? / Tokens? / Contributor? → "Chatbot uses refill over time. You can tip to support the site for extra uses; see the message in the chatbot panel."
 - Co-op? / Can I log co-op? / How does co-op work? → Yes; when you log a run you can add teammates. They get a pending run to confirm. One run counts for everyone. More on map pages when logging.
-- What's the mystery box? / Tournaments? / Find group? / Friends? / Messaging? → Mystery box: track box hits and weapons (see site). Tournaments: /tournaments. Find group: list for finding players. Friends and messaging: use the site’s friends and chat features. Point to the relevant area (e.g. /tournaments, find group, or the chat/friends hub).
+- What's the mystery box? / Tournaments? / Find group? / Friends? / Messaging? → Mystery box: track box hits and weapons (see site). Tournaments: /tournaments. Find group: list for finding players. Friends and messaging: use the site's friends and chat features. Point to the relevant area (e.g. /tournaments, find group, or the chat/friends hub).
 
 NICHE / SPECIFIC DATA (use ${UNKNOWN_MARKER}; do NOT suggest external resources):
 - Gobblegums / mega gobblegums / ideal loadout / best gums for [map] high round / "what gobblegums to run" → We do not have this in context. Use ${UNKNOWN_MARKER} and say you're forwarding the question. Do NOT suggest "community forums", "external resources", "external wikis", or "check CoD Fandom" — only say we don't have that info and are forwarding it.
@@ -67,9 +61,8 @@ NICHE / SPECIFIC DATA (use ${UNKNOWN_MARKER}; do NOT suggest external resources)
 
 When you use ${UNKNOWN_MARKER}, put it as the first line only, then one short sentence that you're forwarding the question. Never suggest the user go to "community forums", "external resources", or "external wikis" when you don't know — only forward. Keep replies concise when possible (2–4 sentences unless the user asks for detail). When linking to site pages, use markdown-style links so they appear clickable: [Leaderboards](/leaderboards), [Maps](/maps), [Rules](/rules), [map name](/maps/[slug]), e.g. [Revelations](/maps/revelations). Paths like /leaderboards are also linkified.`;
 
-async function _postHandler(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const { getUser } = await import('@/lib/supabase/server');
     const supabaseUser = await getUser();
     if (!supabaseUser) {
       return NextResponse.json({ error: 'Sign in to use the chatbot' }, { status: 401 });
@@ -159,4 +152,3 @@ async function _postHandler(request: NextRequest) {
     );
   }
 }
-*/

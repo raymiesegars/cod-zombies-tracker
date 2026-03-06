@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams } from 'next/navigation';
@@ -30,12 +31,28 @@ import {
   RelockAchievementButton,
   RankHelpContent,
   PendingCoOpSection,
-  RunsModal,
-  EasterEggsModal,
-  MapsModal,
-  AchievementsModal,
-  WorldRecordsModal,
 } from '@/components/game';
+
+const RunsModal = dynamic(
+  () => import('@/components/game/runs-modal').then((m) => m.RunsModal),
+  { ssr: false }
+);
+const EasterEggsModal = dynamic(
+  () => import('@/components/game/easter-eggs-modal').then((m) => m.EasterEggsModal),
+  { ssr: false }
+);
+const MapsModal = dynamic(
+  () => import('@/components/game/maps-modal').then((m) => m.MapsModal),
+  { ssr: false }
+);
+const AchievementsModal = dynamic(
+  () => import('@/components/game/achievements-modal').then((m) => m.AchievementsModal),
+  { ssr: false }
+);
+const WorldRecordsModal = dynamic(
+  () => import('@/components/game/world-records-modal').then((m) => m.WorldRecordsModal),
+  { ssr: false }
+);
 import {
   ACHIEVEMENT_CATEGORY_LABELS,
   getAchievementCategory,
@@ -1549,26 +1566,31 @@ export default function UserProfilePage() {
         />
       </div>
 
-      {/* Runs modal (total / verified) */}
-      <RunsModal
-        isOpen={runsModalOpen !== null}
-        onClose={() => setRunsModalOpen(null)}
-        username={username}
-        title={runsModalOpen === 'verified' ? 'Verified Runs' : 'Total Runs'}
-        verifiedOnly={runsModalOpen === 'verified'}
-      />
+      {runsModalOpen !== null && (
+        <RunsModal
+          isOpen={true}
+          onClose={() => setRunsModalOpen(null)}
+          username={username}
+          title={runsModalOpen === 'verified' ? 'Verified Runs' : 'Total Runs'}
+          verifiedOnly={runsModalOpen === 'verified'}
+        />
+      )}
 
-      <EasterEggsModal
-        isOpen={easterEggsModalOpen}
-        onClose={() => setEasterEggsModalOpen(false)}
-        username={username}
-      />
+      {easterEggsModalOpen && (
+        <EasterEggsModal
+          isOpen={true}
+          onClose={() => setEasterEggsModalOpen(false)}
+          username={username}
+        />
+      )}
 
-      <WorldRecordsModal
-        isOpen={worldRecordsModalOpen}
-        onClose={() => setWorldRecordsModalOpen(false)}
-        username={username}
-      />
+      {worldRecordsModalOpen && (
+        <WorldRecordsModal
+          isOpen={true}
+          onClose={() => setWorldRecordsModalOpen(false)}
+          username={username}
+        />
+      )}
 
       <Modal
         isOpen={tournamentTrophiesModalOpen}
@@ -1599,27 +1621,33 @@ export default function UserProfilePage() {
         </div>
       </Modal>
 
-      <MapsModal
-        isOpen={mapsModalOpen}
-        onClose={() => setMapsModalOpen(false)}
-        username={username}
-        isOwnProfile={isOwnProfile}
-      />
+      {mapsModalOpen && (
+        <MapsModal
+          isOpen={true}
+          onClose={() => setMapsModalOpen(false)}
+          username={username}
+          isOwnProfile={isOwnProfile}
+        />
+      )}
 
-      <AchievementsModal
-        isOpen={achievementsModalOpen}
-        onClose={() => setAchievementsModalOpen(false)}
-        username={username}
-        isOwnProfile={isOwnProfile}
-      />
+      {achievementsModalOpen && (
+        <AchievementsModal
+          isOpen={true}
+          onClose={() => setAchievementsModalOpen(false)}
+          username={username}
+          isOwnProfile={isOwnProfile}
+        />
+      )}
 
-      <AchievementsModal
-        isOpen={verifiedAchievementsModalOpen}
-        onClose={() => setVerifiedAchievementsModalOpen(false)}
-        username={username}
-        isOwnProfile={isOwnProfile}
-        variant="verified"
-      />
+      {verifiedAchievementsModalOpen && (
+        <AchievementsModal
+          isOpen={true}
+          onClose={() => setVerifiedAchievementsModalOpen(false)}
+          username={username}
+          isOwnProfile={isOwnProfile}
+          variant="verified"
+        />
+      )}
 
       {/* Promote to admin confirmation */}
       <Modal
