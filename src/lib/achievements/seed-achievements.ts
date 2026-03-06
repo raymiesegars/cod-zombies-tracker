@@ -2,6 +2,7 @@ import {
   BASE_ROUNDS,
   BASE_XP,
   EASTER_EGG_BASE_XP,
+  getBaseXpForRound,
   getMilestonesForChallengeType,
   getCapXp,
 } from './milestones';
@@ -170,6 +171,42 @@ function expandBo4AchievementDifficulties(row: AchievementSeedRow): AchievementS
   }));
 }
 
+/** Ensures XP never decreases within a category: higher round or faster time = more XP. */
+function enforceMonotonicXp<T extends { type?: string; criteria?: { round?: number; maxTimeSeconds?: number; challengeType?: string; difficulty?: string; firstRoomVariant?: string; useDirectorsCut?: boolean }; xpReward: number }>(rows: T[]): T[] {
+  const groups = new Map<string, T[]>();
+  for (const row of rows) {
+    const c = row.criteria ?? {};
+    const key = `${(row as { type?: string }).type ?? 'CHALLENGE_COMPLETE'}|${c.challengeType ?? 'HIGHEST_ROUND'}|${c.difficulty ?? ''}|${c.firstRoomVariant ?? ''}|${c.useDirectorsCut ?? ''}|${(c as Record<string, unknown>).bo3GobbleGumMode ?? ''}|${(c as Record<string, unknown>).bo4ElixirMode ?? ''}|${(c as Record<string, unknown>).rampageInducerUsed ?? ''}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(row);
+  }
+  const result: T[] = [];
+  for (const group of Array.from(groups.values())) {
+    const hasRound = group.some((r) => r.criteria?.round != null);
+    const hasMaxTime = group.some((r) => r.criteria?.maxTimeSeconds != null);
+    if (hasRound) {
+      group.sort((a, b) => (a.criteria?.round ?? 0) - (b.criteria?.round ?? 0));
+      let maxXp = 0;
+      for (const row of group) {
+        if (row.xpReward < maxXp) (row as { xpReward: number }).xpReward = maxXp;
+        maxXp = Math.max(maxXp, row.xpReward);
+        result.push(row);
+      }
+    } else if (hasMaxTime) {
+      group.sort((a, b) => (b.criteria?.maxTimeSeconds ?? 0) - (a.criteria?.maxTimeSeconds ?? 0));
+      let maxXp = 0;
+      for (const row of group) {
+        if (row.xpReward < maxXp) (row as { xpReward: number }).xpReward = maxXp;
+        maxXp = Math.max(maxXp, row.xpReward);
+        result.push(row);
+      }
+    } else {
+      result.push(...group);
+    }
+  }
+  return result;
+}
+
 export function getMapAchievementDefinitions(
   mapSlug: string,
   roundCap: number | null | undefined,
@@ -290,7 +327,7 @@ export function getMapAchievementDefinitions(
           });
         }
       }
-      return rows;
+      return enforceMonotonicXp(rows);
     }
   }
 
@@ -406,7 +443,7 @@ export function getMapAchievementDefinitions(
           });
         }
       }
-      return rows;
+      return enforceMonotonicXp(rows);
     }
   }
 
@@ -511,7 +548,7 @@ export function getMapAchievementDefinitions(
           });
         }
       }
-      return rows;
+      return enforceMonotonicXp(rows);
     }
   }
 
@@ -708,7 +745,7 @@ export function getMapAchievementDefinitions(
           });
         }
       }
-      return rows;
+      return enforceMonotonicXp(rows);
     }
   }
 
@@ -868,7 +905,7 @@ export function getMapAchievementDefinitions(
           }
         }
       }
-      return rows;
+      return enforceMonotonicXp(rows);
     }
   }
 
@@ -955,7 +992,7 @@ export function getMapAchievementDefinitions(
           rarity: 'RARE',
         });
       }
-      return rows;
+      return enforceMonotonicXp(rows);
     }
   }
 
@@ -1071,7 +1108,7 @@ export function getMapAchievementDefinitions(
           rarity: 'RARE',
         });
       }
-      return rows;
+      return enforceMonotonicXp(rows);
     }
   }
 
@@ -1126,7 +1163,7 @@ export function getMapAchievementDefinitions(
           });
         }
       }
-      return rows;
+      return enforceMonotonicXp(rows);
     }
   }
 
@@ -1181,7 +1218,7 @@ export function getMapAchievementDefinitions(
           });
         }
       }
-      return rows;
+      return enforceMonotonicXp(rows);
     }
   }
 
@@ -1259,7 +1296,7 @@ export function getMapAchievementDefinitions(
           });
         }
       }
-      return rows;
+      return enforceMonotonicXp(rows);
     }
   }
 
@@ -1345,7 +1382,7 @@ export function getMapAchievementDefinitions(
           rarity: 'RARE',
         });
       }
-      return rows;
+      return enforceMonotonicXp(rows);
     }
   }
 
@@ -1444,9 +1481,9 @@ export function getMapAchievementDefinitions(
       }
     }
     if (isBo4Game(gameShortName)) {
-      return rows.flatMap((r) => expandBo4Difficulties(r));
+      return enforceMonotonicXp(rows.flatMap((r) => expandBo4Difficulties(r)));
     }
-    return rows;
+    return enforceMonotonicXp(rows);
   }
 
   // BASE_ROUNDS + optional cap
@@ -1508,7 +1545,7 @@ export function getMapAchievementDefinitions(
       if (config.flatXp != null) {
         xp = config.flatXp;
       } else {
-        const baseXp = BASE_XP[BASE_ROUNDS.indexOf(round as any)] ?? MIN_ACHIEVEMENT_XP;
+        const baseXp = getBaseXpForRound(round, roundCap) || MIN_ACHIEVEMENT_XP;
         xp = Math.floor(baseXp * config.multiplier);
       }
       rows.push({
@@ -1523,9 +1560,9 @@ export function getMapAchievementDefinitions(
   }
 
   if (isBo4Game(gameShortName)) {
-    return rows.flatMap((r) => expandBo4Difficulties(r));
+    return enforceMonotonicXp(rows.flatMap((r) => expandBo4Difficulties(r)));
   }
-  return rows;
+  return enforceMonotonicXp(rows);
 }
 
 const SPEEDRUN_TYPE_LABELS: Record<string, string> = {
@@ -1742,7 +1779,7 @@ export function getSpeedrunAchievementDefinitions(
       }
     }
   }
-  return rows;
+  return enforceMonotonicXp(rows);
 }
 
 /** Call of the Dead: two EE speedruns (Stand-in Solo, Ensemble Cast 2+). Balance patch resolves easterEggSlug to easterEggId. */
@@ -1772,7 +1809,7 @@ export function getBo2EeSpeedrunDefinitions(mapSlug: string): AchievementSeedRow
       });
     }
   }
-  return rows;
+  return enforceMonotonicXp(rows);
 }
 
 export function getBo1CallOfTheDeadEeSpeedrunDefinitions(): AchievementSeedRow[] {
@@ -1797,7 +1834,7 @@ export function getBo1CallOfTheDeadEeSpeedrunDefinitions(): AchievementSeedRow[]
       });
     }
   }
-  return rows;
+  return enforceMonotonicXp(rows);
 }
 
 export function getEasterEggAchievementDefinition(): Omit<AchievementSeedRow, 'challengeId'> & {

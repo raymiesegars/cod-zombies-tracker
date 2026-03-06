@@ -6,6 +6,7 @@ import { isBo3Game } from '@/lib/bo3';
 import { isBocwGame } from '@/lib/bocw';
 import { isBo6Game } from '@/lib/bo6';
 import { isBo7Game } from '@/lib/bo7';
+import { assignCompetitionRanks } from '@/lib/leaderboard-ranks';
 import { isWw2Game } from '@/lib/ww2';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
@@ -390,11 +391,17 @@ export async function GET(
       return b.round - a.round;
     });
 
-    const total = uniqueLogs.length;
-    const entries = uniqueLogs
+    const rankedLogs = assignCompetitionRanks(
+      uniqueLogs,
+      (e) => (isSpeedrun && e.completionTimeSeconds != null ? e.completionTimeSeconds : e.round),
+      !!isSpeedrun
+    );
+
+    const total = rankedLogs.length;
+    const entries = rankedLogs
       .slice(offsetParam, offsetParam + limitParam)
-      .map((entry, index) => ({
-        rank: offsetParam + index + 1,
+      .map((entry) => ({
+        rank: entry.rank,
         user: entry.user,
         value: isSpeedrun && entry.completionTimeSeconds != null ? entry.completionTimeSeconds : entry.round,
         invertRanking: isSpeedrun,

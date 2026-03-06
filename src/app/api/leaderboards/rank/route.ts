@@ -24,21 +24,25 @@ export async function GET(request: NextRequest) {
       type Row = { id: string; username: string; displayName: string | null; avatarUrl: string | null; avatarPreset: string | null; level: number; totalXp: number; verifiedTotalXp: number; rank: number };
       const rows = verifiedOnly
         ? await prisma.$queryRaw<(Omit<Row, 'level'> & { level?: number })[]>`
-            SELECT u.id, u.username, u."displayName", u."avatarUrl", u."avatarPreset", u."totalXp", u."verifiedTotalXp",
-              (SELECT COUNT(*)::int + 1 FROM "User" u2 WHERE u2."isPublic" = true AND u2."verifiedTotalXp" > u."verifiedTotalXp") as rank
-            FROM "User" u
-            WHERE u."isPublic" = true
-              AND (u.username ILIKE ${pattern} OR u."displayName" ILIKE ${pattern})
-            ORDER BY u."verifiedTotalXp" DESC, u.id ASC
+            SELECT * FROM (
+              SELECT u.id, u.username, u."displayName", u."avatarUrl", u."avatarPreset", u."totalXp", u."verifiedTotalXp",
+                RANK() OVER (ORDER BY u."verifiedTotalXp" DESC, u.id ASC)::int as rank
+              FROM "User" u
+              WHERE u."isPublic" = true
+                AND (u.username ILIKE ${pattern} OR u."displayName" ILIKE ${pattern})
+            ) sub
+            ORDER BY rank
             LIMIT ${SEARCH_LIMIT}
           `
         : await prisma.$queryRaw<Row[]>`
-            SELECT u.id, u.username, u."displayName", u."avatarUrl", u."avatarPreset", u.level, u."totalXp", u."verifiedTotalXp",
-              (SELECT COUNT(*)::int + 1 FROM "User" u2 WHERE u2."isPublic" = true AND u2."totalXp" > u."totalXp") as rank
-            FROM "User" u
-            WHERE u."isPublic" = true
-              AND (u.username ILIKE ${pattern} OR u."displayName" ILIKE ${pattern})
-            ORDER BY u."totalXp" DESC, u.id ASC
+            SELECT * FROM (
+              SELECT u.id, u.username, u."displayName", u."avatarUrl", u."avatarPreset", u.level, u."totalXp", u."verifiedTotalXp",
+                RANK() OVER (ORDER BY u."totalXp" DESC, u.id ASC)::int as rank
+              FROM "User" u
+              WHERE u."isPublic" = true
+                AND (u.username ILIKE ${pattern} OR u."displayName" ILIKE ${pattern})
+            ) sub
+            ORDER BY rank
             LIMIT ${SEARCH_LIMIT}
           `;
       const total = rows.length;
@@ -66,33 +70,35 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const [total, users] = await Promise.all([
-      prisma.user.count({ where: { isPublic: true } }),
-      prisma.user.findMany({
-        where: { isPublic: true },
-        select: {
-          id: true,
-          username: true,
-          displayName: true,
-          avatarUrl: true,
-          avatarPreset: true,
-          level: true,
-          totalXp: true,
-          verifiedTotalXp: true,
-        },
-        orderBy: verifiedOnly
-          ? [{ verifiedTotalXp: 'desc' }, { id: 'asc' }]
-          : [{ totalXp: 'desc' }, { id: 'asc' }],
-        skip: offset,
-        take: limit,
-      }),
-    ]);
+    type RankRow = { id: string; username: string; displayName: string | null; avatarUrl: string | null; avatarPreset: string | null; totalXp: number; verifiedTotalXp: number; rank: number };
+    const rows = verifiedOnly
+      ? await prisma.$queryRaw<RankRow[]>`
+          SELECT * FROM (
+            SELECT u.id, u.username, u."displayName", u."avatarUrl", u."avatarPreset", u."totalXp", u."verifiedTotalXp",
+              RANK() OVER (ORDER BY u."verifiedTotalXp" DESC, u.id ASC)::int as rank
+            FROM "User" u
+            WHERE u."isPublic" = true
+          ) sub
+          ORDER BY rank
+          LIMIT ${limit} OFFSET ${offset}
+        `
+      : await prisma.$queryRaw<RankRow[]>`
+          SELECT * FROM (
+            SELECT u.id, u.username, u."displayName", u."avatarUrl", u."avatarPreset", u."totalXp", u."verifiedTotalXp",
+              RANK() OVER (ORDER BY u."totalXp" DESC, u.id ASC)::int as rank
+            FROM "User" u
+            WHERE u."isPublic" = true
+          ) sub
+          ORDER BY rank
+          LIMIT ${limit} OFFSET ${offset}
+        `;
 
-    const entries = users.map((user, i) => {
+    const total = await prisma.user.count({ where: { isPublic: true } });
+    const entries = rows.map((user) => {
       const xp = verifiedOnly ? (user.verifiedTotalXp ?? 0) : user.totalXp;
       const level = getLevelFromXp(xp).level;
       return {
-        rank: offset + i + 1,
+        rank: user.rank,
         user: {
           id: user.id,
           username: user.username,

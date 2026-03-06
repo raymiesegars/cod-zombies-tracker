@@ -23,3 +23,5 @@ export * from './easter-eggs-modal';
 export * from './maps-modal';
 export * from './achievements-modal';
 export * from './world-records-modal';
+export * from './maps-section';
+export * from './run-card';

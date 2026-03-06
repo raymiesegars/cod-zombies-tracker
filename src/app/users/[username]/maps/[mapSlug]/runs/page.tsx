@@ -4,11 +4,10 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
-import { Badge, Card, CardContent, EasterEggIcon, Logo, PageLoader, Select } from '@/components/ui';
-import { RoundCounter, ChallengeTypeIcon } from '@/components/game';
-import { formatCompletionTime } from '@/components/ui/time-input';
+import { Card, CardContent, Logo, PageLoader, Select } from '@/components/ui';
+import { RunCard, type RunItem } from '@/components/game';
 import { getAssetUrl } from '@/lib/assets';
-import { ChevronLeft, Filter, ListChecks, Clock, ShieldCheck } from 'lucide-react';
+import { ChevronLeft, Filter, ListChecks } from 'lucide-react';
 
 type ChallengeLog = {
   id: string;
@@ -226,86 +225,9 @@ export default function UserMapRunsPage() {
           </Card>
         ) : (
           <div className="flex flex-col gap-2">
-            {sortedRuns.map(({ kind, log }) =>
-              kind === 'challenge' ? (
-                <Link
-                  key={`c-${log.id}`}
-                  href={`/maps/${mapSlug}/run/challenge/${log.id}`}
-                  className="block"
-                >
-                  <Card variant="bordered" interactive className="transition-opacity hover:opacity-95">
-                    <CardContent className="p-3 sm:p-4 grid grid-cols-[auto_minmax(0,1fr)_auto] sm:grid-cols-[auto_minmax(0,1fr)_auto_auto] md:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto] items-center gap-x-2 sm:gap-x-3 gap-y-1">
-                      <ChallengeTypeIcon type={(log as ChallengeLog).challenge.type ?? 'HIGHEST_ROUND'} className="w-5 h-5 text-blood-400 flex-shrink-0" size={20} />
-                      <span className="font-medium text-white truncate min-w-0 flex items-center gap-1.5">
-                        {(log as ChallengeLog).challenge.name}
-                        {(log as ChallengeLog).isVerified && (
-                          <span className="flex-shrink-0 min-w-[1rem] w-4 h-4 inline-flex items-center justify-center rounded-full bg-blue-500/90 text-white" title="Verified run">
-                            <ShieldCheck className="w-2.5 h-2.5" strokeWidth={2.5} />
-                          </span>
-                        )}
-                      </span>
-                      <span className="w-12 sm:w-14 flex justify-end flex-shrink-0">
-                        <RoundCounter round={(log as ChallengeLog).roundReached} size="xs" animated={false} />
-                      </span>
-                      <span className="hidden sm:flex items-center gap-1.5 text-sm text-bunker-400 flex-shrink-0 col-start-4">
-                        <Badge variant="default" size="sm">{(log as ChallengeLog).playerCount}</Badge>
-                      </span>
-                      {(() => {
-                        const sec = (log as ChallengeLog).completionTimeSeconds;
-                        const timeTitle = sec != null && sec > 0 ? formatCompletionTime(sec) : undefined;
-                        return (
-                          <span className="hidden md:flex items-center gap-1.5 text-sm text-bunker-500 flex-shrink-0 col-start-5" title={timeTitle}>
-                            <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-                            {sec != null && sec > 0 ? formatCompletionTime(sec) : '—'}
-                          </span>
-                        );
-                      })()}
-                    </CardContent>
-                  </Card>
-                </Link>
-              ) : (
-                <Link
-                  key={`e-${log.id}`}
-                  href={`/maps/${mapSlug}/run/easter-egg/${log.id}`}
-                  className="block"
-                >
-                  <Card variant="bordered" interactive className="transition-opacity hover:opacity-95">
-                    <CardContent className="p-3 sm:p-4 grid grid-cols-[auto_minmax(0,1fr)_auto] sm:grid-cols-[auto_minmax(0,1fr)_auto_auto] md:grid-cols-[auto_minmax(0,1fr)_auto_auto_auto] items-center gap-x-2 sm:gap-x-3 gap-y-1">
-                      <EasterEggIcon className="w-5 h-5 text-element-400 flex-shrink-0" />
-                      <span className="font-medium text-white truncate min-w-0 flex items-center gap-1.5">
-                        {(log as EasterEggLog).easterEgg.name}
-                        {(log as EasterEggLog).isVerified && (
-                          <span className="flex-shrink-0 min-w-[1rem] w-4 h-4 inline-flex items-center justify-center rounded-full bg-blue-500/90 text-white" title="Verified run">
-                            <ShieldCheck className="w-2.5 h-2.5" strokeWidth={2.5} />
-                          </span>
-                        )}
-                      </span>
-                      <span className="w-12 sm:w-14 flex justify-end flex-shrink-0">
-                        {(log as EasterEggLog).roundCompleted != null ? (
-                          <RoundCounter round={(log as EasterEggLog).roundCompleted!} size="xs" animated={false} />
-                        ) : (
-                          <span className="text-xs text-bunker-500">—</span>
-                        )}
-                      </span>
-                      <span className="hidden sm:flex items-center gap-2 flex-shrink-0 col-start-4">
-                        <span className="text-sm text-bunker-400">{(log as EasterEggLog).playerCount}</span>
-                        {(log as EasterEggLog).isSolo && <Badge variant="default" size="sm">Solo</Badge>}
-                      </span>
-                      {(() => {
-                        const sec = (log as EasterEggLog).completionTimeSeconds;
-                        const timeTitle = sec != null && sec > 0 ? formatCompletionTime(sec) : undefined;
-                        return (
-                          <span className="hidden md:flex items-center gap-1.5 text-sm text-bunker-500 flex-shrink-0 col-start-5" title={timeTitle}>
-                            <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-                            {sec != null && sec > 0 ? formatCompletionTime(sec) : '—'}
-                          </span>
-                        );
-                      })()}
-                    </CardContent>
-                  </Card>
-                </Link>
-              )
-            )}
+            {sortedRuns.map((run) => (
+              <RunCard key={`${run.kind}-${run.log.id}`} run={run as RunItem} mapSlug={mapSlug} />
+            ))}
           </div>
         )}
       </div>

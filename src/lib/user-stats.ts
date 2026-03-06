@@ -63,6 +63,9 @@ export async function computeUserStats(user: UserWithLogs) {
     mapName: map.name,
     mapImageUrl: map.imageUrl,
     gameShortName: map.game.shortName,
+    gameId: map.game.id,
+    gameOrder: map.game.order,
+    mapOrder: map.order ?? 0,
     highestRound: highestByMap.get(map.id) ?? 0,
     ...(isBo4Game(map.game.shortName) &&
       highestDifficultyByMap.has(map.id) && {
