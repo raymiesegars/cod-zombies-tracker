@@ -293,13 +293,22 @@ export function Navbar() {
               className="navbar:hidden bg-bunker-900/95 border-b border-bunker-800/50 relative z-50 max-h-[85vh] flex flex-col"
             >
             <div className="overflow-y-auto overflow-x-hidden overscroll-contain flex-1 min-h-0 px-4 py-4 pb-16 space-y-2 touch-pan-y">
-              {/* Notifications first (when logged in) — easy to reach, matches bell in desktop nav */}
+              {/* Profile first when logged in */}
+              {user && profile?.username && (
+                <Link
+                  href={`/users/${profile.username}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 min-h-[44px] text-base text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors touch-manipulation font-medium"
+                >
+                  <User className="w-5 h-5 flex-shrink-0" />
+                  Profile
+                </Link>
+              )}
               {user && (
                 <div className="flex justify-center py-1">
                   <NotificationsDropdown />
                 </div>
               )}
-              {/* Primary CTA: Log Progress (when logged in) */}
               {user && openLogProgressModal && (
                 <button
                   type="button"
@@ -332,13 +341,14 @@ export function Navbar() {
                     chatbot.openChatbot();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="flex items-center gap-3 w-full px-4 py-3 min-h-[44px] text-left text-base font-zombies text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors tracking-wide touch-manipulation"
+                  className="flex items-center gap-3 w-full px-4 py-3 min-h-[44px] text-left text-base font-zombies rounded-lg transition-colors tracking-wide touch-manipulation border border-element-700/50 bg-element-950/40 hover:bg-element-900/50 hover:border-element-600/70 text-element-100"
                   aria-label="Open LeKronorium chatbot"
                 >
-                  <span className="w-6 h-6 rounded flex items-center justify-center bg-bunker-800 border border-bunker-600 shrink-0 text-element-400">
-                    <Bot className="w-3.5 h-3.5" strokeWidth={2} />
+                  <span className="w-8 h-8 rounded-lg flex items-center justify-center bg-element-900/60 border border-element-600/50 shrink-0 text-element-400">
+                    <Bot className="w-4 h-4" strokeWidth={2} />
                   </span>
-                  LeKronorium
+                  <span>LeKronorium</span>
+                  <span className="text-xs text-element-400/90 ml-auto">AI Q&A</span>
                 </button>
               )}
               <Link
@@ -387,20 +397,10 @@ export function Navbar() {
                 <BookOpen className="w-5 h-5 flex-shrink-0 text-current" />
                 Rules
               </Link>
-              {/* Account section (when logged in) */}
+              {/* Account section (when logged in) — Profile is already first at top */}
               {user ? (
                 <>
                   <hr className="border-bunker-700 my-2" />
-                  {profile?.username && (
-                    <Link
-                      href={`/users/${profile.username}`}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 min-h-[44px] text-base text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors touch-manipulation"
-                    >
-                      <User className="w-5 h-5 flex-shrink-0" />
-                      Profile
-                    </Link>
-                  )}
                   <Link
                     href="/settings"
                     onClick={() => setIsMobileMenuOpen(false)}
