@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
-import { getChatbotTokens, consumeChatbotToken, refundChatbotToken } from '@/lib/chatbot/rate-limit';
+import { getChatbotTokens, consumeChatbotToken } from '@/lib/chatbot/rate-limit';
 import { buildChatbotContext } from '@/lib/chatbot/context';
-import { looksLikeAbuse } from '@/lib/chatbot/abuse-check';
+import { looksLikeAbuse, isOffTopic } from '@/lib/chatbot/abuse-check';
 import OpenAI from 'openai';
 
 export const dynamic = 'force-dynamic';
@@ -14,7 +14,9 @@ const OPENAI_MODEL = 'gpt-4o-mini';
 const MAX_RESPONSE_TOKENS = 600;
 const UNKNOWN_MARKER = '[LEKRONORIUM_UNKNOWN]';
 
-const systemPromptPrefix = `You are LeKronorium, the chatbot for CoD Zombies Tracker (CZT). Answer from the CONTEXT below. Only use ${UNKNOWN_MARKER} when the question asks for a specific fact that is 100% not in the context (e.g. a spreadsheet, exact shot counts, or a niche stat we don't store). Otherwise answer or direct the user to the right page. Never make up player names, rounds, or strategies.
+const systemPromptPrefix = `You are LeKronorium, the chatbot for CoD Zombies Tracker (CZT).
+
+CRITICAL: Answer from the CONTEXT below. When the exact answer is in context, give it directly. When you have related/partial context that could inform an educated guess, you MAY offer one — but you MUST explicitly caveat it first: e.g. "I don't have the exact [X] in our data, but based on what we have, [guess]. We'll try to add the precise info." Only use ${UNKNOWN_MARKER} when there is truly nothing relevant in the context (no related maps, weapons, rules, or mechanics). Never make up player names or rounds; for stats/mechanics we don't store, an educated guess with a clear caveat is fine.
 
 Handle these types of questions as follows (never use ${UNKNOWN_MARKER} for these):
 
@@ -38,7 +40,7 @@ LEADERBOARDS:
 EASTER EGGS, WONDER WEAPONS & BUILDABLES:
 - Apothicon Servant? / Apothican servant? / Do you know about the Apothicon Servant? / Basic stuff about Apothicon Servant from Revelations? → CONTEXT has buildables per map. Apothicon Servant is on Revelations (BO3). In "Maps and Easter Eggs" find the line for "Apothicon Servant" or "Revelations"; summarize from that description and reply: "We have guides on our site: the Apothicon Servant (Mystery Box) and its upgrade Estoom-oth (shoot five blue panels then PaP). Full steps: /maps/revelations — open the Easter Eggs tab." Never reply that we don't have this.
 - Wonder weapon / buildable / [weapon name] (e.g. Thundergun, Ragnarok, Estoom-oth)? → Check the Maps and Easter Eggs section for that name or the map it's on. Give description and link /maps/[slug]. Do not use ${UNKNOWN_MARKER} if the weapon or map appears in the list.
-- How do I do the main easter egg on [map]? / Guide for [map]? / Steps for [ee]? / Where can I learn [map] EE? → If the map is in context, give the EE name/description from the list and say "Full step-by-step guide on the map page at /maps/[slug] — open the Easter Eggs tab."
+- How do I speedrun [map]? / How do I do the main easter egg on [map]? / Guide for [map]? / Steps for [ee]? → If the map is in context, give the EE name/description from the list and say "Full step-by-step guide on the map page at /maps/[slug] — open the Easter Eggs tab. Speedrun rules and verification: /rules (filter by game)."
 - What's the main quest on [map]? → Same: use context for that map's main EE, link /maps/[slug] and Easter Eggs tab.
 - Easter egg guide? / How do I complete [ee name]? → Direct to /maps and the specific map page, Easter Eggs tab.
 
@@ -55,9 +57,12 @@ ACCOUNT & FEATURES:
 - Co-op? / Can I log co-op? / How does co-op work? → Yes; when you log a run you can add teammates. They get a pending run to confirm. One run counts for everyone. More on map pages when logging.
 - What's the mystery box? / Tournaments? / Find group? / Friends? / Messaging? → Mystery box: track box hits and weapons (see site). Tournaments: /tournaments. Find group: list for finding players. Friends and messaging: use the site's friends and chat features. Point to the relevant area (e.g. /tournaments, find group, or the chat/friends hub).
 
-NICHE / SPECIFIC DATA (use ${UNKNOWN_MARKER}; do NOT suggest external resources):
-- Gobblegums / mega gobblegums / ideal loadout / best gums for [map] high round / "what gobblegums to run" → We do not have this in context. Use ${UNKNOWN_MARKER} and say you're forwarding the question. Do NOT suggest "community forums", "external resources", "external wikis", or "check CoD Fandom" — only say we don't have that info and are forwarding it.
-- Spreadsheet for X / exact stat we don't have / "shots each round" / very specific calc → If it's not in the context, use ${UNKNOWN_MARKER} and say you're forwarding the question. If we have a related page (e.g. leaderboards, map guide), you may add one line: "You can check /leaderboards or /maps/[slug] for related data." Do NOT suggest community forums or external sites.
+NICHE / SPECIFIC DATA (use ${UNKNOWN_MARKER} only when nothing relevant in context; do NOT suggest external resources):
+- "How many zombies per shot" / "kills per shot" / "average kills" / exact weapon stats → We don't store these. If we have related context (e.g. weapon description, map info), offer an educated guess with caveat ("I don't have exact numbers, but based on [what we have]..."). If nothing relevant, use ${UNKNOWN_MARKER}.
+- "Round end time" / "what is round end" / timing mechanics → If in rules/context, answer. If we have related rules, guess with caveat. If nothing, use ${UNKNOWN_MARKER}.
+- Gobblegums / mega gobblegums / ideal loadout / best gums → We don't have this. Use ${UNKNOWN_MARKER}. Do NOT suggest external resources.
+- Spreadsheet / exact stat we don't have / very specific calc → If we have related data, guess with caveat and link /leaderboards or /maps/[slug]. If nothing, use ${UNKNOWN_MARKER}.
+- Off-topic / personal / subjective → Use ${UNKNOWN_MARKER} or briefly redirect to site/zombies questions.
 
 When you use ${UNKNOWN_MARKER}, put it as the first line only, then one short sentence that you're forwarding the question. Never suggest the user go to "community forums", "external resources", or "external wikis" when you don't know — only forward. Keep replies concise when possible (2–4 sentences unless the user asks for detail). When linking to site pages, use markdown-style links so they appear clickable: [Leaderboards](/leaderboards), [Maps](/maps), [Rules](/rules), [map name](/maps/[slug]), e.g. [Revelations](/maps/revelations). Paths like /leaderboards are also linkified.`;
 
@@ -102,6 +107,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (isOffTopic(message)) {
+      return NextResponse.json({
+        reply: "I can only help with questions about CoD Zombies Tracker and zombies content. Try asking about maps, leaderboards, rules, or easter egg guides!",
+        tokensRemaining: remaining,
+        wasUnknown: false,
+      });
+    }
+
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: 'Chatbot is not configured' }, { status: 503 });
@@ -118,7 +131,7 @@ export async function POST(request: NextRequest) {
         { role: 'user', content: message },
       ],
       max_tokens: MAX_RESPONSE_TOKENS,
-      temperature: 0.3,
+      temperature: 0.2,
     });
 
     let reply = completion.choices[0]?.message?.content?.trim() ?? 'I could not generate a response. Please try again.';
@@ -138,12 +151,7 @@ export async function POST(request: NextRequest) {
         { status: 429 }
       );
     }
-    let tokensRemaining = newRemaining;
-    if (wasUnknown) {
-      const refunded = await refundChatbotToken(userId);
-      tokensRemaining = refunded.remaining;
-    }
-    return NextResponse.json({ reply, tokensRemaining, wasUnknown });
+    return NextResponse.json({ reply, tokensRemaining: newRemaining, wasUnknown });
   } catch (err) {
     console.error('Chatbot API error:', err);
     return NextResponse.json(
