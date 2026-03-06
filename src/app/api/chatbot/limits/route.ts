@@ -17,7 +17,7 @@ export async function GET() {
       select: { id: true },
     });
     if (!me) {
-      return NextResponse.json({ remaining: 0, isAdmin: false, signedIn: true, nextRefillAt: null });
+      return NextResponse.json({ remaining: 0, isAdmin: false, signedIn: false, nextRefillAt: null });
     }
 
     const { remaining, isAdmin, nextRefillAt } = await getChatbotTokens(me.id);
