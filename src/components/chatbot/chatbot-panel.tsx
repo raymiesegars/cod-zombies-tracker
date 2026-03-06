@@ -20,7 +20,7 @@ function parseChatbotContent(content: string): ContentPart[] {
     if (path === '/tournaments') return 'Tournaments';
     return path;
   };
-  const regex = /\[([^\]]+)\]\((\/[^)]*)\)|(\/leaderboards|\/maps(?:\/[a-zA-Z0-9-]+)?|\/rules|\/tournaments)|(\bZombacus\b)/gi;
+  const regex = /\[([^\]]+)\]\((https?:\/\/[^)]+|\/[^)]*)\)|(\/leaderboards|\/maps(?:\/[a-zA-Z0-9-]+)?|\/rules|\/tournaments)|(\bZombacus\b)/gi;
   let lastIndex = 0;
   let m: RegExpExecArray | null;
   while ((m = regex.exec(content)) !== null) {
@@ -28,7 +28,8 @@ function parseChatbotContent(content: string): ContentPart[] {
       parts.push({ type: 'text', value: content.slice(lastIndex, m.index) });
     }
     if (m[1] !== undefined && m[2] !== undefined) {
-      parts.push({ type: 'link', href: m[2].startsWith('/') ? m[2] : '/', label: m[1] });
+      const href = m[2].startsWith('http') ? m[2] : (m[2].startsWith('/') ? m[2] : '/');
+      parts.push({ type: 'link', href, label: m[1] });
     } else if (m[3] !== undefined) {
       const path = m[3];
       parts.push({ type: 'link', href: path, label: pathLabel(path) });
@@ -250,14 +251,18 @@ export function ChatbotPanel({ onClose }: ChatbotPanelProps) {
                     {parseChatbotContent(m.content).map((part, j) =>
                       part.type === 'text' ? (
                         <span key={j}>{part.value}</span>
-                      ) : (
-                        <Link
+                      ) : part.href.startsWith('http') ? (
+                        <a
                           key={j}
                           href={part.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="text-blood-400 hover:text-blood-300 underline"
-                          target={part.href.startsWith('/') ? undefined : '_blank'}
-                          rel={part.href.startsWith('/') ? undefined : 'noopener noreferrer'}
                         >
+                          {part.label}
+                        </a>
+                      ) : (
+                        <Link key={j} href={part.href} className="text-blood-400 hover:text-blood-300 underline">
                           {part.label}
                         </Link>
                       )

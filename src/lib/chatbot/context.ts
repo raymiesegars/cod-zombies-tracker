@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 const MAX_CONTEXT_CHARS = 40_000;
 const MAX_SITE_DATA_CHARS = 14_000;
 const MAX_LEADERBOARD_CHARS = 6_000;
-const MAX_WIKI_CHARS = 18_000;
+const MAX_WIKI_CHARS = 28_000;
 const CONTEXT_CACHE_TTL_MS = 90_000;
 
 let cachedContext: { value: string; expiresAt: number } | null = null;
