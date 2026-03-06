@@ -161,10 +161,11 @@ export function MessagingWidget() {
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // ── Background friends count (always, for button badge). Brief stagger to avoid connection spike when profile just loaded.
+  // ── Background friends count (for button badge). Pause when tab hidden to reduce pool pressure.
   useEffect(() => {
     if (!profile?.id) return;
     const doFetch = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
       fetch('/api/me/friends', { credentials: 'same-origin', cache: 'no-store' })
         .then((r) => r.ok ? r.json() : { friends: [] })
         .then((d) => {
@@ -175,15 +176,16 @@ export function MessagingWidget() {
         .catch(() => {});
     };
     const t = setTimeout(doFetch, 1000);
-    const i = setInterval(doFetch, 60 * 1000);
+    const i = setInterval(doFetch, 120 * 1000);
     const onUpdate = () => doFetch();
     window.addEventListener('cod-tracker-friends-updated', onUpdate);
     return () => { clearTimeout(t); clearInterval(i); window.removeEventListener('cod-tracker-friends-updated', onUpdate); };
   }, [profile?.id]);
 
-  // ── Unread count polling (always) ──────────────────────────────────────────
+  // ── Unread count polling. Pause when tab hidden to reduce pool pressure.
   const fetchUnreadCount = useCallback(() => {
     if (!profile?.id) return;
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
     fetch('/api/me/messages', { credentials: 'same-origin', cache: 'no-store' })
       .then((r) => r.ok ? r.json() : { totalUnread: 0, conversations: [] })
       .then((d) => {
@@ -196,7 +198,7 @@ export function MessagingWidget() {
   useEffect(() => {
     if (!profile?.id) return;
     const t = setTimeout(fetchUnreadCount, 1500);
-    const i = setInterval(fetchUnreadCount, 20 * 1000);
+    const i = setInterval(fetchUnreadCount, 60 * 1000);
     return () => { clearTimeout(t); clearInterval(i); };
   }, [profile?.id, fetchUnreadCount]);
 
@@ -290,7 +292,10 @@ export function MessagingWidget() {
       return;
     }
     fetchThread(chatWith.id);
-    pollRef.current = setInterval(() => fetchThread(chatWith.id), 5000);
+    pollRef.current = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+      fetchThread(chatWith.id);
+    }, 15 * 1000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   // chatWith object ref is stable enough via .id; full object intentionally excluded to avoid re-triggering
   // eslint-disable-next-line react-hooks/exhaustive-deps

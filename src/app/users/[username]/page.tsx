@@ -664,12 +664,16 @@ export default function UserProfilePage() {
     return () => window.removeEventListener('cod-tracker-profile-refresh-requested', handler);
   }, [username]);
 
+  // Lazy-load tournament trophies after initial render to avoid connection contention
   useEffect(() => {
     if (!username) return;
-    fetch(`/api/users/${username}/tournament-trophies`, { credentials: 'same-origin', cache: 'no-store' })
-      .then((r) => (r.ok ? r.json() : null))
-      .then(setTournamentTrophies)
-      .catch(() => setTournamentTrophies(null));
+    const t = setTimeout(() => {
+      fetch(`/api/users/${username}/tournament-trophies`, { credentials: 'same-origin', cache: 'no-store' })
+        .then((r) => (r.ok ? r.json() : null))
+        .then(setTournamentTrophies)
+        .catch(() => setTournamentTrophies(null));
+    }, 500);
+    return () => clearTimeout(t);
   }, [username, profileRefreshTrigger]);
 
   // Admin: can current user promote/demote? Only fetch when logged in.
@@ -879,55 +883,54 @@ export default function UserProfilePage() {
   useEffect(() => {
     async function fetchProfile() {
       try {
-        const [profileRes, statsRes, overviewRes] = await Promise.all([
-          fetch(`/api/users/${username}`, { credentials: 'same-origin', cache: 'no-store' }),
-          fetch(`/api/users/${username}/stats`, { credentials: 'same-origin', cache: 'no-store' }),
+        const [combinedRes, overviewRes] = await Promise.all([
+          fetch(`/api/users/${username}?withStats=true`, { credentials: 'same-origin', cache: 'no-store' }),
           fetch(`/api/users/${username}/achievements-overview`, { credentials: 'same-origin', cache: 'no-store' }),
         ]);
 
-        if (profileRes.ok) {
-          const profileData = await profileRes.json();
-          setProfile(profileData);
-          const raw = (profileData as { profileStatBlocks?: { selectedBlockIds?: unknown[] } })?.profileStatBlocks?.selectedBlockIds;
+        if (combinedRes.ok) {
+          const data = await combinedRes.json();
+          setProfile(data);
+          const raw = (data as { profileStatBlocks?: { selectedBlockIds?: unknown[] } })?.profileStatBlocks?.selectedBlockIds;
           const ids = Array.isArray(raw) && raw.length === 4 && raw.every((x) => typeof x === 'string' && PROFILE_STAT_BLOCK_IDS.includes(x as ProfileStatBlockId))
             ? (raw as ProfileStatBlockId[])
             : DEFAULT_PROFILE_STAT_BLOCK_IDS;
           setProfileStatBlockSelection(ids);
-        }
 
-        if (statsRes.ok) {
-          const statsData = await statsRes.json();
-          setMapStats(statsData.mapStats ?? []);
+          setMapStats(data.mapStats ?? []);
           setStatsTotals({
-            totalMaps: statsData.totalMaps ?? 0,
-            totalMainEasterEggs: statsData.totalMainEasterEggs ?? 0,
-            totalChallenges: statsData.totalChallenges ?? 0,
-            totalAchievements: statsData.totalAchievements ?? 0,
-            easterEggAchievementsUnlocked: statsData.easterEggAchievementsUnlocked ?? 0,
-            verifiedAchievements: statsData.verifiedAchievementsCount ?? 0,
-            totalRuns: statsData.totalRuns ?? 0,
-            verifiedRuns: statsData.verifiedRuns ?? 0,
-            highestRound: statsData.highestRound ?? 0,
-            avgRoundLoggedRuns: statsData.avgRoundLoggedRuns ?? 0,
-            speedrunCompletions: statsData.speedrunCompletions ?? 0,
-            mysteryBoxCompletions: statsData.mysteryBoxCompletions ?? 0,
-            xpRank: statsData.xpRank ?? undefined,
-            verifiedXpRank: statsData.verifiedXpRank ?? undefined,
-            worldRecords: statsData.worldRecords ?? 0,
-            verifiedWorldRecords: statsData.verifiedWorldRecords ?? 0,
+            totalMaps: data.totalMaps ?? 0,
+            totalMainEasterEggs: data.totalMainEasterEggs ?? 0,
+            totalChallenges: data.totalChallenges ?? 0,
+            totalAchievements: data.totalAchievements ?? 0,
+            easterEggAchievementsUnlocked: data.easterEggAchievementsUnlocked ?? 0,
+            verifiedAchievements: data.verifiedAchievementsCount ?? 0,
+            totalRuns: data.totalRuns ?? 0,
+            verifiedRuns: data.verifiedRuns ?? 0,
+            highestRound: data.highestRound ?? 0,
+            avgRoundLoggedRuns: data.avgRoundLoggedRuns ?? 0,
+            speedrunCompletions: data.speedrunCompletions ?? 0,
+            mysteryBoxCompletions: data.mysteryBoxCompletions ?? 0,
+            xpRank: data.xpRank ?? undefined,
+            verifiedXpRank: data.verifiedXpRank ?? undefined,
+            worldRecords: data.worldRecords ?? 0,
+            verifiedWorldRecords: data.verifiedWorldRecords ?? 0,
           });
-          fetch(`/api/users/${username}/world-records-summary`, { credentials: 'same-origin', cache: 'no-store' })
-            .then((r) => (r.ok ? r.json() : null))
-            .then((wr) => {
-              if (wr && (wr.worldRecords != null || wr.verifiedWorldRecords != null)) {
-                setStatsTotals((prev) => ({
-                  ...prev,
-                  worldRecords: wr.worldRecords ?? prev.worldRecords ?? 0,
-                  verifiedWorldRecords: wr.verifiedWorldRecords ?? prev.verifiedWorldRecords ?? 0,
-                }));
-              }
-            })
-            .catch(() => {});
+
+          setTimeout(() => {
+            fetch(`/api/users/${username}/world-records-summary`, { credentials: 'same-origin', cache: 'no-store' })
+              .then((r) => (r.ok ? r.json() : null))
+              .then((wr) => {
+                if (wr && (wr.worldRecords != null || wr.verifiedWorldRecords != null)) {
+                  setStatsTotals((prev) => ({
+                    ...prev,
+                    worldRecords: wr.worldRecords ?? prev.worldRecords ?? 0,
+                    verifiedWorldRecords: wr.verifiedWorldRecords ?? prev.verifiedWorldRecords ?? 0,
+                  }));
+                }
+              })
+              .catch(() => {});
+          }, 100);
         }
 
         if (overviewRes.ok) {

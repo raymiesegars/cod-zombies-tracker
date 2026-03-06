@@ -2,15 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getLevelFromXp } from '@/lib/ranks';
 import { getUser } from '@/lib/supabase/server';
+import { computeUserStats, type UserWithLogs } from '@/lib/user-stats';
 
 // Public profile (logs, achievements, counts). Private = minimal.
-// When viewer is admin, response includes viewed user's isAdmin (so UI can show Promote/Remove admin).
+// ?withStats=true returns profile + stats in one response to reduce connection usage.
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ username: string }> }
 ) {
   try {
     const { username } = await params;
+    const withStats = request.nextUrl.searchParams.get('withStats') === 'true';
+
     const viewerSupabase = await getUser();
     let viewerId: string | null = null;
     let viewerIsAdmin = false;
@@ -33,6 +36,20 @@ export async function GET(
             userAchievements: true,
           },
         },
+        ...(withStats && {
+          challengeLogs: {
+            include: {
+              challenge: true,
+              map: { include: { game: true } },
+            },
+          },
+          easterEggLogs: {
+            include: {
+              easterEgg: true,
+              map: { include: { game: true } },
+            },
+          },
+        }),
       },
     });
 
@@ -101,6 +118,11 @@ export async function GET(
     }
     payload.friendshipStatus = friendshipStatus;
     if (friendRequestId) payload.friendRequestId = friendRequestId;
+
+    if (withStats && 'challengeLogs' in user && 'easterEggLogs' in user) {
+      const stats = await computeUserStats(user as unknown as UserWithLogs);
+      Object.assign(payload, stats);
+    }
 
     return NextResponse.json(payload);
   } catch (error) {

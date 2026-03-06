@@ -120,8 +120,12 @@ export function NotificationsDropdown() {
   };
 
   useEffect(() => {
-    const t = setTimeout(fetchNotifications, 2000);
-    const interval = setInterval(fetchNotifications, 60 * 1000);
+    const doFetch = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+      fetchNotifications();
+    };
+    const t = setTimeout(doFetch, 2000);
+    const interval = setInterval(doFetch, 120 * 1000);
     const onRefresh = () => fetchNotifications();
     window.addEventListener('cod-tracker-notifications-refresh', onRefresh);
     return () => {
