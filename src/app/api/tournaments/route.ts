@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     const now = new Date();
     const startsAt = body.startsAt ? new Date(body.startsAt) : now;
-    const endsAt = body.endsAt ? new Date(body.endsAt) : new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const endsAt = body.endsAt ? new Date(body.endsAt) : new Date(now.getTime() + 12 * 24 * 60 * 60 * 1000);
     const config = body.config && typeof body.config === 'object' ? body.config : undefined;
     const pollId = typeof body.pollId === 'string' ? body.pollId : undefined;
 

@@ -1022,7 +1022,7 @@ model Tournament {
   easterEgg    EasterEgg?        @relation(fields: [easterEggId], references: [id], onDelete: Cascade)
   config       Json?             // tags: difficulty, playerCount, bo3GobbleGumMode, etc.
   startsAt     DateTime
-  endsAt       DateTime          // 7 days from start; then locked, no more runs
+  endsAt       DateTime          // 12 days from start; then locked, no more runs
   status       TournamentStatus  @default(UPCOMING) // UPCOMING | OPEN | LOCKED
   createdAt    DateTime          @default(now())
   createdById  String

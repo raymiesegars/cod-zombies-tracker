@@ -6,6 +6,7 @@ import { ChatbotProvider } from '@/context/chatbot-context';
 import { Navbar, Footer, BackToTop, TVRoomBackground, MusicPlayer, AuthLayoutWrapper, MessagingWidget } from '@/components/layout';
 import { SiteUpdatesModal } from '@/components/site-updates-modal';
 import { PollVoteReminderModal } from '@/components/poll-vote-reminder-modal';
+import { TournamentAnnouncementModal } from '@/components/tournament-announcement-modal';
 import './globals.css';
 
 export const viewport: Viewport = {
@@ -160,6 +161,7 @@ export default function RootLayout({
                 <MessagingWidget />
                 <SiteUpdatesModal />
                 <PollVoteReminderModal />
+                <TournamentAnnouncementModal />
               </AuthLayoutWrapper>
                 </ChatbotProvider>
               </LogProgressModalProvider>

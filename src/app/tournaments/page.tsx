@@ -13,7 +13,8 @@ import {
   Input,
   Modal,
 } from '@/components/ui';
-import { Medal, Trophy, Clock, Award, Loader2, Lock, Plus, Banknote, Pencil } from 'lucide-react';
+import { Medal, Trophy, Clock, Award, Loader2, Lock, Plus, Banknote, Pencil, BookOpen } from 'lucide-react';
+import { TournamentRulesContent } from '@/components/tournament-rules-content';
 import { BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT, getBo3GobbleGumLabel } from '@/lib/bo3';
 import { BO4_DIFFICULTIES, getBo4DifficultyLabel } from '@/lib/bo4';
 import { BOCW_SUPPORT_MODES, BOCW_SUPPORT_DEFAULT, getBocwSupportLabel } from '@/lib/bocw';
@@ -123,6 +124,7 @@ export default function TournamentsPage() {
   const [prizePoolEditOpen, setPrizePoolEditOpen] = useState(false);
   const [prizePoolSaving, setPrizePoolSaving] = useState(false);
   const [endTournamentModalOpen, setEndTournamentModalOpen] = useState(false);
+  const [learnRulesModalOpen, setLearnRulesModalOpen] = useState(false);
   const [endTournamentLoading, setEndTournamentLoading] = useState(false);
   const [awardingKey, setAwardingKey] = useState<string | null>(null); // `${userId}-${place}` when awarding
   const [games, setGames] = useState<{ id: string; name: string; shortName: string }[]>([]);
@@ -552,7 +554,7 @@ export default function TournamentsPage() {
             <h2 className="text-lg font-zombies text-white mb-2">Rules</h2>
             <ul className="text-sm text-bunker-400 space-y-1 list-disc list-inside">
               <li>Polls run for 5 days. When the timer ends, voting closes and results are revealed.</li>
-              <li>Each tournament runs for 7 days; after that, no more runs can be submitted.</li>
+              <li>Each tournament runs for 12 days; after that, no more runs can be submitted.</li>
               <li>Top 3 verified runs receive gold (30k XP), silver (15k XP), and bronze (7.5k XP).</li>
               <li>Trophies are awarded by a super admin after the tournament closes.</li>
             </ul>
@@ -862,6 +864,15 @@ export default function TournamentsPage() {
                     className="bg-bunker-800 border-bunker-600 text-white flex-1 min-w-0"
                   />
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 shrink-0">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setLearnRulesModalOpen(true)}
+                      className="inline-flex items-center justify-center gap-1.5"
+                    >
+                      <BookOpen className="w-4 h-4 shrink-0" />
+                      Learn Rules
+                    </Button>
                     {tournament?.isOpen && user && tournament.map?.slug && (
                       <Link href={`/maps/${tournament.map.slug}/edit?tournamentId=${tournamentId}`} className="block min-w-0">
                         <Button
@@ -1023,12 +1034,28 @@ export default function TournamentsPage() {
           </div>
         </Modal>
 
+        {/* Learn Rules modal */}
+        <Modal
+          isOpen={learnRulesModalOpen}
+          onClose={() => setLearnRulesModalOpen(false)}
+          title="Tournament rules"
+          description="Submission window, proof requirements, and top 3 verification."
+          size="md"
+        >
+          <div className="space-y-4">
+            <TournamentRulesContent />
+          </div>
+          <div className="flex justify-end pt-4">
+            <Button onClick={() => setLearnRulesModalOpen(false)}>Close</Button>
+          </div>
+        </Modal>
+
         {/* Create leaderboard modal (super admin) */}
         <Modal
           isOpen={createLeaderboardOpen}
           onClose={() => !createLeaderboardLoading && setCreateLeaderboardOpen(false)}
           title="Create tournament leaderboard"
-          description="Set the game, map, and category. The leaderboard runs for 7 days."
+          description="Set the game, map, and category. The leaderboard runs for 12 days."
           size="sm"
         >
           <div className="space-y-3">
