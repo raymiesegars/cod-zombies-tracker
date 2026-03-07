@@ -740,7 +740,7 @@ model MysteryBoxRoll {
   // Optional tags (wawNoJug, wawFixedWunderwaffe, firstRoomVariant, etc.)
   tags         Json?    // { wawNoJug?: boolean, firstRoomVariant?: string, ... }
   // Filter settings used when rolling (for XP scaling)
-  filterSettings Json?   // { excludedGameIds?: string[], excludeSpeedruns?: boolean, maxRound?: number }
+  filterSettings Json?   // { excludedGameIds?: string[], excludeSpeedruns?: boolean, minRound?: number, maxRound?: number }
   completedByHost Boolean @default(false)  // Host has logged and claimed
   createdAt     DateTime @default(now())
 

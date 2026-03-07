@@ -79,10 +79,11 @@ type MysteryBoxData = {
 type MysteryBoxFilterSettings = {
   excludedGameIds: string[];
   excludeSpeedruns: boolean;
+  minRound: number | null;
   maxRound: number | null;
 };
 function toLibFilterSettings(s: MysteryBoxFilterSettings): import('@/lib/mystery-box').MysteryBoxFilterSettings {
-  return { ...s, maxRound: s.maxRound ?? undefined };
+  return { ...s, minRound: s.minRound ?? undefined, maxRound: s.maxRound ?? undefined };
 }
 
 export default function MysteryBoxPage() {
@@ -96,6 +97,7 @@ export default function MysteryBoxPage() {
   const [filterSettings, setFilterSettings] = useState<MysteryBoxFilterSettings>({
     excludedGameIds: [],
     excludeSpeedruns: false,
+    minRound: null,
     maxRound: null,
   });
   const [adminMe, setAdminMe] = useState<{ isSuperAdmin: boolean } | null>(null);
@@ -174,6 +176,7 @@ export default function MysteryBoxPage() {
     const payload = {
       excludedGameIds: filterSettings.excludedGameIds.length ? filterSettings.excludedGameIds : undefined,
       excludeSpeedruns: filterSettings.excludeSpeedruns || undefined,
+      minRound: filterSettings.minRound ?? undefined,
       maxRound: filterSettings.maxRound ?? undefined,
     };
     const res = await fetch('/api/mystery-box/lobby/roll', {
@@ -1146,6 +1149,7 @@ function FilterModal({
   const [loading, setLoading] = useState(true);
   const [excludedGameIds, setExcludedGameIds] = useState<Set<string>>(new Set(settings.excludedGameIds));
   const [excludeSpeedruns, setExcludeSpeedruns] = useState(settings.excludeSpeedruns);
+  const [minRound, setMinRound] = useState(settings.minRound?.toString() ?? '');
   const [maxRound, setMaxRound] = useState(settings.maxRound?.toString() ?? '');
 
   useEffect(() => {
@@ -1162,6 +1166,7 @@ function FilterModal({
   const previewSettings: MysteryBoxFilterSettings = {
     excludedGameIds: Array.from(excludedGameIds),
     excludeSpeedruns,
+    minRound: minRound.trim() ? parseInt(minRound, 10) || null : null,
     maxRound: maxRound.trim() ? parseInt(maxRound, 10) || null : null,
   };
   const xpMultiplier = getMysteryBoxXpMultiplierPercent(toLibFilterSettings(previewSettings));
@@ -1171,6 +1176,7 @@ function FilterModal({
     onSave({
       excludedGameIds: Array.from(excludedGameIds),
       excludeSpeedruns,
+      minRound: minRound.trim() ? parseInt(minRound, 10) || null : null,
       maxRound: maxRound.trim() ? parseInt(maxRound, 10) || null : null,
     });
   };
@@ -1236,17 +1242,31 @@ function FilterModal({
               <span className="text-white text-sm">Exclude all speedrun categories</span>
             </label>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-bunker-300 mb-1">Max round (e.g. 50 = no challenges over round 50)</label>
-            <input
-              type="number"
-              min={1}
-              max={999}
-              placeholder="No limit"
-              value={maxRound}
-              onChange={(e) => setMaxRound(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-bunker-800 border border-bunker-600 text-white"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-bunker-300 mb-1">Min round (e.g. 20 = no challenges under round 20)</label>
+              <input
+                type="number"
+                min={1}
+                max={999}
+                placeholder="No limit"
+                value={minRound}
+                onChange={(e) => setMinRound(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-bunker-800 border border-bunker-600 text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-bunker-300 mb-1">Max round (e.g. 50 = no challenges over round 50)</label>
+              <input
+                type="number"
+                min={1}
+                max={999}
+                placeholder="No limit"
+                value={maxRound}
+                onChange={(e) => setMaxRound(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-bunker-800 border border-bunker-600 text-white"
+              />
+            </div>
           </div>
           <div className="p-3 rounded-lg bg-amber-900/20 border border-amber-700/40">
             <p className="text-sm font-medium text-amber-400">Preview: {xpMultiplier}% XP · {xpRange.min}-{xpRange.max} XP range</p>
