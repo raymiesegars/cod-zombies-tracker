@@ -291,11 +291,17 @@ export function PendingCoOpSection() {
                     <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full border border-bunker-500/60 bg-bunker-900/95 text-bunker-200">
                       {playerLabel}
                     </span>
+                    <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full border border-blood-500/60 bg-blood-950/95 text-blood-200 max-w-full sm:max-w-[240px]" title={item.runLabel}>
+                      <span className="line-clamp-2 break-words">{item.runLabel}</span>
+                    </span>
                   </div>
                   <div className="absolute bottom-2 left-2 right-2 flex flex-col gap-1.5">
                     <p className="text-sm font-medium text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]">
                       {item.mapName}
                     </p>
+                    <span className="inline-flex px-2 py-0.5 rounded text-xs font-semibold text-blood-200 bg-bunker-950/95 border border-blood-600/50 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
+                      {item.runLabel}
+                    </span>
                     <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-bunker-950/90 border border-bunker-600/80 w-fit">
                       <Avatar
                         src={item.creator.avatarUrl}
@@ -321,6 +327,14 @@ export function PendingCoOpSection() {
                   </div>
                 </div>
                 <CardContent className="p-3 flex flex-col gap-2">
+                  <div className="px-2.5 py-1.5 rounded-lg bg-bunker-800/60 border border-bunker-600/60">
+                    <p className="text-xs text-bunker-400 uppercase tracking-wide">
+                      {item.logType === 'challenge' ? 'Challenge' : 'Easter Egg'}
+                    </p>
+                    <p className="text-sm font-semibold text-white mt-0.5 line-clamp-2 break-words" title={item.runLabel}>
+                      {item.runLabel}
+                    </p>
+                  </div>
                   <Button
                     size="sm"
                     variant="secondary"
