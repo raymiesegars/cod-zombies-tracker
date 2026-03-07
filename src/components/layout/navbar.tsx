@@ -74,7 +74,7 @@ export function Navbar() {
               return (
                 <Link key={link.href} href={link.href} className={`${linkClass} inline-flex items-center gap-1`} aria-label={link.href === '/find-group' ? 'Find Group' : link.label}>
                   <Icon className={`w-4 h-4 flex-shrink-0 ${link.iconClass}`} />
-                  <span className="hidden min-[1230px]:inline">{link.label}</span>
+                  {link.href !== '/find-group' && <span className="hidden min-[1230px]:inline">{link.label}</span>}
                 </Link>
               );
             })}
@@ -329,9 +329,10 @@ export function Navbar() {
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center gap-3 px-4 py-3 min-h-[44px] text-base font-zombies text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors tracking-wide touch-manipulation"
+                  aria-label={link.href === '/find-group' ? 'Find Group' : undefined}
                 >
                   <link.icon className={`w-5 h-5 flex-shrink-0 ${link.iconClass}`} />
-                  {link.label}
+                  {link.href !== '/find-group' && link.label}
                 </Link>
               ))}
               {chatbot && (
