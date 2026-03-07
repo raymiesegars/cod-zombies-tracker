@@ -25,6 +25,7 @@ const XP_BASE_NO_FILTERS = 50;
 export type MysteryBoxFilterSettings = {
   excludedGameIds?: string[];
   excludeSpeedruns?: boolean;
+  minRound?: number; // e.g. 20 = no challenges under round 20
   maxRound?: number; // e.g. 50 = no challenges over round 50
 };
 
@@ -120,8 +121,9 @@ export function getBaseXpFromFilters(settings: MysteryBoxFilterSettings | null):
   if (!settings || Object.keys(settings).length === 0) return XP_BASE_NO_FILTERS;
   const excludedGames = (settings.excludedGameIds ?? []).length;
   const excludeSpeedruns = settings.excludeSpeedruns === true ? 1 : 0;
+  const hasMinRound = typeof settings.minRound === 'number' && settings.minRound > 0 ? 1 : 0;
   const hasMaxRound = typeof settings.maxRound === 'number' && settings.maxRound > 0 ? 1 : 0;
-  const filterCount = excludedGames + excludeSpeedruns + hasMaxRound;
+  const filterCount = excludedGames + excludeSpeedruns + hasMinRound + hasMaxRound;
   if (filterCount === 0) return XP_BASE_NO_FILTERS;
   // More filters = lower base (5–50)
   const base = Math.max(XP_MIN, XP_BASE_NO_FILTERS - filterCount * 12);
@@ -220,6 +222,7 @@ export async function pickRandomRoll(
 ): Promise<MysteryBoxRollResult | null> {
   const excludedIds = new Set(settings?.excludedGameIds ?? []);
   const excludeSpeedruns = settings?.excludeSpeedruns === true;
+  const minRound = typeof settings?.minRound === 'number' && settings.minRound > 0 ? settings.minRound : null;
   const maxRound = typeof settings?.maxRound === 'number' && settings.maxRound > 0 ? settings.maxRound : null;
 
   const challenges = await prisma.challenge.findMany({
@@ -240,6 +243,9 @@ export async function pickRandomRoll(
   if (excludeSpeedruns) {
     filtered = filtered.filter((c) => !isSpeedrunType(c.type));
   }
+  if (minRound != null) {
+    filtered = filtered.filter((c) => getMinRoundForType(c.type) >= minRound);
+  }
   if (maxRound != null) {
     filtered = filtered.filter((c) => getMinRoundForType(c.type) <= maxRound);
   }
@@ -256,45 +262,45 @@ export async function pickRandomRoll(
 
   // WaW
   if (gs === 'WAW') {
-    if (hasNoJugSupport(slug, gs) && r() < 0.35) tags.wawNoJug = true;
-    if (slug === 'der-riese' && r() < 0.25) tags.wawFixedWunderwaffe = true;
+    if (hasNoJugSupport(slug, gs) && r() < 0.55) tags.wawNoJug = true;
+    if (slug === 'der-riese' && r() < 0.45) tags.wawFixedWunderwaffe = true;
   }
 
   // BO2 Bank (Tranzit, Die Rise, Buried)
-  if (gs === 'BO2' && getBo2MapConfig(slug)?.hasBank && r() < 0.3) tags.bo2BankUsed = false;
+  if (gs === 'BO2' && getBo2MapConfig(slug)?.hasBank && r() < 0.5) tags.bo2BankUsed = false;
 
   // First room variant (STARTING_ROOM only on verruckt, buried, aw-carrier)
-  if (chosen.type === 'STARTING_ROOM' && hasFirstRoomVariantFilter(slug) && r() < 0.35) {
+  if (chosen.type === 'STARTING_ROOM' && hasFirstRoomVariantFilter(slug) && r() < 0.55) {
     const opts = getFirstRoomVariantsForMap(slug);
     if (opts?.length) tags.firstRoomVariant = opts[Math.floor(r() * opts.length)]!.value;
   }
 
   // IW: Fate only vs Fate+Fortune
-  if (gs === 'IW' && r() < 0.35) tags.useFortuneCards = false;
-  if (gs === 'IW' && r() < 0.15) tags.useDirectorsCut = true;
+  if (gs === 'IW' && r() < 0.55) tags.useFortuneCards = false;
+  if (gs === 'IW' && r() < 0.35) tags.useDirectorsCut = true;
 
   // BO3: GobbleGums
   if (gs === 'BO3') {
-    if (r() < 0.4) tags.bo3GobbleGumMode = (BO3_GOBBLEGUM_MODES as readonly string[])[Math.floor(r() * BO3_GOBBLEGUM_MODES.length)];
-    if (r() < 0.2) tags.bo3AatUsed = false;
+    if (r() < 0.6) tags.bo3GobbleGumMode = (BO3_GOBBLEGUM_MODES as readonly string[])[Math.floor(r() * BO3_GOBBLEGUM_MODES.length)];
+    if (r() < 0.4) tags.bo3AatUsed = false;
   }
 
   // BO4: Elixir mode (CLASSIC_ONLY vs ALL_ELIXIRS_TALISMANS)
-  if (gs === 'BO4' && r() < 0.3) tags.bo4ElixirMode = r() < 0.5 ? 'CLASSIC_ONLY' : 'ALL_ELIXIRS_TALISMANS';
+  if (gs === 'BO4' && r() < 0.5) tags.bo4ElixirMode = r() < 0.5 ? 'CLASSIC_ONLY' : 'ALL_ELIXIRS_TALISMANS';
 
   // BOCW Support
-  if (gs === 'BOCW' && r() < 0.35) tags.bocwSupportMode = (BOCW_SUPPORT_MODES as readonly string[])[Math.floor(r() * BOCW_SUPPORT_MODES.length)];
+  if (gs === 'BOCW' && r() < 0.55) tags.bocwSupportMode = (BOCW_SUPPORT_MODES as readonly string[])[Math.floor(r() * BOCW_SUPPORT_MODES.length)];
 
   // BO6
   if (gs === 'BO6') {
-    if (r() < 0.3) tags.bo6GobbleGumMode = (BO6_GOBBLEGUM_MODES as readonly string[])[Math.floor(r() * BO6_GOBBLEGUM_MODES.length)];
-    if (r() < 0.3) tags.bo6SupportMode = (BO6_SUPPORT_MODES as readonly string[])[Math.floor(r() * BO6_SUPPORT_MODES.length)];
+    if (r() < 0.5) tags.bo6GobbleGumMode = (BO6_GOBBLEGUM_MODES as readonly string[])[Math.floor(r() * BO6_GOBBLEGUM_MODES.length)];
+    if (r() < 0.5) tags.bo6SupportMode = (BO6_SUPPORT_MODES as readonly string[])[Math.floor(r() * BO6_SUPPORT_MODES.length)];
   }
 
   // BO7
   if (gs === 'BO7') {
-    if (r() < 0.35) tags.bo7SupportMode = (BO7_SUPPORT_MODES as readonly string[])[Math.floor(r() * BO7_SUPPORT_MODES.length)];
-    if (r() < 0.2) {
+    if (r() < 0.55) tags.bo7SupportMode = (BO7_SUPPORT_MODES as readonly string[])[Math.floor(r() * BO7_SUPPORT_MODES.length)];
+    if (r() < 0.4) {
       tags.bo7IsCursedRun = true;
       const n = 1 + Math.floor(r() * 3);
       const shuffled = [...BO7_RELICS].sort(() => r() - 0.5);
@@ -303,12 +309,12 @@ export async function pickRandomRoll(
   }
 
   // WW2 Consumables
-  if (gs === 'WW2' && r() < 0.3) tags.ww2ConsumablesUsed = false;
+  if (gs === 'WW2' && r() < 0.5) tags.ww2ConsumablesUsed = false;
 
   // Vanguard Void / Rampage
-  if (gs === 'VANGUARD' && hasVanguardVoidFilter(slug) && r() < 0.3) tags.vanguardVoidUsed = false;
+  if (gs === 'VANGUARD' && hasVanguardVoidFilter(slug) && r() < 0.5) tags.vanguardVoidUsed = false;
   if ((gs === 'BOCW' || gs === 'BO6' || gs === 'BO7') || (gs === 'VANGUARD' && hasVanguardRampageFilter(slug))) {
-    if (r() < 0.25) tags.rampageInducerUsed = false;
+    if (r() < 0.45) tags.rampageInducerUsed = false;
   }
 
   return {
