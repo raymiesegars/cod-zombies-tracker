@@ -16,7 +16,7 @@ export async function GET(
       where: { id: tournamentId },
       include: {
         challenge: { select: { type: true } },
-        map: { select: { id: true } },
+        map: { select: { id: true, slug: true } },
       },
     });
     if (!tournament) {
@@ -88,6 +88,7 @@ export async function GET(
       killsReached?: number | null;
       scoreReached?: number | null;
       logId: string;
+      logType: 'challenge' | 'easter-egg';
       isVerified: boolean;
       playerCount: string;
     };
@@ -121,6 +122,7 @@ export async function GET(
             killsReached: kills,
             scoreReached: score,
             logId: t.challengeLog.id,
+            logType: 'challenge',
             isVerified: t.challengeLog.isVerified,
             playerCount: t.challengeLog.playerCount,
           });
@@ -137,6 +139,7 @@ export async function GET(
             roundReached: round ?? undefined,
             completionTimeSeconds: time,
             logId: t.easterEggLog.id,
+            logType: 'easter-egg',
             isVerified: t.easterEggLog.isVerified,
             playerCount: t.easterEggLog.playerCount,
           });
@@ -176,6 +179,7 @@ export async function GET(
       trophyByUser.set(t.userId, t.place);
     }
 
+    const mapSlug = tournament.map?.slug ?? '';
     const ranked = rankedEntries.map((e) => ({
       rank: e.rank,
       user: e.user,
@@ -184,6 +188,8 @@ export async function GET(
       killsReached: e.killsReached,
       scoreReached: e.scoreReached,
       logId: e.logId,
+      logType: e.logType,
+      mapSlug,
       isVerified: e.isVerified,
       playerCount: e.playerCount,
       trophyPlace: trophyByUser.get(e.user.id) ?? null,

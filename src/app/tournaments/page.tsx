@@ -39,6 +39,7 @@ type Tournament = {
   startsAt: string;
   endsAt: string;
   isOpen?: boolean;
+  config?: Record<string, unknown>;
   game?: { shortName: string };
   map?: { name: string; slug: string };
   challenge?: { name: string };
@@ -54,6 +55,9 @@ type LeaderboardEntry = {
   isVerified: boolean;
   playerCount: string;
   trophyPlace?: number | null; // 1=gold, 2=silver, 3=bronze
+  logId?: string;
+  logType?: 'challenge' | 'easter-egg';
+  mapSlug?: string;
 };
 
 function useCountdown(endsAt: string | null): number | null {
@@ -406,7 +410,10 @@ export default function TournamentsPage() {
     const shortName = game?.shortName ?? '';
     const mergedConfig: Record<string, unknown> = {
       playerCount: (config?.playerCount as string) || 'SOLO',
-      ...(shortName === 'BO3' && { bo3GobbleGumMode: (config?.bo3GobbleGumMode as string) || BO3_GOBBLEGUM_DEFAULT }),
+      ...(shortName === 'BO3' && {
+        bo3GobbleGumMode: (config?.bo3GobbleGumMode as string) || BO3_GOBBLEGUM_DEFAULT,
+        bo3AatUsed: config?.bo3AatUsed === true,
+      }),
       ...(shortName === 'BO4' && {
         difficulty: (config?.difficulty as string) || 'NORMAL',
         bo4ElixirMode: (config?.bo4ElixirMode as string) || 'CLASSIC',
@@ -796,9 +803,14 @@ export default function TournamentsPage() {
           </div>
         </Modal>
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left: Poll */}
-          <div className="lg:w-1/2 flex flex-col min-h-0">
+        {(() => {
+          const activePoll = poll && !pollEnded && poll.status === 'ACTIVE';
+          const userHasVoted = !!poll?.userVoteOptionId;
+          const pollFirst = activePoll && !userHasVoted;
+          return (
+        <div className="flex flex-col lg:flex-row lg:flex-wrap gap-8">
+          {/* Poll: first on mobile when active and not voted, else last */}
+          <div className={`flex flex-col min-h-0 lg:w-1/2 ${pollFirst ? 'order-1' : 'order-3 lg:order-1'}`}>
             <Card variant="bordered" className="border-bunker-700 flex flex-col min-h-[320px] lg:min-h-[380px]">
               <CardHeader className="flex flex-row items-center justify-between gap-3 flex-wrap shrink-0">
                 <CardTitle className="text-lg font-zombies text-white flex items-center gap-2">
@@ -913,8 +925,8 @@ export default function TournamentsPage() {
             </Card>
           </div>
 
-          {/* Right: Leaderboard */}
-          <div className="lg:w-1/2 flex flex-col min-h-0">
+          {/* Tournament Leaderboard: first on mobile when poll not active or user voted, else second */}
+          <div className={`flex flex-col min-h-0 lg:w-1/2 ${pollFirst ? 'order-2' : 'order-1 lg:order-2'}`}>
             <Card variant="bordered" className="border-bunker-700 flex flex-col min-h-[320px] lg:min-h-[380px]">
               <CardHeader className="flex flex-row items-center justify-between gap-3 flex-wrap shrink-0">
                 <CardTitle className="text-lg font-zombies text-white flex items-center gap-2">
@@ -955,6 +967,13 @@ export default function TournamentsPage() {
                     <p className="text-bunker-400 text-sm shrink-0">
                       {tournament.game?.shortName} · {tournament.map?.name}
                       {tournament.challenge ? ` · ${tournament.challenge.name}` : tournament.easterEgg ? ` · ${tournament.easterEgg.name}` : ''}
+                      {tournament.game?.shortName === 'BO3' && tournament.config && typeof tournament.config === 'object' && (
+                        <>
+                          {' · '}
+                          {getBo3GobbleGumLabel((tournament.config.bo3GobbleGumMode as string) || BO3_GOBBLEGUM_DEFAULT)}
+                          {(tournament.config.bo3AatUsed as boolean) ? ' · AATs Used' : ' · No AATs'}
+                        </>
+                      )}
                     </p>
                     {tournamentEndsAt && (
                       <div className="flex items-center gap-2 text-blood-400 text-sm shrink-0">
@@ -1008,8 +1027,11 @@ export default function TournamentsPage() {
                   <ul className="space-y-1 pr-1">
                     {leaderboard.map((e) => {
                       const userHasTrophy = e.trophyPlace != null;
-                      return (
-                        <li key={e.user.id} className="flex items-center gap-2 py-2 text-sm border-b border-bunker-800/50 last:border-0">
+                      const runHref = e.logId && e.mapSlug && e.logType
+                        ? `/maps/${e.mapSlug}/run/${e.logType}/${e.logId}`
+                        : null;
+                      const rowContent = (
+                        <>
                           {/* Trophy on far left when awarded */}
                           <span className="w-6 shrink-0 flex items-center justify-center">
                             {e.trophyPlace === 1 && <span title="Gold"><Medal className="w-4 h-4 text-amber-400" /></span>}
@@ -1018,6 +1040,9 @@ export default function TournamentsPage() {
                           </span>
                           <span className="text-bunker-500 w-6 shrink-0 tabular-nums">#{e.rank}</span>
                           <span className="text-white font-medium min-w-0 truncate">{e.user.displayName || e.user.username}</span>
+                          {e.isVerified && (
+                            <span className="text-blue-400 text-xs shrink-0" title="Verified">✓</span>
+                          )}
                           {e.completionTimeSeconds != null && (
                             <span className="text-military-400 ml-auto shrink-0 tabular-nums whitespace-nowrap min-w-[5rem] text-right" title="Completion time">
                               {formatCompletionTime(e.completionTimeSeconds)}
@@ -1032,8 +1057,16 @@ export default function TournamentsPage() {
                           {e.roundReached != null && e.completionTimeSeconds == null && e.killsReached == null && e.scoreReached == null && (
                             <span className="text-military-400 ml-auto shrink-0">Round {e.roundReached}</span>
                           )}
-                          {e.isVerified && (
-                            <span className="text-blue-400 text-xs shrink-0" title="Verified">✓</span>
+                        </>
+                      );
+                      return (
+                        <li key={e.user.id} className="flex items-center gap-2 py-2 text-sm border-b border-bunker-800/50 last:border-0">
+                          {runHref ? (
+                            <Link href={runHref} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 flex-1 min-w-0 hover:text-blood-400 transition-colors">
+                              {rowContent}
+                            </Link>
+                          ) : (
+                            <span className="flex items-center gap-2 flex-1 min-w-0">{rowContent}</span>
                           )}
                           {/* Super admin: Gold / Silver / Bronze buttons per run */}
                           {adminMe?.isSuperAdmin && tournamentId && tournamentLocked && !userHasTrophy && (
@@ -1080,11 +1113,10 @@ export default function TournamentsPage() {
               </CardContent>
             </Card>
           </div>
-        </div>
 
-        {/* Trophy leaderboard */}
-        <section className="mt-10">
-          <Card variant="bordered" className="border-bunker-700 max-w-2xl flex flex-col min-h-[280px]">
+          {/* Trophy leaderboard: third when poll first, else second on mobile */}
+          <div className={`lg:w-full flex flex-col ${pollFirst ? 'order-3 lg:order-3' : 'order-2 lg:order-3'}`}>
+            <Card variant="bordered" className="border-bunker-700 max-w-2xl flex flex-col min-h-[280px]">
             <CardHeader className="flex flex-row items-center justify-between gap-2 shrink-0">
               <CardTitle className="text-base font-zombies text-white flex items-center gap-2">
                 <Award className="w-4 h-4 text-amber-500 shrink-0" />
@@ -1117,7 +1149,8 @@ export default function TournamentsPage() {
               </div>
             </CardContent>
           </Card>
-        </section>
+          </div>
+        </div>
 
         {/* Vote confirmation modal */}
         <Modal
@@ -1244,15 +1277,29 @@ export default function TournamentsPage() {
                     />
                   </div>
                   {shortName === 'BO3' && (
-                    <div>
-                      <label className="block text-sm font-medium text-bunker-300 mb-1">GobbleGums</label>
-                      <Select
-                        value={String(config.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT)}
-                        onChange={(e) => setConfig('bo3GobbleGumMode', e.target.value)}
-                        options={BO3_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo3GobbleGumLabel(m) }))}
-                        className="w-full bg-bunker-800 border-bunker-600 text-white"
-                      />
-                    </div>
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-bunker-300 mb-1">GobbleGums</label>
+                        <Select
+                          value={String(config.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT)}
+                          onChange={(e) => setConfig('bo3GobbleGumMode', e.target.value)}
+                          options={BO3_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo3GobbleGumLabel(m) }))}
+                          className="w-full bg-bunker-800 border-bunker-600 text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-bunker-300 mb-1">AATs</label>
+                        <Select
+                          value={config.bo3AatUsed === true ? 'true' : 'false'}
+                          onChange={(e) => setConfig('bo3AatUsed', e.target.value === 'true')}
+                          options={[
+                            { value: 'false', label: 'No AATs' },
+                            { value: 'true', label: 'AATs Used' },
+                          ]}
+                          className="w-full bg-bunker-800 border-bunker-600 text-white"
+                        />
+                      </div>
+                    </>
                   )}
                   {shortName === 'BO4' && (
                     <>

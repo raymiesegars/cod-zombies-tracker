@@ -67,6 +67,19 @@ export async function GET(request: NextRequest) {
         ? rawChallengeLogs.filter((log) => String(log.challenge.type).includes('SPEEDRUN'))
         : rawChallengeLogs;
 
+    const challengeLogIds = challengeLogs.map((l) => l.id);
+    const eeLogIds = easterEggLogs.map((l) => l.id);
+    const [tournamentChallengeLogIds, tournamentEeLogIds] = await Promise.all([
+      challengeLogIds.length > 0
+        ? prisma.tournamentLog.findMany({ where: { challengeLogId: { in: challengeLogIds } }, select: { challengeLogId: true } })
+        : Promise.resolve([]),
+      eeLogIds.length > 0
+        ? prisma.tournamentLog.findMany({ where: { easterEggLogId: { in: eeLogIds } }, select: { easterEggLogId: true } })
+        : Promise.resolve([]),
+    ]);
+    const tournamentChallengeSet = new Set(tournamentChallengeLogIds.map((t) => t.challengeLogId).filter(Boolean));
+    const tournamentEeSet = new Set(tournamentEeLogIds.map((t) => t.easterEggLogId).filter(Boolean));
+
     const challengeItems = challengeLogs.map((log) => ({
       logType: 'challenge' as const,
       logId: log.id,
@@ -77,6 +90,7 @@ export async function GET(request: NextRequest) {
       runLabel: `${log.challenge.name} – Round ${log.roundReached}`,
       roundReached: log.roundReached,
       playerCount: log.playerCount,
+      isTournamentRun: tournamentChallengeSet.has(log.id),
       user: {
         id: log.user.id,
         username: log.user.username,
@@ -96,6 +110,7 @@ export async function GET(request: NextRequest) {
       runLabel: log.easterEgg.name,
       roundCompleted: log.roundCompleted,
       playerCount: log.playerCount,
+      isTournamentRun: tournamentEeSet.has(log.id),
       user: {
         id: log.user.id,
         username: log.user.username,
