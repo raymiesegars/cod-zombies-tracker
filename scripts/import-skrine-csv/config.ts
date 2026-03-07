@@ -77,9 +77,10 @@ export const MAP_SLUG_BY_GAME: Record<string, Record<string, string | null>> = {
     'shi-no-numa-van': 'shi-no-numa-reborn',
     'van-archon': 'the-archon',
   },
-  // WW2: CSV "frozen-dawn" → CZT "the-frozen-dawn"
+  // WW2: CSV slugs → CZT map slugs
   wwii: {
     'frozen-dawn': 'the-frozen-dawn',
+    'gresten-haus': 'groesten-haus',
   },
   // BO7: all 6 maps. ZWR "farm" → CZT "vandorn-farm"; others use same slug.
   bo7: {
@@ -101,6 +102,7 @@ export const MAP_SLUG_OVERRIDES: Record<string, string | null> = {
   'die-maschine': 'die-maschine',
   'mauer-der-toten': 'mauer-der-toten',
   'forsaken': 'forsaken',
+  'gresten-haus': 'groesten-haus',
 };
 
 // ---------------------------------------------------------------------------
@@ -174,9 +176,9 @@ function applySubRecordModifiers(record: string, subRecord: string, mods: Record
     mods.useDirectorsCut = true;
   }
 
-  // WW2
-  if (subRecord === 'with-cons') mods.ww2ConsumablesUsed = true;
-  else if (subRecord === 'no-cons') mods.ww2ConsumablesUsed = false;
+  // WW2 (ZWR uses "with-consumables"/"no-consumables" or "with-cons"/"no-cons")
+  if (subRecord === 'with-cons' || subRecord === 'with-consumables') mods.ww2ConsumablesUsed = true;
+  else if (subRecord === 'no-cons' || subRecord === 'no-consumables') mods.ww2ConsumablesUsed = false;
 
   // Vanguard
   if (subRecord === 'with-void') mods.vanguardVoidUsed = true;

@@ -17,11 +17,15 @@
  *   npx tsx scripts/import-skrine-csv/run.ts --csv=path/to/file.csv \
  *     --source-player-id=17046 --czt-user=cmlvocpbj0006ar6ml9vz7hsm [--dry-run] [--report=report.json]
  *
+ *   --ww2-only  Skip all non-WW2 rows (faster). When imports/updates occur, runs reunlock + recompute
+ *               for that user (with BACKFILL_GAMES=WW2 for speed).
+ *
  * See README.md in this folder for full options and mapping docs.
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { execSync } from 'child_process';
 
 const root = path.resolve(__dirname, '../..');
 for (const file of ['.env', '.env.local']) {
@@ -252,6 +256,7 @@ function parseArgs(): {
   dryRun: boolean;
   reportPath: string | null;
   skipExisting: boolean;
+  ww2Only: boolean;
 } {
   const args = process.argv.slice(2);
   let csvPath = '';
@@ -260,6 +265,7 @@ function parseArgs(): {
   let dryRun = false;
   let reportPath: string | null = null;
   let skipExisting = true;
+  let ww2Only = false;
 
   for (const a of args) {
     if (a.startsWith('--csv=')) csvPath = a.slice(6).trim().replace(/^=+/, '');
@@ -268,13 +274,14 @@ function parseArgs(): {
     else if (a === '--dry-run') dryRun = true;
     else if (a.startsWith('--report=')) reportPath = a.slice(9).trim().replace(/^=+/, '') || null;
     else if (a === '--no-skip-existing') skipExisting = false;
+    else if (a === '--ww2-only') ww2Only = true;
   }
 
   if (!csvPath || !sourcePlayerId || !cztUser) {
-    console.error('Usage: npx tsx scripts/import-skrine-csv/run.ts --csv=<path> --source-player-id=<id> --czt-user=<username|id|displayName> [--dry-run] [--report=<path>] [--no-skip-existing]');
+    console.error('Usage: npx tsx scripts/import-skrine-csv/run.ts --csv=<path> --source-player-id=<id> --czt-user=<username|id|displayName> [--dry-run] [--report=<path>] [--no-skip-existing] [--ww2-only]');
     process.exit(1);
   }
-  return { csvPath, sourcePlayerId, cztUser, dryRun, reportPath, skipExisting };
+  return { csvPath, sourcePlayerId, cztUser, dryRun, reportPath, skipExisting, ww2Only };
 }
 
 async function resolveCztUser(cztUser: string): Promise<{ id: string }> {
@@ -367,7 +374,7 @@ async function findExistingEasterEggLog(
 }
 
 async function main() {
-  const { csvPath, sourcePlayerId, cztUser, dryRun, reportPath, skipExisting } = parseArgs();
+  const { csvPath, sourcePlayerId, cztUser, dryRun, reportPath, skipExisting, ww2Only } = parseArgs();
   const csvAbs = path.isAbsolute(csvPath) ? csvPath : path.resolve(process.cwd(), csvPath);
   if (!fs.existsSync(csvAbs)) {
     console.error('CSV file not found:', csvAbs);
@@ -380,11 +387,17 @@ async function main() {
 
   const content = fs.readFileSync(csvAbs, 'utf-8');
   const allRows = parseCsv(content);
-  const rows = allRows.filter((r) => {
+  let rows = allRows.filter((r) => {
     const players = [r.player_1, r.player_2, r.player_3, r.player_4].map((p) => (p || '').trim());
     return players.includes(sourcePlayerId);
   });
-  console.log(`CSV rows: ${allRows.length} total, ${rows.length} where source player "${sourcePlayerId}" is in the run`);
+  if (ww2Only) {
+    const before = rows.length;
+    rows = rows.filter((r) => r.game.toLowerCase().trim() === 'wwii');
+    console.log(`CSV rows: ${allRows.length} total, ${before} where source player "${sourcePlayerId}", ${rows.length} WW2 only`);
+  } else {
+    console.log(`CSV rows: ${allRows.length} total, ${rows.length} where source player "${sourcePlayerId}" is in the run`);
+  }
 
   const report: ReportRow[] = [];
   const skippedReasons: { row: number; game: string; map: string; record: string; sub_record: string; reason: string }[] = [];
@@ -396,6 +409,8 @@ async function main() {
   for (const row of rows) {
     const gameCode = row.game.toLowerCase().trim();
     const mapSlug = row.map.toLowerCase().trim();
+
+    if (ww2Only && gameCode !== 'wwii') continue;
 
     if (SKIP_GAMES.has(gameCode)) {
       skippedReasons.push({
@@ -719,6 +734,14 @@ async function main() {
     const out = path.isAbsolute(reportPath) ? reportPath : path.resolve(process.cwd(), reportPath);
     fs.writeFileSync(out, JSON.stringify({ report, skippedReasons, summary: { imported, updated, skipped, errors } }, null, 2));
     console.log('Report written to:', out);
+  }
+
+  if ((imported > 0 || updated > 0) && !dryRun) {
+    console.log('\n--- Revalidating (reunlock + recompute verified XP) ---');
+    const revalEnv = { ...process.env, BACKFILL_USER_ID: user.id };
+    if (ww2Only) revalEnv.BACKFILL_GAMES = 'WW2';
+    execSync('pnpm db:reunlock-achievements', { stdio: 'inherit', cwd: root, env: revalEnv });
+    execSync('pnpm db:recompute-verified-xp', { stdio: 'inherit', cwd: root, env: revalEnv });
   }
 
   if (errors > 0) process.exit(1);

@@ -13,7 +13,7 @@ import {
   Input,
   Modal,
 } from '@/components/ui';
-import { Medal, Trophy, Clock, Award, Loader2, Lock, Plus, Banknote, Pencil, BookOpen } from 'lucide-react';
+import { Medal, Trophy, Clock, Award, Loader2, Lock, Plus, Banknote, Pencil, BookOpen, Trash2 } from 'lucide-react';
 import { TournamentRulesContent } from '@/components/tournament-rules-content';
 import { BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT, getBo3GobbleGumLabel } from '@/lib/bo3';
 import { BO4_DIFFICULTIES, getBo4DifficultyLabel } from '@/lib/bo4';
@@ -124,8 +124,12 @@ export default function TournamentsPage() {
   const [prizePoolEditOpen, setPrizePoolEditOpen] = useState(false);
   const [prizePoolSaving, setPrizePoolSaving] = useState(false);
   const [endTournamentModalOpen, setEndTournamentModalOpen] = useState(false);
-  const [learnRulesModalOpen, setLearnRulesModalOpen] = useState(false);
   const [endTournamentLoading, setEndTournamentLoading] = useState(false);
+  const [deleteTournamentModal1Open, setDeleteTournamentModal1Open] = useState(false);
+  const [deleteTournamentModal2Open, setDeleteTournamentModal2Open] = useState(false);
+  const [deleteTournamentConfirmText, setDeleteTournamentConfirmText] = useState('');
+  const [deleteTournamentLoading, setDeleteTournamentLoading] = useState(false);
+  const [learnRulesModalOpen, setLearnRulesModalOpen] = useState(false);
   const [awardingKey, setAwardingKey] = useState<string | null>(null); // `${userId}-${place}` when awarding
   const [games, setGames] = useState<{ id: string; name: string; shortName: string }[]>([]);
   const [mapsByGame, setMapsByGame] = useState<{ id: string; name: string; slug: string; gameId: string }[]>([]);
@@ -519,6 +523,30 @@ export default function TournamentsPage() {
     }
   };
 
+  const handleDeleteTournament = async () => {
+    if (!tournamentId || deleteTournamentLoading || deleteTournamentConfirmText !== 'DELETE') return;
+    setDeleteTournamentLoading(true);
+    try {
+      const r = await fetch(`/api/tournaments/${tournamentId}`, {
+        method: 'DELETE',
+        credentials: 'same-origin',
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'Failed');
+      setDeleteTournamentModal2Open(false);
+      setDeleteTournamentModal1Open(false);
+      setDeleteTournamentConfirmText('');
+      setTournamentId(null);
+      setTournament(null);
+      setLeaderboard([]);
+      fetchTournaments();
+    } catch (e) {
+      alert((e as Error).message);
+    } finally {
+      setDeleteTournamentLoading(false);
+    }
+  };
+
   const handleSavePrizePool = async () => {
     const parsed = parseFloat(prizePoolEditValue);
     if (Number.isNaN(parsed) || parsed < 0) {
@@ -554,7 +582,7 @@ export default function TournamentsPage() {
             <h2 className="text-lg font-zombies text-white mb-2">Rules</h2>
             <ul className="text-sm text-bunker-400 space-y-1 list-disc list-inside">
               <li>Polls run for 5 days. When the timer ends, voting closes and results are revealed.</li>
-              <li>Each tournament runs for 12 days; after that, no more runs can be submitted.</li>
+              <li>Each tournament runs for 12 days: 9 days to start runs, then 3 days to finish and submit. After that, no more runs can be submitted.</li>
               <li>Top 3 verified runs receive gold (30k XP), silver (15k XP), and bronze (7.5k XP).</li>
               <li>Trophies are awarded by a super admin after the tournament closes.</li>
             </ul>
@@ -685,6 +713,70 @@ export default function TournamentsPage() {
               >
                 {endTournamentLoading ? <Loader2 className="w-4 h-4 animate-spin shrink-0" /> : null}
                 End tournament
+              </Button>
+            </div>
+          </div>
+        </Modal>
+
+        {/* Delete tournament confirmation 1 (super admin) */}
+        <Modal
+          isOpen={deleteTournamentModal1Open}
+          onClose={() => !deleteTournamentLoading && setDeleteTournamentModal1Open(false)}
+          title="Delete this tournament?"
+          description="First confirmation."
+          size="sm"
+        >
+          <div className="flex flex-col gap-4 pt-1">
+            <p className="text-sm text-bunker-300">
+              This will permanently remove the tournament and all its leaderboard data, logs, and trophies. This cannot be undone.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" onClick={() => setDeleteTournamentModal1Open(false)} disabled={deleteTournamentLoading}>
+                Cancel
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => { setDeleteTournamentModal1Open(false); setDeleteTournamentModal2Open(true); }}
+                disabled={deleteTournamentLoading}
+                className="bg-blood-900/50 border-blood-600 text-blood-200 hover:bg-blood-800/50"
+              >
+                I understand, continue
+              </Button>
+            </div>
+          </div>
+        </Modal>
+
+        {/* Delete tournament confirmation 2 (super admin) */}
+        <Modal
+          isOpen={deleteTournamentModal2Open}
+          onClose={() => !deleteTournamentLoading && (setDeleteTournamentModal2Open(false), setDeleteTournamentConfirmText(''))}
+          title="Final confirmation"
+          description="Type DELETE to confirm."
+          size="sm"
+        >
+          <div className="flex flex-col gap-4 pt-1">
+            <p className="text-sm text-bunker-300">
+              Type <strong className="text-blood-400">DELETE</strong> below to permanently delete this tournament.
+            </p>
+            <Input
+              value={deleteTournamentConfirmText}
+              onChange={(e) => setDeleteTournamentConfirmText(e.target.value)}
+              placeholder="DELETE"
+              className="bg-bunker-800 border-bunker-600 text-white font-mono"
+              autoComplete="off"
+            />
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" onClick={() => { setDeleteTournamentModal2Open(false); setDeleteTournamentConfirmText(''); }} disabled={deleteTournamentLoading}>
+                Cancel
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={handleDeleteTournament}
+                disabled={deleteTournamentLoading || deleteTournamentConfirmText !== 'DELETE'}
+                className="bg-blood-900/50 border-blood-600 text-blood-200 hover:bg-blood-800/50 disabled:opacity-50"
+              >
+                {deleteTournamentLoading ? <Loader2 className="w-4 h-4 animate-spin shrink-0" /> : null}
+                Delete permanently
               </Button>
             </div>
           </div>
@@ -828,6 +920,12 @@ export default function TournamentsPage() {
                   {adminMe?.isSuperAdmin && tournamentId && tournament?.isOpen && !tournamentEnded && (
                     <Button variant="secondary" size="sm" onClick={() => setEndTournamentModalOpen(true)}>
                       End tournament
+                    </Button>
+                  )}
+                  {adminMe?.isSuperAdmin && tournamentId && tournamentLocked && (
+                    <Button variant="secondary" size="sm" onClick={() => setDeleteTournamentModal1Open(true)} className="text-blood-400 hover:text-blood-300 border-blood-700 hover:border-blood-600">
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Delete tournament
                     </Button>
                   )}
                   {adminMe?.isSuperAdmin && (
@@ -1055,7 +1153,7 @@ export default function TournamentsPage() {
           isOpen={createLeaderboardOpen}
           onClose={() => !createLeaderboardLoading && setCreateLeaderboardOpen(false)}
           title="Create tournament leaderboard"
-          description="Set the game, map, and category. The leaderboard runs for 12 days."
+          description="Set the game, map, and category. The leaderboard runs 12 days (9 to start runs, 3 to finish and submit)."
           size="sm"
         >
           <div className="space-y-3">
