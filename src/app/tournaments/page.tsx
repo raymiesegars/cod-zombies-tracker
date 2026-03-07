@@ -167,15 +167,22 @@ export default function TournamentsPage() {
       .catch(() => setPolls([]));
   }, [pollId]);
 
-  const fetchTournaments = useCallback(() => {
-    fetch('/api/tournaments')
+  const fetchTournaments = useCallback((opts?: { bypassCache?: boolean }) => {
+    const url = opts?.bypassCache ? `/api/tournaments?_=${Date.now()}` : '/api/tournaments';
+    fetch(url, { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {
-        setTournaments(Array.isArray(data) ? data : []);
-        if (Array.isArray(data) && data.length > 0 && !tournamentId) {
-          const open = data.find((t: Tournament) => t.status === 'OPEN');
-          const current = open ?? data[0];
-          setTournamentId(current?.id ?? data[0]?.id);
+        const list = Array.isArray(data) ? data : [];
+        setTournaments(list);
+        const ids = new Set(list.map((t: Tournament) => t.id));
+        if (tournamentId && !ids.has(tournamentId)) {
+          setTournamentId(null);
+          setTournament(null);
+          setLeaderboard([]);
+        } else if (list.length > 0 && !tournamentId) {
+          const open = list.find((t: Tournament) => t.status === 'OPEN');
+          const current = open ?? list[0];
+          setTournamentId(current?.id ?? list[0]?.id);
         }
       })
       .catch(() => setTournaments([]));
@@ -219,10 +226,17 @@ export default function TournamentsPage() {
 
   useEffect(() => {
     if (!tournamentId) return setTournament(null);
-    fetch(`/api/tournaments/${tournamentId}`)
-      .then((r) => r.json())
-      .then(setTournament)
-      .catch(() => setTournament(null));
+    fetch(`/api/tournaments/${tournamentId}`, { cache: 'no-store' })
+      .then((r) => {
+        if (!r.ok) {
+          setTournament(null);
+          setTournamentId(null);
+          return null;
+        }
+        return r.json();
+      })
+      .then((data) => { if (data) setTournament(data); })
+      .catch(() => { setTournament(null); setTournamentId(null); });
   }, [tournamentId]);
 
   // When countdown hits 0, refetch tournament so isOpen/locked state updates
@@ -539,7 +553,7 @@ export default function TournamentsPage() {
       setTournamentId(null);
       setTournament(null);
       setLeaderboard([]);
-      fetchTournaments();
+      fetchTournaments({ bypassCache: true });
     } catch (e) {
       alert((e as Error).message);
     } finally {

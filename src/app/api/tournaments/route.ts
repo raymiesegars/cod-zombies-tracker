@@ -4,7 +4,7 @@ import { getUser } from '@/lib/supabase/server';
 import { isSuperAdmin } from '@/lib/admin';
 import { TournamentStatus } from '@prisma/client';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 /** GET: List tournaments for dropdown/filter. Order: latest first. */
 export async function GET() {
@@ -24,7 +24,7 @@ export async function GET() {
       },
     });
     return NextResponse.json(tournaments, {
-      headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' },
+      headers: { 'Cache-Control': 'private, max-age=0, must-revalidate' },
     });
   } catch (error) {
     console.error('Error listing tournaments:', error);
