@@ -90,6 +90,10 @@ export async function GET(_request: NextRequest, { params }: Params) {
       avatarPreset: u.avatarPreset,
       level: getLevelFromXp(u.totalXp ?? 0).level,
     };
+    const tournamentLog = await prisma.tournamentLog.findFirst({
+      where: { challengeLogId: log.id },
+      include: { tournament: { select: { title: true } } },
+    });
     return NextResponse.json({
       ...logWithoutUser,
       isOwner: isOwner ?? false,
@@ -97,6 +101,8 @@ export async function GET(_request: NextRequest, { params }: Params) {
       runOwnerDisplayName: u.displayName ?? u.username ?? undefined,
       runOwner,
       teammateUserDetails,
+      isTournamentRun: !!tournamentLog,
+      tournamentTitle: tournamentLog?.tournament?.title ?? undefined,
     });
   } catch (error) {
     console.error('Error fetching challenge log:', error);

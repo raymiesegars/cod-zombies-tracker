@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui';
-import { History, Loader2, ExternalLink } from 'lucide-react';
+import { History, Loader2, ExternalLink, Trophy } from 'lucide-react';
 
 type VerifiedEntry = {
   logType: 'challenge' | 'easter_egg';
@@ -13,6 +13,7 @@ type VerifiedEntry = {
   runLabel: string;
   verifiedAt: string;
   verifiedBy: { id: string; username: string; displayName: string | null };
+  isTournamentRun?: boolean;
 };
 
 export default function AdminVerifiedHistoryPage() {
@@ -116,7 +117,17 @@ export default function AdminVerifiedHistoryPage() {
                           minute: '2-digit',
                         })}
                       </td>
-                      <td className="py-3 px-4 text-white">{e.runLabel}</td>
+                      <td className="py-3 px-4 text-white">
+                        <span className="flex items-center gap-2 flex-wrap">
+                          {e.runLabel}
+                          {e.isTournamentRun && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded-full border border-amber-600/60 bg-amber-950/95 text-amber-300" title="Tournament submission">
+                              <Trophy className="w-3 h-3" />
+                              Tourney
+                            </span>
+                          )}
+                        </span>
+                      </td>
                       <td className="py-3 px-4 text-bunker-300">{e.mapName}</td>
                       <td className="py-3 px-4 text-bunker-300">
                         {e.verifiedBy.displayName || e.verifiedBy.username}

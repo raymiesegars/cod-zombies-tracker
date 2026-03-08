@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Card, CardContent, Avatar, Logo } from '@/components/ui';
 import { RoundCounter } from '@/components/game';
 import { getAssetUrl } from '@/lib/assets';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, Trophy } from 'lucide-react';
 
 const PLAYER_COUNT_LABEL: Record<string, string> = {
   SOLO: 'Solo',
@@ -26,6 +26,7 @@ export type PendingVerificationRun = {
   roundReached?: number;
   roundCompleted?: number | null;
   playerCount: string;
+  isTournamentRun?: boolean;
   user: {
     id: string;
     username: string;
@@ -113,6 +114,12 @@ export function PendingVerificationSection() {
                       <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full border border-bunker-500/60 bg-bunker-900/95 text-bunker-200">
                         {playerLabel}
                       </span>
+                      {item.isTournamentRun && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded-full border border-amber-600/60 bg-amber-950/95 text-amber-300" title="Tournament submission">
+                          <Trophy className="w-3 h-3" />
+                          Tourney
+                        </span>
+                      )}
                     </div>
                     <div className="absolute bottom-2 left-2 right-2 flex flex-col gap-1.5">
                       <p className="text-sm font-medium text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]">

@@ -12,15 +12,16 @@ import {
   Select,
   Input,
   Modal,
+  Avatar,
 } from '@/components/ui';
-import { Medal, Trophy, Clock, Award, Loader2, Lock, Plus, Banknote, Pencil, BookOpen, Trash2 } from 'lucide-react';
+import { Medal, Trophy, Clock, Award, Loader2, Lock, Plus, Banknote, Pencil, BookOpen, Trash2, ShieldCheck } from 'lucide-react';
 import { TournamentRulesContent } from '@/components/tournament-rules-content';
 import { BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT, getBo3GobbleGumLabel } from '@/lib/bo3';
 import { BO4_DIFFICULTIES, getBo4DifficultyLabel } from '@/lib/bo4';
 import { BOCW_SUPPORT_MODES, BOCW_SUPPORT_DEFAULT, getBocwSupportLabel } from '@/lib/bocw';
 import { BO6_GOBBLEGUM_MODES, BO6_GOBBLEGUM_DEFAULT, BO6_SUPPORT_MODES, BO6_SUPPORT_DEFAULT, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
 import { BO7_SUPPORT_MODES, BO7_SUPPORT_DEFAULT, getBo7SupportLabel } from '@/lib/bo7';
-import { formatCompletionTime } from '@/components/ui/time-input';
+import { TournamentLeaderboardEntry } from '@/components/game';
 
 type PollOption = { id: string; label: string; order: number; voteCount?: number };
 type Poll = {
@@ -39,6 +40,7 @@ type Tournament = {
   startsAt: string;
   endsAt: string;
   isOpen?: boolean;
+  config?: Record<string, unknown>;
   game?: { shortName: string };
   map?: { name: string; slug: string };
   challenge?: { name: string };
@@ -46,7 +48,7 @@ type Tournament = {
 };
 type LeaderboardEntry = {
   rank: number;
-  user: { id: string; username: string; displayName: string | null; avatarUrl: string | null; level: number };
+  user: { id: string; username: string; displayName: string | null; avatarUrl: string | null; avatarPreset?: string | null; level: number };
   roundReached?: number;
   completionTimeSeconds?: number | null;
   killsReached?: number | null;
@@ -54,6 +56,9 @@ type LeaderboardEntry = {
   isVerified: boolean;
   playerCount: string;
   trophyPlace?: number | null; // 1=gold, 2=silver, 3=bronze
+  logId?: string;
+  logType?: 'challenge' | 'easter-egg';
+  mapSlug?: string;
 };
 
 function useCountdown(endsAt: string | null): number | null {
@@ -102,9 +107,11 @@ export default function TournamentsPage() {
   const [tournamentId, setTournamentId] = useState<string | null>(null);
   const [tournament, setTournament] = useState<(Tournament & { isOpen?: boolean }) | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [trophySort, setTrophySort] = useState<'gold' | 'silver' | 'bronze'>('gold');
   const [trophyEntries, setTrophyEntries] = useState<{ user: { username: string; displayName: string | null }; gold: number; silver: number; bronze: number }[]>([]);
+  const [trophyLeaderboardLoading, setTrophyLeaderboardLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [voting, setVoting] = useState(false);
   const [adminMe, setAdminMe] = useState<{ isSuperAdmin: boolean } | null>(null);
@@ -129,6 +136,9 @@ export default function TournamentsPage() {
   const [deleteTournamentModal2Open, setDeleteTournamentModal2Open] = useState(false);
   const [deleteTournamentConfirmText, setDeleteTournamentConfirmText] = useState('');
   const [deleteTournamentLoading, setDeleteTournamentLoading] = useState(false);
+  const [editTournamentModalOpen, setEditTournamentModalOpen] = useState(false);
+  const [editTournamentConfig, setEditTournamentConfig] = useState<Record<string, unknown>>({});
+  const [editTournamentSaving, setEditTournamentSaving] = useState(false);
   const [learnRulesModalOpen, setLearnRulesModalOpen] = useState(false);
   const [awardingKey, setAwardingKey] = useState<string | null>(null); // `${userId}-${place}` when awarding
   const [games, setGames] = useState<{ id: string; name: string; shortName: string }[]>([]);
@@ -250,20 +260,28 @@ export default function TournamentsPage() {
   }, [tournamentId, tournamentCountdown]);
 
   useEffect(() => {
-    if (!tournamentId) return setLeaderboard([]);
+    if (!tournamentId) {
+      setLeaderboard([]);
+      setLeaderboardLoading(false);
+      return;
+    }
+    setLeaderboardLoading(true);
     const params = new URLSearchParams();
     if (search) params.set('search', search);
     fetch(`/api/tournaments/${tournamentId}/leaderboard?${params}`)
       .then((r) => r.json())
       .then((d) => setLeaderboard(d.entries ?? []))
-      .catch(() => setLeaderboard([]));
+      .catch(() => setLeaderboard([]))
+      .finally(() => setLeaderboardLoading(false));
   }, [tournamentId, search]);
 
   useEffect(() => {
+    setTrophyLeaderboardLoading(true);
     fetch(`/api/tournaments/trophy-leaderboard?sort=${trophySort}`)
       .then((r) => r.json())
       .then((d) => setTrophyEntries(d.entries ?? []))
-      .catch(() => setTrophyEntries([]));
+      .catch(() => setTrophyEntries([]))
+      .finally(() => setTrophyLeaderboardLoading(false));
   }, [trophySort]);
 
   useEffect(() => {
@@ -336,6 +354,47 @@ export default function TournamentsPage() {
 
   const tournamentLocked = tournament && (tournament.status === 'LOCKED' || (tournament.endsAt && new Date(tournament.endsAt) < new Date()));
 
+  const openEditTournamentModal = () => {
+    if (!tournament) return;
+    const cfg = (tournament.config && typeof tournament.config === 'object' ? tournament.config : {}) as Record<string, unknown>;
+    const elixir = cfg.bo4ElixirMode as string | undefined;
+    if (elixir === 'CLASSIC_ONLY') cfg.bo4ElixirMode = 'CLASSIC';
+    else if (elixir === 'ALL_ELIXIRS_TALISMANS') cfg.bo4ElixirMode = 'ALL';
+    setEditTournamentConfig({ ...cfg });
+    setEditTournamentModalOpen(true);
+  };
+
+  const handleSaveEditTournament = async () => {
+    if (!tournamentId || !tournament) return;
+    setEditTournamentSaving(true);
+    try {
+      const cfg = { ...editTournamentConfig };
+      const elixir = cfg.bo4ElixirMode as string | undefined;
+      if (elixir === 'CLASSIC') cfg.bo4ElixirMode = 'CLASSIC_ONLY';
+      else if (elixir === 'ALL') cfg.bo4ElixirMode = 'ALL_ELIXIRS_TALISMANS';
+      const r = await fetch(`/api/tournaments/${tournamentId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ config: cfg }),
+        credentials: 'same-origin',
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error((data as { error?: string }).error || 'Failed');
+      setTournament(data);
+      setEditTournamentModalOpen(false);
+      const params = new URLSearchParams();
+      if (search) params.set('search', search);
+      fetch(`/api/tournaments/${tournamentId}/leaderboard?${params}`)
+        .then((res) => res.json())
+        .then((d) => setLeaderboard(d.entries ?? []))
+        .catch(() => {});
+    } catch (e) {
+      alert((e as Error).message);
+    } finally {
+      setEditTournamentSaving(false);
+    }
+  };
+
   const openPollModal = (editPoll?: Poll | null) => {
     setPollModalEditingPoll(editPoll ?? null);
     if (editPoll) {
@@ -406,7 +465,10 @@ export default function TournamentsPage() {
     const shortName = game?.shortName ?? '';
     const mergedConfig: Record<string, unknown> = {
       playerCount: (config?.playerCount as string) || 'SOLO',
-      ...(shortName === 'BO3' && { bo3GobbleGumMode: (config?.bo3GobbleGumMode as string) || BO3_GOBBLEGUM_DEFAULT }),
+      ...(shortName === 'BO3' && {
+        bo3GobbleGumMode: (config?.bo3GobbleGumMode as string) || BO3_GOBBLEGUM_DEFAULT,
+        bo3AatUsed: config?.bo3AatUsed === true,
+      }),
       ...(shortName === 'BO4' && {
         difficulty: (config?.difficulty as string) || 'NORMAL',
         bo4ElixirMode: (config?.bo4ElixirMode as string) || 'CLASSIC',
@@ -796,10 +858,15 @@ export default function TournamentsPage() {
           </div>
         </Modal>
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left: Poll */}
-          <div className="lg:w-1/2 flex flex-col min-h-0">
-            <Card variant="bordered" className="border-bunker-700 flex flex-col min-h-[320px] lg:min-h-[380px]">
+        {(() => {
+          const activePoll = poll && !pollEnded && poll.status === 'ACTIVE';
+          const userHasVoted = !!poll?.userVoteOptionId;
+          const pollFirst = activePoll && !userHasVoted;
+          return (
+        <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-8 items-stretch">
+          {/* Poll: full width row, first when active+not voted else last. Wide: Leaderboard 60% | Trophy 40% side by side. */}
+          <div className={`flex flex-col min-h-0 lg:col-span-2 ${pollFirst ? 'order-1' : 'order-3'}`}>
+            <Card variant="bordered" className="border-bunker-700 flex flex-col min-h-[320px] lg:min-h-[380px] w-full">
               <CardHeader className="flex flex-row items-center justify-between gap-3 flex-wrap shrink-0">
                 <CardTitle className="text-lg font-zombies text-white flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-blood-500 shrink-0" />
@@ -913,9 +980,9 @@ export default function TournamentsPage() {
             </Card>
           </div>
 
-          {/* Right: Leaderboard */}
-          <div className="lg:w-1/2 flex flex-col min-h-0">
-            <Card variant="bordered" className="border-bunker-700 flex flex-col min-h-[320px] lg:min-h-[380px]">
+          {/* Tournament Leaderboard: left 3/5 on wide screens */}
+          <div className={`flex flex-col min-h-0 h-full ${pollFirst ? 'order-2' : 'order-1'}`}>
+            <Card variant="bordered" className="border-bunker-700 flex flex-col flex-1 min-h-[320px] lg:min-h-[380px] w-full">
               <CardHeader className="flex flex-row items-center justify-between gap-3 flex-wrap shrink-0">
                 <CardTitle className="text-lg font-zombies text-white flex items-center gap-2">
                   <Medal className="w-5 h-5 text-blood-500 shrink-0" />
@@ -942,6 +1009,12 @@ export default function TournamentsPage() {
                       Delete tournament
                     </Button>
                   )}
+                  {adminMe?.isSuperAdmin && tournamentId && tournament && (
+                    <Button variant="secondary" size="sm" onClick={openEditTournamentModal}>
+                      <Pencil className="w-4 h-4 mr-1" />
+                      Edit rules
+                    </Button>
+                  )}
                   {adminMe?.isSuperAdmin && (
                     <Button variant="secondary" size="sm" onClick={() => setCreateLeaderboardOpen(true)}>
                       Create leaderboard
@@ -955,6 +1028,13 @@ export default function TournamentsPage() {
                     <p className="text-bunker-400 text-sm shrink-0">
                       {tournament.game?.shortName} · {tournament.map?.name}
                       {tournament.challenge ? ` · ${tournament.challenge.name}` : tournament.easterEgg ? ` · ${tournament.easterEgg.name}` : ''}
+                      {tournament.game?.shortName === 'BO3' && tournament.config && typeof tournament.config === 'object' && (
+                        <>
+                          {' · '}
+                          {getBo3GobbleGumLabel((tournament.config.bo3GobbleGumMode as string) || BO3_GOBBLEGUM_DEFAULT)}
+                          {(tournament.config.bo3AatUsed as boolean) ? ' · AATs Used' : ' · No AATs'}
+                        </>
+                      )}
                     </p>
                     {tournamentEndsAt && (
                       <div className="flex items-center gap-2 text-blood-400 text-sm shrink-0">
@@ -999,92 +1079,76 @@ export default function TournamentsPage() {
                   </div>
                 </div>
                 <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-                  {(() => {
+                  {leaderboardLoading && tournamentId ? (
+                    <div className="py-12 flex items-center justify-center">
+                      <div className="w-8 h-8 border-2 border-blood-500 border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  ) : (() => {
                     const awardedPlaces = new Set(leaderboard.map((x) => x.trophyPlace).filter((p): p is number => p != null));
                     const goldAwarded = awardedPlaces.has(1);
                     const silverAwarded = awardedPlaces.has(2);
                     const bronzeAwarded = awardedPlaces.has(3);
+                    const mapSlug = tournament?.map?.slug;
                     return (
-                  <ul className="space-y-1 pr-1">
-                    {leaderboard.map((e) => {
+                  <ul className="space-y-2 pr-1">
+                    {leaderboard.map((e, index) => {
                       const userHasTrophy = e.trophyPlace != null;
+                      const awardButtons = adminMe?.isSuperAdmin && tournamentId && tournamentLocked && !userHasTrophy ? (
+                        <div className="flex items-center gap-1 shrink-0" onClick={(ev) => ev.stopPropagation()}>
+                          <button
+                            type="button"
+                            onClick={() => handleAwardTrophy(e.user.id, 1)}
+                            disabled={goldAwarded || awardingKey !== null}
+                            title="Award gold"
+                            className="px-2 py-0.5 rounded text-xs font-medium bg-amber-900/60 text-amber-300 border border-amber-600/50 hover:bg-amber-800/60 disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            {awardingKey === `${e.user.id}-1` ? <Loader2 className="w-3 h-3 animate-spin inline" /> : '🥇'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleAwardTrophy(e.user.id, 2)}
+                            disabled={silverAwarded || awardingKey !== null}
+                            title="Award silver"
+                            className="px-2 py-0.5 rounded text-xs font-medium bg-bunker-700 text-bunker-300 border border-bunker-600 hover:bg-bunker-600 disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            {awardingKey === `${e.user.id}-2` ? <Loader2 className="w-3 h-3 animate-spin inline" /> : '🥈'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleAwardTrophy(e.user.id, 3)}
+                            disabled={bronzeAwarded || awardingKey !== null}
+                            title="Award bronze"
+                            className="px-2 py-0.5 rounded text-xs font-medium bg-amber-950/80 text-amber-600 border border-amber-700/50 hover:bg-amber-900/60 disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            {awardingKey === `${e.user.id}-3` ? <Loader2 className="w-3 h-3 animate-spin inline" /> : '🥉'}
+                          </button>
+                        </div>
+                      ) : undefined;
                       return (
-                        <li key={e.user.id} className="flex items-center gap-2 py-2 text-sm border-b border-bunker-800/50 last:border-0">
-                          {/* Trophy on far left when awarded */}
-                          <span className="w-6 shrink-0 flex items-center justify-center">
-                            {e.trophyPlace === 1 && <span title="Gold"><Medal className="w-4 h-4 text-amber-400" /></span>}
-                            {e.trophyPlace === 2 && <span title="Silver"><Medal className="w-4 h-4 text-bunker-400" /></span>}
-                            {e.trophyPlace === 3 && <span title="Bronze"><Medal className="w-4 h-4 text-amber-700" /></span>}
-                          </span>
-                          <span className="text-bunker-500 w-6 shrink-0 tabular-nums">#{e.rank}</span>
-                          <span className="text-white font-medium min-w-0 truncate">{e.user.displayName || e.user.username}</span>
-                          {e.completionTimeSeconds != null && (
-                            <span className="text-military-400 ml-auto shrink-0 tabular-nums whitespace-nowrap min-w-[5rem] text-right" title="Completion time">
-                              {formatCompletionTime(e.completionTimeSeconds)}
-                            </span>
-                          )}
-                          {e.killsReached != null && e.completionTimeSeconds == null && (
-                            <span className="text-military-400 ml-auto shrink-0">{e.killsReached.toLocaleString()} kills</span>
-                          )}
-                          {e.scoreReached != null && e.completionTimeSeconds == null && e.killsReached == null && (
-                            <span className="text-military-400 ml-auto shrink-0">{e.scoreReached >= 1e9 ? (e.scoreReached / 1e9).toFixed(2) + 'B' : e.scoreReached >= 1e6 ? (e.scoreReached / 1e6).toFixed(2) + 'M' : e.scoreReached.toLocaleString()}</span>
-                          )}
-                          {e.roundReached != null && e.completionTimeSeconds == null && e.killsReached == null && e.scoreReached == null && (
-                            <span className="text-military-400 ml-auto shrink-0">Round {e.roundReached}</span>
-                          )}
-                          {e.isVerified && (
-                            <span className="text-blue-400 text-xs shrink-0" title="Verified">✓</span>
-                          )}
-                          {/* Super admin: Gold / Silver / Bronze buttons per run */}
-                          {adminMe?.isSuperAdmin && tournamentId && tournamentLocked && !userHasTrophy && (
-                            <div className="flex items-center gap-1 shrink-0 ml-1">
-                              <button
-                                type="button"
-                                onClick={() => handleAwardTrophy(e.user.id, 1)}
-                                disabled={goldAwarded || awardingKey !== null}
-                                title="Award gold"
-                                className="px-2 py-0.5 rounded text-xs font-medium bg-amber-900/60 text-amber-300 border border-amber-600/50 hover:bg-amber-800/60 disabled:opacity-40 disabled:cursor-not-allowed"
-                              >
-                                {awardingKey === `${e.user.id}-1` ? <Loader2 className="w-3 h-3 animate-spin inline" /> : '🥇'}
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleAwardTrophy(e.user.id, 2)}
-                                disabled={silverAwarded || awardingKey !== null}
-                                title="Award silver"
-                                className="px-2 py-0.5 rounded text-xs font-medium bg-bunker-700 text-bunker-300 border border-bunker-600 hover:bg-bunker-600 disabled:opacity-40 disabled:cursor-not-allowed"
-                              >
-                                {awardingKey === `${e.user.id}-2` ? <Loader2 className="w-3 h-3 animate-spin inline" /> : '🥈'}
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleAwardTrophy(e.user.id, 3)}
-                                disabled={bronzeAwarded || awardingKey !== null}
-                                title="Award bronze"
-                                className="px-2 py-0.5 rounded text-xs font-medium bg-amber-950/80 text-amber-600 border border-amber-700/50 hover:bg-amber-900/60 disabled:opacity-40 disabled:cursor-not-allowed"
-                              >
-                                {awardingKey === `${e.user.id}-3` ? <Loader2 className="w-3 h-3 animate-spin inline" /> : '🥉'}
-                              </button>
-                            </div>
-                          )}
+                        <li key={e.user.id}>
+                          <TournamentLeaderboardEntry
+                            entry={e}
+                            index={index}
+                            mapSlug={mapSlug}
+                            awardButtons={awardButtons}
+                          />
                         </li>
                       );
                     })}
                   </ul>
                     );
                   })()}
-                  {leaderboard.length === 0 && tournamentId && (
+                  {!leaderboardLoading && leaderboard.length === 0 && tournamentId && (
                     <p className="text-bunker-500 text-sm py-6 text-center">No runs yet.</p>
                   )}
                 </div>
               </CardContent>
             </Card>
           </div>
-        </div>
 
-        {/* Trophy leaderboard */}
-        <section className="mt-10">
-          <Card variant="bordered" className="border-bunker-700 max-w-2xl flex flex-col min-h-[280px]">
+          {/* Trophy leaderboard: right 2/5 on wide screens */}
+          <div className={`flex flex-col min-h-0 h-full ${pollFirst ? 'order-3' : 'order-2'}`}>
+            <Card variant="bordered" className="border-bunker-700 flex flex-col flex-1 min-h-[280px] lg:min-h-[380px] w-full">
             <CardHeader className="flex flex-row items-center justify-between gap-2 shrink-0">
               <CardTitle className="text-base font-zombies text-white flex items-center gap-2">
                 <Award className="w-4 h-4 text-amber-500 shrink-0" />
@@ -1103,21 +1167,32 @@ export default function TournamentsPage() {
             </CardHeader>
             <CardContent className="min-h-0 flex-1 overflow-hidden pt-0">
               <div className="h-[220px] overflow-y-auto overscroll-contain">
+                {trophyLeaderboardLoading ? (
+                  <div className="h-full flex items-center justify-center py-12">
+                    <div className="w-8 h-8 border-2 border-blood-500 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : (
                 <ul className="space-y-1.5 text-sm pr-1">
                   {trophyEntries.slice(0, 15).map((e, i) => (
                     <li key={e.user.username} className="flex items-center gap-2 py-1.5 border-b border-bunker-800/50 last:border-0">
                       <span className="text-bunker-500 w-5 shrink-0 tabular-nums">{i + 1}.</span>
-                      <span className="text-white min-w-0 truncate">{e.user.displayName || e.user.username}</span>
-                      <span className="text-amber-400 shrink-0">{e.gold}🥇</span>
-                      <span className="text-bunker-400 shrink-0">{e.silver}🥈</span>
-                      <span className="text-amber-700 shrink-0">{e.bronze}🥉</span>
+                      <span className="text-white min-w-0 truncate flex-1">{e.user.displayName || e.user.username}</span>
+                      <span className="ml-auto shrink-0 flex items-center gap-2">
+                        <span className="text-amber-400">{e.gold}🥇</span>
+                        <span className="text-bunker-400">{e.silver}🥈</span>
+                        <span className="text-amber-700">{e.bronze}🥉</span>
+                      </span>
                     </li>
                   ))}
                 </ul>
+                )}
               </div>
             </CardContent>
           </Card>
-        </section>
+          </div>
+        </div>
+          );
+        })()}
 
         {/* Vote confirmation modal */}
         <Modal
@@ -1161,6 +1236,255 @@ export default function TournamentsPage() {
             <Button onClick={() => setLearnRulesModalOpen(false)}>Close</Button>
           </div>
         </Modal>
+
+        {/* Edit tournament rules modal (super admin) */}
+        {adminMe?.isSuperAdmin && tournament && (
+          <Modal
+            isOpen={editTournamentModalOpen}
+            onClose={() => !editTournamentSaving && setEditTournamentModalOpen(false)}
+            title="Edit tournament rules"
+            description="Changes apply to all runs already submitted to this tournament."
+            size="sm"
+          >
+            <div className="space-y-3">
+              {tournament.game?.shortName && (() => {
+                const shortName = tournament.game.shortName;
+                const config = (editTournamentConfig || {}) as Record<string, string | boolean>;
+                const setConfig = (key: string, value: string | boolean) => {
+                  setEditTournamentConfig((prev) => ({ ...prev, [key]: value }));
+                };
+                return (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-bunker-300 mb-1">Player count</label>
+                      <Select
+                        value={String(config.playerCount || 'SOLO')}
+                        onChange={(e) => setConfig('playerCount', e.target.value)}
+                        options={[
+                          { value: 'SOLO', label: 'Solo' },
+                          { value: 'DUO', label: 'Duo' },
+                          { value: 'TRIO', label: 'Trio' },
+                          { value: 'SQUAD', label: 'Squad' },
+                        ]}
+                        className="w-full bg-bunker-800 border-bunker-600 text-white"
+                      />
+                    </div>
+                    {shortName === 'BO3' && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-bunker-300 mb-1">GobbleGums</label>
+                          <Select
+                            value={String(config.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT)}
+                            onChange={(e) => setConfig('bo3GobbleGumMode', e.target.value)}
+                            options={BO3_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo3GobbleGumLabel(m) }))}
+                            className="w-full bg-bunker-800 border-bunker-600 text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-bunker-300 mb-1">AATs</label>
+                          <Select
+                            value={config.bo3AatUsed === true ? 'true' : 'false'}
+                            onChange={(e) => setConfig('bo3AatUsed', e.target.value === 'true')}
+                            options={[
+                              { value: 'false', label: 'No AATs' },
+                              { value: 'true', label: 'AATs Used' },
+                            ]}
+                            className="w-full bg-bunker-800 border-bunker-600 text-white"
+                          />
+                        </div>
+                      </>
+                    )}
+                    {shortName === 'BO4' && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-bunker-300 mb-1">Difficulty</label>
+                          <Select
+                            value={String(config.difficulty ?? 'NORMAL')}
+                            onChange={(e) => setConfig('difficulty', e.target.value)}
+                            options={BO4_DIFFICULTIES.map((d) => ({ value: d, label: getBo4DifficultyLabel(d) }))}
+                            className="w-full bg-bunker-800 border-bunker-600 text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-bunker-300 mb-1">Elixirs</label>
+                          <Select
+                            value={String(config.bo4ElixirMode ?? 'CLASSIC')}
+                            onChange={(e) => setConfig('bo4ElixirMode', e.target.value)}
+                            options={[
+                              { value: 'CLASSIC', label: 'Classic only' },
+                              { value: 'ALL', label: 'All elixirs' },
+                            ]}
+                            className="w-full bg-bunker-800 border-bunker-600 text-white"
+                          />
+                        </div>
+                      </>
+                    )}
+                    {shortName === 'BOCW' && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-bunker-300 mb-1">Support</label>
+                          <Select
+                            value={String(config.bocwSupportMode ?? BOCW_SUPPORT_DEFAULT)}
+                            onChange={(e) => setConfig('bocwSupportMode', e.target.value)}
+                            options={BOCW_SUPPORT_MODES.map((m) => ({ value: m, label: getBocwSupportLabel(m) }))}
+                            className="w-full bg-bunker-800 border-bunker-600 text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-bunker-300 mb-1">Rampage Inducer</label>
+                          <Select
+                            value={config.rampageInducerUsed === true ? 'true' : 'false'}
+                            onChange={(e) => setConfig('rampageInducerUsed', e.target.value === 'true')}
+                            options={[
+                              { value: 'false', label: 'No Rampage Inducer' },
+                              { value: 'true', label: 'Rampage Inducer' },
+                            ]}
+                            className="w-full bg-bunker-800 border-bunker-600 text-white"
+                          />
+                        </div>
+                      </>
+                    )}
+                    {shortName === 'BO6' && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-bunker-300 mb-1">GobbleGums</label>
+                          <Select
+                            value={String(config.bo6GobbleGumMode ?? BO6_GOBBLEGUM_DEFAULT)}
+                            onChange={(e) => setConfig('bo6GobbleGumMode', e.target.value)}
+                            options={BO6_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo6GobbleGumLabel(m) }))}
+                            className="w-full bg-bunker-800 border-bunker-600 text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-bunker-300 mb-1">Support</label>
+                          <Select
+                            value={String(config.bo6SupportMode ?? BO6_SUPPORT_DEFAULT)}
+                            onChange={(e) => setConfig('bo6SupportMode', e.target.value)}
+                            options={BO6_SUPPORT_MODES.map((m) => ({ value: m, label: getBo6SupportLabel(m) }))}
+                            className="w-full bg-bunker-800 border-bunker-600 text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-bunker-300 mb-1">Rampage Inducer</label>
+                          <Select
+                            value={config.rampageInducerUsed === true ? 'true' : 'false'}
+                            onChange={(e) => setConfig('rampageInducerUsed', e.target.value === 'true')}
+                            options={[
+                              { value: 'false', label: 'No Rampage Inducer' },
+                              { value: 'true', label: 'Rampage Inducer' },
+                            ]}
+                            className="w-full bg-bunker-800 border-bunker-600 text-white"
+                          />
+                        </div>
+                      </>
+                    )}
+                    {shortName === 'BO7' && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-bunker-300 mb-1">Support</label>
+                          <Select
+                            value={String(config.bo7SupportMode ?? BO7_SUPPORT_DEFAULT)}
+                            onChange={(e) => setConfig('bo7SupportMode', e.target.value)}
+                            options={BO7_SUPPORT_MODES.map((m) => ({ value: m, label: getBo7SupportLabel(m) }))}
+                            className="w-full bg-bunker-800 border-bunker-600 text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-bunker-300 mb-1">Rampage Inducer</label>
+                          <Select
+                            value={config.rampageInducerUsed === true ? 'true' : 'false'}
+                            onChange={(e) => setConfig('rampageInducerUsed', e.target.value === 'true')}
+                            options={[
+                              { value: 'false', label: 'No Rampage Inducer' },
+                              { value: 'true', label: 'Rampage Inducer' },
+                            ]}
+                            className="w-full bg-bunker-800 border-bunker-600 text-white"
+                          />
+                        </div>
+                      </>
+                    )}
+                    {shortName === 'IW' && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-bunker-300 mb-1">Fortune Cards</label>
+                          <Select
+                            value={config.useFortuneCards === true ? 'true' : 'false'}
+                            onChange={(e) => setConfig('useFortuneCards', e.target.value === 'true')}
+                            options={[
+                              { value: 'false', label: 'Fate cards only' },
+                              { value: 'true', label: 'Fate & Fortune cards' },
+                            ]}
+                            className="w-full bg-bunker-800 border-bunker-600 text-white"
+                          />
+                        </div>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={config.useDirectorsCut === true}
+                            onChange={(e) => setConfig('useDirectorsCut', e.target.checked)}
+                            className="w-4 h-4 rounded border-bunker-600 bg-bunker-800 text-blood-500"
+                          />
+                          <span className="text-sm text-bunker-300">Directors Cut</span>
+                        </label>
+                      </>
+                    )}
+                    {(shortName === 'WW2' || shortName === 'WWII') && (
+                      <div>
+                        <label className="block text-sm font-medium text-bunker-300 mb-1">Consumables</label>
+                        <Select
+                          value={config.ww2ConsumablesUsed !== false ? 'true' : 'false'}
+                          onChange={(e) => setConfig('ww2ConsumablesUsed', e.target.value === 'true')}
+                          options={[
+                            { value: 'true', label: 'With Consumables' },
+                            { value: 'false', label: 'No Consumables' },
+                          ]}
+                          className="w-full bg-bunker-800 border-bunker-600 text-white"
+                        />
+                      </div>
+                    )}
+                    {shortName === 'VANGUARD' && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-bunker-300 mb-1">Void</label>
+                          <Select
+                            value={config.vanguardVoidUsed !== false ? 'true' : 'false'}
+                            onChange={(e) => setConfig('vanguardVoidUsed', e.target.value === 'true')}
+                            options={[
+                              { value: 'true', label: 'With Void' },
+                              { value: 'false', label: 'Without Void' },
+                            ]}
+                            className="w-full bg-bunker-800 border-bunker-600 text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-bunker-300 mb-1">Rampage Inducer</label>
+                          <Select
+                            value={config.rampageInducerUsed === true ? 'true' : 'false'}
+                            onChange={(e) => setConfig('rampageInducerUsed', e.target.value === 'true')}
+                            options={[
+                              { value: 'false', label: 'No Rampage Inducer' },
+                              { value: 'true', label: 'Rampage Inducer' },
+                            ]}
+                            className="w-full bg-bunker-800 border-bunker-600 text-white"
+                          />
+                        </div>
+                      </>
+                    )}
+                  </>
+                );
+              })()}
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="secondary" onClick={() => setEditTournamentModalOpen(false)} disabled={editTournamentSaving}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveEditTournament} disabled={editTournamentSaving}>
+                  {editTournamentSaving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
+                  Save
+                </Button>
+              </div>
+            </div>
+          </Modal>
+        )}
 
         {/* Create leaderboard modal (super admin) */}
         <Modal
@@ -1244,15 +1568,29 @@ export default function TournamentsPage() {
                     />
                   </div>
                   {shortName === 'BO3' && (
-                    <div>
-                      <label className="block text-sm font-medium text-bunker-300 mb-1">GobbleGums</label>
-                      <Select
-                        value={String(config.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT)}
-                        onChange={(e) => setConfig('bo3GobbleGumMode', e.target.value)}
-                        options={BO3_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo3GobbleGumLabel(m) }))}
-                        className="w-full bg-bunker-800 border-bunker-600 text-white"
-                      />
-                    </div>
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-bunker-300 mb-1">GobbleGums</label>
+                        <Select
+                          value={String(config.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT)}
+                          onChange={(e) => setConfig('bo3GobbleGumMode', e.target.value)}
+                          options={BO3_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo3GobbleGumLabel(m) }))}
+                          className="w-full bg-bunker-800 border-bunker-600 text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-bunker-300 mb-1">AATs</label>
+                        <Select
+                          value={config.bo3AatUsed === true ? 'true' : 'false'}
+                          onChange={(e) => setConfig('bo3AatUsed', e.target.value === 'true')}
+                          options={[
+                            { value: 'false', label: 'No AATs' },
+                            { value: 'true', label: 'AATs Used' },
+                          ]}
+                          className="w-full bg-bunker-800 border-bunker-600 text-white"
+                        />
+                      </div>
+                    </>
                   )}
                   {shortName === 'BO4' && (
                     <>

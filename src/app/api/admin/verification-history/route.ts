@@ -12,6 +12,7 @@ type VerifiedEntry = {
   runLabel: string;
   verifiedAt: string;
   verifiedBy: { id: string; username: string; displayName: string | null };
+  isTournamentRun?: boolean;
 };
 
 export async function GET() {
@@ -84,6 +85,27 @@ export async function GET() {
     }
 
     entries.sort((a, b) => new Date(b.verifiedAt).getTime() - new Date(a.verifiedAt).getTime());
+
+    const challengeLogIds = challengeLogs.map((l) => l.id);
+    const eeLogIds = eeLogs.map((l) => l.id);
+    const [tournamentChallengeLogIds, tournamentEeLogIds] = await Promise.all([
+      challengeLogIds.length > 0
+        ? prisma.tournamentLog.findMany({ where: { challengeLogId: { in: challengeLogIds } }, select: { challengeLogId: true } })
+        : Promise.resolve([]),
+      eeLogIds.length > 0
+        ? prisma.tournamentLog.findMany({ where: { easterEggLogId: { in: eeLogIds } }, select: { easterEggLogId: true } })
+        : Promise.resolve([]),
+    ]);
+    const tournamentChallengeSet = new Set(tournamentChallengeLogIds.map((t) => t.challengeLogId).filter(Boolean));
+    const tournamentEeSet = new Set(tournamentEeLogIds.map((t) => t.easterEggLogId).filter(Boolean));
+
+    for (const e of entries) {
+      if (e.logType === 'challenge') {
+        (e as { isTournamentRun?: boolean }).isTournamentRun = tournamentChallengeSet.has(e.logId);
+      } else {
+        (e as { isTournamentRun?: boolean }).isTournamentRun = tournamentEeSet.has(e.logId);
+      }
+    }
 
     return NextResponse.json({ entries: entries.slice(0, 300) });
   } catch (error) {
