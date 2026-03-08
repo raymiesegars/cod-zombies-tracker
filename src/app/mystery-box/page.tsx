@@ -7,7 +7,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Avatar, Button, Logo, Modal, PageLoader } from '@/components/ui';
 import { motion } from 'framer-motion';
-import { Box, Settings, HelpCircle, UserPlus, LogOut, Shield, Trash2, Check, CheckCircle, Clock, Loader2, RefreshCw, XCircle } from 'lucide-react';
+import { Box, Settings, HelpCircle, UserPlus, LogOut, Shield, Trash2, Check, CheckCircle, Clock, Loader2, RefreshCw, XCircle, Trophy } from 'lucide-react';
 import { getMysteryBoxXpRange, getChallengeRangeDisplay, getBaseXpFromFilters, getMysteryBoxXpMultiplierPercent } from '@/lib/mystery-box';
 import { getBo3GobbleGumLabel } from '@/lib/bo3';
 import { getBocwSupportLabel } from '@/lib/bocw';
@@ -16,6 +16,8 @@ import { getBo7SupportLabel } from '@/lib/bo7';
 import { getFirstRoomVariantLabel } from '@/lib/first-room-variants';
 import { getVanguardVoidLabel } from '@/lib/vanguard';
 import { getLevelFromXp, getRankForLevel, getRankIconPath } from '@/lib/ranks';
+import { cn } from '@/lib/utils';
+import { getDisplayAvatarUrl } from '@/lib/avatar';
 
 type LobbyMember = {
   id: string;
@@ -101,6 +103,11 @@ export default function MysteryBoxPage() {
     maxRound: null,
   });
   const [adminMe, setAdminMe] = useState<{ isSuperAdmin: boolean } | null>(null);
+  const [completionsLeaderboard, setCompletionsLeaderboard] = useState<{
+    rank: number;
+    user: { id: string; username: string; displayName: string | null; avatarUrl: string | null; avatarPreset?: string | null; level: number };
+    completions: number;
+  }[]>([]);
   const [spinWarningOpen, setSpinWarningOpen] = useState(false);
   const [spinInsufficientModal, setSpinInsufficientModal] = useState<{
     users: { userId: string; displayName: string }[];
@@ -324,9 +331,16 @@ export default function MysteryBoxPage() {
 
   useEffect(() => {
     fetch('/api/admin/me', { credentials: 'same-origin', cache: 'no-store' })
-      .then((res) => (res.ok ? res.json() : { isSuperAdmin: false }))
-      .then((d) => setAdminMe({ isSuperAdmin: d.isSuperAdmin ?? false }))
+      .then((res) => (res.ok ? res.json() : { admin: null }))
+      .then((d) => setAdminMe(d?.admin ? { isSuperAdmin: d.admin.isSuperAdmin === true } : null))
       .catch(() => setAdminMe(null));
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/mystery-box/leaderboard', { credentials: 'same-origin', cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : { entries: [] }))
+      .then((d) => setCompletionsLeaderboard(d.entries ?? []))
+      .catch(() => setCompletionsLeaderboard([]));
   }, []);
 
   useEffect(() => {
@@ -369,6 +383,8 @@ export default function MysteryBoxPage() {
   return (
     <div className="min-h-screen bg-bunker-950">
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-stretch gap-6">
+          <div className="flex-1 min-w-0 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-zombies text-white tracking-wide flex items-center gap-2">
@@ -505,6 +521,10 @@ export default function MysteryBoxPage() {
           </div>
         )}
 
+          </div>
+          <MysteryBoxCompletionsLeaderboard entries={completionsLeaderboard} currentUserId={profile?.id} />
+        </div>
+
         {aboutModalOpen && (
           <AboutModal onClose={() => setAboutModalOpen(false)} />
         )}
@@ -558,6 +578,60 @@ export default function MysteryBoxPage() {
             loading={discardVoteSubmitting}
           />
         )}
+      </div>
+    </div>
+  );
+}
+
+function MysteryBoxCompletionsLeaderboard({
+  entries,
+  currentUserId,
+}: {
+  entries: { rank: number; user: { id: string; username: string; displayName: string | null; avatarUrl: string | null; avatarPreset?: string | null; level: number }; completions: number }[];
+  currentUserId?: string;
+}) {
+  if (entries.length === 0) return null;
+  return (
+    <div className="lg:w-72 shrink-0">
+      <div className="rounded-xl border border-bunker-700 bg-bunker-900/80 p-4 sticky top-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Trophy className="w-4 h-4 text-amber-500" strokeWidth={1.5} />
+          <h3 className="text-sm font-semibold text-amber-400 uppercase tracking-wider">Top completions</h3>
+        </div>
+        <div className="space-y-1.5">
+          {entries.map((e) => {
+            const isCurrentUser = e.user.id === currentUserId;
+            const displayName = e.user.displayName ?? e.user.username;
+            const rankBg = e.rank === 1 ? 'bg-yellow-500/30 border-yellow-500/50' : e.rank === 2 ? 'bg-bunker-500/20 border-bunker-400/50' : e.rank === 3 ? 'bg-amber-900/30 border-amber-700/50' : null;
+            return (
+              <Link
+                key={e.user.id}
+                href={`/users/${e.user.username}`}
+                className={cn(
+                  'flex items-center gap-2.5 p-2 rounded-lg border transition-colors min-w-0',
+                  isCurrentUser ? 'bg-blood-950/30 border-blood-700/50' : rankBg ?? 'bg-bunker-800/50 border-bunker-700/50 hover:bg-bunker-800'
+                )}
+              >
+                <span className={cn(
+                  'flex-shrink-0 w-6 h-6 flex items-center justify-center text-xs font-zombies',
+                  e.rank <= 3 ? 'text-amber-400' : 'text-blood-500'
+                )}>
+                  #{e.rank}
+                </span>
+                <Avatar
+                  src={getDisplayAvatarUrl(e.user)}
+                  fallback={displayName}
+                  size="sm"
+                  className="w-6 h-6 shrink-0"
+                />
+                <span className="min-w-0 truncate text-sm font-medium text-white">{displayName}</span>
+                <span className="flex-shrink-0 text-xs font-semibold text-amber-400 tabular-nums">
+                  {e.completions}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
