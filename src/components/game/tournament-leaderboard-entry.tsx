@@ -25,9 +25,9 @@ export type TournamentLeaderboardEntryData = {
 };
 
 const rowHighlight = {
-  1: 'bg-amber-950/50 border-amber-500/70',
+  1: 'bg-yellow-500/30 border-yellow-400',
   2: 'bg-bunker-800/80 border-bunker-400/60',
-  3: 'bg-amber-950/40 border-amber-700/60',
+  3: 'bg-amber-950/80 border-amber-800',
 };
 
 export function TournamentLeaderboardEntry({
@@ -75,9 +75,9 @@ export function TournamentLeaderboardEntry({
       <div className="flex items-center justify-center w-8 h-8 shrink-0">
         {isTopThree ? (
           <span title={entry.rank === 1 ? 'Gold' : entry.rank === 2 ? 'Silver' : 'Bronze'}>
-            {entry.rank === 1 && <Medal className="w-5 h-5 text-amber-400" />}
+            {entry.rank === 1 && <Medal className="w-5 h-5 text-yellow-300" />}
             {entry.rank === 2 && <Medal className="w-5 h-5 text-bunker-400" />}
-            {entry.rank === 3 && <Medal className="w-5 h-5 text-amber-700" />}
+            {entry.rank === 3 && <Medal className="w-5 h-5 text-amber-800" />}
           </span>
         ) : (
           <span className="text-base font-zombies text-blood-500">#{entry.rank}</span>
@@ -107,19 +107,19 @@ export function TournamentLeaderboardEntry({
         >
           {displayName}
         </Link>
-      </div>
-      <div className="flex items-center justify-end shrink-0 gap-2">
-        {valueEl}
         {entry.isVerified && (
           <span className="shrink-0" title="Verified">
             <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
           </span>
         )}
+      </div>
+      <div className="flex items-center justify-end shrink-0 gap-2">
+        {valueEl}
         {entry.trophyPlace != null && (
           <span className="shrink-0 flex items-center justify-center w-6" title={entry.trophyPlace === 1 ? 'Gold' : entry.trophyPlace === 2 ? 'Silver' : 'Bronze'}>
-            {entry.trophyPlace === 1 && <Medal className="w-4 h-4 text-amber-400" />}
+            {entry.trophyPlace === 1 && <Medal className="w-4 h-4 text-yellow-300" />}
             {entry.trophyPlace === 2 && <Medal className="w-4 h-4 text-bunker-400" />}
-            {entry.trophyPlace === 3 && <Medal className="w-4 h-4 text-amber-700" />}
+            {entry.trophyPlace === 3 && <Medal className="w-4 h-4 text-amber-800" />}
           </span>
         )}
         {awardButtons && (
