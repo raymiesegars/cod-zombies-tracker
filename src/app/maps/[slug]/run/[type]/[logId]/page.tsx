@@ -28,7 +28,7 @@ import { getBo7SupportLabel } from '@/lib/bo7';
 import { getWw2ConsumablesLabel } from '@/lib/ww2';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter, getVanguardVoidLabel } from '@/lib/vanguard';
 import { hasNoJugSupport } from '@/lib/no-jug-support';
-import { ChevronLeft, FileText, ExternalLink, Clock, Pencil, Trash2, Users, ShieldCheck, ShieldOff, Loader2, Check, Lock } from 'lucide-react';
+import { ChevronLeft, FileText, ExternalLink, Clock, Pencil, Trash2, Users, ShieldCheck, ShieldOff, Loader2, Check, Lock, Trophy } from 'lucide-react';
 
 function DeleteRunButton({
   logId,
@@ -476,6 +476,12 @@ export default function RunDetailPage() {
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-600/90 text-white text-xs font-medium border border-blue-500/50">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   Verified run
+                </span>
+              )}
+              {(log as { isTournamentRun?: boolean })?.isTournamentRun && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-amber-600/60 bg-amber-950/95 text-amber-300 text-xs font-medium" title={(log as { tournamentTitle?: string })?.tournamentTitle ?? 'Tournament submission'}>
+                  <Trophy className="w-3.5 h-3.5" />
+                  Tourney
                 </span>
               )}
             </p>

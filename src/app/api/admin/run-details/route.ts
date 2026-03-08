@@ -103,6 +103,10 @@ export async function GET(request: NextRequest) {
         },
       });
       if (!log) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+      const tournamentLog = await prisma.tournamentLog.findFirst({
+        where: { challengeLogId: log.id },
+        include: { tournament: { select: { title: true } } },
+      });
       const proofUrls = [...(log.proofUrls || []), ...(log.screenshotUrl ? [log.screenshotUrl] : [])].filter(Boolean);
       return NextResponse.json({
         run: {
@@ -125,6 +129,8 @@ export async function GET(request: NextRequest) {
           teammateUserIds: log.teammateUserIds ?? [],
           teammateNonUserNames: log.teammateNonUserNames ?? [],
           extra: pickExtraChallenge(log),
+          isTournamentRun: !!tournamentLog,
+          tournamentTitle: tournamentLog?.tournament?.title ?? undefined,
         },
       });
     }
@@ -138,6 +144,10 @@ export async function GET(request: NextRequest) {
       },
     });
     if (!log) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    const tournamentLog = await prisma.tournamentLog.findFirst({
+      where: { easterEggLogId: log.id },
+      include: { tournament: { select: { title: true } } },
+    });
     const proofUrls = [...(log.proofUrls || []), ...(log.screenshotUrl ? [log.screenshotUrl] : [])].filter(Boolean);
     return NextResponse.json({
       run: {
@@ -160,6 +170,8 @@ export async function GET(request: NextRequest) {
         teammateUserIds: log.teammateUserIds ?? [],
         teammateNonUserNames: log.teammateNonUserNames ?? [],
         extra: pickExtraEe(log),
+        isTournamentRun: !!tournamentLog,
+        tournamentTitle: tournamentLog?.tournament?.title ?? undefined,
       },
     });
   } catch (error) {

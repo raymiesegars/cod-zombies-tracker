@@ -8,7 +8,7 @@ import { RoundCounter } from '@/components/game';
 import { getAssetUrl } from '@/lib/assets';
 import { useXpToast } from '@/context/xp-toast-context';
 import { formatCompletionTime } from '@/components/ui/time-input';
-import { ShieldCheck, CheckSquare, Square, Loader2, CheckCircle2, FileText, ExternalLink } from 'lucide-react';
+import { ShieldCheck, CheckSquare, Square, Loader2, CheckCircle2, FileText, ExternalLink, Trophy } from 'lucide-react';
 import type { PendingVerificationRun } from '@/components/game/pending-verification-section';
 
 type RunDetails = {
@@ -310,6 +310,12 @@ export default function AdminVerificationPage() {
                           <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full border border-bunker-500/60 bg-bunker-900/95 text-bunker-200">
                             {playerLabel}
                           </span>
+                          {item.isTournamentRun && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded-full border border-amber-600/60 bg-amber-950/95 text-amber-300" title="Tournament submission">
+                              <Trophy className="w-3 h-3" />
+                              Tourney
+                            </span>
+                          )}
                         </div>
                         <div className="absolute bottom-2 left-2 right-2 flex flex-col gap-1.5">
                           <p className="text-sm font-medium text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]">
@@ -370,6 +376,15 @@ export default function AdminVerificationPage() {
           ) : runDetails ? (
             <div className="space-y-4 text-sm">
               <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+                {quickReviewRun?.isTournamentRun && (
+                  <>
+                    <dt className="text-bunker-500">Tournament</dt>
+                    <dd className="text-amber-300 font-medium flex items-center gap-1">
+                      <Trophy className="w-4 h-4 shrink-0" />
+                      Yes
+                    </dd>
+                  </>
+                )}
                 <dt className="text-bunker-500">Game</dt>
                 <dd className="text-white">{runDetails.gameShortName}</dd>
                 <dt className="text-bunker-500">Map</dt>

@@ -25,3 +25,4 @@ export * from './achievements-modal';
 export * from './world-records-modal';
 export * from './maps-section';
 export * from './run-card';
+export * from './tournament-leaderboard-entry';
