@@ -27,7 +27,6 @@ import { getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
 import { getBo7SupportLabel } from '@/lib/bo7';
 import { getWw2ConsumablesLabel } from '@/lib/ww2';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter, getVanguardVoidLabel } from '@/lib/vanguard';
-import { isSpeedrunChallengeType } from '@/lib/iw';
 import { hasNoJugSupport } from '@/lib/no-jug-support';
 import { ChevronLeft, FileText, ExternalLink, Clock, Pencil, Trash2, Users, ShieldCheck, ShieldOff, Loader2, Check, Lock, Trophy } from 'lucide-react';
 
@@ -679,9 +678,7 @@ export default function RunDetailPage() {
                   )}
                   {(() => {
                     const sec = (log as ChallengeLogDetail).completionTimeSeconds;
-                    const chalType = (log as ChallengeLogDetail).challenge?.type;
-                    const showTime = chalType && isSpeedrunChallengeType(chalType) && sec != null && sec > 0;
-                    return showTime ? (
+                    return (sec != null && sec > 0) ? (
                       <div className="flex items-center justify-between">
                         <span className="text-bunker-400 text-sm flex items-center gap-1.5">
                           <Clock className="w-3.5 h-3.5" />
