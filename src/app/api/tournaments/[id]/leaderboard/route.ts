@@ -184,7 +184,7 @@ export async function GET(
       rank: e.rank,
       user: e.user,
       roundReached: e.roundReached,
-      completionTimeSeconds: e.completionTimeSeconds,
+      completionTimeSeconds: isSpeedrun ? e.completionTimeSeconds : undefined,
       killsReached: e.killsReached,
       scoreReached: e.scoreReached,
       logId: e.logId,

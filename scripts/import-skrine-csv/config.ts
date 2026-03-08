@@ -140,39 +140,49 @@ export function getRecordMapping(record: string, subRecord: string): RecordMappi
 function applySubRecordModifiers(record: string, subRecord: string, mods: Record<string, unknown>): void {
   if (!subRecord) return;
 
-  // BO3
-  if (subRecord === 'classic-gobblegum') mods.bo3GobbleGumMode = 'CLASSIC_ONLY';
+  // BO3 (ZWR uses mega-gobblegum, classic-gobblegum-only, no-gobblegum; legacy used all-gobblegum, classic-gobblegum)
+  if (subRecord === 'classic-gobblegum' || subRecord === 'classic-gobblegum-only') mods.bo3GobbleGumMode = 'CLASSIC_ONLY';
   else if (subRecord === 'no-gobblegum') mods.bo3GobbleGumMode = 'NONE';
-  else if (subRecord === 'all-gobblegum') mods.bo3GobbleGumMode = 'MEGA';
+  else if (subRecord === 'all-gobblegum' || subRecord === 'mega-gobblegum' || subRecord === 'mega-gobblegums') mods.bo3GobbleGumMode = 'MEGA';
   else if (subRecord === 'no-aat') mods.bo3AatUsed = false;
 
-  // BO4
-  if (subRecord === 'all-elixirs' || subRecord.startsWith('all-elixirs-talismans')) mods.bo4ElixirMode = 'ALL_ELIXIRS_TALISMANS';
-  else if (subRecord === 'classic-elixirs-only') mods.bo4ElixirMode = 'CLASSIC_ONLY';
-  else if (subRecord === 'hc-all-elixirs' || subRecord === 'hc-classic-elixirs-only') mods.bo4ElixirMode = 'CLASSIC_ONLY'; // HC = hardcore, use classic
+  // BO4 (ZWR uses all-elixirs-and-talismans, all-elixirs-talismans, classic-elixirs, classic-elixirs-only)
+  if (subRecord === 'all-elixirs' || subRecord.startsWith('all-elixirs-talismans') || subRecord === 'all-elixirs-and-talismans') mods.bo4ElixirMode = 'ALL_ELIXIRS_TALISMANS';
+  else if (subRecord === 'classic-elixirs-only' || subRecord === 'classic-elixirs') mods.bo4ElixirMode = 'CLASSIC_ONLY';
+  else if (subRecord === 'hc-all-elixirs' || subRecord === 'hc-classic-elixirs-only') mods.bo4ElixirMode = 'CLASSIC_ONLY';
   else if (subRecord === 'no-elixirs') mods.bo4ElixirMode = 'CLASSIC_ONLY';
   if (subRecord === 'realistic' || subRecord.includes('realistic')) mods.difficulty = 'REALISTIC';
   else if (subRecord === 'hardcore' || subRecord.includes('hardcore')) mods.difficulty = 'HARDCORE';
   else if (subRecord === 'casual' || subRecord.includes('casual')) mods.difficulty = 'CASUAL';
 
-  // BOCW
+  // BOCW / BO7 (ZWR uses no-support, without-support, with-support)
   if (subRecord === 'inducer') mods.rampageInducerUsed = true;
   else if (subRecord === 'non-inducer') mods.rampageInducerUsed = false;
-  else if (subRecord === 'without-support') mods.bocwSupportMode = 'WITHOUT_SUPPORT';
-  else if (subRecord === 'with-support') {
+  else if (subRecord === 'without-support' || subRecord === 'no-support') {
+    mods.bocwSupportMode = 'WITHOUT_SUPPORT';
+    mods.bo7SupportMode = 'NO_SUPPORT';
+  } else if (subRecord === 'with-support') {
     mods.bocwSupportMode = 'WITH_SUPPORT';
     mods.bo7SupportMode = 'WITH_SUPPORT';
   }
-  if (subRecord === 'no-support') mods.bo7SupportMode = 'NO_SUPPORT';
-  // BO7 / BO6 ZWR: rampage in sub_record (e.g. with-gobblegums-rampage-allowed, no-gobblegums-with-rampage, no-gobblegums-no-rampage)
-  if (subRecord.includes('rampage-allowed') || subRecord.includes('with-rampage')) mods.rampageInducerUsed = true;
-  else if (subRecord.includes('no-rampage')) mods.rampageInducerUsed = false;
+  // BO7 / BO6 ZWR: rampage in sub_record
+  if (subRecord.includes('rampage-allowed') || subRecord.includes('with-rampage') || subRecord.includes('rampage-inducer')) mods.rampageInducerUsed = true;
+  else if (subRecord.includes('no-rampage') || subRecord.includes('no-rage-inducer')) mods.rampageInducerUsed = false;
 
-  // IW
-  if (subRecord === 'fate-cards') mods.useFortuneCards = false;
-  else if (subRecord === 'all-cards') mods.useFortuneCards = true;
-  else if (subRecord === 'dc-all-cards') {
+  // BO6 (ZWR: with-gobblegums-with-support, no-gobblegums-no-support, with-gobblegums-no-support, no-gobblegums-with-support, rampage-inducer-no-gobblegums)
+  if (subRecord.includes('with-gobblegums')) mods.bo6GobbleGumMode = 'WITH_GOBBLEGUMS';
+  else if (subRecord.includes('no-gobblegums')) mods.bo6GobbleGumMode = 'NO_GOBBLEGUMS';
+  if (subRecord.includes('with-support')) mods.bo6SupportMode = 'WITH_SUPPORT';
+  else if (subRecord.includes('no-support')) mods.bo6SupportMode = 'NO_SUPPORT';
+
+  // IW (ZWR uses fate-cards-only, fate-fortune-cards, directors-cut-fate-cards-only, directors-cut-fate-fortune-cards)
+  if (subRecord === 'fate-cards' || subRecord === 'fate-cards-only') mods.useFortuneCards = false;
+  else if (subRecord === 'all-cards' || subRecord === 'fate-fortune-cards') mods.useFortuneCards = true;
+  else if (subRecord === 'dc-all-cards' || subRecord === 'directors-cut-fate-fortune-cards') {
     mods.useFortuneCards = true;
+    mods.useDirectorsCut = true;
+  } else if (subRecord === 'directors-cut-fate-cards-only') {
+    mods.useFortuneCards = false;
     mods.useDirectorsCut = true;
   }
 
