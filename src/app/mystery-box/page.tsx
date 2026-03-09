@@ -382,9 +382,9 @@ export default function MysteryBoxPage() {
 
   return (
     <div className="min-h-screen bg-bunker-950">
-      <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-        <div className="flex flex-col lg:flex-row lg:items-stretch gap-6">
-          <div className="flex-1 min-w-0 space-y-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-5 py-6 sm:py-8 space-y-6 min-w-0">
+        <div className="flex flex-col lg:flex-row lg:items-start gap-6 min-w-0">
+          <div className="flex-1 min-w-0 space-y-6 w-full">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-zombies text-white tracking-wide flex items-center gap-2">
@@ -592,24 +592,27 @@ function MysteryBoxCompletionsLeaderboard({
 }) {
   if (entries.length === 0) return null;
   return (
-    <div className="lg:w-72 shrink-0">
-      <div className="rounded-xl border border-bunker-700 bg-bunker-900/80 p-4 sticky top-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Trophy className="w-4 h-4 text-amber-500" strokeWidth={1.5} />
-          <h3 className="text-sm font-semibold text-amber-400 uppercase tracking-wider">Top completions</h3>
+    <div className="w-full lg:w-80 xl:w-72 shrink-0 min-w-0">
+      <div className="rounded-xl border border-bunker-700 bg-bunker-900/80 overflow-hidden sticky top-4">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-bunker-700/60 bg-bunker-900/60">
+          <div className="flex items-center gap-2">
+            <Trophy className="w-4 h-4 text-amber-500" strokeWidth={1.5} />
+            <h3 className="text-sm font-semibold text-amber-400 uppercase tracking-wider">Top completions</h3>
+          </div>
+          <span className="text-xs font-medium text-bunker-500 uppercase tracking-wider">Boxes</span>
         </div>
-        <div className="space-y-1.5">
+        <div className="divide-y divide-bunker-800/60">
           {entries.map((e) => {
             const isCurrentUser = e.user.id === currentUserId;
             const displayName = e.user.displayName ?? e.user.username;
-            const rankBg = e.rank === 1 ? 'bg-yellow-500/30 border-yellow-500/50' : e.rank === 2 ? 'bg-bunker-500/20 border-bunker-400/50' : e.rank === 3 ? 'bg-amber-900/30 border-amber-700/50' : null;
+            const rankBg = e.rank === 1 ? 'bg-yellow-500/20 border-yellow-500/40' : e.rank === 2 ? 'bg-bunker-500/15 border-bunker-400/40' : e.rank === 3 ? 'bg-amber-900/25 border-amber-700/40' : null;
             return (
               <Link
                 key={e.user.id}
                 href={`/users/${e.user.username}`}
                 className={cn(
-                  'flex items-center gap-2.5 p-2 rounded-lg border transition-colors min-w-0',
-                  isCurrentUser ? 'bg-blood-950/30 border-blood-700/50' : rankBg ?? 'bg-bunker-800/50 border-bunker-700/50 hover:bg-bunker-800'
+                  'grid grid-cols-[2rem_2rem_minmax(0,1fr)_3.5rem] sm:grid-cols-[2.25rem_2.25rem_minmax(0,1fr)_4rem] items-center gap-2 px-3 py-2.5 sm:px-4 sm:py-2.5 transition-colors min-w-0',
+                  isCurrentUser ? 'bg-blood-950/30' : rankBg ?? 'hover:bg-bunker-800/50'
                 )}
               >
                 <span className={cn(
@@ -622,10 +625,10 @@ function MysteryBoxCompletionsLeaderboard({
                   src={getDisplayAvatarUrl(e.user)}
                   fallback={displayName}
                   size="sm"
-                  className="w-6 h-6 shrink-0"
+                  className="w-6 h-6 sm:w-7 sm:h-7 shrink-0"
                 />
                 <span className="min-w-0 truncate text-sm font-medium text-white">{displayName}</span>
-                <span className="flex-shrink-0 text-xs font-semibold text-amber-400 tabular-nums">
+                <span className="flex-shrink-0 text-right text-sm font-semibold text-amber-400 tabular-nums">
                   {e.completions}
                 </span>
               </Link>

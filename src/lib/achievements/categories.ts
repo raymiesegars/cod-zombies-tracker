@@ -153,7 +153,7 @@ const CATEGORY_ORDER = [
   'OTHER',
 ];
 
-/** Modifier keys in achievement criteria that indicate "restricted" band (Classic/No support/Fate only/No rampage). */
+/** Modifier keys in achievement criteria that indicate "restricted" band (Classic/No support/Fate only/No rampage/Without void). */
 const RESTRICTION_CRITERIA_KEYS = [
   'bo3GobbleGumMode',
   'bo4ElixirMode',
@@ -164,6 +164,7 @@ const RESTRICTION_CRITERIA_KEYS = [
   'useFortuneCards',
   'useDirectorsCut',
   'rampageInducerUsed',
+  'vanguardVoidUsed',
 ] as const;
 
 /** True if this achievement is in a restricted band (classic gums, no support, fate only, no rampage, etc.). */

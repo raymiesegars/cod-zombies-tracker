@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Bot, ShieldCheck, MessageSquare, History, Trophy, Award } from 'lucide-react';
+import { Bot, ShieldCheck, MessageSquare, History, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const tabs = [
@@ -12,7 +12,6 @@ const tabs = [
   { href: '/admin/feedback', label: 'Feedback', icon: MessageSquare, badgeKey: 'feedbackUnread' as const },
   { href: '/admin/verified-history', label: 'Verified history', icon: History, badgeKey: 'verifiedHistoryUnread' as const },
   { href: '/admin/leaderboard', label: 'Leaderboard', icon: Trophy, badgeKey: null },
-  { href: '/tournaments', label: 'Tournament', icon: Award, badgeKey: null },
   { href: '/admin/chatbot', label: 'LeKronorium', icon: Bot, badgeKey: null },
 ];
 

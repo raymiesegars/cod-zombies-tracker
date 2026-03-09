@@ -48,7 +48,6 @@ export function Navbar() {
     { href: '/maps', label: 'Maps', icon: MapIcon, iconClass: 'text-blood-400' },
     { href: '/leaderboards', label: 'Leaderboards', icon: Trophy, iconClass: 'text-amber-400' },
     { href: '/tournaments', label: 'Tourney', icon: Medal, iconClass: 'text-amber-500' },
-    { href: '/find-group', label: 'LFG', icon: Users, iconClass: 'text-element-400' },
   ];
 
   return (
@@ -72,9 +71,9 @@ export function Navbar() {
             {navLinks.map((link) => {
               const Icon = link.icon;
               return (
-                <Link key={link.href} href={link.href} className={`${linkClass} inline-flex items-center gap-1`} aria-label={link.href === '/find-group' ? 'Find Group' : link.label}>
+                <Link key={link.href} href={link.href} className={`${linkClass} inline-flex items-center gap-1`} aria-label={link.label}>
                   <Icon className={`w-4 h-4 flex-shrink-0 ${link.iconClass}`} />
-                  {link.href !== '/find-group' && <span className="hidden min-[1230px]:inline">{link.label}</span>}
+                  <span className="hidden min-[1230px]:inline">{link.label}</span>
                 </Link>
               );
             })}
@@ -124,6 +123,14 @@ export function Navbar() {
                         <DiscordIcon className="w-4 h-4 flex-shrink-0" />
                         Discord
                       </a>
+                      <Link
+                        href="/find-group"
+                        onClick={() => setIsMoreMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-white hover:text-blood-400 hover:bg-bunker-800/50"
+                      >
+                        <Users className="w-4 h-4 flex-shrink-0 text-element-400" />
+                        LFG
+                      </Link>
                       <Link
                         href="/tools"
                         onClick={() => setIsMoreMenuOpen(false)}
@@ -293,20 +300,34 @@ export function Navbar() {
               className="navbar:hidden bg-bunker-900/95 border-b border-bunker-800/50 relative z-50 max-h-[85vh] flex flex-col"
             >
             <div className="overflow-y-auto overflow-x-hidden overscroll-contain flex-1 min-h-0 px-4 py-4 pb-16 space-y-2 touch-pan-y">
-              {/* Profile first when logged in */}
+              {/* Profile + Notifications bar when logged in */}
               {user && profile?.username && (
-                <Link
-                  href={`/users/${profile.username}`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 min-h-[44px] text-base text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors touch-manipulation font-medium"
-                >
-                  <User className="w-5 h-5 flex-shrink-0" />
-                  Profile
-                </Link>
-              )}
-              {user && (
-                <div className="flex justify-center py-1">
-                  <NotificationsDropdown />
+                <div className="flex items-center gap-0 rounded-lg bg-bunker-800/50 border border-bunker-700/50 overflow-hidden mb-1">
+                  <Link
+                    href={`/users/${profile.username}`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex-1 min-w-0 flex items-center gap-3 py-3 px-4 text-white hover:text-blood-400 hover:bg-bunker-800/70 transition-colors touch-manipulation"
+                  >
+                    <UserWithRank
+                      user={{
+                        id: profile.id,
+                        username: profile.username,
+                        displayName: profile.displayName,
+                        avatarUrl: profile.avatarUrl,
+                        avatarPreset: (profile as { avatarPreset?: string | null }).avatarPreset,
+                        level: profile.level,
+                        totalXp: profile.totalXp,
+                      }}
+                      showAvatar={true}
+                      showLevel={true}
+                      size="sm"
+                      linkToProfile={false}
+                      maxNameLength={14}
+                    />
+                  </Link>
+                  <div className="shrink-0 border-l border-bunker-700/60 self-stretch flex items-center px-2 min-h-[44px]">
+                    <NotificationsDropdown />
+                  </div>
                 </div>
               )}
               {user && openLogProgressModal && (
@@ -332,7 +353,7 @@ export function Navbar() {
                   aria-label={link.href === '/find-group' ? 'Find Group' : undefined}
                 >
                   <link.icon className={`w-5 h-5 flex-shrink-0 ${link.iconClass}`} />
-                  {link.href !== '/find-group' && link.label}
+                  {link.label}
                 </Link>
               ))}
               {chatbot && (
@@ -362,7 +383,7 @@ export function Navbar() {
                 <MysteryBoxIcon className="w-5 h-5 flex-shrink-0 text-current" />
                 Mystery Box
               </Link>
-              {/* Discord + Tools */}
+              {/* Discord + LFG + Tools */}
               <a
                 href={DISCORD_URL}
                 target="_blank"
@@ -374,6 +395,15 @@ export function Navbar() {
                 <DiscordIcon className="w-5 h-5 flex-shrink-0" />
                 Discord
               </a>
+              <Link
+                href="/find-group"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 min-h-[44px] text-base font-zombies text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors tracking-wide touch-manipulation"
+                aria-label="Find Group"
+              >
+                <Users className="w-5 h-5 flex-shrink-0 text-element-400" />
+                LFG
+              </Link>
               <Link
                 href="/tools"
                 onClick={() => setIsMobileMenuOpen(false)}

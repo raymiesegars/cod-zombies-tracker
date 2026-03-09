@@ -983,10 +983,10 @@ function buildVanguardSpeedrunTiers(cfg: {
 
 export const VANGUARD_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
   'der-anfang': buildVanguardSpeedrunTiers({
-    r10: m(21) + 30, r30: m(50), exfilR5: m(8) + 40, exfilR10: m(12) + 40, ee: m(9),
+    r10: m(21) + 30, exfilR5: m(8) + 40, exfilR10: m(12) + 40, ee: m(9),
   }),
   'terra-maledicta': buildVanguardSpeedrunTiers({
-    r10: m(21), r20: m(50), exfilR5: m(9), exfilR10: m(20), ee: m(21),
+    r10: m(21), r20: m(50), exfilR5: m(9), exfilR10: m(22) + 20, ee: m(21),
   }),
   'shi-no-numa-reborn': buildVanguardSpeedrunTiers({
     r30: m(16) + 30, r50: m(38), r70: hs(1, 2, 48), r100: h(2), r200: h(6),

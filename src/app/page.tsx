@@ -305,6 +305,29 @@ export default function HomePage() {
         </Link>
       </section>
 
+      {/* LFG — Find Group Promo */}
+      <section className="py-8 sm:py-12 px-4 border-y border-element-900/40 bg-gradient-to-b from-element-950/30 to-bunker-950">
+        <Link
+          href="/find-group"
+          className="block max-w-4xl mx-auto p-6 sm:p-8 rounded-2xl border-2 border-element-700/50 bg-element-950/60 hover:bg-element-900/50 hover:border-element-600/70 transition-all text-left group"
+        >
+          <div className="flex items-center gap-4 sm:gap-6">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-element-900/50 border-2 border-element-600/50 flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
+              <Users className="w-10 h-10 sm:w-12 sm:h-12 text-element-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-zombies text-element-100 tracking-wide">
+                Find Group
+              </h2>
+              <p className="mt-1 sm:mt-2 text-sm sm:text-base text-element-200/80">
+                Need a squad? Post a lobby or browse others looking to run Easter eggs and challenges. Connect with players on your platform.
+              </p>
+            </div>
+            <ChevronRight className="w-8 h-8 text-element-400 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+          </div>
+        </Link>
+      </section>
+
       {/* Features Section */}
       <section id="features" className="py-16 sm:py-24 bg-bunker-950 px-4">
         <div className="max-w-7xl mx-auto">

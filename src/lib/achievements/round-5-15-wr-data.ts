@@ -7,9 +7,11 @@
  */
 const min = (m: number, s: number = 0) => m * 60 + s;
 
-/** 4% rule: achievement time = WR * 1.04 (same as number-ones-loader, inlined for browser). */
+/** Top tier: WR + buffer. For short runs (<2min), add at least 15s so 5% isn't trivial. */
 function timeWRToAchievementSeconds(sec: number): number {
-  return Math.round(sec * 1.04);
+  const pct = Math.round(sec * 0.04);
+  const minBuf = sec < 120 ? 15 : 0;
+  return sec + Math.max(pct, minBuf);
 }
 
 /** Megas = with gums/rampage; Restricted = classic gums (BO3), classic elixirs (BO4), or no rampage (BOCW/BO6/BO7/Vanguard). */
