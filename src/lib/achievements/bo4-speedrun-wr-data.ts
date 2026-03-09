@@ -52,7 +52,7 @@ function buildCache(): typeof cache {
       const recs = (catMaps as Record<string, unknown[]>)[map];
       if (!Array.isArray(recs)) continue;
 
-      const solo = recs.filter((r: { player_count?: number }) => r.player_count === 1);
+      const solo = recs.filter((r: unknown) => (r as { player_count?: number }).player_count === 1);
       const byDiff: Record<Bo4Difficulty, { classic: number | null; all: number | null }> = {
         NORMAL: { classic: null, all: null },
         HARDCORE: { classic: null, all: null },
