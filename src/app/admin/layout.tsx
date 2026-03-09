@@ -110,7 +110,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       <nav className="border-b border-bunker-800 bg-bunker-900/80 sticky top-0 z-10" aria-label="Admin sections">
         <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
-          <div className="flex gap-0 overflow-x-auto overflow-y-hidden overscroll-x-contain px-2 sm:px-0 sm:gap-1 sm:overflow-visible" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div
+            className="relative flex gap-0 overflow-x-auto overflow-y-hidden overscroll-x-contain px-2 sm:px-0 sm:gap-1 min-[1160px]:overflow-visible min-[1160px]:flex-wrap"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+            <div
+              className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 min-[1160px]:hidden bg-gradient-to-l from-bunker-900 to-transparent"
+              aria-hidden
+            />
             {tabs.filter((t) => !(t as { superAdminOnly?: boolean }).superAdminOnly || adminMe?.isSuperAdmin).map(({ href, label, icon: Icon, badgeKey }) => {
               const isActive = pathname === href || (href !== '/admin' && pathname.startsWith(href));
               const count = badgeKey != null ? badges[badgeKey] : 0;
