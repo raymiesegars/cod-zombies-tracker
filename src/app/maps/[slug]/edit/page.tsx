@@ -24,6 +24,7 @@ import {
 import { ProofEmbed, ProofUrlsInput, TeammatePicker, Bo7RelicPicker } from '@/components/game';
 import { cn, normalizeProofUrls } from '@/lib/utils';
 import { useXpToast } from '@/context/xp-toast-context';
+import { useActionProgress } from '@/context/action-progress-context';
 import { getXpForChallengeLog, getXpForEasterEggLog, type AchievementForPreview } from '@/lib/xp-preview';
 import { computeMysteryBoxXp, type MysteryBoxFilterSettings } from '@/lib/mystery-box';
 import { isBo4Game, BO4_DIFFICULTIES, getBo4DifficultyLabel } from '@/lib/bo4';
@@ -323,6 +324,7 @@ export default function EditMapProgressPage() {
     isOpen?: boolean;
   } | null>(null);
   const { showXpToast } = useXpToast();
+  const runWithProgress = useActionProgress()?.runWithProgress;
 
   const [map, setMap] = useState<(MapWithDetails & { achievements?: AchievementForPreview[]; unlockedAchievementIds?: string[] }) | null>(null);
   const mapWithAchievements = map;
@@ -756,17 +758,19 @@ export default function EditMapProgressPage() {
       }
     }
 
-    setIsSaving(true);
-    setSaveStatus('idle');
-    setSaveErrorMessage(null);
-    setSaveErrorModalMessage(null);
-    let totalXpGained = 0;
-    let totalMysteryBoxXp = 0;
-    let lastTotalXp: number | undefined;
+    const doSave = async (report: (current: number, total: number) => void) => {
+      setIsSaving(true);
+      setSaveStatus('idle');
+      setSaveErrorMessage(null);
+      setSaveErrorModalMessage(null);
+      let totalXpGained = 0;
+      let totalMysteryBoxXp = 0;
+      let lastTotalXp: number | undefined;
 
-    try {
-      const ids = Array.from(selectedChallengeIds);
-      for (const challengeId of ids) {
+      try {
+        const ids = Array.from(selectedChallengeIds);
+        for (let i = 0; i < ids.length; i++) {
+          const challengeId = ids[i]!;
         const challenge = map.challenges.find((ch) => ch.id === challengeId);
         const isNoMansLand = challenge?.type === 'NO_MANS_LAND';
         const isRush = challenge?.type === 'RUSH';
@@ -855,20 +859,23 @@ export default function EditMapProgressPage() {
             }
           }
         }
+        report(i + 1, ids.length);
       }
-      const achievementXp = totalXpGained - totalMysteryBoxXp;
-      if (achievementXp > 0) {
-        showXpToast(achievementXp, lastTotalXp != null ? { totalXp: lastTotalXp } : undefined);
+        const achievementXp = totalXpGained - totalMysteryBoxXp;
+        if (achievementXp > 0) {
+          showXpToast(achievementXp, lastTotalXp != null ? { totalXp: lastTotalXp } : undefined);
+        }
+        setSaveStatus('success');
+        setTimeout(() => router.push(`/maps/${slug}?achievementUpdated=1`), 1500);
+      } catch (error) {
+        console.error('Error saving challenge logs:', error);
+        setSaveErrorModalMessage(error instanceof Error ? error.message : 'Error saving progress. Please try again.');
+        setSaveStatus('error');
+      } finally {
+        setIsSaving(false);
       }
-      setSaveStatus('success');
-      setTimeout(() => router.push(`/maps/${slug}?achievementUpdated=1`), 1500);
-    } catch (error) {
-      console.error('Error saving challenge logs:', error);
-      setSaveErrorModalMessage(error instanceof Error ? error.message : 'Error saving progress. Please try again.');
-      setSaveStatus('error');
-    } finally {
-      setIsSaving(false);
-    }
+    };
+    await (runWithProgress ? runWithProgress('Logging challenges...', doSave) : doSave(() => {}));
   };
 
   const handleEasterEggChange = (
@@ -900,19 +907,20 @@ export default function EditMapProgressPage() {
       }
     }
 
-    setIsSaving(true);
-    setSaveStatus('idle');
-    setSaveErrorMessage(null);
-    setSaveErrorModalMessage(null);
+    const doSave = async () => {
+      setIsSaving(true);
+      setSaveStatus('idle');
+      setSaveErrorMessage(null);
+      setSaveErrorModalMessage(null);
 
-    try {
-      const res = await fetch('/api/challenge-logs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          challengeId,
-          mapId: map.id,
-          roundReached: parseInt(form.roundReached),
+      try {
+        const res = await fetch('/api/challenge-logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            challengeId,
+            mapId: map.id,
+            roundReached: parseInt(form.roundReached),
           playerCount: form.playerCount,
           ...(map.game?.shortName === 'BO4' && form.difficulty && { difficulty: form.difficulty }),
           ...(map?.slug && hasNoJugSupport(map.slug, map.game?.shortName) && { wawNoJug: challenge?.type === 'NO_JUG' ? true : (sharedChallengeForm.wawNoJug ?? false) }),
@@ -951,13 +959,22 @@ export default function EditMapProgressPage() {
       }
       setSaveStatus('success');
       setTimeout(() => router.push(`/maps/${slug}?achievementUpdated=1`), 1500);
-    } catch (error) {
-      console.error('Error saving challenge log:', error);
-      setSaveErrorModalMessage(error instanceof Error ? error.message : 'Error saving progress. Please try again.');
-      setSaveStatus('error');
-    } finally {
-      setIsSaving(false);
-    }
+      } catch (error) {
+        console.error('Error saving challenge log:', error);
+        setSaveErrorModalMessage(error instanceof Error ? error.message : 'Error saving progress. Please try again.');
+        setSaveStatus('error');
+      } finally {
+        setIsSaving(false);
+      }
+    };
+    await (runWithProgress
+      ? runWithProgress('Logging challenge...', (report) =>
+          doSave().then((r) => {
+            report(1, 1);
+            return r;
+          })
+        )
+      : doSave());
   };
 
   const handleSaveEasterEgg = async (eeId: string) => {
@@ -974,13 +991,14 @@ export default function EditMapProgressPage() {
       }
     }
 
-    setIsSaving(true);
-    setSaveStatus('idle');
-    setSaveErrorMessage(null);
-    setSaveErrorModalMessage(null);
+    const doSave = async () => {
+      setIsSaving(true);
+      setSaveStatus('idle');
+      setSaveErrorMessage(null);
+      setSaveErrorModalMessage(null);
 
-    try {
-      const res = await fetch('/api/easter-egg-logs', {
+      try {
+        const res = await fetch('/api/easter-egg-logs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1001,14 +1019,14 @@ export default function EditMapProgressPage() {
           ...(isVanguardGame(map.game?.shortName) && hasVanguardVoidFilter(map.slug) && { vanguardVoidUsed: form.vanguardVoidUsed ?? true }),
           ...(isWw2Game(map.game?.shortName) && { ww2ConsumablesUsed: form.ww2ConsumablesUsed ?? true }),
         }),
-      });
-      const data = await res.json();
+        });
+        const data = await res.json();
 
-      if (!res.ok) throw new Error(data.error || 'Failed to save');
+        if (!res.ok) throw new Error(data.error || 'Failed to save');
 
-      const tid = tournamentId ?? tournamentIdRef.current;
-      if (tid && data.id) {
-        const subRes = await fetch(`/api/tournaments/${tid}/submit`, {
+        const tid = tournamentId ?? tournamentIdRef.current;
+        if (tid && data.id) {
+          const subRes = await fetch(`/api/tournaments/${tid}/submit`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ easterEggLogId: data.id }),
@@ -1029,13 +1047,22 @@ export default function EditMapProgressPage() {
       }
       setSaveStatus('success');
       setTimeout(() => router.push(`/maps/${slug}?achievementUpdated=1`), 1500);
-    } catch (error) {
-      console.error('Error saving Easter Egg log:', error);
-      setSaveErrorModalMessage(error instanceof Error ? error.message : 'Error saving progress. Please try again.');
-      setSaveStatus('error');
-    } finally {
-      setIsSaving(false);
-    }
+      } catch (error) {
+        console.error('Error saving Easter Egg log:', error);
+        setSaveErrorModalMessage(error instanceof Error ? error.message : 'Error saving progress. Please try again.');
+        setSaveStatus('error');
+      } finally {
+        setIsSaving(false);
+      }
+    };
+    await (runWithProgress
+      ? runWithProgress('Logging easter egg...', (report) =>
+          doSave().then((r) => {
+            report(1, 1);
+            return r;
+          })
+        )
+      : doSave());
   };
 
   const mainQuestEasterEggs = useMemo(

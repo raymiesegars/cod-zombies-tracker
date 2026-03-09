@@ -69,7 +69,7 @@ function getRulesByShortName(shortName: string): { generalRules: RulesSection[];
   }
 }
 
-const CATEGORY_ORDER = [
+export const CATEGORY_ORDER = [
   'EASTER_EGG', 'BASE_ROUNDS', 'HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM',
   'STARTING_ROOM_JUG_SIDE', 'STARTING_ROOM_QUICK_SIDE', 'ONE_BOX', 'PISTOL_ONLY', 'NO_POWER', 'NO_MAGIC',
   'NO_JUG', 'NO_ARMOR', 'NO_ATS', 'NO_MANS_LAND', 'ROUND_10_SPEEDRUN', 'ROUND_20_SPEEDRUN',

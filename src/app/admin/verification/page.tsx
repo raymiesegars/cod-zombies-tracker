@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useActionProgress } from '@/context/action-progress-context';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, Avatar, Logo, Button, Select, Modal } from '@/components/ui';
@@ -46,6 +47,7 @@ function runKey(item: PendingVerificationRun) {
 
 export default function AdminVerificationPage() {
   const { showXpToast } = useXpToast();
+  const runWithProgress = useActionProgress()?.runWithProgress;
   const [runs, setRuns] = useState<PendingVerificationRun[]>([]);
   const [games, setGames] = useState<GameOption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -132,19 +134,21 @@ export default function AdminVerificationPage() {
 
   const approveSelected = async () => {
     if (selected.size === 0) return;
-    setApproving(true);
-    const toApprove = runs.filter((r) => selected.has(runKey(r)));
-    const seen = new Set<string>();
-    const unique = toApprove.filter((r) => {
-      const k = runKey(r);
-      if (seen.has(k)) return false;
-      seen.add(k);
-      return true;
-    });
-    let done = 0;
-    for (const item of unique) {
-      try {
-        const res = await fetch('/api/admin/verify/approve', {
+    const doApprove = async (report: (current: number, total: number) => void) => {
+      setApproving(true);
+      const toApprove = runs.filter((r) => selected.has(runKey(r)));
+      const seen = new Set<string>();
+      const unique = toApprove.filter((r) => {
+        const k = runKey(r);
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
+      let done = 0;
+      for (let i = 0; i < unique.length; i++) {
+        const item = unique[i]!;
+        try {
+          const res = await fetch('/api/admin/verify/approve', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'same-origin',
@@ -168,12 +172,15 @@ export default function AdminVerificationPage() {
           });
           done++;
         }
-      } catch {
-        // continue
+        } catch {
+          // continue
+        }
+        report(i + 1, unique.length);
       }
-    }
-    setApproving(false);
-    if (done > 0) fetchRuns();
+      setApproving(false);
+      if (done > 0) fetchRuns();
+    };
+    await (runWithProgress ? runWithProgress('Verifying runs...', doApprove) : doApprove(() => {}));
   };
 
   if (forbidden) {

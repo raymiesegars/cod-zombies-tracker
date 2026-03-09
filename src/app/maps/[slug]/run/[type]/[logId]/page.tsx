@@ -28,6 +28,7 @@ import { getBo7SupportLabel } from '@/lib/bo7';
 import { getWw2ConsumablesLabel } from '@/lib/ww2';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter, getVanguardVoidLabel } from '@/lib/vanguard';
 import { hasNoJugSupport } from '@/lib/no-jug-support';
+import { useActionProgress } from '@/context/action-progress-context';
 import { ChevronLeft, FileText, ExternalLink, Clock, Pencil, Trash2, Users, ShieldCheck, ShieldOff, Loader2, Check, Lock, Trophy } from 'lucide-react';
 
 function DeleteRunButton({
@@ -214,6 +215,7 @@ export default function RunDetailPage() {
   const [addVerificationModalOpen, setAddVerificationModalOpen] = useState(false);
   const [submitForVerificationModalOpen, setSubmitForVerificationModalOpen] = useState(false);
 
+  const runWithProgress = useActionProgress()?.runWithProgress;
   const isChallenge = type === 'challenge';
   const apiUrl = isChallenge ? `/api/challenge-logs/${logId}` : `/api/easter-egg-logs/${logId}`;
   const logTypeForApi = isChallenge ? 'challenge' : 'easter_egg';
@@ -275,25 +277,35 @@ export default function RunDetailPage() {
   }, [apiUrl]);
 
   const handleApproveVerification = useCallback(async () => {
-    setAdminActionLoading(true);
-    try {
-      const res = await fetch('/api/admin/verify/approve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ logType: logTypeForApi, logId }),
-        credentials: 'same-origin',
-      });
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        throw new Error(d.error || 'Failed to approve');
+    const doApprove = async () => {
+      setAdminActionLoading(true);
+      try {
+        const res = await fetch('/api/admin/verify/approve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ logType: logTypeForApi, logId }),
+          credentials: 'same-origin',
+        });
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({}));
+          throw new Error(d.error || 'Failed to approve');
+        }
+        refetchLog();
+      } catch (e) {
+        alert(e instanceof Error ? e.message : 'Something went wrong');
+      } finally {
+        setAdminActionLoading(false);
       }
-      refetchLog();
-    } catch (e) {
-      alert(e instanceof Error ? e.message : 'Something went wrong');
-    } finally {
-      setAdminActionLoading(false);
-    }
-  }, [logId, logTypeForApi, refetchLog]);
+    };
+    await (runWithProgress
+      ? runWithProgress('Verifying run...', (report) =>
+          doApprove().then((r) => {
+            report(1, 1);
+            return r;
+          })
+        )
+      : doApprove());
+  }, [logId, logTypeForApi, refetchLog, runWithProgress]);
 
   const handleDenyVerification = useCallback(async () => {
     const msg = denyMessage.trim();
@@ -301,96 +313,136 @@ export default function RunDetailPage() {
       alert('Please enter a reason for not verifying this run.');
       return;
     }
-    setAdminActionLoading(true);
-    try {
-      const res = await fetch('/api/admin/verify/deny', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ logType: logTypeForApi, logId, message: msg }),
-        credentials: 'same-origin',
-      });
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        throw new Error(d.error || 'Failed to deny');
+    const doDeny = async () => {
+      setAdminActionLoading(true);
+      try {
+        const res = await fetch('/api/admin/verify/deny', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ logType: logTypeForApi, logId, message: msg }),
+          credentials: 'same-origin',
+        });
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({}));
+          throw new Error(d.error || 'Failed to deny');
+        }
+        setDenyModalOpen(false);
+        setDenyMessage('');
+        refetchLog();
+        setAdminActionSuccess('denied');
+      } catch (e) {
+        alert(e instanceof Error ? e.message : 'Something went wrong');
+      } finally {
+        setAdminActionLoading(false);
       }
-      setDenyModalOpen(false);
-      setDenyMessage('');
-      refetchLog();
-      setAdminActionSuccess('denied');
-    } catch (e) {
-      alert(e instanceof Error ? e.message : 'Something went wrong');
-    } finally {
-      setAdminActionLoading(false);
-    }
-  }, [logId, logTypeForApi, denyMessage, refetchLog]);
+    };
+    await (runWithProgress
+      ? runWithProgress('Denying verification...', (report) =>
+          doDeny().then((r) => {
+            report(1, 1);
+            return r;
+          })
+        )
+      : doDeny());
+  }, [logId, logTypeForApi, denyMessage, refetchLog, runWithProgress]);
 
   const handleAddVerification = useCallback(async () => {
-    setAdminActionLoading(true);
-    try {
-      const res = await fetch('/api/admin/verify/add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ logType: logTypeForApi, logId }),
-        credentials: 'same-origin',
-      });
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        throw new Error(d.error || 'Failed to add verification');
+    const doAdd = async () => {
+      setAdminActionLoading(true);
+      try {
+        const res = await fetch('/api/admin/verify/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ logType: logTypeForApi, logId }),
+          credentials: 'same-origin',
+        });
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({}));
+          throw new Error(d.error || 'Failed to add verification');
+        }
+        setAddVerificationModalOpen(false);
+        refetchLog();
+        setAdminActionSuccess('added');
+      } catch (e) {
+        alert(e instanceof Error ? e.message : 'Something went wrong');
+      } finally {
+        setAdminActionLoading(false);
       }
-      setAddVerificationModalOpen(false);
-      refetchLog();
-      setAdminActionSuccess('added');
-    } catch (e) {
-      alert(e instanceof Error ? e.message : 'Something went wrong');
-    } finally {
-      setAdminActionLoading(false);
-    }
-  }, [logId, logTypeForApi, refetchLog]);
+    };
+    await (runWithProgress
+      ? runWithProgress('Adding verification...', (report) =>
+          doAdd().then((r) => {
+            report(1, 1);
+            return r;
+          })
+        )
+      : doAdd());
+  }, [logId, logTypeForApi, refetchLog, runWithProgress]);
 
   const handleSubmitForVerification = useCallback(async () => {
-    setAdminActionLoading(true);
-    try {
-      const res = await fetch('/api/admin/verify/request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ logType: logTypeForApi, logId }),
-        credentials: 'same-origin',
-      });
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        throw new Error(d.error || 'Failed to submit for verification');
+    const doSubmit = async () => {
+      setAdminActionLoading(true);
+      try {
+        const res = await fetch('/api/admin/verify/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ logType: logTypeForApi, logId }),
+          credentials: 'same-origin',
+        });
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({}));
+          throw new Error(d.error || 'Failed to submit for verification');
+        }
+        setSubmitForVerificationModalOpen(false);
+        refetchLog();
+        setAdminActionSuccess('submitted');
+      } catch (e) {
+        alert(e instanceof Error ? e.message : 'Something went wrong');
+      } finally {
+        setAdminActionLoading(false);
       }
-      setSubmitForVerificationModalOpen(false);
-      refetchLog();
-      setAdminActionSuccess('submitted');
-    } catch (e) {
-      alert(e instanceof Error ? e.message : 'Something went wrong');
-    } finally {
-      setAdminActionLoading(false);
-    }
-  }, [logId, logTypeForApi, refetchLog]);
+    };
+    await (runWithProgress
+      ? runWithProgress('Submitting for verification...', (report) =>
+          doSubmit().then((r) => {
+            report(1, 1);
+            return r;
+          })
+        )
+      : doSubmit());
+  }, [logId, logTypeForApi, refetchLog, runWithProgress]);
 
   const handleRemoveVerification = useCallback(async () => {
-    setAdminActionLoading(true);
-    try {
-      const res = await fetch('/api/admin/verify/remove', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ logType: logTypeForApi, logId }),
-        credentials: 'same-origin',
-      });
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        throw new Error(d.error || 'Failed to remove verification');
+    const doRemove = async () => {
+      setAdminActionLoading(true);
+      try {
+        const res = await fetch('/api/admin/verify/remove', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ logType: logTypeForApi, logId }),
+          credentials: 'same-origin',
+        });
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({}));
+          throw new Error(d.error || 'Failed to remove verification');
+        }
+        refetchLog();
+        setAdminActionSuccess('removed');
+      } catch (e) {
+        alert(e instanceof Error ? e.message : 'Something went wrong');
+      } finally {
+        setAdminActionLoading(false);
       }
-      refetchLog();
-      setAdminActionSuccess('removed');
-    } catch (e) {
-      alert(e instanceof Error ? e.message : 'Something went wrong');
-    } finally {
-      setAdminActionLoading(false);
-    }
-  }, [logId, logTypeForApi, refetchLog]);
+    };
+    await (runWithProgress
+      ? runWithProgress('Removing verification...', (report) =>
+          doRemove().then((r) => {
+            report(1, 1);
+            return r;
+          })
+        )
+      : doRemove());
+  }, [logId, logTypeForApi, refetchLog, runWithProgress]);
 
   if (loading) {
     return (

@@ -83,26 +83,33 @@ export default async function MapSlugPage({ params }: Props) {
           steps: { orderBy: { order: 'asc' } },
         },
       },
-      achievements: {
-        where: { isActive: true },
-        orderBy: [{ type: 'asc' }, { slug: 'asc' }],
-        include: {
-          easterEgg: { select: { id: true, name: true, slug: true } },
-        },
-      },
     },
   });
 
   if (!map) notFound();
 
-  // Only active achievements (earnable, count for XP); sort lowest round → highest, slowest time → fastest
-  const activeAchievements = (map.achievements ?? []).filter((a) => a.isActive !== false);
-  const sortedAchievements = sortAchievementsForDisplay(activeAchievements);
-
-  const [stats, supabaseUser] = await Promise.all([
+  const [achievements, stats, supabaseUser] = await Promise.all([
+    prisma.achievement.findMany({
+      where: {
+        isActive: true,
+        OR: [{ mapId: map.id }, { easterEgg: { mapId: map.id } }],
+      },
+      orderBy: [{ type: 'asc' }, { slug: 'asc' }],
+      include: { easterEgg: { select: { id: true, name: true, slug: true } } },
+    }),
     getMapStats(map.id),
     getUser(),
   ]);
+
+  const hasSpecificEeAchievement = achievements.some(
+    (a) => a.type === 'EASTER_EGG_COMPLETE' && (a.easterEgg?.name !== 'Main Quest' || a.slug !== 'main-quest')
+  );
+  const filteredAchievements = hasSpecificEeAchievement
+    ? achievements.filter(
+        (a) => !(a.type === 'EASTER_EGG_COMPLETE' && a.name === 'Main Quest' && a.slug === 'main-quest')
+      )
+    : achievements;
+  const sortedAchievements = sortAchievementsForDisplay(filteredAchievements.filter((a) => a.isActive !== false));
 
   let unlockedAchievementIds: string[] = [];
   let verifiedUnlockedAchievementIds: string[] = [];

@@ -8,6 +8,7 @@ import { Logo } from '@/components/ui';
 import { RoundCounter, ProofUrlsInput } from '@/components/game';
 import { useAuth } from '@/context/auth-context';
 import { dispatchXpToast } from '@/context/xp-toast-context';
+import { useActionProgress } from '@/context/action-progress-context';
 import { normalizeProofUrls } from '@/lib/utils';
 import { Users, CheckCircle, XCircle, Loader2, CheckSquare, Square, Pencil } from 'lucide-react';
 
@@ -43,6 +44,7 @@ type ProofOverride = { proofUrls: string[]; screenshotUrl?: string | null };
 
 export function PendingCoOpSection() {
   const { profile, refreshProfile } = useAuth();
+  const runWithProgress = useActionProgress()?.runWithProgress;
   const [pendings, setPendings] = useState<PendingCoOpItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [actingId, setActingId] = useState<string | null>(null);
@@ -100,9 +102,10 @@ export function PendingCoOpSection() {
   };
 
   const handleConfirm = async (item: PendingCoOpItem) => {
-    setActingId(item.id);
-    try {
-      const res = await postConfirm(item.id, proofOverrides[item.id]);
+    const doConfirm = async () => {
+      setActingId(item.id);
+      try {
+        const res = await postConfirm(item.id, proofOverrides[item.id]);
       if (res.ok) {
         const data = await res.json().catch(() => ({}));
         setPendings((prev) => prev.filter((p) => p.id !== item.id));
@@ -139,15 +142,26 @@ export function PendingCoOpSection() {
     } finally {
       setActingId(null);
     }
+    };
+    await (runWithProgress
+      ? runWithProgress('Confirming run...', (report) =>
+          doConfirm().then((r) => {
+            report(1, 1);
+            return r;
+          })
+        )
+      : doConfirm());
   };
 
   const handleAcceptSelected = async () => {
     if (selected.size === 0) return;
-    const toAccept = pendings.filter((p) => selected.has(p.id));
-    setActingId('bulk');
-    try {
-      let xpTotal = 0;
-      for (const item of toAccept) {
+    const doAccept = async (report: (current: number, total: number) => void) => {
+      const toAccept = pendings.filter((p) => selected.has(p.id));
+      setActingId('bulk');
+      try {
+        let xpTotal = 0;
+        for (let i = 0; i < toAccept.length; i++) {
+          const item = toAccept[i]!;
         const res = await postConfirm(item.id, proofOverrides[item.id]);
         if (res.ok) {
           const data = await res.json().catch(() => ({}));
@@ -158,6 +172,7 @@ export function PendingCoOpSection() {
             return rest;
           });
         }
+        report(i + 1, toAccept.length);
       }
       setSelected(new Set());
       await refreshProfile?.();
@@ -172,6 +187,8 @@ export function PendingCoOpSection() {
     } finally {
       setActingId(null);
     }
+    };
+    await (runWithProgress ? runWithProgress('Accepting runs...', doAccept) : doAccept(() => {}));
   };
 
   const toggleSelect = (id: string) => {
@@ -189,19 +206,29 @@ export function PendingCoOpSection() {
   };
 
   const handleDeny = async (item: PendingCoOpItem) => {
-    setActingId(item.id);
-    try {
-      const res = await fetch(`/api/me/pending-coop/${item.id}/deny`, {
-        method: 'POST',
-        credentials: 'same-origin',
-      });
-      if (res.ok) {
-        setPendings((prev) => prev.filter((p) => p.id !== item.id));
-        setDenyModal(null);
+    const doDeny = async () => {
+      setActingId(item.id);
+      try {
+        const res = await fetch(`/api/me/pending-coop/${item.id}/deny`, {
+          method: 'POST',
+          credentials: 'same-origin',
+        });
+        if (res.ok) {
+          setPendings((prev) => prev.filter((p) => p.id !== item.id));
+          setDenyModal(null);
+        }
+      } finally {
+        setActingId(null);
       }
-    } finally {
-      setActingId(null);
-    }
+    };
+    await (runWithProgress
+      ? runWithProgress('Removing from run...', (report) =>
+          doDeny().then((r) => {
+            report(1, 1);
+            return r;
+          })
+        )
+      : doDeny());
   };
 
   if (loading) {
