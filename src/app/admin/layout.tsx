@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Bot, ShieldCheck, MessageSquare, History, Trophy } from 'lucide-react';
+import { Bot, ShieldCheck, MessageSquare, History, Trophy, Egg, Award, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const tabs = [
@@ -12,7 +12,10 @@ const tabs = [
   { href: '/admin/feedback', label: 'Feedback', icon: MessageSquare, badgeKey: 'feedbackUnread' as const },
   { href: '/admin/verified-history', label: 'Verified history', icon: History, badgeKey: 'verifiedHistoryUnread' as const },
   { href: '/admin/leaderboard', label: 'Leaderboard', icon: Trophy, badgeKey: null },
+  { href: '/admin/easter-eggs', label: 'Easter Eggs', icon: Egg, badgeKey: null, superAdminOnly: true },
+  { href: '/admin/achievements', label: 'Achievements', icon: Award, badgeKey: null },
   { href: '/admin/chatbot', label: 'LeKronorium', icon: Bot, badgeKey: null },
+  { href: '/rules', label: 'Rules', icon: BookOpen, badgeKey: null, superAdminOnly: true },
 ];
 
 type Badges = { pending: number; feedbackUnread: number; verifiedHistoryUnread: number };
@@ -24,6 +27,7 @@ type AdminMe = {
   nextLevelXp: number;
   progress: number;
   totalVerified: number;
+  isSuperAdmin?: boolean;
 };
 
 const POLL_MS = 12000;
@@ -107,7 +111,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <nav className="border-b border-bunker-800 bg-bunker-900/80 sticky top-0 z-10" aria-label="Admin sections">
         <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8">
           <div className="flex gap-0 overflow-x-auto overflow-y-hidden overscroll-x-contain px-2 sm:px-0 sm:gap-1 sm:overflow-visible" style={{ WebkitOverflowScrolling: 'touch' }}>
-            {tabs.map(({ href, label, icon: Icon, badgeKey }) => {
+            {tabs.filter((t) => !(t as { superAdminOnly?: boolean }).superAdminOnly || adminMe?.isSuperAdmin).map(({ href, label, icon: Icon, badgeKey }) => {
               const isActive = pathname === href || (href !== '/admin' && pathname.startsWith(href));
               const count = badgeKey != null ? badges[badgeKey] : 0;
               return (

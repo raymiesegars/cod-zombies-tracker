@@ -899,6 +899,7 @@ export default function UserProfilePage() {
   }, [profileStatBlockSelection, refreshProfile]);
 
   useEffect(() => {
+    setIsLoading(true);
     async function fetchProfile() {
       try {
         const [combinedRes, overviewRes] = await Promise.all([
@@ -1055,7 +1056,9 @@ export default function UserProfilePage() {
   // completion by game (same source as achievements section; overview only has unlocked ids when a map is selected)
   const achievementsUnlocked = achievementsOverview?.completionByGame
     ? achievementsOverview.completionByGame.reduce((s, g) => s + g.unlocked, 0)
-    : (achievementsOverview?.unlockedAchievementIds?.length ?? 0);
+    : (achievementsOverview?.unlockedAchievementIds?.length ??
+       (profile as { _count?: { userAchievements?: number } })?._count?.userAchievements ??
+       0);
   const achievementsPct = totalAchievements > 0 ? Math.round((achievementsUnlocked / totalAchievements) * 100) : 0;
 
   const selectedBlockIds = profileStatBlockSelection.length === 4 ? profileStatBlockSelection : DEFAULT_PROFILE_STAT_BLOCK_IDS;
@@ -1463,13 +1466,13 @@ export default function UserProfilePage() {
           </Modal>
         )}
 
-        <MapsSection
-          mapStats={mapStats}
-          username={username}
-          isOwnProfile={isOwnProfile}
-          profile={profile}
-          onPreferencesSaved={() => setProfileRefreshTrigger((t) => t + 1)}
-        />
+          <MapsSection
+            mapStats={mapStats}
+            username={username}
+            isOwnProfile={isOwnProfile}
+            profile={profile}
+            onPreferencesSaved={() => setProfileRefreshTrigger((t) => t + 1)}
+          />
 
         {/* Achievements Section - full list with filters and completion by game */}
         <AchievementsSection

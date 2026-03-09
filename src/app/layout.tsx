@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { AuthProvider } from '@/context/auth-context';
 import { XpToastProvider } from '@/context/xp-toast-context';
 import { LogProgressModalProvider } from '@/context/log-progress-modal-context';
+import { ActionProgressProvider } from '@/context/action-progress-context';
 import { ChatbotProvider } from '@/context/chatbot-context';
 import { Navbar, Footer, BackToTop, TVRoomBackground, MusicPlayer, AuthLayoutWrapper, MessagingWidget } from '@/components/layout';
 import { SiteUpdatesModal } from '@/components/site-updates-modal';
@@ -151,6 +152,7 @@ export default function RootLayout({
         <div className="relative z-10 flex flex-col min-h-screen">
           <AuthProvider>
             <XpToastProvider>
+              <ActionProgressProvider>
               <LogProgressModalProvider>
                 <ChatbotProvider>
                 <AuthLayoutWrapper>
@@ -165,6 +167,7 @@ export default function RootLayout({
               </AuthLayoutWrapper>
                 </ChatbotProvider>
               </LogProgressModalProvider>
+              </ActionProgressProvider>
             </XpToastProvider>
           </AuthProvider>
         </div>

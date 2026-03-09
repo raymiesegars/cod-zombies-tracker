@@ -169,36 +169,34 @@ export async function GET(
   }
 
     // They picked a map – only that map’s achievements
-    const [rawAchievements, unlocked] = await Promise.all([
-      prisma.achievement.findMany({
-        where: {
-          isActive: true,
+    const rawAchievements = await prisma.achievement.findMany({
+      where: {
+        isActive: true,
+        OR: [{ mapId }, { easterEgg: { mapId } }],
+      },
+      include: {
+        map: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            order: true,
+            game: { select: { id: true, name: true, shortName: true, order: true } },
+          },
+        },
+        easterEgg: { select: { id: true, name: true, slug: true } },
+      },
+      orderBy: [{ type: 'asc' }, { slug: 'asc' }],
+    });
+    const unlocked = await prisma.userAchievement.findMany({
+      where: {
+        userId: user.id,
+        achievement: {
           OR: [{ mapId }, { easterEgg: { mapId } }],
         },
-        include: {
-          map: {
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-              order: true,
-              game: { select: { id: true, name: true, shortName: true, order: true } },
-            },
-          },
-          easterEgg: { select: { id: true, name: true, slug: true } },
-        },
-        orderBy: [{ type: 'asc' }, { slug: 'asc' }],
-      }),
-      prisma.userAchievement.findMany({
-        where: {
-          userId: user.id,
-          achievement: {
-            OR: [{ mapId }, { easterEgg: { mapId } }],
-          },
-        },
-        select: { achievementId: true, verifiedAt: true },
-      }),
-    ]);
+      },
+      select: { achievementId: true, verifiedAt: true },
+    });
 
     const unlockedIds = unlocked.map((u) => u.achievementId);
     const verifiedUnlockedAchievementIds = unlocked.filter((u) => u.verifiedAt != null).map((u) => u.achievementId);

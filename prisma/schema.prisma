@@ -177,6 +177,32 @@ model ChatbotWikiImport {
 }
 
 // ============================================================================
+// RULES (editable by super admins; DB overrides static files)
+// ============================================================================
+
+model GameRules {
+  id                   String   @id @default(cuid())
+  gameShortName        String   @unique  // "WAW", "BO1", "BO3", etc.
+  generalSections      Json     // RulesSection[]
+  challengeSections    Json     // RulesSection[]
+  challengeRulesByType Json     // Record<string, string>
+  updatedAt            DateTime @updatedAt
+
+  @@index([gameShortName])
+}
+
+model RulesPageSection {
+  id        String   @id @default(cuid())
+  key       String   @unique  // "verification_proof", etc.
+  title     String
+  items     Json     // RuleItem[]
+  sortOrder Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}
+
+// ============================================================================
 // DIRECT MESSAGES & BLOCKS
 // ============================================================================
 

@@ -766,16 +766,14 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     }
   }, [initialMap, initialMapStats]);
 
-  // After redirect from edit page (e.g. after logging EE), refetch map + profile so achievements update without manual refresh
+  // Clean up achievementUpdated URL param when present (no refetch—cache will update in time)
   useEffect(() => {
     if (searchParams.get('achievementUpdated') !== '1') return;
-    setRefreshMapCounter((c) => c + 1);
-    refreshProfile?.();
     const u = new URLSearchParams(searchParams.toString());
     u.delete('achievementUpdated');
     const next = u.toString() ? `?${u.toString()}` : window.location.pathname;
     router.replace(next, { scroll: false });
-  }, [searchParams, router, refreshProfile]);
+  }, [searchParams, router]);
 
   // Refetch only when user triggers refresh (not on initial load when we have server data)
   useEffect(() => {
@@ -1869,7 +1867,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                               {ee.description || 'Steps for this Easter Egg will be added soon.'}
                             </p>
                           ) : (
-                            <ul className={isMainQuest ? 'space-y-4 pt-2' : 'space-y-1.5 pt-2'}>
+                            <ul className={isMainQuest ? 'space-y-4 pt-2' : 'space-y-3 pt-2'}>
                               {steps.map((step, stepIndex) => {
                                 const checked = eeProgress.checkedStepIds.includes(step.id);
                                 const parts = isMainQuest ? formatStepLabel(step.label) : null;
@@ -1877,8 +1875,8 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                                   <div
                                     className={
                                       isMainQuest
-                                        ? 'flex gap-3 p-4 rounded-lg border border-bunker-700/60 bg-bunker-900/40'
-                                        : 'flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-bunker-800/30'
+                                        ? 'flex items-start gap-3 p-4 rounded-lg border border-bunker-700/60 bg-bunker-900/40'
+                                        : 'flex items-start gap-3 py-3 px-3 rounded-lg border border-bunker-700/40 bg-bunker-900/30 hover:bg-bunker-800/40'
                                     }
                                   >
                                     {profile ? (
@@ -1886,7 +1884,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                                         type="button"
                                         onClick={() => handleToggleStep(step.id)}
                                         disabled={togglingStepId === step.id}
-                                        className={`flex-shrink-0 w-6 h-6 rounded border-2 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-element-500 disabled:opacity-50 ${isMainQuest ? 'mt-0.5' : ''}`}
+                                        className="flex-shrink-0 w-6 h-6 mt-0.5 rounded border-2 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-element-500 disabled:opacity-50"
                                         style={{
                                           borderColor: checked ? 'var(--color-military-400)' : 'var(--color-bunker-500)',
                                           backgroundColor: checked ? 'var(--color-military-500)' : 'transparent',
@@ -1895,9 +1893,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                                         {checked && <Check className="w-4 h-4 text-military-200 stroke-[3]" />}
                                       </button>
                                     ) : (
-                                      <div
-                                        className={`flex-shrink-0 w-6 h-6 rounded border-2 border-bunker-600 flex items-center justify-center ${isMainQuest ? 'mt-0.5' : ''}`}
-                                      >
+                                      <div className="flex-shrink-0 w-6 h-6 mt-0.5 rounded border-2 border-bunker-600 flex items-center justify-center">
                                         {checked && <Check className="w-4 h-4 text-military-400 stroke-[3]" />}
                                       </div>
                                     )}
@@ -2672,13 +2668,13 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                             )}
                           </button>
                           {open && (
-                            <div className="p-3 pt-2 space-y-3 border-t border-bunker-700/40">
+                            <div className="p-3 pt-2 space-y-4 border-t border-bunker-700/40">
                               {partSteps.map((step, idx) => (
                                 <div
                                   key={step.id}
-                                  className="flex gap-3 rounded-lg border border-bunker-700/50 bg-bunker-900/50 p-2.5"
+                                  className="flex items-start gap-3 rounded-lg border border-bunker-700/50 bg-bunker-900/50 p-3"
                                 >
-                                  <span className="flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md bg-bunker-700/80 border border-bunker-600/60 text-xs font-semibold text-bunker-200">
+                                  <span className="flex-shrink-0 inline-flex items-center justify-center w-6 h-6 mt-0.5 rounded-md bg-bunker-700/80 border border-bunker-600/60 text-xs font-semibold text-bunker-200">
                                     {idx + 1}
                                   </span>
                                   <div className="flex-1 min-w-0 space-y-2">
