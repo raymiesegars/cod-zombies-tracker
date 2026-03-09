@@ -73,6 +73,8 @@
     "db:reimport-all-zwr-users": "tsx scripts/import-skrine-csv/reimport-all-zwr-users.ts",
     "db:verify-ww2-import": "tsx scripts/import-skrine-csv/verify-ww2-import.ts",
     "db:revalidate-bo4-backfill-users": "tsx scripts/revalidate-bo4-backfill-users.ts",
+    "db:revalidate-bo4-speedruns": "tsx scripts/revalidate-bo4-speedruns.ts",
+    "db:revalidate-speedrun-achievements": "tsx scripts/revalidate-speedrun-achievements.ts",
     "db:revalidate-ww2-users": "tsx scripts/revalidate-ww2-users.ts",
     "db:fetch-wiki-for-chatbot": "tsx scripts/fetch-wiki-for-chatbot.ts"
   },

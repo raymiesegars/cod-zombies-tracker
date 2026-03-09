@@ -142,7 +142,9 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
     for (const key of MODIFIER_CRITERIA_KEYS) {
       if (key === 'firstRoomVariant') continue;
       const v = (criteria as Record<string, unknown>)[key];
-      if (v !== undefined && v !== null) (baseWhere as Record<string, unknown>)[key] = v;
+      if (v === undefined || v === null) continue;
+      const whereClause = modifierWhereForCriteria(key, v);
+      if (whereClause) (baseWhere as Record<string, unknown>)[key] = whereClause;
     }
 
     // Speedrun tier: qualify if user has a run with completionTimeSeconds <= maxTimeSeconds
@@ -349,9 +351,64 @@ const MODIFIER_CRITERIA_KEYS = [
   'useFortuneCards',
   'useDirectorsCut',
   'rampageInducerUsed',
+  'vanguardVoidUsed',
 ] as const;
 
-/** True if the log satisfies any modifier constraints in criteria. If criteria has no modifier keys, returns true. */
+/** Hierarchy: stricter run satisfies looser achievement. NONE > CLASSIC_ONLY > MEGA. */
+const BO3_GUM_STRICTNESS = { NONE: 0, CLASSIC_ONLY: 1, MEGA: 2 } as const;
+/** CLASSIC_ONLY stricter than ALL_ELIXIRS_TALISMANS. */
+const BO4_ELIXIR_STRICTNESS = { CLASSIC_ONLY: 0, ALL_ELIXIRS_TALISMANS: 1 } as const;
+/** WITHOUT/NO stricter than WITH. */
+const SUPPORT_STRICTNESS = { WITHOUT_SUPPORT: 0, NO_SUPPORT: 0, WITH_SUPPORT: 1 } as const;
+const BO6_GUM_STRICTNESS = { NO_GOBBLEGUMS: 0, WITH_GOBBLEGUMS: 1 } as const;
+
+/** True if log's modifier satisfies achievement criteria. Stricter run (no gums, no support, etc.) satisfies looser achievements (classics, with support). */
+function logModifierSatisfiesCriteria(
+  key: (typeof MODIFIER_CRITERIA_KEYS)[number],
+  logVal: unknown,
+  critVal: unknown
+): boolean {
+  if (critVal === undefined || critVal === null) return true;
+  if (logVal === undefined || logVal === null) return false;
+
+  if (key === 'bo3GobbleGumMode') {
+    const logS = (logVal as string) in BO3_GUM_STRICTNESS ? BO3_GUM_STRICTNESS[logVal as keyof typeof BO3_GUM_STRICTNESS] : 999;
+    const critS = (critVal as string) in BO3_GUM_STRICTNESS ? BO3_GUM_STRICTNESS[critVal as keyof typeof BO3_GUM_STRICTNESS] : 999;
+    return logS <= critS;
+  }
+  if (key === 'bo4ElixirMode') {
+    const logS = (logVal as string) in BO4_ELIXIR_STRICTNESS ? BO4_ELIXIR_STRICTNESS[logVal as keyof typeof BO4_ELIXIR_STRICTNESS] : 999;
+    const critS = (critVal as string) in BO4_ELIXIR_STRICTNESS ? BO4_ELIXIR_STRICTNESS[critVal as keyof typeof BO4_ELIXIR_STRICTNESS] : 999;
+    return logS <= critS;
+  }
+  if (key === 'bocwSupportMode') {
+    const logS = (logVal as string) in SUPPORT_STRICTNESS ? SUPPORT_STRICTNESS[logVal as keyof typeof SUPPORT_STRICTNESS] : 999;
+    const critS = (critVal as string) in SUPPORT_STRICTNESS ? SUPPORT_STRICTNESS[critVal as keyof typeof SUPPORT_STRICTNESS] : 999;
+    return logS <= critS;
+  }
+  if (key === 'bo6GobbleGumMode') {
+    const logS = (logVal as string) in BO6_GUM_STRICTNESS ? BO6_GUM_STRICTNESS[logVal as keyof typeof BO6_GUM_STRICTNESS] : 999;
+    const critS = (critVal as string) in BO6_GUM_STRICTNESS ? BO6_GUM_STRICTNESS[critVal as keyof typeof BO6_GUM_STRICTNESS] : 999;
+    return logS <= critS;
+  }
+  if (key === 'bo6SupportMode' || key === 'bo7SupportMode') {
+    const logS = (logVal as string) in SUPPORT_STRICTNESS ? SUPPORT_STRICTNESS[logVal as keyof typeof SUPPORT_STRICTNESS] : 999;
+    const critS = (critVal as string) in SUPPORT_STRICTNESS ? SUPPORT_STRICTNESS[critVal as keyof typeof SUPPORT_STRICTNESS] : 999;
+    return logS <= critS;
+  }
+  if (key === 'useFortuneCards') {
+    const logB = Boolean(logVal);
+    const critB = Boolean(critVal);
+    return !logB || critB;
+  }
+  if (key === 'firstRoomVariant' || key === 'useDirectorsCut' || key === 'rampageInducerUsed' || key === 'vanguardVoidUsed') {
+    if (typeof critVal === 'boolean') return logVal === critVal;
+    return String(logVal) === String(critVal);
+  }
+  return String(logVal) === String(critVal);
+}
+
+/** True if the log satisfies modifier constraints in criteria. Stricter runs (no gums, no support) satisfy looser achievements. */
 function logMatchesModifierCriteria(
   log: MapAchievementContext['challengeLogs'][number],
   criteria: Record<string, unknown>
@@ -360,13 +417,45 @@ function logMatchesModifierCriteria(
     const critVal = criteria[key];
     if (critVal === undefined || critVal === null) continue;
     const logVal = log[key as keyof typeof log];
-    if (typeof critVal === 'boolean') {
-      if (logVal !== critVal) return false;
-    } else {
-      if (String(logVal) !== String(critVal)) return false;
-    }
+    if (!logModifierSatisfiesCriteria(key, logVal, critVal)) return false;
   }
   return true;
+}
+
+/** Returns Prisma where clause for a modifier: for hierarchical keys, use { in: [...] } so stricter logs match. */
+export function modifierWhereForCriteria(
+  key: (typeof MODIFIER_CRITERIA_KEYS)[number],
+  critVal: unknown
+): Record<string, unknown> | null {
+  if (critVal === undefined || critVal === null) return null;
+  if (key === 'bo3GobbleGumMode') {
+    const critS = (critVal as string) in BO3_GUM_STRICTNESS ? BO3_GUM_STRICTNESS[critVal as keyof typeof BO3_GUM_STRICTNESS] : 999;
+    const allowed = (Object.entries(BO3_GUM_STRICTNESS) as [keyof typeof BO3_GUM_STRICTNESS, number][]).filter(([, s]) => s <= critS).map(([k]) => k);
+    return allowed.length > 0 ? { in: allowed } : null;
+  }
+  if (key === 'bo4ElixirMode') {
+    const critS = (critVal as string) in BO4_ELIXIR_STRICTNESS ? BO4_ELIXIR_STRICTNESS[critVal as keyof typeof BO4_ELIXIR_STRICTNESS] : 999;
+    const allowed = (Object.entries(BO4_ELIXIR_STRICTNESS) as [keyof typeof BO4_ELIXIR_STRICTNESS, number][]).filter(([, s]) => s <= critS).map(([k]) => k);
+    return allowed.length > 0 ? { in: allowed } : null;
+  }
+  if (key === 'bocwSupportMode') {
+    const allowed = (critVal === 'WITH_SUPPORT') ? ['WITHOUT_SUPPORT', 'WITH_SUPPORT'] : ['WITHOUT_SUPPORT'];
+    return { in: allowed };
+  }
+  if (key === 'bo6SupportMode' || key === 'bo7SupportMode') {
+    const allowed = (critVal === 'WITH_SUPPORT') ? ['NO_SUPPORT', 'WITH_SUPPORT'] : ['NO_SUPPORT'];
+    return { in: allowed };
+  }
+  if (key === 'bo6GobbleGumMode') {
+    const critS = (critVal as string) in BO6_GUM_STRICTNESS ? BO6_GUM_STRICTNESS[critVal as keyof typeof BO6_GUM_STRICTNESS] : 999;
+    const allowed = (Object.entries(BO6_GUM_STRICTNESS) as [keyof typeof BO6_GUM_STRICTNESS, number][]).filter(([, s]) => s <= critS).map(([k]) => k);
+    return allowed.length > 0 ? { in: allowed } : null;
+  }
+  if (key === 'useFortuneCards') {
+    if (critVal === true) return { in: [true, false] };
+    return { equals: false };
+  }
+  return { equals: critVal };
 }
 
 // Uses pre-fetched context only (no DB). ROUND_MILESTONE, CHALLENGE_COMPLETE, EASTER_EGG_COMPLETE.

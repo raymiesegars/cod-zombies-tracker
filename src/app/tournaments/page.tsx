@@ -650,10 +650,10 @@ export default function TournamentsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-bunker-950">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-bunker-950 min-w-0 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-6 xl:px-8 py-6 sm:py-8 min-w-0">
         {/* Rules at top + Prize pool & Add to Prizepool */}
-        <section className="mb-8 flex flex-col sm:flex-row sm:items-start gap-6 sm:gap-8">
+        <section className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start gap-6 sm:gap-8 min-w-0">
           <div className="max-w-2xl flex-1 min-w-0">
             <h2 className="text-lg font-zombies text-white mb-2">Rules</h2>
             <ul className="text-sm text-bunker-400 space-y-1 list-disc list-inside">
@@ -863,10 +863,10 @@ export default function TournamentsPage() {
           const userHasVoted = !!poll?.userVoteOptionId;
           const pollFirst = activePoll && !userHasVoted;
           return (
-        <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-6 lg:gap-8 items-stretch min-w-0">
           {/* Poll: full width row, first when active+not voted else last. Wide: Leaderboard 60% | Trophy 40% side by side. */}
-          <div className={`flex flex-col min-h-0 lg:col-span-2 ${pollFirst ? 'order-1' : 'order-3'}`}>
-            <Card variant="bordered" className="border-bunker-700 flex flex-col min-h-[320px] lg:min-h-[380px] w-full">
+          <div className={`flex flex-col min-h-0 min-w-0 lg:col-span-2 ${pollFirst ? 'order-1' : 'order-3'}`}>
+            <Card variant="bordered" className="border-bunker-700 flex flex-col min-h-[320px] lg:min-h-[380px] w-full min-w-0 overflow-hidden">
               <CardHeader className="flex flex-row items-center justify-between gap-3 flex-wrap shrink-0">
                 <CardTitle className="text-lg font-zombies text-white flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-blood-500 shrink-0" />
@@ -981,8 +981,8 @@ export default function TournamentsPage() {
           </div>
 
           {/* Tournament Leaderboard: left 3/5 on wide screens */}
-          <div className={`flex flex-col min-h-0 h-full ${pollFirst ? 'order-2' : 'order-1'}`}>
-            <Card variant="bordered" className="border-bunker-700 flex flex-col flex-1 min-h-[320px] lg:min-h-[380px] w-full">
+          <div className={`flex flex-col min-h-0 min-w-0 h-full ${pollFirst ? 'order-2' : 'order-1'}`}>
+            <Card variant="bordered" className="border-bunker-700 flex flex-col flex-1 min-h-[320px] lg:min-h-[380px] w-full min-w-0 overflow-hidden">
               <CardHeader className="flex flex-row items-center justify-between gap-3 flex-wrap shrink-0">
                 <CardTitle className="text-lg font-zombies text-white flex items-center gap-2">
                   <Medal className="w-5 h-5 text-blood-500 shrink-0" />
@@ -1147,8 +1147,8 @@ export default function TournamentsPage() {
           </div>
 
           {/* Trophy leaderboard: right 2/5 on wide screens */}
-          <div className={`flex flex-col min-h-0 h-full ${pollFirst ? 'order-3' : 'order-2'}`}>
-            <Card variant="bordered" className="border-bunker-700 flex flex-col flex-1 min-h-[280px] lg:min-h-[380px] w-full">
+          <div className={`flex flex-col min-h-0 min-w-0 h-full ${pollFirst ? 'order-3' : 'order-2'}`}>
+            <Card variant="bordered" className="border-bunker-700 flex flex-col flex-1 min-h-[280px] lg:min-h-[380px] w-full min-w-0 overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between gap-2 shrink-0">
               <CardTitle className="text-base font-zombies text-white flex items-center gap-2">
                 <Award className="w-4 h-4 text-amber-500 shrink-0" />

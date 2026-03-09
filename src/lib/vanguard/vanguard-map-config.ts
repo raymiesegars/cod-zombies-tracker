@@ -48,6 +48,10 @@ export type VanguardMapConfig = {
   exfilR20WR?: number;
   eeSpeedrunWR?: number;
   buildEeSpeedrunWR?: number;
+  /** With-void WRs for Der Anfang/Terra (base band). */
+  speedrunWRsWithVoid?: { r10?: number; r20?: number; exfilR5?: number; exfilR10?: number; eeSpeedrun?: number };
+  /** Without-void WRs for Der Anfang/Terra (restricted band). */
+  speedrunWRsNoVoid?: { r10?: number; r20?: number; exfilR5?: number; exfilR10?: number; eeSpeedrun?: number };
   highRoundWR: number;
   noDownsWR: number;
   firstRoomWR?: number;
@@ -60,17 +64,18 @@ export const VANGUARD_MAP_CONFIG: Record<VanguardMapSlug, VanguardMapConfig> = {
   'der-anfang': {
     challengeTypes: [
       'HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_ARMOR',
-      'ROUND_10_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'EXFIL_R5_SPEEDRUN', 'EXFIL_R10_SPEEDRUN',
+      'ROUND_10_SPEEDRUN', 'EXFIL_R5_SPEEDRUN', 'EXFIL_R10_SPEEDRUN',
       'EASTER_EGG_SPEEDRUN',
     ],
     hasFirstRoom: false,
     speedrunWRs: {
       r10: min(21) + 30,
-      r30: min(50),
     },
     exfilR5WR: min(8) + 40,
     exfilR10WR: min(12) + 40,
     eeSpeedrunWR: min(9),
+    speedrunWRsWithVoid: { r10: min(21) + 30, exfilR5: min(8) + 40, exfilR10: min(12) + 40, eeSpeedrun: min(9) },
+    speedrunWRsNoVoid: { r10: min(45), exfilR5: min(17), exfilR10: min(21) + 30, eeSpeedrun: min(12) },
     highRoundWR: 222,
     noDownsWR: 186,
     noPerksWR: 54,
@@ -89,8 +94,10 @@ export const VANGUARD_MAP_CONFIG: Record<VanguardMapSlug, VanguardMapConfig> = {
       r20: min(50),
     },
     exfilR5WR: min(9),
-    exfilR10WR: min(20),
+    exfilR10WR: min(22) + 20,
     eeSpeedrunWR: min(21),
+    speedrunWRsWithVoid: { r10: min(24), r20: min(55), exfilR5: min(9), exfilR10: min(24) + 30, eeSpeedrun: min(21) },
+    speedrunWRsNoVoid: { r10: min(21), r20: min(51), exfilR5: min(9), exfilR10: min(22) + 20, eeSpeedrun: min(21) },
     highRoundWR: 186,
     noDownsWR: 181,
     noPerksWR: 92,

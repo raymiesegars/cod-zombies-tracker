@@ -42,6 +42,7 @@ import {
   buildSpeedrunTiersFromWR,
   getNoSpeedrunCategory,
 } from './wr-to-tiers';
+import { getBo4SpeedrunWRSeconds } from './bo4-speedrun-wr-data';
 import { hasFirstRoomGumMachineBo3 } from '@/lib/first-room-variants';
 
 const CHALLENGE_TYPES = [
@@ -1650,8 +1651,10 @@ function getSpeedrunWRSecondsFromConfig(
   }
   if (gameShortName === 'BO1' || gameShortName === 'BO2' || gameShortName === 'WW2' || gameShortName === 'VANGUARD' || gameShortName === 'AW') {
     const getCfg = gameShortName === 'BO1' ? getBo1MapConfig : gameShortName === 'BO2' ? getBo2MapConfig : gameShortName === 'WW2' ? getWw2MapConfig : gameShortName === 'VANGUARD' ? getVanguardMapConfig : getAwMapConfig;
-    const c = getCfg(mapSlug) as { speedrunWRs?: Record<string, number>; eeSpeedrunWR?: number } | null;
-    const s = c?.speedrunWRs;
+    const c = getCfg(mapSlug) as { speedrunWRs?: Record<string, number>; speedrunWRsWithVoid?: Record<string, number>; eeSpeedrunWR?: number } | null;
+    const s = (gameShortName === 'VANGUARD' && ['der-anfang', 'terra-maledicta'].includes(mapSlug))
+      ? c?.speedrunWRsWithVoid
+      : c?.speedrunWRs;
     if (challengeType === 'EASTER_EGG_SPEEDRUN') return c?.eeSpeedrunWR ?? (s && 'eeSpeedrunWR' in s ? (s as Record<string, number>).eeSpeedrunWR : null) ?? null;
     return (s && key && key in s ? (s as Record<string, number>)[key] : null) ?? null;
   }
@@ -1671,10 +1674,10 @@ function getSpeedrunWRSecondsFromConfigRestricted(
     }
     return null;
   }
-  const key = challengeType === 'ROUND_30_SPEEDRUN' ? 'r30' : challengeType === 'ROUND_50_SPEEDRUN' ? 'r50' : challengeType === 'ROUND_70_SPEEDRUN' ? 'r70' : challengeType === 'ROUND_100_SPEEDRUN' ? 'r100' : challengeType === 'ROUND_200_SPEEDRUN' ? 'r200' : challengeType === 'EXFIL_SPEEDRUN' ? 'exfilSpeedrunWR' : challengeType === 'EXFIL_R10_SPEEDRUN' ? 'exfilR10WR' : challengeType === 'EXFIL_R20_SPEEDRUN' ? 'exfilR20WR' : challengeType === 'EASTER_EGG_SPEEDRUN' ? 'eeSpeedrunWR' : challengeType === 'BUILD_EE_SPEEDRUN' ? 'buildEeSpeedrunWR' : '';
+  const key = challengeType === 'ROUND_30_SPEEDRUN' ? 'r30' : challengeType === 'ROUND_50_SPEEDRUN' ? 'r50' : challengeType === 'ROUND_70_SPEEDRUN' ? 'r70' : challengeType === 'ROUND_100_SPEEDRUN' ? 'r100' : challengeType === 'ROUND_200_SPEEDRUN' ? 'r200' : challengeType === 'EXFIL_SPEEDRUN' ? 'exfilSpeedrunWR' : challengeType === 'EXFIL_R10_SPEEDRUN' ? 'exfilR10WR' : challengeType === 'EXFIL_R20_SPEEDRUN' ? 'exfilR20WR' : challengeType === 'EASTER_EGG_SPEEDRUN' ? 'eeSpeedrunWR' : challengeType === 'BUILD_EE_SPEEDRUN' ? 'buildEeSpeedrunWR' : challengeType === 'ROUND_10_SPEEDRUN' ? 'r10' : challengeType === 'ROUND_20_SPEEDRUN' ? 'r20' : '';
   if (gameShortName === 'VANGUARD') {
-    const c = getVanguardMapConfig(mapSlug) as { speedrunWRsNoRampage?: Record<string, number> } | null;
-    const s = c?.speedrunWRsNoRampage;
+    const c = getVanguardMapConfig(mapSlug) as { speedrunWRsNoRampage?: Record<string, number>; speedrunWRsNoVoid?: Record<string, number> } | null;
+    const s = ['der-anfang', 'terra-maledicta'].includes(mapSlug) ? c?.speedrunWRsNoVoid : c?.speedrunWRsNoRampage;
     if (!s || !key) return null;
     return (key in s ? (s as Record<string, number>)[key] : null) ?? null;
   }
@@ -1703,7 +1706,8 @@ export function getSpeedrunAchievementDefinitions(
   const r5r15Tiers = getR5R15TiersForMap(gameShortName, mapSlug);
   const mergedTiers: SpeedrunTiersByType = { ...tiersByType, ...r5r15Tiers };
   const rows: AchievementSeedRow[] = [];
-  // Speedrun splits: BO3/BO4 classic vs megas; BOCW/Vanguard/BO6/BO7 no rampage vs rampage; IW fate-only vs dcut
+  const vgVoidMaps = ['der-anfang', 'terra-maledicta'];
+  const isVgVoidMap = gameShortName === 'VANGUARD' && vgVoidMaps.includes(mapSlug);
   const restrictedModifier: Record<string, unknown> =
     gameShortName === 'BO3' ? { bo3GobbleGumMode: 'CLASSIC_ONLY' }
     : gameShortName === 'BO4' ? { bo4ElixirMode: 'CLASSIC_ONLY' }
@@ -1711,6 +1715,7 @@ export function getSpeedrunAchievementDefinitions(
     : gameShortName === 'BO6' ? { bo6GobbleGumMode: 'NO_GOBBLEGUMS', rampageInducerUsed: false }
     : gameShortName === 'BO7' ? { rampageInducerUsed: false }
     : gameShortName === 'IW' ? { useDirectorsCut: false }
+    : isVgVoidMap ? { vanguardVoidUsed: false }
     : gameShortName === 'VANGUARD' ? { rampageInducerUsed: false }
     : {};
   const hasRestricted = Object.keys(restrictedModifier).length > 0;
@@ -1718,16 +1723,64 @@ export function getSpeedrunAchievementDefinitions(
     gameShortName === 'BO3' || gameShortName === 'BO4' ? ' (Classic)'
     : gameShortName === 'BO7' ? ' (No Rampage, No Gums)'
     : gameShortName === 'BO6' ? ' (No Gum / No Rampage)'
-    : gameShortName === 'BOCW' || gameShortName === 'VANGUARD' ? ' (No Rampage)'
+    : gameShortName === 'BOCW' ? ' (No Rampage)'
+    : isVgVoidMap ? ' (Without Void)'
+    : gameShortName === 'VANGUARD' ? ' (No Rampage)'
     : gameShortName === 'IW' ? ' (Fate Only)'
     : '';
 
   const noCategory = getNoSpeedrunCategory;
+  const isBo4 = gameShortName === 'BO4';
+  const BO4_DIFFS = ['NORMAL', 'HARDCORE', 'REALISTIC'] as const;
+
   for (const [challengeType, tiers] of Object.entries(mergedTiers)) {
     const label = SPEEDRUN_TYPE_LABELS[challengeType] ?? challengeType.replace(/_/g, ' ');
     const configWrSec = getSpeedrunWRSecondsFromConfig(gameShortName, mapSlug, challengeType);
     const configRestrictedSec = getSpeedrunWRSecondsFromConfigRestricted(gameShortName, mapSlug, challengeType);
     const categoryKey = noCategory(challengeType);
+    const baseXpRewards = tiers.map((t) => t.xpReward);
+    const restrictedXpRewards = baseXpRewards.map((x) => x * 2);
+
+    if (isBo4) {
+      for (const difficulty of BO4_DIFFS) {
+        const wrAll = getBo4SpeedrunWRSeconds(mapSlug, challengeType, difficulty, 'all');
+        const wrClassic = hasRestricted ? getBo4SpeedrunWRSeconds(mapSlug, challengeType, difficulty, 'classic') : null;
+        const wrMegas = wrAll ?? getWRTimeForSeed(gameShortName, categoryKey, mapSlug, configWrSec ?? undefined, { variant: 'megas', useSpeedrunVariant: true });
+        const wrRestricted = wrClassic ?? (hasRestricted ? getWRTimeForSeed(gameShortName, categoryKey, mapSlug, configWrSec ?? undefined, { variant: 'restricted', useSpeedrunVariant: true, configRestrictedFallbackSeconds: configRestrictedSec ?? undefined }) : null);
+        const baseTiers = wrMegas != null ? buildSpeedrunTiersFromWR(wrMegas, baseXpRewards, 1.05) : tiers;
+        const restrictedTiers = hasRestricted && wrRestricted != null ? buildSpeedrunTiersFromWR(wrRestricted, restrictedXpRewards, 1.05) : null;
+        for (let i = 0; i < baseTiers.length; i++) {
+          const { maxTimeSeconds, xpReward } = baseTiers[i]!;
+          const timeStr = formatSpeedrunTime(maxTimeSeconds).replace(/:/g, '-');
+          const slug = `${challengeType.toLowerCase().replace(/_/g, '-')}-under-${timeStr}`.replace(/\s/g, '-');
+          const rarity = i === baseTiers.length - 1 ? 'LEGENDARY' : i >= baseTiers.length - 2 ? 'EPIC' : i >= baseTiers.length - 3 ? 'RARE' : 'UNCOMMON';
+          const diffLabel = difficulty.charAt(0) + difficulty.slice(1).toLowerCase();
+          rows.push({
+            slug,
+            name: `${label} in under ${formatSpeedrunTime(maxTimeSeconds)} (${diffLabel})`,
+            type: 'CHALLENGE_COMPLETE',
+            criteria: { challengeType, maxTimeSeconds, difficulty },
+            xpReward: Math.max(MIN_ACHIEVEMENT_XP, Math.floor(xpReward * BO4_DIFFICULTY_XP_MULTIPLIER[difficulty])),
+            rarity,
+            difficulty,
+          });
+          if (hasRestricted) {
+            const resTier = restrictedTiers?.[i] ?? { maxTimeSeconds, xpReward: xpReward * 2 };
+            rows.push({
+              slug: `${slug}-restricted`,
+              name: `${label} in under ${formatSpeedrunTime(resTier.maxTimeSeconds)}${restrictedLabelSuffix} (${diffLabel})`,
+              type: 'CHALLENGE_COMPLETE',
+              criteria: { challengeType, maxTimeSeconds: resTier.maxTimeSeconds, ...restrictedModifier, difficulty },
+              xpReward: Math.max(MIN_ACHIEVEMENT_XP, Math.floor(resTier.xpReward * BO4_DIFFICULTY_XP_MULTIPLIER[difficulty])),
+              rarity,
+              difficulty,
+            });
+          }
+        }
+      }
+      continue;
+    }
+
     const wrTimeMegas = getWRTimeForSeed(gameShortName, categoryKey, mapSlug, configWrSec ?? undefined, { variant: 'megas', useSpeedrunVariant: true });
     const wrTimeRestricted = hasRestricted
       ? getWRTimeForSeed(gameShortName, categoryKey, mapSlug, configWrSec ?? undefined, {
@@ -1736,46 +1789,32 @@ export function getSpeedrunAchievementDefinitions(
           configRestrictedFallbackSeconds: configRestrictedSec ?? undefined,
         })
       : null;
-    const baseXpRewards = tiers.map((t) => t.xpReward);
-    const restrictedXpRewards = baseXpRewards.map((x) => x * 2);
     const baseTiers = wrTimeMegas != null ? buildSpeedrunTiersFromWR(wrTimeMegas, baseXpRewards) : tiers;
     const restrictedTiers = hasRestricted && wrTimeRestricted != null ? buildSpeedrunTiersFromWR(wrTimeRestricted, restrictedXpRewards) : null;
-    const isBo4 = gameShortName === 'BO4';
+    const baseCriteriaModifier = isVgVoidMap ? { vanguardVoidUsed: true } : {};
     for (let i = 0; i < baseTiers.length; i++) {
       const { maxTimeSeconds, xpReward } = baseTiers[i]!;
       const timeStr = formatSpeedrunTime(maxTimeSeconds).replace(/:/g, '-');
       const slug = `${challengeType.toLowerCase().replace(/_/g, '-')}-under-${timeStr}`.replace(/\s/g, '-');
       const rarity = i === baseTiers.length - 1 ? 'LEGENDARY' : i >= baseTiers.length - 2 ? 'EPIC' : i >= baseTiers.length - 3 ? 'RARE' : 'UNCOMMON';
-      const baseRow: AchievementSeedRow = {
+      rows.push({
         slug,
         name: `${label} in under ${formatSpeedrunTime(maxTimeSeconds)}`,
         type: 'CHALLENGE_COMPLETE',
-        criteria: { challengeType, maxTimeSeconds },
+        criteria: { challengeType, maxTimeSeconds, ...baseCriteriaModifier },
         xpReward,
         rarity,
-      };
-      if (isBo4) {
-        rows.push(...expandBo4AchievementDifficulties(baseRow));
-      } else {
-        rows.push(baseRow);
-      }
+      });
       if (hasRestricted) {
         const resTier = restrictedTiers?.[i] ?? { maxTimeSeconds, xpReward: xpReward * 2 };
-        const restrictedMaxTime = resTier.maxTimeSeconds;
-        const restrictedXp = resTier.xpReward;
-        const restrictedRow: AchievementSeedRow = {
+        rows.push({
           slug: `${slug}-restricted`,
-          name: `${label} in under ${formatSpeedrunTime(restrictedMaxTime)}${restrictedLabelSuffix}`,
+          name: `${label} in under ${formatSpeedrunTime(resTier.maxTimeSeconds)}${restrictedLabelSuffix}`,
           type: 'CHALLENGE_COMPLETE',
-          criteria: { challengeType, maxTimeSeconds: restrictedMaxTime, ...restrictedModifier },
-          xpReward: restrictedXp,
+          criteria: { challengeType, maxTimeSeconds: resTier.maxTimeSeconds, ...restrictedModifier },
+          xpReward: resTier.xpReward,
           rarity,
-        };
-        if (isBo4) {
-          rows.push(...expandBo4AchievementDifficulties(restrictedRow));
-        } else {
-          rows.push(restrictedRow);
-        }
+        });
       }
     }
   }

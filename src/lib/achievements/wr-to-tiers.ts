@@ -306,13 +306,19 @@ export function getWRTimeForSeed(
 
 export { roundWRToAchievementRound, timeWRToAchievementSeconds };
 
-/** Build speedrun tiers from WR time (seconds). Hardest tier = 4% slower than WR. Returns 4 tiers. */
+/** Min seconds to add for top tier when WR is very short (5% of 60s = 3s is insufficient). */
+const MIN_TOP_TIER_BUFFER_SECONDS = 15;
+
+/** Build speedrun tiers from WR time (seconds). Hardest tier = pctSlower slower than WR (default 4%). For short runs (<5min), uses min buffer so top tier is achievable. Returns 4 tiers. */
 export function buildSpeedrunTiersFromWR(
   wrTimeSeconds: number,
-  xpRewards: number[] = [100, 400, 1000, 2500]
+  xpRewards: number[] = [100, 400, 1000, 2500],
+  pctSlower: number = 1.04
 ): { maxTimeSeconds: number; xpReward: number }[] {
-  const cap = timeWRToAchievementSeconds(wrTimeSeconds);
-  const ratios = [2.0, 1.5, 1.2, 1.04];
+  const pctBased = Math.round(wrTimeSeconds * pctSlower);
+  const minBufferBased = wrTimeSeconds < 300 ? wrTimeSeconds + MIN_TOP_TIER_BUFFER_SECONDS : 0;
+  const cap = Math.max(pctBased, minBufferBased || pctBased);
+  const ratios = [2.0, 1.5, 1.2, pctSlower];
   return ratios.map((r, i) => ({
     maxTimeSeconds: i === ratios.length - 1 ? cap : Math.round(wrTimeSeconds * r),
     xpReward: xpRewards[i] ?? 2500,
