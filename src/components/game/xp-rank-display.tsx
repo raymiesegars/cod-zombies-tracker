@@ -121,12 +121,13 @@ export function XpRankDisplay({
   );
 
   if (showBothXpRanks) {
+    const barContainer = 'rounded-lg border p-3 sm:p-4';
     return (
       <div className={cn('flex flex-col gap-4', className)}>
-        <div className="rounded-lg border border-blue-500/40 bg-blue-950/20 p-3 sm:p-4">
+        <div className={cn(barContainer, 'border-blue-500/40 bg-blue-950/20')}>
           <SingleXpBar totalXp={verifiedTotalXp} isVerified showCheckmark size={size} />
         </div>
-        <div>
+        <div className={cn(barContainer, 'border-bunker-600 bg-bunker-800/30')}>
           <SingleXpBar totalXp={totalXp} isVerified={false} size={size} />
         </div>
       </div>

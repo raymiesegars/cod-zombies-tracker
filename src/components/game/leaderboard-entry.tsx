@@ -139,8 +139,8 @@ export function LeaderboardEntry({
           {displayName}
         </Link>
         {(showVerifiedBadge || (entry as LeaderboardEntryType & { isVerified?: boolean }).isVerified) && (
-          <span className="flex-shrink-0 min-w-[1rem] w-4 h-4 inline-flex items-center justify-center rounded-full bg-blue-500/90 text-white" title={showVerifiedBadge ? 'Verified XP' : 'Verified run'} aria-hidden>
-            <ShieldCheck className="w-2.5 h-2.5" strokeWidth={2.5} />
+          <span className="flex-shrink-0 min-w-[1rem] w-4 h-4 inline-grid place-items-center rounded-full bg-blue-500/90 text-white" title={showVerifiedBadge ? 'Verified XP' : 'Verified run'} aria-hidden>
+            <ShieldCheck className="w-2.5 h-2.5 block shrink-0" strokeWidth={2.5} />
           </span>
         )}
       </div>

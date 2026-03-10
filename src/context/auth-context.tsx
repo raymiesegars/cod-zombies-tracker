@@ -91,6 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const data = await response.json();
         setProfile(data);
         profileFetchedRef.current = true;
+        if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('czt_first_login', '1');
         return data;
       }
       return null;
