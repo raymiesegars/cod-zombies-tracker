@@ -509,8 +509,8 @@ function AchievementsTabContent({
                     <div className="flex items-center gap-3 min-w-0 min-h-[2.75rem] overflow-hidden">
                       {unlocked ? (
                         verifiedOnly && isVerified ? (
-                          <span className="flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white" title="Verified">
-                            <ShieldCheck className="w-3.5 h-3.5" />
+                          <span className="flex-shrink-0 inline-grid place-items-center w-5 h-5 rounded-full bg-blue-500 text-white" title="Verified">
+                            <ShieldCheck className="w-3.5 h-3.5 block shrink-0" />
                           </span>
                         ) : (
                           <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-military-400" />
@@ -2405,14 +2405,19 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                             grid-cols-[auto_minmax(0,1fr)_auto]
                             sm:grid-cols-[auto_minmax(0,1fr)_auto_auto]
                             md:grid-cols-[auto_minmax(0,1fr)_4.5rem_auto_auto]
-                            lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,8rem)_4.5rem_auto_auto_auto]">
+                            lg:grid-cols-[auto_minmax(0,1fr)_auto_minmax(0,8rem)_4.5rem_auto_auto_auto]">
                             <ChallengeTypeIcon type={item.log.challenge.type ?? 'HIGHEST_ROUND'} className="w-5 h-5 text-blood-400 flex-shrink-0" size={20} />
                             <span className="font-medium text-white truncate min-w-0 flex items-center gap-1.5">
                               {item.log.challenge.name}
                               {(item.log as { isVerified?: boolean }).isVerified && (
-                                <span className="flex-shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500/90 text-white" title="Verified run">
-                                  <ShieldCheck className="w-2.5 h-2.5" strokeWidth={2.5} />
+                                <span className="flex-shrink-0 inline-grid place-items-center w-4 h-4 rounded-full bg-blue-500/90 text-white" title="Verified run">
+                                  <ShieldCheck className="w-2.5 h-2.5 block shrink-0" strokeWidth={2.5} />
                                 </span>
+                              )}
+                            </span>
+                            <span className="hidden lg:flex flex-shrink-0">
+                              {slug && hasNoJugSupport(slug, map?.game?.shortName) && (item.log as unknown as { wawNoJug?: boolean | null }).wawNoJug === true && (
+                                <span className="px-1.5 py-0.5 rounded border border-blood-600/60 bg-blood-950/70 text-white text-xs">No Jug</span>
                               )}
                             </span>
                             <span className="hidden lg:block text-sm text-bunker-500 truncate min-w-0" title={item.log.notes ?? undefined}>
@@ -2428,9 +2433,6 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                               {item.log.playerCount}
                               {map?.game?.shortName === 'BO4' && item.log.difficulty && (
                                 <span className="text-bunker-500">· {getBo4DifficultyLabel(item.log.difficulty)}</span>
-                              )}
-                              {slug && hasNoJugSupport(slug, map?.game?.shortName) && (item.log as unknown as { wawNoJug?: boolean | null }).wawNoJug === true && (
-                                <span className="px-1.5 py-0.5 rounded border border-blood-600/60 bg-blood-950/70 text-blood-300 text-xs">No Jug</span>
                               )}
                               {map?.game?.shortName === 'BO6' && (
                                 <>
@@ -2485,8 +2487,8 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                             <span className="font-medium text-white truncate min-w-0 flex items-center gap-1.5">
                               {item.log.easterEgg.name}
                               {(item.log as { isVerified?: boolean }).isVerified && (
-                                <span className="flex-shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-500/90 text-white" title="Verified run">
-                                  <ShieldCheck className="w-2.5 h-2.5" strokeWidth={2.5} />
+                                <span className="flex-shrink-0 inline-grid place-items-center w-4 h-4 rounded-full bg-blue-500/90 text-white" title="Verified run">
+                                  <ShieldCheck className="w-2.5 h-2.5 block shrink-0" strokeWidth={2.5} />
                                 </span>
                               )}
                             </span>

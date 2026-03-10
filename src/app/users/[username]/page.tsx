@@ -550,8 +550,8 @@ function AchievementsSection({
                                 <div className="flex items-center gap-3 min-w-0 min-h-[2.75rem]">
                                   {unlocked ? (
                                     verifiedOnly && verifiedSet.has(a.id) ? (
-                                      <span className="flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white" title="Verified">
-                                        <ShieldCheck className="w-3.5 h-3.5" />
+                                      <span className="flex-shrink-0 inline-grid place-items-center w-5 h-5 rounded-full bg-blue-500 text-white" title="Verified">
+                                        <ShieldCheck className="w-3.5 h-3.5 block shrink-0" />
                                       </span>
                                     ) : (
                                       <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-military-400" />

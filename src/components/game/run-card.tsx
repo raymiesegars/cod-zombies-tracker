@@ -72,10 +72,10 @@ export function RunCard({
                 : (log as EasterEggLog).easterEgg.name}
               {(log as ChallengeLog & EasterEggLog).isVerified && (
                 <span
-                  className="flex-shrink-0 w-4 h-4 inline-flex justify-center rounded-full bg-blue-500/90 text-white"
+                  className="flex-shrink-0 w-4 h-4 inline-grid place-items-center rounded-full bg-blue-500/90 text-white"
                   title="Verified"
                 >
-                  <ShieldCheck className="w-2.5 h-2.5" strokeWidth={2.5} />
+                  <ShieldCheck className="w-2.5 h-2.5 block shrink-0" strokeWidth={2.5} />
                 </span>
               )}
             </span>

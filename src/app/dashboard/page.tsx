@@ -49,6 +49,11 @@ export default function DashboardPage() {
       return;
     }
     if (profile?.username) {
+      if (typeof window !== 'undefined' && sessionStorage.getItem('czt_first_login')) {
+        sessionStorage.removeItem('czt_first_login');
+        router.replace('/settings');
+        return;
+      }
       router.replace(`/users/${profile.username}`);
     }
   }, [user, profile, isLoading, router]);
