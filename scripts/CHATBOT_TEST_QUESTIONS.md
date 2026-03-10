@@ -4,15 +4,28 @@ Use these to validate retrieval and answers before pushing. ✓ = has keyword tr
 
 ---
 
-## ✓ Point Drops (BO1) – has keywords
+## ✓ Terminology (ZWR Glossary)
+
+| Question | Expected source | Expected answer |
+|----------|-----------------|-----------------|
+| What is g-spawn? | ZWR Terminology Glossary | Definition from zwr.gg/wiki/zombies-terminology-glossary – g-spawn (or G-spawn) = round where you get your first guaranteed max ammo. |
+| What does SPH mean? | ZWR Terminology Glossary | SPH = spawns per horde (or similar). Link to glossary. |
+| Define AAT | ZWR Terminology Glossary | AAT = Alternative Ammo Type. Glossary definition. |
+| What is spawn manip? | ZWR Terminology Glossary | Spawn manipulation – glossary definition. |
+
+---
+
+## ✓ Point Drops / Wonder Weapons (BO1) – has keywords
+
+Data = wonder weapons (rayguns) needed to clear the round, Waffe shots per horde, drop chances. NOT "shot chance" or probability.
 
 | Question | Expected chunk | Expected answer |
 |----------|----------------|-----------------|
-| What's the raygun PAP shot chance for solo vs 4p? | Point Drops | Round 1: Solo 0.003 (0.6 shots), 4p 0.012 (2.4 shots). Values vary by round. |
+| How many raygun PAP shots needed to clear round 1 solo vs 4p? | Point Drops | Round 1: Solo 0.6 shots, 4p 2.4 shots. (Shots = rayguns needed to clear round.) |
 | How many Waffe shots per horde on round 5? | Point Drops | 2.4 shots (solo 1p). 2.7 (2p), 3.2 (3p), 3.7 (4p). |
 | What's the drop chance for solo round 1 on Ascension? | Point Drops | DROPS = 0.01 (1%) per zombie. Note: BO1 maps only, not WaW. |
-| DG2 PAP shot chance round 10 solo? | Point Drops | Column DG2 (PAP) – look up round 10. |
-| VR-11 PAP shots per zombie round 5? | Point Drops | VR-11 (PAP) columns in the table. |
+| DG2 shots needed round 10 solo? | Point Drops | DG2 (PAP) column – look up round 10. Wonder-weapon shots needed. |
+| VR-11 shots needed round 5? | Point Drops | VR-11 (PAP) columns in the table (wonder weapons needed per round). |
 
 ---
 
@@ -117,7 +130,7 @@ Use these to validate retrieval and answers before pushing. ✓ = has keyword tr
 
 | Chunk title contains | Add keywords |
 |----------------------|--------------|
-| Point Drops | ✓ raygun, waffe, shot chance, drop chance |
+| Point Drops | ✓ raygun, waffe, shots needed, wonder weapons, drop chance |
 | Instakill Rounds | ✓ health scale, dog round, zombie health |
 | Map Reset Times | reset, 165h, resets, hours |
 | Round – Per-round / Cumulative | round time, per round, cumulative, total time to round |

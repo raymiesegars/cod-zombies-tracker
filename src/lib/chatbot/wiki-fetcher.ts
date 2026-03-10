@@ -201,7 +201,9 @@ export async function fetchAndStoreZwrWiki(verbose = false): Promise<{ fetched: 
         const bodyText = await page.evaluate(() => document.body?.innerText ?? '');
         await page.close();
 
-        const content = bodyText.slice(0, MAX_CONTENT_CHARS);
+        const isGlossary = url.includes('zombies-terminology-glossary');
+        const maxChars = isGlossary ? 10_000 : MAX_CONTENT_CHARS;
+        const content = bodyText.slice(0, maxChars);
         if (!content.trim() || content.length < 100) {
           if (verbose) console.log(`  SKIP (too short): ${url}`);
           continue;
