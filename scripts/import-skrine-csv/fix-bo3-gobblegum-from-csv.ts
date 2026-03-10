@@ -88,6 +88,7 @@ const LOG_MODIFIER_SELECT = {
   bocwSupportMode: true,
   bo6GobbleGumMode: true,
   bo6SupportMode: true,
+  bo7GobbleGumMode: true,
   bo7SupportMode: true,
   rampageInducerUsed: true,
 } as const;
@@ -103,6 +104,7 @@ type LogModifiers = {
   bocwSupportMode: string | null;
   bo6GobbleGumMode: string | null;
   bo6SupportMode: string | null;
+  bo7GobbleGumMode: string | null;
   bo7SupportMode: string | null;
   rampageInducerUsed: boolean | null;
 };
@@ -166,6 +168,8 @@ function buildCorrectModifiers(
     if (mods.rampageInducerUsed !== undefined) out.rampageInducerUsed = mods.rampageInducerUsed;
   }
   if (gameCode === 'bo7') {
+    const gg = (mods.bo7GobbleGumMode as string) ?? DEFAULTS.bo7GobbleGumMode;
+    if (gg != null) out.bo7GobbleGumMode = gg;
     const v = (mods.bo7SupportMode as string) ?? DEFAULTS.bo7SupportMode;
     if (v != null) out.bo7SupportMode = v;
     if (mods.rampageInducerUsed !== undefined) out.rampageInducerUsed = mods.rampageInducerUsed;

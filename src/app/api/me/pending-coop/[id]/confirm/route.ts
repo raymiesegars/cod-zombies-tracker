@@ -74,6 +74,7 @@ export async function POST(
       bocwSupportMode: true,
       bo6GobbleGumMode: true,
       bo6SupportMode: true,
+      bo7GobbleGumMode: true,
       bo7SupportMode: true,
       bo7IsCursedRun: true,
       bo7RelicsUsed: true,
@@ -137,6 +138,7 @@ export async function POST(
             ...(log.bocwSupportMode != null && { bocwSupportMode: log.bocwSupportMode }),
             ...(log.bo6GobbleGumMode != null && { bo6GobbleGumMode: log.bo6GobbleGumMode }),
             ...(log.bo6SupportMode != null && { bo6SupportMode: log.bo6SupportMode }),
+            ...(log.bo7GobbleGumMode != null && { bo7GobbleGumMode: log.bo7GobbleGumMode }),
             ...(log.bo7SupportMode != null && { bo7SupportMode: log.bo7SupportMode }),
             ...(log.bo7IsCursedRun != null && { bo7IsCursedRun: log.bo7IsCursedRun }),
             ...(log.bo7RelicsUsed != null && { bo7RelicsUsed: log.bo7RelicsUsed }),
@@ -180,6 +182,7 @@ export async function POST(
             (tags.bocwSupportMode === undefined || tags.bocwSupportMode === (log.bocwSupportMode ?? null)) &&
             (tags.bo6GobbleGumMode === undefined || tags.bo6GobbleGumMode === (log.bo6GobbleGumMode ?? null)) &&
             (tags.bo6SupportMode === undefined || tags.bo6SupportMode === (log.bo6SupportMode ?? null)) &&
+            (tags.bo7GobbleGumMode === undefined || tags.bo7GobbleGumMode === (log.bo7GobbleGumMode ?? null)) &&
             (tags.bo7SupportMode === undefined || tags.bo7SupportMode === (log.bo7SupportMode ?? null)) &&
             (tags.bo7IsCursedRun === undefined || tags.bo7IsCursedRun === (log.bo7IsCursedRun ?? false)) &&
             (tags.bo7RelicsUsed === undefined || (Array.isArray(tags.bo7RelicsUsed) && Array.isArray(log.bo7RelicsUsed) && arrEq(tags.bo7RelicsUsed as unknown[], log.bo7RelicsUsed as unknown[]))) &&

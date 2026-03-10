@@ -51,6 +51,7 @@ type LogWithMeta = {
   bocwSupportMode?: string | null;
   bo6GobbleGumMode?: string | null;
   bo6SupportMode?: string | null;
+  bo7GobbleGumMode?: string | null;
   bo7SupportMode?: string | null;
   bo7IsCursedRun?: boolean | null;
   bo7RelicsUsed?: string[];
@@ -112,6 +113,16 @@ function getFilterKeyVariants(log: LogWithMeta, gameShortName: string, mapSlug?:
     }
   }
   if (isBo7Game(gameShortName)) {
+    const gg = log.bo7GobbleGumMode ?? '';
+    if (gg) {
+      const support = log.bo7SupportMode ?? '';
+      const ramp = log.rampageInducerUsed;
+      const parts: string[] = [`gg:${gg}`];
+      if (support) parts.push(`support:${support}`);
+      if (ramp !== undefined && ramp !== null) parts.push(`ramp:${ramp}`);
+      if (parts.length > 1) variants.push(parts.join('|'));
+      variants.push(`gg:${gg}`);
+    }
     const cursed = log.bo7IsCursedRun;
     const relics = log.bo7RelicsUsed ?? [];
     if (cursed !== undefined && cursed !== null) {
@@ -157,6 +168,8 @@ function getFilterLabels(filterKey: string): string[] {
       if (v === 'CLASSIC_ONLY') labels.push('Classic GobbleGums');
       else if (v === 'MEGA') labels.push('Mega GobbleGums');
       else if (v === 'NONE') labels.push('No GobbleGums');
+      else if (v === 'WITH_GOBBLEGUMS') labels.push('With GobbleGums');
+      else if (v === 'NO_GOBBLEGUMS') labels.push('No GobbleGums');
       else labels.push(`GobbleGum: ${v}`);
     } else if (k === 'aat') labels.push(v === 'true' ? 'With AATs' : 'No AATs');
     else if (k === 'elixir') labels.push(v === 'CLASSIC_ONLY' ? 'Classic Elixirs' : v === 'ALL_ELIXIRS_TALISMANS' ? 'All Elixirs' : `Elixir: ${v}`);
@@ -213,6 +226,15 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
       rampageInducerUsed: true,
       vanguardVoidUsed: true,
       ww2ConsumablesUsed: true,
+      bo3GobbleGumMode: true,
+      bo4ElixirMode: true,
+      bocwSupportMode: true,
+      bo6GobbleGumMode: true,
+      bo6SupportMode: true,
+      bo7GobbleGumMode: true,
+      bo7SupportMode: true,
+      bo7IsCursedRun: true,
+      bo7RelicsUsed: true,
       challenge: { select: { type: true, name: true } },
       map: { select: { slug: true, name: true, game: { select: { shortName: true } } } },
     },
@@ -245,6 +267,7 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
     bocwSupportMode?: string | null;
     bo6GobbleGumMode?: string | null;
     bo6SupportMode?: string | null;
+    bo7GobbleGumMode?: string | null;
     bo7SupportMode?: string | null;
     bo7IsCursedRun?: boolean | null;
     bo7RelicsUsed?: string[];
@@ -299,6 +322,7 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
         bocwSupportMode: r.bocwSupportMode,
         bo6GobbleGumMode: r.bo6GobbleGumMode,
         bo6SupportMode: r.bo6SupportMode,
+        bo7GobbleGumMode: r.bo7GobbleGumMode,
         bo7SupportMode: r.bo7SupportMode,
         bo7IsCursedRun: r.bo7IsCursedRun,
         bo7RelicsUsed: r.bo7RelicsUsed,

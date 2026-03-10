@@ -534,6 +534,7 @@ async function main() {
     const bo6GobbleGumMode = (mods.bo6GobbleGumMode as string) ?? null;
     const bo6SupportMode = (mods.bo6SupportMode as string) ?? null;
     const bo7SupportMode = (mods.bo7SupportMode as string) ?? (gameCode === 'bo7' ? DEFAULTS.bo7SupportMode : null);
+    const bo7GobbleGumMode = (mods.bo7GobbleGumMode as string) ?? (gameCode === 'bo7' ? DEFAULTS.bo7GobbleGumMode : null);
 
     if (skipExisting) {
       const existing = await findExistingChallengeLog(
@@ -639,6 +640,7 @@ async function main() {
         bo6GobbleGumMode,
         bo6SupportMode,
         bo7SupportMode,
+        bo7GobbleGumMode,
       };
 
       const challengeLog = await prisma.challengeLog.create({

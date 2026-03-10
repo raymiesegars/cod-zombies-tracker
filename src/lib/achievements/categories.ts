@@ -160,6 +160,7 @@ const RESTRICTION_CRITERIA_KEYS = [
   'bocwSupportMode',
   'bo6GobbleGumMode',
   'bo6SupportMode',
+  'bo7GobbleGumMode',
   'bo7SupportMode',
   'useFortuneCards',
   'useDirectorsCut',

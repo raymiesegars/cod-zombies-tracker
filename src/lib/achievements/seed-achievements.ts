@@ -1713,7 +1713,7 @@ export function getSpeedrunAchievementDefinitions(
     : gameShortName === 'BO4' ? { bo4ElixirMode: 'CLASSIC_ONLY' }
     : gameShortName === 'BOCW' ? { rampageInducerUsed: false }
     : gameShortName === 'BO6' ? { bo6GobbleGumMode: 'NO_GOBBLEGUMS', rampageInducerUsed: false }
-    : gameShortName === 'BO7' ? { rampageInducerUsed: false }
+    : gameShortName === 'BO7' ? { bo7GobbleGumMode: 'NO_GOBBLEGUMS', rampageInducerUsed: false }
     : gameShortName === 'IW' ? { useDirectorsCut: false }
     : isVgVoidMap ? { vanguardVoidUsed: false }
     : gameShortName === 'VANGUARD' ? { rampageInducerUsed: false }

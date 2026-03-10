@@ -32,7 +32,7 @@ import { isIwGame, isIwSpeedrunChallengeType, isSpeedrunChallengeType, getMinRou
 import { isBo3Game, BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT, getBo3GobbleGumLabel } from '@/lib/bo3';
 import { isBocwGame, BOCW_SUPPORT_MODES, BOCW_SUPPORT_DEFAULT, getBocwSupportLabel } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_GOBBLEGUM_DEFAULT, BO6_SUPPORT_MODES, BO6_SUPPORT_DEFAULT, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
-import { isBo7Game, BO7_SUPPORT_MODES, BO7_SUPPORT_DEFAULT, getBo7SupportLabel } from '@/lib/bo7';
+import { isBo7Game, BO7_GOBBLEGUM_MODES, BO7_GOBBLEGUM_DEFAULT, BO7_SUPPORT_MODES, BO7_SUPPORT_DEFAULT, getBo7GobbleGumLabel, getBo7SupportLabel } from '@/lib/bo7';
 import type { MapWithDetails, ChallengeType, PlayerCount } from '@/types';
 import { ChevronLeft, Save, CheckCircle, AlertCircle, BookOpen } from 'lucide-react';
 import { WAW_OFFICIAL_RULES } from '@/lib/waw/waw-official-rules';
@@ -363,6 +363,7 @@ export default function EditMapProgressPage() {
     bocwSupportMode?: string;
     bo6GobbleGumMode?: string;
     bo6SupportMode?: string;
+    bo7GobbleGumMode?: string;
     bo7SupportMode?: string;
     bo7IsCursedRun?: boolean;
     bo7RelicsUsed?: string[];
@@ -451,7 +452,7 @@ export default function EditMapProgressPage() {
             useFortuneCards?: boolean; useDirectorsCut?: boolean;
             bo3GobbleGumMode?: string; bo3AatUsed?: boolean;
             bo4ElixirMode?: string; bocwSupportMode?: string; bo6GobbleGumMode?: string; bo6SupportMode?: string;
-            bo7SupportMode?: string; bo7IsCursedRun?: boolean; bo7RelicsUsed?: string[];
+            bo7GobbleGumMode?: string; bo7SupportMode?: string; bo7IsCursedRun?: boolean; bo7RelicsUsed?: string[];
             bo2BankUsed?: boolean; rampageInducerUsed?: boolean; ww2ConsumablesUsed?: boolean;
             vanguardVoidUsed?: boolean;
           };
@@ -522,6 +523,7 @@ export default function EditMapProgressPage() {
               rampageInducerUsed: rollTags?.rampageInducerUsed ?? false,
             }),
             ...(isBo7 && {
+              bo7GobbleGumMode: rollTags?.bo7GobbleGumMode ?? BO7_GOBBLEGUM_DEFAULT,
               bo7SupportMode: rollTags?.bo7SupportMode ?? BO7_SUPPORT_DEFAULT,
               bo7IsCursedRun: rollTags?.bo7IsCursedRun ?? false,
               bo7RelicsUsed: rollTags?.bo7RelicsUsed ?? [],
@@ -805,6 +807,7 @@ export default function EditMapProgressPage() {
               bo6SupportMode: form.bo6SupportMode ?? BO6_SUPPORT_DEFAULT,
             }),
             ...(isBo7 && {
+              bo7GobbleGumMode: form.bo7GobbleGumMode ?? BO7_GOBBLEGUM_DEFAULT,
               bo7SupportMode: form.bo7SupportMode ?? BO7_SUPPORT_DEFAULT,
               bo7IsCursedRun: form.bo7IsCursedRun ?? false,
               bo7RelicsUsed: form.bo7IsCursedRun ? (form.bo7RelicsUsed ?? []) : [],
@@ -1546,6 +1549,13 @@ export default function EditMapProgressPage() {
                     ))}
                     {isBo7Game(map?.game?.shortName) && (
                       <>
+                        <Select
+                          label="GobbleGums"
+                          disabled={tournamentLocked}
+                          options={BO7_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo7GobbleGumLabel(m) }))}
+                          value={sharedChallengeForm.bo7GobbleGumMode ?? BO7_GOBBLEGUM_DEFAULT}
+                          onChange={(e) => handleSharedChallengeChange('bo7GobbleGumMode', e.target.value)}
+                        />
                         <Select
                           label="Support"
                           disabled={tournamentLocked}

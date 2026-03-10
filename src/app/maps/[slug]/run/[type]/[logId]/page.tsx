@@ -24,7 +24,7 @@ import { getBo4DifficultyLabel } from '@/lib/bo4';
 import { getBo3GobbleGumLabel } from '@/lib/bo3';
 import { getBocwSupportLabel } from '@/lib/bocw';
 import { getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
-import { getBo7SupportLabel } from '@/lib/bo7';
+import { getBo7GobbleGumLabel, getBo7SupportLabel } from '@/lib/bo7';
 import { getWw2ConsumablesLabel } from '@/lib/ww2';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter, getVanguardVoidLabel } from '@/lib/vanguard';
 import { hasNoJugSupport } from '@/lib/no-jug-support';
@@ -161,6 +161,7 @@ type ChallengeLogDetail = {
   bocwSupportMode?: string | null;
   bo6GobbleGumMode?: string | null;
   bo6SupportMode?: string | null;
+  bo7GobbleGumMode?: string | null;
   bo7SupportMode?: string | null;
   bo7IsCursedRun?: boolean | null;
   bo7RelicsUsed?: string[];
@@ -681,14 +682,24 @@ export default function RunDetailPage() {
                     </div>
                   )}
                   {map.game.shortName === 'BO7' && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-bunker-400 text-sm">Support</span>
-                      <span className="text-white font-medium">
-                        {(log as ChallengeLogDetail).bo7SupportMode
-                          ? getBo7SupportLabel((log as ChallengeLogDetail).bo7SupportMode!)
-                          : 'Not specified'}
-                      </span>
-                    </div>
+                    <>
+                      <div className="flex items-center justify-between">
+                        <span className="text-bunker-400 text-sm">GobbleGums</span>
+                        <span className="text-white font-medium">
+                          {(log as ChallengeLogDetail).bo7GobbleGumMode
+                            ? getBo7GobbleGumLabel((log as ChallengeLogDetail).bo7GobbleGumMode!)
+                            : 'Not specified'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-bunker-400 text-sm">Support</span>
+                        <span className="text-white font-medium">
+                          {(log as ChallengeLogDetail).bo7SupportMode
+                            ? getBo7SupportLabel((log as ChallengeLogDetail).bo7SupportMode!)
+                            : 'Not specified'}
+                        </span>
+                      </div>
+                    </>
                   )}
                   {map.game.shortName === 'WW2' && (log as ChallengeLogDetail).ww2ConsumablesUsed != null && (
                     <div className="flex items-center justify-between">

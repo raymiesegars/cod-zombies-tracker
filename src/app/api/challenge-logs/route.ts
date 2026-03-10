@@ -9,7 +9,7 @@ import { isIwGame, isSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType 
 import { isBo3Game, BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT } from '@/lib/bo3';
 import { isBocwGame, BOCW_SUPPORT_MODES, BOCW_SUPPORT_DEFAULT } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_GOBBLEGUM_DEFAULT, BO6_SUPPORT_MODES, BO6_SUPPORT_DEFAULT } from '@/lib/bo6';
-import { isBo7Game, BO7_SUPPORT_MODES, BO7_SUPPORT_DEFAULT, BO7_RELICS } from '@/lib/bo7';
+import { isBo7Game, BO7_GOBBLEGUM_MODES, BO7_GOBBLEGUM_DEFAULT, BO7_SUPPORT_MODES, BO7_SUPPORT_DEFAULT, BO7_RELICS } from '@/lib/bo7';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 import { isWw2Game, WW2_CONSUMABLES_DEFAULT } from '@/lib/ww2';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
@@ -257,7 +257,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (isBo7) {
+      const gg = body.bo7GobbleGumMode ?? BO7_GOBBLEGUM_DEFAULT;
       const sup = body.bo7SupportMode ?? BO7_SUPPORT_DEFAULT;
+      if (!(BO7_GOBBLEGUM_MODES as readonly string[]).includes(gg)) {
+        return NextResponse.json({ error: 'Invalid bo7GobbleGumMode' }, { status: 400 });
+      }
       if (!(BO7_SUPPORT_MODES as readonly string[]).includes(sup)) {
         return NextResponse.json({ error: 'Invalid bo7SupportMode' }, { status: 400 });
       }
@@ -275,6 +279,7 @@ export async function POST(request: NextRequest) {
     const bocwSupportMode = isBocw ? (body.bocwSupportMode ?? BOCW_SUPPORT_DEFAULT) : undefined;
     const bo6GobbleGumMode = isBo6 ? (body.bo6GobbleGumMode ?? BO6_GOBBLEGUM_DEFAULT) : undefined;
     const bo6SupportMode = isBo6 ? (body.bo6SupportMode ?? BO6_SUPPORT_DEFAULT) : undefined;
+    const bo7GobbleGumMode = isBo7 ? (body.bo7GobbleGumMode ?? BO7_GOBBLEGUM_DEFAULT) : undefined;
     const bo7SupportMode = isBo7 ? (body.bo7SupportMode ?? BO7_SUPPORT_DEFAULT) : undefined;
     const bo7IsCursedRun = isBo7 ? Boolean(body.bo7IsCursedRun ?? false) : undefined;
     const bo7RelicsUsed = isBo7
@@ -347,6 +352,7 @@ export async function POST(request: NextRequest) {
         ...(bocwSupportMode != null && { bocwSupportMode }),
         ...(bo6GobbleGumMode != null && { bo6GobbleGumMode }),
         ...(bo6SupportMode != null && { bo6SupportMode }),
+        ...(bo7GobbleGumMode != null && { bo7GobbleGumMode }),
         ...(bo7SupportMode != null && { bo7SupportMode }),
         ...(bo7IsCursedRun != null && { bo7IsCursedRun }),
         ...(bo7RelicsUsed != null && { bo7RelicsUsed }),
@@ -393,6 +399,7 @@ export async function POST(request: NextRequest) {
           (tags.bocwSupportMode === undefined || tags.bocwSupportMode === bocwSupportMode) &&
           (tags.bo6GobbleGumMode === undefined || tags.bo6GobbleGumMode === bo6GobbleGumMode) &&
           (tags.bo6SupportMode === undefined || tags.bo6SupportMode === bo6SupportMode) &&
+          (tags.bo7GobbleGumMode === undefined || tags.bo7GobbleGumMode === bo7GobbleGumMode) &&
           (tags.bo7SupportMode === undefined || tags.bo7SupportMode === bo7SupportMode) &&
           (tags.bo7IsCursedRun === undefined || tags.bo7IsCursedRun === bo7IsCursedRun) &&
           (tags.bo7RelicsUsed === undefined || (Array.isArray(tags.bo7RelicsUsed) && Array.isArray(bo7RelicsUsed) && arrEq(tags.bo7RelicsUsed as unknown[], bo7RelicsUsed))) &&

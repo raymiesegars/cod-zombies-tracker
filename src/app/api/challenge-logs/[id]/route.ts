@@ -12,7 +12,7 @@ import { isIwGame, isIwSpeedrunChallengeType, isSpeedrunChallengeType, getMinRou
 import { isBo3Game, BO3_GOBBLEGUM_MODES } from '@/lib/bo3';
 import { isBocwGame, BOCW_SUPPORT_MODES } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES } from '@/lib/bo6';
-import { isBo7Game, BO7_SUPPORT_MODES, BO7_RELICS } from '@/lib/bo7';
+import { isBo7Game, BO7_GOBBLEGUM_MODES, BO7_SUPPORT_MODES, BO7_RELICS } from '@/lib/bo7';
 import { isWw2Game } from '@/lib/ww2';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap } from '@/lib/first-room-variants';
@@ -191,6 +191,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     const bo6SupportMode = body.bo6SupportMode !== undefined
       ? isBo6Game(gameShortName) && (BO6_SUPPORT_MODES as readonly string[]).includes(body.bo6SupportMode) ? body.bo6SupportMode : undefined
       : undefined;
+    const bo7GobbleGumMode = body.bo7GobbleGumMode !== undefined
+      ? isBo7Game(gameShortName) && (BO7_GOBBLEGUM_MODES as readonly string[]).includes(body.bo7GobbleGumMode) ? body.bo7GobbleGumMode : undefined
+      : undefined;
     const bo7SupportMode = body.bo7SupportMode !== undefined
       ? isBo7Game(gameShortName) && (BO7_SUPPORT_MODES as readonly string[]).includes(body.bo7SupportMode) ? body.bo7SupportMode : undefined
       : undefined;
@@ -300,6 +303,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         ...(bocwSupportMode !== undefined && { bocwSupportMode }),
         ...(bo6GobbleGumMode !== undefined && { bo6GobbleGumMode }),
         ...(bo6SupportMode !== undefined && { bo6SupportMode }),
+        ...(bo7GobbleGumMode !== undefined && { bo7GobbleGumMode }),
         ...(bo7SupportMode !== undefined && { bo7SupportMode }),
         ...(bo7IsCursedRun !== undefined && { bo7IsCursedRun }),
         ...(bo7RelicsUsed !== undefined && { bo7RelicsUsed }),
