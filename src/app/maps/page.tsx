@@ -1,12 +1,19 @@
-import { unstable_cache } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { MapsPageClient } from './MapsPageClient';
 import type { MapWithGame, Game } from '@/types';
 
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-const getCachedMaps = unstable_cache(
-  () =>
+export default async function MapsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ submitMap?: string }> | { submitMap?: string };
+}) {
+  const params = await Promise.resolve(searchParams);
+  const openSubmit = params?.submitMap === '1';
+
+  const [maps, games] = await Promise.all([
     prisma.map.findMany({
       include: { game: true },
       orderBy: [
@@ -15,23 +22,14 @@ const getCachedMaps = unstable_cache(
         { name: 'asc' },
       ],
     }),
-  ['maps-page-maps'],
-  { revalidate: 300 }
-);
-
-const getCachedGames = unstable_cache(
-  () => prisma.game.findMany({ orderBy: { order: 'asc' } }),
-  ['maps-page-games'],
-  { revalidate: 300 }
-);
-
-export default async function MapsPage() {
-  const [maps, games] = await Promise.all([getCachedMaps(), getCachedGames()]);
+    prisma.game.findMany({ orderBy: { order: 'asc' } }),
+  ]);
 
   return (
     <MapsPageClient
       initialMaps={maps as MapWithGame[]}
       initialGames={games as Game[]}
+      openSubmitModal={openSubmit}
     />
   );
 }

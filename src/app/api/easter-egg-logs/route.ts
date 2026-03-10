@@ -138,18 +138,18 @@ export async function POST(request: NextRequest) {
     // Main quest = one-time XP; we track so we don’t double-award
     const newlyUnlocked = await processMapAchievements(user.id, mapId);
     const xpGained = newlyUnlocked.reduce((sum, a) => sum + a.xpReward, 0);
-    const totalXp =
-      xpGained > 0
-        ? (await prisma.user.findUnique({ where: { id: user.id }, select: { totalXp: true } }))?.totalXp ?? undefined
-        : undefined;
+    const isBo3Custom = map.game?.shortName === 'BO3_CUSTOM';
+    const userAfterXp = xpGained > 0
+      ? await prisma.user.findUnique({ where: { id: user.id }, select: { totalXp: true, customZombiesTotalXp: true, level: true } })
+      : null;
+    const totalXp = userAfterXp ? (isBo3Custom ? undefined : userAfterXp.totalXp) : undefined;
+    const customZombiesTotalXp = isBo3Custom && userAfterXp ? userAfterXp.customZombiesTotalXp ?? undefined : undefined;
 
-    // Bump level if they crossed a threshold
-    if (xpGained > 0) {
+    if (xpGained > 0 && !isBo3Custom) {
       const { getLevelFromXp } = await import('@/lib/ranks');
-      const updated = await prisma.user.findUnique({ where: { id: user.id }, select: { totalXp: true, level: true } });
-      if (updated) {
-        const { level } = getLevelFromXp(updated.totalXp);
-        if (level !== updated.level) {
+      if (userAfterXp) {
+        const { level } = getLevelFromXp(userAfterXp.totalXp ?? 0);
+        if (level !== userAfterXp.level) {
           await prisma.user.update({ where: { id: user.id }, data: { level } });
         }
       }
@@ -160,6 +160,7 @@ export async function POST(request: NextRequest) {
       xpGained,
       newlyUnlockedAchievements: newlyUnlocked.length,
       ...(totalXp != null && { totalXp }),
+      ...(customZombiesTotalXp != null && isBo3Custom && { customZombiesTotalXp }),
     });
   } catch (error) {
     console.error('Error creating Easter Egg log:', error);

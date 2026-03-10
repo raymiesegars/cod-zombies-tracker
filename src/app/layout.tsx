@@ -6,6 +6,7 @@ import { ActionProgressProvider } from '@/context/action-progress-context';
 import { ChatbotProvider } from '@/context/chatbot-context';
 import { Navbar, Footer, BackToTop, TVRoomBackground, MusicPlayer, AuthLayoutWrapper, MessagingWidget } from '@/components/layout';
 import { SiteUpdatesModal } from '@/components/site-updates-modal';
+import { CustomMapsAnnouncementModal } from '@/components/custom-maps-announcement-modal';
 import { PollVoteReminderModal } from '@/components/poll-vote-reminder-modal';
 import { TournamentAnnouncementModal } from '@/components/tournament-announcement-modal';
 import './globals.css';
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
     template: '%s | CoD Zombies Tracker',
   },
   description:
-    'CZT - Free CoD Zombies tracker: Easter egg guides, challenges, speedruns, leaderboards, co-op logging, verified runs, XP and ranks. Ask LeKronorium—our AI with exclusive zombies knowledge and strats. WW2, IW, AW, Vanguard, MW2. Find group, friends, messaging. No ads.',
+    'CZT - Free CoD Zombies tracker: Easter egg guides, challenges, speedruns, leaderboards, co-op logging, verified runs, XP and ranks. BO3 Custom Zombies—browse and submit community maps. Ask LeKronorium—our AI with exclusive zombies knowledge. WW2, IW, AW, Vanguard, MW2. Find group, friends, messaging. No ads.',
   keywords: [
     'CZT',
     'CZT CoD Zombies',
@@ -35,6 +36,9 @@ export const metadata: Metadata = {
     'Call of Duty Zombies',
     'CoD Zombies',
     'Zombies tracker',
+    'BO3 Custom Zombies',
+    'custom Zombies maps',
+    'submit custom map',
     'Easter egg guide',
     'Zombies Easter egg',
     'main quest guide',
@@ -46,6 +50,7 @@ export const metadata: Metadata = {
     'Co-op Zombies',
     'verified Zombies runs',
     'Black Ops Zombies',
+    'Black Ops 3 custom maps',
     'WAW BO1 BO2 BO3 BO4 BOCW BO6 BO7',
     'Infinite Warfare Zombies',
     'WW2 Zombies',
@@ -68,15 +73,15 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     siteName: 'CoD Zombies Tracker',
-    title: 'CoD Zombies Tracker – Easter Egg Guides, Leaderboards, Co-op & Verified Runs',
-    description: 'Free CoD Zombies tracker. Easter egg guides, challenges, speedruns, leaderboards, co-op logging, verified runs. WW2, IW, AW, Vanguard, MW2. No ads.',
+    title: 'CoD Zombies Tracker – Easter Egg Guides, Leaderboards, BO3 Custom Zombies & Verified Runs',
+    description: 'Free CoD Zombies tracker. Easter egg guides, challenges, speedruns, leaderboards, BO3 Custom Zombies map submission, co-op logging, verified runs. WW2, IW, AW, Vanguard, MW2. No ads.',
     url: BASE,
     images: [{ url: `${BASE}/opengraph-image`, width: 1200, height: 630, alt: 'CoD Zombies Tracker' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CoD Zombies Tracker – Easter Egg Guides, Leaderboards & Co-op',
-    description: 'Free CoD Zombies tracker. Easter egg guides, challenges, speedruns, co-op logging, verified runs. No ads.',
+    title: 'CoD Zombies Tracker – Easter Egg Guides, BO3 Custom Zombies & Leaderboards',
+    description: 'Free CoD Zombies tracker. Easter egg guides, BO3 Custom Zombies maps, challenges, speedruns, co-op logging, verified runs. No ads.',
   },
   robots: {
     index: true,
@@ -113,10 +118,11 @@ const jsonLd = {
       url: BASE,
       name: 'CoD Zombies Tracker',
       alternateName: 'CZT',
-      description: 'Free CoD Zombies tracker. Easter egg guides, challenges, speedruns, leaderboards, co-op logging, verified runs, XP and ranks. WW2, IW, AW, Vanguard, MW2. No ads.',
+      description: 'Free CoD Zombies tracker. Easter egg guides, challenges, speedruns, leaderboards, BO3 Custom Zombies maps, co-op logging, verified runs, XP and ranks. WW2, IW, AW, Vanguard, MW2. No ads.',
       potentialAction: [
         { '@type': 'SearchAction', target: { '@type': 'EntryPoint', urlTemplate: `${BASE}/maps?search={search_term_string}` }, 'query-input': 'required name=search_term_string' },
         { '@type': 'ViewAction', target: BASE + '/maps', name: 'Browse Maps' },
+        { '@type': 'ViewAction', target: BASE + '/maps', name: 'Browse BO3 Custom Zombies Maps' },
         { '@type': 'ViewAction', target: BASE + '/leaderboards', name: 'View Leaderboards' },
         { '@type': 'ViewAction', target: BASE + '/find-group', name: 'Find Group' },
       ],
@@ -162,6 +168,7 @@ export default function RootLayout({
                 <BackToTop />
                 <MessagingWidget />
                 <SiteUpdatesModal />
+                <CustomMapsAnnouncementModal />
                 <PollVoteReminderModal />
                 <TournamentAnnouncementModal />
               </AuthLayoutWrapper>

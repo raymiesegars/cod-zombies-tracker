@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import prisma from '@/lib/prisma';
+import { getGameDisplayShortName } from '@/lib/bo3-custom';
 
 const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://codzombiestracker.com').replace(/^https?:\/\/www\./, 'https://').replace(/\/$/, '');
 
@@ -16,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: 'Map Not Found' };
   }
 
-  const title = `${map.name} (${map.game.shortName}) - Easter Egg Guide & Leaderboard`;
+  const title = `${map.name} (${getGameDisplayShortName(map.game.shortName, map.game.name)}) - Easter Egg Guide & Leaderboard`;
   const description = `${map.name} - ${map.game.name}. Step-by-step Easter egg guide, challenges, high round leaderboard, and progress tracking. CoD Zombies Tracker.`;
 
   const mapUrl = `${baseUrl}/maps/${map.slug}`;

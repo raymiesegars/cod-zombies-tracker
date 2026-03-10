@@ -230,9 +230,10 @@ export async function pickRandomRoll(
       isActive: true,
       type: { not: 'NO_JUG' },
       mapId: { not: null },
-      ...(excludedIds.size > 0 && {
-        map: { gameId: { notIn: Array.from(excludedIds) } },
-      }),
+      map: {
+        game: { shortName: { not: 'BO3_CUSTOM' } },
+        ...(excludedIds.size > 0 && { gameId: { notIn: Array.from(excludedIds) } }),
+      },
     },
     include: {
       map: { include: { game: true } },

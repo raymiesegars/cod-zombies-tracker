@@ -4,11 +4,12 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Bot, ShieldCheck, MessageSquare, History, Trophy, Egg, Award, BookOpen } from 'lucide-react';
+import { Bot, ShieldCheck, MessageSquare, History, Trophy, Egg, Award, BookOpen, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const tabs = [
   { href: '/admin/verification', label: 'Verification', icon: ShieldCheck, badgeKey: 'pending' as const },
+  { href: '/admin/map-submissions', label: 'Map submissions', icon: MapPin, badgeKey: 'mapSubmissionsPending' as const },
   { href: '/admin/feedback', label: 'Feedback', icon: MessageSquare, badgeKey: 'feedbackUnread' as const },
   { href: '/admin/verified-history', label: 'Verified history', icon: History, badgeKey: 'verifiedHistoryUnread' as const },
   { href: '/admin/leaderboard', label: 'Leaderboard', icon: Trophy, badgeKey: null },
@@ -18,7 +19,7 @@ const tabs = [
   { href: '/rules', label: 'Rules', icon: BookOpen, badgeKey: null, superAdminOnly: true },
 ];
 
-type Badges = { pending: number; feedbackUnread: number; verifiedHistoryUnread: number };
+type Badges = { pending: number; feedbackUnread: number; verifiedHistoryUnread: number; mapSubmissionsPending: number };
 type AdminMe = {
   adminXp: number;
   level: number;
@@ -34,13 +35,13 @@ const POLL_MS = 12000;
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [badges, setBadges] = useState<Badges>({ pending: 0, feedbackUnread: 0, verifiedHistoryUnread: 0 });
+  const [badges, setBadges] = useState<Badges>({ pending: 0, feedbackUnread: 0, verifiedHistoryUnread: 0, mapSubmissionsPending: 0 });
   const [adminMe, setAdminMe] = useState<AdminMe | null>(null);
 
   const fetchBadges = useCallback(() => {
     fetch('/api/admin/dashboard-badges', { credentials: 'same-origin', cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : Promise.resolve({} as Partial<Badges>)))
-      .then((d) => setBadges({ pending: d.pending ?? 0, feedbackUnread: d.feedbackUnread ?? 0, verifiedHistoryUnread: d.verifiedHistoryUnread ?? 0 }))
+      .then((d) => setBadges({ pending: d.pending ?? 0, feedbackUnread: d.feedbackUnread ?? 0, verifiedHistoryUnread: d.verifiedHistoryUnread ?? 0, mapSubmissionsPending: d.mapSubmissionsPending ?? 0 }))
       .catch(() => {});
   }, []);
 

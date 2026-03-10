@@ -17,6 +17,7 @@ import {
 } from '@/components/ui';
 import { UserWithRank } from '@/components/game';
 import { Users, MessageSquare, ChevronLeft, Trash2 } from 'lucide-react';
+import { getGameDisplayShortName } from '@/lib/bo3-custom';
 import { getLevelFromXp, getRankForLevel, getRankIconPath } from '@/lib/ranks';
 import { getDisplayAvatarUrl } from '@/lib/avatar';
 import Image from 'next/image';
@@ -251,7 +252,7 @@ export default function FindGroupListingPage() {
             <div className="flex flex-wrap items-center gap-2 mb-3">
               <span className="font-semibold text-white text-lg">{listing.map.name}</span>
               <Badge variant="default" size="sm">
-                {listing.map.game.shortName}
+                {getGameDisplayShortName(listing.map.game.shortName)}
               </Badge>
               {listing.easterEgg && (
                 <Badge variant="purple" size="sm">

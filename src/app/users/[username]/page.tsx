@@ -68,6 +68,7 @@ import {
   getRestrictedFilterLabel,
 } from '@/lib/achievements/categories';
 import { getAssetUrl } from '@/lib/assets';
+import { getGameDisplayShortName, isBo3CustomGame } from '@/lib/bo3-custom';
 import { getDisplayAvatarUrl } from '@/lib/avatar';
 import { getBo4DifficultyLabel } from '@/lib/bo4';
 import { formatCompletionTime } from '@/components/ui/time-input';
@@ -238,7 +239,7 @@ function AchievementsSection({
 
   const games = useMemo(() => overview?.completionByGame ?? [], [overview]);
   const gameOptions = useMemo(
-    () => games.map((g) => ({ value: g.gameId, label: `${g.shortName} (${g.percentage}%)` })),
+    () => games.map((g) => ({ value: g.gameId, label: `${getGameDisplayShortName(g.shortName, g.gameName)} (${g.percentage}%)` })),
     [games]
   );
 
@@ -671,6 +672,7 @@ export default function UserProfilePage() {
   const isOwnProfile = Boolean(profile && currentProfile && profile.id === currentProfile.id);
   const viewedUserIsAdmin = Boolean(profile && 'isAdmin' in profile && (profile as { isAdmin?: boolean }).isAdmin);
   const viewedUserIsContributor = Boolean(profile && 'isContributor' in profile && (profile as { isContributor?: boolean }).isContributor);
+  const hideCustom = Boolean(currentProfile && (currentProfile as { hideCustomZombiesEverywhere?: boolean }).hideCustomZombiesEverywhere);
 
   // when they confirm a coop run we refetch so XP and map highs update without a full reload
   useEffect(() => {
@@ -716,15 +718,15 @@ export default function UserProfilePage() {
   const refetchAchievementsAfterRelock = useCallback(async () => {
     await refreshProfile?.();
     if (!username) return;
-    const url = achievementFilterMap
-      ? `/api/users/${username}/achievements-overview?mapId=${encodeURIComponent(achievementFilterMap)}`
-      : `/api/users/${username}/achievements-overview`;
-    const res = await fetch(url);
+    const params = new URLSearchParams();
+    if (achievementFilterMap) params.set('mapId', achievementFilterMap);
+    if (hideCustom) params.set('hideCustom', '1');
+    const res = await fetch(`/api/users/${username}/achievements-overview?${params}`);
     if (res.ok) {
       const data = await res.json();
       setAchievementsOverview((prev) => (prev ? { ...prev, ...data } : data));
     }
-  }, [username, achievementFilterMap, refreshProfile]);
+  }, [username, achievementFilterMap, hideCustom, refreshProfile]);
 
   const handlePromoteToAdmin = useCallback(async () => {
     if (!profile?.id) return;
@@ -902,9 +904,13 @@ export default function UserProfilePage() {
     setIsLoading(true);
     async function fetchProfile() {
       try {
+        const overviewParams = new URLSearchParams();
+        if (hideCustom) overviewParams.set('hideCustom', '1');
+        const userParams = new URLSearchParams({ withStats: 'true' });
+        if (hideCustom) userParams.set('hideCustom', '1');
         const [combinedRes, overviewRes] = await Promise.all([
-          fetch(`/api/users/${username}?withStats=true`, { credentials: 'same-origin', cache: 'no-store' }),
-          fetch(`/api/users/${username}/achievements-overview`, { credentials: 'same-origin', cache: 'no-store' }),
+          fetch(`/api/users/${username}?${userParams}`, { credentials: 'same-origin', cache: 'no-store' }),
+          fetch(`/api/users/${username}/achievements-overview${overviewParams.toString() ? `?${overviewParams}` : ''}`, { credentials: 'same-origin', cache: 'no-store' }),
         ]);
 
         if (combinedRes.ok) {
@@ -964,7 +970,7 @@ export default function UserProfilePage() {
     }
 
     fetchProfile();
-  }, [username, profileRefreshTrigger]);
+  }, [username, profileRefreshTrigger, hideCustom]);
 
   // achievements load when they pick a map, clear when filter is cleared
   useEffect(() => {
@@ -980,9 +986,9 @@ export default function UserProfilePage() {
     setAchievementMapLoading(true);
     async function fetchMapAchievements() {
       try {
-        const res = await fetch(
-          `/api/users/${username}/achievements-overview?mapId=${encodeURIComponent(achievementFilterMap)}`
-        );
+        const params = new URLSearchParams({ mapId: achievementFilterMap });
+        if (hideCustom) params.set('hideCustom', '1');
+        const res = await fetch(`/api/users/${username}/achievements-overview?${params}`);
         if (!res.ok || cancelled) return;
         const data = await res.json();
         if (cancelled) return;
@@ -997,7 +1003,7 @@ export default function UserProfilePage() {
     }
     fetchMapAchievements();
     return () => { cancelled = true; };
-  }, [username, achievementFilterMap]);
+  }, [username, achievementFilterMap, hideCustom]);
 
   const isViewingOwnProfileDuringSetup =
     currentUser && !currentProfile && isProfileSettingUp && params.username === currentUser.id;
@@ -1202,7 +1208,10 @@ export default function UserProfilePage() {
                   <XpRankDisplay
                     totalXp={profile.totalXp}
                     verifiedTotalXp={(profile as { verifiedTotalXp?: number }).verifiedTotalXp ?? 0}
-                    showBothXpRanks={(currentProfile as { showBothXpRanks?: boolean })?.showBothXpRanks ?? false}
+                    customZombiesTotalXp={(profile as { customZombiesTotalXp?: number }).customZombiesTotalXp ?? 0}
+                    verifiedCustomZombiesTotalXp={(profile as { verifiedCustomZombiesTotalXp?: number }).verifiedCustomZombiesTotalXp ?? 0}
+                    profileRankDisplay={(profile as { profileRankDisplay?: { showNormalXp?: boolean; showVerifiedXp?: boolean; showCustomZombiesXp?: boolean; showVerifiedCustomZombiesXp?: boolean } }).profileRankDisplay ?? undefined}
+                    showBothXpRanks={!(profile as { profileRankDisplay?: unknown }).profileRankDisplay && ((currentProfile as { showBothXpRanks?: boolean })?.showBothXpRanks ?? false)}
                     preferredRankView={(currentProfile as { preferredRankView?: 'total' | 'verified' | null })?.preferredRankView ?? 'total'}
                     onPreferredRankViewChange={
                       currentProfile
@@ -1476,7 +1485,17 @@ export default function UserProfilePage() {
 
         {/* Achievements Section - full list with filters and completion by game */}
         <AchievementsSection
-          overview={achievementsOverview}
+          overview={(() => {
+            if (!achievementsOverview) return null;
+            const hideCustom = Boolean(currentProfile && (currentProfile as { hideCustomZombiesEverywhere?: boolean }).hideCustomZombiesEverywhere);
+            if (!hideCustom) return achievementsOverview;
+            const completionByGame = (achievementsOverview.completionByGame ?? []).filter((g) => !isBo3CustomGame(g.shortName));
+            const mapsByGame = achievementsOverview.mapsByGame ?? {};
+            const customGameIds = (achievementsOverview.completionByGame ?? []).filter((g) => isBo3CustomGame(g.shortName)).map((g) => g.gameId);
+            const filteredMapsByGame = { ...mapsByGame };
+            for (const id of customGameIds) delete filteredMapsByGame[id];
+            return { ...achievementsOverview, completionByGame, mapsByGame: filteredMapsByGame };
+          })()}
           totalAchievementsFallback={statsTotals.totalAchievements}
           filterGame={achievementFilterGame}
           filterMap={achievementFilterMap}

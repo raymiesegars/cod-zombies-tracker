@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
 import { Badge, Card, CardContent, Logo, PageLoader } from '@/components/ui';
+import { getGameDisplayShortName } from '@/lib/bo3-custom';
 import { getAssetUrl } from '@/lib/assets';
 import { ChevronLeft, ListChecks } from 'lucide-react';
 
@@ -141,7 +142,7 @@ export default function UserLogsPage() {
                 >
                   <span className="font-medium text-white truncate flex-1">{map.name}</span>
                   <Badge variant="default" size="sm">
-                    {map.game.shortName}
+                    {getGameDisplayShortName(map.game.shortName, map.game.name)}
                   </Badge>
                   <span className="text-blood-400 text-sm">View runs →</span>
                 </Link>

@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   AlertCircle,
 } from 'lucide-react';
+import { getGameDisplayShortName } from '@/lib/bo3-custom';
 import { cn } from '@/lib/utils';
 import { useActionProgress } from '@/context/action-progress-context';
 import {
@@ -218,7 +219,7 @@ export default function AdminAchievementsPage() {
             onChange={(e) => setSelectedGameId(e.target.value)}
             options={[
               { value: '', label: '— Select game —' },
-              ...games.map((g) => ({ value: g.id, label: `${g.shortName}: ${g.name}` })),
+              ...games.map((g) => ({ value: g.id, label: `${getGameDisplayShortName(g.shortName, g.name)}: ${g.name}` })),
             ]}
             className="w-full bg-bunker-800 border-bunker-600 text-white"
           />
@@ -270,7 +271,7 @@ export default function AdminAchievementsPage() {
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div className="flex items-center gap-4 flex-wrap">
                   <p className="text-sm text-bunker-400">
-                    {mapData.map.game?.shortName} / {mapData.map.name} —{' '}
+                    {getGameDisplayShortName(mapData.map.game?.shortName)} / {mapData.map.name} —{' '}
                     {categoryFilter
                       ? `${sortedAchievements.length} (${ACHIEVEMENT_CATEGORY_LABELS[categoryFilter] ?? categoryFilter})`
                       : hideDeactivated

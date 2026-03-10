@@ -10,6 +10,7 @@ import { getBo7MapConfig } from '@/lib/bo7/bo7-map-config';
 import { getWw2MapConfig } from '@/lib/ww2/ww2-map-config';
 import { getVanguardMapConfig } from '@/lib/vanguard/vanguard-map-config';
 import { getAwMapConfig } from '@/lib/aw/aw-map-config';
+import { BO3_CUSTOM_CHALLENGE_TYPES } from '@/lib/bo3-custom';
 
 // How we group and order achievements on map detail and profile
 export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
@@ -336,6 +337,12 @@ export function getAllowedNonSpeedrunCategoriesForMap(
     );
     return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG']));
   }
+  if (gameShortName === 'BO3_CUSTOM') {
+    const fromConfig = BO3_CUSTOM_CHALLENGE_TYPES.filter(
+      (c) => !isSpeedrunCategory(c) && c !== 'HIGHEST_ROUND'
+    );
+    return Array.from(new Set([...fromConfig, 'BASE_ROUNDS', 'EASTER_EGG']));
+  }
   return null;
 }
 
@@ -451,6 +458,9 @@ export function getAllowedSpeedrunCategoriesForMap(
       return cfg.challengeTypes.filter((c) => isSpeedrunCategory(c));
     }
     return bo2Generic;
+  }
+  if (gameShortName === 'BO3_CUSTOM') {
+    return BO3_CUSTOM_CHALLENGE_TYPES.filter((c) => isSpeedrunCategory(c));
   }
   return bo2Generic;
 }

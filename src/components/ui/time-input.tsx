@@ -74,9 +74,10 @@ export function TimeInput({
     [h, m, s, onChange]
   );
 
+  const isEmpty = valueSeconds == null || !Number.isFinite(Number(valueSeconds)) || Number(valueSeconds) <= 0;
   const displayH = h > 0 ? String(h) : '';
-  const displayM = String(m).padStart(2, '0');
-  const displayS = String(s).padStart(2, '0');
+  const displayM = isEmpty ? '' : String(m).padStart(2, '0');
+  const displayS = isEmpty ? '' : String(s).padStart(2, '0');
 
   return (
     <div className={cn('w-full', className)}>

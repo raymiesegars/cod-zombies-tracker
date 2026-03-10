@@ -33,10 +33,14 @@ model User {
   totalXp       Int       @default(0)
   level         Int       @default(1)
   verifiedTotalXp Int     @default(0)  // XP from verified achievements only; drives verified rank
+  customZombiesTotalXp Int @default(0)  // XP from BO3 Custom Zombies achievements only
+  verifiedCustomZombiesTotalXp Int @default(0)  // XP from verified Custom Zombies achievements only
 
   // Profile display preferences (for XP rank on dashboards)
   showBothXpRanks   Boolean @default(false)  // If true, show both XP bars on dashboards; if false, single bar with toggle
   preferredRankView String? // 'total' | 'verified' – last selected when showing single bar
+  hideCustomZombiesEverywhere Boolean @default(false)  // If true, hide BO3 Custom Zombies from entire site
+  profileRankDisplay Json?  // { showNormalXp, showVerifiedXp, showCustomZombiesXp, showVerifiedCustomZombiesXp } - which ranks to show (default: normal only)
   
   // Privacy settings
   isPublic      Boolean   @default(true)
@@ -100,6 +104,8 @@ model User {
   chatbotKnowledgeReviewed  ChatbotKnowledge[] @relation("ChatbotReviewedBy")
   chatbotToken            ChatbotToken?
   chatbotUnansweredQuestions ChatbotUnansweredQuestion[]
+  mapSubmissions          MapSubmission[]
+  mapSubmissionsReviewed  MapSubmission[] @relation("MapSubmissionReviewedBy")
 
   @@index([username])
   @@index([supabaseId])
@@ -271,12 +277,13 @@ enum FriendRequestStatus {
 model Game {
   id            String   @id @default(cuid())
   name          String   @unique  // "World at War", "Black Ops", etc.
-  shortName     String   @unique  // "WAW", "BO1", "BO2", "BO3", "BO4", "BOCW"
+  shortName     String   @unique  // "WAW", "BO1", "BO2", "BO3", "BO4", "BOCW", "BO3_CUSTOM"
   releaseYear   Int
   order         Int      // For sorting games chronologically
   
   maps          Map[]
   tournaments   Tournament[]
+  mapSubmissions MapSubmission[]
 
   @@index([order])
 }
@@ -294,6 +301,8 @@ model Map {
   
   // Map metadata
   isDlc         Boolean  @default(false)
+  isCustom      Boolean  @default(false)  // User-submitted custom map (BO3 Custom Zombies)
+  steamWorkshopUrl String?  // Steam Workshop download URL (custom maps only)
   releaseDate   DateTime?
   order         Int      @default(0)  // Release order within game: base maps first, then DLC in order
   roundCap      Int?     // Widely considered round cap for this map (e.g. 255); used for achievement milestones
@@ -307,10 +316,39 @@ model Map {
   groupListings     GroupListing[]
   tournaments       Tournament[]
 
-  @@unique([gameId, name])
   @@index([slug])
   @@index([gameId])
   @@index([gameId, order])
+  @@index([isCustom])
+}
+
+model MapSubmission {
+  id                String   @id @default(cuid())
+  status            String   @default("PENDING")  // PENDING | APPROVED | REJECTED
+  gameId            String
+  game              Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  submittedById     String
+  submittedBy       User     @relation(fields: [submittedById], references: [id], onDelete: Cascade)
+  
+  mapName           String
+  steamWorkshopUrl  String
+  thumbnailImageUrl String?  // Map list thumbnail (Supabase Storage URL)
+  mapPageImageUrl   String?  // Map detail page hero/banner (Supabase Storage URL)
+  
+  suggestedAchievements Json?  // { challengeType: suggestedRound } e.g. { "HIGHEST_ROUND": 50, "NO_DOWNS": 30 }
+  suggestedEasterEgg    Json?  // Optional: { name, steps?: [...], xpReward? }
+  rejectionReason       String?
+  reviewedById          String?
+  reviewedBy            User?   @relation("MapSubmissionReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt            DateTime?
+  approvedMapId         String?  // Set when approved; links to created Map
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([status])
+  @@index([gameId])
+  @@index([submittedById])
 }
 
 // ============================================================================
@@ -982,6 +1020,7 @@ model Notification {
   // VERIFICATION_APPROVED only: XP gained from this verification (for verified XP toast)
   verifiedXpGained Int?
   verifiedTotalXp  Int?
+  verifiedCustomZombiesTotalXp Int?
 
   @@index([userId])
   @@index([userId, read])

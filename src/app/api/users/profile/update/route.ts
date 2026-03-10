@@ -14,7 +14,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { displayName, username: rawUsername, bio, isPublic, showBothXpRanks, preferredRankView, profileStatBlocks: rawBlocks } = body;
+    const { displayName, username: rawUsername, bio, isPublic, showBothXpRanks, preferredRankView, profileStatBlocks: rawBlocks, hideCustomZombiesEverywhere, profileRankDisplay } = body;
 
     const data: {
       displayName?: string | null;
@@ -25,6 +25,8 @@ export async function PATCH(request: NextRequest) {
       showBothXpRanks?: boolean;
       preferredRankView?: string | null;
       profileStatBlocks?: { selectedBlockIds: string[] };
+      hideCustomZombiesEverywhere?: boolean;
+      profileRankDisplay?: { showNormalXp: boolean; showVerifiedXp: boolean; showCustomZombiesXp: boolean; showVerifiedCustomZombiesXp: boolean };
       updatedAt: Date;
     } = {
       updatedAt: new Date(),
@@ -58,6 +60,18 @@ export async function PATCH(request: NextRequest) {
         );
       }
       data.profileStatBlocks = { selectedBlockIds: parsed };
+    }
+    if (hideCustomZombiesEverywhere !== undefined) data.hideCustomZombiesEverywhere = Boolean(hideCustomZombiesEverywhere);
+    if (profileRankDisplay !== undefined && typeof profileRankDisplay === 'object') {
+      const d = profileRankDisplay as Record<string, unknown>;
+      const showNormalXp = Boolean(d.showNormalXp);
+      const showVerifiedXp = Boolean(d.showVerifiedXp);
+      const showCustomZombiesXp = Boolean(d.showCustomZombiesXp);
+      const showVerifiedCustomZombiesXp = Boolean(d.showVerifiedCustomZombiesXp);
+      if (!showNormalXp && !showVerifiedXp && !showCustomZombiesXp && !showVerifiedCustomZombiesXp) {
+        return NextResponse.json({ error: 'At least one rank type must be shown' }, { status: 400 });
+      }
+      data.profileRankDisplay = { showNormalXp, showVerifiedXp, showCustomZombiesXp, showVerifiedCustomZombiesXp };
     }
 
     if (rawUsername !== undefined) {

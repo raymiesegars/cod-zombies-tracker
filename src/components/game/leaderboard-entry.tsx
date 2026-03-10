@@ -23,6 +23,8 @@ interface LeaderboardEntryProps {
   mapSlug?: string;
   /** When true (e.g. verified XP rank leaderboard), show blue verified checkmark on every entry */
   showVerifiedBadge?: boolean;
+  /** Label for XP value when valueKind is 'xp', e.g. "Custom Zombies XP" to differentiate rank type */
+  xpLabel?: string;
 }
 
 const rankColors = {
@@ -41,6 +43,7 @@ export function LeaderboardEntry({
   hidePlayerCount = false,
   mapSlug,
   showVerifiedBadge = false,
+  xpLabel = 'XP',
 }: LeaderboardEntryProps) {
   const isTopThree = entry.rank <= 3;
   const level = entry.user.level ?? 1;
@@ -180,10 +183,28 @@ export function LeaderboardEntry({
           {valueKind === 'xp' ? (
             <>
               <span className="text-xs sm:text-sm font-semibold text-military-400 tabular-nums leading-none whitespace-nowrap lg:hidden">
-                {formatXpCompact(entry.value)} XP
+                {formatXpCompact(entry.value)}{' '}
+                {xpLabel.includes('Custom') ? (
+                  <>
+                    <span className="font-extrabold text-element-300 uppercase tracking-wide">Custom</span>
+                    {xpLabel.startsWith('Verified ') ? ' Verified' : ''}
+                    {xpLabel.includes('Zombies') ? ' Zombies XP' : ' XP'}
+                  </>
+                ) : (
+                  xpLabel
+                )}
               </span>
               <span className="hidden lg:inline text-sm font-semibold text-military-400 tabular-nums leading-none whitespace-nowrap">
-                {entry.value.toLocaleString()} XP
+                {entry.value.toLocaleString()}{' '}
+                {xpLabel.includes('Custom') ? (
+                  <>
+                    <span className="font-extrabold text-element-300 uppercase tracking-wide">Custom</span>
+                    {xpLabel.startsWith('Verified ') ? ' Verified' : ''}
+                    {xpLabel.includes('Zombies') ? ' Zombies XP' : ' XP'}
+                  </>
+                ) : (
+                  xpLabel
+                )}
               </span>
             </>
           ) : hasRightSlots ? (

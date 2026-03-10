@@ -16,6 +16,7 @@ import {
   HelpTrigger,
 } from '@/components/ui';
 import { UserWithRank, FindGroupHelpContent } from '@/components/game';
+import { getGameDisplayShortName } from '@/lib/bo3-custom';
 import { FIND_GROUP_PLATFORMS, PLATFORM_GROUPS } from '@/lib/find-group-platforms';
 import { getAssetUrl } from '@/lib/assets';
 import { Users, Search, Plus, X } from 'lucide-react';
@@ -376,7 +377,7 @@ export default function FindGroupPage() {
                           <div className="flex flex-wrap items-center gap-2 mb-1">
                             <span className="font-semibold text-white">{listing.map.name}</span>
                             <Badge variant="default" size="sm">
-                              {listing.map.game.shortName}
+                              {getGameDisplayShortName(listing.map.game.shortName, listing.map.game.name)}
                             </Badge>
                             {listing.easterEgg && (
                               <Badge variant="purple" size="sm">
@@ -426,7 +427,7 @@ export default function FindGroupPage() {
             <Select
               options={[
                 { value: '', label: 'Select map…' },
-                ...maps.map((m) => ({ value: m.id, label: `${m.game.shortName} – ${m.name}` })),
+                ...maps.map((m) => ({ value: m.id, label: `${getGameDisplayShortName(m.game.shortName, m.game.name)} – ${m.name}` })),
               ]}
               value={createForm.mapId}
               onChange={(e) =>

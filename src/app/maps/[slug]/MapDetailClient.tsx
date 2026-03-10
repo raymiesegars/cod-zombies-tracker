@@ -72,7 +72,8 @@ import {
 import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { getBo1MapConfig, getBo1ChallengeTypeLabel } from '@/lib/bo1/bo1-map-config';
 import { getBo2MapConfig, getBo2ChallengeTypeLabel } from '@/lib/bo2/bo2-map-config';
-import { getBo3MapConfig } from '@/lib/bo3/bo3-map-config';
+import { getBo3MapConfig, getBo3ChallengeTypeLabel } from '@/lib/bo3/bo3-map-config';
+import { BO3_CUSTOM_CHALLENGE_TYPES, getGameDisplayShortName } from '@/lib/bo3-custom';
 import { getBo4MapConfig, getBo4ChallengeTypeLabel } from '@/lib/bo4/bo4-map-config';
 import { getBocwMapConfig, getBocwChallengeTypeLabel } from '@/lib/bocw/bocw-map-config';
 import { getBo6MapConfig, getBo6ChallengeTypeLabel } from '@/lib/bo6/bo6-map-config';
@@ -1204,6 +1205,13 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
         return { value: t, label: getLabel(t, c?.name) };
       });
     }
+    if (map?.game?.shortName === 'BO3_CUSTOM' && challenges.length > 0) {
+      const types = BO3_CUSTOM_CHALLENGE_TYPES.filter((t) => challenges.some((c) => c.type === t));
+      return types.map((t) => {
+        const c = challenges.find((ch) => ch.type === t);
+        return { value: t, label: getLabel(t, c?.name) ?? getBo3ChallengeTypeLabel(t) };
+      });
+    }
     return challenges
       .sort((a, b) => (a.name || a.type).localeCompare(b.name || b.type))
       .map((c) => ({ value: c.type, label: getLabel(c.type, c.name) }));
@@ -1279,7 +1287,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           {/* Mobile only */}
           <div className="flex items-center gap-2 flex-shrink-0 sm:hidden">
             <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-xs font-semibold shadow-[0_0_1px_rgba(0,0,0,1),0_0_3px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.8)] [text-shadow:0_0_1px_rgba(0,0,0,1),0_0_2px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">
-              {map.game.shortName}
+              {getGameDisplayShortName(map.game.shortName, map.game.name)}
             </span>
             {map.isDlc && <Badge variant="purple">DLC</Badge>}
           </div>
@@ -1293,7 +1301,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                 {/* Tags: hidden on mobile (shown above under back button), visible sm+ */}
                 <div className="hidden sm:flex flex-wrap items-center gap-2 mb-2">
                   <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-xs font-semibold shadow-[0_0_1px_rgba(0,0,0,1),0_0_3px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.8)] [text-shadow:0_0_1px_rgba(0,0,0,1),0_0_2px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">
-                    {map.game.shortName}
+                    {getGameDisplayShortName(map.game.shortName, map.game.name)}
                   </span>
                   {map.isDlc && <Badge variant="purple">DLC</Badge>}
                 </div>
@@ -1696,10 +1704,8 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                       body: JSON.stringify({ action: 'toggle', easterEggStepId }),
                     });
                     const data = await res.json();
-                    console.log('[EE progress] response', { ok: res.ok, action: data.action, xpAwarded: data.xpAwarded, totalXp: data.totalXp, _debug: data._debug });
                     if (res.ok && data.action === 'checked') {
                       const xpAwarded = data.xpAwarded != null ? Number(data.xpAwarded) : 0;
-                      console.log('[EE progress] checked, xpAwarded', xpAwarded);
                       if (xpAwarded > 0) {
                         setEeProgress((p) => ({
                           ...p,
@@ -1708,11 +1714,14 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                             : [...p.mainEeXpAwardedEasterEggIds, ee.id],
                         }));
                         const totalXp = data.totalXp != null ? Number(data.totalXp) : undefined;
-                        console.log('[EE progress] scheduling toast', { xpAwarded, totalXp });
-                        // Defer toast so it fires after this handler; dispatch so it works even if we're outside the provider
+                        const customZombiesTotalXp = data.customZombiesTotalXp != null ? Number(data.customZombiesTotalXp) : undefined;
+                        const toastOpts = customZombiesTotalXp != null
+                          ? { customZombiesTotalXp }
+                          : totalXp != null
+                            ? { totalXp }
+                            : undefined;
                         setTimeout(() => {
-                          console.log('[EE progress] calling dispatchXpToast', { xpAwarded, totalXp });
-                          dispatchXpToast(xpAwarded, totalXp != null ? { totalXp } : undefined);
+                          dispatchXpToast(xpAwarded, toastOpts);
                         }, 0);
                         // Refetch map + profile so achievements tab shows the new unlock without manual refresh
                         setRefreshMapCounter((c) => c + 1);

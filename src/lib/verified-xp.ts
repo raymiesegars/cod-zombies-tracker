@@ -11,7 +11,7 @@ export async function grantVerifiedAchievementsForMap(
   userId: string,
   mapId: string,
   options?: { skipUserUpdate?: boolean }
-): Promise<{ verifiedTotalXp: number; xpGained: number }> {
+): Promise<{ verifiedTotalXp: number; verifiedCustomZombiesTotalXp: number; xpGained: number }> {
   const now = new Date();
   const skipUserUpdate = options?.skipUserUpdate ?? false;
 
@@ -19,9 +19,10 @@ export async function grantVerifiedAchievementsForMap(
     ? null
     : await prisma.user.findUnique({
         where: { id: userId },
-        select: { verifiedTotalXp: true },
+        select: { verifiedTotalXp: true, verifiedCustomZombiesTotalXp: true },
       });
   const previousVerifiedTotalXp = user?.verifiedTotalXp ?? 0;
+  const previousVerifiedCustomXp = user?.verifiedCustomZombiesTotalXp ?? 0;
 
   // Get all UNLOCKED map-specific achievements (mapId = X or easterEgg.mapId = X)
   const userAchievements = await prisma.userAchievement.findMany({
@@ -66,23 +67,44 @@ export async function grantVerifiedAchievementsForMap(
   }
 
   if (skipUserUpdate) {
-    return { verifiedTotalXp: 0, xpGained: 0 };
+    return { verifiedTotalXp: 0, verifiedCustomZombiesTotalXp: 0, xpGained: 0 };
   }
 
-  // Recalculate verifiedTotalXp for this user
   const verified = await prisma.userAchievement.findMany({
     where: { userId, verifiedAt: { not: null } },
-    select: { achievement: { select: { xpReward: true } } },
+    select: {
+      achievement: {
+        select: {
+          xpReward: true,
+          map: { select: { game: { select: { shortName: true } } } },
+          easterEgg: { select: { map: { select: { game: { select: { shortName: true } } } } } },
+        },
+      },
+    },
   });
-  const verifiedTotalXp = verified.reduce((s, ua) => s + ua.achievement.xpReward, 0);
+
+  let verifiedTotalXp = 0;
+  let verifiedCustomZombiesTotalXp = 0;
+  for (const ua of verified) {
+    const shortName = ua.achievement.map?.game?.shortName ?? ua.achievement.easterEgg?.map?.game?.shortName ?? null;
+    const xp = ua.achievement.xpReward;
+    if (shortName === 'BO3_CUSTOM') {
+      verifiedCustomZombiesTotalXp += xp;
+    } else {
+      verifiedTotalXp += xp;
+    }
+  }
 
   await prisma.user.update({
     where: { id: userId },
-    data: { verifiedTotalXp },
+    data: { verifiedTotalXp, verifiedCustomZombiesTotalXp },
   });
 
-  const xpGained = Math.max(0, verifiedTotalXp - previousVerifiedTotalXp);
-  return { verifiedTotalXp, xpGained };
+  const xpGained = Math.max(
+    0,
+    verifiedTotalXp - previousVerifiedTotalXp + (verifiedCustomZombiesTotalXp - previousVerifiedCustomXp)
+  );
+  return { verifiedTotalXp, verifiedCustomZombiesTotalXp, xpGained };
 }
 
 /**
@@ -136,11 +158,30 @@ export async function revokeVerifiedAchievementsForMapIfNeeded(
 
   const verified = await prisma.userAchievement.findMany({
     where: { userId, verifiedAt: { not: null } },
-    select: { achievement: { select: { xpReward: true } } },
+    select: {
+      achievement: {
+        select: {
+          xpReward: true,
+          map: { select: { game: { select: { shortName: true } } } },
+          easterEgg: { select: { map: { select: { game: { select: { shortName: true } } } } } },
+        },
+      },
+    },
   });
-  const verifiedTotalXp = verified.reduce((s, ua) => s + ua.achievement.xpReward, 0);
+
+  let verifiedTotalXp = 0;
+  let verifiedCustomZombiesTotalXp = 0;
+  for (const ua of verified) {
+    const shortName = ua.achievement.map?.game?.shortName ?? ua.achievement.easterEgg?.map?.game?.shortName ?? null;
+    const xp = ua.achievement.xpReward;
+    if (shortName === 'BO3_CUSTOM') {
+      verifiedCustomZombiesTotalXp += xp;
+    } else {
+      verifiedTotalXp += xp;
+    }
+  }
   await prisma.user.update({
     where: { id: userId },
-    data: { verifiedTotalXp },
+    data: { verifiedTotalXp, verifiedCustomZombiesTotalXp },
   });
 }

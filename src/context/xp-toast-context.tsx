@@ -14,6 +14,8 @@ export type XpToastOptions = {
   label?: string;
   admin?: boolean;
   adminTotalXp?: number;
+  customZombiesTotalXp?: number;
+  verifiedCustomZombiesTotalXp?: number;
 };
 
 type ToastState = {
@@ -23,6 +25,8 @@ type ToastState = {
   label?: string;
   admin?: boolean;
   adminTotalXp?: number;
+  customZombiesTotalXp?: number;
+  verifiedCustomZombiesTotalXp?: number;
 };
 
 type XpToastContextValue = {
@@ -74,7 +78,13 @@ export function dispatchXpToast(amount: number, options?: XpToastOptions) {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(
       new CustomEvent(eventName, {
-        detail: { amount, totalXp: options?.totalXp, label: options?.label },
+        detail: {
+          amount,
+          totalXp: options?.totalXp,
+          label: options?.label,
+          verifiedCustomZombiesTotalXp: options?.verifiedCustomZombiesTotalXp,
+          customZombiesTotalXp: options?.customZombiesTotalXp,
+        },
       })
     );
   }
@@ -99,6 +109,8 @@ export function XpToastProvider({ children }: { children: React.ReactNode }) {
           label: next.options?.label,
           admin: next.options?.admin ?? false,
           adminTotalXp: next.options?.adminTotalXp,
+          customZombiesTotalXp: next.options?.customZombiesTotalXp,
+          verifiedCustomZombiesTotalXp: next.options?.verifiedCustomZombiesTotalXp,
         });
         timeoutRef.current = setTimeout(showNextInQueue, TOAST_DURATION_MS);
       } else {
@@ -125,6 +137,8 @@ export function XpToastProvider({ children }: { children: React.ReactNode }) {
       label: options?.label,
       admin: options?.admin ?? false,
       adminTotalXp: options?.adminTotalXp,
+      customZombiesTotalXp: options?.customZombiesTotalXp,
+      verifiedCustomZombiesTotalXp: options?.verifiedCustomZombiesTotalXp,
     });
     timeoutRef.current = setTimeout(showNextInQueue, TOAST_DURATION_MS);
   }, [showNextInQueue]);
@@ -144,9 +158,13 @@ export function XpToastProvider({ children }: { children: React.ReactNode }) {
       }
     };
     const verifiedHandler = (e: Event) => {
-      const { amount, totalXp } = (e as CustomEvent<{ amount: number; totalXp?: number }>).detail ?? {};
+      const { amount, totalXp, verifiedCustomZombiesTotalXp } = (e as CustomEvent<{ amount: number; totalXp?: number; verifiedCustomZombiesTotalXp?: number }>).detail ?? {};
       if (typeof amount === 'number' && amount > 0) {
-        showXpToast(amount, { totalXp: totalXp ?? undefined, verified: true });
+        showXpToast(amount, {
+          totalXp: totalXp ?? undefined,
+          verified: true,
+          verifiedCustomZombiesTotalXp: verifiedCustomZombiesTotalXp ?? undefined,
+        });
       }
     };
     window.addEventListener(XP_TOAST_EVENT, handler);
@@ -170,6 +188,8 @@ export function XpToastProvider({ children }: { children: React.ReactNode }) {
             label={toast.label}
             admin={toast.admin}
             adminTotalXp={toast.adminTotalXp}
+            customZombiesTotalXp={toast.customZombiesTotalXp}
+            verifiedCustomZombiesTotalXp={toast.verifiedCustomZombiesTotalXp}
           />
         )}
       </AnimatePresence>
@@ -177,11 +197,20 @@ export function XpToastProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-function XpToastContent({ amount, totalXp, verified, label, admin, adminTotalXp }: ToastState) {
+function XpToastContent({ amount, totalXp, verified, label, admin, adminTotalXp, customZombiesTotalXp, verifiedCustomZombiesTotalXp }: ToastState) {
   const isAdmin = admin === true && adminTotalXp != null && adminTotalXp >= 0;
-  const totalXpBefore = isAdmin ? Math.max(0, adminTotalXp - amount) : totalXp != null && totalXp >= 0 ? Math.max(0, totalXp - amount) : 0;
-  const hasRankAndBar = !isAdmin && totalXp != null && totalXp >= 0;
-  const after = isAdmin ? getAdminLevelFromXp(adminTotalXp) : hasRankAndBar ? getLevelFromXp(totalXp!) : null;
+  const isCustomZombies = verifiedCustomZombiesTotalXp != null && verifiedCustomZombiesTotalXp >= 0;
+  const isCustomZombiesUnverified = !isCustomZombies && customZombiesTotalXp != null && customZombiesTotalXp >= 0;
+  const effectiveTotal = isAdmin
+    ? adminTotalXp
+    : isCustomZombies
+      ? verifiedCustomZombiesTotalXp
+      : isCustomZombiesUnverified
+        ? customZombiesTotalXp
+        : totalXp ?? null;
+  const totalXpBefore = effectiveTotal != null && effectiveTotal >= 0 ? Math.max(0, effectiveTotal - amount) : 0;
+  const hasRankAndBar = !isAdmin && effectiveTotal != null && effectiveTotal >= 0;
+  const after = isAdmin ? getAdminLevelFromXp(adminTotalXp!) : hasRankAndBar ? getLevelFromXp(effectiveTotal!) : null;
   const before = isAdmin ? getAdminLevelFromXp(totalXpBefore) : hasRankAndBar ? getLevelFromXp(totalXpBefore) : null;
   const leveledUp = Boolean(before && after && after.level > before.level);
   const showBar = hasRankAndBar || isAdmin;
@@ -206,11 +235,13 @@ function XpToastContent({ amount, totalXp, verified, label, admin, adminTotalXp 
             'rounded-xl border shadow-xl overflow-hidden',
             isAdmin
               ? 'border-amber-500/80 bg-bunker-900 ring-2 ring-amber-400/50 shadow-[0_0_24px_rgba(251,191,36,0.4)]'
-              : verified
-                ? 'border-blue-500/70 bg-bunker-900 ring-2 ring-blue-500/40'
-                : label === 'Mystery Box Challenge Complete'
-                  ? 'border-amber-500/80 bg-bunker-900 ring-2 ring-amber-400/60 shadow-[0_0_20px_rgba(251,191,36,0.35)]'
-                  : 'border-bunker-600 bg-bunker-900'
+              : isCustomZombies || isCustomZombiesUnverified
+                ? 'border-teal-500/70 bg-bunker-900 ring-2 ring-teal-500/40'
+                : verified
+                  ? 'border-blue-500/70 bg-bunker-900 ring-2 ring-blue-500/40'
+                  : label === 'Mystery Box Challenge Complete'
+                    ? 'border-amber-500/80 bg-bunker-900 ring-2 ring-amber-400/60 shadow-[0_0_20px_rgba(251,191,36,0.35)]'
+                    : 'border-bunker-600 bg-bunker-900'
           )}
         >
           <div
@@ -218,39 +249,41 @@ function XpToastContent({ amount, totalXp, verified, label, admin, adminTotalXp 
               'px-4 py-3',
               isAdmin
                 ? 'border-b border-amber-900/50'
-                : verified
-                  ? 'border-b border-blue-900/50'
-                  : label === 'Mystery Box Challenge Complete'
-                    ? 'border-b border-amber-900/40'
-                    : 'border-b border-bunker-700'
+                : isCustomZombies || isCustomZombiesUnverified
+                  ? 'border-b border-teal-900/50'
+                  : verified
+                    ? 'border-b border-blue-900/50'
+                    : label === 'Mystery Box Challenge Complete'
+                      ? 'border-b border-amber-900/40'
+                      : 'border-b border-bunker-700'
             )}
           >
-            {(label || isAdmin) && (
+            {(label || isAdmin || isCustomZombies || isCustomZombiesUnverified) && (
               <p className={cn(
                 'text-center text-xs font-semibold uppercase tracking-wider mb-2',
-                isAdmin ? 'text-amber-400' : 'text-amber-400'
+                isCustomZombies || isCustomZombiesUnverified ? 'text-teal-400' : isAdmin ? 'text-amber-400' : 'text-amber-400'
               )}>
-                {isAdmin ? 'Admin XP' : label}
+                {isCustomZombies ? 'Custom Verified Zombies XP' : isCustomZombiesUnverified ? 'Custom Zombies XP' : isAdmin ? 'Admin XP' : label}
               </p>
             )}
             {leveledUp && (
               <p className={cn(
                 'text-center text-xs font-black uppercase tracking-widest mb-2',
-                isAdmin ? 'text-amber-400' : verified ? 'text-blue-400' : 'text-blood-400'
+                isAdmin ? 'text-amber-400' : isCustomZombies ? 'text-teal-400' : isCustomZombiesUnverified ? 'text-teal-400' : verified ? 'text-blue-400' : 'text-blood-400'
               )}>
-                {isAdmin ? '⬆ Admin Rank Up!' : verified ? '⬆ Verified Rank Up!' : '⬆ Level Up!'}
+                {isAdmin ? '⬆ Admin Rank Up!' : isCustomZombies ? '⬆ Custom Verified Rank Up!' : isCustomZombiesUnverified ? '⬆ Custom Rank Up!' : verified ? '⬆ Verified Rank Up!' : '⬆ Level Up!'}
               </p>
             )}
             <p className="text-center flex items-center justify-center gap-2">
-              {verified && !isAdmin && (
-                <CheckCircle2 className="w-5 h-5 text-blue-400 shrink-0" strokeWidth={2.5} aria-hidden />
+              {(verified || isCustomZombies) && !isAdmin && (
+                <CheckCircle2 className={cn('w-5 h-5 shrink-0', isCustomZombies ? 'text-teal-400' : 'text-blue-400')} strokeWidth={2.5} aria-hidden />
               )}
-              <span className={isAdmin ? 'text-amber-400 font-medium' : verified ? 'text-blue-400 font-medium' : 'text-military-400 font-medium'}>+</span>
+              <span className={isAdmin ? 'text-amber-400 font-medium' : isCustomZombies || isCustomZombiesUnverified ? 'text-teal-400 font-medium' : verified ? 'text-blue-400 font-medium' : 'text-military-400 font-medium'}>+</span>
               <span className="tabular-nums text-lg font-bold text-white mx-0.5">
                 {amount.toLocaleString()}
               </span>
-              <span className={isAdmin ? 'text-amber-400/90 font-medium' : verified ? 'text-blue-400/90 font-medium' : 'text-military-500 font-medium'}>
-                {isAdmin ? ' Admin' : verified ? ' Verified' : ''} XP
+              <span className={isAdmin ? 'text-amber-400/90 font-medium' : isCustomZombies || isCustomZombiesUnverified ? 'text-teal-400/90 font-medium' : verified ? 'text-blue-400/90 font-medium' : 'text-military-500 font-medium'}>
+                {isAdmin ? ' Admin' : isCustomZombies ? ' Custom Verified' : isCustomZombiesUnverified ? ' Custom' : verified ? ' Verified' : ''} XP
               </span>
             </p>
           </div>
@@ -259,9 +292,9 @@ function XpToastContent({ amount, totalXp, verified, label, admin, adminTotalXp 
             <div className="px-4 py-3 space-y-3">
               <div className="flex items-center gap-3">
                 <div className="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
-                  {verified && !isAdmin && (
+                  {(verified || isCustomZombies) && !isAdmin && (
                     <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center" aria-hidden>
-                      <CheckCircle2 className="w-4 h-4 text-blue-500" strokeWidth={2.5} />
+                      <CheckCircle2 className={cn('w-4 h-4', isCustomZombies ? 'text-teal-500' : 'text-blue-500')} strokeWidth={2.5} />
                     </span>
                   )}
                   <Image
@@ -276,27 +309,27 @@ function XpToastContent({ amount, totalXp, verified, label, admin, adminTotalXp 
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-white truncate flex items-center gap-1.5 flex-wrap">
                     Level {after.level} · {isAdmin ? 'Admin Rank' : (after as ReturnType<typeof getLevelFromXp>).rankName}
-                    {verified && !isAdmin && (
-                      <span className="inline-flex items-center gap-0.5 text-blue-400 text-xs shrink-0">
+                    {(verified || isCustomZombies) && !isAdmin && (
+                      <span className={cn('inline-flex items-center gap-0.5 text-xs shrink-0', isCustomZombies ? 'text-teal-400' : 'text-blue-400')}>
                         <CheckCircle2 className="w-3.5 h-3.5" aria-hidden />
-                        Verified
+                        {isCustomZombies ? 'Custom Verified' : 'Verified'}
                       </span>
                     )}
                   </p>
                   <p className="text-xs text-bunker-400">
-                    {(isAdmin ? adminTotalXp : totalXp)?.toLocaleString()} {isAdmin ? 'admin' : verified ? 'verified' : 'total'} XP
+                    {(isAdmin ? adminTotalXp : effectiveTotal)?.toLocaleString()} {isAdmin ? 'admin' : isCustomZombies ? 'custom verified' : isCustomZombiesUnverified ? 'custom' : verified ? 'verified' : 'total'} XP
                   </p>
                 </div>
               </div>
               <div className="space-y-1">
                 <div className={cn(
                   'w-full h-2 rounded-full overflow-hidden border',
-                  isAdmin ? 'bg-bunker-800 border-amber-800/50' : 'bg-bunker-800 border-bunker-700'
+                  isAdmin ? 'bg-bunker-800 border-amber-800/50' : isCustomZombies || isCustomZombiesUnverified ? 'bg-bunker-800 border-teal-800/50' : 'bg-bunker-800 border-bunker-700'
                 )}>
                   <motion.div
                     className={cn(
                       'h-full rounded-full',
-                      isAdmin ? 'bg-gradient-to-r from-amber-600 to-amber-500 shadow-[0_0_8px_rgba(251,191,36,0.5)]' : verified ? 'bg-gradient-to-r from-blue-600 to-blue-500' : 'bg-gradient-to-r from-blood-600 to-blood-500'
+                      isAdmin ? 'bg-gradient-to-r from-amber-600 to-amber-500 shadow-[0_0_8px_rgba(251,191,36,0.5)]' : isCustomZombies || isCustomZombiesUnverified ? 'bg-gradient-to-r from-teal-600 to-teal-500' : verified ? 'bg-gradient-to-r from-blue-600 to-blue-500' : 'bg-gradient-to-r from-blood-600 to-blood-500'
                     )}
                     initial={{ width: `${before.progress}%` }}
                     animate={{ width: `${after.progress}%` }}
@@ -308,7 +341,7 @@ function XpToastContent({ amount, totalXp, verified, label, admin, adminTotalXp 
                 </div>
                 {after.level < (isAdmin ? ADMIN_MAX_LEVEL : MAX_LEVEL) && (
                   <p className="text-[11px] text-bunker-500 text-right">
-                    {((after as { nextLevelXp: number }).nextLevelXp - (isAdmin ? adminTotalXp! : totalXp!)).toLocaleString()} to next
+                    {((after as { nextLevelXp: number }).nextLevelXp - (isAdmin ? adminTotalXp! : effectiveTotal!)).toLocaleString()} to next
                   </p>
                 )}
               </div>

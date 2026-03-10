@@ -83,6 +83,7 @@ export async function GET() {
         mysteryBoxLobbyId: n.mysteryBoxLobbyId ?? undefined,
         verifiedXpGained: n.verifiedXpGained ?? undefined,
         verifiedTotalXp: n.verifiedTotalXp ?? undefined,
+        verifiedCustomZombiesTotalXp: n.verifiedCustomZombiesTotalXp ?? undefined,
       };
     });
 

@@ -284,6 +284,7 @@ export async function checkAllAchievements(userId: string): Promise<Achievement[
 
   const achievements = await prisma.achievement.findMany({
     where: { isActive: true },
+    include: { map: { select: { game: { select: { shortName: true } } } } },
   });
 
   const userAchievements = await prisma.userAchievement.findMany({
@@ -306,11 +307,12 @@ export async function checkAllAchievements(userId: string): Promise<Achievement[
         },
       });
 
+      const isCustomZombies = achievement.map?.game?.shortName === 'BO3_CUSTOM';
       await prisma.user.update({
         where: { id: userId },
-        data: {
-          totalXp: { increment: achievement.xpReward },
-        },
+        data: isCustomZombies
+          ? { customZombiesTotalXp: { increment: achievement.xpReward } }
+          : { totalXp: { increment: achievement.xpReward } },
       });
 
       unlockedAchievements.push(achievement);
@@ -318,16 +320,21 @@ export async function checkAllAchievements(userId: string): Promise<Achievement[
   }
 
   if (unlockedAchievements.length > 0) {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-    if (user) {
-      const { level } = getLevelFromXp(user.totalXp);
-      if (level !== user.level) {
-        await prisma.user.update({
-          where: { id: userId },
-          data: { level },
-        });
+    const nonCustom = unlockedAchievements.filter(
+      (a) => (a as { map?: { game?: { shortName?: string } } }).map?.game?.shortName !== 'BO3_CUSTOM'
+    );
+    if (nonCustom.length > 0) {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+      if (user) {
+        const { level } = getLevelFromXp(user.totalXp);
+        if (level !== user.level) {
+          await prisma.user.update({
+            where: { id: userId },
+            data: { level },
+          });
+        }
       }
     }
   }
@@ -595,6 +602,7 @@ export async function processMapAchievements(
           isActive: true,
           OR: [{ mapId }, { easterEgg: { mapId } }],
         },
+        include: { map: { select: { game: { select: { shortName: true } } } }, easterEgg: { select: { map: { select: { game: { select: { shortName: true } } } } } } },
       }),
       prisma.userAchievement.findMany({
         where: { userId },
@@ -757,23 +765,36 @@ export async function processMapAchievements(
   if (toUnlock.length === 0) return [];
   if (dryRun) return toUnlock;
 
-  const totalXpToAdd = toUnlock.reduce((s, a) => s + a.xpReward, 0);
+  let totalXpToAdd = 0;
+  let customZombiesXpToAdd = 0;
+  for (const a of toUnlock) {
+    const shortName = (a as { map?: { game?: { shortName?: string } }; easterEgg?: { map?: { game?: { shortName?: string } } } }).map?.game?.shortName
+      ?? (a as { easterEgg?: { map?: { game?: { shortName?: string } } } }).easterEgg?.map?.game?.shortName ?? null;
+    if (shortName === 'BO3_CUSTOM') {
+      customZombiesXpToAdd += a.xpReward;
+    } else {
+      totalXpToAdd += a.xpReward;
+    }
+  }
+
+  const updateData: { totalXp?: { increment: number }; customZombiesTotalXp?: { increment: number } } = {};
+  if (totalXpToAdd > 0) updateData.totalXp = { increment: totalXpToAdd };
+  if (customZombiesXpToAdd > 0) updateData.customZombiesTotalXp = { increment: customZombiesXpToAdd };
 
   await prisma.$transaction([
     prisma.userAchievement.createMany({
       data: toUnlock.map((a) => ({ userId, achievementId: a.id })),
     }),
-    prisma.user.update({
-      where: { id: userId },
-      data: { totalXp: { increment: totalXpToAdd } },
-    }),
+    ...(Object.keys(updateData).length > 0 ? [prisma.user.update({ where: { id: userId }, data: updateData })] : []),
   ]);
 
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (user) {
-    const { level } = getLevelFromXp(user.totalXp);
-    if (level !== user.level) {
-      await prisma.user.update({ where: { id: userId }, data: { level } });
+  if (totalXpToAdd > 0) {
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { totalXp: true, level: true } });
+    if (user) {
+      const { level } = getLevelFromXp(user.totalXp + totalXpToAdd);
+      if (level !== user.level) {
+        await prisma.user.update({ where: { id: userId }, data: { level } });
+      }
     }
   }
 
@@ -960,7 +981,7 @@ export async function revokeAchievementsForMapAfterDelete(
         where: { userId, achievement: { mapId } },
         include: { achievement: true },
       }),
-      prisma.map.findUnique({ where: { id: mapId }, select: { id: true, roundCap: true } }),
+      prisma.map.findUnique({ where: { id: mapId }, select: { id: true, roundCap: true, game: { select: { shortName: true } } } }),
       prisma.challengeLog.findMany({
         where: { userId, mapId },
         select: {
@@ -1038,6 +1059,13 @@ export async function revokeAchievementsForMapAfterDelete(
   if (toRevoke.length === 0) return { revoked: [], xpSubtracted: 0 };
 
   const xpToSubtract = toRevoke.reduce((s, a) => s + a.xpReward, 0);
+  const isBo3Custom = map?.game?.shortName === 'BO3_CUSTOM';
+
+  const updateData: { totalXp?: { decrement: number }; customZombiesTotalXp?: { decrement: number } } = {};
+  if (xpToSubtract > 0) {
+    if (isBo3Custom) updateData.customZombiesTotalXp = { decrement: xpToSubtract };
+    else updateData.totalXp = { decrement: xpToSubtract };
+  }
 
   await prisma.$transaction([
     prisma.userAchievement.deleteMany({
@@ -1046,32 +1074,42 @@ export async function revokeAchievementsForMapAfterDelete(
         achievementId: { in: toRevoke.map((a) => a.id) },
       },
     }),
-    prisma.user.update({
+    ...(Object.keys(updateData).length > 0 ? [prisma.user.update({
       where: { id: userId },
-      data: {
-        totalXp: { decrement: xpToSubtract },
-      },
-    }),
+      data: updateData,
+    })] : []),
   ]);
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { totalXp: true, level: true },
-  });
-  if (user) {
-    const newTotalXp = Math.max(0, user.totalXp);
-    if (newTotalXp !== user.totalXp) {
-      await prisma.user.update({
-        where: { id: userId },
-        data: { totalXp: newTotalXp },
-      });
-    }
-    const { level } = getLevelFromXp(newTotalXp);
-    if (level !== user.level) {
-      await prisma.user.update({
-        where: { id: userId },
-        data: { level },
-      });
+  if (xpToSubtract > 0) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { totalXp: true, customZombiesTotalXp: true, level: true },
+    });
+    if (user) {
+      if (isBo3Custom) {
+        const newCustom = Math.max(0, (user.customZombiesTotalXp ?? 0));
+        if (newCustom !== (user.customZombiesTotalXp ?? 0)) {
+          await prisma.user.update({
+            where: { id: userId },
+            data: { customZombiesTotalXp: newCustom },
+          });
+        }
+      } else {
+        const newTotalXp = Math.max(0, user.totalXp ?? 0);
+        if (newTotalXp !== (user.totalXp ?? 0)) {
+          await prisma.user.update({
+            where: { id: userId },
+            data: { totalXp: newTotalXp },
+          });
+        }
+        const { level } = getLevelFromXp(newTotalXp);
+        if (level !== user.level) {
+          await prisma.user.update({
+            where: { id: userId },
+            data: { level },
+          });
+        }
+      }
     }
   }
 
@@ -1085,11 +1123,18 @@ export async function revokeSingleAchievement(
 ): Promise<{ revoked: boolean; xpSubtracted: number }> {
   const ua = await prisma.userAchievement.findFirst({
     where: { userId, achievementId },
-    include: { achievement: true },
+    include: {
+      achievement: {
+        include: { map: { select: { game: { select: { shortName: true } } } }, easterEgg: { select: { map: { select: { game: { select: { shortName: true } } } } } } },
+      },
+    },
   });
   if (!ua) return { revoked: false, xpSubtracted: 0 };
 
-  const xpReward = (ua.achievement as { xpReward: number }).xpReward;
+  const ach = ua.achievement as { xpReward: number; map?: { game?: { shortName?: string } }; easterEgg?: { map?: { game?: { shortName?: string } } } };
+  const xpReward = ach.xpReward;
+  const shortName = ach.map?.game?.shortName ?? ach.easterEgg?.map?.game?.shortName ?? null;
+  const isBo3Custom = shortName === 'BO3_CUSTOM';
 
   await prisma.$transaction([
     prisma.userAchievement.delete({
@@ -1097,27 +1142,42 @@ export async function revokeSingleAchievement(
     }),
     prisma.user.update({
       where: { id: userId },
-      data: { totalXp: { decrement: xpReward } },
+      data: isBo3Custom
+        ? { customZombiesTotalXp: { decrement: xpReward } }
+        : { totalXp: { decrement: xpReward } },
     }),
   ]);
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { totalXp: true, level: true },
-  });
-  if (user) {
-    const newTotalXp = Math.max(0, user.totalXp);
-    if (newTotalXp !== user.totalXp) {
-      await prisma.user.update({
-        where: { id: userId },
-        data: { totalXp: newTotalXp },
-      });
+  if (!isBo3Custom) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { totalXp: true, level: true },
+    });
+    if (user) {
+      const newTotalXp = Math.max(0, user.totalXp ?? 0);
+      if (newTotalXp !== (user.totalXp ?? 0)) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: { totalXp: newTotalXp },
+        });
+      }
+      const { level } = getLevelFromXp(newTotalXp);
+      if (level !== user.level) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: { level },
+        });
+      }
     }
-    const { level } = getLevelFromXp(newTotalXp);
-    if (level !== user.level) {
+  } else {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { customZombiesTotalXp: true },
+    });
+    if (user && (user.customZombiesTotalXp ?? 0) < 0) {
       await prisma.user.update({
         where: { id: userId },
-        data: { level },
+        data: { customZombiesTotalXp: 0 },
       });
     }
   }

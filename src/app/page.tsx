@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Button, Card, CardContent, Logo, EasterEggIcon, MapIcon, MysteryBoxIcon } from '@/components/ui';
 import { useAuth } from '@/context/auth-context';
 import { useChatbot } from '@/context/chatbot-context';
-import { Trophy, Target, Users, ChevronRight, ChevronDown, Wrench, ExternalLink, PenLine, Medal, BookOpen, Bot } from 'lucide-react';
+import { Trophy, Target, Users, ChevronRight, ChevronDown, Wrench, ExternalLink, PenLine, Medal, BookOpen, Bot, MapPin } from 'lucide-react';
 import { useLogProgressModal } from '@/context/log-progress-modal-context';
 
 const features = [
@@ -277,6 +277,29 @@ export default function HomePage() {
               </p>
             </div>
             <ChevronRight className="w-8 h-8 text-white group-hover:translate-x-1 transition-transform flex-shrink-0" />
+          </div>
+        </Link>
+      </section>
+
+      {/* BO3 Custom Zombies — Map Submission Promo */}
+      <section className="py-8 sm:py-12 px-4 border-y border-blood-900/40 bg-gradient-to-b from-blood-950/30 to-bunker-950">
+        <Link
+          href="/maps"
+          className="block max-w-4xl mx-auto p-6 sm:p-8 rounded-2xl border-2 border-blood-700/50 bg-blood-950/60 hover:bg-blood-900/50 hover:border-blood-600/70 transition-all text-left group"
+        >
+          <div className="flex items-center gap-4 sm:gap-6">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-blood-900/50 border-2 border-blood-600/50 flex items-center justify-center group-hover:scale-105 transition-transform flex-shrink-0">
+              <MapPin className="w-10 h-10 sm:w-12 sm:h-12 text-blood-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-zombies text-white tracking-wide">
+                BO3 Custom Zombies
+              </h2>
+              <p className="mt-1 sm:mt-2 text-sm sm:text-base text-white/90">
+                Browse community-submitted Black Ops 3 custom maps, track progress, and submit your own for review. New maps added regularly.
+              </p>
+            </div>
+            <ChevronRight className="w-8 h-8 text-blood-400 group-hover:translate-x-1 transition-transform flex-shrink-0" />
           </div>
         </Link>
       </section>

@@ -14,7 +14,7 @@ export async function GET() {
       select: { id: true, isAdmin: true, adminDashboardSeen: true },
     });
     if (!me || !me.isAdmin) {
-      return NextResponse.json({ pending: 0, feedbackUnread: 0, verifiedHistoryUnread: 0 });
+      return NextResponse.json({ pending: 0, feedbackUnread: 0, verifiedHistoryUnread: 0, mapSubmissionsPending: 0 });
     }
 
     const seen = (me.adminDashboardSeen as { feedbackAt?: string; verifiedHistoryAt?: string } | null) ?? {};
@@ -25,6 +25,7 @@ export async function GET() {
       feedbackUnread,
       verifiedHistoryChallenge,
       verifiedHistoryEe,
+      mapSubmissionsPending,
     ] = await Promise.all([
       prisma.challengeLog.count({
         where: { verificationRequestedAt: { not: null }, isVerified: false, userId: { not: me.id } },
@@ -41,6 +42,7 @@ export async function GET() {
       seen.verifiedHistoryAt
         ? prisma.easterEggLog.count({ where: { isVerified: true, verifiedAt: { gt: new Date(seen.verifiedHistoryAt) } } })
         : prisma.easterEggLog.count({ where: { isVerified: true, verifiedAt: { not: null } } }),
+      prisma.mapSubmission.count({ where: { status: 'PENDING' } }),
     ]);
     const pending = pendingChallenge + pendingEe;
     const verifiedHistoryUnread = verifiedHistoryChallenge + verifiedHistoryEe;
@@ -49,6 +51,7 @@ export async function GET() {
       pending,
       feedbackUnread,
       verifiedHistoryUnread,
+      mapSubmissionsPending,
     });
   } catch (error) {
     console.error('Error fetching dashboard badges:', error);

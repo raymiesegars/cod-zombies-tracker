@@ -16,7 +16,7 @@ import { Trophy, Medal, Filter, Search, X, ShieldCheck, CheckCircle2, Loader2 } 
 import { useAuth } from '@/context/auth-context';
 import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { getBo2MapConfig, getBo2ChallengeTypeLabel } from '@/lib/bo2/bo2-map-config';
-import { getBo3MapConfig } from '@/lib/bo3/bo3-map-config';
+import { getBo3MapConfig, getBo3ChallengeTypeLabel } from '@/lib/bo3/bo3-map-config';
 import { getBo4MapConfig, getBo4ChallengeTypeLabel } from '@/lib/bo4/bo4-map-config';
 import { getBocwMapConfig, getBocwChallengeTypeLabel } from '@/lib/bocw/bocw-map-config';
 import { getBo6MapConfig, getBo6ChallengeTypeLabel } from '@/lib/bo6/bo6-map-config';
@@ -29,6 +29,7 @@ import { getAwMapConfig, getAwChallengeTypeLabel } from '@/lib/aw/aw-map-config'
 import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap, hasFirstRoomGumMachineBo3 } from '@/lib/first-room-variants';
 import { hasNoJugSupport } from '@/lib/no-jug-support';
 import { getStoredLeaderboardVerifiedOnly, setStoredLeaderboardVerifiedOnly } from '@/lib/achievements-verified-prefs';
+import { getGameDisplayShortName, isBo3CustomGame, BO3_CUSTOM_CHALLENGE_TYPES } from '@/lib/bo3-custom';
 
 const RANK_VIEW = '__rank__'; // Sentinel: show site-wide Rank by XP leaderboard
 const PAGE_SIZE = 25;
@@ -104,12 +105,14 @@ export default function LeaderboardsPage() {
   const [searchForFetch, setSearchForFetch] = useState(''); // Debounced; drives server-side search
   const [verifiedOnly, setVerifiedOnly] = useState(true);
   const [rankVerifiedXpOnly, setRankVerifiedXpOnly] = useState(true);
+  const [xpType, setXpType] = useState<'total' | 'verified' | 'customZombies' | 'verifiedCustomZombies'>('verified');
   const [leaderboardStorageHydrated, setLeaderboardStorageHydrated] = useState(false);
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const stored = getStoredLeaderboardVerifiedOnly();
     setVerifiedOnly(stored);
     setRankVerifiedXpOnly(stored);
+    setXpType(stored ? 'verified' : 'total');
     setLeaderboardStorageHydrated(true);
   }, []);
 
@@ -210,7 +213,8 @@ export default function LeaderboardsPage() {
           params.set('offset', '0');
           params.set('limit', String(PAGE_SIZE));
           if (searchForFetch) params.set('search', searchForFetch);
-          if (rankVerifiedXpOnly) params.set('verified', '1');
+          if (xpType === 'verified' || xpType === 'verifiedCustomZombies') params.set('verified', '1');
+          params.set('xpType', xpType);
           const res = await fetch(`/api/leaderboards/rank?${params}`, { cache: 'no-store' });
           if (res.ok) {
             const data = await res.json();
@@ -336,7 +340,7 @@ export default function LeaderboardsPage() {
 
     fetchLeaderboard();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, isVanguardMap, hasVanguardVoid, hasVanguardRampage, searchForFetch, verifiedOnly, rankVerifiedXpOnly, leaderboardStorageHydrated, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7GobbleGumFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, isVanguardMap, hasVanguardVoid, hasVanguardRampage, searchForFetch, verifiedOnly, rankVerifiedXpOnly, xpType, leaderboardStorageHydrated, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7GobbleGumFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter]);
 
   const loadMore = useCallback(async () => {
     if (leaderboard.length >= total || total === 0) return;
@@ -349,7 +353,8 @@ export default function LeaderboardsPage() {
         const params = new URLSearchParams();
         params.set('offset', String(offset));
         params.set('limit', String(PAGE_SIZE));
-        if (rankVerifiedXpOnly) params.set('verified', '1');
+        if (xpType === 'verified' || xpType === 'verifiedCustomZombies') params.set('verified', '1');
+        params.set('xpType', xpType);
         const res = await fetch(`/api/leaderboards/rank?${params}`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
@@ -444,7 +449,7 @@ export default function LeaderboardsPage() {
       setLoadMoreLoading(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, hasVanguardVoid, hasVanguardRampage, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7GobbleGumFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter, leaderboard.length, total]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, hasVanguardVoid, hasVanguardRampage, verifiedOnly, rankVerifiedXpOnly, xpType, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7GobbleGumFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter, leaderboard.length, total]);
 
   // Observe sentinel when search is empty and more entries exist; trigger well before sentinel is visible
   useEffect(() => {
@@ -461,19 +466,23 @@ export default function LeaderboardsPage() {
     return () => observer.disconnect();
   }, [isSearchActive, loadMore, leaderboard.length, total]);
 
+  const hideCustom = Boolean(profile && (profile as { hideCustomZombiesEverywhere?: boolean }).hideCustomZombiesEverywhere);
+  const filteredGamesForOptions = hideCustom ? games.filter((g) => !isBo3CustomGame((g as { shortName?: string }).shortName)) : games;
+  const filteredMapsForOptions = hideCustom ? maps.filter((m) => !isBo3CustomGame(m.game?.shortName)) : maps;
+
   const filteredMaps = selectedGame
-    ? maps.filter((map) => map.gameId === selectedGame)
-    : maps;
+    ? filteredMapsForOptions.filter((map) => map.gameId === selectedGame)
+    : filteredMapsForOptions;
 
   const gameOptions = [
     { value: RANK_VIEW, label: 'Rank (by XP)' },
     { value: '', label: 'All Games' },
-    ...games.map((game) => ({ value: game.id, label: game.name })),
+    ...filteredGamesForOptions.map((game) => ({ value: game.id, label: game.name })),
   ];
 
   const mapOptions = [
     { value: '', label: 'Select a map' },
-    ...filteredMaps.map((map) => ({ value: map.slug, label: `${map.name} (${map.game.shortName})` })),
+    ...filteredMaps.map((map) => ({ value: map.slug, label: `${map.name} (${getGameDisplayShortName(map.game.shortName, map.game.name)})` })),
   ];
 
   const playerCountOptions = [
@@ -531,7 +540,9 @@ export default function LeaderboardsPage() {
                 ? (fallbackName ?? challengeTypeLabels[type] ?? getBo6ChallengeTypeLabel(type) ?? type)
                 : selectedMapData?.game?.shortName === 'BO7'
                   ? (fallbackName ?? challengeTypeLabels[type] ?? getBo7ChallengeTypeLabel(type) ?? type)
-                  : selectedMapData?.game?.shortName === 'WW2'
+                  : selectedMapData?.game?.shortName === 'BO3_CUSTOM'
+                    ? (fallbackName ?? challengeTypeLabels[type] ?? getBo3ChallengeTypeLabel(type) ?? type)
+                    : selectedMapData?.game?.shortName === 'WW2'
                     ? (challengeTypeLabels[type] ?? getWw2ChallengeTypeLabel(type) ?? fallbackName ?? type)
                     : selectedMapData?.game?.shortName === 'VANGUARD'
                       ? (fallbackName ?? challengeTypeLabels[type] ?? getVanguardChallengeTypeLabel(type) ?? type)
@@ -558,6 +569,14 @@ export default function LeaderboardsPage() {
     } else if (selectedMapData?.game?.shortName === 'BO3' && selectedMap) {
       const bo3Config = getBo3MapConfig(selectedMap);
       const types = bo3Config?.challengeTypes ?? mapChallenges.map((c) => c.type);
+      challengeOptions = types
+        .filter((t) => t !== 'HIGHEST_ROUND')
+        .map((t) => {
+          const c = mapChallenges.find((ch) => ch.type === t);
+          return { value: t, label: getLabel(t, c?.name) };
+        });
+    } else if (selectedMapData?.game?.shortName === 'BO3_CUSTOM' && selectedMap) {
+      const types = BO3_CUSTOM_CHALLENGE_TYPES.filter((t) => mapChallenges.some((c) => c.type === t));
       challengeOptions = types
         .filter((t) => t !== 'HIGHEST_ROUND')
         .map((t) => {
@@ -647,6 +666,31 @@ export default function LeaderboardsPage() {
       ...mapEasterEggs.map((ee) => ({ value: `ee-time-${ee.id}`, label: `${ee.name} (Time)` })),
     ];
   }, [mapChallenges, mapEasterEggs, selectedMapData?.game?.shortName, selectedMap]);
+
+  useEffect(() => {
+    if (hideCustom && selectedGame) {
+      const g = games.find((x) => x.id === selectedGame) as { shortName?: string } | undefined;
+      if (g && isBo3CustomGame(g.shortName)) {
+        setSelectedGame(RANK_VIEW);
+        setSelectedMap('');
+      }
+    }
+  }, [hideCustom, selectedGame, games]);
+
+  useEffect(() => {
+    if (hideCustom && (xpType === 'customZombies' || xpType === 'verifiedCustomZombies')) {
+      setXpType('verified');
+      setRankVerifiedXpOnly(true);
+      setVerifiedOnly(true);
+      setStoredLeaderboardVerifiedOnly(true);
+    }
+  }, [hideCustom, xpType]);
+
+  useEffect(() => {
+    if (selectedMap && selectedGame && !filteredMaps.some((m) => m.slug === selectedMap)) {
+      setSelectedMap(filteredMaps[0]?.slug ?? '');
+    }
+  }, [selectedMap, selectedGame, filteredMaps]);
 
   // When map changes, reset to Highest Round
   useEffect(() => {
@@ -774,45 +818,74 @@ export default function LeaderboardsPage() {
                 />
               )}
               {isRankView && (
-                <div className="flex flex-col gap-1.5 min-w-0">
-                  <span className="text-xs font-medium text-bunker-500">Rank by:</span>
-                  <div className="inline-flex rounded-lg border border-bunker-600 p-1 bg-bunker-800/80 w-fit">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setRankVerifiedXpOnly(false);
-                        setVerifiedOnly(false);
-                        setStoredLeaderboardVerifiedOnly(false);
-                      }}
-                      className={cn(
-                        'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
-                        !rankVerifiedXpOnly
-                          ? 'bg-bunker-700 text-white shadow-sm'
-                          : 'text-bunker-400 hover:text-bunker-300'
-                      )}
-                      aria-pressed={!rankVerifiedXpOnly}
-                    >
-                      Total XP
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setRankVerifiedXpOnly(true);
-                        setVerifiedOnly(true);
-                        setStoredLeaderboardVerifiedOnly(true);
-                      }}
-                      className={cn(
-                        'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
-                        rankVerifiedXpOnly
-                          ? 'bg-blue-600 text-white shadow-sm'
-                          : 'text-bunker-400 hover:text-bunker-300'
-                      )}
-                      aria-pressed={rankVerifiedXpOnly}
-                    >
-                      <CheckCircle2 className="w-4 h-4 shrink-0" aria-hidden />
-                      Verified XP
-                    </button>
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 min-w-0">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-xs font-medium text-bunker-500">Rank by (official):</span>
+                    <div className="inline-flex rounded-lg border border-bunker-600 p-1 bg-bunker-800/80 w-fit">
+                      {[
+                        { v: 'total' as const, label: 'Total XP' },
+                        { v: 'verified' as const, label: 'Verified XP', icon: CheckCircle2 },
+                      ].map(({ v, label, icon: Icon }) => (
+                        <button
+                          key={v}
+                          type="button"
+                          onClick={() => {
+                            setXpType(v);
+                            const ver = v === 'verified';
+                            setRankVerifiedXpOnly(ver);
+                            setVerifiedOnly(ver);
+                            setStoredLeaderboardVerifiedOnly(ver);
+                          }}
+                          className={cn(
+                            'flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors',
+                            xpType === v
+                              ? v === 'verified'
+                                ? 'bg-blue-600 text-white shadow-sm'
+                                : 'bg-bunker-700 text-white shadow-sm'
+                              : 'text-bunker-400 hover:text-bunker-300'
+                          )}
+                          aria-pressed={xpType === v}
+                        >
+                          {Icon && <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden />}
+                          {label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
+                  {!hideCustom && (
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-xs font-bold text-element-300 uppercase tracking-wide">Custom Zombies rank:</span>
+                      <div className="inline-flex rounded-lg border border-bunker-600 p-1 bg-bunker-800/80 w-fit">
+                        {[
+                          { v: 'customZombies' as const, label: <><span className="font-extrabold text-element-300">CUSTOM</span> XP</> },
+                          { v: 'verifiedCustomZombies' as const, label: <><span className="font-extrabold text-element-300">CUSTOM</span> Verified XP</>, icon: CheckCircle2 },
+                        ].map(({ v, label, icon: Icon }) => (
+                          <button
+                            key={v}
+                            type="button"
+                            onClick={() => {
+                              setXpType(v);
+                              setRankVerifiedXpOnly(v === 'verifiedCustomZombies');
+                              setVerifiedOnly(v === 'verifiedCustomZombies');
+                              setStoredLeaderboardVerifiedOnly(v === 'verifiedCustomZombies');
+                            }}
+                            className={cn(
+                              'flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors',
+                              xpType === v
+                                ? v === 'verifiedCustomZombies'
+                                  ? 'bg-blue-600 text-white shadow-sm'
+                                  : 'bg-bunker-700 text-white shadow-sm'
+                                : 'text-bunker-400 hover:text-bunker-300'
+                            )}
+                            aria-pressed={xpType === v}
+                          >
+                            {Icon && <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden />}
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               {!isRankView && (
@@ -1088,12 +1161,16 @@ export default function LeaderboardsPage() {
                   <div>
                     <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                       <Medal className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
-                      {rankVerifiedXpOnly ? 'Rank (by Verified XP)' : 'Rank (by XP)'}
+                      {xpType === 'total' && 'Rank (by Total XP)'}
+                      {xpType === 'verified' && 'Rank (by Verified XP)'}
+                      {xpType === 'customZombies' && <>Rank (by <span className="font-extrabold text-element-300">CUSTOM</span> Zombies XP)</>}
+                      {xpType === 'verifiedCustomZombies' && <>Rank (by <span className="font-extrabold text-element-300">CUSTOM</span> Verified Zombies XP)</>}
                     </CardTitle>
                     <p className="text-xs sm:text-sm text-bunker-400 mt-1">
-                      {rankVerifiedXpOnly
-                        ? 'All members ranked by verified XP only'
-                        : 'All members ranked by total XP'}
+                      {xpType === 'total' && 'All members ranked by total XP'}
+                      {xpType === 'verified' && 'All members ranked by verified XP only'}
+                      {xpType === 'customZombies' && <>All members ranked by <span className="font-extrabold text-element-300">CUSTOM</span> Zombies XP</>}
+                      {xpType === 'verifiedCustomZombies' && <>All members ranked by <span className="font-extrabold text-element-300">CUSTOM</span> Verified Zombies XP only</>}
                     </p>
                   </div>
                   <span className="inline-flex items-center px-3 py-1.5 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-sm font-semibold shadow-[0_0_1px_rgba(0,0,0,1),0_0_3px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.8)] [text-shadow:0_0_1px_rgba(0,0,0,1),0_0_2px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">
@@ -1118,7 +1195,8 @@ export default function LeaderboardsPage() {
                         isCurrentUser={entry.user.id === profile?.id}
                         valueKind="xp"
                         hidePlayerCount
-                        showVerifiedBadge={rankVerifiedXpOnly}
+                        showVerifiedBadge={xpType === 'verified' || xpType === 'verifiedCustomZombies'}
+                        xpLabel={xpType === 'customZombies' ? 'Custom Zombies XP' : xpType === 'verifiedCustomZombies' ? 'Verified Custom Zombies XP' : 'XP'}
                       />
                     ))}
                     {!isSearchActive && leaderboard.length < total && (

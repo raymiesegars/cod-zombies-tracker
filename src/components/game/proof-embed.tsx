@@ -39,11 +39,11 @@ export function ProofEmbed({ url, className }: ProofEmbedProps) {
         <div className="relative aspect-video rounded-lg overflow-hidden bg-bunker-800">
           {!isLoaded && (thumbUrl || hqDefaultUrl) && (
             <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={thumbUrl || hqDefaultUrl || ''}
                 alt="Video thumbnail"
-                className="absolute inset-0 w-full h-full object-cover"
+                fill
+                className="object-cover"
                 onError={() => {
                   if (!thumbFallback && hqDefaultUrl) setThumbFallback(true);
                 }}

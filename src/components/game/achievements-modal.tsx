@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getGameDisplayShortName } from '@/lib/bo3-custom';
 import { Modal } from '@/components/ui';
 import Link from 'next/link';
 import { Award, ExternalLink, Loader2, ListChecks, ShieldCheck } from 'lucide-react';
@@ -95,7 +96,7 @@ export function AchievementsModal({
                         ) : (
                           <ListChecks className="w-4 h-4 text-blue-400 shrink-0" />
                         )}
-                        <span className="font-medium text-white truncate flex-1">{g.shortName}</span>
+                        <span className="font-medium text-white truncate flex-1">{getGameDisplayShortName(g.shortName, g.gameName)}</span>
                         <span className="text-sm text-bunker-400">{g.unlocked}/{g.total} {isVerified ? 'verified ' : ''}achievements</span>
                         <ExternalLink className="w-4 h-4 text-bunker-500 group-hover:text-blood-400 shrink-0" />
                       </Link>
@@ -124,7 +125,7 @@ export function AchievementsModal({
                       )}
                       <span className="font-medium text-white truncate flex-1">{m.mapName}</span>
                       {m.gameShortName && (
-                        <span className="text-xs text-bunker-400">{m.gameShortName}</span>
+                        <span className="text-xs text-bunker-400">{getGameDisplayShortName(m.gameShortName)}</span>
                       )}
                       <span className="text-sm font-zombies text-blood-300 tabular-nums">
                         {m.unlocked}/{m.total}
