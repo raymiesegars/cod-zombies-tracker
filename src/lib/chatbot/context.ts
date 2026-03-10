@@ -343,7 +343,7 @@ async function buildWikiContextLegacy(): Promise<string> {
     '## External wiki knowledge (CoD Fandom, ZWR The Rift, Skrine Zombies Info)'
   );
   lines.push(
-    'Use this to answer questions. ZWR wiki has EE speedrun guides, setup guides. Skrine: round times, instakill tables, EE cheat sheets. Prefer our site links for CZT-specific content.'
+    'Use this to answer questions. ZWR: EE speedrun guides, BO3 gobblegum loadouts per map. Skrine: round times, instakill tables, point drops. For BO3 gum loadouts use ZWR. Prefer our site links for CZT-specific content.'
   );
   lines.push('');
   let len = lines.join('\n').length;
