@@ -7,7 +7,7 @@ import { looksLikeAbuse, isOffTopic } from '@/lib/chatbot/abuse-check';
 import OpenAI from 'openai';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 const MAX_MESSAGE_LENGTH = 2000;
 const OPENAI_MODEL = 'gpt-4o-mini';
@@ -65,7 +65,7 @@ TERMINOLOGY: "What is [term]?" / "Define [term]?" → Use definitions from our s
 
 NICHE / SPECIFIC DATA (use ${UNKNOWN_MARKER} only when nothing relevant in context; do NOT suggest external resources):
 - "How many zombies per shot" / "kills per shot" / "average kills" / exact weapon stats → We don't store these. If we have related context (e.g. weapon description, map info), offer an educated guess with caveat ("I don't have exact numbers, but based on [what we have]..."). If nothing relevant, use ${UNKNOWN_MARKER}.
-- "Round end time" / "what is round end" / timing mechanics / perfect times / round times / instakill → Skrine Zombies Info has round times. Use the "Per-round times" table (Solo = time to complete that round). Do NOT use the "Cumulative total time" table for per-round times. If in context, answer from it. If not, use ${UNKNOWN_MARKER}.
+- "Round end time" / round times / instakill → ROUND TIME = time to complete that specific round. CUMULATIVE / "time to reach round X" = total elapsed to get there. Use Per-round table for "round 5 time". Use Cumulative table only for "total time to reach round 10". Moon Megas vs Classics: Megas (spawn rate boost) are FASTER than Classics. If in context, answer from it.
 - Gobblegums / mega gobblegums / ideal loadout / best gums BO3 / speedrun gums per map → ZWR wiki guides have BO3 gum loadouts (e.g. SoE: Nukes, Reign, Perkaholic, Wall Power, Anywhere but here). Skrine has Cold War Firebase Z trials, not BO3 gums. Use ZWR when in context; otherwise ${UNKNOWN_MARKER}.
 - Spreadsheet / exact stat we don't have / very specific calc → If we have related data, guess with caveat and link /leaderboards or /maps/[slug]. If nothing, use ${UNKNOWN_MARKER}.
 - Off-topic / personal / subjective → Use ${UNKNOWN_MARKER} or briefly redirect to site/zombies questions.

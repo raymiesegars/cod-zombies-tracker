@@ -1,140 +1,161 @@
-# Chatbot Test Questions (Skrine Zombies Info)
+# Chatbot Test Questions
 
-Use these to validate retrieval and answers before pushing. ✓ = has keyword trigger; ⚠ = likely needs keywords.
-
----
-
-## ✓ Terminology (ZWR Glossary)
-
-| Question | Expected source | Expected answer |
-|----------|-----------------|-----------------|
-| What is g-spawn? | Skrine General Info (or terminology chunk) | G-spawn is an error that occurs when you kill too many zombies at once in a spawn. E.g. shooting a ground spawn in SoE junction with a death machine—if multiple zombies spawn in a row at that spawn, it can cause a G-spawn error. |
-| What does SPH mean? | ZWR Terminology Glossary | SPH = spawns per horde (or similar). Link to glossary. |
-| Define AAT | ZWR Terminology Glossary | AAT = Alternative Ammo Type. Glossary definition. |
-| What is spawn manip? | ZWR Terminology Glossary | Spawn manipulation – glossary definition. |
+Validate retrieval and answers before pushing. ✓ = keyword trigger exists.
 
 ---
 
-## ✓ Point Drops / Wonder Weapons (BO1) – has keywords
+## ✓ Terminology
 
-Data = wonder weapons (rayguns) needed to clear the round, Waffe shots per horde, drop chances. NOT "shot chance" or probability.
-
-| Question | Expected chunk | Expected answer |
-|----------|----------------|-----------------|
-| How many raygun PAP shots needed to clear round 1 solo vs 4p? | Point Drops | Round 1: Solo 0.6 shots, 4p 2.4 shots. (Shots = rayguns needed to clear round.) |
-| How many Waffe shots per horde on round 5? | Point Drops | 2.4 shots (solo 1p). 2.7 (2p), 3.2 (3p), 3.7 (4p). |
-| What's the drop chance for solo round 1 on Ascension? | Point Drops | DROPS = 0.01 (1%) per zombie. Note: BO1 maps only, not WaW. |
-| DG2 shots needed round 10 solo? | Point Drops | DG2 (PAP) column – look up round 10. Wonder-weapon shots needed. |
-| VR-11 shots needed round 5? | Point Drops | VR-11 (PAP) columns in the table (wonder weapons needed per round). |
+| Question | Expected answer |
+|----------|-----------------|
+| What is g-spawn? | Error when you kill too many zombies at once at a spawn (e.g. death machine at SoE junction). From Skrine Terminology. |
+| Define gspawn | Same as g-spawn. Skrine definition. |
+| What does AAT mean? | Alternative Ammo Type (ZWR glossary if in context). |
+| What is spawn manip? | Spawn manipulation – ZWR glossary. |
 
 ---
 
-## ✓ Instakill & Health Scale (WaW) – has keywords
+## ✓ Wonder Weapons / Point Drops (BO1)
 
-| Question | Expected chunk | Expected answer |
-|----------|----------------|-----------------|
-| How does zombie health scale with dog rounds on Nacht? | Instakill Rounds | Zombie Round 1 → Health 150, Dog Round 7; Round 2 → 250, Dog 12; etc. |
-| What's the instakill round for Nacht solo? | Instakill Rounds | Round 1 instakill time 0:09 solo, etc. |
-| Verruckt health scale dog round? | Instakill Rounds | Same structure: Zombie Round, Health Scale, Dog Round. |
-| Shi No Numa zombie health by dog round? | Instakill Rounds | Round 1: 150, 6; Round 2: 250, 10; etc. |
-| Der Riese health scale? | Instakill Rounds | Round 1: 150, 5; Round 2: 250, 9; etc. |
+Raygun, VR-11, DG2 = shots needed to clear round. NOT shot chance or probability.
 
----
-
-## ⚠ Map Reset Times – needs keywords
-
-| Question | Expected chunk | Expected answer |
-|----------|----------------|-----------------|
-| What's the Nacht reset time? | Map Reset Times | WaW Nacht: 165h (approximation). |
-| How long until Kino resets? | Map Reset Times | BO1 Kino: 75h30. BO3 Kino: 105h. |
-| Map reset for Der Eisendrache? | Map Reset Times | DE: 63h. |
-| When does ZiS reset? | Map Reset Times | ZiS: 110–120h. |
-| Ascension reset time? | Map Reset Times | BO1 Ascension: 70h. BO3 Ascension: 112h. |
-| Outbreak reset? | Map Reset Times | Outbreak: 71h. |
-
-**Suggested keywords:** `reset`, `165`, `resets`, `hours`
+| Question | Expected answer |
+|----------|-----------------|
+| How many raygun PAP shots needed round 1 solo? | 0.6 shots. 4p = 2.4. |
+| VR-11 shots needed round 5 solo? | 1 shot (VR-11 PAP). 2p/3p/4p from table. |
+| VR-11 round 10? | Look up VR-11 (PAP) column round 10. |
+| Waffe shots per horde round 5? | 2.4 solo, 2.7 2p, 3.2 3p, 3.7 4p. |
+| DG2 shots needed round 7? | DG2 (PAP) column – wonder weapon shots to clear. |
+| Drop chance round 1 Ascension? | DROPS = 0.01 (1%). BO1 only. |
+| Baby gun shots needed? | BABYGUN columns in Point Drops table. |
 
 ---
 
-## ⚠ Round Times (per-round vs cumulative) – needs keywords
+## ✓ Instakill & Health Scale (WaW)
 
-| Question | Expected chunk | Expected answer |
-|----------|----------------|-----------------|
-| What's the round 5 time solo? | Round – Per-round | 53.54 seconds. |
-| Total time to reach round 10 solo? | Round – Cumulative | ~7:32.88 (from cumulative column). |
-| How long is round 1 solo? | Round – Per-round | 19.03 seconds. |
-| Time to complete round 20 duo? | Round – Per-round | 1:14.35 (from table). |
-| Cumulative time to round 15 quad? | Round – Cumulative | ~11:38.64. |
+Round = when you get instakill (1, 163, 165, 167…). Health = actual HP (150, 250, 350…). NOT 1–10 scale. NOT Dog Round.
 
-**Suggested keywords:** `round time`, `per round`, `cumulative`, `total time to round`, `reach round`
-
----
-
-## ⚠ Perfect & Expected Times / Moon – needs keywords
-
-| Question | Expected chunk | Expected answer |
-|----------|----------------|-----------------|
-| What are the round 30 and 50 solo times for Moon with megas vs classics? | Perfect & Expected | Moon 30 SR: Round 30 Megas vs Classics columns. Moon 50 SR+: Round 50. (Table has Megas/Classics per round.) |
-| Perfect round 1 time solo? | Perfect & Expected | 18.650 seconds. |
-| Expected round 5 time quad? | Perfect & Expected | 36.100 seconds. |
-| Moon solo round times megas vs classics? | Perfect & Expected | Moon 30 SR / Moon 50 SR+ sections with Round, Megas, Classics. |
-| SoE symbol guide? | Perfect & Expected | Shadows of Evil Symbol Guide / AAT Info in same chunk. |
-
-**Suggested keywords:** `perfect time`, `expected time`, `moon`, `megas`, `classics`, `round 30`, `round 50`
+| Question | Expected answer |
+|----------|-----------------|
+| What's the instakill round for Nacht solo? | Round 1 (first). Then 163, 165, 167… Round column = when instakill occurs. NOT "5" (that's Dog Round). |
+| Der Riese zombie health round 1? | 150 HP. Round 2 = 250, 3 = 350, 4 = 450, 5 = 550… |
+| Der Riese health scale rounds 1–10? | 1→150, 2→250, 3→350, 4→450, 5→550, 6→650, 8→750, 9→850, 10→935. Actual HP. |
+| Nacht health by dog round? | Zombie Round, Health (HP), Dog Round. Round 1 = 150 HP, Dog 7. |
+| Shi No Numa health scale? | Same structure: Zombie Round, Health Scale (HP), Dog Round. |
+| Verruckt zombie health? | Round 1: 150, Round 2: 250, etc. |
 
 ---
 
-## ⚠ Firebase Z (Cold War) – needs keywords
+## ✓ Map Reset Times
 
-| Question | Expected chunk | Expected answer |
-|----------|----------------|-----------------|
-| What's the best Firebase Z trial combo? | A1+A2 / 4p | A1+A2 = 39s (ideal). A1+B2, A1+C2 = 41s. |
-| Firebase Z ideal trial combos? | A1+A2 | A1+A2 39s, A1+B2 41s, B1+A2 43s, etc. |
-| How many kills for Firebase Z gens solo? | A1+A2 | Rnd 4 Spd Gen: 6 kills solo. Rnd 5 Jug Gen: 0 kills solo. |
-| Firebase Z 4p trial kills needed? | A1+A2 / 4p | 4p = 16 trials; Rnd 5 Jug: 15 kills for 4p. |
-| Weaver trial quotes Firebase Z? | A1+A2 | A1 "No more games" Well 31s, etc. |
+Same map can have different resets per game (BO1 vs BO3).
 
-**Suggested keywords:** `firebase z`, `trial`, `ideal combo`, `weaver`, `peck`, `a1`, `a2`, `cold war`
-
----
-
-## ⚠ IW / ZiS / Carrier – needs keywords
-
-| Question | Expected chunk | Expected answer |
-|----------|----------------|-----------------|
-| ZiS round 1 solo time? | NOT ACTUAL TIMES / Round | 0:13 (sheet 10). Note: estimates. |
-| Carrier bomb times? | NOT ACTUAL TIMES | 1P, 2P, 3P, 4P columns per round. |
-| IW Zombies spawn delay formula? | NOT ACTUAL TIMES | Spawn delay = 2 × 0.95^(Round-1). Max spawn rate round 64 = 0.08. |
-| Zombies in Spaceland first room round 1? | Table 1 (sheet 8) | 30.65 seconds no C4, 30.65 with C4. |
-| Moon 30 SR round 1 time? | NOT ACTUAL TIMES | 0:13 1P, etc. (sheet 10). |
-
-**Suggested keywords:** `zombies in spaceland`, `zis`, `carrier`, `iw`, `infinite warfare`, `bomb time`, `spawn delay`
+| Question | Expected answer |
+|----------|-----------------|
+| Kino reset time? | BO1: 75h30. BO3: 105h. Specify game if unclear. |
+| How long until Kino resets? | Same. BO3 Kino ≠ BO1 Kino. |
+| BO3 Kino reset? | 105h. |
+| BO1 Ascension reset? | 70h. BO3 Ascension = 112h. |
+| Nacht reset? | WaW: 165h (approx). |
+| Der Eisendrache reset? | 63h. |
+| ZiS reset? | 110–120h. |
+| Outbreak reset? | 71h. |
+| Firebase Z reset? | No map resets in CW. |
 
 ---
 
-## ⚠ Vanguard / Blitz / Transmit – needs keywords
+## ✓ Round Times (per-round vs cumulative)
 
-| Question | Expected chunk | Expected answer |
-|----------|----------------|-----------------|
-| Vanguard Blitz round times? | 4p (sheet 11) | R1 = 1:00, R2 = 1:30, R3 = 2:00, R4 = 2:30, R5+ = 3:00. |
-| Harvest stones per player Vanguard? | 4p | 1p = 5 stones, 2p = 5, 3p = 7, 4p = 9. |
-| Transmit times Terra Maledicta? | 4p | Trains top 0:58–1:01, bottom 1:00–1:03, etc. |
-| Purge circles 4p? | 4p | 1p = 10, 2p = 17, 3p = 24, 4p = 30. |
-| Shi No Numa transmit time? | 4p | SNN top 0:53–0:55, bottom 0:48–0:51. |
+**Per-round** = time to complete that round. **Cumulative** = total elapsed to reach that round.
 
-**Suggested keywords:** `blitz`, `transmit`, `harvest`, `purge`, `vanguard`, `terra maledicta`, `anfang`
+| Question | Expected answer |
+|----------|-----------------|
+| Round 5 time solo? | 53.54 seconds (per-round). |
+| Time to complete round 1 solo? | 19.03 seconds. |
+| Total time to reach round 10 solo? | ~7:32.88 (cumulative). |
+| Cumulative time to round 15 quad? | Use cumulative column, ~11:38.64. |
+| Time to reach round 20 duo? | Cumulative column. |
+| How long is round 5? | 53.54 solo (per-round). |
 
 ---
 
-## Chunk summary (for keyword expansion)
+## ✓ Moon / Perfect Times (Megas vs Classics)
 
-| Chunk title contains | Add keywords |
-|----------------------|--------------|
-| Point Drops | ✓ raygun, waffe, shots needed, wonder weapons, drop chance |
-| Instakill Rounds | ✓ health scale, dog round, zombie health |
-| Map Reset Times | reset, 165h, resets, hours |
-| Round – Per-round / Cumulative | round time, per round, cumulative, total time to round |
-| Perfect & Expected | perfect time, expected time, moon, megas, classics |
-| A1+A2 / 4p = 16 | firebase z, trial, ideal combo, cold war |
-| NOT ACTUAL TIMES | zis, carrier, iw, infinite warfare, bomb time |
-| 4p (sheet 11) | blitz, transmit, harvest, purge, vanguard |
+Megas = faster (spawn rate boost). Classics = slower.
+
+| Question | Expected answer |
+|----------|-----------------|
+| Moon megas vs classics round times? | Megas are faster. Moon 30 SR / Moon 50 SR+ tables with Megas, Classics per round. |
+| Moon solo round times megas vs classics? | Use Megas column (faster) vs Classics column. Megas have spawn boost. |
+| Perfect round 1 time solo? | 18.650 seconds. |
+| Expected round 5 quad? | 36.100 seconds. |
+| Moon 30 SR round 1? | 19.03 Megas/Classics (from table). |
+| Best possible total time round 30 Moon? | Cumulative column. Megas faster than Classics. |
+
+---
+
+## ✓ Firebase Z (Cold War)
+
+Ideal Combos = EE quote timings (A1+A2 39s). Trial TYPES = Good (Multi, Equipment, Close Range) vs Bad (Hip Fire, Crouched, Melee). Kills = for gens.
+
+| Question | Expected answer |
+|----------|-----------------|
+| Best Firebase Z trial combo? | EE: A1+A2 39s. Trial types: Good = Multi, Equipment, Close Range. Bad = Hip Fire, Crouched, Melee. Kills: Rnd 4 Spd solo 6, Rnd 5 Jug 4p 15. |
+| Firebase Z ideal trial combos? | A1+A2 39s, A1+B2 41s, A1+C2 41s, B1+A2 43s. Include trial types and kills for gens. |
+| How many kills for Firebase Z gens solo? | Rnd 4 Spd Gen: 6. Rnd 5 Jug Gen: 0. |
+| Firebase Z 4p trial kills? | 4p = 16 trials. Rnd 5 Jug: 15 kills. Rnd 4 Spd: 6 kills. |
+| Weaver quotes Firebase Z? | A1 "No more games" Well 31s, A2 "Fucking coward" 8s, etc. |
+| Firebase Z good trials vs bad? | Good: Multi, Equipment, Close Range. Bad: Hip Fire, Crouched, Melee. |
+
+---
+
+## ✓ Vanguard / Transmit / Shi No Numa (VG)
+
+SNN = Shi No Numa. Transmit times, Blitz, Harvest, Purge.
+
+| Question | Expected answer |
+|----------|-----------------|
+| Shi No Numa transmit time? | SNN (top) 0:53–0:55, SNN (bottom) 0:48–0:51. Vanguard. |
+| Vanguard Shi No Numa transmit? | Same. Top 0:53–0:55, bottom 0:48–0:51. |
+| Vanguard Blitz round times? | R1=1:00, R2=1:30, R3=2:00, R4=2:30, R5+=3:00. |
+| Harvest stones Vanguard? | 1p=5, 2p=5, 3p=7, 4p=9. |
+| Purge circles 4p? | 1p=10, 2p=17, 3p=24, 4p=30. |
+| Terra Maledicta transmit? | Trains top 0:58–1:01, bottom 1:00–1:03. |
+
+---
+
+## ✓ IW / ZiS / Carrier
+
+| Question | Expected answer |
+|----------|-----------------|
+| ZiS round 1 solo time? | 0:13 (estimates, not actual). |
+| Carrier bomb times? | 1P, 2P, 3P, 4P per round. |
+| IW spawn delay formula? | 2 × 0.95^(Round-1). Max spawn rate round 64 = 0.08. |
+| Zombies in Spaceland first room round 1? | 30.65s (sheet 8). |
+
+---
+
+## ✓ Site / Meta
+
+| Question | Expected answer |
+|----------|-----------------|
+| What is CZT? | CoD Zombies Tracker. |
+| Where are the leaderboards? | /leaderboards. |
+| How do I log a run? | Go to map page, log run from there. |
+| What are the rules? | /rules. |
+
+---
+
+## Chunk → keyword mapping
+
+| Chunk | Triggers |
+|-------|----------|
+| Point Drops, Raygun, VR-11, Waffe | raygun, waffe, vr-11, shots needed, wonder weapons, drop chance |
+| Instakill, Health Scale | instakill, health scale, dog round, der riese, nacht, verruckt, shi no numa |
+| Map Reset | reset, kino, 165, BO1, BO3 |
+| Round Times | round time, per round, cumulative, total time, reach round |
+| Perfect & Expected, Moon | moon, megas, classics, perfect time, expected time |
+| Firebase Z | firebase z, trial, ideal combo, a1, a2, weaver, cold war |
+| Vanguard Transmit, 4p | transmit, shi no numa, snn, blitz, harvest, purge, vanguard |
+| Terminology | g-spawn, gspawn, terminology |
+| NOT ACTUAL TIMES | zis, carrier, iw, spawn delay |

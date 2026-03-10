@@ -139,6 +139,7 @@ function extractPointDropsFacts(
 
   const raygunSoloIdx = findCol((c) => c.includes('RAYGUN (PAP) SOLO'));
   const roundCol = raygunSoloIdx >= 6 ? raygunSoloIdx - 6 : findCol((c) => c === 'ROUND');
+  const vr11Cols = findAllCols((c) => /VR-11\s*\(PAP\)/i.test(c));
   if (raygunSoloIdx < 0 || roundCol < 0) return result;
 
   const shotsCols = [raygunSoloIdx + 1, raygunSoloIdx + 3, raygunSoloIdx + 5, raygunSoloIdx + 7];
@@ -170,6 +171,13 @@ function extractPointDropsFacts(
     '| Round | Solo | 2p | 3p | 4p |',
     '|-------|------|-----|-----|-----|',
   ];
+  const vr11Lines: string[] = [
+    '## VR-11 (PAP) Shots Needed Per Round – BO1 (CotD)',
+    'Shots = wonder weapon shots needed to clear the round.',
+    '',
+    '| Round | Solo | 2p | 3p | 4p |',
+    '|-------|------|-----|-----|-----|',
+  ];
 
   for (let r = 1; r < rawRows.length && r <= maxRows; r++) {
     const row = rawRows[r] ?? [];
@@ -188,6 +196,11 @@ function extractPointDropsFacts(
     const dv = dropsCols.slice(0, 4).map((col) => (col >= 0 ? row[col] ?? '' : ''));
     if (dropsCols.length >= 1 && dv.some(Boolean)) {
       dropsLines.push(`| ${round} | ${dv[0]} | ${dv[1] || '-'} | ${dv[2] || '-'} | ${dv[3] || '-'} |`);
+    }
+
+    const v11 = vr11Cols.slice(0, 4).map((col) => (col >= 0 ? row[col] ?? '' : ''));
+    if (vr11Cols.length >= 4 && v11.some(Boolean)) {
+      vr11Lines.push(`| ${round} | ${v11[0]} | ${v11[1]} | ${v11[2]} | ${v11[3]} |`);
     }
   }
 
@@ -216,6 +229,14 @@ function extractPointDropsFacts(
       externalId: `${sheetName ? slugify(sheetName) + '-' : ''}point-drops-drops-quick`,
       title: `${sheetName ? sheetName + ' – ' : ''}Drop Chance Per Round (BO1)`,
       content: dropsContent,
+      sheetName,
+    });
+  }
+  if (vr11Lines.length > 5 && vr11Cols.length >= 4) {
+    result.push({
+      externalId: `${sheetName ? slugify(sheetName) + '-' : ''}point-drops-vr11-quick`,
+      title: `${sheetName ? sheetName + ' – ' : ''}VR-11 (PAP) Shots Needed Per Round (BO1 CotD)`,
+      content: vr11Lines.join('\n'),
       sheetName,
     });
   }
@@ -366,15 +387,23 @@ function extractChunks(rows: string[][], sheetName?: string): ExtractResult {
             tableTitle = 'Map Reset Times';
           } else if (headerText.includes('perfect time') || headerText.includes('expected time')) {
             tableTitle = 'Perfect & Expected Round Times';
-          } else if (headerText.includes('ideal combo')) {
-            tableTitle = 'Firebase Z Ideal Trial Combos';
+          } else if (headerText.includes('ideal combo') || (headerText.includes('firebase') && headerText.includes('a1'))) {
+            tableTitle = 'Firebase Z EE & Trials (Cold War)';
+          } else if ((headerText.includes('transmit') || headerText.includes('harvest') || headerText.includes('blitz')) && (headerText.includes('snn') || headerText.includes('anfang') || headerText.includes('vanguard'))) {
+            tableTitle = 'Vanguard Transmit, Harvest, Blitz (SNN = Shi No Numa)';
           }
           const prefix =
             headerText.includes('raygun') && headerText.includes('solo')
-              ? 'BO1 wonder weapons & point drops. Contains: RAYGUN (PAP) shots needed to clear round (1p/2p/3p/4p), Waffe shots per horde, drop chances per round. ROUND column = round number.\n\n'
+              ? 'BO1 wonder weapons & point drops. Contains: RAYGUN (PAP) shots needed to clear round (1p/2p/3p/4p), VR-11 (PAP), Waffe shots per horde, drop chances. ROUND column = round number.\n\n'
               : headerText.includes('health scale') && headerText.includes('zombie round')
-                ? 'WaW instakill rounds and zombie health scale by dog round. Zombie Round, Health Scale, Dog Round columns. Contains: Nacht, Verruckt, Shi No Numa, Der Riese.\n\n'
-                : '';
+                ? 'WaW: INSTAKILL ROUNDS = Round column is which round you GET instakill (e.g. 1, 163, 165, 167 for Nacht). Values = instakill duration. HEALTH SCALE = Zombie Round | Health (actual HP: 150, 250, 350, 450, 550, 650...) | Dog Round. Der Riese round 1 = 150 HP, round 2 = 250, etc. Contains: Nacht, Verruckt, Shi No Numa, Der Riese.\n\n'
+                : (headerText.includes('reset') || headerText.includes('165'))
+                  ? 'Columns = game (WaW, BO1, BO2, BO3, BO4, CW, VG, AW, IW, WW2). Same map can have different reset times per game. BO1 Kino = 75h30. BO3 Kino = 105h. BO1 Ascension = 70h, BO3 Ascension = 112h.\n\n'
+                  : (headerText.includes('firebase') && (headerText.includes('ideal') || headerText.includes('a1')))
+                    ? 'Firebase Z (Cold War): Ideal Combos = fastest EE quote combo (A1+A2 39s for Weaver+Peck quotes). Trial TYPES: Good = Multi, Equipment, Close Range. Bad = Hip Fire, Crouched, Melee. Kills for gens: Rnd 4 Spd Gen solo 6 kills, Rnd 5 Jug Gen solo 0, 4p 15. 4p = 16 trials total.\n\n'
+                    : (headerText.includes('transmit') && (headerText.includes('snn') || headerText.includes('anfang')))
+                      ? 'Vanguard: SNN = Shi No Numa. Transmit times: SNN (top) 0:53–0:55, SNN (bottom) 0:48–0:51. Harvest stones, Blitz round times, Purge circles per player.\n\n'
+                      : '';
           content = prefix + (content.length > MAX_CHUNK_CHARS ? content.slice(0, MAX_CHUNK_CHARS - prefix.length) + '\n...[truncated]' : content);
           chunks.push({
             externalId: `${sheetName ? slugify(sheetName) + '-' : ''}table-${slugify(tableTitle)}-${i}`,

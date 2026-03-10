@@ -95,7 +95,9 @@ const CHUNK_TRIGGERS: { pattern: RegExp; titleContains: string }[] = [
   { pattern: /firebase z|firebase.*trial|trial combo|ideal combo|weaver.*trial|a1\+a2|cold war.*trial|kills.*gen/i, titleContains: 'Firebase' },
   { pattern: /firebase z|4p = 16|kills.*gen/i, titleContains: '4p' },
   { pattern: /zis|zombies in spaceland|spaceland|carrier.*bomb|iw.*zombie|infinite warfare|spawn delay/i, titleContains: 'NOT ACTUAL' },
-  { pattern: /blitz|transmit.*time|harvest.*stone|purge.*circle|vanguard|terra maledicta|anfang/i, titleContains: '4p' },
+  { pattern: /blitz|transmit|harvest.*stone|purge.*circle|vanguard|terra maledicta|anfang|shi no numa.*transmit|snn.*transmit/i, titleContains: '4p' },
+  { pattern: /transmit|shi no numa|snn.*transmit/i, titleContains: 'Transmit' },
+  { pattern: /vr-11|vr11/i, titleContains: 'VR-11' },
 ];
 
 export async function getSkrineChunksByKeywords(
