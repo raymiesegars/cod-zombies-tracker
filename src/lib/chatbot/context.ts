@@ -150,11 +150,12 @@ async function buildSiteDataContext(): Promise<string> {
 }
 
 const ZWR_PRIORITY_IDS = [
+  'beginners-guide-on-how-to-speedrun-the-shadows-of-evil-easter-egg',
+  'der-eisendrache-no-power-strategy-guide-using-mega-gobblegums',
   'how-to-setup-the-boiii-client',
   'plutonium-anticheat-setup-and-breakdown',
   'how-to-bypass-the-25-day-freeze-black-screen',
   'how-to-open-the-console-on-plutonium-boiii-etc',
-  'beginners-guide-on-how-to-speedrun-the-shadows-of-evil-easter-egg',
 ];
 
 async function buildWikiContextStatic(): Promise<string> {
@@ -207,7 +208,7 @@ async function buildWikiContextWithRetrieval(
     '## External wiki knowledge (CoD Fandom, ZWR The Rift, Skrine Zombies Info)'
   );
   lines.push(
-    'Use this to answer questions. ZWR: EE speedrun guides, setup guides — summarize and link zwr.gg/wiki. Skrine Zombies Info: round times (per round, solo/duo/trio/quad), instakill tables, ideal gobblegum combos, EE cheat sheets, perfect times, point drops, reset times — ANSWER DIRECTLY from the Skrine chunks when they contain the answer. Note: "165h" etc. are high-round RESET times, not round times. Round times are per-round (e.g. "Round 1 | 19.03 | 0:13"). Prefer our site links for CZT-specific content.'
+    'Use this to answer questions. ZWR: EE speedrun guides, setup guides, BO3 gobblegum loadouts per map (e.g. SoE: Nukes, Reign, Perkaholic, Wall Power, ABH) — summarize and link zwr.gg/wiki. Skrine Zombies Info: round times (per-round and cumulative), instakill tables, point drops, reset times, perfect times, Cold War Firebase Z trials/combos — NOT BO3 gobblegum loadouts. For "best gobblegum loadout BO3", "mega gums for BO3 speedruns", "ideal gums per map" → use ZWR guides. For "round times", use Skrine "Per-round times" chunk (Solo = time for that round). "165h" = high-round RESET times. Prefer our site links for CZT-specific content.'
   );
   lines.push('');
   let len = lines.join('\n').length;
@@ -342,7 +343,7 @@ async function buildWikiContextLegacy(): Promise<string> {
     '## External wiki knowledge (CoD Fandom, ZWR The Rift, Skrine Zombies Info)'
   );
   lines.push(
-    'Use this to answer questions. ZWR wiki has EE speedrun guides, setup guides. Skrine: round times, instakill tables, EE cheat sheets. Prefer our site links for CZT-specific content.'
+    'Use this to answer questions. ZWR: EE speedrun guides, BO3 gobblegum loadouts per map. Skrine: round times, instakill tables, point drops. For BO3 gum loadouts use ZWR. Prefer our site links for CZT-specific content.'
   );
   lines.push('');
   let len = lines.join('\n').length;

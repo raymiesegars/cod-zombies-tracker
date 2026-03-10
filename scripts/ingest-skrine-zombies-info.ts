@@ -112,8 +112,14 @@ interface Chunk {
   sheetName?: string;
 }
 
-function extractChunks(rows: string[][], sheetName?: string): Chunk[] {
+interface ExtractResult {
+  chunks: Chunk[];
+  supersededExternalIds: string[];
+}
+
+function extractChunks(rows: string[][], sheetName?: string): ExtractResult {
   const chunks: Chunk[] = [];
+  const supersededExternalIds: string[] = [];
   let i = 0;
 
   function collectTextBlock(start: number, end: number): string {
@@ -165,24 +171,77 @@ function extractChunks(rows: string[][], sheetName?: string): Chunk[] {
     }
 
     if (hasTableHeader(row)) {
-      const tableRows: string[] = [];
+      const rawRows: string[][] = [];
       let r = i;
       while (r < rows.length) {
         const tr = rows[r];
-        const line = tr.filter((c) => c.length > 0).join(' | ');
-        if (line) tableRows.push(line);
+        if (tr.some((c) => c.length > 0)) rawRows.push([...tr]);
         r++;
         if (r < rows.length && rows[r]?.filter((c) => c.length > 0).length === 0) break;
       }
-      if (tableRows.length >= 2) {
-        const content = tableRows.join('\n');
-        const tableTitle = row.filter((c) => c.length > 0)[0] ?? 'Table';
-        chunks.push({
-          externalId: `${sheetName ? slugify(sheetName) + '-' : ''}table-${slugify(tableTitle)}-${i}`,
-          title: `${sheetName ? sheetName + ' – ' : ''}${tableTitle}`,
-          content: content.length > MAX_CHUNK_CHARS ? content.slice(0, MAX_CHUNK_CHARS) + '\n...[truncated]' : content,
-          sheetName,
-        });
+      if (rawRows.length >= 2) {
+        const filled = rawRows[0].map((c) => c.trim()).filter((c) => c.length > 0);
+        const roundIdx = filled.findIndex((c) => c.toLowerCase() === 'round');
+        const secondRoundIdx =
+          roundIdx >= 0 ? filled.slice(roundIdx + 1).findIndex((c) => c.toLowerCase() === 'round') : -1;
+        const splitAt =
+          secondRoundIdx >= 0 ? roundIdx + 1 + secondRoundIdx : -1;
+
+        if (splitAt > 0 && filled.length >= splitAt + 2) {
+          const toLine = (cells: string[]) =>
+            cells.filter((c) => c.length > 0).join(' | ');
+          const splitRow = (tr: string[]) => {
+            const nonEmpty = tr
+              .map((c) => c.trim())
+              .map((c, idx) => ({ v: c, idx }))
+              .filter((x) => x.v.length > 0);
+            const left = nonEmpty.slice(0, splitAt).map((x) => x.v);
+            const right = nonEmpty.slice(splitAt).map((x) => x.v);
+            return { left: toLine(left), right: toLine(right) };
+          };
+          const leftRows = rawRows.map((tr) => splitRow(tr).left);
+          const rightRows = rawRows.map((tr) => splitRow(tr).right);
+          const leftContent = leftRows.join('\n');
+          const rightContent = rightRows.join('\n');
+          const tableTitle = filled[0] ?? 'Table';
+          const baseId = `${sheetName ? slugify(sheetName) + '-' : ''}table-${slugify(tableTitle)}-${i}`;
+          chunks.push({
+            externalId: `${baseId}-per-round`,
+            title: `${sheetName ? sheetName + ' – ' : ''}${tableTitle} – Per-round times`,
+            content:
+              (leftContent.length > MAX_CHUNK_CHARS
+                ? leftContent.slice(0, MAX_CHUNK_CHARS) + '\n...[truncated]'
+                : leftContent) +
+              '\n\n(Time to complete THAT round. For "round X time" use this table.)',
+            sheetName,
+          });
+          supersededExternalIds.push(baseId);
+          chunks.push({
+            externalId: `${baseId}-cumulative`,
+            title: `${sheetName ? sheetName + ' – ' : ''}${tableTitle} – Cumulative total time`,
+            content:
+              (rightContent.length > MAX_CHUNK_CHARS
+                ? rightContent.slice(0, MAX_CHUNK_CHARS) + '\n...[truncated]'
+                : rightContent) +
+              '\n\n(Total elapsed time to REACH that round. Use only when asked for "total time to round X" or "cumulative".)',
+            sheetName,
+          });
+        } else {
+          const tableRows = rawRows.map((tr) =>
+            tr.filter((c) => c.length > 0).join(' | ')
+          );
+          const content = tableRows.join('\n');
+          const tableTitle = row.filter((c) => c.length > 0)[0] ?? 'Table';
+          chunks.push({
+            externalId: `${sheetName ? slugify(sheetName) + '-' : ''}table-${slugify(tableTitle)}-${i}`,
+            title: `${sheetName ? sheetName + ' – ' : ''}${tableTitle}`,
+            content:
+              content.length > MAX_CHUNK_CHARS
+                ? content.slice(0, MAX_CHUNK_CHARS) + '\n...[truncated]'
+                : content,
+            sheetName,
+          });
+        }
         i = r;
       } else {
         i++;
@@ -220,10 +279,10 @@ function extractChunks(rows: string[][], sheetName?: string): Chunk[] {
     i++;
   }
 
-  return chunks;
+  return { chunks, supersededExternalIds };
 }
 
-function processCsvFile(path: string): Chunk[] {
+function processCsvFile(path: string): ExtractResult {
   const content = readFileSync(path, 'utf-8');
   const rows = parseCsv(content);
   const base = basename(path, '.csv');
@@ -247,6 +306,7 @@ async function main() {
   }
 
   let allChunks: Chunk[] = [];
+  const allSuperseded: string[] = [];
 
   if (csvPaths.length > 0) {
     for (const csvPath of csvPaths) {
@@ -255,8 +315,9 @@ async function main() {
         console.error('File not found:', abs);
         continue;
       }
-      const chunks = processCsvFile(abs);
+      const { chunks, supersededExternalIds } = processCsvFile(abs);
       allChunks.push(...chunks);
+      allSuperseded.push(...supersededExternalIds);
       console.log(`  ${csvPath}: ${chunks.length} chunks`);
     }
     console.log(`Total: ${allChunks.length} chunks from ${csvPaths.length} files`);
@@ -268,8 +329,9 @@ async function main() {
     }
     const files = readdirSync(abs).filter((f) => f.endsWith('.csv'));
     for (const f of files) {
-      const chunks = processCsvFile(join(abs, f));
+      const { chunks, supersededExternalIds } = processCsvFile(join(abs, f));
       allChunks.push(...chunks);
+      allSuperseded.push(...supersededExternalIds);
       console.log(`  ${f}: ${chunks.length} chunks`);
     }
     console.log(`Total: ${allChunks.length} chunks from ${files.length} files`);
@@ -299,7 +361,17 @@ async function main() {
       console.log(`  ${c.content.slice(0, 100)}...`);
       console.log('');
     }
+    if (allSuperseded.length > 0) {
+      console.log('Would delete superseded:', allSuperseded.join(', '));
+    }
     process.exit(0);
+  }
+
+  if (allSuperseded.length > 0) {
+    const del = await prisma.chatbotWikiImport.deleteMany({
+      where: { source: 'skrine', externalId: { in: allSuperseded } },
+    });
+    if (del.count > 0) console.log(`Deleted ${del.count} superseded chunk(s)`);
   }
 
   const apiKey = process.env.OPENAI_API_KEY;
