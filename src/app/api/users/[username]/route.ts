@@ -13,6 +13,7 @@ export async function GET(
   try {
     const { username } = await params;
     const withStats = request.nextUrl.searchParams.get('withStats') === 'true';
+    const hideCustom = request.nextUrl.searchParams.get('hideCustom') === '1';
 
     const viewerSupabase = await getUser();
     let viewerId: string | null = null;
@@ -38,12 +39,14 @@ export async function GET(
         },
         ...(withStats && {
           challengeLogs: {
+            ...(hideCustom && { where: { map: { game: { shortName: { not: 'BO3_CUSTOM' } } } } }),
             include: {
               challenge: true,
               map: { include: { game: true } },
             },
           },
           easterEggLogs: {
+            ...(hideCustom && { where: { map: { game: { shortName: { not: 'BO3_CUSTOM' } } } } }),
             include: {
               easterEgg: true,
               map: { include: { game: true } },
@@ -120,7 +123,7 @@ export async function GET(
     if (friendRequestId) payload.friendRequestId = friendRequestId;
 
     if (withStats && 'challengeLogs' in user && 'easterEggLogs' in user) {
-      const stats = await computeUserStats(user as unknown as UserWithLogs);
+      const stats = await computeUserStats(user as unknown as UserWithLogs, hideCustom);
       Object.assign(payload, stats);
     }
 

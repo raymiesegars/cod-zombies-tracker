@@ -97,6 +97,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     const map = await prisma.map.findUnique({
       where: { slug },
       include: {
+        game: { select: { shortName: true } },
         easterEggs: {
           where: { isActive: true },
           include: { steps: { orderBy: { order: 'asc' } } },
@@ -168,15 +169,17 @@ export async function POST(request: NextRequest, { params }: Params) {
         });
 
         debugMainQuest = { stepsLength: ee.steps.length, checkedCount, allChecked, alreadyAwarded: !!alreadyAwarded, xpReward: ee.xpReward };
-        console.log('[EE progress API]', { eeId: ee.id, eeName: ee.name, ...debugMainQuest });
 
         if (allChecked && !alreadyAwarded && ee.xpReward > 0) {
           await prisma.mainEasterEggXpAwarded.create({
             data: { userId: user.id, easterEggId: ee.id },
           });
+          const isCustomZombies = map.game?.shortName === 'BO3_CUSTOM';
           await prisma.user.update({
             where: { id: user.id },
-            data: { totalXp: { increment: ee.xpReward } },
+            data: isCustomZombies
+              ? { customZombiesTotalXp: { increment: ee.xpReward } }
+              : { totalXp: { increment: ee.xpReward } },
           });
           // Create UserAchievement so the achievement shows as unlocked in the UI (XP already added above)
           const eeAchievement = await prisma.achievement.findFirst({
@@ -194,26 +197,30 @@ export async function POST(request: NextRequest, { params }: Params) {
           }
           const updated = await prisma.user.findUnique({
             where: { id: user.id },
-            select: { totalXp: true, level: true },
+            select: { totalXp: true, customZombiesTotalXp: true, level: true },
           });
           if (updated) {
-            totalXp = updated.totalXp;
-            const { level } = getLevelFromXp(updated.totalXp);
-            if (level !== updated.level) {
-              await prisma.user.update({
-                where: { id: user.id },
-                data: { level },
-              });
+            totalXp = isCustomZombies ? (updated.customZombiesTotalXp ?? undefined) : updated.totalXp;
+            if (!isCustomZombies) {
+              const { level } = getLevelFromXp(updated.totalXp);
+              if (level !== updated.level) {
+                await prisma.user.update({
+                  where: { id: user.id },
+                  data: { level },
+                });
+              }
             }
           }
           xpAwarded = ee.xpReward;
         }
       }
 
-      const response: { action: string; xpAwarded: number | null; totalXp: number | null; _debug?: Record<string, unknown> } = {
+      const isCustom = map.game?.shortName === 'BO3_CUSTOM';
+      const response: { action: string; xpAwarded: number | null; totalXp: number | null; customZombiesTotalXp?: number; _debug?: Record<string, unknown> } = {
         action: 'checked',
         xpAwarded: xpAwarded != null ? Number(xpAwarded) : null,
-        totalXp: totalXp != null ? Number(totalXp) : null,
+        totalXp: !isCustom && totalXp != null ? Number(totalXp) : null,
+        ...(isCustom && totalXp != null && { customZombiesTotalXp: Number(totalXp) }),
       };
       if (process.env.NODE_ENV === 'development' && debugMainQuest) {
         response._debug = debugMainQuest;

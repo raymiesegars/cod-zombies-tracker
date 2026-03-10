@@ -8,15 +8,26 @@ import { getLevelFromXp, MAX_LEVEL } from '@/lib/ranks';
 import { ProgressBar } from '@/components/ui';
 import { CheckCircle2 } from 'lucide-react';
 
+type ProfileRankDisplay = {
+  showNormalXp?: boolean;
+  showVerifiedXp?: boolean;
+  showCustomZombiesXp?: boolean;
+  showVerifiedCustomZombiesXp?: boolean;
+};
+
 interface XpRankDisplayProps {
   totalXp: number;
   verifiedTotalXp: number;
-  /** Viewer's preference: show both bars or single with toggle */
+  customZombiesTotalXp?: number;
+  verifiedCustomZombiesTotalXp?: number;
+  /** Viewer's preference: show both bars or single with toggle (legacy) */
   showBothXpRanks?: boolean;
   /** Viewer's last selected when showing single bar */
   preferredRankView?: 'total' | 'verified' | null;
   /** Callback when user toggles (to persist preferredRankView) */
   onPreferredRankViewChange?: (view: 'total' | 'verified') => void;
+  /** Which ranks to show (mix and match). When set, overrides showBothXpRanks. */
+  profileRankDisplay?: ProfileRankDisplay;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
@@ -26,11 +37,14 @@ function SingleXpBar({
   isVerified,
   size = 'md',
   showCheckmark,
+  xpSubtitle,
 }: {
   totalXp: number;
   isVerified: boolean;
   size?: 'sm' | 'md' | 'lg';
   showCheckmark?: boolean;
+  /** Override the XP subtitle, e.g. "Custom Zombies XP" instead of "total XP" / "verified XP" */
+  xpSubtitle?: string;
 }) {
   const [rankIconError, setRankIconError] = useState(false);
   const { level, progress, rankName, rankIcon, nextLevelXp } = getLevelFromXp(totalXp);
@@ -89,7 +103,16 @@ function SingleXpBar({
         </div>
         <ProgressBar value={progress} variant="xp" size={size === 'lg' ? 'lg' : 'md'} />
         <p className="text-xs text-bunker-400 mt-1">
-          {totalXp.toLocaleString()} {isVerified ? 'verified' : 'total'} XP
+          {xpSubtitle ? (
+            <>
+              <span className="font-extrabold text-element-300 uppercase tracking-wide">Custom</span>
+              {xpSubtitle.startsWith('Verified ') ? ' Verified Zombies ' : ' Zombies '}
+              <span className="tabular-nums">{totalXp.toLocaleString()}</span>
+              {' XP'}
+            </>
+          ) : (
+            <>{totalXp.toLocaleString()} {isVerified ? 'verified' : 'total'} XP</>
+          )}
         </p>
       </div>
     </div>
@@ -99,9 +122,12 @@ function SingleXpBar({
 export function XpRankDisplay({
   totalXp,
   verifiedTotalXp,
+  customZombiesTotalXp = 0,
+  verifiedCustomZombiesTotalXp = 0,
   showBothXpRanks = false,
   preferredRankView = 'total',
   onPreferredRankViewChange,
+  profileRankDisplay,
   size = 'md',
   className,
 }: XpRankDisplayProps) {
@@ -120,8 +146,28 @@ export function XpRankDisplay({
     [onPreferredRankViewChange]
   );
 
+  const barContainer = 'rounded-lg border p-3 sm:p-4';
+
+  if (profileRankDisplay) {
+    const bars: { totalXp: number; isVerified: boolean; showCheckmark: boolean; title: string; borderClass: string; xpSubtitle?: string }[] = [];
+    if (profileRankDisplay.showNormalXp) bars.push({ totalXp, isVerified: false, showCheckmark: false, title: 'Normal XP', borderClass: 'border-bunker-600 bg-bunker-800/30' });
+    if (profileRankDisplay.showVerifiedXp) bars.push({ totalXp: verifiedTotalXp, isVerified: true, showCheckmark: true, title: 'Verified XP', borderClass: 'border-blue-500/40 bg-blue-950/20' });
+    if (profileRankDisplay.showCustomZombiesXp) bars.push({ totalXp: customZombiesTotalXp, isVerified: false, showCheckmark: false, title: 'Custom Zombies XP', borderClass: 'border-element-500/40 bg-element-950/20', xpSubtitle: 'Custom Zombies' });
+    if (profileRankDisplay.showVerifiedCustomZombiesXp) bars.push({ totalXp: verifiedCustomZombiesTotalXp, isVerified: true, showCheckmark: true, title: 'Verified Custom Zombies XP', borderClass: 'border-blue-500/30 bg-blue-950/10', xpSubtitle: 'Verified Custom Zombies' });
+
+    if (bars.length === 0) return null;
+    return (
+      <div className={cn('flex flex-col gap-4', className)}>
+        {bars.map((bar, i) => (
+          <div key={i} className={cn(barContainer, bar.borderClass)}>
+            <SingleXpBar totalXp={bar.totalXp} isVerified={bar.isVerified} showCheckmark={bar.showCheckmark} size={size} xpSubtitle={bar.xpSubtitle} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   if (showBothXpRanks) {
-    const barContainer = 'rounded-lg border p-3 sm:p-4';
     return (
       <div className={cn('flex flex-col gap-4', className)}>
         <div className={cn(barContainer, 'border-blue-500/40 bg-blue-950/20')}>

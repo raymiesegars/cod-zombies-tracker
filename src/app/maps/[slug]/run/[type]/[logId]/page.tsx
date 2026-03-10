@@ -20,6 +20,7 @@ import { formatCompletionTime } from '@/components/ui/time-input';
 import { getAssetUrl } from '@/lib/assets';
 import { formatRushScore } from '@/lib/utils';
 import { RoundCounter, ProofEmbed, ChallengeTypeIcon, UserWithRank } from '@/components/game';
+import { getGameDisplayShortName } from '@/lib/bo3-custom';
 import { getBo4DifficultyLabel } from '@/lib/bo4';
 import { getBo3GobbleGumLabel } from '@/lib/bo3';
 import { getBocwSupportLabel } from '@/lib/bocw';
@@ -500,7 +501,7 @@ export default function RunDetailPage() {
           </Link>
           <div className="flex flex-wrap items-center justify-end gap-2">
             <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-xs font-semibold">
-              {map.game.shortName}
+              {getGameDisplayShortName(map.game.shortName, map.game.name)}
             </span>
             {map.game.shortName === 'BO4' && (log as ChallengeLogDetail & EasterEggLogDetail).difficulty && (
               <span className="inline-flex items-center px-2.5 py-1 rounded-full border border-bunker-500 bg-bunker-800/95 text-bunker-200 text-xs font-medium">

@@ -196,6 +196,11 @@ export async function POST(
             if (!existingCompletion) {
               const filterSettings = (roll.filterSettings ?? {}) as MysteryBoxFilterSettings | null;
               mysteryBoxXp = computeMysteryBoxXp(filterSettings, log.roundReached);
+              const mapForMb = await prisma.map.findUnique({
+                where: { id: log.mapId },
+                select: { game: { select: { shortName: true } } },
+              });
+              const isBo3CustomMysteryBox = mapForMb?.game?.shortName === 'BO3_CUSTOM';
               await prisma.$transaction([
                 prisma.mysteryBoxCompletion.create({
                   data: {
@@ -208,7 +213,9 @@ export async function POST(
                 prisma.user.update({
                   where: { id: me.id },
                   data: {
-                    totalXp: { increment: mysteryBoxXp },
+                    ...(isBo3CustomMysteryBox
+                      ? { customZombiesTotalXp: { increment: mysteryBoxXp } }
+                      : { totalXp: { increment: mysteryBoxXp } }),
                     mysteryBoxCompletionsLifetime: { increment: 1 },
                   },
                 }),
@@ -229,17 +236,27 @@ export async function POST(
 
       xpGained += mysteryBoxXp;
       let totalXp: number | undefined;
+      let customZombiesTotalXp: number | undefined;
+      const mapWithGame = await prisma.map.findUnique({
+        where: { id: log.mapId },
+        select: { game: { select: { shortName: true } } },
+      });
+      const isBo3Custom = mapWithGame?.game?.shortName === 'BO3_CUSTOM';
+
       if (xpGained > 0) {
-        const updated = await prisma.user.findUnique({ where: { id: me.id }, select: { totalXp: true, level: true } });
+        const updated = await prisma.user.findUnique({ where: { id: me.id }, select: { totalXp: true, customZombiesTotalXp: true, level: true } });
         if (updated) {
           totalXp = updated.totalXp;
-          const { level } = getLevelFromXp(updated.totalXp);
-          if (level !== updated.level) {
+          if (isBo3Custom) customZombiesTotalXp = updated.customZombiesTotalXp;
+          const effectiveXp = isBo3Custom && (xpGained - mysteryBoxXp) > 0 ? (updated.customZombiesTotalXp ?? 0) : updated.totalXp;
+          const { level } = getLevelFromXp(effectiveXp);
+          if (level !== updated.level && !isBo3Custom) {
             await prisma.user.update({ where: { id: me.id }, data: { level } });
           }
         }
         if (mysteryBoxXp > 0) {
-          mysteryBoxTotalXp = (await prisma.user.findUnique({ where: { id: me.id }, select: { totalXp: true } }))?.totalXp;
+          const u = await prisma.user.findUnique({ where: { id: me.id }, select: { totalXp: true, customZombiesTotalXp: true } });
+          mysteryBoxTotalXp = isBo3Custom ? u?.customZombiesTotalXp : u?.totalXp;
           mysteryBoxCompletionsCount = (
             await prisma.user.findUnique({
               where: { id: me.id },
@@ -248,14 +265,16 @@ export async function POST(
           )?.mysteryBoxCompletionsLifetime ?? 0;
         }
       } else {
-        const u = await prisma.user.findUnique({ where: { id: me.id }, select: { totalXp: true } });
+        const u = await prisma.user.findUnique({ where: { id: me.id }, select: { totalXp: true, customZombiesTotalXp: true } });
         totalXp = u?.totalXp;
+        if (isBo3Custom) customZombiesTotalXp = u?.customZombiesTotalXp;
       }
       return NextResponse.json({
         ok: true,
         logType: 'challenge',
         xpGained,
         totalXp,
+        ...(isBo3Custom && customZombiesTotalXp != null && { customZombiesTotalXp }),
         ...(mysteryBoxXp > 0 && {
           mysteryBoxXp,
           mysteryBoxTotalXp: mysteryBoxTotalXp ?? totalXp,
@@ -312,12 +331,19 @@ export async function POST(
           where: { userId_easterEggId: { userId: me.id, easterEggId: ee.id } },
         });
         if (!existing) {
+          const mapWithGame = await prisma.map.findUnique({
+            where: { id: log.mapId },
+            select: { game: { select: { shortName: true } } },
+          });
+          const isCustomZombies = mapWithGame?.game?.shortName === 'BO3_CUSTOM';
           await prisma.mainEasterEggXpAwarded.create({
             data: { userId: me.id, easterEggId: ee.id },
           });
           await prisma.user.update({
             where: { id: me.id },
-            data: { totalXp: { increment: ee.xpReward } },
+            data: isCustomZombies
+              ? { customZombiesTotalXp: { increment: ee.xpReward } }
+              : { totalXp: { increment: ee.xpReward } },
           });
           mainEeXpAwarded = ee.xpReward;
           const eeAchievement = await prisma.achievement.findFirst({
@@ -337,20 +363,37 @@ export async function POST(
       const newlyUnlocked = await processMapAchievements(me.id, log.mapId);
       const xpGained = newlyUnlocked.reduce((sum, a) => sum + a.xpReward, 0) + mainEeXpAwarded;
       let totalXp: number | undefined;
+      let customZombiesTotalXp: number | undefined;
+      const mapWithGameEe = await prisma.map.findUnique({
+        where: { id: log.mapId },
+        select: { game: { select: { shortName: true } } },
+      });
+      const isBo3CustomEe = mapWithGameEe?.game?.shortName === 'BO3_CUSTOM';
+
       if (xpGained > 0) {
-        const updated = await prisma.user.findUnique({ where: { id: me.id }, select: { totalXp: true, level: true } });
+        const updated = await prisma.user.findUnique({ where: { id: me.id }, select: { totalXp: true, customZombiesTotalXp: true, level: true } });
         if (updated) {
-          totalXp = updated.totalXp;
-          const { level } = getLevelFromXp(updated.totalXp);
-          if (level !== updated.level) {
-            await prisma.user.update({ where: { id: me.id }, data: { level } });
+          totalXp = isBo3CustomEe ? undefined : updated.totalXp;
+          if (isBo3CustomEe) customZombiesTotalXp = updated.customZombiesTotalXp;
+          if (!isBo3CustomEe) {
+            const { level } = getLevelFromXp(updated.totalXp);
+            if (level !== updated.level) {
+              await prisma.user.update({ where: { id: me.id }, data: { level } });
+            }
           }
         }
       } else {
-        const u = await prisma.user.findUnique({ where: { id: me.id }, select: { totalXp: true } });
-        totalXp = u?.totalXp;
+        const u = await prisma.user.findUnique({ where: { id: me.id }, select: { totalXp: true, customZombiesTotalXp: true } });
+        totalXp = isBo3CustomEe ? undefined : u?.totalXp;
+        if (isBo3CustomEe) customZombiesTotalXp = u?.customZombiesTotalXp;
       }
-      return NextResponse.json({ ok: true, logType: 'easter_egg', xpGained, totalXp });
+      return NextResponse.json({
+        ok: true,
+        logType: 'easter_egg',
+        xpGained,
+        ...(totalXp != null && { totalXp }),
+        ...(customZombiesTotalXp != null && isBo3CustomEe && { customZombiesTotalXp }),
+      });
     }
 
     return NextResponse.json({ error: 'Invalid pending' }, { status: 400 });

@@ -1,9 +1,11 @@
+import { Prisma } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { sortAchievementsForDisplay } from '@/lib/achievements/categories';
 
 // No mapId = completion by game + map list. mapId = achievements for that map + unlocked ids.
+// ?hideCustom=1 = viewer wants BO3 Custom Zombies excluded (reduces data and query cost)
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ username: string }> }
@@ -12,6 +14,7 @@ export async function GET(
     const { username } = await params;
     const { searchParams } = new URL(request.url);
     const mapId = searchParams.get('mapId') || undefined;
+    const hideCustom = searchParams.get('hideCustom') === '1';
 
     const user = await prisma.user.findUnique({
       where: { username },
@@ -35,9 +38,10 @@ export async function GET(
       }
     }
 
+    const gameFilter = hideCustom ? Prisma.sql`WHERE g."shortName" != 'BO3_CUSTOM'` : Prisma.empty;
     const completionRows = await prisma.$queryRaw<
       { gameId: string; gameName: string; shortName: string; order: number; total: bigint; unlocked: bigint }[]
-    >`
+    >(Prisma.sql`
       SELECT g.id as "gameId", g.name as "gameName", g."shortName", g."order",
         COUNT(a.id)::bigint as total,
         COUNT(ua.id)::bigint as unlocked
@@ -45,9 +49,10 @@ export async function GET(
       JOIN "Map" m ON m."gameId" = g.id
       JOIN "Achievement" a ON a."mapId" = m.id AND a."isActive" = true
       LEFT JOIN "UserAchievement" ua ON ua."achievementId" = a.id AND ua."userId" = ${user.id}
+      ${gameFilter}
       GROUP BY g.id, g.name, g."shortName", g."order"
       ORDER BY g."order"
-    `;
+    `);
 
     type MapSummaryRow = { mapId: string; mapName: string; mapSlug: string; gameShortName: string | null; gameOrder: number; mapOrder: number; total: bigint; unlocked: bigint };
     let mapSummaryRows: MapSummaryRow[] = [];
@@ -55,7 +60,7 @@ export async function GET(
     let verifiedMapSummaryRows: VerifiedMapSummaryRow[] = [];
     let verifiedCompletionRows: { gameId: string; gameName: string; shortName: string; order: number; total: bigint; unlocked: bigint }[] = [];
     if (!mapId) {
-      mapSummaryRows = (await prisma.$queryRaw`
+      mapSummaryRows = (await prisma.$queryRaw(Prisma.sql`
         SELECT m.id as "mapId", m.name as "mapName", m.slug as "mapSlug",
           g."shortName" as "gameShortName", g."order" as "gameOrder", m."order" as "mapOrder",
           COUNT(a.id)::bigint as total,
@@ -64,10 +69,11 @@ export async function GET(
         JOIN "Game" g ON m."gameId" = g.id
         JOIN "Achievement" a ON a."mapId" = m.id AND a."isActive" = true
         LEFT JOIN "UserAchievement" ua ON ua."achievementId" = a.id AND ua."userId" = ${user.id}
+        ${gameFilter}
         GROUP BY m.id, m.name, m.slug, g."shortName", g."order", m."order"
         ORDER BY g."order", m."order"
-      `) as MapSummaryRow[];
-      verifiedCompletionRows = (await prisma.$queryRaw`
+      `)) as MapSummaryRow[];
+      verifiedCompletionRows = (await prisma.$queryRaw(Prisma.sql`
         SELECT g.id as "gameId", g.name as "gameName", g."shortName", g."order",
           COUNT(a.id)::bigint as total,
           COUNT(ua.id)::bigint as unlocked
@@ -75,10 +81,11 @@ export async function GET(
         JOIN "Map" m ON m."gameId" = g.id
         JOIN "Achievement" a ON a."mapId" = m.id AND a."isActive" = true
         LEFT JOIN "UserAchievement" ua ON ua."achievementId" = a.id AND ua."userId" = ${user.id} AND ua."verifiedAt" IS NOT NULL
+        ${gameFilter}
         GROUP BY g.id, g.name, g."shortName", g."order"
         ORDER BY g."order"
-      `) as { gameId: string; gameName: string; shortName: string; order: number; total: bigint; unlocked: bigint }[];
-      verifiedMapSummaryRows = (await prisma.$queryRaw`
+      `)) as { gameId: string; gameName: string; shortName: string; order: number; total: bigint; unlocked: bigint }[];
+      verifiedMapSummaryRows = (await prisma.$queryRaw(Prisma.sql`
         SELECT m.id as "mapId", m.name as "mapName", m.slug as "mapSlug",
           g."shortName" as "gameShortName", g."order" as "gameOrder", m."order" as "mapOrder",
           COUNT(a.id)::bigint as total,
@@ -87,9 +94,10 @@ export async function GET(
         JOIN "Game" g ON m."gameId" = g.id
         JOIN "Achievement" a ON a."mapId" = m.id AND a."isActive" = true
         LEFT JOIN "UserAchievement" ua ON ua."achievementId" = a.id AND ua."userId" = ${user.id} AND ua."verifiedAt" IS NOT NULL
+        ${gameFilter}
         GROUP BY m.id, m.name, m.slug, g."shortName", g."order", m."order"
         ORDER BY g."order", m."order"
-      `) as VerifiedMapSummaryRow[];
+      `)) as VerifiedMapSummaryRow[];
     }
 
     const completionByGame = completionRows.map((r) => ({
@@ -103,7 +111,10 @@ export async function GET(
     }));
 
     const mapsByGame = await prisma.map.findMany({
-      where: { achievements: { some: { isActive: true } } },
+      where: {
+        achievements: { some: { isActive: true } },
+        ...(hideCustom && { game: { shortName: { not: 'BO3_CUSTOM' } } }),
+      },
       select: {
         id: true,
         name: true,
@@ -148,7 +159,11 @@ export async function GET(
         percentage: Number(r.total) > 0 ? Math.round((Number(r.unlocked) / Number(r.total)) * 100) : 0,
       }));
     const verifiedAchievementsTotal = await prisma.userAchievement.count({
-      where: { userId: user.id, verifiedAt: { not: null } },
+      where: {
+        userId: user.id,
+        verifiedAt: { not: null },
+        ...(hideCustom && { achievement: { map: { game: { shortName: { not: 'BO3_CUSTOM' } } } } }),
+      },
     });
 
     return NextResponse.json({

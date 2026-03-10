@@ -27,6 +27,8 @@ Supabase: create a project, get the API keys and DB URLs from project settings, 
 - `pnpm db:seed` — seed games, maps, challenges, achievements
 - `pnpm db:studio` — open Prisma Studio
 
+For BO3 Custom Zombies map submission uploads, create a Supabase storage bucket `custom-map-images` with public read access.
+
 ## Layout
 
 - `src/app` — App Router pages and API routes

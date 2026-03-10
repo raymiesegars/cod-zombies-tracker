@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { getAssetUrl } from '@/lib/assets';
 import { getBo4DifficultyLabel } from '@/lib/bo4';
+import { getGameDisplayShortName } from '@/lib/bo3-custom';
 import { Badge, Logo, EasterEggIcon } from '@/components/ui';
 import { RoundCounter } from './round-counter';
 import type { MapWithGame } from '@/types';
@@ -61,7 +62,7 @@ export function MapCard({
           {/* Game badge */}
           <div className="absolute top-2 sm:top-3 left-2 sm:left-3">
             <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full border border-blood-600/60 bg-blood-950/95 text-white shadow-[0_0_1px_rgba(0,0,0,1),0_0_3px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.8)] [text-shadow:0_0_1px_rgba(0,0,0,1),0_0_2px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">
-              {map.game.shortName}
+              {getGameDisplayShortName(map.game.shortName, map.game.name)}
             </span>
           </div>
 
@@ -107,7 +108,7 @@ export function MapCard({
             {map.name}
           </h3>
           <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
-            <span className="text-xs sm:text-sm text-bunker-200 truncate [text-shadow:0_0_1px_rgba(0,0,0,0.8),0_1px_3px_rgba(0,0,0,0.6)]">{map.game.name}</span>
+            <span className="text-xs sm:text-sm text-bunker-200 truncate [text-shadow:0_0_1px_rgba(0,0,0,0.8),0_1px_3px_rgba(0,0,0,0.6)]">{getGameDisplayShortName(map.game.shortName, map.game.name)}</span>
           </div>
         </div>
       </motion.div>

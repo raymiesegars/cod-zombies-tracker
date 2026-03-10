@@ -20,6 +20,7 @@ import {
   ChevronDown,
   ExternalLink,
 } from 'lucide-react';
+import { getGameDisplayShortName } from '@/lib/bo3-custom';
 import { cn } from '@/lib/utils';
 import { useActionProgress } from '@/context/action-progress-context';
 
@@ -165,7 +166,7 @@ export default function AdminEasterEggsPage() {
             onChange={(e) => setSelectedGameId(e.target.value)}
             options={[
               { value: '', label: '— Select game —' },
-              ...games.map((g) => ({ value: g.id, label: `${g.shortName}: ${g.name}` })),
+              ...games.map((g) => ({ value: g.id, label: `${getGameDisplayShortName(g.shortName, g.name)}: ${g.name}` })),
             ]}
             className="w-full bg-bunker-800 border-bunker-600 text-white"
           />
@@ -201,7 +202,7 @@ export default function AdminEasterEggsPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 <p className="text-sm text-bunker-400">
-                  {mapData.map.game?.shortName} / {mapData.map.name} — {mapData.easterEggs.length} easter eggs
+                  {getGameDisplayShortName(mapData.map.game?.shortName)} / {mapData.map.name} — {mapData.easterEggs.length} easter eggs
                 </p>
                 <div className="flex items-center gap-2">
                   <Link

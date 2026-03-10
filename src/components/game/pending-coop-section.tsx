@@ -130,7 +130,12 @@ export function PendingCoOpSection() {
             });
           }
           if (achievementXp > 0) {
-            dispatchXpToast(achievementXp, typeof data.totalXp === 'number' ? { totalXp: data.totalXp } : undefined);
+            const toastOpts = typeof data.customZombiesTotalXp === 'number'
+              ? { customZombiesTotalXp: data.customZombiesTotalXp }
+              : typeof data.totalXp === 'number'
+                ? { totalXp: data.totalXp }
+                : undefined;
+            dispatchXpToast(achievementXp, toastOpts);
           }
         }
         if (typeof window !== 'undefined') {

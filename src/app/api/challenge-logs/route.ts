@@ -415,6 +415,7 @@ export async function POST(request: NextRequest) {
             mysteryBoxXp = computeMysteryBoxXp(filterSettings, roundReached);
             const lobbyUserIds = [roll.lobby.hostId, ...roll.lobby.members.map((m) => m.userId)];
             const expectedCount = new Set(lobbyUserIds).size;
+            const isBo3CustomMysteryBox = mapWithGame?.game?.shortName === 'BO3_CUSTOM';
             await prisma.$transaction([
               prisma.mysteryBoxCompletion.create({
                 data: {
@@ -427,7 +428,9 @@ export async function POST(request: NextRequest) {
               prisma.user.update({
                 where: { id: user.id },
                 data: {
-                  totalXp: { increment: mysteryBoxXp },
+                  ...(isBo3CustomMysteryBox
+                    ? { customZombiesTotalXp: { increment: mysteryBoxXp } }
+                    : { totalXp: { increment: mysteryBoxXp } }),
                   mysteryBoxCompletionsLifetime: { increment: 1 },
                 },
               }),
@@ -443,11 +446,12 @@ export async function POST(request: NextRequest) {
         }
       }
       if (mysteryBoxXp > 0) {
+        const isBo3CustomMysteryBox = mapWithGame?.game?.shortName === 'BO3_CUSTOM';
         const updated = await prisma.user.findUnique({
           where: { id: user.id },
-          select: { totalXp: true },
+          select: { totalXp: true, customZombiesTotalXp: true },
         });
-        mysteryBoxTotalXp = updated?.totalXp;
+        mysteryBoxTotalXp = isBo3CustomMysteryBox ? updated?.customZombiesTotalXp : updated?.totalXp;
         mysteryBoxCompletionsCount = (
           await prisma.user.findUnique({
             where: { id: user.id },
@@ -463,10 +467,13 @@ export async function POST(request: NextRequest) {
     }
 
     const xpGained = newlyUnlocked.reduce((sum, a) => sum + a.xpReward, 0);
-    const totalXp =
-      xpGained > 0 || mysteryBoxXp > 0
-        ? (await prisma.user.findUnique({ where: { id: user.id }, select: { totalXp: true } }))?.totalXp ?? undefined
-        : undefined;
+    const isBo3Custom = mapWithGame?.game?.shortName === 'BO3_CUSTOM';
+    const xpFromAchievements = xpGained > 0 || mysteryBoxXp > 0;
+    const userAfterXp = xpFromAchievements
+      ? await prisma.user.findUnique({ where: { id: user.id }, select: { totalXp: true, customZombiesTotalXp: true } })
+      : null;
+    const totalXp = userAfterXp?.totalXp ?? undefined;
+    const customZombiesTotalXp = isBo3Custom && xpFromAchievements ? userAfterXp?.customZombiesTotalXp ?? undefined : undefined;
 
     return NextResponse.json({
       ...log,
@@ -474,6 +481,7 @@ export async function POST(request: NextRequest) {
       newlyUnlockedAchievements: newlyUnlocked.length,
       isNewRecord: isImprovement,
       ...(totalXp != null && { totalXp }),
+      ...(customZombiesTotalXp != null && isBo3Custom && { customZombiesTotalXp }),
       ...(mysteryBoxXp > 0 && {
         mysteryBoxXp,
         mysteryBoxTotalXp: mysteryBoxTotalXp ?? totalXp,

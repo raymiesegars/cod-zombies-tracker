@@ -4,6 +4,7 @@ import { getUser } from '@/lib/supabase/server';
 import { isSuperAdmin } from '@/lib/admin';
 import { getLevelFromXp } from '@/lib/ranks';
 import { isSpeedrunChallengeType } from '@/lib/iw';
+import { isBo3CustomGame } from '@/lib/bo3-custom';
 
 const XP_BY_PLACE: Record<number, number> = {
   1: 30_000,
@@ -36,6 +37,7 @@ export async function POST(
       where: { id: tournamentId },
       include: {
         challenge: { select: { type: true } },
+        map: { select: { game: { select: { shortName: true } } } },
         trophies: true,
       },
     });
@@ -116,6 +118,7 @@ export async function POST(
     }
 
     const existingPlaces = new Set(tournament.trophies.map((t) => t.place));
+    const isBo3CustomTournament = tournament.map?.game && isBo3CustomGame(tournament.map.game.shortName);
     await prisma.$transaction(async (tx) => {
       for (let place = 1; place <= top3.length; place++) {
         if (existingPlaces.has(place)) continue;
@@ -133,15 +136,19 @@ export async function POST(
         if (xp > 0) {
           const updated = await tx.user.update({
             where: { id: userId },
-            data: { totalXp: { increment: xp } },
-            select: { totalXp: true, level: true },
+            data: isBo3CustomTournament
+              ? { customZombiesTotalXp: { increment: xp } }
+              : { totalXp: { increment: xp } },
+            select: { totalXp: true, customZombiesTotalXp: true, level: true },
           });
-          const { level } = getLevelFromXp(updated.totalXp);
-          if (level !== updated.level) {
-            await tx.user.update({
-              where: { id: userId },
-              data: { level },
-            });
+          if (!isBo3CustomTournament) {
+            const { level } = getLevelFromXp(updated.totalXp ?? 0);
+            if (level !== updated.level) {
+              await tx.user.update({
+                where: { id: userId },
+                data: { level },
+              });
+            }
           }
         }
       }

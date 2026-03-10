@@ -37,6 +37,13 @@ export default function SettingsPage() {
   const [bio, setBio] = useState('');
   const [isPublic, setIsPublic] = useState(true);
   const [showBothXpRanks, setShowBothXpRanks] = useState(false);
+  const [hideCustomZombiesEverywhere, setHideCustomZombiesEverywhere] = useState(false);
+  const [profileRankDisplay, setProfileRankDisplay] = useState({
+    showNormalXp: true,
+    showVerifiedXp: false,
+    showCustomZombiesXp: false,
+    showVerifiedCustomZombiesXp: false,
+  });
   const [avatarPreset, setAvatarPreset] = useState<AvatarPreset | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -54,6 +61,18 @@ export default function SettingsPage() {
       setBio(profile.bio || '');
       setIsPublic(profile.isPublic);
       setShowBothXpRanks((profile as { showBothXpRanks?: boolean }).showBothXpRanks ?? false);
+      setHideCustomZombiesEverywhere((profile as { hideCustomZombiesEverywhere?: boolean }).hideCustomZombiesEverywhere ?? false);
+      const prd = (profile as { profileRankDisplay?: { showNormalXp?: boolean; showVerifiedXp?: boolean; showCustomZombiesXp?: boolean; showVerifiedCustomZombiesXp?: boolean } }).profileRankDisplay;
+      if (prd && typeof prd === 'object') {
+        setProfileRankDisplay({
+          showNormalXp: prd.showNormalXp ?? true,
+          showVerifiedXp: prd.showVerifiedXp ?? false,
+          showCustomZombiesXp: prd.showCustomZombiesXp ?? false,
+          showVerifiedCustomZombiesXp: prd.showVerifiedCustomZombiesXp ?? false,
+        });
+      } else {
+        setProfileRankDisplay({ showNormalXp: true, showVerifiedXp: false, showCustomZombiesXp: false, showVerifiedCustomZombiesXp: false });
+      }
       setAvatarPreset(profile.avatarPreset && isAvatarPreset(profile.avatarPreset) ? profile.avatarPreset : null);
     }
   }, [profile]);
@@ -76,6 +95,8 @@ export default function SettingsPage() {
           isPublic,
           avatarPreset: avatarPreset ?? '',
           showBothXpRanks,
+          hideCustomZombiesEverywhere,
+          profileRankDisplay,
         }),
       });
 
@@ -224,7 +245,7 @@ export default function SettingsPage() {
                 XP Display
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex flex-col gap-1">
                   <p className="font-medium text-sm sm:text-base text-white">Show both XP ranks on dashboards</p>
@@ -241,6 +262,71 @@ export default function SettingsPage() {
                   <span
                     className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
                       showBothXpRanks ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              <div className="pt-3 border-t border-bunker-800">
+                <p className="font-medium text-sm sm:text-base text-white mb-2">Ranks to show on profile</p>
+                <p className="text-xs sm:text-sm text-bunker-400 mb-3">
+                  Check which XP ranks appear on your profile. At least one required.
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  {[
+                    { key: 'showNormalXp' as const, label: 'Normal XP' },
+                    { key: 'showVerifiedXp' as const, label: 'Verified XP' },
+                    { key: 'showCustomZombiesXp' as const, label: 'Custom Zombies XP', hideWhenCustomHidden: true },
+                    { key: 'showVerifiedCustomZombiesXp' as const, label: 'Custom Verified XP', hideWhenCustomHidden: true },
+                  ].map(({ key, label, hideWhenCustomHidden }) => {
+                    if (hideWhenCustomHidden && hideCustomZombiesEverywhere) return null;
+                    return (
+                      <label key={key} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={profileRankDisplay[key]}
+                          onChange={(e) => {
+                            const next = { ...profileRankDisplay, [key]: e.target.checked };
+                            if (!next.showNormalXp && !next.showVerifiedXp && !next.showCustomZombiesXp && !next.showVerifiedCustomZombiesXp) return;
+                            setProfileRankDisplay(next);
+                          }}
+                          className="rounded border-bunker-600 bg-bunker-900 text-blood-500 focus:ring-blood-500"
+                        />
+                        <span className="text-sm text-bunker-200">{label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* BO3 Custom Zombies */}
+        <div>
+          <Card variant="bordered">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-blood-400" />
+                BO3 Custom Zombies
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex flex-col gap-1">
+                  <p className="font-medium text-sm sm:text-base text-white">Hide Custom Zombies everywhere</p>
+                  <p className="text-xs sm:text-sm text-bunker-400">
+                    When on, BO3 Custom Zombies maps won&apos;t appear on the maps page, leaderboards, achievements filters, or anywhere on the site. Turn this <strong>OFF</strong> to show BO3 Custom Zombies.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setHideCustomZombiesEverywhere(!hideCustomZombiesEverywhere)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blood-500 focus:ring-offset-2 focus:ring-offset-bunker-900 ${
+                    hideCustomZombiesEverywhere ? 'bg-blood-600' : 'bg-bunker-700'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      hideCustomZombiesEverywhere ? 'translate-x-6' : 'translate-x-1'
                     }`}
                   />
                 </button>

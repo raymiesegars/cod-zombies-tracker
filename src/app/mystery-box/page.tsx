@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { Avatar, Button, Logo, Modal, PageLoader } from '@/components/ui';
 import { motion } from 'framer-motion';
 import { Box, Settings, HelpCircle, UserPlus, LogOut, Shield, Trash2, Check, CheckCircle, Clock, Loader2, RefreshCw, XCircle, Trophy } from 'lucide-react';
+import { getGameDisplayShortName } from '@/lib/bo3-custom';
 import { getMysteryBoxXpRange, getChallengeRangeDisplay, getBaseXpFromFilters, getMysteryBoxXpMultiplierPercent } from '@/lib/mystery-box';
 import { getBo3GobbleGumLabel } from '@/lib/bo3';
 import { getBocwSupportLabel } from '@/lib/bocw';
@@ -1009,7 +1010,7 @@ function RollResult({
     <>
       <div className="mb-4 px-2">
         <p className="text-amber-400 font-semibold text-base sm:text-lg truncate">
-          {roll.game?.shortName} · {roll.map?.name}
+          {getGameDisplayShortName(roll.game?.shortName, roll.game?.name)} · {roll.map?.name}
         </p>
         <p className="text-white text-lg sm:text-xl font-zombies mt-1 break-words">
           {roll.challenge?.name ?? 'Challenge'}

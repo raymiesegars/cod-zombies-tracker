@@ -158,6 +158,14 @@ async function main() {
         order: 10,
       },
     }),
+    prisma.game.create({
+      data: {
+        name: 'BO3 Custom Zombies',
+        shortName: 'BO3_CUSTOM',
+        releaseYear: 2015,
+        order: 11,
+      },
+    }),
   ]);
 
   const gameMap = new Map(games.map(g => [g.shortName, g]));

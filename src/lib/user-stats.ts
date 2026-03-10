@@ -15,7 +15,7 @@ export type UserWithLogs = NonNullable<
   >
 >;
 
-export async function computeUserStats(user: UserWithLogs) {
+export async function computeUserStats(user: UserWithLogs, hideCustom = false) {
   const mapIds = new Set<string>();
   const highestByMap = new Map<string, number>();
   const highestDifficultyByMap = new Map<string, string>();
@@ -94,6 +94,9 @@ export async function computeUserStats(user: UserWithLogs) {
 
   const mysteryBoxCompletions = user.mysteryBoxCompletionsLifetime ?? 0;
 
+  const mapGameFilter = hideCustom ? { game: { shortName: { not: 'BO3_CUSTOM' } } } : {};
+  const mapFilter = hideCustom ? { map: { game: { shortName: { not: 'BO3_CUSTOM' } } } } : {};
+
   const [
     totalMaps,
     totalMainEasterEggs,
@@ -104,18 +107,31 @@ export async function computeUserStats(user: UserWithLogs) {
     xpRank,
     verifiedXpRank,
   ] = await Promise.all([
-    prisma.map.count(),
-    prisma.easterEgg.count({ where: { type: 'MAIN_QUEST', isActive: true } }),
-    prisma.challenge.count({ where: { isActive: true } }),
-    prisma.achievement.count({ where: { isActive: true, mapId: { not: null } } }),
+    prisma.map.count({ where: mapGameFilter }),
+    prisma.easterEgg.count({ where: { type: 'MAIN_QUEST', isActive: true, ...mapFilter } }),
+    prisma.challenge.count({
+      where: hideCustom
+        ? { isActive: true, OR: [{ mapId: null }, { map: { game: { shortName: { not: 'BO3_CUSTOM' } } } }] }
+        : { isActive: true },
+    }),
+    prisma.achievement.count({ where: { isActive: true, mapId: { not: null }, ...mapFilter } }),
     prisma.userAchievement.count({
       where: {
         userId: user.id,
-        achievement: { type: 'EASTER_EGG_COMPLETE', isActive: true },
+        achievement: { type: 'EASTER_EGG_COMPLETE', isActive: true, ...mapFilter },
       },
     }),
     prisma.userAchievement.count({
-      where: { userId: user.id, verifiedAt: { not: null } },
+      where: {
+        userId: user.id,
+        verifiedAt: { not: null },
+        ...(hideCustom && {
+          OR: [
+            { achievement: { mapId: null } },
+            { achievement: { map: { game: { shortName: { not: 'BO3_CUSTOM' } } } } },
+          ],
+        }),
+      },
     }),
     prisma.user.count({ where: { isPublic: true, totalXp: { gt: user.totalXp ?? 0 } } }),
     prisma.user.count({ where: { isPublic: true, verifiedTotalXp: { gt: user.verifiedTotalXp ?? 0 } } }),

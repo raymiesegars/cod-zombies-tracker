@@ -47,7 +47,12 @@ export async function POST(request: NextRequest) {
         where: { id: logId },
         data: { isVerified: true, verificationRequestedAt: null, verifiedById: me.id, verifiedAt: now },
       });
-      const { verifiedTotalXp, xpGained } = await grantVerifiedAchievementsForMap(log.userId, log.mapId);
+      const mapWithGame = await prisma.map.findUnique({
+        where: { id: log.mapId },
+        select: { game: { select: { shortName: true } } },
+      });
+      const isBo3Custom = mapWithGame?.game?.shortName === 'BO3_CUSTOM';
+      const { verifiedTotalXp, verifiedCustomZombiesTotalXp, xpGained } = await grantVerifiedAchievementsForMap(log.userId, log.mapId);
       await prisma.notification.create({
         data: {
           userId: log.userId,
@@ -55,7 +60,8 @@ export async function POST(request: NextRequest) {
           challengeLogId: log.id,
           read: false,
           verifiedXpGained: xpGained > 0 ? xpGained : null,
-          verifiedTotalXp: xpGained > 0 ? verifiedTotalXp : null,
+          verifiedTotalXp: xpGained > 0 && !isBo3Custom ? verifiedTotalXp : null,
+          verifiedCustomZombiesTotalXp: xpGained > 0 && isBo3Custom ? verifiedCustomZombiesTotalXp : null,
         },
       });
       const adminXp = adminXpForRun(log.roundReached);
@@ -82,7 +88,12 @@ export async function POST(request: NextRequest) {
       where: { id: logId },
       data: { isVerified: true, verificationRequestedAt: null, verifiedById: me.id, verifiedAt: now },
     });
-    const { verifiedTotalXp, xpGained } = await grantVerifiedAchievementsForMap(log.userId, log.mapId);
+    const mapWithGameEe = await prisma.map.findUnique({
+      where: { id: log.mapId },
+      select: { game: { select: { shortName: true } } },
+    });
+    const isBo3CustomEe = mapWithGameEe?.game?.shortName === 'BO3_CUSTOM';
+    const { verifiedTotalXp, verifiedCustomZombiesTotalXp, xpGained } = await grantVerifiedAchievementsForMap(log.userId, log.mapId);
     await prisma.notification.create({
       data: {
         userId: log.userId,
@@ -90,7 +101,8 @@ export async function POST(request: NextRequest) {
         easterEggLogId: log.id,
         read: false,
         verifiedXpGained: xpGained > 0 ? xpGained : null,
-        verifiedTotalXp: xpGained > 0 ? verifiedTotalXp : null,
+        verifiedTotalXp: xpGained > 0 && !isBo3CustomEe ? verifiedTotalXp : null,
+        verifiedCustomZombiesTotalXp: xpGained > 0 && isBo3CustomEe ? verifiedCustomZombiesTotalXp : null,
       },
     });
     const rounds = log.roundCompleted ?? 1;

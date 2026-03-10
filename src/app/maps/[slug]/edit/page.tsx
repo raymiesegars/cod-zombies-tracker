@@ -768,6 +768,8 @@ export default function EditMapProgressPage() {
       let totalXpGained = 0;
       let totalMysteryBoxXp = 0;
       let lastTotalXp: number | undefined;
+      let lastCustomZombiesTotalXp: number | undefined;
+      const isBo3Custom = map.game?.shortName === 'BO3_CUSTOM';
 
       try {
         const ids = Array.from(selectedChallengeIds);
@@ -837,6 +839,7 @@ export default function EditMapProgressPage() {
         if (!res.ok) throw new Error(data.error || 'Failed to save');
         totalXpGained += typeof data.xpGained === 'number' ? data.xpGained : 0;
         if (typeof data.totalXp === 'number') lastTotalXp = data.totalXp;
+        if (typeof data.customZombiesTotalXp === 'number') lastCustomZombiesTotalXp = data.customZombiesTotalXp;
         if (typeof data.mysteryBoxXp === 'number' && data.mysteryBoxXp > 0) {
           totalMysteryBoxXp += data.mysteryBoxXp;
           showXpToast(data.mysteryBoxXp, {
@@ -866,7 +869,12 @@ export default function EditMapProgressPage() {
       }
         const achievementXp = totalXpGained - totalMysteryBoxXp;
         if (achievementXp > 0) {
-          showXpToast(achievementXp, lastTotalXp != null ? { totalXp: lastTotalXp } : undefined);
+          const toastOpts = isBo3Custom && lastCustomZombiesTotalXp != null
+            ? { customZombiesTotalXp: lastCustomZombiesTotalXp }
+            : lastTotalXp != null
+              ? { totalXp: lastTotalXp }
+              : undefined;
+          showXpToast(achievementXp, toastOpts);
         }
         setSaveStatus('success');
         setTimeout(() => router.push(`/maps/${slug}?achievementUpdated=1`), 1500);
@@ -958,7 +966,12 @@ export default function EditMapProgressPage() {
       }
       const achievementXp = typeof data.xpGained === 'number' ? data.xpGained - (typeof data.mysteryBoxXp === 'number' ? data.mysteryBoxXp : 0) : 0;
       if (achievementXp > 0) {
-        showXpToast(achievementXp, typeof data.totalXp === 'number' ? { totalXp: data.totalXp } : undefined);
+        const toastOpts = map.game?.shortName === 'BO3_CUSTOM' && typeof data.customZombiesTotalXp === 'number'
+          ? { customZombiesTotalXp: data.customZombiesTotalXp }
+          : typeof data.totalXp === 'number'
+            ? { totalXp: data.totalXp }
+            : undefined;
+        showXpToast(achievementXp, toastOpts);
       }
       setSaveStatus('success');
       setTimeout(() => router.push(`/maps/${slug}?achievementUpdated=1`), 1500);
@@ -1046,7 +1059,12 @@ export default function EditMapProgressPage() {
         }
       }
       if (typeof data.xpGained === 'number' && data.xpGained > 0) {
-        showXpToast(data.xpGained, typeof data.totalXp === 'number' ? { totalXp: data.totalXp } : undefined);
+        const toastOpts = map.game?.shortName === 'BO3_CUSTOM' && typeof data.customZombiesTotalXp === 'number'
+          ? { customZombiesTotalXp: data.customZombiesTotalXp }
+          : typeof data.totalXp === 'number'
+            ? { totalXp: data.totalXp }
+            : undefined;
+        showXpToast(data.xpGained, toastOpts);
       }
       setSaveStatus('success');
       setTimeout(() => router.push(`/maps/${slug}?achievementUpdated=1`), 1500);

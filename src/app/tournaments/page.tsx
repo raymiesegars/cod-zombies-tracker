@@ -16,6 +16,7 @@ import {
 } from '@/components/ui';
 import { Medal, Trophy, Clock, Award, Loader2, Lock, Plus, Banknote, Pencil, BookOpen, Trash2, ShieldCheck } from 'lucide-react';
 import { TournamentRulesContent } from '@/components/tournament-rules-content';
+import { getGameDisplayShortName } from '@/lib/bo3-custom';
 import { BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT, getBo3GobbleGumLabel } from '@/lib/bo3';
 import { BO4_DIFFICULTIES, getBo4DifficultyLabel } from '@/lib/bo4';
 import { BOCW_SUPPORT_MODES, BOCW_SUPPORT_DEFAULT, getBocwSupportLabel } from '@/lib/bocw';
@@ -1026,7 +1027,7 @@ export default function TournamentsPage() {
                 {tournament && (
                   <>
                     <p className="text-bunker-400 text-sm shrink-0">
-                      {tournament.game?.shortName} · {tournament.map?.name}
+                      {getGameDisplayShortName(tournament.game?.shortName)} · {tournament.map?.name}
                       {tournament.challenge ? ` · ${tournament.challenge.name}` : tournament.easterEgg ? ` · ${tournament.easterEgg.name}` : ''}
                       {tournament.game?.shortName === 'BO3' && tournament.config && typeof tournament.config === 'object' && (
                         <>
@@ -1507,7 +1508,7 @@ export default function TournamentsPage() {
               <Select
                 value={createForm.gameId}
                 onChange={(e) => setCreateForm((f) => ({ ...f, gameId: e.target.value }))}
-                options={[{ value: '', label: 'Select game' }, ...games.map((g) => ({ value: g.id, label: g.shortName || g.name }))]}
+                options={[{ value: '', label: 'Select game' }, ...games.map((g) => ({ value: g.id, label: getGameDisplayShortName(g.shortName, g.name) }))]}
                 className="w-full bg-bunker-800 border-bunker-600 text-white"
               />
             </div>

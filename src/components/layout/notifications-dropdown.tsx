@@ -67,6 +67,7 @@ type NotificationItem = {
   mysteryBoxLobbyId?: string;
   verifiedXpGained?: number;
   verifiedTotalXp?: number;
+  verifiedCustomZombiesTotalXp?: number;
 };
 
 export function NotificationsDropdown() {
@@ -107,9 +108,16 @@ export function NotificationsDropdown() {
         ) as NotificationItem[];
         if (verifiedWithXp.length > 0) {
           const totalXp = verifiedWithXp.reduce((s, n) => s + (n.verifiedXpGained ?? 0), 0);
-          const lastTotal = verifiedWithXp[verifiedWithXp.length - 1]?.verifiedTotalXp;
+          const last = verifiedWithXp[verifiedWithXp.length - 1];
+          const lastTotal = last?.verifiedTotalXp;
+          const lastCustomTotal = last?.verifiedCustomZombiesTotalXp;
           verifiedWithXp.forEach((n) => markVerifiedToastShown(n.id));
-          dispatchXpToast(totalXp, { totalXp: lastTotal, verified: true });
+          const toastOpts = lastCustomTotal != null
+            ? { verified: true, verifiedCustomZombiesTotalXp: lastCustomTotal }
+            : lastTotal != null
+              ? { totalXp: lastTotal, verified: true }
+              : { verified: true };
+          dispatchXpToast(totalXp, toastOpts);
         }
       })
       .catch(() => {

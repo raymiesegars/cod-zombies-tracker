@@ -16,6 +16,7 @@ import { getBo7MapConfig } from '@/lib/bo7/bo7-map-config';
 import { getWw2MapConfig } from '@/lib/ww2/ww2-map-config';
 import { getVanguardMapConfig } from '@/lib/vanguard/vanguard-map-config';
 import { getAwMapConfig } from '@/lib/aw/aw-map-config';
+import { BO3_CUSTOM_CHALLENGE_TYPES } from '@/lib/bo3-custom';
 
 /** Get ordered challenge types for a map. Highest Round is always first; rest follow config order. */
 export function getChallengeTypeOrderForMap(
@@ -23,6 +24,9 @@ export function getChallengeTypeOrderForMap(
   mapSlug: string | null | undefined
 ): string[] {
   if (!gameShortName || !mapSlug) return [];
+  if (gameShortName === 'BO3_CUSTOM') {
+    return ['HIGHEST_ROUND', ...BO3_CUSTOM_CHALLENGE_TYPES.filter((t) => t !== 'HIGHEST_ROUND')];
+  }
   const rest =
     gameShortName === 'IW'
       ? IW_CHALLENGE_TYPES_ORDER.filter((t) => t !== 'HIGHEST_ROUND')
