@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
     const systemContent = `${systemPromptPrefix}\n\n---\nCONTEXT:\n${context}`;
     const chatMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
       { role: 'system', content: systemContent },
-      ...trimmedHistory.map((m) => ({
+      ...trimmedHistory.map((m: { role: string; content: string }) => ({
         role: m.role as 'user' | 'assistant' | 'system',
         content: m.content,
       })),

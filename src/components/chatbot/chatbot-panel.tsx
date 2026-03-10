@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useContext } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Loader2, AlertCircle } from 'lucide-react';
 import { getAssetUrl } from '@/lib/assets';
 import { Button, Input, Modal } from '@/components/ui';
-import { ChatbotContext } from '@/context/chatbot-context';
+import { useChatbot, type ChatMessage } from '@/context/chatbot-context';
 
 type ContentPart = { type: 'text'; value: string } | { type: 'link'; href: string; label: string };
 
@@ -60,8 +60,8 @@ interface ChatbotPanelProps {
 }
 
 export function ChatbotPanel({ onClose }: ChatbotPanelProps) {
-  const ctx = useContext(ChatbotContext);
-  const messages = ctx?.messages ?? [];
+  const ctx = useChatbot();
+  const messages = useMemo(() => ctx?.messages ?? [], [ctx?.messages]);
   const setMessages = ctx?.setMessages ?? (() => {});
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -133,7 +133,7 @@ export function ChatbotPanel({ onClose }: ChatbotPanelProps) {
     }
     setError(null);
     setInput('');
-    const newMessages: Message[] = [...messages, { role: 'user', content: text }];
+    const newMessages: ChatMessage[] = [...messages, { role: 'user', content: text }];
     setMessages(newMessages);
     setLoading(true);
     try {
