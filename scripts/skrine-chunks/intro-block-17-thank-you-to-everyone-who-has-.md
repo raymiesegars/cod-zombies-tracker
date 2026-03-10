@@ -1,0 +1,3 @@
+# Intro – Thank you to everyone who has made this spreadshee…
+
+Thank you to everyone who has made this spreadsheet possible! Also, be sure to spread the word and share this spreadsheet to anyone that may need it! My goal is for anyone and everyone to have all the info they may need to go for a world record. Everyone deserves a chance to become a great player! If you think you have information worth sharing, please dm me on Discord (username: the_skrine). Please be sure to subscribe and/or follow all those that helped build this spreadsheet! Listed down below will be the player, brief description of what they play, and their links for their YouTube, Twitter and/or Twitch. Thank you all again, and I hope you find what you're looking for!
