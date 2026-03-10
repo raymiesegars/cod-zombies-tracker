@@ -59,6 +59,7 @@ const CHALLENGE_TYPE_ICONS: Record<ChallengeType, LucideIcon> = {
   PURIST: Shield,
   INSTAKILL_ROUND_SPEEDRUN: Timer,
   EASTER_EGG_SPEEDRUN: Timer,
+  BUYABLE_ENDING_SPEEDRUN: Timer,
   GHOST_AND_SKULLS: Timer,
   ALIENS_BOSS_FIGHT: Timer,
   CRYPTID_FIGHT: Timer,

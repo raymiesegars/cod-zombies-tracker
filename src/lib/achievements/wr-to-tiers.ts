@@ -89,6 +89,7 @@ const SPEEDRUN_CATEGORY: Record<string, string> = {
   ROUND_255_SPEEDRUN: '255-speedrun',
   ROUND_935_SPEEDRUN: '935-speedrun',
   EASTER_EGG_SPEEDRUN: 'ee-speedrun',
+  BUYABLE_ENDING_SPEEDRUN: 'buyable-ending-speedrun',
   EXFIL_SPEEDRUN: 'exfil-speedrun',
   BUILD_EE_SPEEDRUN: 'build-speedrun',
 };

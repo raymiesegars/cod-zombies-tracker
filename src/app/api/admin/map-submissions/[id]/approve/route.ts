@@ -102,8 +102,12 @@ export async function POST(
     },
   });
 
+  const typesToCreate = BO3_CUSTOM_CHALLENGE_TYPES.filter(
+    (t) =>
+      t !== 'BUYABLE_ENDING_SPEEDRUN' || (suggested[t] != null && suggested[t]! > 0)
+  );
   const challengeIds: string[] = [];
-  for (const cType of BO3_CUSTOM_CHALLENGE_TYPES) {
+  for (const cType of typesToCreate) {
     const round = suggested[cType] ?? BO3_CUSTOM_DEFAULT_ROUNDS[cType] ?? (cType.includes('SPEEDRUN') ? 1800 : 30);
     const slug = (cType as string).toLowerCase().replace(/_/g, '-');
     const name = CHALLENGE_NAMES[cType] ?? (cType as string).replace(/_/g, ' ');
@@ -137,7 +141,7 @@ export async function POST(
     PISTOL_ONLY: 3,
   };
 
-  for (const cType of BO3_CUSTOM_CHALLENGE_TYPES) {
+  for (const cType of typesToCreate) {
     const capRound = suggested[cType] ?? BO3_CUSTOM_DEFAULT_ROUNDS[cType] ?? (cType.includes('SPEEDRUN') ? 1800 : 30);
     const challengeId = challengeByType.get(cType) ?? null;
 
