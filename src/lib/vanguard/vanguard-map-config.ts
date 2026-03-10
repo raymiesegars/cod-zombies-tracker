@@ -63,7 +63,7 @@ export type VanguardMapConfig = {
 export const VANGUARD_MAP_CONFIG: Record<VanguardMapSlug, VanguardMapConfig> = {
   'der-anfang': {
     challengeTypes: [
-      'HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_ARMOR',
+      'HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_ARMOR', 'ONE_BOX',
       'ROUND_10_SPEEDRUN', 'EXFIL_R5_SPEEDRUN', 'EXFIL_R10_SPEEDRUN',
       'EASTER_EGG_SPEEDRUN',
     ],
@@ -84,7 +84,7 @@ export const VANGUARD_MAP_CONFIG: Record<VanguardMapSlug, VanguardMapConfig> = {
   },
   'terra-maledicta': {
     challengeTypes: [
-      'HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_ARMOR',
+      'HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_ARMOR', 'ONE_BOX',
       'ROUND_10_SPEEDRUN', 'ROUND_20_SPEEDRUN', 'EXFIL_R5_SPEEDRUN', 'EXFIL_R10_SPEEDRUN',
       'EASTER_EGG_SPEEDRUN',
     ],
@@ -106,7 +106,7 @@ export const VANGUARD_MAP_CONFIG: Record<VanguardMapSlug, VanguardMapConfig> = {
   },
   'shi-no-numa-reborn': {
     challengeTypes: [
-      'HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_ARMOR',
+      'HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_ARMOR', 'ONE_BOX',
       'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN',
       'ROUND_100_SPEEDRUN', 'ROUND_200_SPEEDRUN',
       'EXFIL_R10_SPEEDRUN', 'EXFIL_R20_SPEEDRUN',
@@ -184,6 +184,7 @@ export const VANGUARD_MAP_CONFIG: Record<VanguardMapSlug, VanguardMapConfig> = {
 };
 
 export const VANGUARD_CHALLENGE_TYPE_LABELS: Record<string, string> = {
+  ONE_BOX: 'One Box Challenge',
   EXFIL_R5_SPEEDRUN: 'Exfil Round 5 Speedrun',
   EXFIL_R10_SPEEDRUN: 'Exfil Round 10 Speedrun',
   EXFIL_R20_SPEEDRUN: 'Exfil Round 20 Speedrun',
