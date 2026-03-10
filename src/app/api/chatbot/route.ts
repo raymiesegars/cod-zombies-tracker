@@ -59,8 +59,8 @@ ACCOUNT & FEATURES:
 
 NICHE / SPECIFIC DATA (use ${UNKNOWN_MARKER} only when nothing relevant in context; do NOT suggest external resources):
 - "How many zombies per shot" / "kills per shot" / "average kills" / exact weapon stats → We don't store these. If we have related context (e.g. weapon description, map info), offer an educated guess with caveat ("I don't have exact numbers, but based on [what we have]..."). If nothing relevant, use ${UNKNOWN_MARKER}.
-- "Round end time" / "what is round end" / timing mechanics → If in rules/context, answer. If we have related rules, guess with caveat. If nothing, use ${UNKNOWN_MARKER}.
-- Gobblegums / mega gobblegums / ideal loadout / best gums → We don't have this. Use ${UNKNOWN_MARKER}. Do NOT suggest external resources.
+- "Round end time" / "what is round end" / timing mechanics / perfect times / round times / instakill → Skrine Zombies Info has round times, perfect times, instakill tables. If in context, answer from it. If not, use ${UNKNOWN_MARKER}.
+- Gobblegums / mega gobblegums / ideal loadout / best gums / ideal combos → Check Skrine Zombies Info chunks for ideal combos, trials, and gum-related data. If in context, answer from it. Otherwise use ${UNKNOWN_MARKER}.
 - Spreadsheet / exact stat we don't have / very specific calc → If we have related data, guess with caveat and link /leaderboards or /maps/[slug]. If nothing, use ${UNKNOWN_MARKER}.
 - Off-topic / personal / subjective → Use ${UNKNOWN_MARKER} or briefly redirect to site/zombies questions.
 
@@ -120,10 +120,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Chatbot is not configured' }, { status: 503 });
     }
 
-    const context = await buildChatbotContext();
-    const systemContent = `${systemPromptPrefix}\n\n---\nCONTEXT:\n${context}`;
-
     const openai = new OpenAI({ apiKey });
+    const context = await buildChatbotContext({
+      userMessage: message,
+      openai,
+    });
+    const systemContent = `${systemPromptPrefix}\n\n---\nCONTEXT:\n${context}`;
     const completion = await openai.chat.completions.create({
       model: OPENAI_MODEL,
       messages: [

@@ -165,11 +165,12 @@ model ChatbotUnansweredQuestion {
 
 model ChatbotWikiImport {
   id         String   @id @default(cuid())
-  source     String   // "cod_fandom" | "zwr"
+  source     String   // "cod_fandom" | "zwr" | "skrine"
   externalId String?  // e.g. Fandom pageid for upserts
   title      String
   url        String?
   content    String   @db.Text
+  embedding  Json?    // float[] for semantic retrieval (Skrine chunks)
   fetchedAt  DateTime @default(now())
 
   @@unique([source, externalId])

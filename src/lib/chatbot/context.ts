@@ -1,12 +1,15 @@
 import prisma from '@/lib/prisma';
+import OpenAI from 'openai';
+import { retrieveSkrineChunks } from './wiki-retrieval';
 
 const MAX_CONTEXT_CHARS = 80_000;
 const MAX_SITE_DATA_CHARS = 14_000;
 const MAX_LEADERBOARD_CHARS = 6_000;
 const MAX_WIKI_CHARS = 38_000;
+const MAX_WIKI_NON_SKRINE_CHARS = 20_000;
 const CONTEXT_CACHE_TTL_MS = 90_000;
 
-let cachedContext: { value: string; expiresAt: number } | null = null;
+let cachedStaticContext: { value: string; expiresAt: number } | null = null;
 
 async function buildLeaderboardContext(): Promise<string> {
   const [maps, challengeTops, eeTops] = await Promise.all([
@@ -151,8 +154,9 @@ const ZWR_PRIORITY_IDS = [
   'beginners-guide-on-how-to-speedrun-the-shadows-of-evil-easter-egg',
 ];
 
-async function buildWikiContext(): Promise<string> {
+async function buildWikiContextStatic(): Promise<string> {
   const rows = await prisma.chatbotWikiImport.findMany({
+    where: { source: { not: 'skrine' } },
     orderBy: [{ source: 'desc' }, { title: 'asc' }],
     select: { source: true, externalId: true, title: true, content: true, url: true },
   });
@@ -167,14 +171,11 @@ async function buildWikiContext(): Promise<string> {
     return 0;
   });
   const lines: string[] = [];
-  lines.push('## External wiki knowledge (CoD Fandom, ZWR The Rift)');
-  lines.push('Use this to answer questions. ZWR wiki has EE speedrun guides, setup guides, and more — when relevant, summarize and link the specific zwr.gg/wiki page. Prefer our site links for CZT-specific content.');
-  lines.push('');
   let len = lines.join('\n').length;
   for (const row of sorted) {
     const block = `[${row.source}: ${row.title}]${row.url ? ` ${row.url}` : ''}\n${row.content}`;
-    if (len + block.length + 4 > MAX_WIKI_CHARS) {
-      const remaining = MAX_WIKI_CHARS - len - 50;
+    if (len + block.length + 4 > MAX_WIKI_NON_SKRINE_CHARS) {
+      const remaining = MAX_WIKI_NON_SKRINE_CHARS - len - 50;
       if (remaining > 0) lines.push(block.slice(0, remaining) + '\n...[truncated]');
       break;
     }
@@ -184,29 +185,107 @@ async function buildWikiContext(): Promise<string> {
   return lines.join('\n\n');
 }
 
-export async function buildChatbotContext(): Promise<string> {
-  const now = Date.now();
-  if (cachedContext && cachedContext.expiresAt > now) {
-    return cachedContext.value;
+async function buildWikiContextWithRetrieval(
+  userMessage: string,
+  openai: OpenAI
+): Promise<string> {
+  const [staticRows, skrineChunks] = await Promise.all([
+    buildWikiContextStatic(),
+    retrieveSkrineChunks(userMessage, openai),
+  ]);
+
+  const lines: string[] = [];
+  lines.push(
+    '## External wiki knowledge (CoD Fandom, ZWR The Rift, Skrine Zombies Info)'
+  );
+  lines.push(
+    'Use this to answer questions. ZWR: EE speedrun guides, setup guides — summarize and link zwr.gg/wiki. Skrine Zombies Info: round times, instakill tables, EE cheat sheets, perfect times, point drops from world record players — use the retrieved Skrine chunks below. Prefer our site links for CZT-specific content.'
+  );
+  lines.push('');
+  let len = lines.join('\n').length;
+
+  if (skrineChunks.length > 0) {
+    lines.push('### Skrine Zombies Info (retrieved for this question)');
+    lines.push('');
+    for (const chunk of skrineChunks) {
+      const block = `[skrine: ${chunk.title}]\n${chunk.content}`;
+      if (len + block.length + 4 > MAX_WIKI_CHARS) break;
+      lines.push(block);
+      len += block.length + 4;
+    }
+    lines.push('');
   }
 
-  const [siteData, leaderboardData, wikiData, approved] = await Promise.all([
-    buildSiteDataContext(),
-    buildLeaderboardContext(),
-    buildWikiContext(),
-    prisma.chatbotKnowledge.findMany({
-      where: { status: 'APPROVED' },
-      orderBy: { createdAt: 'asc' },
-      select: { title: true, category: true, content: true },
-    }),
-  ]);
+  if (staticRows.trim()) {
+    lines.push('### ZWR & CoD Fandom');
+    lines.push('');
+    if (len + staticRows.length + 4 <= MAX_WIKI_CHARS) {
+      lines.push(staticRows);
+    } else {
+      const remaining = MAX_WIKI_CHARS - len - 50;
+      if (remaining > 0) lines.push(staticRows.slice(0, remaining) + '\n...[truncated]');
+    }
+  }
+
+  return lines.join('\n\n');
+}
+
+export interface BuildContextOptions {
+  userMessage?: string;
+  openai?: OpenAI;
+}
+
+export async function buildChatbotContext(
+  options: BuildContextOptions = {}
+): Promise<string> {
+  const { userMessage, openai } = options;
+  const useRetrieval = !!userMessage && !!openai && !!process.env.OPENAI_API_KEY;
+
+  const now = Date.now();
+  let siteData: string;
+  let leaderboardData: string;
+  let approved: { title: string | null; category: string | null; content: string }[];
+
+  if (cachedStaticContext && cachedStaticContext.expiresAt > now) {
+    const cached = JSON.parse(cachedStaticContext.value) as {
+      site: string;
+      leaderboard: string;
+      approved: { title: string | null; category: string | null; content: string }[];
+    };
+    siteData = cached.site;
+    leaderboardData = cached.leaderboard;
+    approved = cached.approved;
+  } else {
+    const [site, leaderboard, approvedRows] = await Promise.all([
+      buildSiteDataContext(),
+      buildLeaderboardContext(),
+      prisma.chatbotKnowledge.findMany({
+        where: { status: 'APPROVED' },
+        orderBy: { createdAt: 'asc' },
+        select: { title: true, category: true, content: true },
+      }),
+    ]);
+    siteData = site;
+    leaderboardData = leaderboard;
+    approved = approvedRows;
+    cachedStaticContext = {
+      value: JSON.stringify({ site: siteData, leaderboard: leaderboardData, approved }),
+      expiresAt: now + CONTEXT_CACHE_TTL_MS,
+    };
+  }
+
+  const wikiData = useRetrieval
+    ? await buildWikiContextWithRetrieval(userMessage!, openai!)
+    : await buildWikiContextLegacy();
 
   const parts: string[] = [];
   parts.push(
     'You only answer from the CONTEXT below. If the answer is not in the context, say you do not have that information.'
   );
   parts.push('');
-  parts.push('SITE IDENTITY: This is CoD Zombies Tracker (CZT), a Call of Duty Zombies progress tracker. Leaderboards at /leaderboards, maps and easter egg guides at /maps/[slug], rules at /rules.');
+  parts.push(
+    'SITE IDENTITY: This is CoD Zombies Tracker (CZT), a Call of Duty Zombies progress tracker. Leaderboards at /leaderboards, maps and easter egg guides at /maps/[slug], rules at /rules.'
+  );
   parts.push('');
   parts.push('[Site data – maps, easter eggs, links, leaderboard #1s]');
   parts.push(siteData);
@@ -214,7 +293,7 @@ export async function buildChatbotContext(): Promise<string> {
   parts.push(leaderboardData);
   parts.push('');
   if (wikiData.trim()) {
-    parts.push('[External wiki – CoD Fandom, ZWR]');
+    parts.push('[External wiki – CoD Fandom, ZWR, Skrine Zombies Info]');
     parts.push(wikiData);
     parts.push('');
   }
@@ -232,7 +311,42 @@ export async function buildChatbotContext(): Promise<string> {
     total += block.length + 10;
   }
 
-  const value = parts.join('\n\n---\n\n');
-  cachedContext = { value, expiresAt: now + CONTEXT_CACHE_TTL_MS };
-  return value;
+  return parts.join('\n\n---\n\n');
+}
+
+async function buildWikiContextLegacy(): Promise<string> {
+  const rows = await prisma.chatbotWikiImport.findMany({
+    orderBy: [{ source: 'desc' }, { title: 'asc' }],
+    select: { source: true, externalId: true, title: true, content: true, url: true },
+  });
+  const priority = (r: { source: string; externalId: string | null }) =>
+    r.source === 'zwr' && r.externalId ? ZWR_PRIORITY_IDS.indexOf(r.externalId) : -1;
+  const sorted = [...rows].sort((a, b) => {
+    const pa = priority(a);
+    const pb = priority(b);
+    if (pa >= 0 && pb >= 0) return pa - pb;
+    if (pa >= 0) return -1;
+    if (pb >= 0) return 1;
+    return 0;
+  });
+  const lines: string[] = [];
+  lines.push(
+    '## External wiki knowledge (CoD Fandom, ZWR The Rift, Skrine Zombies Info)'
+  );
+  lines.push(
+    'Use this to answer questions. ZWR wiki has EE speedrun guides, setup guides. Skrine: round times, instakill tables, EE cheat sheets. Prefer our site links for CZT-specific content.'
+  );
+  lines.push('');
+  let len = lines.join('\n').length;
+  for (const row of sorted) {
+    const block = `[${row.source}: ${row.title}]${row.url ? ` ${row.url}` : ''}\n${row.content}`;
+    if (len + block.length + 4 > MAX_WIKI_CHARS) {
+      const remaining = MAX_WIKI_CHARS - len - 50;
+      if (remaining > 0) lines.push(block.slice(0, remaining) + '\n...[truncated]');
+      break;
+    }
+    lines.push(block);
+    len += block.length + 4;
+  }
+  return lines.join('\n\n');
 }
