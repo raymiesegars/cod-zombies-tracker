@@ -105,7 +105,7 @@ export function RunsModal({
                     </div>
                     <p className="text-xs text-bunker-400 mt-0.5">
                       {run.map.name}
-                      {run.map.game?.shortName && ` · ${getGameDisplayShortName(run.map.game.shortName, run.map.game.name)}`}
+                      {run.map.game?.shortName && ` · ${getGameDisplayShortName(run.map.game.shortName)}`}
                       {run.roundReached != null && ` · Round ${run.roundReached}`}
                       {run.roundCompleted != null && ` · Round ${run.roundCompleted}`}
                     </p>

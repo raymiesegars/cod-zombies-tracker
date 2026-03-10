@@ -271,7 +271,7 @@ export default function AdminAchievementsPage() {
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div className="flex items-center gap-4 flex-wrap">
                   <p className="text-sm text-bunker-400">
-                    {getGameDisplayShortName(mapData.map.game?.shortName, mapData.map.game?.name)} / {mapData.map.name} —{' '}
+                    {getGameDisplayShortName(mapData.map.game?.shortName)} / {mapData.map.name} —{' '}
                     {categoryFilter
                       ? `${sortedAchievements.length} (${ACHIEVEMENT_CATEGORY_LABELS[categoryFilter] ?? categoryFilter})`
                       : hideDeactivated

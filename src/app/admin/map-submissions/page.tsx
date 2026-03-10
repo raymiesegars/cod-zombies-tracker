@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, Button, Select, Input, TimeInput } from '@/components/ui';
 import { CheckCircle2, XCircle, ExternalLink, Loader2, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
 import { BO3_CUSTOM_CHALLENGE_TYPES, BO3_CUSTOM_DEFAULT_ROUNDS } from '@/lib/bo3-custom';
@@ -119,13 +120,13 @@ function PendingSubmissionCard({
               <div className="space-y-1.5">
                 <p className="text-xs font-medium text-bunker-500">Thumbnail</p>
                 <a href={thumbnailUrl!} target="_blank" rel="noopener noreferrer" className="block relative w-full aspect-video rounded-lg overflow-hidden bg-bunker-800 border border-bunker-600 hover:border-blood-600/50 transition-colors">
-                  <img src={thumbnailUrl!} alt="Thumbnail" className="w-full h-full object-cover" />
+                  <Image src={thumbnailUrl!} alt="Thumbnail" fill className="object-cover" />
                 </a>
               </div>
               <div className="space-y-1.5">
                 <p className="text-xs font-medium text-bunker-500">Banner{sub.mapPageImageUrl ? '' : ' (thumbnail used)'}</p>
                 <a href={bannerUrl!} target="_blank" rel="noopener noreferrer" className="block relative w-full aspect-video rounded-lg overflow-hidden bg-bunker-800 border border-bunker-600 hover:border-blood-600/50 transition-colors">
-                  <img src={bannerUrl!} alt="Banner" className="w-full h-full object-cover" />
+                  <Image src={bannerUrl!} alt="Banner" fill className="object-cover" />
                 </a>
               </div>
             </div>
@@ -281,13 +282,13 @@ function SubmissionCardReadOnly({ sub }: { sub: Submission }) {
             <div className="space-y-1.5">
               <p className="text-xs font-medium text-bunker-500">Thumbnail</p>
               <a href={thumbnailUrl!} target="_blank" rel="noopener noreferrer" className="block relative w-full aspect-video rounded-lg overflow-hidden bg-bunker-800 border border-bunker-600 hover:border-blood-600/50 transition-colors">
-                <img src={thumbnailUrl!} alt="Thumbnail" className="w-full h-full object-cover" />
+                <Image src={thumbnailUrl!} alt="Thumbnail" fill className="object-cover" />
               </a>
             </div>
             <div className="space-y-1.5">
               <p className="text-xs font-medium text-bunker-500">Banner{sub.mapPageImageUrl ? '' : ' (thumbnail used)'}</p>
               <a href={bannerUrl!} target="_blank" rel="noopener noreferrer" className="block relative w-full aspect-video rounded-lg overflow-hidden bg-bunker-800 border border-bunker-600 hover:border-blood-600/50 transition-colors">
-                <img src={bannerUrl!} alt="Banner" className="w-full h-full object-cover" />
+                <Image src={bannerUrl!} alt="Banner" fill className="object-cover" />
               </a>
             </div>
           </div>

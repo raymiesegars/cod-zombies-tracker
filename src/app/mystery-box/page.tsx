@@ -689,10 +689,9 @@ function LobbySlot({
       {user ? (
         <>
           <div className="relative">
-            <div className="w-12 h-12 rounded-full bg-bunker-700 flex items-center justify-center overflow-hidden mb-2">
+            <div className="relative w-12 h-12 rounded-full bg-bunker-700 flex items-center justify-center overflow-hidden mb-2">
               {user.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                <Image src={user.avatarUrl} alt="" fill className="object-cover" />
               ) : (
                 <span className="text-lg font-bold text-bunker-400">
                   {(user.displayName ?? user.username).charAt(0).toUpperCase()}

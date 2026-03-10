@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import Image from 'next/image';
 import { Modal, Button, Input, TimeInput } from '@/components/ui';
 import { BO3_CUSTOM_CHALLENGE_TYPES, BO3_CUSTOM_DEFAULT_ROUNDS } from '@/lib/bo3-custom';
 import { Loader2, Plus, Upload, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
@@ -53,11 +54,12 @@ function ImageUploadBlock({
       </div>
       <div className="p-4">
         {imageUrl ? (
-          <div className="relative group">
-            <img
+          <div className="relative group w-full h-48 rounded-lg border border-bunker-600 bg-bunker-900 overflow-hidden">
+            <Image
               src={imageUrl}
               alt=""
-              className="w-full max-h-48 object-contain rounded-lg border border-bunker-600 bg-bunker-900"
+              fill
+              className="object-contain"
             />
             <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg cursor-pointer">
               <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={onChange} disabled={uploading} />
@@ -260,8 +262,6 @@ export function SubmitMapModal({ isOpen, onClose, onSuccess }: Props) {
     eeName,
     eeXp,
     eeSteps,
-    onClose,
-    onSuccess,
   ]);
 
   return (
