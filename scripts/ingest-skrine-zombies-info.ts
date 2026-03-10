@@ -494,6 +494,16 @@ async function main() {
     process.exit(0);
   }
 
+  const skrineTerminology: Chunk = {
+    externalId: 'skrine-terminology-definitions',
+    title: 'Skrine – Terminology (G-spawn, etc.)',
+    content: `## G-spawn (Skrine)
+
+G-spawn is an error that occurs when you kill too many zombies at once in a spawn. For example, if you shoot a ground spawn in the junction of Shadows of Evil with a death machine, if multiple zombies spawn in a row at that spawn you are shooting at, it can cause a G-spawn error.`,
+    sheetName: null,
+  };
+  allChunks.unshift(skrineTerminology);
+
   if (outputDir) {
     const out = resolve(process.cwd(), outputDir);
     if (!existsSync(out)) mkdirSync(out, { recursive: true });
