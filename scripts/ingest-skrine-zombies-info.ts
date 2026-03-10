@@ -141,7 +141,6 @@ function extractPointDropsFacts(
   const roundCol = raygunSoloIdx >= 6 ? raygunSoloIdx - 6 : findCol((c) => c === 'ROUND');
   if (raygunSoloIdx < 0 || roundCol < 0) return result;
 
-  const chanceCols = [raygunSoloIdx, raygunSoloIdx + 2, raygunSoloIdx + 4, raygunSoloIdx + 6];
   const shotsCols = [raygunSoloIdx + 1, raygunSoloIdx + 3, raygunSoloIdx + 5, raygunSoloIdx + 7];
   const waffeCols = findAllCols((c) => c.toLowerCase().includes('waffe shots per horde')).slice(0, 4);
   let dropsCols = findAllCols((c) => /^DROPS$/i.test(String(c).trim())).slice(0, 4);
@@ -153,11 +152,11 @@ function extractPointDropsFacts(
   const maxRows = 15;
 
   const raygunLines: string[] = [
-    '## Raygun (PAP) Shot Chance – BO1 (Ascension, Kino, CotD)',
-    'Chance = kill probability per shot. Shots = avg shots per kill.',
+    '## Wonder Weapons Needed Per Round – Raygun (PAP) – BO1 (Ascension, Kino, CotD)',
+    'Shots = number of raygun (PAP) shots needed to clear the round. 1p/2p/3p/4p = player count.',
     '',
-    '| Round | Solo (chance) | Solo (shots) | 2p | 2p shots | 3p | 3p shots | 4p | 4p shots |',
-    '|-------|---------------|--------------|-----|----------|-----|----------|-----|----------|',
+    '| Round | Solo | 2p | 3p | 4p |',
+    '|-------|------|-----|-----|-----|',
   ];
   const waffeLines: string[] = [
     '## Waffe (DG-2) Shots Per Horde – BO1',
@@ -176,10 +175,9 @@ function extractPointDropsFacts(
     const row = rawRows[r] ?? [];
     const round = row[roundCol] ?? '';
 
-    const rc = chanceCols.map((col) => (col >= 0 ? row[col] ?? '' : '')).filter(Boolean);
-    const rs = shotsCols.map((col) => (col >= 0 ? row[col] ?? '' : '')).filter(Boolean);
-    if (rc.length >= 4 && rs.length >= 4) {
-      raygunLines.push(`| ${round} | ${rc[0]} | ${rs[0]} | ${rc[1]} | ${rs[1]} | ${rc[2]} | ${rs[2]} | ${rc[3]} | ${rs[3]} |`);
+    const rs = shotsCols.map((col) => (col >= 0 ? row[col] ?? '' : ''));
+    if (rs.length >= 4 && rs.some(Boolean)) {
+      raygunLines.push(`| ${round} | ${rs[0]} | ${rs[1]} | ${rs[2]} | ${rs[3]} |`);
     }
 
     const wv = waffeCols.slice(0, 4).map((col) => (col >= 0 ? row[col] ?? '' : ''));
@@ -200,7 +198,7 @@ function extractPointDropsFacts(
   if (raygunLines.length > 5) {
     result.push({
       externalId: `${sheetName ? slugify(sheetName) + '-' : ''}point-drops-raygun-quick`,
-      title: `${sheetName ? sheetName + ' – ' : ''}Raygun PAP Shot Chance (BO1)`,
+      title: `${sheetName ? sheetName + ' – ' : ''}Raygun (PAP) Shots Needed Per Round (BO1)`,
       content: raygunContent,
       sheetName,
     });
@@ -373,7 +371,7 @@ function extractChunks(rows: string[][], sheetName?: string): ExtractResult {
           }
           const prefix =
             headerText.includes('raygun') && headerText.includes('solo')
-              ? 'BO1 point drops. Contains: RAYGUN (PAP) shot chance solo vs 2p vs 3p vs 4p, Waffe shots per horde, drop chances per round. ROUND column = round number.\n\n'
+              ? 'BO1 wonder weapons & point drops. Contains: RAYGUN (PAP) shots needed to clear round (1p/2p/3p/4p), Waffe shots per horde, drop chances per round. ROUND column = round number.\n\n'
               : headerText.includes('health scale') && headerText.includes('zombie round')
                 ? 'WaW instakill rounds and zombie health scale by dog round. Zombie Round, Health Scale, Dog Round columns. Contains: Nacht, Verruckt, Shi No Numa, Der Riese.\n\n'
                 : '';

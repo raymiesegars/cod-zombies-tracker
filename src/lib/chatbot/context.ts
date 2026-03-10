@@ -151,6 +151,7 @@ async function buildSiteDataContext(): Promise<string> {
 }
 
 const ZWR_PRIORITY_IDS = [
+  'zombies-terminology-glossary',
   'beginners-guide-on-how-to-speedrun-the-shadows-of-evil-easter-egg',
   'der-eisendrache-no-power-strategy-guide-using-mega-gobblegums',
   'how-to-setup-the-boiii-client',
@@ -225,7 +226,7 @@ async function buildWikiContextWithRetrieval(
     '## External wiki knowledge (CoD Fandom, ZWR The Rift, Skrine Zombies Info)'
   );
   lines.push(
-    'Use this to answer questions. ZWR: EE speedrun guides, setup guides, BO3 gobblegum loadouts — summarize and link zwr.gg/wiki. Skrine: round times (per-round/cumulative), instakill rounds, zombie health scale by dog round, map reset times, perfect times, point drops, Cold War Firebase Z trials. Point Drops / Raygun / Waffe chunks = BO1 maps (Ascension, Kino, CotD) — NOT WaW Nacht (Nacht has no PaP). Instakill & Health Scale = WaW (Nacht, Verruckt, Shi No Numa, Der Riese). For "raygun PAP shot chance", "waffe shots per horde", "drop chance" — use Point Drops chunk (BO1). For "zombie health dog rounds" — use Instakill chunk (WaW). When the data contains exact numbers (e.g. 0.003, 2.4, 150), cite them directly in your answer. Do not say "I don\'t have that info" if the numbers appear in the Skrine chunks. Prefer our site links for CZT-specific content.'
+    'Use this to answer questions. ZWR: EE speedrun guides, setup guides, BO3 gobblegum loadouts, terminology glossary (g-spawn, SPH, AAT, etc.) — summarize and link zwr.gg/wiki. Skrine: round times (per-round/cumulative), instakill rounds, zombie health scale by dog round, map reset times, perfect times, point drops, Cold War Firebase Z trials. Point Drops / Raygun / Waffe chunks = BO1 maps (Ascension, Kino, CotD) — NOT WaW Nacht (Nacht has no PaP). Raygun columns = shots needed to clear round (not shot chance). Waffe = shots per horde. Instakill & Health Scale = WaW (Nacht, Verruckt, Shi No Numa, Der Riese). For "raygun shots needed", "waffe shots per horde", "drop chance" — use Point Drops chunk (BO1). For "zombie health dog rounds" — use Instakill chunk (WaW). When the data contains exact numbers, cite them directly. Do not say "I don\'t have that info" if the numbers appear in the Skrine chunks. Prefer our site links for CZT-specific content.'
   );
   lines.push('');
   let len = lines.join('\n').length;
