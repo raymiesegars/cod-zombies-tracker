@@ -132,13 +132,23 @@ function extractChunks(rows: string[][], sheetName?: string): ExtractResult {
     return parts.join('\n').trim();
   }
 
+  const SKIP_FIRST_CELL =
+    /^credit\b|^click here|^(gap|disclaimer|all resets|please copy|using zio|solo includes|drop chances|hordes|assuming no point|ideal combos|trials|worst possible|not actual)$/i;
+
   function hasTableHeader(row: string[]): boolean {
     const filled = row.filter((c) => c.length > 0);
     if (filled.length < 2) return false;
     const first = filled[0].toLowerCase();
+    if (SKIP_FIRST_CELL.test(first)) return false;
     if (/^(name|map|round|game|record|player|type|twitch|youtube|twitter)$/.test(first)) return true;
     if (filled.every((c) => c.length < 50 && !/\./.test(c))) return true;
     return false;
+  }
+
+  function isPreambleRow(row: string[]): boolean {
+    const filled = row.filter((c) => c.length > 0);
+    if (filled.length === 0) return false;
+    return SKIP_FIRST_CELL.test(filled[0].trim());
   }
 
   while (i < rows.length) {
@@ -181,13 +191,21 @@ function extractChunks(rows: string[][], sheetName?: string): ExtractResult {
       }
       if (rawRows.length >= 2) {
         const filled = rawRows[0].map((c) => c.trim()).filter((c) => c.length > 0);
+        const headerPreview = rawRows
+          .slice(0, 3)
+          .map((tr) => tr.filter((c) => c.length > 0).join(' '))
+          .join(' ')
+          .toLowerCase();
+        const isPointDropsTable =
+          headerPreview.includes('raygun') && (headerPreview.includes('waffe') || headerPreview.includes('drop'));
+
         const roundIdx = filled.findIndex((c) => c.toLowerCase() === 'round');
         const secondRoundIdx =
           roundIdx >= 0 ? filled.slice(roundIdx + 1).findIndex((c) => c.toLowerCase() === 'round') : -1;
         const splitAt =
           secondRoundIdx >= 0 ? roundIdx + 1 + secondRoundIdx : -1;
 
-        if (splitAt > 0 && filled.length >= splitAt + 2) {
+        if (!isPointDropsTable && splitAt > 0 && filled.length >= splitAt + 2) {
           const toLine = (cells: string[]) =>
             cells.filter((c) => c.length > 0).join(' | ');
           const splitRow = (tr: string[]) => {
@@ -230,15 +248,33 @@ function extractChunks(rows: string[][], sheetName?: string): ExtractResult {
           const tableRows = rawRows.map((tr) =>
             tr.filter((c) => c.length > 0).join(' | ')
           );
-          const content = tableRows.join('\n');
-          const tableTitle = row.filter((c) => c.length > 0)[0] ?? 'Table';
+          let content = tableRows.join('\n');
+          const headerText = content.slice(0, 1500).toLowerCase();
+          let tableTitle = row.filter((c) => c.length > 0)[0] ?? 'Table';
+          if (headerText.includes('raygun') && (headerText.includes('waffe') || headerText.includes('drop'))) {
+            tableTitle = 'Point Drops – Raygun, Waffe, Drops (BO1)';
+          } else if (headerText.includes('health scale') && headerText.includes('dog round')) {
+            tableTitle = 'Instakill Rounds & Zombie Health Scale (WaW)';
+          } else if (headerText.includes('insta') || headerText.includes('instakill')) {
+            tableTitle = 'Instakill Rounds (WaW)';
+          } else if (headerText.includes('reset') || headerText.includes('165h')) {
+            tableTitle = 'Map Reset Times';
+          } else if (headerText.includes('perfect time') || headerText.includes('expected time')) {
+            tableTitle = 'Perfect & Expected Round Times';
+          } else if (headerText.includes('ideal combo')) {
+            tableTitle = 'Firebase Z Ideal Trial Combos';
+          }
+          const prefix =
+            headerText.includes('raygun') && headerText.includes('solo')
+              ? 'BO1 point drops. Contains: RAYGUN (PAP) shot chance solo vs 2p vs 3p vs 4p, Waffe shots per horde, drop chances per round. ROUND column = round number.\n\n'
+              : headerText.includes('health scale') && headerText.includes('zombie round')
+                ? 'WaW instakill rounds and zombie health scale by dog round. Zombie Round, Health Scale, Dog Round columns. Contains: Nacht, Verruckt, Shi No Numa, Der Riese.\n\n'
+                : '';
+          content = prefix + (content.length > MAX_CHUNK_CHARS ? content.slice(0, MAX_CHUNK_CHARS - prefix.length) + '\n...[truncated]' : content);
           chunks.push({
             externalId: `${sheetName ? slugify(sheetName) + '-' : ''}table-${slugify(tableTitle)}-${i}`,
             title: `${sheetName ? sheetName + ' – ' : ''}${tableTitle}`,
-            content:
-              content.length > MAX_CHUNK_CHARS
-                ? content.slice(0, MAX_CHUNK_CHARS) + '\n...[truncated]'
-                : content,
+            content,
             sheetName,
           });
         }
@@ -246,6 +282,11 @@ function extractChunks(rows: string[][], sheetName?: string): ExtractResult {
       } else {
         i++;
       }
+      continue;
+    }
+
+    if (isPreambleRow(row)) {
+      i++;
       continue;
     }
 

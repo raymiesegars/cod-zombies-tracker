@@ -1,0 +1,17 @@
+# (11) – 4p
+
+4p | 16 | 1p = 5 stones | Anfang | Terra | R1 = 1:00 | 1p = 10
+3p | 19 | 2p = 5 stones | SNN (top) = 0:53 - 0:55 | Trains (top) = 0:58 - 1:01 | R2 = 1:30 | 2p = 17
+2p | 24 | 3p = 7 stones | SNN (bottom) = 0:48 - 0:51 | Trains (bottom) = 1:00 - 1:03 | R3 = 2:00 | 3p = 24
+1p | 30 | 4p = 9 stones | Rooftop (boxes) = 1:05 - 1:07 | Stam (back) = 0:57 - 1:00 | R4 = 2:30 | 4p = 30
+Rooftop (balcony) = 0:58 - 1:01 | Stam (front) = 1:18 - 1:21 | R5+ = 3:00
+Palace = 0:52 - 0:55 | Islands (isle) = 0:49 - 0:52
+Speed = 0:56 - 0:59 | Islands (soil) = 0:42 - 0:45
+Apartments (Top stairs) = 0:47 - 0:50 | Spawn puddle = 0:58 - 1:01
+Apartments (crossroads) = 0:47 - 0:50 | Spawn wall = 0:57 - 1:00
+Apartments (flags) = 0:47 - 0:50 | Jug = 1:04 - 1:07
+Windmill (field) = 1:09 - 1:12 | Fuel = 1:01 - 1:04
+Windmill (gate) = 1:07 - 1:10 | Rail Path = 1:23 - 1:26
+Speed = 0:48 - 0:51
+QR = 1:04 - 1:07
+Market = 0:53 - 0:56

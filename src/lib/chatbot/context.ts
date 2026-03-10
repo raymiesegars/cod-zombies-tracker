@@ -208,7 +208,7 @@ async function buildWikiContextWithRetrieval(
     '## External wiki knowledge (CoD Fandom, ZWR The Rift, Skrine Zombies Info)'
   );
   lines.push(
-    'Use this to answer questions. ZWR: EE speedrun guides, setup guides, BO3 gobblegum loadouts per map (e.g. SoE: Nukes, Reign, Perkaholic, Wall Power, ABH) — summarize and link zwr.gg/wiki. Skrine Zombies Info: round times (per-round and cumulative), instakill tables, point drops, reset times, perfect times, Cold War Firebase Z trials/combos — NOT BO3 gobblegum loadouts. For "best gobblegum loadout BO3", "mega gums for BO3 speedruns", "ideal gums per map" → use ZWR guides. For "round times", use Skrine "Per-round times" chunk (Solo = time for that round). "165h" = high-round RESET times. Prefer our site links for CZT-specific content.'
+    'Use this to answer questions. ZWR: EE speedrun guides, setup guides, BO3 gobblegum loadouts — summarize and link zwr.gg/wiki. Skrine: round times (per-round/cumulative), instakill rounds, zombie health scale by dog round, map reset times, perfect times, point drops, Cold War Firebase Z trials. Point Drops / Raygun / Waffe chunks = BO1 maps (Ascension, Kino, CotD) — NOT WaW Nacht (Nacht has no PaP). Instakill & Health Scale = WaW (Nacht, Verruckt, Shi No Numa, Der Riese). For "raygun PAP shot chance", "waffe shots per horde", "drop chance" — use Point Drops chunk (BO1). For "zombie health dog rounds" — use Instakill chunk (WaW). Answer directly from the data when present. Prefer our site links for CZT-specific content.'
   );
   lines.push('');
   let len = lines.join('\n').length;

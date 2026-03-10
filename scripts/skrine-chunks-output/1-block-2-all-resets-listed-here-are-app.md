@@ -1,0 +1,3 @@
+# (1) – All resets listed here are approximations and not …
+
+All resets listed here are approximations and not exact. Reset can vary greatly depending on how you play (and platform in some cases)
