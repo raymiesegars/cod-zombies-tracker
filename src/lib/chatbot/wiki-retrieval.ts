@@ -104,7 +104,7 @@ export async function getSkrineChunksByKeywords(
   }
   if (titleFilters.size === 0) return [];
 
-  const conditions = [...titleFilters].map((contains) => ({
+  const conditions = Array.from(titleFilters).map((contains) => ({
     title: { contains, mode: 'insensitive' as const },
   }));
 
