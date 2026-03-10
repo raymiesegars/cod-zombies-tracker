@@ -140,6 +140,7 @@ function extractPointDropsFacts(
   const raygunSoloIdx = findCol((c) => c.includes('RAYGUN (PAP) SOLO'));
   const roundCol = raygunSoloIdx >= 6 ? raygunSoloIdx - 6 : findCol((c) => c === 'ROUND');
   const vr11Cols = findAllCols((c) => /VR-11\s*\(PAP\)/i.test(c));
+  const babygunCols = findAllCols((c) => /BABYGUN\s*\(PAP\)/i.test(c));
   if (raygunSoloIdx < 0 || roundCol < 0) return result;
 
   const shotsCols = [raygunSoloIdx + 1, raygunSoloIdx + 3, raygunSoloIdx + 5, raygunSoloIdx + 7];
@@ -178,6 +179,13 @@ function extractPointDropsFacts(
     '| Round | Solo | 2p | 3p | 4p |',
     '|-------|------|-----|-----|-----|',
   ];
+  const babygunLines: string[] = [
+    '## Baby Gun (PAP) Shots Needed Per Round – BO1 (Shangri-La)',
+    'Shots = wonder weapon shots needed to clear the round.',
+    '',
+    '| Round | Solo | 2p | 3p | 4p |',
+    '|-------|------|-----|-----|-----|',
+  ];
 
   for (let r = 1; r < rawRows.length && r <= maxRows; r++) {
     const row = rawRows[r] ?? [];
@@ -201,6 +209,11 @@ function extractPointDropsFacts(
     const v11 = vr11Cols.slice(0, 4).map((col) => (col >= 0 ? row[col] ?? '' : ''));
     if (vr11Cols.length >= 4 && v11.some(Boolean)) {
       vr11Lines.push(`| ${round} | ${v11[0]} | ${v11[1]} | ${v11[2]} | ${v11[3]} |`);
+    }
+
+    const bg = babygunCols.slice(0, 4).map((col) => (col >= 0 ? row[col] ?? '' : ''));
+    if (babygunCols.length >= 4 && bg.some(Boolean)) {
+      babygunLines.push(`| ${round} | ${bg[0]} | ${bg[1]} | ${bg[2]} | ${bg[3]} |`);
     }
   }
 
@@ -237,6 +250,14 @@ function extractPointDropsFacts(
       externalId: `${sheetName ? slugify(sheetName) + '-' : ''}point-drops-vr11-quick`,
       title: `${sheetName ? sheetName + ' – ' : ''}VR-11 (PAP) Shots Needed Per Round (BO1 CotD)`,
       content: vr11Lines.join('\n'),
+      sheetName,
+    });
+  }
+  if (babygunLines.length > 5 && babygunCols.length >= 4) {
+    result.push({
+      externalId: `${sheetName ? slugify(sheetName) + '-' : ''}point-drops-babygun-quick`,
+      title: `${sheetName ? sheetName + ' – ' : ''}Baby Gun (PAP) Shots Needed Per Round (BO1 Shangri-La)`,
+      content: babygunLines.join('\n'),
       sheetName,
     });
   }
@@ -398,9 +419,9 @@ function extractChunks(rows: string[][], sheetName?: string): ExtractResult {
               : headerText.includes('health scale') && headerText.includes('zombie round')
                 ? 'WaW: INSTAKILL ROUNDS = Round column is which round you GET instakill (e.g. 1, 163, 165, 167 for Nacht). Values = instakill duration. HEALTH SCALE = Zombie Round | Health (actual HP: 150, 250, 350, 450, 550, 650...) | Dog Round. Der Riese round 1 = 150 HP, round 2 = 250, etc. Contains: Nacht, Verruckt, Shi No Numa, Der Riese.\n\n'
                 : (headerText.includes('reset') || headerText.includes('165'))
-                  ? 'Columns = game (WaW, BO1, BO2, BO3, BO4, CW, VG, AW, IW, WW2). Same map can have different reset times per game. BO1 Kino = 75h30. BO3 Kino = 105h. BO1 Ascension = 70h, BO3 Ascension = 112h.\n\n'
+                  ? 'Columns = game (WaW, BO1, BO2, BO3, BO4, CW, VG, AW, IW, WW2). Same map can have different resets per game. BO1 Kino = 75h30. BO3 Kino = 105h. COLD WAR (CW) AND BO4 HAVE NO MAP RESETS – Firebase Z is CW, so no reset. Outbreak (CW) = 71h. ZiS = IW Zombies in Spaceland = 110–120h.\n\n'
                   : (headerText.includes('firebase') && (headerText.includes('ideal') || headerText.includes('a1')))
-                    ? 'Firebase Z (Cold War): Ideal Combos = fastest EE quote combo (A1+A2 39s for Weaver+Peck quotes). Trial TYPES: Good = Multi, Equipment, Close Range. Bad = Hip Fire, Crouched, Melee. Kills for gens: Rnd 4 Spd Gen solo 6 kills, Rnd 5 Jug Gen solo 0, 4p 15. 4p = 16 trials total.\n\n'
+                    ? 'Firebase Z (Cold War): A1+A2 etc. = EE QUOTE combos (Weaver/Peck quotes for fastest EE), NOT trial combos. Trials = objective TYPES (Good: Multi, Equipment, Close Range; Bad: Hip Fire, Crouched, Melee). "Kills needed" = GENERATOR kills only (Rnd 4 Spd Gen, Rnd 5 Jug Gen) – to start those gens, NOT trial kills. We have NO "trial kills per round" table. 4p = 16 trials total. Do NOT invent a round-by-round kills table.\n\n'
                     : (headerText.includes('transmit') && (headerText.includes('snn') || headerText.includes('anfang')))
                       ? 'Vanguard: SNN = Shi No Numa. Transmit times: SNN (top) 0:53–0:55, SNN (bottom) 0:48–0:51. Harvest stones, Blitz round times, Purge circles per player.\n\n'
                       : '';
@@ -525,10 +546,12 @@ async function main() {
 
   const skrineTerminology: Chunk = {
     externalId: 'skrine-terminology-definitions',
-    title: 'Skrine – Terminology (G-spawn, etc.)',
-    content: `## G-spawn (Skrine)
+    title: 'Skrine – Terminology (G-spawn, Spawn Manip, etc.)',
+    content: `## G-spawn
+Error when you kill too many zombies at once in a spawn (e.g. death machine at SoE junction ground spawn – multiple zombies spawning in a row can cause it).
 
-G-spawn is an error that occurs when you kill too many zombies at once in a spawn. For example, if you shoot a ground spawn in the junction of Shadows of Evil with a death machine, if multiple zombies spawn in a row at that spawn you are shooting at, it can cause a G-spawn error.`,
+## Spawn Manip (Spawn Manipulation)
+Doing things (typically standing and looking at a specific spot) to force zombies to spawn in a certain spot. Used in SoE egg charging – e.g. teleport to waterfront, place egg, stare at window to force zombies to respawn there.`,
     sheetName: null,
   };
   allChunks.unshift(skrineTerminology);

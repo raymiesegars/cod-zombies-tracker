@@ -83,13 +83,13 @@ export async function getSkrineChunksFallback(): Promise<
 }
 
 const CHUNK_TRIGGERS: { pattern: RegExp; titleContains: string }[] = [
-  { pattern: /g-spawn|gspawn|g spawn/i, titleContains: 'Terminology' },
-  { pattern: /raygun|ray gun|shots needed|wonder weapons needed/i, titleContains: 'Raygun' },
-  { pattern: /raygun|ray gun|shots needed|wonder weapons|waffe|shots per horde|drop chance|point drop/i, titleContains: 'Point Drops' },
+  { pattern: /g-spawn|gspawn|g spawn|spawn manip|spawn manipulation/i, titleContains: 'Terminology' },
+  { pattern: /raygun|ray gun|shots needed|wonder weapons needed|baby gun|babygun/i, titleContains: 'Raygun' },
+  { pattern: /raygun|ray gun|shots needed|wonder weapons|waffe|shots per horde|drop chance|point drop|baby gun|babygun/i, titleContains: 'Point Drops' },
   { pattern: /waffe|shots per horde/i, titleContains: 'Waffe' },
   { pattern: /drop chance|point drop/i, titleContains: 'Drop Chance' },
   { pattern: /health scale|dog round|zombie health|instakill round|(nacht|verruckt|shi no numa|der riese).*(health|scale|dog)/i, titleContains: 'Instakill' },
-  { pattern: /reset|165|resets|reset time|map reset|hours.*reset/i, titleContains: 'Reset' },
+  { pattern: /reset|165|resets|reset time|map reset|hours.*reset|outbreak.*reset|reset.*outbreak|outbreak/i, titleContains: 'Reset' },
   { pattern: /round time|per round|cumulative|total time to round|time to round|reach round|get to round/i, titleContains: 'Round' },
   { pattern: /perfect time|expected time|moon.*(round|\d)|megas.*classics|round 30|round 50|moon 30|moon 50/i, titleContains: 'Perfect' },
   { pattern: /firebase z|firebase.*trial|trial combo|ideal combo|weaver.*trial|a1\+a2|cold war.*trial|kills.*gen/i, titleContains: 'Firebase' },
@@ -98,6 +98,7 @@ const CHUNK_TRIGGERS: { pattern: RegExp; titleContains: string }[] = [
   { pattern: /blitz|transmit|harvest.*stone|purge.*circle|vanguard|terra maledicta|anfang|shi no numa.*transmit|snn.*transmit/i, titleContains: '4p' },
   { pattern: /transmit|shi no numa|snn.*transmit/i, titleContains: 'Transmit' },
   { pattern: /vr-11|vr11/i, titleContains: 'VR-11' },
+  { pattern: /baby gun|babygun/i, titleContains: 'Baby Gun' },
 ];
 
 export async function getSkrineChunksByKeywords(
