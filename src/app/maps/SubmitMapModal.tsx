@@ -24,6 +24,7 @@ const CHALLENGE_LABELS: Record<string, string> = {
   ROUND_100_SPEEDRUN: 'R100 Speedrun',
   ROUND_255_SPEEDRUN: 'R255 Speedrun',
   EASTER_EGG_SPEEDRUN: 'EE Speedrun',
+  BUYABLE_ENDING_SPEEDRUN: 'Buyable Ending Speedrun',
 };
 
 const isSpeedrun = (t: string) => t.includes('SPEEDRUN');
@@ -102,10 +103,13 @@ export function SubmitMapModal({ isOpen, onClose, onSuccess }: Props) {
   const [suggestedRounds, setSuggestedRounds] = useState<Record<string, number>>(() => {
     const r: Record<string, number> = {};
     for (const t of BO3_CUSTOM_CHALLENGE_TYPES) {
+      if (t === 'BUYABLE_ENDING_SPEEDRUN') continue;
       r[t] = BO3_CUSTOM_DEFAULT_ROUNDS[t] ?? (isSpeedrun(t) ? 1800 : 30);
     }
     return r;
   });
+  const [hasBuyableEnding, setHasBuyableEnding] = useState(false);
+  const [buyableEndingTimeSeconds, setBuyableEndingTimeSeconds] = useState(0);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [eeName, setEeName] = useState('');
   const [eeXp, setEeXp] = useState(250);
@@ -210,10 +214,20 @@ export function SubmitMapModal({ isOpen, onClose, onSuccess }: Props) {
       setError('At least one image is required (thumbnail or banner)');
       return;
     }
+    if (hasBuyableEnding && (!buyableEndingTimeSeconds || buyableEndingTimeSeconds < 60)) {
+      setError('Buyable ending speedrun requires a time of at least 1:00 for the hardest tier');
+      return;
+    }
     setSubmitting(true);
     try {
       const suggestedAchievements: Record<string, number> = {};
       for (const t of BO3_CUSTOM_CHALLENGE_TYPES) {
+        if (t === 'BUYABLE_ENDING_SPEEDRUN') {
+          if (hasBuyableEnding && buyableEndingTimeSeconds > 0) {
+            suggestedAchievements[t] = buyableEndingTimeSeconds;
+          }
+          continue;
+        }
         const v = suggestedRounds[t];
         if (v != null && !Number.isNaN(v) && v > 0) {
           suggestedAchievements[t] = Math.floor(Number(v));
@@ -259,6 +273,8 @@ export function SubmitMapModal({ isOpen, onClose, onSuccess }: Props) {
     thumbnailImageUrl,
     mapPageImageUrl,
     suggestedRounds,
+    hasBuyableEnding,
+    buyableEndingTimeSeconds,
     eeName,
     eeXp,
     eeSteps,
@@ -356,7 +372,7 @@ export function SubmitMapModal({ isOpen, onClose, onSuccess }: Props) {
               <div>
                 <p className="text-sm font-medium text-bunker-300 mb-3">Timed challenges (h:m:s)</p>
                 <div className="grid grid-cols-1 gap-4">
-                  {BO3_CUSTOM_CHALLENGE_TYPES.filter(isSpeedrun).map((t) => (
+                  {BO3_CUSTOM_CHALLENGE_TYPES.filter((t) => isSpeedrun(t) && t !== 'BUYABLE_ENDING_SPEEDRUN').map((t) => (
                     <div key={t} className="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-4">
                       <label className="shrink-0 text-xs sm:text-sm text-bunker-400 sm:min-w-[7rem]" title={CHALLENGE_LABELS[t] ?? t}>
                         {CHALLENGE_LABELS[t] ?? t}
@@ -376,6 +392,31 @@ export function SubmitMapModal({ isOpen, onClose, onSuccess }: Props) {
                     </div>
                   ))}
                 </div>
+              </div>
+              <div className="border-t border-bunker-700 pt-4 mt-4">
+                <label className="flex items-center gap-2 mb-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={hasBuyableEnding}
+                    onChange={(e) => setHasBuyableEnding(e.target.checked)}
+                    className="rounded border-bunker-600 bg-bunker-800 text-blood-500 focus:ring-blood-500"
+                  />
+                  <span className="text-sm font-medium text-bunker-300">This map has a buyable ending speedrun</span>
+                </label>
+                {hasBuyableEnding && (
+                  <div className="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-4 mt-2">
+                    <label className="shrink-0 text-xs sm:text-sm text-bunker-400 sm:min-w-[7rem]">
+                      Hardest tier time (h:m:s)
+                    </label>
+                    <div className="flex-1 min-w-0">
+                      <TimeInput
+                        valueSeconds={buyableEndingTimeSeconds}
+                        onChange={(seconds) => setBuyableEndingTimeSeconds(seconds ?? 0)}
+                        className="[&_p]:hidden"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="border-t border-bunker-700 pt-4 mt-4">
                 <p className="text-sm font-medium text-bunker-200 mb-2">Optional Easter Egg</p>

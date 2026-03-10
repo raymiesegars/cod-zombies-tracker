@@ -80,6 +80,7 @@ const challengeTypeLabels: Record<string, string> = {
   NO_ATS: 'No AATs',
   NO_MANS_LAND: "No Man's Land",
   EASTER_EGG_SPEEDRUN: 'Easter Egg Speedrun',
+  BUYABLE_ENDING_SPEEDRUN: 'Buyable Ending Speedrun',
   GHOST_AND_SKULLS: 'Ghost and Skulls',
   ALIENS_BOSS_FIGHT: 'Aliens Boss Fight',
   CRYPTID_FIGHT: 'Cryptid Fight',

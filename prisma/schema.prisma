@@ -426,6 +426,7 @@ enum ChallengeType {
   BUILD_EE_SPEEDRUN    // BOCW: Build% EE speedrun (Firebase Z, Forsaken)
   SUPER_30_SPEEDRUN    // WW2: Multi-map R30 (Final Reich→Groesten Haus→Darkest Shore→Shadowed Throne→Frozen Dawn)
   EASTER_EGG_SPEEDRUN
+  BUYABLE_ENDING_SPEEDRUN   // BO3 Custom: Buyable ending speedrun (optional per map)
   INSTAKILL_ROUND_SPEEDRUN  // BO4: Instakill round speedrun (some maps only)
   RUSH                // BO4: Score-based rush mode
   PURIST              // BO4: Stricter rules, map-specific challenge mode

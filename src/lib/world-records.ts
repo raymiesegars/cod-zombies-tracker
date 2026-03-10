@@ -488,6 +488,7 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
     ROUND_100_SPEEDRUN: 'Round 100 Speedrun',
     ROUND_255_SPEEDRUN: 'Round 255 Speedrun',
     EASTER_EGG_SPEEDRUN: 'EE Speedrun',
+    BUYABLE_ENDING_SPEEDRUN: 'Buyable Ending Speedrun',
     NO_MANS_LAND: "No Man's Land",
     RUSH: 'Rush',
     EE_TIME: 'EE Time',

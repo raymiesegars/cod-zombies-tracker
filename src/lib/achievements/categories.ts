@@ -55,6 +55,7 @@ export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
   SUPER_30_SPEEDRUN: 'Super 30 Speedrun',
   INSTAKILL_ROUND_SPEEDRUN: 'Instakill Round Speedrun',
   EASTER_EGG_SPEEDRUN: 'Easter Egg Speedrun',
+  BUYABLE_ENDING_SPEEDRUN: 'Buyable Ending Speedrun',
   NO_MANS_LAND: "No Man's Land",
   RUSH: 'Rush',
   PURIST: 'Purist',

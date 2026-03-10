@@ -40,6 +40,7 @@ const CHALLENGE_LABELS: Record<string, string> = {
   ROUND_100_SPEEDRUN: 'R100 Speedrun',
   ROUND_255_SPEEDRUN: 'R255 Speedrun',
   EASTER_EGG_SPEEDRUN: 'EE Speedrun',
+  BUYABLE_ENDING_SPEEDRUN: 'Buyable Ending Speedrun',
 };
 
 const isSpeedrun = (t: string) => t.includes('SPEEDRUN');
@@ -48,7 +49,11 @@ function initEditAchievements(sub: Submission): Record<string, number> {
   const suggested = sub.suggestedAchievements ?? {};
   const r: Record<string, number> = {};
   for (const t of BO3_CUSTOM_CHALLENGE_TYPES) {
-    r[t] = suggested[t] ?? BO3_CUSTOM_DEFAULT_ROUNDS[t] ?? (isSpeedrun(t) ? 1800 : 30);
+    if (t === 'BUYABLE_ENDING_SPEEDRUN') {
+      r[t] = suggested[t] ?? 0;
+    } else {
+      r[t] = suggested[t] ?? BO3_CUSTOM_DEFAULT_ROUNDS[t] ?? (isSpeedrun(t) ? 1800 : 30);
+    }
   }
   return r;
 }
@@ -82,7 +87,9 @@ function PendingSubmissionCard({
     const suggestedAchievements: Record<string, number> = {};
     for (const t of BO3_CUSTOM_CHALLENGE_TYPES) {
       const v = editAchievements[t];
-      if (v != null && !Number.isNaN(v) && v > 0) suggestedAchievements[t] = Math.floor(v);
+      if (v == null || Number.isNaN(v) || v <= 0) continue;
+      if (t === 'BUYABLE_ENDING_SPEEDRUN' && v < 60) continue;
+      suggestedAchievements[t] = Math.floor(v);
     }
     const suggestedEasterEgg = editEeName.trim()
       ? { name: editEeName.trim(), xpReward: Math.max(0, Math.floor(editEeXp) || 250), steps: editEeSteps.trim() ? editEeSteps.trim().split('\n').filter(Boolean) : undefined }

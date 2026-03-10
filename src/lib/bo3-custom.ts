@@ -28,9 +28,10 @@ export const BO3_CUSTOM_CHALLENGE_TYPES = [
   'ROUND_100_SPEEDRUN',
   'ROUND_255_SPEEDRUN',
   'EASTER_EGG_SPEEDRUN',
+  'BUYABLE_ENDING_SPEEDRUN',
 ] as const;
 
-/** Default achievement rounds/times for BO3 custom maps (from The Giant as baseline). Override with suggested values. Round challenges use round numbers; speedruns use seconds. */
+/** Default achievement rounds/times for BO3 custom maps (from The Giant as baseline). Override with suggested values. Round challenges use round numbers; speedruns use seconds. BUYABLE_ENDING_SPEEDRUN has no default (optional per map). */
 export const BO3_CUSTOM_DEFAULT_ROUNDS: Record<string, number> = {
   HIGHEST_ROUND: 255,
   NO_DOWNS: 255,
@@ -49,13 +50,14 @@ export const BO3_CUSTOM_DEFAULT_ROUNDS: Record<string, number> = {
   ROUND_100_SPEEDRUN: 13360,
   ROUND_255_SPEEDRUN: 198000,
   EASTER_EGG_SPEEDRUN: 3900,
+  BUYABLE_ENDING_SPEEDRUN: 1800,
 };
 
 export function isBo3CustomSpeedrunType(type: string): boolean {
   return type.includes('SPEEDRUN');
 }
 
-/** XP tiers [easiest, ..., hardest] for 4-speedrun-tier spread. Based on The Giant / BO3. */
+/** XP tiers [easiest, ..., hardest] for 4-speedrun-tier spread. Based on The Giant / BO3. BUYABLE_ENDING_SPEEDRUN has highest top tier for custom achievements. */
 const BO3_CUSTOM_SPEEDRUN_XP_TIERS: Record<string, [number, number, number, number]> = {
   ROUND_5_SPEEDRUN: [50, 100, 250, 600],
   ROUND_15_SPEEDRUN: [60, 150, 350, 800],
@@ -65,6 +67,7 @@ const BO3_CUSTOM_SPEEDRUN_XP_TIERS: Record<string, [number, number, number, numb
   ROUND_100_SPEEDRUN: [200, 500, 1200, 2500],
   ROUND_255_SPEEDRUN: [300, 800, 1800, 3500],
   EASTER_EGG_SPEEDRUN: [200, 600, 1500, 2500],
+  BUYABLE_ENDING_SPEEDRUN: [250, 600, 1500, 3000],
 };
 
 export type SpeedrunTier = { maxTimeSeconds: number; xpReward: number };
