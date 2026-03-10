@@ -83,6 +83,7 @@ export async function getSkrineChunksFallback(): Promise<
 }
 
 const CHUNK_TRIGGERS: { pattern: RegExp; titleContains: string }[] = [
+  { pattern: /g-spawn|gspawn|g spawn/i, titleContains: 'Terminology' },
   { pattern: /raygun|ray gun|shots needed|wonder weapons needed/i, titleContains: 'Raygun' },
   { pattern: /raygun|ray gun|shots needed|wonder weapons|waffe|shots per horde|drop chance|point drop/i, titleContains: 'Point Drops' },
   { pattern: /waffe|shots per horde/i, titleContains: 'Waffe' },

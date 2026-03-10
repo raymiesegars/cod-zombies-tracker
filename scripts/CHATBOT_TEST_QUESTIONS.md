@@ -8,7 +8,7 @@ Use these to validate retrieval and answers before pushing. ✓ = has keyword tr
 
 | Question | Expected source | Expected answer |
 |----------|-----------------|-----------------|
-| What is g-spawn? | ZWR Terminology Glossary | Definition from zwr.gg/wiki/zombies-terminology-glossary – g-spawn (or G-spawn) = round where you get your first guaranteed max ammo. |
+| What is g-spawn? | Skrine General Info (or terminology chunk) | G-spawn is an error that occurs when you kill too many zombies at once in a spawn. E.g. shooting a ground spawn in SoE junction with a death machine—if multiple zombies spawn in a row at that spawn, it can cause a G-spawn error. |
 | What does SPH mean? | ZWR Terminology Glossary | SPH = spawns per horde (or similar). Link to glossary. |
 | Define AAT | ZWR Terminology Glossary | AAT = Alternative Ammo Type. Glossary definition. |
 | What is spawn manip? | ZWR Terminology Glossary | Spawn manipulation – glossary definition. |
