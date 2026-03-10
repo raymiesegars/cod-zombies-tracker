@@ -83,7 +83,10 @@ export async function getSkrineChunksFallback(): Promise<
 }
 
 const CHUNK_TRIGGERS: { pattern: RegExp; titleContains: string }[] = [
+  { pattern: /raygun|ray gun|pap shot|shot chance/i, titleContains: 'Raygun' },
   { pattern: /raygun|ray gun|pap shot|shot chance|waffe|shots per horde|drop chance|point drop/i, titleContains: 'Point Drops' },
+  { pattern: /waffe|shots per horde/i, titleContains: 'Waffe' },
+  { pattern: /drop chance|point drop/i, titleContains: 'Drop Chance' },
   { pattern: /health scale|dog round|zombie health|instakill round|(nacht|verruckt|shi no numa|der riese).*(health|scale|dog)/i, titleContains: 'Instakill' },
   { pattern: /reset|165|resets|reset time|map reset|hours.*reset/i, titleContains: 'Reset' },
   { pattern: /round time|per round|cumulative|total time to round|time to round|reach round|get to round/i, titleContains: 'Round' },

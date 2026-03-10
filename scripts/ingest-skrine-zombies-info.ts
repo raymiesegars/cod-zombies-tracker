@@ -117,6 +117,113 @@ interface ExtractResult {
   supersededExternalIds: string[];
 }
 
+function extractPointDropsFacts(
+  rawRows: string[][],
+  sheetName?: string
+): Chunk[] {
+  const result: Chunk[] = [];
+  const header = rawRows[0] ?? [];
+  const findCol = (fn: (cell: string) => boolean): number => {
+    for (let c = 0; c < header.length; c++) {
+      if (fn(String(header[c] ?? ''))) return c;
+    }
+    return -1;
+  };
+  const findAllCols = (fn: (cell: string) => boolean): number[] => {
+    const out: number[] = [];
+    for (let c = 0; c < header.length; c++) {
+      if (fn(String(header[c] ?? ''))) out.push(c);
+    }
+    return out;
+  };
+
+  const raygunSoloIdx = findCol((c) => c.includes('RAYGUN (PAP) SOLO'));
+  const roundCol = raygunSoloIdx >= 6 ? raygunSoloIdx - 6 : findCol((c) => c === 'ROUND');
+  if (raygunSoloIdx < 0 || roundCol < 0) return result;
+
+  const chanceCols = [raygunSoloIdx, raygunSoloIdx + 2, raygunSoloIdx + 4, raygunSoloIdx + 6];
+  const shotsCols = [raygunSoloIdx + 1, raygunSoloIdx + 3, raygunSoloIdx + 5, raygunSoloIdx + 7];
+  const waffeCols = findAllCols((c) => c.toLowerCase().includes('waffe shots per horde')).slice(0, 4);
+  let dropsCols = findAllCols((c) => /^DROPS$/i.test(String(c).trim())).slice(0, 4);
+  if (dropsCols.length === 0) {
+    const firstDrops = findCol((c) => c === 'DROPS' || (c.includes('DROPS') && !c.includes('Drop Chances')));
+    if (firstDrops >= 0) dropsCols = [firstDrops];
+  }
+
+  const maxRows = 15;
+
+  const raygunLines: string[] = [
+    '## Raygun (PAP) Shot Chance – BO1 (Ascension, Kino, CotD)',
+    'Chance = kill probability per shot. Shots = avg shots per kill.',
+    '',
+    '| Round | Solo (chance) | Solo (shots) | 2p | 2p shots | 3p | 3p shots | 4p | 4p shots |',
+    '|-------|---------------|--------------|-----|----------|-----|----------|-----|----------|',
+  ];
+  const waffeLines: string[] = [
+    '## Waffe (DG-2) Shots Per Horde – BO1',
+    '',
+    '| Round | Solo | 2p | 3p | 4p |',
+    '|-------|------|-----|-----|-----|',
+  ];
+  const dropsLines: string[] = [
+    '## Drop Chance Per Round – BO1',
+    '',
+    '| Round | Solo | 2p | 3p | 4p |',
+    '|-------|------|-----|-----|-----|',
+  ];
+
+  for (let r = 1; r < rawRows.length && r <= maxRows; r++) {
+    const row = rawRows[r] ?? [];
+    const round = row[roundCol] ?? '';
+
+    const rc = chanceCols.map((col) => (col >= 0 ? row[col] ?? '' : '')).filter(Boolean);
+    const rs = shotsCols.map((col) => (col >= 0 ? row[col] ?? '' : '')).filter(Boolean);
+    if (rc.length >= 4 && rs.length >= 4) {
+      raygunLines.push(`| ${round} | ${rc[0]} | ${rs[0]} | ${rc[1]} | ${rs[1]} | ${rc[2]} | ${rs[2]} | ${rc[3]} | ${rs[3]} |`);
+    }
+
+    const wv = waffeCols.slice(0, 4).map((col) => (col >= 0 ? row[col] ?? '' : ''));
+    if (waffeCols.length >= 4 && wv.some(Boolean)) {
+      waffeLines.push(`| ${round} | ${wv[0]} | ${wv[1]} | ${wv[2]} | ${wv[3]} |`);
+    }
+
+    const dv = dropsCols.slice(0, 4).map((col) => (col >= 0 ? row[col] ?? '' : ''));
+    if (dropsCols.length >= 1 && dv.some(Boolean)) {
+      dropsLines.push(`| ${round} | ${dv[0]} | ${dv[1] || '-'} | ${dv[2] || '-'} | ${dv[3] || '-'} |`);
+    }
+  }
+
+  const raygunContent = raygunLines.join('\n');
+  const waffeContent = waffeLines.join('\n');
+  const dropsContent = dropsLines.join('\n');
+
+  if (raygunLines.length > 5) {
+    result.push({
+      externalId: `${sheetName ? slugify(sheetName) + '-' : ''}point-drops-raygun-quick`,
+      title: `${sheetName ? sheetName + ' – ' : ''}Raygun PAP Shot Chance (BO1)`,
+      content: raygunContent,
+      sheetName,
+    });
+  }
+  if (waffeLines.length > 4) {
+    result.push({
+      externalId: `${sheetName ? slugify(sheetName) + '-' : ''}point-drops-waffe-quick`,
+      title: `${sheetName ? sheetName + ' – ' : ''}Waffe Shots Per Horde (BO1)`,
+      content: waffeContent,
+      sheetName,
+    });
+  }
+  if (dropsLines.length > 4 || (dropsCols.length >= 1 && dropsLines.length === 4)) {
+    result.push({
+      externalId: `${sheetName ? slugify(sheetName) + '-' : ''}point-drops-drops-quick`,
+      title: `${sheetName ? sheetName + ' – ' : ''}Drop Chance Per Round (BO1)`,
+      content: dropsContent,
+      sheetName,
+    });
+  }
+  return result;
+}
+
 function extractChunks(rows: string[][], sheetName?: string): ExtractResult {
   const chunks: Chunk[] = [];
   const supersededExternalIds: string[] = [];
@@ -277,6 +384,11 @@ function extractChunks(rows: string[][], sheetName?: string): ExtractResult {
             content,
             sheetName,
           });
+
+          if (headerText.includes('raygun') && headerText.includes('solo')) {
+            const extracted = extractPointDropsFacts(rawRows, sheetName);
+            chunks.push(...extracted);
+          }
         }
         i = r;
       } else {
