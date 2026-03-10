@@ -4,11 +4,17 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Loader2, AlertCircle } from 'lucide-react';
 import { getAssetUrl } from '@/lib/assets';
 import { Button, Input, Modal } from '@/components/ui';
 import { useChatbot, type ChatMessage } from '@/context/chatbot-context';
+
+function normalizeTableNewlines(content: string): string {
+  if (!content.includes('|')) return content;
+  return content.replace(/(\S)\s*\|\s*\|/g, '$1|\n|');
+}
 
 const GET_MORE_TOKENS_MESSAGE = (
   <>
@@ -219,6 +225,7 @@ export function ChatbotPanel({ onClose }: ChatbotPanelProps) {
                 ) : (
                   <div className="chatbot-markdown overflow-x-auto [&_table]:my-2 [&_ul]:my-1 [&_ol]:my-1 [&_p]:mb-1 [&_p:last-child]:mb-0">
                     <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
                       components={{
                         a: ({ href, children }) => {
                           if (!href) return <span>{children}</span>;
@@ -255,7 +262,7 @@ export function ChatbotPanel({ onClose }: ChatbotPanelProps) {
                         p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
                       }}
                     >
-                      {m.content}
+                      {normalizeTableNewlines(m.content)}
                     </ReactMarkdown>
                   </div>
                 )}
