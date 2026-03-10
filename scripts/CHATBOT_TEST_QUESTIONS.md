@@ -11,7 +11,7 @@ Validate retrieval and answers before pushing. ✓ = keyword trigger exists.
 | What is g-spawn? | Error when you kill too many zombies at once at a spawn (e.g. death machine at SoE junction). From Skrine Terminology. |
 | Define gspawn | Same as g-spawn. Skrine definition. |
 | What does AAT mean? | Alternative Ammo Type (ZWR glossary if in context). |
-| What is spawn manip? | Spawn manipulation – ZWR glossary. |
+| What is spawn manip? | Standing/looking at a spot to force zombies to spawn there (e.g. SoE egg charging). From Terminology chunk. |
 
 ---
 
@@ -27,7 +27,8 @@ Raygun, VR-11, DG2 = shots needed to clear round. NOT shot chance or probability
 | Waffe shots per horde round 5? | 2.4 solo, 2.7 2p, 3.2 3p, 3.7 4p. |
 | DG2 shots needed round 7? | DG2 (PAP) column – wonder weapon shots to clear. |
 | Drop chance round 1 Ascension? | DROPS = 0.01 (1%). BO1 only. |
-| Baby gun shots needed? | BABYGUN columns in Point Drops table. |
+| Baby gun shots needed round 5? | Baby Gun (PAP) quick chunk – table with Round, Solo, 2p, 3p, 4p. Shangri-La. |
+| Can you give me the Baby Gun table? | Baby Gun (PAP) Shots Needed Per Round – format as markdown table from chunk. |
 
 ---
 
@@ -59,8 +60,9 @@ Same map can have different resets per game (BO1 vs BO3).
 | Nacht reset? | WaW: 165h (approx). |
 | Der Eisendrache reset? | 63h. |
 | ZiS reset? | 110–120h. |
-| Outbreak reset? | 71h. |
-| Firebase Z reset? | No map resets in CW. |
+| Outbreak reset? | 71h. ("Reset" or "reset time" both retrieve.) |
+| What is the Outbreak reset time? | 71h. |
+| Firebase Z reset time? | Cold War has NO map resets. Firebase Z = CW. Do NOT give ZiS (110–120h). |
 
 ---
 
@@ -96,14 +98,15 @@ Megas = faster (spawn rate boost). Classics = slower.
 
 ## ✓ Firebase Z (Cold War)
 
-Ideal Combos = EE quote timings (A1+A2 39s). Trial TYPES = Good (Multi, Equipment, Close Range) vs Bad (Hip Fire, Crouched, Melee). Kills = for gens.
+A1+A2 39s = EE QUOTE combo (which Weaver/Peck quotes for fastest EE). There is NO "ideal trial combo". Trial TYPES = Good (Multi, Equipment, Close Range) vs Bad (Hip Fire, Crouched, Melee).
 
 | Question | Expected answer |
 |----------|-----------------|
-| Best Firebase Z trial combo? | EE: A1+A2 39s. Trial types: Good = Multi, Equipment, Close Range. Bad = Hip Fire, Crouched, Melee. Kills: Rnd 4 Spd solo 6, Rnd 5 Jug 4p 15. |
-| Firebase Z ideal trial combos? | A1+A2 39s, A1+B2 41s, A1+C2 41s, B1+A2 43s. Include trial types and kills for gens. |
+| Best Firebase Z trial combo? | There is no ideal trial combo. Trial TYPES: Good = Multi, Equipment, Close Range. Bad = Hip Fire, Crouched, Melee. (Do NOT give A1+A2 – that's for EE quotes.) |
+| Firebase Z ideal trial combos? | If they mean EE quotes: A1+A2 39s, A1+B2 41s. If trials: Good = Multi, Equipment, Close Range. Clarify or give both. |
 | How many kills for Firebase Z gens solo? | Rnd 4 Spd Gen: 6. Rnd 5 Jug Gen: 0. |
-| Firebase Z 4p trial kills? | 4p = 16 trials. Rnd 5 Jug: 15 kills. Rnd 4 Spd: 6 kills. |
+| Firebase Z 4p trial kills? | We have NO trial kills per round. Generator kills only: Rnd 4 Spd Gen 4p=6, Rnd 5 Jug Gen 4p=15. Do NOT invent a round-by-round table. |
+| Firebase Z 4p trial kills based on round? | Same – no trial kills data. Generator kills (Rnd 4 Spd, Rnd 5 Jug) only. |
 | Weaver quotes Firebase Z? | A1 "No more games" Well 31s, A2 "Fucking coward" 8s, etc. |
 | Firebase Z good trials vs bad? | Good: Multi, Equipment, Close Range. Bad: Hip Fire, Crouched, Melee. |
 
@@ -157,5 +160,6 @@ SNN = Shi No Numa. Transmit times, Blitz, Harvest, Purge.
 | Perfect & Expected, Moon | moon, megas, classics, perfect time, expected time |
 | Firebase Z | firebase z, trial, ideal combo, a1, a2, weaver, cold war |
 | Vanguard Transmit, 4p | transmit, shi no numa, snn, blitz, harvest, purge, vanguard |
-| Terminology | g-spawn, gspawn, terminology |
+| Terminology | g-spawn, gspawn, spawn manip, terminology |
+| Baby Gun | baby gun, babygun |
 | NOT ACTUAL TIMES | zis, carrier, iw, spawn delay |
