@@ -3,47 +3,12 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Loader2, AlertCircle } from 'lucide-react';
 import { getAssetUrl } from '@/lib/assets';
 import { Button, Input, Modal } from '@/components/ui';
 import { useChatbot, type ChatMessage } from '@/context/chatbot-context';
-
-type ContentPart = { type: 'text'; value: string } | { type: 'link'; href: string; label: string };
-
-function parseChatbotContent(content: string): ContentPart[] {
-  const parts: ContentPart[] = [];
-  const pathLabel = (path: string): string => {
-    if (path === '/leaderboards') return 'Leaderboards';
-    if (path === '/maps') return 'Maps';
-    if (path.startsWith('/maps/')) return 'map page';
-    if (path === '/rules') return 'Rules';
-    if (path === '/tournaments') return 'Tournaments';
-    return path;
-  };
-  const regex = /\[([^\]]+)\]\((https?:\/\/[^)]+|\/[^)]*)\)|(\/leaderboards|\/maps(?:\/[a-zA-Z0-9-]+)?|\/rules|\/tournaments)|(\bZombacus\b)/gi;
-  let lastIndex = 0;
-  let m: RegExpExecArray | null;
-  while ((m = regex.exec(content)) !== null) {
-    if (m.index > lastIndex) {
-      parts.push({ type: 'text', value: content.slice(lastIndex, m.index) });
-    }
-    if (m[1] !== undefined && m[2] !== undefined) {
-      const href = m[2].startsWith('http') ? m[2] : (m[2].startsWith('/') ? m[2] : '/');
-      parts.push({ type: 'link', href, label: m[1] });
-    } else if (m[3] !== undefined) {
-      const path = m[3];
-      parts.push({ type: 'link', href: path, label: pathLabel(path) });
-    } else if (m[4] !== undefined) {
-      parts.push({ type: 'link', href: '/', label: 'Zombacus' });
-    }
-    lastIndex = regex.lastIndex;
-  }
-  if (lastIndex < content.length) {
-    parts.push({ type: 'text', value: content.slice(lastIndex) });
-  }
-  return parts.length ? parts : [{ type: 'text', value: content }];
-}
 
 const GET_MORE_TOKENS_MESSAGE = (
   <>
@@ -252,27 +217,47 @@ export function ChatbotPanel({ onClose }: ChatbotPanelProps) {
                 {m.role === 'user' ? (
                   <p className="whitespace-pre-wrap break-words">{m.content}</p>
                 ) : (
-                  <p className="whitespace-pre-wrap break-words">
-                    {parseChatbotContent(m.content).map((part, j) =>
-                      part.type === 'text' ? (
-                        <span key={j}>{part.value}</span>
-                      ) : part.href.startsWith('http') ? (
-                        <a
-                          key={j}
-                          href={part.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blood-400 hover:text-blood-300 underline"
-                        >
-                          {part.label}
-                        </a>
-                      ) : (
-                        <Link key={j} href={part.href} className="text-blood-400 hover:text-blood-300 underline">
-                          {part.label}
-                        </Link>
-                      )
-                    )}
-                  </p>
+                  <div className="chatbot-markdown overflow-x-auto [&_table]:my-2 [&_ul]:my-1 [&_ol]:my-1 [&_p]:mb-1 [&_p:last-child]:mb-0">
+                    <ReactMarkdown
+                      components={{
+                        a: ({ href, children }) => {
+                          if (!href) return <span>{children}</span>;
+                          if (href.startsWith('/')) {
+                            return (
+                              <Link href={href} className="text-blood-400 hover:text-blood-300 underline">
+                                {children}
+                              </Link>
+                            );
+                          }
+                          return (
+                            <a
+                              href={href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blood-400 hover:text-blood-300 underline"
+                            >
+                              {children}
+                            </a>
+                          );
+                        },
+                        table: ({ children }) => (
+                          <div className="overflow-x-auto my-2">
+                            <table className="min-w-max border-collapse text-left">{children}</table>
+                          </div>
+                        ),
+                        thead: ({ children }) => <thead className="border-b border-bunker-500">{children}</thead>,
+                        tbody: ({ children }) => <tbody>{children}</tbody>,
+                        tr: ({ children }) => <tr className="border-b border-bunker-600/50">{children}</tr>,
+                        th: ({ children }) => (
+                          <th className="px-2 py-1.5 font-semibold text-bunker-300 whitespace-nowrap">{children}</th>
+                        ),
+                        td: ({ children }) => <td className="px-2 py-1.5 whitespace-nowrap">{children}</td>,
+                        p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
+                      }}
+                    >
+                      {m.content}
+                    </ReactMarkdown>
+                  </div>
                 )}
               </div>
             </div>
