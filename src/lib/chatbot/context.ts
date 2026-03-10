@@ -3,6 +3,7 @@ import OpenAI from 'openai';
 import {
   retrieveSkrineChunks,
   getSkrineChunksFallback,
+  getSkrineChunksByKeywords,
 } from './wiki-retrieval';
 
 const MAX_CONTEXT_CHARS = 80_000;
@@ -193,22 +194,38 @@ async function buildWikiContextWithRetrieval(
   userMessage: string,
   openai: OpenAI
 ): Promise<string> {
-  const [staticRows, retrieved] = await Promise.all([
+  const [staticRows, retrieved, keywordChunks] = await Promise.all([
     buildWikiContextStatic(),
     retrieveSkrineChunks(userMessage, openai),
+    getSkrineChunksByKeywords(userMessage),
   ]);
 
-  const skrineChunks =
+  const baseChunks =
     retrieved && retrieved.length > 0
       ? retrieved
       : await getSkrineChunksFallback();
+
+  const seen = new Set<string>();
+  const skrineChunks: { title: string; content: string; source: string }[] = [];
+  for (const c of keywordChunks) {
+    if (!seen.has(c.title)) {
+      seen.add(c.title);
+      skrineChunks.push(c);
+    }
+  }
+  for (const c of baseChunks) {
+    if (!seen.has(c.title)) {
+      seen.add(c.title);
+      skrineChunks.push(c);
+    }
+  }
 
   const lines: string[] = [];
   lines.push(
     '## External wiki knowledge (CoD Fandom, ZWR The Rift, Skrine Zombies Info)'
   );
   lines.push(
-    'Use this to answer questions. ZWR: EE speedrun guides, setup guides, BO3 gobblegum loadouts — summarize and link zwr.gg/wiki. Skrine: round times (per-round/cumulative), instakill rounds, zombie health scale by dog round, map reset times, perfect times, point drops, Cold War Firebase Z trials. Point Drops / Raygun / Waffe chunks = BO1 maps (Ascension, Kino, CotD) — NOT WaW Nacht (Nacht has no PaP). Instakill & Health Scale = WaW (Nacht, Verruckt, Shi No Numa, Der Riese). For "raygun PAP shot chance", "waffe shots per horde", "drop chance" — use Point Drops chunk (BO1). For "zombie health dog rounds" — use Instakill chunk (WaW). Answer directly from the data when present. Prefer our site links for CZT-specific content.'
+    'Use this to answer questions. ZWR: EE speedrun guides, setup guides, BO3 gobblegum loadouts — summarize and link zwr.gg/wiki. Skrine: round times (per-round/cumulative), instakill rounds, zombie health scale by dog round, map reset times, perfect times, point drops, Cold War Firebase Z trials. Point Drops / Raygun / Waffe chunks = BO1 maps (Ascension, Kino, CotD) — NOT WaW Nacht (Nacht has no PaP). Instakill & Health Scale = WaW (Nacht, Verruckt, Shi No Numa, Der Riese). For "raygun PAP shot chance", "waffe shots per horde", "drop chance" — use Point Drops chunk (BO1). For "zombie health dog rounds" — use Instakill chunk (WaW). When the data contains exact numbers (e.g. 0.003, 2.4, 150), cite them directly in your answer. Do not say "I don\'t have that info" if the numbers appear in the Skrine chunks. Prefer our site links for CZT-specific content.'
   );
   lines.push('');
   let len = lines.join('\n').length;
