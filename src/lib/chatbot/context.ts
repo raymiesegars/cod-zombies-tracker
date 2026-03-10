@@ -1,6 +1,9 @@
 import prisma from '@/lib/prisma';
 import OpenAI from 'openai';
-import { retrieveSkrineChunks } from './wiki-retrieval';
+import {
+  retrieveSkrineChunks,
+  getSkrineChunksFallback,
+} from './wiki-retrieval';
 
 const MAX_CONTEXT_CHARS = 80_000;
 const MAX_SITE_DATA_CHARS = 14_000;
@@ -189,17 +192,22 @@ async function buildWikiContextWithRetrieval(
   userMessage: string,
   openai: OpenAI
 ): Promise<string> {
-  const [staticRows, skrineChunks] = await Promise.all([
+  const [staticRows, retrieved] = await Promise.all([
     buildWikiContextStatic(),
     retrieveSkrineChunks(userMessage, openai),
   ]);
+
+  const skrineChunks =
+    retrieved && retrieved.length > 0
+      ? retrieved
+      : await getSkrineChunksFallback();
 
   const lines: string[] = [];
   lines.push(
     '## External wiki knowledge (CoD Fandom, ZWR The Rift, Skrine Zombies Info)'
   );
   lines.push(
-    'Use this to answer questions. ZWR: EE speedrun guides, setup guides — summarize and link zwr.gg/wiki. Skrine Zombies Info: round times, instakill tables, EE cheat sheets, perfect times, point drops from world record players — use the retrieved Skrine chunks below. Prefer our site links for CZT-specific content.'
+    'Use this to answer questions. ZWR: EE speedrun guides, setup guides — summarize and link zwr.gg/wiki. Skrine Zombies Info: round times (per round, solo/duo/trio/quad), instakill tables, ideal gobblegum combos, EE cheat sheets, perfect times, point drops, reset times — ANSWER DIRECTLY from the Skrine chunks when they contain the answer. Note: "165h" etc. are high-round RESET times, not round times. Round times are per-round (e.g. "Round 1 | 19.03 | 0:13"). Prefer our site links for CZT-specific content.'
   );
   lines.push('');
   let len = lines.join('\n').length;

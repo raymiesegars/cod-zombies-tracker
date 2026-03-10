@@ -14,9 +14,13 @@ const OPENAI_MODEL = 'gpt-4o-mini';
 const MAX_RESPONSE_TOKENS = 600;
 const UNKNOWN_MARKER = '[LEKRONORIUM_UNKNOWN]';
 
+const MAX_TURNS = 7;
+
 const systemPromptPrefix = `You are LeKronorium, the chatbot for CoD Zombies Tracker (CZT).
 
 CRITICAL: Answer from the CONTEXT below. When the exact answer is in context, give it directly. When you have related/partial context that could inform an educated guess, you MAY offer one — but you MUST explicitly caveat it first: e.g. "I don't have the exact [X] in our data, but based on what we have, [guess]. We'll try to add the precise info." Only use ${UNKNOWN_MARKER} when there is truly nothing relevant in the context (no related maps, weapons, rules, or mechanics). Never make up player names or rounds; for stats/mechanics we don't store, an educated guess with a clear caveat is fine.
+
+FOLLOW-UPS: When the user's question is ambiguous and you need one specific detail to answer precisely, you MAY ask a short clarifying question (e.g. "Which game — WaW or BO3?" or "Solo or co-op?"). You can ask up to 3 clarifying questions in this conversation. Keep each follow-up to one short sentence. After 3 assistant replies or when you have enough info, give the full answer from context. Do not ask if the answer is already clear.
 
 Handle these types of questions as follows (never use ${UNKNOWN_MARKER} for these):
 
@@ -90,24 +94,42 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const message = typeof body.message === 'string' ? body.message.trim() : '';
-    if (!message) {
+    const history = Array.isArray(body.messages)
+      ? body.messages.filter(
+          (m: unknown) =>
+            m && typeof m === 'object' && 'role' in m && 'content' in m &&
+            (m as { role: string }).role in { user: 1, assistant: 1 } &&
+            typeof (m as { content: unknown }).content === 'string'
+        ).map((m: { role: string; content: string }) => ({
+          role: m.role as 'user' | 'assistant',
+          content: String(m.content).trim(),
+        }))
+      : [];
+    const message =
+      typeof body.message === 'string'
+        ? body.message.trim()
+        : history.length > 0 && history[history.length - 1]?.role === 'user'
+          ? history[history.length - 1].content
+          : '';
+    const lastMessage = message || (history.length > 0 ? history[history.length - 1]?.content : '');
+    if (!lastMessage) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
-    if (message.length > MAX_MESSAGE_LENGTH) {
+    if (lastMessage.length > MAX_MESSAGE_LENGTH) {
       return NextResponse.json(
         { error: `Message must be ${MAX_MESSAGE_LENGTH} characters or less` },
         { status: 400 }
       );
     }
-    if (looksLikeAbuse(message)) {
+    const trimmedHistory = history.slice(-MAX_TURNS);
+    if (looksLikeAbuse(lastMessage)) {
       return NextResponse.json(
         { error: 'Message was rejected. Please ask a normal question about the site or zombies.' },
         { status: 400 }
       );
     }
 
-    if (isOffTopic(message)) {
+    if (isOffTopic(lastMessage)) {
       return NextResponse.json({
         reply: "I can only help with questions about CoD Zombies Tracker and zombies content. Try asking about maps, leaderboards, rules, or easter egg guides!",
         tokensRemaining: remaining,
@@ -122,16 +144,23 @@ export async function POST(request: NextRequest) {
 
     const openai = new OpenAI({ apiKey });
     const context = await buildChatbotContext({
-      userMessage: message,
+      userMessage: lastMessage,
       openai,
     });
     const systemContent = `${systemPromptPrefix}\n\n---\nCONTEXT:\n${context}`;
+    const chatMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+      { role: 'system', content: systemContent },
+      ...trimmedHistory.map((m) => ({
+        role: m.role as 'user' | 'assistant' | 'system',
+        content: m.content,
+      })),
+    ];
+    if (history.length === 0 || trimmedHistory[trimmedHistory.length - 1]?.role !== 'user') {
+      chatMessages.push({ role: 'user', content: lastMessage });
+    }
     const completion = await openai.chat.completions.create({
       model: OPENAI_MODEL,
-      messages: [
-        { role: 'system', content: systemContent },
-        { role: 'user', content: message },
-      ],
+      messages: chatMessages,
       max_tokens: MAX_RESPONSE_TOKENS,
       temperature: 0.2,
     });
@@ -142,7 +171,7 @@ export async function POST(request: NextRequest) {
       wasUnknown = true;
       reply = reply.replace(UNKNOWN_MARKER, '').trim() || "I don't have that information yet. I'm forwarding your question to the team so we can learn for the future.";
       await prisma.chatbotUnansweredQuestion.create({
-        data: { userId, question: message },
+        data: { userId, question: lastMessage },
       });
     }
 

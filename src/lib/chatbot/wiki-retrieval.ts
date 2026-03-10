@@ -2,8 +2,8 @@ import prisma from '@/lib/prisma';
 import OpenAI from 'openai';
 
 const EMBEDDING_MODEL = 'text-embedding-3-small';
-const MAX_SKRINE_CHARS = 25_000;
-const TOP_K = 12;
+const MAX_SKRINE_CHARS = 28_000;
+const TOP_K = 15;
 
 function cosineSimilarity(a: number[], b: number[]): number {
   if (a.length !== b.length) return 0;
@@ -22,7 +22,7 @@ function cosineSimilarity(a: number[], b: number[]): number {
 export async function retrieveSkrineChunks(
   query: string,
   openai: OpenAI
-): Promise<{ title: string; content: string; source: string }[]> {
+): Promise<{ title: string; content: string; source: string }[] | null> {
   const skrineRows = await prisma.chatbotWikiImport.findMany({
     where: { source: 'skrine' },
     select: { title: true, content: true, embedding: true },
@@ -31,14 +31,14 @@ export async function retrieveSkrineChunks(
     (r) => r.embedding != null && Array.isArray(r.embedding)
   );
 
-  if (withEmbedding.length === 0) return [];
+  if (withEmbedding.length === 0) return null;
 
   const embeddingRes = await openai.embeddings.create({
     model: EMBEDDING_MODEL,
     input: query.slice(0, 8000),
   });
   const queryEmbedding = embeddingRes.data[0]?.embedding as number[] | undefined;
-  if (!queryEmbedding) return [];
+  if (!queryEmbedding) return null;
 
   const scored = withEmbedding
     .map((row) => {
@@ -60,6 +60,24 @@ export async function retrieveSkrineChunks(
       source: 'skrine',
     });
     totalChars += row.content.length;
+  }
+  return result;
+}
+
+export async function getSkrineChunksFallback(): Promise<
+  { title: string; content: string; source: string }[]
+> {
+  const rows = await prisma.chatbotWikiImport.findMany({
+    where: { source: 'skrine' },
+    orderBy: { title: 'asc' },
+    select: { title: true, content: true },
+  });
+  const result: { title: string; content: string; source: string }[] = [];
+  let total = 0;
+  for (const row of rows) {
+    if (total + row.content.length > MAX_SKRINE_CHARS) break;
+    result.push({ title: row.title, content: row.content, source: 'skrine' });
+    total += row.content.length;
   }
   return result;
 }

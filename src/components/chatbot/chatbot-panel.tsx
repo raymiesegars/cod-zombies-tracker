@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Loader2, AlertCircle } from 'lucide-react';
 import { getAssetUrl } from '@/lib/assets';
 import { Button, Input, Modal } from '@/components/ui';
+import { ChatbotContext } from '@/context/chatbot-context';
 
 type ContentPart = { type: 'text'; value: string } | { type: 'link'; href: string; label: string };
 
@@ -54,14 +55,14 @@ const GET_MORE_TOKENS_MESSAGE = (
 
 const CHATBOT_IMAGE = getAssetUrl('/images/ranks/chatbot.png');
 
-type Message = { role: 'user' | 'assistant'; content: string };
-
 interface ChatbotPanelProps {
   onClose: () => void;
 }
 
 export function ChatbotPanel({ onClose }: ChatbotPanelProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const ctx = useContext(ChatbotContext);
+  const messages = ctx?.messages ?? [];
+  const setMessages = ctx?.setMessages ?? (() => {});
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [tokensRemaining, setTokensRemaining] = useState<number | null>(null);
@@ -132,14 +133,18 @@ export function ChatbotPanel({ onClose }: ChatbotPanelProps) {
     }
     setError(null);
     setInput('');
-    setMessages((prev) => [...prev, { role: 'user', content: text }]);
+    const newMessages: Message[] = [...messages, { role: 'user', content: text }];
+    setMessages(newMessages);
     setLoading(true);
     try {
       const res = await fetch('/api/chatbot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({
+          message: text,
+          messages: newMessages.map((m) => ({ role: m.role, content: m.content })),
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
