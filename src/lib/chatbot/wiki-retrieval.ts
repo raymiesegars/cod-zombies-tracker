@@ -82,6 +82,43 @@ export async function getSkrineChunksFallback(): Promise<
   return result;
 }
 
+const CHUNK_TRIGGERS: { pattern: RegExp; titleContains: string }[] = [
+  { pattern: /raygun|ray gun|pap shot|shot chance|waffe|shots per horde|drop chance|point drop/i, titleContains: 'Point Drops' },
+  { pattern: /health scale|dog round|zombie health|instakill round|(nacht|verruckt|shi no numa|der riese).*(health|scale|dog)/i, titleContains: 'Instakill' },
+  { pattern: /reset|165|resets|reset time|map reset|hours.*reset/i, titleContains: 'Reset' },
+  { pattern: /round time|per round|cumulative|total time to round|time to round|reach round|get to round/i, titleContains: 'Round' },
+  { pattern: /perfect time|expected time|moon.*(round|\d)|megas.*classics|round 30|round 50|moon 30|moon 50/i, titleContains: 'Perfect' },
+  { pattern: /firebase z|firebase.*trial|trial combo|ideal combo|weaver.*trial|a1\+a2|cold war.*trial|kills.*gen/i, titleContains: 'Firebase' },
+  { pattern: /firebase z|4p = 16|kills.*gen/i, titleContains: '4p' },
+  { pattern: /zis|zombies in spaceland|spaceland|carrier.*bomb|iw.*zombie|infinite warfare|spawn delay/i, titleContains: 'NOT ACTUAL' },
+  { pattern: /blitz|transmit.*time|harvest.*stone|purge.*circle|vanguard|terra maledicta|anfang/i, titleContains: '4p' },
+];
+
+export async function getSkrineChunksByKeywords(
+  query: string
+): Promise<{ title: string; content: string; source: string }[]> {
+  const q = query.toLowerCase();
+  const titleFilters = new Set<string>();
+  for (const { pattern, titleContains } of CHUNK_TRIGGERS) {
+    if (pattern.test(q)) titleFilters.add(titleContains);
+  }
+  if (titleFilters.size === 0) return [];
+
+  const conditions = [...titleFilters].map((contains) => ({
+    title: { contains, mode: 'insensitive' as const },
+  }));
+
+  const rows = await prisma.chatbotWikiImport.findMany({
+    where: {
+      source: 'skrine',
+      OR: conditions,
+    },
+    select: { title: true, content: true },
+  });
+
+  return rows.map((r) => ({ title: r.title, content: r.content, source: 'skrine' }));
+}
+
 export async function embedSkrineChunk(
   title: string,
   content: string,
