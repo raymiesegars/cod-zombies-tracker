@@ -35,7 +35,7 @@ export type AwMapConfig = {
 export const AW_MAP_CONFIG: Record<AwMapSlug, AwMapConfig> = {
   'aw-outbreak': {
     challengeTypes: [
-      'HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'NO_POWER',
+      'HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'ONE_BOX', 'STARTING_ROOM', 'NO_POWER',
       'NO_EXO_SUIT', 'NO_EXO_HEALTH',
       'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN',
       'EASTER_EGG_SPEEDRUN',
@@ -58,7 +58,7 @@ export const AW_MAP_CONFIG: Record<AwMapSlug, AwMapConfig> = {
   },
   'aw-infection': {
     challengeTypes: [
-      'HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'NO_POWER',
+      'HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'ONE_BOX', 'STARTING_ROOM', 'NO_POWER',
       'NO_EXO_SUIT', 'NO_EXO_HEALTH',
       'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN',
       'EASTER_EGG_SPEEDRUN',
@@ -104,7 +104,7 @@ export const AW_MAP_CONFIG: Record<AwMapSlug, AwMapConfig> = {
   },
   'aw-descent': {
     challengeTypes: [
-      'HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'STARTING_ROOM', 'NO_POWER',
+      'HIGHEST_ROUND', 'NO_DOWNS', 'NO_PERKS', 'NO_PACK', 'ONE_BOX', 'STARTING_ROOM', 'NO_POWER',
       'NO_EXO_SUIT', 'NO_EXO_HEALTH', 'DOUBLE_FEATURE',
       'ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN', 'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN', 'ROUND_100_SPEEDRUN',
       'EASTER_EGG_SPEEDRUN',
@@ -129,6 +129,7 @@ export const AW_MAP_CONFIG: Record<AwMapSlug, AwMapConfig> = {
 };
 
 export const AW_CHALLENGE_TYPE_LABELS: Record<string, string> = {
+  ONE_BOX: 'One Box Challenge',
   NO_EXO_SUIT: 'No Exo Suit',
   NO_EXO_HEALTH: 'No Exo Health',
   DOUBLE_FEATURE: 'Double Feature',

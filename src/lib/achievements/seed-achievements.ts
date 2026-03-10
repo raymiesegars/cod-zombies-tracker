@@ -1164,6 +1164,16 @@ export function getMapAchievementDefinitions(
           });
         }
       }
+      if (ww2Cfg.challengeTypes.includes('ONE_BOX')) {
+        rows.push({
+          slug: 'one-box-30',
+          name: 'One Box Round 30',
+          type: 'CHALLENGE_COMPLETE',
+          criteria: { round: 30, challengeType: 'ONE_BOX' },
+          xpReward: 600,
+          rarity: 'RARE',
+        });
+      }
       return enforceMonotonicXp(rows);
     }
   }
@@ -1218,6 +1228,16 @@ export function getMapAchievementDefinitions(
             rarity: rarityForRound(round, wr),
           });
         }
+      }
+      if (vgCfg.challengeTypes.includes('ONE_BOX')) {
+        rows.push({
+          slug: 'one-box-30',
+          name: 'One Box Round 30',
+          type: 'CHALLENGE_COMPLETE',
+          criteria: { round: 30, challengeType: 'ONE_BOX' },
+          xpReward: 600,
+          rarity: 'RARE',
+        });
       }
       return enforceMonotonicXp(rows);
     }
@@ -1296,6 +1316,16 @@ export function getMapAchievementDefinitions(
             rarity: rarityForRound(round, wr),
           });
         }
+      }
+      if (awCfg.challengeTypes.includes('ONE_BOX')) {
+        rows.push({
+          slug: 'one-box-30',
+          name: 'One Box Round 30',
+          type: 'CHALLENGE_COMPLETE',
+          criteria: { round: 30, challengeType: 'ONE_BOX' },
+          xpReward: 600,
+          rarity: 'RARE',
+        });
       }
       return enforceMonotonicXp(rows);
     }
