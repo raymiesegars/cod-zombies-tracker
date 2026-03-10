@@ -6,6 +6,11 @@
 
 export const GAME_SHORT_NAME_BO7 = 'BO7';
 
+export const BO7_GOBBLEGUM_MODES = ['WITH_GOBBLEGUMS', 'NO_GOBBLEGUMS'] as const;
+export type Bo7GobbleGumMode = (typeof BO7_GOBBLEGUM_MODES)[number];
+
+export const BO7_GOBBLEGUM_DEFAULT: Bo7GobbleGumMode = 'WITH_GOBBLEGUMS';
+
 export const BO7_SUPPORT_MODES = ['WITH_SUPPORT', 'NO_SUPPORT'] as const;
 export type Bo7SupportMode = (typeof BO7_SUPPORT_MODES)[number];
 
@@ -19,6 +24,14 @@ export function getBo7SupportLabel(mode: string): string {
   switch (mode) {
     case 'WITH_SUPPORT': return 'With Support';
     case 'NO_SUPPORT': return 'No Support';
+    default: return mode;
+  }
+}
+
+export function getBo7GobbleGumLabel(mode: string): string {
+  switch (mode) {
+    case 'WITH_GOBBLEGUMS': return 'With GobbleGums';
+    case 'NO_GOBBLEGUMS': return 'No GobbleGums';
     default: return mode;
   }
 }

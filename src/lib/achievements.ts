@@ -11,6 +11,7 @@ export type ChallengeLogModifiers = {
   bocwSupportMode?: string | null;
   bo6GobbleGumMode?: string | null;
   bo6SupportMode?: string | null;
+  bo7GobbleGumMode?: string | null;
   bo7SupportMode?: string | null;
   useFortuneCards?: boolean | null;
   useDirectorsCut?: boolean | null;
@@ -347,6 +348,7 @@ const MODIFIER_CRITERIA_KEYS = [
   'bocwSupportMode',
   'bo6GobbleGumMode',
   'bo6SupportMode',
+  'bo7GobbleGumMode',
   'bo7SupportMode',
   'useFortuneCards',
   'useDirectorsCut',
@@ -361,6 +363,7 @@ const BO4_ELIXIR_STRICTNESS = { CLASSIC_ONLY: 0, ALL_ELIXIRS_TALISMANS: 1 } as c
 /** WITHOUT/NO stricter than WITH. */
 const SUPPORT_STRICTNESS = { WITHOUT_SUPPORT: 0, NO_SUPPORT: 0, WITH_SUPPORT: 1 } as const;
 const BO6_GUM_STRICTNESS = { NO_GOBBLEGUMS: 0, WITH_GOBBLEGUMS: 1 } as const;
+const BO7_GUM_STRICTNESS = { NO_GOBBLEGUMS: 0, WITH_GOBBLEGUMS: 1 } as const;
 
 /** True if log's modifier satisfies achievement criteria. Stricter run (no gums, no support, etc.) satisfies looser achievements (classics, with support). */
 function logModifierSatisfiesCriteria(
@@ -389,6 +392,11 @@ function logModifierSatisfiesCriteria(
   if (key === 'bo6GobbleGumMode') {
     const logS = (logVal as string) in BO6_GUM_STRICTNESS ? BO6_GUM_STRICTNESS[logVal as keyof typeof BO6_GUM_STRICTNESS] : 999;
     const critS = (critVal as string) in BO6_GUM_STRICTNESS ? BO6_GUM_STRICTNESS[critVal as keyof typeof BO6_GUM_STRICTNESS] : 999;
+    return logS <= critS;
+  }
+  if (key === 'bo7GobbleGumMode') {
+    const logS = (logVal as string) in BO7_GUM_STRICTNESS ? BO7_GUM_STRICTNESS[logVal as keyof typeof BO7_GUM_STRICTNESS] : 999;
+    const critS = (critVal as string) in BO7_GUM_STRICTNESS ? BO7_GUM_STRICTNESS[critVal as keyof typeof BO7_GUM_STRICTNESS] : 999;
     return logS <= critS;
   }
   if (key === 'bo6SupportMode' || key === 'bo7SupportMode') {
@@ -449,6 +457,11 @@ export function modifierWhereForCriteria(
   if (key === 'bo6GobbleGumMode') {
     const critS = (critVal as string) in BO6_GUM_STRICTNESS ? BO6_GUM_STRICTNESS[critVal as keyof typeof BO6_GUM_STRICTNESS] : 999;
     const allowed = (Object.entries(BO6_GUM_STRICTNESS) as [keyof typeof BO6_GUM_STRICTNESS, number][]).filter(([, s]) => s <= critS).map(([k]) => k);
+    return allowed.length > 0 ? { in: allowed } : null;
+  }
+  if (key === 'bo7GobbleGumMode') {
+    const critS = (critVal as string) in BO7_GUM_STRICTNESS ? BO7_GUM_STRICTNESS[critVal as keyof typeof BO7_GUM_STRICTNESS] : 999;
+    const allowed = (Object.entries(BO7_GUM_STRICTNESS) as [keyof typeof BO7_GUM_STRICTNESS, number][]).filter(([, s]) => s <= critS).map(([k]) => k);
     return allowed.length > 0 ? { in: allowed } : null;
   }
   if (key === 'useFortuneCards') {
@@ -604,6 +617,7 @@ export async function processMapAchievements(
           bocwSupportMode: true,
           bo6GobbleGumMode: true,
           bo6SupportMode: true,
+          bo7GobbleGumMode: true,
           bo7SupportMode: true,
           useFortuneCards: true,
           useDirectorsCut: true,
@@ -687,6 +701,7 @@ export async function processMapAchievements(
       bocwSupportMode: l.bocwSupportMode ?? undefined,
       bo6GobbleGumMode: l.bo6GobbleGumMode ?? undefined,
       bo6SupportMode: l.bo6SupportMode ?? undefined,
+      bo7GobbleGumMode: l.bo7GobbleGumMode ?? undefined,
       bo7SupportMode: l.bo7SupportMode ?? undefined,
       useFortuneCards: l.useFortuneCards ?? undefined,
       useDirectorsCut: l.useDirectorsCut ?? undefined,
@@ -797,6 +812,7 @@ export async function isAchievementSatisfiedByVerifiedRun(
         bocwSupportMode: true,
         bo6GobbleGumMode: true,
         bo6SupportMode: true,
+        bo7GobbleGumMode: true,
         bo7SupportMode: true,
         useFortuneCards: true,
         useDirectorsCut: true,
@@ -832,6 +848,7 @@ export async function isAchievementSatisfiedByVerifiedRun(
       bocwSupportMode: l.bocwSupportMode ?? undefined,
       bo6GobbleGumMode: l.bo6GobbleGumMode ?? undefined,
       bo6SupportMode: l.bo6SupportMode ?? undefined,
+      bo7GobbleGumMode: l.bo7GobbleGumMode ?? undefined,
       bo7SupportMode: l.bo7SupportMode ?? undefined,
       useFortuneCards: l.useFortuneCards ?? undefined,
       useDirectorsCut: l.useDirectorsCut ?? undefined,
@@ -960,6 +977,7 @@ export async function revokeAchievementsForMapAfterDelete(
           bocwSupportMode: true,
           bo6GobbleGumMode: true,
           bo6SupportMode: true,
+          bo7GobbleGumMode: true,
           bo7SupportMode: true,
           useFortuneCards: true,
           useDirectorsCut: true,
@@ -994,6 +1012,7 @@ export async function revokeAchievementsForMapAfterDelete(
       bocwSupportMode: l.bocwSupportMode ?? undefined,
       bo6GobbleGumMode: l.bo6GobbleGumMode ?? undefined,
       bo6SupportMode: l.bo6SupportMode ?? undefined,
+      bo7GobbleGumMode: l.bo7GobbleGumMode ?? undefined,
       bo7SupportMode: l.bo7SupportMode ?? undefined,
       useFortuneCards: l.useFortuneCards ?? undefined,
       useDirectorsCut: l.useDirectorsCut ?? undefined,

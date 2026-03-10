@@ -21,7 +21,7 @@ import { BO4_DIFFICULTIES, getBo4DifficultyLabel } from '@/lib/bo4';
 import { isBo3Game, BO3_GOBBLEGUM_MODES, getBo3GobbleGumLabel } from '@/lib/bo3';
 import { isBocwGame, BOCW_SUPPORT_MODES, getBocwSupportLabel } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
-import { isBo7Game, BO7_SUPPORT_MODES, getBo7SupportLabel } from '@/lib/bo7';
+import { isBo7Game, BO7_GOBBLEGUM_MODES, BO7_GOBBLEGUM_DEFAULT, BO7_SUPPORT_MODES, getBo7GobbleGumLabel, getBo7SupportLabel } from '@/lib/bo7';
 import { isWw2Game } from '@/lib/ww2';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap } from '@/lib/first-room-variants';
@@ -59,6 +59,7 @@ type ChallengeLog = {
   bocwSupportMode?: string | null;
   bo6GobbleGumMode?: string | null;
   bo6SupportMode?: string | null;
+  bo7GobbleGumMode?: string | null;
   bo7SupportMode?: string | null;
   bo7IsCursedRun?: boolean | null;
   bo7RelicsUsed?: string[];
@@ -126,6 +127,7 @@ export default function EditRunPage() {
   const [bocwSupportMode, setBocwSupportMode] = useState('WITH_SUPPORT');
   const [bo6GobbleGumMode, setBo6GobbleGumMode] = useState('WITH_GOBBLEGUMS');
   const [bo6SupportMode, setBo6SupportMode] = useState('WITH_SUPPORT');
+  const [bo7GobbleGumMode, setBo7GobbleGumMode] = useState('WITH_GOBBLEGUMS');
   const [bo7SupportMode, setBo7SupportMode] = useState('WITH_SUPPORT');
   const [bo7IsCursedRun, setBo7IsCursedRun] = useState(false);
   const [bo7RelicsUsed, setBo7RelicsUsed] = useState<string[]>([]);
@@ -201,6 +203,7 @@ export default function EditRunPage() {
           if (data.bocwSupportMode) setBocwSupportMode(data.bocwSupportMode);
           if (data.bo6GobbleGumMode) setBo6GobbleGumMode(data.bo6GobbleGumMode);
           if (data.bo6SupportMode) setBo6SupportMode(data.bo6SupportMode);
+          if (data.bo7GobbleGumMode) setBo7GobbleGumMode(data.bo7GobbleGumMode);
           if (data.bo7SupportMode) setBo7SupportMode(data.bo7SupportMode);
           setBo7IsCursedRun(Boolean(data.bo7IsCursedRun));
           if (Array.isArray(data.bo7RelicsUsed)) setBo7RelicsUsed(data.bo7RelicsUsed);
@@ -291,7 +294,7 @@ export default function EditRunPage() {
           ...(log?.map?.game?.shortName === 'BO4' && bo4ElixirMode && { bo4ElixirMode }),
           ...(isBocwGame(log?.map?.game?.shortName) && { bocwSupportMode }),
           ...(isBo6Game(log?.map?.game?.shortName) && { bo6GobbleGumMode, bo6SupportMode }),
-          ...(isBo7Game(log?.map?.game?.shortName) && { bo7SupportMode, bo7IsCursedRun, bo7RelicsUsed: bo7IsCursedRun ? bo7RelicsUsed : [] }),
+          ...(isBo7Game(log?.map?.game?.shortName) && { bo7GobbleGumMode, bo7SupportMode, bo7IsCursedRun, bo7RelicsUsed: bo7IsCursedRun ? bo7RelicsUsed : [] }),
           ...((isBocwGame(log?.map?.game?.shortName) || isBo6Game(log?.map?.game?.shortName) || isBo7Game(log?.map?.game?.shortName) || (isVanguardGame(log?.map?.game?.shortName) && log?.map?.slug && hasVanguardRampageFilter(log.map.slug))) && { rampageInducerUsed }),
           ...(isVanguardGame(log?.map?.game?.shortName) && log?.map?.slug && hasVanguardVoidFilter(log.map.slug) && { vanguardVoidUsed }),
           ...(isWw2Game(log?.map?.game?.shortName) && { ww2ConsumablesUsed }),
@@ -609,6 +612,13 @@ export default function EditRunPage() {
                 )}
                 {isBo7Game(gameShortName) && (
                   <>
+                    <Select
+                      label="GobbleGums"
+                      options={BO7_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo7GobbleGumLabel(m) }))}
+                      value={bo7GobbleGumMode ?? BO7_GOBBLEGUM_DEFAULT}
+                      onChange={(e) => setBo7GobbleGumMode(e.target.value)}
+                      disabled={verifiedAndLocked}
+                    />
                     <Select
                       label="Support"
                       options={BO7_SUPPORT_MODES.map((m) => ({ value: m, label: getBo7SupportLabel(m) }))}

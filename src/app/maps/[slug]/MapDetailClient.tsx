@@ -34,7 +34,7 @@ import { isIwGame, isIwSpeedrunChallengeType, IW_CHALLENGE_TYPES_ORDER } from '@
 import { isBo3Game, BO3_GOBBLEGUM_MODES, getBo3GobbleGumLabel } from '@/lib/bo3';
 import { isBocwGame, BOCW_SUPPORT_MODES, getBocwSupportLabel } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
-import { isBo7Game, BO7_SUPPORT_MODES, getBo7SupportLabel } from '@/lib/bo7';
+import { isBo7Game, BO7_GOBBLEGUM_MODES, BO7_SUPPORT_MODES, getBo7GobbleGumLabel, getBo7SupportLabel } from '@/lib/bo7';
 import { isWw2Game } from '@/lib/ww2';
 import { formatCompletionTime } from '@/components/ui/time-input';
 import type { MapWithDetails, LeaderboardEntry as LeaderboardEntryType, PlayerCount, ChallengeType } from '@/types';
@@ -735,6 +735,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   const [lbBo6GobbleGumMode, setLbBo6GobbleGumMode] = useState<string>('');
   const [lbBo6SupportMode, setLbBo6SupportMode] = useState<string>('');
   // BO7
+  const [lbBo7GobbleGumMode, setLbBo7GobbleGumMode] = useState<string>('');
   const [lbBo7SupportMode, setLbBo7SupportMode] = useState<string>('');
   const [lbBo7CursedFilter, setLbBo7CursedFilter] = useState<string>(''); // '' | 'true' | 'false'
   const [lbBo7SelectedRelics, setLbBo7SelectedRelics] = useState<string[]>([]);
@@ -865,6 +866,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
             if (lbBo6SupportMode) params.set('bo6SupportMode', lbBo6SupportMode);
           }
           if (isBo7Game(map.game?.shortName)) {
+            if (lbBo7GobbleGumMode) params.set('bo7GobbleGumMode', lbBo7GobbleGumMode);
             if (lbBo7SupportMode) params.set('bo7SupportMode', lbBo7SupportMode);
             if (lbBo7CursedFilter === 'true' || lbBo7CursedFilter === 'false') params.set('bo7CursedRun', lbBo7CursedFilter);
             if (lbBo7CursedFilter === 'true' && lbBo7SelectedRelics.length > 0) params.set('bo7Relics', lbBo7SelectedRelics.join(','));
@@ -906,7 +908,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     })();
     // Intentionally omit leaderboard.length / leaderboardFetchedOnce to avoid re-fetch loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut, lbBo3GobbleGumMode, lbBo3AatUsed, lbBo4ElixirMode, lbBocwSupportMode, lbRampageInducerFilter, lbBo6GobbleGumMode, lbBo6SupportMode, lbBo7SupportMode, lbBo7CursedFilter, lbBo7SelectedRelics, lbWawNoJug, lbWawFixedWunderwaffe, lbBo2BankUsed, lbWw2Consumables, lbVanguardVoidFilter, lbFirstRoomVariant]);
+  }, [map, slug, selectedLeaderboardCategory, selectedPlayerCount, selectedDifficulty, leaderboardVerifiedOnly, leaderboardFortuneCards, leaderboardDirectorsCut, lbBo3GobbleGumMode, lbBo3AatUsed, lbBo4ElixirMode, lbBocwSupportMode, lbRampageInducerFilter, lbBo6GobbleGumMode, lbBo6SupportMode, lbBo7GobbleGumMode, lbBo7SupportMode, lbBo7CursedFilter, lbBo7SelectedRelics, lbWawNoJug, lbWawFixedWunderwaffe, lbBo2BankUsed, lbWw2Consumables, lbVanguardVoidFilter, lbFirstRoomVariant]);
 
   // Sync activeTab with URL so switching to Your Runs triggers fetch
   useEffect(() => {
@@ -2190,6 +2192,12 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                     {isBo7Game(map?.game?.shortName) && (
                       <>
                         <Select
+                          options={[{ value: '', label: 'Any GobbleGums' }, ...BO7_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo7GobbleGumLabel(m) }))]}
+                          value={lbBo7GobbleGumMode}
+                          onChange={(e) => setLbBo7GobbleGumMode(e.target.value)}
+                          className="w-full min-w-0 sm:w-48 max-w-full"
+                        />
+                        <Select
                           options={[{ value: '', label: 'All Support' }, ...BO7_SUPPORT_MODES.map((m) => ({ value: m, label: getBo7SupportLabel(m) }))]}
                           value={lbBo7SupportMode}
                           onChange={(e) => setLbBo7SupportMode(e.target.value)}
@@ -2434,6 +2442,20 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                                   {((item.log as unknown as { bo6SupportMode?: string | null }).bo6SupportMode) && (
                                     <span className="text-bunker-500 text-xs truncate max-w-[5rem]" title={getBo6SupportLabel((item.log as unknown as { bo6SupportMode: string }).bo6SupportMode)}>
                                       {getBo6SupportLabel((item.log as unknown as { bo6SupportMode: string }).bo6SupportMode)}
+                                    </span>
+                                  )}
+                                </>
+                              )}
+                              {map?.game?.shortName === 'BO7' && (
+                                <>
+                                  {((item.log as unknown as { bo7GobbleGumMode?: string | null }).bo7GobbleGumMode) && (
+                                    <span className="text-bunker-500 text-xs truncate max-w-[5rem]" title={getBo7GobbleGumLabel((item.log as unknown as { bo7GobbleGumMode: string }).bo7GobbleGumMode)}>
+                                      {getBo7GobbleGumLabel((item.log as unknown as { bo7GobbleGumMode: string }).bo7GobbleGumMode)}
+                                    </span>
+                                  )}
+                                  {((item.log as unknown as { bo7SupportMode?: string | null }).bo7SupportMode) && (
+                                    <span className="text-bunker-500 text-xs truncate max-w-[5rem]" title={getBo7SupportLabel((item.log as unknown as { bo7SupportMode: string }).bo7SupportMode)}>
+                                      {getBo7SupportLabel((item.log as unknown as { bo7SupportMode: string }).bo7SupportMode)}
                                     </span>
                                   )}
                                 </>

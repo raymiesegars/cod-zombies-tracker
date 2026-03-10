@@ -170,8 +170,13 @@ function applySubRecordModifiers(record: string, subRecord: string, mods: Record
   else if (subRecord.includes('no-rampage') || subRecord.includes('no-rage-inducer')) mods.rampageInducerUsed = false;
 
   // BO6 (ZWR: with-gobblegums-with-support, no-gobblegums-no-support, with-gobblegums-no-support, no-gobblegums-with-support, rampage-inducer-no-gobblegums)
-  if (subRecord.includes('with-gobblegums')) mods.bo6GobbleGumMode = 'WITH_GOBBLEGUMS';
-  else if (subRecord.includes('no-gobblegums')) mods.bo6GobbleGumMode = 'NO_GOBBLEGUMS';
+  if (subRecord.includes('with-gobblegums')) {
+    mods.bo6GobbleGumMode = 'WITH_GOBBLEGUMS';
+    mods.bo7GobbleGumMode = 'WITH_GOBBLEGUMS';
+  } else if (subRecord.includes('no-gobblegums')) {
+    mods.bo6GobbleGumMode = 'NO_GOBBLEGUMS';
+    mods.bo7GobbleGumMode = 'NO_GOBBLEGUMS';
+  }
   if (subRecord.includes('with-support')) mods.bo6SupportMode = 'WITH_SUPPORT';
   else if (subRecord.includes('no-support')) mods.bo6SupportMode = 'NO_SUPPORT';
 
@@ -299,4 +304,6 @@ export const DEFAULTS = {
   bo6SupportMode: 'NO_SUPPORT' as const,
   /** BO7 support mode when not inferred. */
   bo7SupportMode: 'WITH_SUPPORT' as const,
+  /** BO7 gobble gum mode when not inferred (high-round/flawless have no gum distinction in ZWR). */
+  bo7GobbleGumMode: 'WITH_GOBBLEGUMS' as const,
 };

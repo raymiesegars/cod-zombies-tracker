@@ -11,7 +11,7 @@ import { isSpeedrunCategory } from '@/lib/achievements/categories';
 import { isBo3Game, BO3_GOBBLEGUM_MODES, getBo3GobbleGumLabel } from '@/lib/bo3';
 import { isBocwGame, BOCW_SUPPORT_MODES, getBocwSupportLabel } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
-import { isBo7Game, BO7_SUPPORT_MODES, getBo7SupportLabel } from '@/lib/bo7';
+import { isBo7Game, BO7_GOBBLEGUM_MODES, BO7_SUPPORT_MODES, getBo7GobbleGumLabel, getBo7SupportLabel } from '@/lib/bo7';
 import { Trophy, Medal, Filter, Search, X, ShieldCheck, CheckCircle2, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-config';
@@ -127,6 +127,7 @@ export default function LeaderboardsPage() {
   const [bo6GobbleGumFilter, setBo6GobbleGumFilter] = useState<string>('');
   const [bo6SupportFilter, setBo6SupportFilter] = useState<string>('');
   // BO7
+  const [bo7GobbleGumFilter, setBo7GobbleGumFilter] = useState<string>('');
   const [bo7SupportFilter, setBo7SupportFilter] = useState<string>('');
   const [bo7CursedFilter, setBo7CursedFilter] = useState<string>('');
   const [bo7RelicsFilter, setBo7RelicsFilter] = useState<string[]>([]);
@@ -291,6 +292,7 @@ export default function LeaderboardsPage() {
             if (bo6SupportFilter) params.set('bo6SupportMode', bo6SupportFilter);
           }
           if (isBo7Map) {
+            if (bo7GobbleGumFilter) params.set('bo7GobbleGumMode', bo7GobbleGumFilter);
             if (bo7SupportFilter) params.set('bo7SupportMode', bo7SupportFilter);
             if (bo7CursedFilter === 'true' || bo7CursedFilter === 'false') params.set('bo7CursedRun', bo7CursedFilter);
             if (bo7CursedFilter === 'true' && bo7RelicsFilter.length > 0) params.set('bo7Relics', bo7RelicsFilter.join(','));
@@ -334,7 +336,7 @@ export default function LeaderboardsPage() {
 
     fetchLeaderboard();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, isVanguardMap, hasVanguardVoid, hasVanguardRampage, searchForFetch, verifiedOnly, rankVerifiedXpOnly, leaderboardStorageHydrated, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, isVanguardMap, hasVanguardVoid, hasVanguardRampage, searchForFetch, verifiedOnly, rankVerifiedXpOnly, leaderboardStorageHydrated, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7GobbleGumFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter]);
 
   const loadMore = useCallback(async () => {
     if (leaderboard.length >= total || total === 0) return;
@@ -402,6 +404,7 @@ export default function LeaderboardsPage() {
             if (bo6SupportFilter) params.set('bo6SupportMode', bo6SupportFilter);
           }
           if (isBo7Map) {
+            if (bo7GobbleGumFilter) params.set('bo7GobbleGumMode', bo7GobbleGumFilter);
             if (bo7SupportFilter) params.set('bo7SupportMode', bo7SupportFilter);
             if (bo7CursedFilter === 'true' || bo7CursedFilter === 'false') params.set('bo7CursedRun', bo7CursedFilter);
             if (bo7CursedFilter === 'true' && bo7RelicsFilter.length > 0) params.set('bo7Relics', bo7RelicsFilter.join(','));
@@ -441,7 +444,7 @@ export default function LeaderboardsPage() {
       setLoadMoreLoading(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, hasVanguardVoid, hasVanguardRampage, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter, leaderboard.length, total]);
+  }, [isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, hasVanguardVoid, hasVanguardRampage, verifiedOnly, rankVerifiedXpOnly, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7GobbleGumFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter, leaderboard.length, total]);
 
   // Observe sentinel when search is empty and more entries exist; trigger well before sentinel is visible
   useEffect(() => {
@@ -942,6 +945,12 @@ export default function LeaderboardsPage() {
                   )}
                   {isBo7Map && (
                     <>
+                      <Select
+                        options={[{ value: '', label: 'Any GobbleGums' }, ...BO7_GOBBLEGUM_MODES.map((m) => ({ value: m, label: getBo7GobbleGumLabel(m) }))]}
+                        value={bo7GobbleGumFilter}
+                        onChange={(e) => setBo7GobbleGumFilter(e.target.value)}
+                        className="w-full min-w-0 sm:w-48 max-w-full"
+                      />
                       <Select
                         options={[{ value: '', label: 'All Support' }, ...BO7_SUPPORT_MODES.map((m) => ({ value: m, label: getBo7SupportLabel(m) }))]}
                         value={bo7SupportFilter}

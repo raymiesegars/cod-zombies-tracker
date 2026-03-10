@@ -13,7 +13,7 @@ import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 import { BO3_GOBBLEGUM_MODES } from '@/lib/bo3';
 import { BOCW_SUPPORT_MODES } from '@/lib/bocw';
 import { BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES } from '@/lib/bo6';
-import { BO7_SUPPORT_MODES, BO7_RELICS } from '@/lib/bo7';
+import { BO7_GOBBLEGUM_MODES, BO7_SUPPORT_MODES, BO7_RELICS } from '@/lib/bo7';
 import { hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
 
 const TOKEN_CAP = 3;
@@ -299,6 +299,7 @@ export async function pickRandomRoll(
 
   // BO7
   if (gs === 'BO7') {
+    if (r() < 0.5) tags.bo7GobbleGumMode = (BO7_GOBBLEGUM_MODES as readonly string[])[Math.floor(r() * BO7_GOBBLEGUM_MODES.length)];
     if (r() < 0.55) tags.bo7SupportMode = (BO7_SUPPORT_MODES as readonly string[])[Math.floor(r() * BO7_SUPPORT_MODES.length)];
     if (r() < 0.4) {
       tags.bo7IsCursedRun = true;
