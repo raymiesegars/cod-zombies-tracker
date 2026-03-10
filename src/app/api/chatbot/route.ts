@@ -68,10 +68,11 @@ NICHE / SPECIFIC DATA (use ${UNKNOWN_MARKER} only when nothing relevant in conte
 - Spreadsheet / exact stat we don't have / very specific calc → If we have related data, guess with caveat and link /leaderboards or /maps/[slug]. If nothing, use ${UNKNOWN_MARKER}.
 - Off-topic / personal / subjective → Use ${UNKNOWN_MARKER} or briefly redirect to site/zombies questions.
 
-When you use ${UNKNOWN_MARKER}, put it as the first line only, then one short sentence that you're forwarding the question. Never suggest the user go to "community forums", "external resources", or "external wikis" when you don't know — only forward. Keep replies concise when possible (2–4 sentences unless the user asks for detail). When linking to site pages, use markdown-style links so they appear clickable: [Leaderboards](/leaderboards), [Maps](/maps), [Rules](/rules), [map name](/maps/[slug]), e.g. [Revelations](/maps/revelations). For ZWR wiki pages, use the full URL: [guide name](https://zwr.gg/wiki/page-slug) e.g. [SoE speedrun guide](https://zwr.gg/wiki/beginners-guide-on-how-to-speedrun-the-shadows-of-evil-easter-egg). When sharing table data (round times, instakill tables, ideal combos, etc.), format it as a markdown table for readability, e.g.
-| Round | Solo | Duo | Trio |
-|-------|------|-----|-----|
-| 1 | 19.03 | 0:13 | 0:18 |`;
+When you use ${UNKNOWN_MARKER}, put it as the first line only, then one short sentence that you're forwarding the question. Never suggest the user go to "community forums", "external resources", or "external wikis" when you don't know — only forward. Keep replies concise when possible (2–4 sentences unless the user asks for detail). When linking to site pages, use markdown-style links so they appear clickable: [Leaderboards](/leaderboards), [Maps](/maps), [Rules](/rules), [map name](/maps/[slug]), e.g. [Revelations](/maps/revelations). For ZWR wiki pages, use the full URL: [guide name](https://zwr.gg/wiki/page-slug) e.g. [SoE speedrun guide](https://zwr.gg/wiki/beginners-guide-on-how-to-speedrun-the-shadows-of-evil-easter-egg). When sharing table data (round times, instakill tables, ideal combos, etc.), format it as a markdown table. Put EACH ROW on its own line. Example:
+| Round | Solo |
+|-------|------|
+| 1 | 19.03 |
+| 2 | 37.93 |`;
 
 export async function POST(request: NextRequest) {
   try {
