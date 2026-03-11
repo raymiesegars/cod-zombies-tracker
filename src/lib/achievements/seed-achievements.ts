@@ -1691,6 +1691,8 @@ function getSpeedrunWRSecondsFromConfig(
   return null;
 }
 
+const RESTRICTED_WR_MULTIPLIER = 1.12;
+
 /** Config fallback for restricted (no rampage / no gums) speedrun WR seconds. */
 function getSpeedrunWRSecondsFromConfigRestricted(
   gameShortName: string,
@@ -1710,6 +1712,12 @@ function getSpeedrunWRSecondsFromConfigRestricted(
     const s = ['der-anfang', 'terra-maledicta'].includes(mapSlug) ? c?.speedrunWRsNoVoid : c?.speedrunWRsNoRampage;
     if (!s || !key) return null;
     return (key in s ? (s as Record<string, number>)[key] : null) ?? null;
+  }
+  if (['BOCW', 'BO3', 'BO6', 'BO7'].includes(gameShortName) && key) {
+    const baseSec = getSpeedrunWRSecondsFromConfig(gameShortName, mapSlug, challengeType);
+    if (baseSec != null && baseSec > 0) {
+      return Math.round(baseSec * RESTRICTED_WR_MULTIPLIER);
+    }
   }
   return null;
 }
@@ -1829,8 +1837,8 @@ export function getSpeedrunAchievementDefinitions(
       configRestrictedSec != null;
     const baseCriteriaModifier = isVgVoidMap ? { vanguardVoidUsed: true } : {};
     const tiersToUse = isR20DerAnfangNoVoidOnly ? (restrictedTiers ?? buildSpeedrunTiersFromWR(configRestrictedSec!, baseXpRewards, 1.05)) : baseTiers;
-    const modifierToUse = isR20DerAnfangNoVoidOnly ? restrictedModifier : baseCriteriaModifier;
-    const suffixToUse = isR20DerAnfangNoVoidOnly ? restrictedLabelSuffix : '';
+    const modifierToUse = (hasRestricted || isR20DerAnfangNoVoidOnly) ? restrictedModifier : baseCriteriaModifier;
+    const suffixToUse = (hasRestricted || isR20DerAnfangNoVoidOnly) ? restrictedLabelSuffix : '';
     const restrictedSlugSuffix = (hasRestricted || isR20DerAnfangNoVoidOnly) && (isVgVoidMap ? true : !isBo4) ? '-restricted' : '';
     for (let i = 0; i < tiersToUse.length; i++) {
       const { maxTimeSeconds, xpReward } = tiersToUse[i]!;

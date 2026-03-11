@@ -819,10 +819,10 @@ export default function LeaderboardsPage() {
                 />
               )}
               {isRankView && (
-                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 min-w-0">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4 min-w-0 col-span-2 sm:col-span-4">
                   <div className="flex flex-col gap-1.5">
                     <span className="text-xs font-medium text-bunker-500">Rank by (official):</span>
-                    <div className="inline-flex rounded-lg border border-bunker-600 p-1 bg-bunker-800/80 w-fit">
+                    <div className="grid grid-cols-2 rounded-lg border border-bunker-600 p-1 bg-bunker-800/80 w-full">
                       {[
                         { v: 'total' as const, label: 'Total XP' },
                         { v: 'verified' as const, label: 'Verified XP', icon: CheckCircle2 },
@@ -838,7 +838,7 @@ export default function LeaderboardsPage() {
                             setStoredLeaderboardVerifiedOnly(ver);
                           }}
                           className={cn(
-                            'flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors',
+                            'w-full min-w-0 min-h-[40px] flex items-center justify-center gap-1 px-2 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors text-center whitespace-nowrap',
                             xpType === v
                               ? v === 'verified'
                                 ? 'bg-blue-600 text-white shadow-sm'
@@ -856,10 +856,10 @@ export default function LeaderboardsPage() {
                   {!hideCustom && (
                     <div className="flex flex-col gap-1.5">
                       <span className="text-xs font-bold text-element-300 uppercase tracking-wide">Custom Zombies rank:</span>
-                      <div className="inline-flex rounded-lg border border-bunker-600 p-1 bg-bunker-800/80 w-fit">
+                      <div className="grid grid-cols-2 rounded-lg border border-bunker-600 p-1 bg-bunker-800/80 w-full">
                         {[
                           { v: 'customZombies' as const, label: <><span className="font-extrabold text-element-300">CUSTOM</span> XP</> },
-                          { v: 'verifiedCustomZombies' as const, label: <><span className="font-extrabold text-element-300">CUSTOM</span> Verified XP</>, icon: CheckCircle2 },
+                          { v: 'verifiedCustomZombies' as const, label: <><span className="font-extrabold text-element-300">CUSTOM</span> Verified</>, icon: CheckCircle2 },
                         ].map(({ v, label, icon: Icon }) => (
                           <button
                             key={v}
@@ -871,7 +871,7 @@ export default function LeaderboardsPage() {
                               setStoredLeaderboardVerifiedOnly(v === 'verifiedCustomZombies');
                             }}
                             className={cn(
-                              'flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors',
+                              'w-full min-w-0 min-h-[40px] flex items-center justify-center gap-1 px-2 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors text-center whitespace-nowrap',
                               xpType === v
                                 ? v === 'verifiedCustomZombies'
                                   ? 'bg-blue-600 text-white shadow-sm'
@@ -1197,7 +1197,7 @@ export default function LeaderboardsPage() {
                         valueKind="xp"
                         hidePlayerCount
                         showVerifiedBadge={xpType === 'verified' || xpType === 'verifiedCustomZombies'}
-                        xpLabel={xpType === 'customZombies' ? 'Custom Zombies XP' : xpType === 'verifiedCustomZombies' ? 'Verified Custom Zombies XP' : 'XP'}
+                        xpLabel="XP"
                       />
                     ))}
                     {!isSearchActive && leaderboard.length < total && (

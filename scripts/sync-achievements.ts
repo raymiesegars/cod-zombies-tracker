@@ -24,6 +24,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { PrismaClient } from '@prisma/client';
 import { getMapAchievementDefinitions, getSpeedrunAchievementDefinitions, ACHIEVEMENT_TYPES_NEVER_DEACTIVATE } from '../src/lib/achievements/seed-achievements';
+import { isRestrictedAchievement } from '../src/lib/achievements/categories';
 
 const root = path.resolve(__dirname, '..');
 for (const file of ['.env', '.env.local']) {
@@ -123,13 +124,24 @@ async function main() {
         isActive: true,
       };
 
-      const existing = await prisma.achievement.findFirst({
+      const existingCandidates = await prisma.achievement.findMany({
         where: {
           mapId: map.id,
           slug: def.slug,
           difficulty: difficulty ?? null,
         },
+        select: { id: true, criteria: true, isActive: true },
       });
+      const expectedRestricted = isRestrictedAchievement({ criteria: def.criteria as Record<string, unknown> });
+      const existing = existingCandidates
+        .slice()
+        .sort((a, b) => {
+          const aRestricted = isRestrictedAchievement({ criteria: (a.criteria ?? {}) as Record<string, unknown> });
+          const bRestricted = isRestrictedAchievement({ criteria: (b.criteria ?? {}) as Record<string, unknown> });
+          const scoreA = (aRestricted === expectedRestricted ? 2 : 0) + (a.isActive ? 1 : 0);
+          const scoreB = (bRestricted === expectedRestricted ? 2 : 0) + (b.isActive ? 1 : 0);
+          return scoreB - scoreA;
+        })[0];
 
       if (DRY_RUN) {
         if (existing) {
@@ -159,6 +171,13 @@ async function main() {
             isActive: data.isActive,
           },
         });
+        const duplicateIds = existingCandidates.filter((c) => c.id !== existing.id).map((c) => c.id);
+        if (duplicateIds.length > 0) {
+          await prisma.achievement.updateMany({
+            where: { id: { in: duplicateIds }, isActive: true },
+            data: { isActive: false },
+          });
+        }
         updated++;
       } else {
         await prisma.achievement.create({

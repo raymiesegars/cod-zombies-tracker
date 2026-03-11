@@ -96,7 +96,7 @@ async function applyBackupCsv() {
   let skipped = 0;
 
   for (const row of rows) {
-    let existing: { id: string; criteria: object; name: string; isActive: boolean; difficulty: string | null } | null = null;
+    let existing: { id: string; criteria: unknown; name: string; isActive: boolean; difficulty: string | null } | null = null;
 
     if (row.map_slug && row.slug) {
       const difficulty =
@@ -159,6 +159,9 @@ async function applyBackupCsv() {
     updated++;
   }
   console.log(`   ${DRY_RUN ? 'Would update' : 'Updated'} ${updated} achievements from backup CSV${skipped > 0 ? ` (${skipped} rows had no match in production)` : ''}.`);
+  if (updated === 0 && rows.length > 0) {
+    console.log('   (Backup CSV slugs/tiers may differ from production after sync; step 1 seed is the source of criteria/names.)');
+  }
   await prisma.$disconnect();
 }
 
