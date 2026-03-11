@@ -85,6 +85,8 @@ const SPEEDRUN_CATEGORY: Record<string, string> = {
   ROUND_50_SPEEDRUN: '50-speedrun',
   ROUND_70_SPEEDRUN: '70-speedrun',
   ROUND_100_SPEEDRUN: '100-speedrun',
+  ROUND_10_SPEEDRUN: '10-speedrun',
+  ROUND_20_SPEEDRUN: '20-speedrun',
   ROUND_200_SPEEDRUN: '200-speedrun',
   ROUND_255_SPEEDRUN: '255-speedrun',
   ROUND_935_SPEEDRUN: '935-speedrun',

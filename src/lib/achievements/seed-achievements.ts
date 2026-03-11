@@ -1819,29 +1819,41 @@ export function getSpeedrunAchievementDefinitions(
           configRestrictedFallbackSeconds: configRestrictedSec ?? undefined,
         })
       : null;
-    const baseTiers = wrTimeMegas != null ? buildSpeedrunTiersFromWR(wrTimeMegas, baseXpRewards) : tiers;
-    const restrictedTiers = hasRestricted && wrTimeRestricted != null ? buildSpeedrunTiersFromWR(wrTimeRestricted, restrictedXpRewards) : null;
+    const baseTiers = wrTimeMegas != null ? buildSpeedrunTiersFromWR(wrTimeMegas, baseXpRewards, 1.05) : tiers;
+    const restrictedTiers = hasRestricted && wrTimeRestricted != null ? buildSpeedrunTiersFromWR(wrTimeRestricted, restrictedXpRewards, 1.05) : null;
+    const isR20DerAnfangNoVoidOnly =
+      isVgVoidMap &&
+      mapSlug === 'der-anfang' &&
+      challengeType === 'ROUND_20_SPEEDRUN' &&
+      configWrSec == null &&
+      configRestrictedSec != null;
     const baseCriteriaModifier = isVgVoidMap ? { vanguardVoidUsed: true } : {};
-    for (let i = 0; i < baseTiers.length; i++) {
-      const { maxTimeSeconds, xpReward } = baseTiers[i]!;
+    const tiersToUse = isR20DerAnfangNoVoidOnly ? (restrictedTiers ?? buildSpeedrunTiersFromWR(configRestrictedSec!, baseXpRewards, 1.05)) : baseTiers;
+    const modifierToUse = isR20DerAnfangNoVoidOnly ? restrictedModifier : baseCriteriaModifier;
+    const suffixToUse = isR20DerAnfangNoVoidOnly ? restrictedLabelSuffix : '';
+    for (let i = 0; i < tiersToUse.length; i++) {
+      const { maxTimeSeconds, xpReward } = tiersToUse[i]!;
       const timeStr = formatSpeedrunTime(maxTimeSeconds).replace(/:/g, '-');
-      const slug = `${challengeType.toLowerCase().replace(/_/g, '-')}-under-${timeStr}`.replace(/\s/g, '-');
-      const rarity = i === baseTiers.length - 1 ? 'LEGENDARY' : i >= baseTiers.length - 2 ? 'EPIC' : i >= baseTiers.length - 3 ? 'RARE' : 'UNCOMMON';
-      rows.push({
-        slug,
-        name: `${label} in under ${formatSpeedrunTime(maxTimeSeconds)}`,
-        type: 'CHALLENGE_COMPLETE',
-        criteria: { challengeType, maxTimeSeconds, ...baseCriteriaModifier },
-        xpReward,
-        rarity,
-      });
-      if (hasRestricted) {
-        const resTier = restrictedTiers?.[i] ?? { maxTimeSeconds, xpReward: xpReward * 2 };
+      const slugBase = `${challengeType.toLowerCase().replace(/_/g, '-')}-under-${timeStr}`.replace(/\s/g, '-');
+      const slug = isR20DerAnfangNoVoidOnly ? `${slugBase}-restricted` : slugBase;
+      const rarity = i === tiersToUse.length - 1 ? 'LEGENDARY' : i >= tiersToUse.length - 2 ? 'EPIC' : i >= tiersToUse.length - 3 ? 'RARE' : 'UNCOMMON';
+      if (!isR20DerAnfangNoVoidOnly) {
         rows.push({
-          slug: `${slug}-restricted`,
-          name: `${label} in under ${formatSpeedrunTime(resTier.maxTimeSeconds)}${restrictedLabelSuffix}`,
+          slug: slugBase,
+          name: `${label} in under ${formatSpeedrunTime(maxTimeSeconds)}`,
           type: 'CHALLENGE_COMPLETE',
-          criteria: { challengeType, maxTimeSeconds: resTier.maxTimeSeconds, ...restrictedModifier },
+          criteria: { challengeType, maxTimeSeconds, ...baseCriteriaModifier },
+          xpReward,
+          rarity,
+        });
+      }
+      if (hasRestricted || isR20DerAnfangNoVoidOnly) {
+        const resTier = restrictedTiers?.[i] ?? (isR20DerAnfangNoVoidOnly ? tiersToUse[i]! : { maxTimeSeconds, xpReward: (baseTiers[i]?.xpReward ?? 0) * 2 });
+        rows.push({
+          slug,
+          name: `${label} in under ${formatSpeedrunTime(resTier.maxTimeSeconds)}${suffixToUse}`,
+          type: 'CHALLENGE_COMPLETE',
+          criteria: { challengeType, maxTimeSeconds: resTier.maxTimeSeconds, ...modifierToUse },
           xpReward: resTier.xpReward,
           rarity,
         });

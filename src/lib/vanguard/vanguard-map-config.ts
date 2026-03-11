@@ -64,7 +64,7 @@ export const VANGUARD_MAP_CONFIG: Record<VanguardMapSlug, VanguardMapConfig> = {
   'der-anfang': {
     challengeTypes: [
       'HIGHEST_ROUND', 'NO_JUG', 'NO_DOWNS', 'NO_PERKS', 'NO_ARMOR', 'ONE_BOX',
-      'ROUND_10_SPEEDRUN', 'EXFIL_R5_SPEEDRUN', 'EXFIL_R10_SPEEDRUN',
+      'ROUND_10_SPEEDRUN', 'ROUND_20_SPEEDRUN', 'EXFIL_R5_SPEEDRUN', 'EXFIL_R10_SPEEDRUN',
       'EASTER_EGG_SPEEDRUN',
     ],
     hasFirstRoom: false,
@@ -75,7 +75,7 @@ export const VANGUARD_MAP_CONFIG: Record<VanguardMapSlug, VanguardMapConfig> = {
     exfilR10WR: min(12) + 40,
     eeSpeedrunWR: min(9),
     speedrunWRsWithVoid: { r10: min(21) + 30, exfilR5: min(8) + 40, exfilR10: min(12) + 40, eeSpeedrun: min(9) },
-    speedrunWRsNoVoid: { r10: min(45), exfilR5: min(17), exfilR10: min(21) + 30, eeSpeedrun: min(12) },
+    speedrunWRsNoVoid: { r10: min(45), r20: min(49) + 42, exfilR5: min(17), exfilR10: min(21) + 30, eeSpeedrun: min(12) },
     highRoundWR: 222,
     noDownsWR: 186,
     noPerksWR: 54,
