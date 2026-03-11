@@ -141,11 +141,17 @@ async function main() {
     where: userWhere,
     select: { id: true },
   });
+  const totalUsers = users.length;
+  console.log(`   Checking ${totalUsers} users (no progress = still running)...`);
   let globalUnlocks = 0;
   if (!DRY_RUN) {
-    for (const user of users) {
+    for (let i = 0; i < users.length; i++) {
+      const user = users[i]!;
       const added = await checkAllAchievements(user.id);
       globalUnlocks += added.length;
+      if ((i + 1) % 100 === 0 || i === users.length - 1) {
+        console.log(`   Checked ${i + 1}/${totalUsers} users, ${globalUnlocks} new global unlocks so far.`);
+      }
     }
   }
   console.log(`   ${globalUnlocks} new global/map unlocks from checkAllAchievements.`);
