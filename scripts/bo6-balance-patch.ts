@@ -32,6 +32,7 @@ for (const file of ['.env', '.env.local']) {
 }
 
 import prisma from '../src/lib/prisma';
+import { isRestrictedAchievement } from '../src/lib/achievements/categories';
 import {
   getMapAchievementDefinitions,
   getSpeedrunAchievementDefinitions,
@@ -173,10 +174,10 @@ async function main() {
     },
   });
 
-  const existingBySlug = new Map<string, { id: string; xpReward: number; isActive: boolean; type: string }>();
+  const existingBySlug = new Map<string, { id: string; xpReward: number; isActive: boolean; type: string; criteria?: Record<string, unknown> }>();
   for (const map of mapsWithChallenges) {
     for (const a of map.achievements) {
-      existingBySlug.set(`${map.id}:${a.slug}`, { id: a.id, xpReward: a.xpReward, isActive: a.isActive, type: a.type });
+      existingBySlug.set(`${map.id}:${a.slug}`, { id: a.id, xpReward: a.xpReward, isActive: a.isActive, type: a.type, criteria: a.criteria as Record<string, unknown> });
     }
   }
 
@@ -231,13 +232,16 @@ async function main() {
 
   let achievementsDeactivated = 0;
   for (const entry of Array.from(existingBySlug.values())) {
-    const { id, isActive, type } = entry;
+    const { id, isActive, type, criteria } = entry;
     if (type === 'EASTER_EGG_COMPLETE') continue;
-    if (isActive && !DRY_RUN) {
-      await prisma.achievement.update({
-        where: { id },
-        data: { isActive: false },
-      });
+    if (criteria && isRestrictedAchievement({ criteria })) continue;
+    if (isActive) {
+      if (!DRY_RUN) {
+        await prisma.achievement.update({
+          where: { id },
+          data: { isActive: false },
+        });
+      }
       achievementsDeactivated++;
     }
   }

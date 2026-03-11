@@ -42,6 +42,12 @@ export type MapAchievementContext = {
 
 type AchievementChecker = (userId: string, criteria: any, achievement: Achievement) => Promise<boolean>;
 
+const MAX_SAFE_INT4 = 2_147_483_647;
+function clampInt4(n: number): number {
+  if (typeof n !== 'number' || !Number.isFinite(n)) return 0;
+  return Math.max(-MAX_SAFE_INT4, Math.min(MAX_SAFE_INT4, Math.floor(n)));
+}
+
 const achievementCheckers: Record<AchievementType, AchievementChecker> = {
   ROUND_MILESTONE: async (userId, criteria, achievement) => {
     if (!achievement.mapId) return false;
@@ -109,7 +115,7 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
         where: {
           userId,
           easterEggId: achievement.easterEggId,
-          completionTimeSeconds: { not: null, lte: maxTimeSeconds },
+          completionTimeSeconds: { not: null, lte: clampInt4(maxTimeSeconds) },
         },
       });
       return !!log;
@@ -126,7 +132,7 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
         ],
       };
       if (achievement.difficulty != null) noJugWhere.difficulty = achievement.difficulty;
-      if (targetRound != null) noJugWhere.roundReached = { gte: targetRound };
+      if (targetRound != null) noJugWhere.roundReached = { gte: clampInt4(targetRound) };
       const log = await prisma.challengeLog.findFirst({ where: noJugWhere });
       return !!log;
     }
@@ -153,7 +159,7 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
       const log = await prisma.challengeLog.findFirst({
         where: {
           ...baseWhere,
-          completionTimeSeconds: { not: null, lte: maxTimeSeconds },
+          completionTimeSeconds: { not: null, lte: clampInt4(maxTimeSeconds) },
         },
       });
       return !!log;
@@ -166,17 +172,17 @@ const achievementCheckers: Record<AchievementType, AchievementChecker> = {
       });
       if (map?.roundCap == null) return false;
       const log = await prisma.challengeLog.findFirst({
-        where: { ...baseWhere, roundReached: { gte: map.roundCap } },
+        where: { ...baseWhere, roundReached: { gte: clampInt4(map.roundCap) } },
       });
       return !!log;
     }
 
     if (challengeType === 'NO_MANS_LAND' && targetKills != null) {
-      (baseWhere as Record<string, unknown>).killsReached = { gte: targetKills };
+      (baseWhere as Record<string, unknown>).killsReached = { gte: clampInt4(targetKills) };
     } else if (challengeType === 'RUSH' && targetScore != null) {
-      (baseWhere as Record<string, unknown>).scoreReached = { gte: targetScore };
+      (baseWhere as Record<string, unknown>).scoreReached = { gte: clampInt4(targetScore) };
     } else if (targetRound != null) {
-      baseWhere.roundReached = { gte: targetRound };
+      baseWhere.roundReached = { gte: clampInt4(targetRound) };
     }
 
     const log = await prisma.challengeLog.findFirst({

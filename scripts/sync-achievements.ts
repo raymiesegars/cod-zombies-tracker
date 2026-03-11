@@ -16,6 +16,7 @@
  * Usage:
  *   pnpm db:sync-achievements           # Run and upsert
  *   pnpm db:sync-achievements --dry-run # Log what would be created/updated, no writes
+ *   pnpm db:sync-achievements --prune   # Also deactivate achievements not in defs (DANGEROUS: can remove splits)
  *   GAMES=BO4,BOCW,BO6,BO7 pnpm db:sync-achievements   # Only sync maps for these games (faster, targeted)
  */
 
@@ -46,6 +47,8 @@ const prisma = new PrismaClient({
 });
 
 const DRY_RUN = process.argv.includes('--dry-run');
+/** If true, deactivate achievements not in defs. DANGEROUS: pruning wrongly removes classics/no support/fate only/no void etc. Do NOT use. */
+const ENABLE_PRUNE = process.argv.includes('--prune');
 /** Optional: comma-separated game shortNames, e.g. GAMES=BO4,BOCW,BO6,BO7 — only sync these games (faster). */
 const GAMES_FILTER = process.env.GAMES?.trim()
   ? new Set(process.env.GAMES.split(',').map((g) => g.trim()).filter(Boolean))
@@ -60,6 +63,9 @@ async function main() {
 
   if (DRY_RUN) {
     console.log('*** DRY RUN – no changes will be written ***\n');
+  }
+  if (ENABLE_PRUNE) {
+    console.warn('*** WARNING: --prune is DANGEROUS and will deactivate valid achievements (classics, fate only, no support, etc.). Avoid unless you know exactly what you are doing. ***\n');
   }
   if (GAMES_FILTER) {
     console.log(`Filtering to games: ${Array.from(GAMES_FILTER).join(', ')}\n`);
@@ -166,8 +172,8 @@ async function main() {
     }
 
     // Prune: deactivate achievements for this map that are no longer in defs (removes obsolete bands).
-    // Never deactivate EASTER_EGG_COMPLETE etc. – they are created by seed-easter-eggs, not by getMapAchievementDefinitions.
-    if (!DRY_RUN && currentKeys.size > 0) {
+    // Only runs with --prune. Use --dry-run --prune to preview what would be pruned.
+    if (ENABLE_PRUNE && currentKeys.size > 0) {
       const existingAchievements = await prisma.achievement.findMany({
         where: {
           mapId: map.id,
@@ -179,10 +185,12 @@ async function main() {
       for (const a of existingAchievements) {
         const key = `${a.slug}\0${a.difficulty ?? ''}`;
         if (!currentKeys.has(key)) {
-          await prisma.achievement.update({
-            where: { id: a.id },
-            data: { isActive: false },
-          });
+          if (!DRY_RUN) {
+            await prisma.achievement.update({
+              where: { id: a.id },
+              data: { isActive: false },
+            });
+          }
           pruned++;
         }
       }
@@ -190,7 +198,7 @@ async function main() {
   }
 
   if (pruned > 0) {
-    console.log(`Pruned (deactivated) ${pruned} obsolete achievements.`);
+    console.log(DRY_RUN ? `Would prune (deactivate) ${pruned} obsolete achievements.` : `Pruned (deactivated) ${pruned} obsolete achievements.`);
   }
   console.log(DRY_RUN ? `Would create ${created}, update ${updated} achievements.` : `Created ${created}, updated ${updated} achievements.`);
 }

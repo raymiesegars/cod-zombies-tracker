@@ -1831,11 +1831,13 @@ export function getSpeedrunAchievementDefinitions(
     const tiersToUse = isR20DerAnfangNoVoidOnly ? (restrictedTiers ?? buildSpeedrunTiersFromWR(configRestrictedSec!, baseXpRewards, 1.05)) : baseTiers;
     const modifierToUse = isR20DerAnfangNoVoidOnly ? restrictedModifier : baseCriteriaModifier;
     const suffixToUse = isR20DerAnfangNoVoidOnly ? restrictedLabelSuffix : '';
+    const restrictedSlugSuffix = (hasRestricted || isR20DerAnfangNoVoidOnly) && (isVgVoidMap ? true : !isBo4) ? '-restricted' : '';
     for (let i = 0; i < tiersToUse.length; i++) {
       const { maxTimeSeconds, xpReward } = tiersToUse[i]!;
       const timeStr = formatSpeedrunTime(maxTimeSeconds).replace(/:/g, '-');
       const slugBase = `${challengeType.toLowerCase().replace(/_/g, '-')}-under-${timeStr}`.replace(/\s/g, '-');
-      const slug = isR20DerAnfangNoVoidOnly ? `${slugBase}-restricted` : slugBase;
+      const slugRestricted = `${slugBase}${restrictedSlugSuffix}`;
+      const slug = isR20DerAnfangNoVoidOnly ? slugRestricted : slugBase;
       const rarity = i === tiersToUse.length - 1 ? 'LEGENDARY' : i >= tiersToUse.length - 2 ? 'EPIC' : i >= tiersToUse.length - 3 ? 'RARE' : 'UNCOMMON';
       if (!isR20DerAnfangNoVoidOnly) {
         rows.push({
@@ -1850,7 +1852,7 @@ export function getSpeedrunAchievementDefinitions(
       if (hasRestricted || isR20DerAnfangNoVoidOnly) {
         const resTier = restrictedTiers?.[i] ?? (isR20DerAnfangNoVoidOnly ? tiersToUse[i]! : { maxTimeSeconds, xpReward: (baseTiers[i]?.xpReward ?? 0) * 2 });
         rows.push({
-          slug,
+          slug: slugRestricted,
           name: `${label} in under ${formatSpeedrunTime(resTier.maxTimeSeconds)}${suffixToUse}`,
           type: 'CHALLENGE_COMPLETE',
           criteria: { challengeType, maxTimeSeconds: resTier.maxTimeSeconds, ...modifierToUse },
