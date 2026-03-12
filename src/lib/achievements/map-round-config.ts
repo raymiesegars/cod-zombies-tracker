@@ -164,6 +164,7 @@ const BO7: Record<string, MapRoundConfig> = {
   'vandorn-farm': config(999, BO6_BO7_999),
   'exit-115': config(999, BO6_BO7_999),
   'zarya-cosmodrome': config(999, BO6_BO7_999),
+  'paradox-junction': config(999, BO6_BO7_999),
 };
 
 // IW: ZIS WR 207 cap 190, Rave 255, Shaolin 182, AOTRT 180.

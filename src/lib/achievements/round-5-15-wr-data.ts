@@ -122,6 +122,7 @@ export const ROUND_5_15_WR_BY_GAME_MAP: Record<
     'exit-115': { r5: min(2, 51), r15: min(11, 35), r5NoRampage: Math.round(min(2, 51) * 1.15), r15NoRampage: Math.round(min(11, 35) * 1.15) },
     'zarya-cosmodrome': { r5: min(3, 22), r15: min(10, 38), r5NoRampage: Math.round(min(3, 22) * 1.15), r15NoRampage: Math.round(min(10, 38) * 1.15) },
     mars: { r5: min(2, 20), r15: min(11, 50), r5NoRampage: Math.round(min(2, 20) * 1.15), r15NoRampage: Math.round(min(11, 50) * 1.15) },
+    'paradox-junction': { r5: min(3, 6), r15: min(10, 44), r5NoRampage: Math.round(min(3, 6) * 1.15), r15NoRampage: Math.round(min(10, 44) * 1.15) },
   },
 };
 

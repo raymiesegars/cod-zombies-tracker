@@ -11975,6 +11975,77 @@ export const SPECIFIC_EASTER_EGGS_BASE: SpecificEasterEgg[] = [
     ],
   },
 
+  // ——— Paradox Junction (BO7): Main Quest ———
+
+  {
+    gameShortName: 'BO7',
+    mapSlug: 'paradox-junction',
+    name: 'The Dark Heart',
+    slug: 'the-dark-heart-paradox',
+    type: 'MAIN_QUEST',
+    xpReward: 5000,
+    description:
+      'Obtain the Blundergat, upgrade to Sundergat, complete the Twins trials (Swing, Strange Tree, Hopscotch, Piano, Bouncing Ball, Toy Box & Four Square), align the clock tower, and defeat the Dark Heart boss. Normal and Destroyed Nuketown alternate; Sundergat required to fill souls on objects.',
+    rewardsDescription: 'Main quest completion; cutscene.',
+    steps: [
+      { order: 1, label: 'Build Blundergat: 4 parts (Sealant—Yellow House shelf; Barrel—feed Cysts in Destroyed Nuketown; Hammer—H2SO4 from sink, pour on mannequin; Stock—explosive on humming wall in Normal, collect in Destroyed). Build at workbench in Destroyed Truck Interior.' },
+      { order: 2, label: 'Upgrade to Sundergat: Kill 2 Tortured Zombies then 1 Tortured Mimic near bench with Blundergat in Destroyed Nuketown. Melee bench in Normal then Destroyed to get Sundergat.' },
+      { order: 3, label: 'The Twins Swing: Shoot swing in Yellow House Backyard, get Swing Seat. Destroyed: find RC-XD Controller (PaP boxes, Green House fence, Yellow House garage). Race RC-XD into garage, detonate. Get Chalk; place Swing Seat and Chalk on chains.' },
+      { order: 4, label: 'Strange Tree: Destroyed—Yellow House Garage toolbox for Irradiated Seeds. Normal Trinity Ave.—place seeds, kill with Blundergat to fill tree. Destroyed: 3 Combat Axes at tree. Normal: place Strange Firewood in Yellow House fireplace, Molotov to light.' },
+      { order: 5, label: 'Hopscotch and Music Box: Destroyed Trinity Ave.—step on X until blue. Normal: hopscotch trial (1 to 12, 12 to 1, avoid black smoke). Sundergat fill music box, escort to Yellow House fireplace.' },
+      { order: 6, label: 'Piano Lesson: Destroyed Green House Backyard—Piano Teacher zombie; Brain Rot or Psych Grenade, follow. Teleport to Normal; Piano Teacher plays piano. Destroyed: 8 notes blink 1–8 (order). Normal Green House: play piano in that order (note Treble/Bass clef).' },
+      { order: 7, label: 'Bouncing Ball and Music Sheet: Destroyed Green House Backyard—kill 3 floating zombies. Normal Trinity Ave.—Twins draw circle; bounce trial (kill zombies in air). Sundergat fill sheet, escort to Green House piano.' },
+      { order: 8, label: 'Toy Box and Four Square: Destroyed—speaker pole, Wisp Tea for Goggles; Death Perception for Headset (3 locations). Normal: interact blue toy box. Destroyed: red ball to massive X. Normal: Four Square trial (melee ball into squares). Sundergat fill cymbals, escort to toy box.' },
+      { order: 9, label: 'Clock Tower and The Twins: Destroyed—shoot crumbled clock to 0; during teleport animation shoot hands again. White orb triggers scene; yellow portal at swing starts boss.' },
+      { order: 10, label: 'The Dark Heart Boss: Phase 1—fill 3 cysts at black goo piles (Trinity Ave., Yellow House Backyard, Green House Backyard), defend Concentration Field at each. Phase 2—kill zombies from green orbs, defend fields. Phase 3—Tortured Zombie at objects, defend fields. Damage Dark Heart to finish.' },
+    ],
+  },
+
+  // ——— Paradox Junction (BO7): Cursed Relics ———
+
+  {
+    gameShortName: 'BO7',
+    mapSlug: 'paradox-junction',
+    name: 'Cursed Relics — Grim',
+    slug: 'cursed-relics-grim-paradox-junction',
+    type: 'SIDE_QUEST',
+    xpReward: 0,
+    categoryTag: 'Relic',
+    description:
+      'Grim Relics (Paradox Junction): Unlock in Cursed mode. Trials at Round 20+. Each Grim relic fills one-third of a Cursed tier bar. Tier I unlocks Golden Armor (45,000 Essence).',
+    steps: [
+      { order: 1, label: 'Reach Round 20+ in Cursed on Paradox Junction. Complete steps for desired Grim relic; complete its Relic Trial.' },
+    ],
+  },
+  {
+    gameShortName: 'BO7',
+    mapSlug: 'paradox-junction',
+    name: 'Cursed Relics — Sinister',
+    slug: 'cursed-relics-sinister-paradox-junction',
+    type: 'SIDE_QUEST',
+    xpReward: 0,
+    categoryTag: 'Relic',
+    description:
+      'Sinister Relics (Paradox Junction): Round 40+ Tier I Cursed. Each Sinister relic fills two-thirds of a tier. Tier II enables Ultra Rarity (8000–17500 Salvage).',
+    steps: [
+      { order: 1, label: 'Reach Round 40+ Tier I Cursed on Paradox Junction. Complete steps for desired Sinister relic and Trial.' },
+    ],
+  },
+  {
+    gameShortName: 'BO7',
+    mapSlug: 'paradox-junction',
+    name: 'Cursed Relics — Wicked',
+    slug: 'cursed-relics-wicked-paradox-junction',
+    type: 'SIDE_QUEST',
+    xpReward: 0,
+    categoryTag: 'Relic',
+    description:
+      'Wicked Relics (Paradox Junction): Round 60+ Tier II Cursed. Each Wicked relic fills a full tier. Tier III enables Pack-a-Punch Level IV (100,000 Essence).',
+    steps: [
+      { order: 1, label: 'Reach Round 60+ Tier II Cursed on Paradox Junction. Complete steps for desired Wicked relic and Trial.' },
+    ],
+  },
+
   // ——— Astra Malorum (BO7): Miscellaneous Side Quests ———
 
   {

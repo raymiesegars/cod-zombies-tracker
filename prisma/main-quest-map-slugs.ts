@@ -38,6 +38,7 @@ export const MAIN_QUEST_MAP_SLUGS = new Set([
   'vandorn-farm',
   'exit-115',
   'zarya-cosmodrome',
+  'paradox-junction',
   // WW2 Zombies
   'the-final-reich',
   'the-darkest-shore',

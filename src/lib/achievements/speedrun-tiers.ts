@@ -713,6 +713,10 @@ export const BO7_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
     r30: mBo6(14) + 30, r50: mBo6(34) + 20, r70: mBo6(54), r100: hsBo6(1, 50, 40), r200: hsBo6(8, 30, 0), r999: hBo6(120),
     exfil: mBo6(4), exfilR21: mBo6(9),
   }),
+  'paradox-junction': buildBo6SpeedrunTiers({
+    r30: mBo6(13) + 24, r50: mBo6(24) + 27, r70: mBo6(34) + 49, r100: mBo6(52) + 36, r200: hBo6(4), r999: hBo6(80),
+    exfil: mBo6(4) + 20, exfilR21: mBo6(10), ee: mBo6(30),
+  }),
 };
 
 export const BOCW_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
