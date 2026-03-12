@@ -13,7 +13,7 @@ const tabs = [
   { href: '/admin/feedback', label: 'Feedback', icon: MessageSquare, badgeKey: 'feedbackUnread' as const },
   { href: '/admin/verified-history', label: 'Verified history', icon: History, badgeKey: 'verifiedHistoryUnread' as const },
   { href: '/admin/leaderboard', label: 'Leaderboard', icon: Trophy, badgeKey: null },
-  { href: '/admin/easter-eggs', label: 'Easter Eggs', icon: Egg, badgeKey: null, superAdminOnly: true },
+  { href: '/admin/easter-eggs', label: 'Easter Eggs', icon: Egg, badgeKey: null, easterEggAdminOrSuper: true },
   { href: '/admin/achievements', label: 'Achievements', icon: Award, badgeKey: null },
   { href: '/admin/chatbot', label: 'LeKronorium', icon: Bot, badgeKey: null },
   { href: '/rules', label: 'Rules', icon: BookOpen, badgeKey: null, superAdminOnly: true },
@@ -21,6 +21,8 @@ const tabs = [
 
 type Badges = { pending: number; feedbackUnread: number; verifiedHistoryUnread: number; mapSubmissionsPending: number };
 type AdminMe = {
+  isAdmin: boolean;
+  isEasterEggAdmin?: boolean;
   adminXp: number;
   level: number;
   levelIconPath: string;
@@ -73,7 +75,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen bg-bunker-950">
-      {adminMe && (
+      {adminMe?.isAdmin && (
         <div className="border-b border-amber-900/50 bg-bunker-900/90 sticky top-0 z-20">
           <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3">
             <div className="flex flex-wrap items-center gap-3 sm:gap-4">
@@ -119,7 +121,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 min-[1160px]:hidden bg-gradient-to-l from-bunker-900 to-transparent"
               aria-hidden
             />
-            {tabs.filter((t) => !(t as { superAdminOnly?: boolean }).superAdminOnly || adminMe?.isSuperAdmin).map(({ href, label, icon: Icon, badgeKey }) => {
+            {tabs.filter((t) => {
+              if ((adminMe?.isEasterEggAdmin && !adminMe?.isAdmin && !adminMe?.isSuperAdmin)) {
+                return t.href === '/admin/easter-eggs';
+              }
+              if ((t as { superAdminOnly?: boolean }).superAdminOnly && !adminMe?.isSuperAdmin) return false;
+              if ((t as { easterEggAdminOrSuper?: boolean }).easterEggAdminOrSuper && !adminMe?.isSuperAdmin && !adminMe?.isEasterEggAdmin) return false;
+              return true;
+            }).map(({ href, label, icon: Icon, badgeKey }) => {
               const isActive = pathname === href || (href !== '/admin' && pathname.startsWith(href));
               const count = badgeKey != null ? badges[badgeKey] : 0;
               return (

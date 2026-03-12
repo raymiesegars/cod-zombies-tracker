@@ -2,18 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
-import { isSuperAdmin } from '@/lib/admin';
+import { hasEasterEggAdminAccess } from '@/lib/admin';
 
 export const dynamic = 'force-dynamic';
 
-async function requireSuperAdmin() {
+async function requireEasterEggAdmin() {
   const supabaseUser = await getUser();
   if (!supabaseUser) return { error: 'Unauthorized' as const, status: 401 as const, user: null };
   const me = await prisma.user.findUnique({
     where: { supabaseId: supabaseUser.id },
-    select: { id: true },
+    select: { id: true, isEasterEggAdmin: true },
   });
-  if (!me || !isSuperAdmin(me.id)) return { error: 'Forbidden: super admin only' as const, status: 403 as const, user: null };
+  if (!me || !hasEasterEggAdminAccess(me)) return { error: 'Forbidden' as const, status: 403 as const, user: null };
   return { user: me, error: null, status: null };
 }
 
@@ -22,7 +22,7 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ stepId: string }> }
 ) {
-  const auth = await requireSuperAdmin();
+  const auth = await requireEasterEggAdmin();
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   const { stepId } = await params;
@@ -82,7 +82,7 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ stepId: string }> }
 ) {
-  const auth = await requireSuperAdmin();
+  const auth = await requireEasterEggAdmin();
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   const { stepId } = await params;

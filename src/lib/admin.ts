@@ -17,3 +17,7 @@ export function isSuperAdmin(userId: string): boolean {
 export function getSuperAdminUserIds(): string[] {
   return Array.from(SUPER_ADMIN_IDS);
 }
+
+export function hasEasterEggAdminAccess(user: { id: string; isEasterEggAdmin?: boolean | null }): boolean {
+  return isSuperAdmin(user.id) || Boolean(user.isEasterEggAdmin);
+}
