@@ -75,8 +75,8 @@ export default function AdminEasterEggsPage() {
   useEffect(() => {
     fetch('/api/admin/me', { credentials: 'same-origin', cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : { admin: null }))
-      .then((d: { admin?: { isSuperAdmin?: boolean } | null }) => {
-        if (!d.admin?.isSuperAdmin) setForbidden(true);
+      .then((d: { admin?: { isSuperAdmin?: boolean; isEasterEggAdmin?: boolean } | null }) => {
+        if (!d.admin?.isSuperAdmin && !d.admin?.isEasterEggAdmin) setForbidden(true);
       })
       .catch(() => setForbidden(true));
   }, []);
@@ -136,9 +136,9 @@ export default function AdminEasterEggsPage() {
       <div className="max-w-4xl mx-auto p-6">
         <Card variant="bordered" className="border-blood-800/50">
           <CardContent className="p-8 text-center">
-            <p className="text-blood-400 font-medium">Access denied. Super admins only.</p>
-            <Link href="/admin/verification" className="mt-4 inline-block text-bunker-400 hover:text-white">
-              Back to admin
+            <p className="text-blood-400 font-medium">Access denied.</p>
+            <Link href="/" className="mt-4 inline-block text-bunker-400 hover:text-white">
+              Back home
             </Link>
           </CardContent>
         </Card>
@@ -154,7 +154,7 @@ export default function AdminEasterEggsPage() {
           Easter Egg Editor
         </h1>
         <p className="text-sm text-bunker-400 mt-1">
-          Edit easter eggs, steps, and buildables for any map. Super admin only.
+          Edit easter eggs, steps, and buildables for any map.
         </p>
       </div>
 

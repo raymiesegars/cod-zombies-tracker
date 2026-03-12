@@ -661,9 +661,10 @@ export default function UserProfilePage() {
   const [worldRecordsModalOpen, setWorldRecordsModalOpen] = useState(false);
   const [tournamentTrophiesModalOpen, setTournamentTrophiesModalOpen] = useState(false);
   const [tournamentTrophies, setTournamentTrophies] = useState<{ gold: number; silver: number; bronze: number; tournaments: { tournamentId: string; title: string; place: number; xpAwarded: number }[] } | null>(null);
-  const [adminMe, setAdminMe] = useState<{ isAdmin: boolean; isSuperAdmin: boolean } | null>(null);
+  const [adminMe, setAdminMe] = useState<{ isAdmin: boolean; isEasterEggAdmin?: boolean; isSuperAdmin: boolean } | null>(null);
   const [promoteModalOpen, setPromoteModalOpen] = useState(false);
   const [demoteModalOpen, setDemoteModalOpen] = useState(false);
+  const [easterEggAdminModalOpen, setEasterEggAdminModalOpen] = useState(false);
   const [contributorModalOpen, setContributorModalOpen] = useState(false);
   const [adminActionLoading, setAdminActionLoading] = useState(false);
   const [friendActionLoading, setFriendActionLoading] = useState<'add' | 'accept' | 'deny' | null>(null);
@@ -671,6 +672,9 @@ export default function UserProfilePage() {
   // so "Your runs" vs "Back to runs" and map links point the right place
   const isOwnProfile = Boolean(profile && currentProfile && profile.id === currentProfile.id);
   const viewedUserIsAdmin = Boolean(profile && 'isAdmin' in profile && (profile as { isAdmin?: boolean }).isAdmin);
+  const viewedUserIsEasterEggAdmin = Boolean(
+    profile && 'isEasterEggAdmin' in profile && (profile as { isEasterEggAdmin?: boolean }).isEasterEggAdmin
+  );
   const viewedUserIsContributor = Boolean(profile && 'isContributor' in profile && (profile as { isContributor?: boolean }).isContributor);
   const hideCustom = Boolean(currentProfile && (currentProfile as { hideCustomZombiesEverywhere?: boolean }).hideCustomZombiesEverywhere);
 
@@ -707,7 +711,7 @@ export default function UserProfilePage() {
     fetch('/api/admin/me', { credentials: 'same-origin', cache: 'no-store' })
       .then((res) => (res.ok ? res.json() : { admin: null }))
       .then((data) => {
-        if (!cancelled) setAdminMe(data?.admin ?? { isAdmin: false, isSuperAdmin: false });
+        if (!cancelled) setAdminMe(data?.admin ?? { isAdmin: false, isEasterEggAdmin: false, isSuperAdmin: false });
       })
       .catch(() => {
         if (!cancelled) setAdminMe(null);
@@ -779,6 +783,33 @@ export default function UserProfilePage() {
       setAdminActionLoading(false);
     }
   }, [profile?.id]);
+
+  const handleToggleEasterEggAdmin = useCallback(async () => {
+    if (!profile?.id) return;
+    setAdminActionLoading(true);
+    try {
+      const endpoint = viewedUserIsEasterEggAdmin ? '/api/admin/revoke-easter-egg-admin' : '/api/admin/grant-easter-egg-admin';
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ userId: profile.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? 'Failed to update easter egg admin role');
+      setEasterEggAdminModalOpen(false);
+      setProfileRefreshTrigger((t) => t + 1);
+      const meRes = await fetch('/api/admin/me', { credentials: 'same-origin', cache: 'no-store' });
+      if (meRes.ok) {
+        const d = await meRes.json();
+        setAdminMe(d?.admin ?? null);
+      }
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Something went wrong');
+    } finally {
+      setAdminActionLoading(false);
+    }
+  }, [profile?.id, viewedUserIsEasterEggAdmin]);
 
   const handleGrantContributor = useCallback(async () => {
     if (!profile?.username) return;
@@ -1186,6 +1217,16 @@ export default function UserProfilePage() {
                       leftIcon={<ShieldOff className="w-4 h-4" />}
                     >
                       Remove admin
+                    </Button>
+                  )}
+                  {!isOwnProfile && adminMe?.isSuperAdmin && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setEasterEggAdminModalOpen(true)}
+                      leftIcon={viewedUserIsEasterEggAdmin ? <ShieldOff className="w-4 h-4" /> : <ShieldPlus className="w-4 h-4" />}
+                    >
+                      {viewedUserIsEasterEggAdmin ? 'Remove easter egg admin' : 'Grant easter egg admin'}
                     </Button>
                   )}
                   {!isOwnProfile && adminMe?.isSuperAdmin && !viewedUserIsContributor && (
@@ -1639,6 +1680,34 @@ export default function UserProfilePage() {
             leftIcon={adminActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldOff className="w-4 h-4" />}
           >
             {adminActionLoading ? 'Removing…' : 'Remove admin'}
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={easterEggAdminModalOpen}
+        onClose={() => !adminActionLoading && setEasterEggAdminModalOpen(false)}
+        title={viewedUserIsEasterEggAdmin ? 'Remove easter egg admin?' : 'Grant easter egg admin?'}
+        description={
+          viewedUserIsEasterEggAdmin
+            ? `${profile?.displayName || profile?.username || 'This user'} will lose access to the Easter Eggs admin tab and APIs.`
+            : `${profile?.displayName || profile?.username || 'This user'} will get access to only the Easter Eggs admin tab and full easter egg CRUD on all maps.`
+        }
+        size="sm"
+      >
+        <div className="flex justify-end gap-2 pt-2">
+          <Button variant="secondary" onClick={() => setEasterEggAdminModalOpen(false)} disabled={adminActionLoading}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleToggleEasterEggAdmin}
+            disabled={adminActionLoading}
+            leftIcon={adminActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : viewedUserIsEasterEggAdmin ? <ShieldOff className="w-4 h-4" /> : <ShieldPlus className="w-4 h-4" />}
+          >
+            {adminActionLoading
+              ? (viewedUserIsEasterEggAdmin ? 'Removing…' : 'Granting…')
+              : (viewedUserIsEasterEggAdmin ? 'Remove easter egg admin' : 'Grant easter egg admin')}
           </Button>
         </div>
       </Modal>

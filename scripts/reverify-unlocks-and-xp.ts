@@ -42,6 +42,8 @@ import { grantVerifiedAchievementsForMap } from '../src/lib/verified-xp';
 import { getLevelFromXp } from '../src/lib/ranks';
 
 const DRY_RUN = process.argv.includes('--dry-run');
+const SKIP_GLOBAL = process.argv.includes('--skip-global');
+const FULL_GLOBAL_PASS = process.argv.includes('--full-global-pass');
 const filterUserId = process.env.BACKFILL_USER_ID?.trim();
 
 async function main() {
@@ -53,6 +55,12 @@ async function main() {
 
   if (DRY_RUN) {
     console.log('*** DRY RUN – no changes will be written ***\n');
+  }
+  if (SKIP_GLOBAL) {
+    console.log('*** SKIP GLOBAL – step 4 (checkAllAchievements) will be skipped ***\n');
+  }
+  if (FULL_GLOBAL_PASS) {
+    console.log('*** FULL GLOBAL PASS – step 4 will run legacy checkAllAchievements for all active achievements ***\n');
   }
   if (filterUserId) {
     console.log(`Filtering to userId=${filterUserId}\n`);
@@ -137,20 +145,67 @@ async function main() {
   console.log(`   Processed ${pairs.length} (userId, mapId) pairs; ${mapUnlocks} new unlocks.`);
 
   console.log('4. Adding missing unlocks (global achievements)...');
-  const users = await prisma.user.findMany({
-    where: userWhere,
-    select: { id: true },
-  });
-  const totalUsers = users.length;
-  console.log(`   Checking ${totalUsers} users (no progress = still running)...`);
   let globalUnlocks = 0;
-  if (!DRY_RUN) {
-    for (let i = 0; i < users.length; i++) {
-      const user = users[i]!;
-      const added = await checkAllAchievements(user.id);
-      globalUnlocks += added.length;
-      if ((i + 1) % 100 === 0 || i === users.length - 1) {
-        console.log(`   Checked ${i + 1}/${totalUsers} users, ${globalUnlocks} new global unlocks so far.`);
+  if (SKIP_GLOBAL) {
+    console.log('   Skipped global achievement pass.');
+  } else {
+    const users = await prisma.user.findMany({
+      where: userWhere,
+      select: { id: true },
+    });
+    const totalUsers = users.length;
+    if (FULL_GLOBAL_PASS) {
+      console.log(`   Checking ${totalUsers} users with legacy full pass...`);
+      if (!DRY_RUN) {
+        for (let i = 0; i < users.length; i++) {
+          const user = users[i]!;
+          const added = await checkAllAchievements(user.id);
+          globalUnlocks += added.length;
+          if ((i + 1) % 100 === 0 || i === users.length - 1) {
+            console.log(`   Checked ${i + 1}/${totalUsers} users, ${globalUnlocks} new global unlocks so far.`);
+          }
+        }
+      }
+    } else {
+      const globalAchievements = await prisma.achievement.findMany({
+        where: {
+          isActive: true,
+          mapId: null,
+          easterEggId: null,
+        },
+      });
+      console.log(`   Checking ${totalUsers} users across ${globalAchievements.length} global achievements...`);
+      const globalAchievementIds = globalAchievements.map((a) => a.id);
+      if (!DRY_RUN && globalAchievements.length > 0) {
+        for (let i = 0; i < users.length; i++) {
+          const user = users[i]!;
+          const existing = await prisma.userAchievement.findMany({
+            where: {
+              userId: user.id,
+              achievementId: { in: globalAchievementIds },
+            },
+            select: { achievementId: true },
+          });
+          const existingSet = new Set(existing.map((e) => e.achievementId));
+          const toCreate: { userId: string; achievementId: string }[] = [];
+          for (const achievement of globalAchievements) {
+            if (existingSet.has(achievement.id)) continue;
+            const qualifies = await checkAchievement(user.id, achievement);
+            if (qualifies) {
+              toCreate.push({ userId: user.id, achievementId: achievement.id });
+            }
+          }
+          if (toCreate.length > 0) {
+            await prisma.userAchievement.createMany({
+              data: toCreate,
+              skipDuplicates: true,
+            });
+            globalUnlocks += toCreate.length;
+          }
+          if ((i + 1) % 25 === 0 || i === users.length - 1) {
+            console.log(`   Checked ${i + 1}/${totalUsers} users, ${globalUnlocks} new global unlocks so far.`);
+          }
+        }
       }
     }
   }

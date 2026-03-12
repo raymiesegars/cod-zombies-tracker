@@ -2,18 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
-import { isSuperAdmin } from '@/lib/admin';
+import { hasEasterEggAdminAccess } from '@/lib/admin';
 
 export const dynamic = 'force-dynamic';
 
-async function requireSuperAdmin() {
+async function requireEasterEggAdmin() {
   const supabaseUser = await getUser();
   if (!supabaseUser) return { error: 'Unauthorized' as const, status: 401 as const, user: null };
   const me = await prisma.user.findUnique({
     where: { supabaseId: supabaseUser.id },
-    select: { id: true },
+    select: { id: true, isEasterEggAdmin: true },
   });
-  if (!me || !isSuperAdmin(me.id)) return { error: 'Forbidden: super admin only' as const, status: 403 as const, user: null };
+  if (!me || !hasEasterEggAdminAccess(me)) return { error: 'Forbidden' as const, status: 403 as const, user: null };
   return { user: me, error: null, status: null };
 }
 
@@ -27,7 +27,7 @@ function slugify(s: string): string {
 
 /** GET: List easter eggs for a map. Query: mapId (required). */
 export async function GET(request: NextRequest) {
-  const auth = await requireSuperAdmin();
+  const auth = await requireEasterEggAdmin();
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   const { searchParams } = new URL(request.url);
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
 
 /** POST: Create new easter egg. Body: mapId, name, slug?, type, description?, xpReward?, etc. */
 export async function POST(request: NextRequest) {
-  const auth = await requireSuperAdmin();
+  const auth = await requireEasterEggAdmin();
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
   const body = await request.json().catch(() => ({}));

@@ -16,6 +16,7 @@ export async function GET() {
       select: {
         id: true,
         isAdmin: true,
+        isEasterEggAdmin: true,
         adminXp: true,
         adminDashboardSeen: true,
         _count: {
@@ -24,7 +25,7 @@ export async function GET() {
       },
     });
 
-    if (!me || !me.isAdmin) {
+    if (!me || (!me.isAdmin && !me.isEasterEggAdmin)) {
       return NextResponse.json({ admin: null });
     }
 
@@ -32,6 +33,8 @@ export async function GET() {
     return NextResponse.json({
       admin: {
         id: me.id,
+        isAdmin: me.isAdmin,
+        isEasterEggAdmin: me.isEasterEggAdmin,
         adminXp: me.adminXp,
         isSuperAdmin: isSuperAdmin(me.id),
         adminDashboardSeen: me.adminDashboardSeen as { feedbackAt?: string; verifiedHistoryAt?: string } | null,

@@ -238,9 +238,14 @@ export function Navbar() {
                           <BookOpen className="w-4 h-4" />
                           Rules
                         </Link>
-                        {(profile as { isAdmin?: boolean })?.isAdmin && (
+                        {((profile as { isAdmin?: boolean; isEasterEggAdmin?: boolean })?.isAdmin ||
+                          (profile as { isAdmin?: boolean; isEasterEggAdmin?: boolean })?.isEasterEggAdmin) && (
                           <Link
-                            href="/admin/verification"
+                            href={
+                              (profile as { isAdmin?: boolean; isEasterEggAdmin?: boolean })?.isAdmin
+                                ? '/admin/verification'
+                                : '/admin/easter-eggs'
+                            }
                             onClick={() => setIsMenuOpen(false)}
                             className="flex items-center gap-2 px-4 py-2 text-sm text-white hover:text-blood-400 hover:bg-bunker-800/50"
                           >
@@ -440,9 +445,14 @@ export function Navbar() {
                     <Settings className="w-5 h-5 flex-shrink-0" />
                     Settings
                   </Link>
-                  {(profile as { isAdmin?: boolean })?.isAdmin && (
+                  {((profile as { isAdmin?: boolean; isEasterEggAdmin?: boolean })?.isAdmin ||
+                    (profile as { isAdmin?: boolean; isEasterEggAdmin?: boolean })?.isEasterEggAdmin) && (
                     <Link
-                      href="/admin/verification"
+                      href={
+                        (profile as { isAdmin?: boolean; isEasterEggAdmin?: boolean })?.isAdmin
+                          ? '/admin/verification'
+                          : '/admin/easter-eggs'
+                      }
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="flex items-center gap-3 px-4 py-3 min-h-[44px] text-base text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors touch-manipulation"
                     >
