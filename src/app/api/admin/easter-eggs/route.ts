@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { hasEasterEggAdminAccess } from '@/lib/admin';
+import { normalizeEasterEggVideoEmbedUrl } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest) {
       xpReward,
       playerCountRequirement,
       rewardsDescription: typeof body.rewardsDescription === 'string' ? body.rewardsDescription.trim() || null : null,
-      videoEmbedUrl: typeof body.videoEmbedUrl === 'string' ? body.videoEmbedUrl.trim() || null : null,
+      videoEmbedUrl: typeof body.videoEmbedUrl === 'string' ? normalizeEasterEggVideoEmbedUrl(body.videoEmbedUrl) : null,
       variantTag: typeof body.variantTag === 'string' ? body.variantTag.trim() || null : null,
       categoryTag: typeof body.categoryTag === 'string' ? body.categoryTag.trim() || null : null,
     },

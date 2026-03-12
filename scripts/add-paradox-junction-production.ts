@@ -227,7 +227,7 @@ async function main() {
   }
 
   console.log('Paradox Junction added successfully.');
-  console.log('Next: run achievement sync for this map, e.g. GAMES=BO7 pnpm db:sync-achievements');
+  console.log('Next: run pnpm db:sync-achievements-paradox-junction-only to create this map\'s achievements only.');
   await prisma.$disconnect();
 }
 

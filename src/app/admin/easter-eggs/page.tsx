@@ -464,11 +464,11 @@ function EasterEggEditModal({
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-bunker-500 mb-1">Video embed URL (YouTube)</label>
+          <label className="block text-xs font-medium text-bunker-500 mb-1">Video (YouTube)</label>
           <Input
             value={form.videoEmbedUrl}
             onChange={(e) => setForm((p) => ({ ...p, videoEmbedUrl: e.target.value }))}
-            placeholder="https://www.youtube.com/embed/VIDEO_ID"
+            placeholder="Paste watch link or embed URL (e.g. youtube.com/watch?v=...)"
             className="bg-bunker-800 border-bunker-600"
           />
         </div>

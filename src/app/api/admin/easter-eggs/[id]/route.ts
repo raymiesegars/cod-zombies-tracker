@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { hasEasterEggAdminAccess } from '@/lib/admin';
+import { normalizeEasterEggVideoEmbedUrl } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -79,7 +80,7 @@ export async function PATCH(
     updates.playerCountRequirement = body.playerCountRequirement ?? null;
   }
   if (typeof body.rewardsDescription === 'string') updates.rewardsDescription = body.rewardsDescription.trim() || null;
-  if (typeof body.videoEmbedUrl === 'string') updates.videoEmbedUrl = body.videoEmbedUrl.trim() || null;
+  if (typeof body.videoEmbedUrl === 'string') updates.videoEmbedUrl = normalizeEasterEggVideoEmbedUrl(body.videoEmbedUrl);
   if (typeof body.variantTag === 'string') updates.variantTag = body.variantTag.trim() || null;
   if (typeof body.categoryTag === 'string') updates.categoryTag = body.categoryTag.trim() || null;
   if (typeof body.isActive === 'boolean') updates.isActive = body.isActive;

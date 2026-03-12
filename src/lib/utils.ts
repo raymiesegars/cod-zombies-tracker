@@ -97,6 +97,30 @@ export function getProofEmbedUrl(url: string): { type: 'youtube' | 'twitch' | 'i
   };
 }
 
+/**
+ * Normalize Easter egg "Video embed URL" so the stored value is always a clean iframe src.
+ * Accepts: YouTube watch link, youtu.be link, full iframe HTML, or already an embed URL.
+ */
+export function normalizeEasterEggVideoEmbedUrl(input: string | null | undefined): string | null {
+  const raw = (input ?? '').trim();
+  if (!raw) return null;
+
+  let url = raw;
+  const iframeSrcMatch = raw.match(/src\s*=\s*["']([^"']+)["']/i);
+  if (iframeSrcMatch) url = iframeSrcMatch[1].trim();
+
+  const youtubeWatchMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if (youtubeWatchMatch) {
+    return `https://www.youtube.com/embed/${youtubeWatchMatch[1]}`;
+  }
+
+  const youtubeEmbedMatch = url.match(/^(https:\/\/(?:www\.)?youtube(?:-nocookie)?\.com\/embed\/[a-zA-Z0-9_-]+(?:\?[^#]*)?)/);
+  if (youtubeEmbedMatch) return youtubeEmbedMatch[1];
+
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return null;
+}
+
 /** Max number of proof URLs per run */
 export const PROOF_URLS_MAX = 20;
 
