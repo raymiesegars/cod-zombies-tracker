@@ -12,7 +12,8 @@ export type Bo7MapSlug =
   | 'mars'
   | 'vandorn-farm'
   | 'exit-115'
-  | 'zarya-cosmodrome';
+  | 'zarya-cosmodrome'
+  | 'paradox-junction';
 
 function min(s: number) {
   return s * 60;
@@ -274,6 +275,47 @@ export const BO7_MAP_CONFIG: Record<Bo7MapSlug, Bo7MapConfig> = {
       r999: h(120),
       exfilSpeedrunWR: min(4),
       exfilR21SpeedrunWR: min(9),
+    },
+  },
+  'paradox-junction': {
+    challengeTypes: [
+      'HIGHEST_ROUND',
+      'NO_JUG',
+      'NO_DOWNS',
+      'NO_PERKS',
+      'NO_PACK',
+      'STARTING_ROOM',
+      'ONE_BOX',
+      'PISTOL_ONLY',
+      'NO_POWER',
+      'ROUND_5_SPEEDRUN',
+      'ROUND_15_SPEEDRUN',
+      'ROUND_30_SPEEDRUN',
+      'ROUND_50_SPEEDRUN',
+      'ROUND_70_SPEEDRUN',
+      'ROUND_100_SPEEDRUN',
+      'ROUND_200_SPEEDRUN',
+      'ROUND_999_SPEEDRUN',
+      'EXFIL_SPEEDRUN',
+      'EXFIL_R21_SPEEDRUN',
+      'EASTER_EGG_SPEEDRUN',
+    ],
+    highRoundWR: 999,
+    noDownsWR: 999,
+    firstRoomWR: 241,
+    noPerksWR: 120,
+    noJugWR: 258,
+    noPowerWR: 241,
+    speedrunWRs: {
+      r30: min(13) + 24,
+      r50: min(24) + 27,
+      r70: min(34) + 49,
+      r100: min(52) + 36,
+      r200: h(4),
+      r999: h(80),
+      exfilSpeedrunWR: min(4) + 20,
+      exfilR21SpeedrunWR: min(10),
+      eeSpeedrunWR: min(30),
     },
   },
 };

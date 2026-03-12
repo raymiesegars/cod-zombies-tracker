@@ -85,7 +85,7 @@ export const MAP_SLUG_BY_GAME: Record<string, Record<string, string | null>> = {
     'frozen-dawn': 'the-frozen-dawn',
     'gresten-haus': 'groesten-haus',
   },
-  // BO7: all 6 maps. ZWR "farm" → CZT "vandorn-farm"; others use same slug.
+  // BO7: all 7 maps. ZWR "farm" → CZT "vandorn-farm"; others use same slug.
   bo7: {
     'ashes-of-the-damned': 'ashes-of-the-damned',
     farm: 'vandorn-farm',
@@ -93,6 +93,7 @@ export const MAP_SLUG_BY_GAME: Record<string, Record<string, string | null>> = {
     'astra-malorum': 'astra-malorum',
     'zarya-cosmodrome': 'zarya-cosmodrome',
     mars: 'mars',
+    'paradox-junction': 'paradox-junction',
   },
 };
 

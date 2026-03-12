@@ -50,6 +50,7 @@
     "db:verify-user-xp": "tsx scripts/verify-user-xp.ts",
     "db:reunlock-achievements": "node scripts/run-reunlock-with-direct.js",
     "db:sync-achievements": "tsx scripts/sync-achievements.ts",
+    "db:add-paradox-junction": "tsx scripts/add-paradox-junction-production.ts",
     "db:revalidate-tiered-xp": "tsx scripts/revalidate-tiered-achievements-xp.ts",
     "db:sync-level-thresholds": "tsx scripts/sync-level-thresholds.ts",
     "db:compute-total-xp": "tsx scripts/compute-total-obtainable-xp.ts",

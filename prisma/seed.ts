@@ -262,9 +262,10 @@ async function main() {
       { name: 'Ashes of the Damned', slug: 'ashes-of-the-damned', isDlc: false, hasEasterEgg: true, order: 1, description: 'Black Ops 7 Zombies. Survive the undead.' },
       { name: 'Vandorn Farm', slug: 'vandorn-farm', isDlc: false, hasEasterEgg: true, order: 2, description: 'Black Ops 7 Zombies. Survival map.' },
       { name: 'Exit 115', slug: 'exit-115', isDlc: false, hasEasterEgg: true, order: 3, description: 'Black Ops 7 Zombies. Survival map.' },
-      { name: 'Astra Malorum', slug: 'astra-malorum', isDlc: true, hasEasterEgg: true, order: 4, description: 'Black Ops 7 Zombies DLC. Thurston Observatory and Mars.' },
-      { name: 'Zarya Cosmodrome', slug: 'zarya-cosmodrome', isDlc: true, hasEasterEgg: true, order: 5, description: 'Black Ops 7 Zombies DLC. Survival map. A cosmodrome under siege.' },
+      { name: 'Zarya Cosmodrome', slug: 'zarya-cosmodrome', isDlc: true, hasEasterEgg: true, order: 4, description: 'Black Ops 7 Zombies DLC. Survival map. A cosmodrome under siege.' },
+      { name: 'Astra Malorum', slug: 'astra-malorum', isDlc: true, hasEasterEgg: true, order: 5, description: 'Black Ops 7 Zombies DLC. Thurston Observatory and Mars.' },
       { name: 'Mars', slug: 'mars', isDlc: true, hasEasterEgg: false, order: 6, description: 'Black Ops 7 Zombies DLC. Survival map on Mars.', imageUrl: '/images/maps/mars.webp' },
+      { name: 'Paradox Junction', slug: 'paradox-junction', isDlc: true, hasEasterEgg: true, order: 7, description: 'Black Ops 7 Zombies DLC. Nuketown Normal and Destroyed. The Dark Heart main quest.', imageUrl: '/images/maps/paradox-junction.webp' },
     ],
     WW2: [
       { name: 'Prologue', slug: 'prologue', isDlc: false, hasEasterEgg: false, order: 1, imageUrl: '/images/maps/prologue.webp', description: 'WW2 Zombies prologue map. Small survival challenge.' },
