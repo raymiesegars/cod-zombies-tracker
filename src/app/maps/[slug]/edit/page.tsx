@@ -261,21 +261,28 @@ function OfficialRulesModal({
 
 function SaveProgressRow({
   onSave,
+  onSaveWithVerification,
   isSaving,
   saveStatus,
   saveDisabled,
+  verifyDisabled,
   saveErrorMessage,
   hideInlineError,
 }: {
   onSave: () => void;
+  onSaveWithVerification: () => void;
   isSaving: boolean;
   saveStatus: 'idle' | 'success' | 'error';
   saveDisabled?: boolean;
+  verifyDisabled?: boolean;
   saveErrorMessage?: string | null;
   hideInlineError?: boolean;
 }) {
+  const [confirmOpen, setConfirmOpen] = useState<null | 'standard' | 'verification'>(null);
+  const isVerification = confirmOpen === 'verification';
+
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 pt-6 border-t border-bunker-800 mt-6">
+    <div className="flex flex-col gap-3 sm:gap-4 pt-6 border-t border-bunker-800 mt-6">
       <div className="order-2 sm:order-1">
         {saveStatus === 'success' && (
           <div className="flex items-center gap-2 text-military-400 text-sm">
@@ -290,15 +297,62 @@ function SaveProgressRow({
           </div>
         )}
       </div>
-      <Button
-        onClick={onSave}
-        isLoading={isSaving}
-        disabled={saveDisabled}
-        leftIcon={isSaving ? undefined : <Save className="w-4 h-4" />}
-        className="w-full sm:w-auto order-1 sm:order-2"
+      {verifyDisabled && (
+        <p className="order-1 sm:order-2 text-sm text-bunker-400">
+          Add at least one proof URL above to enable &quot;Save + Request Verification&quot;.
+        </p>
+      )}
+      <div className="order-1 sm:order-2 grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
+        <Button
+          variant="verification"
+          onClick={() => setConfirmOpen('verification')}
+          isLoading={isSaving}
+          disabled={saveDisabled || verifyDisabled}
+          leftIcon={isSaving ? undefined : <CheckCircle className="w-4 h-4" />}
+          className="w-full"
+        >
+          Save + Request Verification
+        </Button>
+        <Button
+          onClick={() => setConfirmOpen('standard')}
+          isLoading={isSaving}
+          disabled={saveDisabled}
+          leftIcon={isSaving ? undefined : <Save className="w-4 h-4" />}
+          variant="secondary"
+          className="w-full"
+        >
+          Save Without Verification
+        </Button>
+      </div>
+
+      <Modal
+        isOpen={confirmOpen !== null}
+        onClose={() => !isSaving && setConfirmOpen(null)}
+        title={isVerification ? 'Submit with verification request?' : 'Submit run normally?'}
+        description={
+          isVerification
+            ? 'This saves your run and also sends it to admins for review. Please include a proof URL so it can be verified.'
+            : 'This saves your run immediately without creating a verification request.'
+        }
+        size="sm"
       >
-        Save Progress
-      </Button>
+        <div className="flex justify-end gap-2 pt-2">
+          <Button variant="secondary" onClick={() => setConfirmOpen(null)} disabled={isSaving}>
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              const mode = confirmOpen;
+              setConfirmOpen(null);
+              if (mode === 'verification') onSaveWithVerification();
+              if (mode === 'standard') onSave();
+            }}
+            disabled={isSaving}
+          >
+            {isVerification ? 'Save + request verification' : 'Save run'}
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }
@@ -687,7 +741,7 @@ export default function EditMapProgressPage() {
     setSharedChallengeForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSaveSelectedChallenges = async () => {
+  const handleSaveSelectedChallenges = async (requestVerification = false) => {
     if (!profile || !map || selectedChallengeIds.size === 0) return;
     const form = sharedChallengeForm;
     const selectedChallenges = Array.from(selectedChallengeIds).map((cid) => map.challenges.find((c) => c.id === cid));
@@ -753,10 +807,10 @@ export default function EditMapProgressPage() {
         return;
       }
     }
-    if (form.requestVerification) {
+    if (requestVerification) {
       const hasProof = (form.proofUrls ?? []).filter(Boolean).length > 0;
       if (!hasProof) {
-        setSaveErrorModalMessage('To request verification, add at least one proof (URL or screenshot) or uncheck "Request verification".');
+        setSaveErrorModalMessage('To request verification, add at least one proof URL.');
         return;
       }
     }
@@ -832,7 +886,7 @@ export default function EditMapProgressPage() {
             })(),
             teammateUserIds: form.teammateUserIds ?? [],
             teammateNonUserNames: form.teammateNonUserNames ?? [],
-            requestVerification: form.requestVerification ?? false,
+            requestVerification,
             ...(mysteryBoxRollId && challengeId === preselectedChallengeId && { mysteryBoxRollId }),
           }),
         });
@@ -904,17 +958,17 @@ export default function EditMapProgressPage() {
     }));
   };
 
-  const handleSaveChallenge = async (challengeId: string) => {
+  const handleSaveChallenge = async (challengeId: string, requestVerification = false) => {
     if (!profile || !map) return;
 
     const form = challengeForms[challengeId];
     const challenge = map.challenges?.find((c) => c.id === challengeId);
     if (!form?.roundReached || parseInt(form.roundReached) <= 0) return;
 
-    if (form.requestVerification) {
+    if (requestVerification) {
       const hasProof = (form.proofUrls ?? []).filter(Boolean).length > 0;
       if (!hasProof) {
-        setSaveErrorModalMessage('To request verification, add at least one proof (URL or screenshot) or uncheck "Request verification".');
+        setSaveErrorModalMessage('To request verification, add at least one proof URL.');
         return;
       }
     }
@@ -951,7 +1005,7 @@ export default function EditMapProgressPage() {
           completionTimeSeconds: form.completionTimeSeconds ?? null,
           teammateUserIds: form.teammateUserIds ?? [],
           teammateNonUserNames: form.teammateNonUserNames ?? [],
-          requestVerification: form.requestVerification ?? false,
+          requestVerification,
           ...(mysteryBoxRollId && challengeId === preselectedChallengeId && { mysteryBoxRollId }),
         }),
       });
@@ -994,16 +1048,16 @@ export default function EditMapProgressPage() {
       : doSave());
   };
 
-  const handleSaveEasterEgg = async (eeId: string) => {
+  const handleSaveEasterEgg = async (eeId: string, requestVerification = false) => {
     if (!profile || !map) return;
 
     const form = easterEggForms[eeId];
     if (!form?.completed) return;
 
-    if (form.requestVerification) {
+    if (requestVerification) {
       const hasProof = (form.proofUrls ?? []).filter(Boolean).length > 0;
       if (!hasProof) {
-        setSaveErrorModalMessage('To request verification, add at least one proof (URL or screenshot) or uncheck "Request verification".');
+        setSaveErrorModalMessage('To request verification, add at least one proof URL.');
         return;
       }
     }
@@ -1031,7 +1085,7 @@ export default function EditMapProgressPage() {
           completionTimeSeconds: form.completionTimeSeconds ?? null,
           teammateUserIds: form.teammateUserIds ?? [],
           teammateNonUserNames: form.teammateNonUserNames ?? [],
-          requestVerification: form.requestVerification ?? false,
+          requestVerification,
           ...((isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName) || (isVanguardGame(map.game?.shortName) && hasVanguardRampageFilter(map.slug))) && { rampageInducerUsed: form.rampageInducerUsed ?? false }),
           ...(isVanguardGame(map.game?.shortName) && hasVanguardVoidFilter(map.slug) && { vanguardVoidUsed: form.vanguardVoidUsed ?? true }),
           ...(isWw2Game(map.game?.shortName) && { ww2ConsumablesUsed: form.ww2ConsumablesUsed ?? true }),
@@ -1676,16 +1730,6 @@ export default function EditMapProgressPage() {
                     />
                   </div>
 
-                  <label className="mt-3 sm:mt-4 flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={sharedChallengeForm.requestVerification ?? false}
-                      onChange={(e) => handleSharedChallengeChange('requestVerification', e.target.checked)}
-                      className="w-4 h-4 rounded border-bunker-600 bg-bunker-800 text-blood-500"
-                    />
-                    <span className="text-sm text-bunker-300">Request verification for this run</span>
-                  </label>
-
                   {(sharedChallengeForm.proofUrls?.filter(Boolean).length ?? 0) > 0 && (
                     <div className="mt-3 sm:mt-4 flex flex-col gap-4">
                       {(sharedChallengeForm.proofUrls ?? []).filter(Boolean).map((url, i) => (
@@ -1697,7 +1741,8 @@ export default function EditMapProgressPage() {
               </Card>
 
               <SaveProgressRow
-                onSave={handleSaveSelectedChallenges}
+                onSave={() => handleSaveSelectedChallenges(false)}
+                onSaveWithVerification={() => handleSaveSelectedChallenges(true)}
                 isSaving={isSaving}
                 saveStatus={saveStatus}
                 saveDisabled={
@@ -1726,6 +1771,7 @@ export default function EditMapProgressPage() {
                     );
                   })()
                 }
+                verifyDisabled={(sharedChallengeForm.proofUrls?.filter(Boolean).length ?? 0) === 0}
                 saveErrorMessage={saveErrorMessage}
                 hideInlineError={!!saveErrorModalMessage}
               />
@@ -1913,17 +1959,6 @@ export default function EditMapProgressPage() {
                           />
                           <span className="text-sm text-bunker-300">No guide used</span>
                         </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={easterEggForms[ee.id]?.requestVerification || false}
-                            onChange={(e) =>
-                              handleEasterEggChange(ee.id, 'requestVerification', e.target.checked)
-                            }
-                            className="w-4 h-4 rounded border-bunker-600 bg-bunker-800 text-blood-500 focus:ring-blood-500"
-                          />
-                          <span className="text-sm text-bunker-300">Request verification for this run</span>
-                        </label>
                       </div>
 
                       {(easterEggForms[ee.id]?.proofUrls?.filter(Boolean).length ?? 0) > 0 && (
@@ -1939,10 +1974,15 @@ export default function EditMapProgressPage() {
               </Card>
 
               <SaveProgressRow
-                onSave={() => handleSaveEasterEgg(ee.id)}
+                onSave={() => handleSaveEasterEgg(ee.id, false)}
+                onSaveWithVerification={() => handleSaveEasterEgg(ee.id, true)}
                 isSaving={isSaving}
                 saveStatus={saveStatus}
                 saveDisabled={!easterEggForms[ee.id]?.completed}
+                verifyDisabled={
+                  !easterEggForms[ee.id]?.completed ||
+                  ((easterEggForms[ee.id]?.proofUrls?.filter(Boolean).length ?? 0) === 0)
+                }
                 saveErrorMessage={saveErrorMessage}
                 hideInlineError={!!saveErrorModalMessage}
               />

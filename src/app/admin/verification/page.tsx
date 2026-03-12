@@ -9,6 +9,7 @@ import { RoundCounter } from '@/components/game';
 import { getAssetUrl } from '@/lib/assets';
 import { useXpToast } from '@/context/xp-toast-context';
 import { formatCompletionTime } from '@/components/ui/time-input';
+import { getGameDisplayShortName } from '@/lib/bo3-custom';
 import { ShieldCheck, CheckSquare, Square, Loader2, CheckCircle2, FileText, ExternalLink, Trophy } from 'lucide-react';
 import type { PendingVerificationRun } from '@/components/game/pending-verification-section';
 
@@ -216,7 +217,7 @@ export default function AdminVerificationPage() {
               label=""
               options={[
                 { value: '', label: 'All games' },
-                ...games.map((g) => ({ value: g.shortName, label: g.name })),
+                ...games.map((g) => ({ value: g.shortName, label: getGameDisplayShortName(g.shortName, g.name) })),
               ]}
               value={filterGame}
               onChange={(e) => setFilterGame(e.target.value)}

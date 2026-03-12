@@ -192,7 +192,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       const hasProof = (Array.isArray(effectiveProofUrls) && effectiveProofUrls.filter(Boolean).length > 0) || !!effectiveScreenshotUrl;
       if (!hasProof) {
         return NextResponse.json(
-          { error: 'To request verification, add at least one proof (URL or screenshot) or uncheck "Request verification".' },
+          { error: 'To request verification, add at least one proof URL or uncheck "Request verification".' },
           { status: 400 }
         );
       }

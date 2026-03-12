@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useCallback, useEffect } from 'rea
 import { useRouter } from 'next/navigation';
 import { Modal, Button, Select } from '@/components/ui';
 import type { Game, MapWithGame } from '@/types';
+import { getGameDisplayShortName } from '@/lib/bo3-custom';
 
 type LogProgressModalContextValue = {
   openLogProgressModal: () => void;
@@ -61,12 +62,15 @@ export function LogProgressModalProvider({ children }: { children: React.ReactNo
 
   const gameOptions = [
     { value: '', label: 'Select a game' },
-    ...games.map((g) => ({ value: g.id, label: g.name })),
+    ...games.map((g) => ({ value: g.id, label: getGameDisplayShortName(g.shortName, g.name) })),
   ];
 
   const mapOptions = [
     { value: '', label: 'Select a map' },
-    ...filteredMaps.map((m) => ({ value: m.slug, label: `${m.name} (${m.game?.shortName ?? ''})` })),
+    ...filteredMaps.map((m) => ({
+      value: m.slug,
+      label: `${m.name} (${getGameDisplayShortName(m.game?.shortName, m.game?.name)})`,
+    })),
   ];
 
   const handleContinue = () => {

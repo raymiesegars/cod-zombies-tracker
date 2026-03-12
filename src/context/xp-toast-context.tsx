@@ -308,7 +308,7 @@ function XpToastContent({ amount, totalXp, verified, label, admin, adminTotalXp,
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-white truncate flex items-center gap-1.5 flex-wrap">
-                    Level {after.level} · {isAdmin ? 'Admin Rank' : (after as ReturnType<typeof getLevelFromXp>).rankName}
+                    Level {after.level}
                     {(verified || isCustomZombies) && !isAdmin && (
                       <span className={cn('inline-flex items-center gap-0.5 text-xs shrink-0', isCustomZombies ? 'text-teal-400' : 'text-blue-400')}>
                         <CheckCircle2 className="w-3.5 h-3.5" aria-hidden />

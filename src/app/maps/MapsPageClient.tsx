@@ -7,7 +7,7 @@ import { Input, Select, Badge, Logo, MapIcon } from '@/components/ui';
 import { MapCard } from '@/components/game';
 import { MapsPageGameOrderModal } from './MapsPageGameOrderModal';
 import { SubmitMapModal } from './SubmitMapModal';
-import { isBo3CustomGame } from '@/lib/bo3-custom';
+import { getGameDisplayShortName, isBo3CustomGame } from '@/lib/bo3-custom';
 import type { MapWithGame, Game } from '@/types';
 import type { UserMapStats } from '@/types';
 import { Search, Filter, X, Settings, Plus, MapPin } from 'lucide-react';
@@ -82,12 +82,19 @@ export function MapsPageClient({ initialMaps, initialGames, openSubmitModal }: P
   const [showGameOrderModal, setShowGameOrderModal] = useState(false);
   const [showGameOrderFirstTime, setShowGameOrderFirstTime] = useState(false);
 
-  const [filters, setFilters] = useState(() => getMapsPageFiltersFromStorage());
+  const [filters, setFilters] = useState({ search: '', selectedGame: '', showDlcOnly: false });
+  const [filtersLoaded, setFiltersLoaded] = useState(false);
   const { search, selectedGame, showDlcOnly } = filters;
 
   useEffect(() => {
+    setFilters(getMapsPageFiltersFromStorage());
+    setFiltersLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!filtersLoaded) return;
     setMapsPageFiltersInStorage(filters.search, filters.selectedGame, filters.showDlcOnly);
-  }, [filters.search, filters.selectedGame, filters.showDlcOnly]);
+  }, [filters.search, filters.selectedGame, filters.showDlcOnly, filtersLoaded]);
 
   const setSearch = useCallback((v: string) => setFilters((f) => ({ ...f, search: v })), []);
   const setSelectedGame = useCallback((v: string) => setFilters((f) => ({ ...f, selectedGame: v })), []);
@@ -233,7 +240,7 @@ export function MapsPageClient({ initialMaps, initialGames, openSubmitModal }: P
       { value: '', label: 'All Games' },
       ...games
         .filter((g) => !hideCustomZombies || !isBo3CustomGame(g.shortName))
-        .map((game) => ({ value: game.id, label: game.name })),
+        .map((game) => ({ value: game.id, label: getGameDisplayShortName(game.shortName, game.name) })),
     ],
     [games, hideCustomZombies]
   );
@@ -332,7 +339,10 @@ export function MapsPageClient({ initialMaps, initialGames, openSubmitModal }: P
               <span className="text-xs sm:text-sm text-bunker-400">Filters:</span>
               {selectedGame && (
                 <Badge variant="blood" size="sm" className="cursor-pointer" onClick={() => setSelectedGame('')}>
-                  {games.find((g) => g.id === selectedGame)?.name}
+                  {(() => {
+                    const game = games.find((g) => g.id === selectedGame);
+                    return getGameDisplayShortName(game?.shortName, game?.name);
+                  })()}
                   <X className="w-3 h-3 ml-1" />
                 </Badge>
               )}
@@ -386,7 +396,7 @@ export function MapsPageClient({ initialMaps, initialGames, openSubmitModal }: P
                 <section key={game.id}>
                   <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                     <h2 className="text-lg sm:text-xl font-zombies text-white tracking-wide [text-shadow:0_0_2px_rgba(0,0,0,0.95),0_0_4px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.85)]">
-                      {game.name}
+                      {getGameDisplayShortName(game.shortName, game.name)}
                     </h2>
                     <Badge variant="default" size="sm">
                       {(mapsByGame[game.id] ?? []).length} maps

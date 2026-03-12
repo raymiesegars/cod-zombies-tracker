@@ -5,7 +5,7 @@ import { motion, HTMLMotionProps } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'verification';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'size' | 'children'> {
@@ -27,6 +27,8 @@ const variantStyles: Record<ButtonVariant, string> = {
     'bg-gradient-to-b from-blood-700 via-blood-800 to-blood-900 hover:from-blood-600 hover:via-blood-700 hover:to-blood-800 text-white border border-blood-600/30 shadow-[inset_0_1px_0_rgba(112,30,39,0.3),0_2px_8px_rgba(31,10,12,0.5)]',
   success:
     'bg-gradient-to-b from-military-700 to-military-800 hover:from-military-600 hover:to-military-700 text-white border border-military-500/30 shadow-[inset_0_1px_0_rgba(101,163,13,0.2),0_2px_4px_rgba(0,0,0,0.3)]',
+  verification:
+    'bg-gradient-to-b from-blue-600 via-blue-700 to-blue-800 hover:from-blue-500 hover:via-blue-600 hover:to-blue-700 text-white border border-blue-500/40 hover:border-blue-400/50 shadow-[inset_0_1px_0_rgba(59,130,246,0.25),0_2px_8px_rgba(30,64,175,0.4)] hover:shadow-[inset_0_1px_0_rgba(96,165,250,0.3),0_4px_12px_rgba(30,64,175,0.5)]',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {

@@ -301,13 +301,13 @@ export default function SettingsPage() {
           </Card>
         </div>
 
-        {/* BO3 Custom Zombies */}
+        {/* Custom Zombies */}
         <div>
           <Card variant="bordered">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                 <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-blood-400" />
-                BO3 Custom Zombies
+                Custom Zombies
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -315,7 +315,7 @@ export default function SettingsPage() {
                 <div className="flex flex-col gap-1">
                   <p className="font-medium text-sm sm:text-base text-white">Hide Custom Zombies everywhere</p>
                   <p className="text-xs sm:text-sm text-bunker-400">
-                    When on, BO3 Custom Zombies maps won&apos;t appear on the maps page, leaderboards, achievements filters, or anywhere on the site. Turn this <strong>OFF</strong> to show BO3 Custom Zombies.
+                    When on, Custom Zombies maps won&apos;t appear on the maps page, leaderboards, achievements filters, or anywhere on the site. Turn this <strong>OFF</strong> to show Custom Zombies.
                   </p>
                 </div>
                 <button

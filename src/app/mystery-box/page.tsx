@@ -1303,7 +1303,7 @@ function FilterModal({
                     onChange={() => toggleGame(g.id)}
                     className="rounded border-bunker-600"
                   />
-                  <span className="text-white text-sm">{g.name}</span>
+                  <span className="text-white text-sm">{getGameDisplayShortName(g.shortName, g.name)}</span>
                 </label>
               ))}
             </div>

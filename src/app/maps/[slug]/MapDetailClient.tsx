@@ -1309,7 +1309,9 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                 <h1 className="text-2xl pt-6 sm:text-3xl md:text-4xl lg:text-5xl font-zombies text-white tracking-wide [text-shadow:0_0_2px_rgba(0,0,0,0.95),0_0_6px_rgba(0,0,0,0.9),0_1px_8px_rgba(0,0,0,0.85),0_2px_12px_rgba(0,0,0,0.7)]">
                   {map.name}
                 </h1>
-                <p className="mt-1 sm:mt-2 text-sm sm:text-base text-white/95 [text-shadow:0_0_2px_rgba(0,0,0,0.95),0_1px_4px_rgba(0,0,0,0.8)]">{map.game.name}</p>
+                <p className="mt-1 sm:mt-2 text-sm sm:text-base text-white/95 [text-shadow:0_0_2px_rgba(0,0,0,0.95),0_1px_4px_rgba(0,0,0,0.8)]">
+                  {getGameDisplayShortName(map.game.shortName, map.game.name)}
+                </p>
                 {map.description && (
                   <p className="mt-2 sm:mt-3 text-xs sm:text-sm text-white/85 max-w-2xl [text-shadow:0_0_2px_rgba(0,0,0,0.9),0_1px_3px_rgba(0,0,0,0.7)] hidden min-[700px]:block">
                     {map.description}

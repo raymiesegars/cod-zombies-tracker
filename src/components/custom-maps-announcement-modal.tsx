@@ -38,7 +38,7 @@ export function CustomMapsAnnouncementModal() {
       isOpen={true}
       onClose={handleDismiss}
       title="Introducing: Custom Maps on CZT"
-      description="Add your Black Ops 3 Custom Zombies map — one-time announcement."
+      description="Add your Black Ops 3 Custom map — one-time announcement."
       size="xl"
       contentScroll={true}
       className="max-h-[90vh]"
@@ -77,7 +77,7 @@ export function CustomMapsAnnouncementModal() {
             <div>
               <span className="font-medium text-bunker-200">Go to Maps</span>
               <p className="text-sm text-bunker-400 mt-0.5">
-                Scroll to the <strong className="text-teal-400">BO3 Custom Zombies</strong> section
+                Scroll to the <strong className="text-teal-400">Custom Zombies</strong> section
                 and click <strong className="text-teal-400">Submit Custom Map</strong>.
               </p>
             </div>

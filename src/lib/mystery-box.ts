@@ -43,56 +43,43 @@ export async function accrueAndGetTokens(userId: string): Promise<{
 }> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { mysteryBoxTokens: true, mysteryBoxLastTokenAt: true },
+    select: { mysteryBoxTokens: true, mysteryBoxLastTokenAt: true, createdAt: true },
   });
   if (!user) return { tokens: 0, nextTokenAt: null };
 
-  let tokens = user.mysteryBoxTokens ?? 0;
-  const lastAt = user.mysteryBoxLastTokenAt;
   const now = new Date();
+  const nowMs = now.getTime();
 
-  // Accrue up to cap
-  while (tokens < TOKEN_CAP) {
-    const ref = lastAt ? new Date(lastAt.getTime() + (tokens * TOKEN_INTERVAL_MS)) : now;
-    const nextEligible = new Date(ref.getTime() + TOKEN_INTERVAL_MS);
-    if (now.getTime() < nextEligible.getTime()) break;
-    tokens += 1;
+  let tokens = Math.min(Math.max(user.mysteryBoxTokens ?? 0, 0), TOKEN_CAP);
+  // If lastTokenAt is missing (legacy/admin data), anchor to account creation so accrual can catch up.
+  let anchorMs = (user.mysteryBoxLastTokenAt ?? user.createdAt ?? now).getTime();
+
+  // If we are below cap and enough time passed since anchor, grant missed tokens up to cap.
+  if (tokens < TOKEN_CAP) {
+    const elapsedIntervals = Math.floor((nowMs - anchorMs) / TOKEN_INTERVAL_MS);
+    if (elapsedIntervals > 0) {
+      const granted = Math.min(TOKEN_CAP - tokens, elapsedIntervals);
+      tokens += granted;
+      anchorMs += granted * TOKEN_INTERVAL_MS;
+    }
+  }
+
+  const shouldPersist =
+    tokens !== (user.mysteryBoxTokens ?? 0) ||
+    user.mysteryBoxLastTokenAt == null ||
+    (user.mysteryBoxLastTokenAt?.getTime() ?? 0) !== anchorMs;
+
+  if (shouldPersist) {
     await prisma.user.update({
       where: { id: userId },
       data: {
         mysteryBoxTokens: tokens,
-        mysteryBoxLastTokenAt: lastAt ? new Date(lastAt.getTime() + TOKEN_INTERVAL_MS) : now,
+        mysteryBoxLastTokenAt: new Date(anchorMs),
       },
     });
   }
 
-  // Clamp (in case of inconsistency)
-  tokens = Math.min(tokens, TOKEN_CAP);
-
-  // Re-fetch to get accurate lastTokenAt (updated by accrual loop)
-  let updated = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { mysteryBoxLastTokenAt: true },
-  });
-
-  // Backfill: if we have tokens but no lastTokenAt (e.g. admin grant), set it so we can show a countdown
-  if (tokens > 0 && tokens < TOKEN_CAP && !updated?.mysteryBoxLastTokenAt) {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { mysteryBoxLastTokenAt: now },
-    });
-    updated = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { mysteryBoxLastTokenAt: true },
-    });
-  }
-
-  const effectiveLastAt = updated?.mysteryBoxLastTokenAt ?? null;
-  const nextTokenAt =
-    tokens < TOKEN_CAP && effectiveLastAt
-      ? new Date(effectiveLastAt.getTime() + TOKEN_INTERVAL_MS)
-      : null;
-
+  const nextTokenAt = tokens < TOKEN_CAP ? new Date(anchorMs + TOKEN_INTERVAL_MS) : null;
   return { tokens, nextTokenAt };
 }
 

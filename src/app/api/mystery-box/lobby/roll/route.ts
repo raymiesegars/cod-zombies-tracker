@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
-import { spendToken, pickRandomRoll, type MysteryBoxFilterSettings } from '@/lib/mystery-box';
+import { accrueAndGetTokens, spendToken, pickRandomRoll, type MysteryBoxFilterSettings } from '@/lib/mystery-box';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,6 +82,9 @@ export async function POST(request: NextRequest) {
     // Everyone in lobby (host + members) must spend 1 token
     const lobbyUserIds = [lobby.hostId, ...lobby.members.map((m) => m.userId)];
     const uniqueUserIds = Array.from(new Set(lobbyUserIds));
+
+    // Ensure token accrual is up-to-date for every lobby member before token checks.
+    await Promise.all(uniqueUserIds.map((uid) => accrueAndGetTokens(uid)));
 
     const usersWithTokens = await prisma.user.findMany({
       where: { id: { in: uniqueUserIds } },

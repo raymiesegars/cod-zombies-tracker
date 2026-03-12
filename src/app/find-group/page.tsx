@@ -125,7 +125,7 @@ export default function FindGroupPage() {
   }, [createOpen, fetchGamesAndMaps]);
 
   const gameOptions = useMemo(
-    () => [{ value: '', label: 'All games' }, ...games.map((g) => ({ value: g.id, label: g.name }))],
+    () => [{ value: '', label: 'All games' }, ...games.map((g) => ({ value: g.id, label: getGameDisplayShortName(g.shortName, g.name) }))],
     [games]
   );
 

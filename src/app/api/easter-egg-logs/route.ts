@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
       const hasProof = (proofUrls?.filter(Boolean).length ?? 0) > 0 || !!screenshotUrl;
       if (!hasProof) {
         return NextResponse.json(
-          { error: 'To request verification, add at least one proof (URL or screenshot) or uncheck "Request verification".' },
+          { error: 'To request verification, add at least one proof URL or uncheck "Request verification".' },
           { status: 400 }
         );
       }
