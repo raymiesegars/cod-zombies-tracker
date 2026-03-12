@@ -18,7 +18,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const title = `${map.name} (${getGameDisplayShortName(map.game.shortName, map.game.name)}) - Easter Egg Guide & Leaderboard`;
-  const description = `${map.name} - ${map.game.name}. Step-by-step Easter egg guide, challenges, high round leaderboard, and progress tracking. CoD Zombies Tracker.`;
+  const gameDisplayName = getGameDisplayShortName(map.game.shortName, map.game.name);
+  const description = `${map.name} - ${gameDisplayName}. Step-by-step Easter egg guide, challenges, high round leaderboard, and progress tracking. CoD Zombies Tracker.`;
 
   const mapUrl = `${baseUrl}/maps/${map.slug}`;
   const ogImage = map.imageUrl
@@ -55,6 +56,7 @@ export default async function MapSlugLayout({ children, params }: Props) {
   });
 
   const mapUrl = map ? `${baseUrl}/maps/${map.slug}` : '';
+  const gameDisplayName = map ? getGameDisplayShortName(map.game.shortName, map.game.name) : '';
   const jsonLd = map
     ? {
         '@context': 'https://schema.org',
@@ -62,7 +64,7 @@ export default async function MapSlugLayout({ children, params }: Props) {
           {
             '@type': 'VideoGame',
             name: map.name,
-            description: `${map.name} - ${map.game.name}. Easter egg guide, high round leaderboard, and challenges on CoD Zombies Tracker.`,
+            description: `${map.name} - ${gameDisplayName}. Easter egg guide, high round leaderboard, and challenges on CoD Zombies Tracker.`,
             url: mapUrl,
             gamePlatform: 'PC, PlayStation, Xbox',
           },

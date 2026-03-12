@@ -61,7 +61,7 @@ export default function UserLogsPage() {
 
   const gameName = useMemo(() => {
     if (!maps.length) return null;
-    return maps[0].game.name;
+    return getGameDisplayShortName(maps[0].game.shortName, maps[0].game.name);
   }, [maps]);
 
   const gameShortName = useMemo(() => {

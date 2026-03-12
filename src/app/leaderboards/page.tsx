@@ -478,7 +478,7 @@ export default function LeaderboardsPage() {
   const gameOptions = [
     { value: RANK_VIEW, label: 'Rank (by XP)' },
     { value: '', label: 'All Games' },
-    ...filteredGamesForOptions.map((game) => ({ value: game.id, label: game.name })),
+    ...filteredGamesForOptions.map((game) => ({ value: game.id, label: getGameDisplayShortName(game.shortName, game.name) })),
   ];
 
   const mapOptions = [
@@ -1256,7 +1256,7 @@ export default function LeaderboardsPage() {
                       {selectedMapData.name}
                     </CardTitle>
                     <p className="text-xs sm:text-sm text-bunker-400 mt-1">
-                      {selectedMapData.game.name}
+                      {getGameDisplayShortName(selectedMapData.game.shortName, selectedMapData.game.name)}
                       {isEeTimeView && eeTimeEasterEggId
                         ? ` • ${mapEasterEggs.find((ee) => ee.id === eeTimeEasterEggId)?.name ?? 'Easter Egg'} (Time)`
                         : ` • ${selectedChallengeType ? challengeTypeLabels[selectedChallengeType as ChallengeType] ?? getWw2ChallengeTypeLabel(selectedChallengeType) ?? selectedChallengeType : 'All Challenges'}`}

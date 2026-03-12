@@ -1,0 +1,500 @@
+{
+  "report": [
+    {
+      "csvRowIndex": 2,
+      "status": "skipped",
+      "game": "bo6",
+      "map": "the-tomb",
+      "record": "first-room",
+      "sub_record": "purist",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 3,
+      "status": "skipped",
+      "game": "bo6",
+      "map": "citadelle-des-morts",
+      "record": "first-room",
+      "sub_record": "purist",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 4,
+      "status": "skipped",
+      "game": "bo6",
+      "map": "shattered-veil",
+      "record": "first-room",
+      "sub_record": "no-gobblegums-no-support",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 5,
+      "status": "skipped",
+      "game": "bo2",
+      "map": "bus-depot",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 6,
+      "status": "skipped",
+      "game": "bo6",
+      "map": "terminus",
+      "record": "first-room",
+      "sub_record": "no-gobblegums-with-support",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 7,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "the-giant",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 8,
+      "status": "skipped",
+      "game": "bo6",
+      "map": "terminus",
+      "record": "first-room",
+      "sub_record": "with-gobblegums-no-support",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 9,
+      "status": "skipped",
+      "game": "bo6",
+      "map": "terminus",
+      "record": "first-room",
+      "sub_record": "no-gobblegums-no-support",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 10,
+      "status": "imported",
+      "game": "bo6",
+      "map": "terminus",
+      "record": "first-room",
+      "sub_record": "no-gobblegums-no-support",
+      "message": "[DRY RUN] Would create ChallengeLog",
+      "logIds": [
+        "dry-run"
+      ]
+    },
+    {
+      "csvRowIndex": 11,
+      "status": "imported",
+      "game": "bo6",
+      "map": "terminus",
+      "record": "first-room",
+      "sub_record": "no-gobblegums-no-support",
+      "message": "[DRY RUN] Would create ChallengeLog",
+      "logIds": [
+        "dry-run"
+      ]
+    },
+    {
+      "csvRowIndex": 12,
+      "status": "imported",
+      "game": "bo6",
+      "map": "terminus",
+      "record": "first-room",
+      "sub_record": "no-gobblegums-with-support",
+      "message": "[DRY RUN] Would create ChallengeLog",
+      "logIds": [
+        "dry-run"
+      ]
+    },
+    {
+      "csvRowIndex": 13,
+      "status": "imported",
+      "game": "bo6",
+      "map": "terminus",
+      "record": "first-room",
+      "sub_record": "with-gobblegums-no-support",
+      "message": "[DRY RUN] Would create ChallengeLog",
+      "logIds": [
+        "dry-run"
+      ]
+    },
+    {
+      "csvRowIndex": 14,
+      "status": "skipped",
+      "game": "bo6",
+      "map": "terminus",
+      "record": "first-room",
+      "sub_record": "no-gobblegums-no-support",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 15,
+      "status": "skipped",
+      "game": "bo2",
+      "map": "mob-of-the-dead",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 16,
+      "status": "skipped",
+      "game": "bo6",
+      "map": "citadelle-des-morts",
+      "record": "first-room",
+      "sub_record": "purist",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 17,
+      "status": "skipped",
+      "game": "bo2",
+      "map": "bus-depot",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 18,
+      "status": "skipped",
+      "game": "bo",
+      "map": "verruckt",
+      "record": "first-room",
+      "sub_record": "mixed",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 19,
+      "status": "skipped",
+      "game": "bo6",
+      "map": "terminus",
+      "record": "first-room",
+      "sub_record": "with-gobblegums-with-support",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 20,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "revelations",
+      "record": "first-room",
+      "sub_record": "classic-gobblegum-only",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 21,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "revelations",
+      "record": "first-room",
+      "sub_record": "no-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 22,
+      "status": "skipped",
+      "game": "aw",
+      "map": "outbreak",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 23,
+      "status": "skipped",
+      "game": "bo2",
+      "map": "bus-depot",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 24,
+      "status": "skipped",
+      "game": "bo6",
+      "map": "terminus",
+      "record": "first-room",
+      "sub_record": "with-gobblegums-no-support",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 25,
+      "status": "skipped",
+      "game": "bo6",
+      "map": "terminus",
+      "record": "first-room",
+      "sub_record": "with-gobblegums-with-support",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 26,
+      "status": "imported",
+      "game": "bo2",
+      "map": "bus-depot",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "[DRY RUN] Would create ChallengeLog",
+      "logIds": [
+        "dry-run"
+      ]
+    },
+    {
+      "csvRowIndex": 27,
+      "status": "skipped",
+      "game": "bo2",
+      "map": "die-rise",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 28,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "gorod-krovi",
+      "record": "first-room",
+      "sub_record": "no-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 29,
+      "status": "skipped",
+      "game": "bo6",
+      "map": "terminus",
+      "record": "first-room",
+      "sub_record": "no-gobblegums-with-support",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 30,
+      "status": "imported",
+      "game": "bo6",
+      "map": "terminus",
+      "record": "first-room",
+      "sub_record": "no-gobblegums-no-support",
+      "message": "[DRY RUN] Would create ChallengeLog",
+      "logIds": [
+        "dry-run"
+      ]
+    },
+    {
+      "csvRowIndex": 31,
+      "status": "skipped",
+      "game": "bo2",
+      "map": "mob-of-the-dead",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 32,
+      "status": "skipped",
+      "game": "bo6",
+      "map": "terminus",
+      "record": "first-room",
+      "sub_record": "with-gobblegums-no-support",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 33,
+      "status": "skipped",
+      "game": "bo4",
+      "map": "blood-of-the-dead",
+      "record": "first-room",
+      "sub_record": "purist-hardcore",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 34,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "gorod-krovi",
+      "record": "first-room",
+      "sub_record": "no-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 35,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "gorod-krovi",
+      "record": "first-room",
+      "sub_record": "classic-gobblegum-only",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 36,
+      "status": "skipped",
+      "game": "aw",
+      "map": "carrier",
+      "record": "first-room",
+      "sub_record": "mk14-side",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 37,
+      "status": "skipped",
+      "game": "aw",
+      "map": "outbreak",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 38,
+      "status": "skipped",
+      "game": "bo2",
+      "map": "mob-of-the-dead",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 39,
+      "status": "skipped",
+      "game": "bo2",
+      "map": "bus-depot",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 40,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "gorod-krovi",
+      "record": "first-room",
+      "sub_record": "no-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 41,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "ascension",
+      "record": "first-room",
+      "sub_record": "no-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 42,
+      "status": "imported",
+      "game": "bo3",
+      "map": "revelations",
+      "record": "first-room",
+      "sub_record": "classic-gobblegum-only",
+      "message": "[DRY RUN] Would create ChallengeLog",
+      "logIds": [
+        "dry-run"
+      ]
+    },
+    {
+      "csvRowIndex": 43,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "revelations",
+      "record": "first-room",
+      "sub_record": "classic-gobblegum-only",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 44,
+      "status": "skipped",
+      "game": "bo4",
+      "map": "classified",
+      "record": "first-room",
+      "sub_record": "purist-hardcore",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 45,
+      "status": "skipped",
+      "game": "bo2",
+      "map": "mob-of-the-dead",
+      "record": "first-room",
+      "sub_record": "",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 46,
+      "status": "skipped",
+      "game": "bo6",
+      "map": "terminus",
+      "record": "first-room",
+      "sub_record": "no-gobblegums-no-support",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 47,
+      "status": "skipped",
+      "game": "bo4",
+      "map": "classified",
+      "record": "first-room",
+      "sub_record": "all-elixirs-talismans",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 48,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "gorod-krovi",
+      "record": "first-room",
+      "sub_record": "no-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 49,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "gorod-krovi",
+      "record": "first-room",
+      "sub_record": "classic-gobblegum-only",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 50,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "verruckt",
+      "record": "first-room",
+      "sub_record": "no-gobblegum-mixed",
+      "message": "Map not found"
+    },
+    {
+      "csvRowIndex": 51,
+      "status": "skipped",
+      "game": "aw",
+      "map": "carrier",
+      "record": "first-room",
+      "sub_record": "bulldog-side",
+      "message": "Duplicate: identical log already exists"
+    },
+    {
+      "csvRowIndex": 52,
+      "status": "skipped",
+      "game": "bo3",
+      "map": "gorod-krovi",
+      "record": "first-room",
+      "sub_record": "no-gobblegum",
+      "message": "Duplicate: identical log already exists"
+    }
+  ],
+  "skippedReasons": [
+    {
+      "row": 50,
+      "game": "bo3",
+      "map": "verruckt",
+      "record": "first-room",
+      "sub_record": "no-gobblegum-mixed",
+      "reason": "Map not found: game=bo3, map=verruckt"
+    }
+  ],
+  "summary": {
+    "imported": 7,
+    "updated": 0,
+    "skipped": 44,
+    "errors": 0
+  }
+}

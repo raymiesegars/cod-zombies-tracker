@@ -59,8 +59,8 @@ export function XpDisplay({
       {showDetails && (
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-sm font-medium text-bunker-200">Level {level} · {rankName}</span>
-            <span className="text-xs text-bunker-400">{level >= MAX_LEVEL ? 'Max rank' : `${xpForNext.toLocaleString()} XP to next`}</span>
+            <span className="text-sm font-medium text-bunker-200">Level {level}</span>
+            <span className="text-xs text-bunker-400">{level >= MAX_LEVEL ? 'Max level' : `${xpForNext.toLocaleString()} XP to next`}</span>
           </div>
           <ProgressBar
             value={progress}

@@ -1,13 +1,22 @@
 export const BO3_CUSTOM_GAME_SHORT_NAME = 'BO3_CUSTOM';
+const CALL_OF_DUTY_PREFIX_RE = /^call of duty:\s*/i;
 
 export function isBo3CustomGame(shortName: string | null | undefined): boolean {
   return shortName === BO3_CUSTOM_GAME_SHORT_NAME;
 }
 
+export function getDisplayGameName(name: string | null | undefined): string {
+  if (!name) return '';
+  const normalized = name.replace(CALL_OF_DUTY_PREFIX_RE, '').trim();
+  if (!normalized) return '';
+  if (normalized.toLowerCase() === 'bo3 custom zombies') return 'Custom Zombies';
+  return normalized;
+}
+
 /** Display label for BO3 Custom when showing game name to users (shortName is "BO3_CUSTOM" internally). */
 export function getGameDisplayShortName(shortName: string | null | undefined, gameName?: string | null): string {
-  if (shortName === BO3_CUSTOM_GAME_SHORT_NAME) return 'BO3 Custom';
-  return gameName ?? shortName ?? '';
+  if (shortName === BO3_CUSTOM_GAME_SHORT_NAME) return 'Custom Zombies';
+  return getDisplayGameName(gameName) || shortName || '';
 }
 
 export const BO3_CUSTOM_CHALLENGE_TYPES = [

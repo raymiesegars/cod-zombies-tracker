@@ -87,8 +87,8 @@ function SingleXpBar({
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1 gap-2 min-w-0">
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
-            <span className="text-sm font-medium text-bunker-200 truncate min-w-0" title={`Level ${level} · ${rankName}`}>
-              Level {level} · {rankName}
+            <span className="text-sm font-medium text-bunker-200 truncate min-w-0" title={`Level ${level}`}>
+              Level {level}
             </span>
             {isVerified && (
               <span className="inline-flex items-center gap-1 text-blue-400 shrink-0 text-xs">
@@ -98,7 +98,7 @@ function SingleXpBar({
             )}
           </div>
           <span className="text-xs text-bunker-400 shrink-0">
-            {level >= MAX_LEVEL ? 'Max rank' : `${xpForNext.toLocaleString()} XP to next`}
+            {level >= MAX_LEVEL ? 'Max level' : `${xpForNext.toLocaleString()} XP to next`}
           </span>
         </div>
         <ProgressBar value={progress} variant="xp" size={size === 'lg' ? 'lg' : 'md'} />

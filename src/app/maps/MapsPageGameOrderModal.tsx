@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { Modal } from '@/components/ui/modal';
+import { getGameDisplayShortName } from '@/lib/bo3-custom';
 import { GripVertical, Eye, EyeOff } from 'lucide-react';
 import type { Game } from '@/types';
 
@@ -147,13 +148,13 @@ export function MapsPageGameOrderModal({
                 >
                   <GripVertical className="w-5 h-5" />
                 </span>
-                <span className="flex-1 min-w-0 font-medium text-white truncate">{game.name}</span>
+                <span className="flex-1 min-w-0 font-medium text-white truncate">{getGameDisplayShortName(game.shortName, game.name)}</span>
                 <button
                   type="button"
                   onClick={() => toggleVisible(index)}
                   className="flex-shrink-0 p-2 rounded-lg text-bunker-400 hover:text-bunker-200 hover:bg-bunker-700 transition-colors"
                   title={item.visible ? 'Hide from maps page' : 'Show on maps page'}
-                  aria-label={item.visible ? `Hide ${game.name}` : `Show ${game.name}`}
+                  aria-label={item.visible ? `Hide ${getGameDisplayShortName(game.shortName, game.name)}` : `Show ${getGameDisplayShortName(game.shortName, game.name)}`}
                 >
                   {item.visible ? (
                     <Eye className="w-5 h-5 text-military-400" />

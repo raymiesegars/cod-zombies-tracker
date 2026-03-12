@@ -428,7 +428,7 @@ export default function AdminMapSubmissionsPage() {
             <MapPin className="w-5 h-5 text-blood-400" />
             Map submissions
           </h1>
-          <p className="text-sm text-bunker-400 mt-1">Review and approve BO3 Custom Zombies map submissions</p>
+          <p className="text-sm text-bunker-400 mt-1">Review and approve Custom Zombies map submissions</p>
         </div>
         <Select
           options={[

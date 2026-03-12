@@ -219,7 +219,7 @@ export default function AdminAchievementsPage() {
             onChange={(e) => setSelectedGameId(e.target.value)}
             options={[
               { value: '', label: '— Select game —' },
-              ...games.map((g) => ({ value: g.id, label: `${getGameDisplayShortName(g.shortName, g.name)}: ${g.name}` })),
+              ...games.map((g) => ({ value: g.id, label: getGameDisplayShortName(g.shortName, g.name) })),
             ]}
             className="w-full bg-bunker-800 border-bunker-600 text-white"
           />

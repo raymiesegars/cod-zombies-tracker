@@ -281,7 +281,7 @@ export default function HomePage() {
         </Link>
       </section>
 
-      {/* BO3 Custom Zombies — Map Submission Promo */}
+      {/* Custom Zombies — Map Submission Promo */}
       <section className="py-8 sm:py-12 px-4 border-y border-blood-900/40 bg-gradient-to-b from-blood-950/30 to-bunker-950">
         <Link
           href="/maps"
@@ -293,7 +293,7 @@ export default function HomePage() {
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-xl sm:text-2xl md:text-3xl font-zombies text-white tracking-wide">
-                BO3 Custom Zombies
+                Custom Zombies
               </h2>
               <p className="mt-1 sm:mt-2 text-sm sm:text-base text-white/90">
                 Browse community-submitted Black Ops 3 custom maps, track progress, and submit your own for review. New maps added regularly.
