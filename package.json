@@ -53,6 +53,8 @@
     "db:add-paradox-junction": "tsx scripts/add-paradox-junction-production.ts",
     "db:sync-achievements-paradox-junction-only": "tsx scripts/sync-achievements-paradox-junction-only.ts",
     "db:fix-bo7-map-order": "tsx scripts/fix-bo7-map-order.ts",
+    "db:fix-terminus-starting-room-only": "tsx scripts/fix-terminus-starting-room-only.ts",
+    "db:reverify-vanguard-unlocks-and-xp": "tsx scripts/reverify-vanguard-unlocks-and-xp.ts",
     "db:revalidate-tiered-xp": "tsx scripts/revalidate-tiered-achievements-xp.ts",
     "db:sync-level-thresholds": "tsx scripts/sync-level-thresholds.ts",
     "db:compute-total-xp": "tsx scripts/compute-total-obtainable-xp.ts",

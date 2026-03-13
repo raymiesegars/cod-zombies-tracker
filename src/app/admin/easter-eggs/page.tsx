@@ -506,6 +506,27 @@ function EasterEggEditModal({
           />
         </div>
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-medium text-bunker-500 mb-1">Variant tag</label>
+            <Input
+              value={form.variantTag}
+              onChange={(e) => setForm((p) => ({ ...p, variantTag: e.target.value }))}
+              placeholder="e.g. Richtofen, Dr. Maxis"
+              className="bg-bunker-800 border-bunker-600"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-bunker-500 mb-1">Category tag</label>
+            <Input
+              value={form.categoryTag}
+              onChange={(e) => setForm((p) => ({ ...p, categoryTag: e.target.value }))}
+              placeholder="e.g. Cipher, Relic"
+              className="bg-bunker-800 border-bunker-600"
+            />
+          </div>
+        </div>
+
         <hr className="border-bunker-700" />
 
         <div>

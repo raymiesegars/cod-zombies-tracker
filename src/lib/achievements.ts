@@ -16,6 +16,7 @@ export type ChallengeLogModifiers = {
   useFortuneCards?: boolean | null;
   useDirectorsCut?: boolean | null;
   rampageInducerUsed?: boolean | null;
+  vanguardVoidUsed?: boolean | null;
 };
 
 // Pre-fetched so we avoid N+1 when checking a bunch of achievements
@@ -636,6 +637,7 @@ export async function processMapAchievements(
           useFortuneCards: true,
           useDirectorsCut: true,
           rampageInducerUsed: true,
+          vanguardVoidUsed: true,
         },
       }),
       prisma.easterEggLog.findMany({
@@ -720,6 +722,7 @@ export async function processMapAchievements(
       useFortuneCards: l.useFortuneCards ?? undefined,
       useDirectorsCut: l.useDirectorsCut ?? undefined,
       rampageInducerUsed: l.rampageInducerUsed ?? undefined,
+      vanguardVoidUsed: l.vanguardVoidUsed ?? undefined,
     })),
     easterEggIds: new Set(easterEggLogs.map((e) => e.easterEggId)),
     easterEggLogsWithTime,
@@ -844,6 +847,7 @@ export async function isAchievementSatisfiedByVerifiedRun(
         useFortuneCards: true,
         useDirectorsCut: true,
         rampageInducerUsed: true,
+        vanguardVoidUsed: true,
       },
     }),
     prisma.easterEggLog.findMany({
@@ -880,6 +884,7 @@ export async function isAchievementSatisfiedByVerifiedRun(
       useFortuneCards: l.useFortuneCards ?? undefined,
       useDirectorsCut: l.useDirectorsCut ?? undefined,
       rampageInducerUsed: l.rampageInducerUsed ?? undefined,
+      vanguardVoidUsed: l.vanguardVoidUsed ?? undefined,
     })),
     easterEggIds: new Set(easterEggLogs.map((e) => e.easterEggId)),
     easterEggLogsWithTime,
@@ -1009,6 +1014,7 @@ export async function revokeAchievementsForMapAfterDelete(
           useFortuneCards: true,
           useDirectorsCut: true,
           rampageInducerUsed: true,
+          vanguardVoidUsed: true,
         },
       }),
       prisma.easterEggLog.findMany({
@@ -1044,6 +1050,7 @@ export async function revokeAchievementsForMapAfterDelete(
       useFortuneCards: l.useFortuneCards ?? undefined,
       useDirectorsCut: l.useDirectorsCut ?? undefined,
       rampageInducerUsed: l.rampageInducerUsed ?? undefined,
+      vanguardVoidUsed: l.vanguardVoidUsed ?? undefined,
     })),
     easterEggIds: new Set(easterEggLogs.map((e) => e.easterEggId)),
     easterEggLogsWithTime,
