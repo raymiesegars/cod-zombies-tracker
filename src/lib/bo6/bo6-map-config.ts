@@ -70,7 +70,7 @@ export const BO6_MAP_CONFIG: Record<Bo6MapSlug, Bo6MapConfig> = {
     ],
     highRoundWR: 999,
     noDownsWR: 999,
-    firstRoomWR: 45,
+    firstRoomWR: 88,
     noPerksWR: 201,
     noJugWR: 351,
     speedrunWRs: {

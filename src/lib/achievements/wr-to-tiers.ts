@@ -262,11 +262,18 @@ export function getWRRoundForSeed(
   options?: { variant?: 'megas' | 'restricted' }
 ): number {
   const noCategory = ROUND_CATEGORY[challengeType] ?? challengeType.toLowerCase().replace(/_/g, '-');
-  const variant = options?.variant === 'restricted'
-    ? getRestrictedVariant(gameShortName)
-    : options?.variant === 'megas'
-      ? getMegasVariant(gameShortName)
-      : undefined;
+  let variant: string | undefined;
+  if (options?.variant === 'restricted') {
+    variant = getRestrictedVariant(gameShortName);
+  } else if (options?.variant === 'megas') {
+    if (gameShortName.toUpperCase() === 'BO6' && challengeType === 'STARTING_ROOM') {
+      variant = 'all-gobblegum';
+    } else {
+      variant = getMegasVariant(gameShortName);
+    }
+  } else {
+    variant = undefined;
+  }
   const fromNo = getSoloWRRound(gameShortName, noCategory, cztMapSlug, variant);
   if (fromNo != null && fromNo > 0) return fromNo;
   if (configFallback != null && configFallback > 0) return configFallback;
