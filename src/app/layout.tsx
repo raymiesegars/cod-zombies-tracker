@@ -9,6 +9,7 @@ import { SiteUpdatesModal } from '@/components/site-updates-modal';
 import { CustomMapsAnnouncementModal } from '@/components/custom-maps-announcement-modal';
 import { PollVoteReminderModal } from '@/components/poll-vote-reminder-modal';
 import { TournamentAnnouncementModal } from '@/components/tournament-announcement-modal';
+import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 
 export const viewport: Viewport = {
@@ -179,6 +180,7 @@ export default function RootLayout({
           </AuthProvider>
         </div>
         <MusicPlayer />
+        <Analytics />
       </body>
     </html>
   );
