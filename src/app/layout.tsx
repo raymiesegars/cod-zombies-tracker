@@ -10,6 +10,7 @@ import { CustomMapsAnnouncementModal } from '@/components/custom-maps-announceme
 import { PollVoteReminderModal } from '@/components/poll-vote-reminder-modal';
 import { TournamentAnnouncementModal } from '@/components/tournament-announcement-modal';
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
 
 export const viewport: Viewport = {
@@ -181,6 +182,7 @@ export default function RootLayout({
         </div>
         <MusicPlayer />
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
