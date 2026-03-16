@@ -18,24 +18,52 @@ const MAX_TURNS = 7;
 
 const UNKNOWN_FALLBACKS = [
   "That intel got downed on round 67. Not even the Kronorium has that one.",
-  "Skill issue — the Shadowman didn't leave that in the script. I'm forwarding your question so we can fix that.",
-  "Richtofen would never tell us. I'm sending this to the team before we end up in the cycle again.",
-  "That one's still in the void. No cap, we don't have it yet — forwarding so we can learn.",
-  "Perkaholic couldn't save that piece of intel. I'm passing it to the team.",
-  "Round 255 brainrot and I still don't have that. Forwarding to the crew.",
-  "Even the Apothicons don't have that one. I'm forwarding it so we can add it.",
-  "That question downed in the dark aether. Sending it to the team to recover.",
-  "Not in the Kronorium, not in the summoning key — forwarding so we can fix that.",
-  "Maxis didn't upload that to the mainframe. I'm forwarding your question.",
-  "That one's classified. (We literally don't have it yet — forwarding to the team.)",
-  "The box didn't give us that RNG. Forwarding so we can add it.",
+  "Skill issue — the Shadowman didn't leave that in the script.",
+  "Richtofen would never tell us. We're sending this to the team before we end up in the cycle again.",
+  "Perkaholic couldn't save that piece of intel.",
+  "Round 255 brainrot and I still don't have that.",
+  "67 moment. The Kronorium has a blank page there.",
+  "Even the Apothicons don't have that one.",
+  "Not in the Kronorium, not in the summoning key.",
+  "Maxis didn't upload that to the mainframe.",
+  "That one's classified. (We literally don't have it.)",
+  "The box didn't give us that RNG.",
+  "Round 67 said no.",
+  "Perkaholic copium — we don't have it in the loadout.",
+  "255 speedrun brainrot but that stat isn't in our tables.",
+  "The AAT didn't proc on that one. No cap.",
+  "Jug didn't spawn for that question.",
+  "That one's still in the cycle. We're forwarding to break it.",
+  "Quick Revive couldn't save that intel.",
+  "Pulled a firesale and got nothing. Forwarding to the team.",
 ];
 
-function pickUnknownFallback(): string {
-  return UNKNOWN_FALLBACKS[Math.floor(Math.random() * UNKNOWN_FALLBACKS.length)] ?? UNKNOWN_FALLBACKS[0]!;
+const UNKNOWN_HEADER = "I don't have that information — I'm forwarding your question to the team so we can learn.\n\n**Complete nonsense joke:**";
+
+function getUsedJokeFallbacksInHistory(history: { role: string; content: string }[]): Set<string> {
+  const used = new Set<string>();
+  for (const msg of history) {
+    if (msg.role !== 'assistant' || !msg.content) continue;
+    const content = msg.content;
+    for (const fallback of UNKNOWN_FALLBACKS) {
+      if (content.includes(fallback)) used.add(fallback);
+    }
+  }
+  return used;
 }
 
-const systemPromptPrefix = `You are LeKronorium, the chatbot for CoD Zombies Tracker (CZT). You have personality: you're a bit witty and sarcastic, obsessed with CoD Zombies lore and the community. You're helpful when you know the answer, but when you don't, you're allowed to be a little unhinged — CoD Zombies themed jokes, zoomer humor, and random callbacks (round 67, 255, Perkaholic copium, "downed in the void", etc.) are encouraged. Keep it light and on-brand; never mean. When you DO know the answer, stay concise and useful; when you DON'T, that's when the personality shines.
+function pickUnknownFallback(alreadyUsedInConversation?: Set<string>): string {
+  const used = alreadyUsedInConversation ?? new Set<string>();
+  const available = UNKNOWN_FALLBACKS.filter((f) => !used.has(f));
+  const pool = available.length > 0 ? available : UNKNOWN_FALLBACKS;
+  return pool[Math.floor(Math.random() * pool.length)] ?? UNKNOWN_FALLBACKS[0]!;
+}
+
+function formatUnknownReply(jokePart: string): string {
+  return `${UNKNOWN_HEADER}\n\n${jokePart}`;
+}
+
+const systemPromptPrefix = `You are LeKronorium, the chatbot for CoD Zombies Tracker (CZT). You have personality: you're a bit witty and sarcastic, obsessed with CoD Zombies lore and the community. When you DO know the answer, give the real answer first (e.g. "851" for a WR question), then you MAY add one line with a clear joke label: "— *(as a joke:)* [short CoD Zombies meme, 67/255/Perkaholic/RNG etc.]" so the real answer is first and the joke is obviously separate. When you DON'T know the answer, you must start by clearly saying you don't have that information, then format everything else as an obvious nonsense joke (see ${UNKNOWN_MARKER} instructions). Use zoomer humor and callbacks: round 67, 255, Perkaholic copium, skill issue, RNG, box hit, etc. Do NOT use "downed in the void" or "dark aether" — use 67, round 255, Perkaholic, RNG, and similar brainrot-style memes. Keep it light and on-brand; never mean.
 
 CRITICAL: Answer from the CONTEXT below. When the exact answer is in context, give it directly. When you have related/partial context that could inform an educated guess, you MAY offer one — but you MUST explicitly caveat it first: e.g. "I don't have the exact [X] in our data, but based on what we have, [guess]. We'll try to add the precise info." Only use ${UNKNOWN_MARKER} when there is truly nothing relevant in the context (no related maps, weapons, rules, or mechanics). Never make up player names or rounds; for stats/mechanics we don't store, an educated guess with a clear caveat is fine.
 
@@ -92,7 +120,7 @@ NICHE / SPECIFIC DATA (use ${UNKNOWN_MARKER} only when nothing relevant in conte
 - Spreadsheet / exact stat we don't have / very specific calc → If we have related data, guess with caveat and link /leaderboards or /maps/[slug]. If nothing, use ${UNKNOWN_MARKER}.
 - Off-topic / personal / subjective → Use ${UNKNOWN_MARKER} or briefly redirect to site/zombies questions.
 
-When you use ${UNKNOWN_MARKER}, put it as the first line only. Then write a SHORT funny or sarcastic CoD Zombies themed response (one or two sentences): zoomer humor, 67 jokes, "that intel got downed", Perkaholic copium, round 255 brainrot, Richtofen would never tell us this, etc. — be random and on-brand. After that, add one sentence that you're forwarding the question to the team. Never suggest "community forums" or "external wikis" when you don't know — only the funny line + forward. Keep normal replies concise (2–4 sentences unless the user asks for detail). When linking to site pages, use markdown-style links so they appear clickable: [Leaderboards](/leaderboards), [Maps](/maps), [Rules](/rules), [map name](/maps/[slug]), e.g. [Revelations](/maps/revelations). For ZWR wiki pages, use the full URL: [guide name](https://zwr.gg/wiki/page-slug) e.g. [SoE speedrun guide](https://zwr.gg/wiki/beginners-guide-on-how-to-speedrun-the-shadows-of-evil-easter-egg). When sharing table data (round times, instakill tables, ideal combos, etc.), format it as a markdown table. Put EACH ROW on its own line. Example:
+When you use ${UNKNOWN_MARKER}, your reply must follow this structure exactly. Put ${UNKNOWN_MARKER} on the first line. Then on the next lines write: (1) One clear sentence that you DON'T have that information and are forwarding the question to the team. (2) A line that says "**Complete nonsense joke:**" so the user knows everything after is a joke. (3) One short meme line — use 67, round 255, Perkaholic copium, skill issue, RNG, box didn't give it, Jug didn't spawn, etc. Do NOT use "downed in the void" or "dark aether"; vary with 67, 255, Perkaholic, Richtofen wouldn't tell us, Kronorium blank page, etc. Never suggest "community forums" or "external wikis" when you don't know. Keep normal replies concise (2–4 sentences unless the user asks for detail). When linking to site pages, use markdown-style links so they appear clickable: [Leaderboards](/leaderboards), [Maps](/maps), [Rules](/rules), [map name](/maps/[slug]), e.g. [Revelations](/maps/revelations). For ZWR wiki pages, use the full URL: [guide name](https://zwr.gg/wiki/page-slug) e.g. [SoE speedrun guide](https://zwr.gg/wiki/beginners-guide-on-how-to-speedrun-the-shadows-of-evil-easter-egg). When sharing table data (round times, instakill tables, ideal combos, etc.), format it as a markdown table. Put EACH ROW on its own line. Example:
 | Round | Solo |
 |-------|------|
 | 1 | 19.03 |
@@ -198,10 +226,13 @@ export async function POST(request: NextRequest) {
     if (reply.includes(UNKNOWN_MARKER)) {
       wasUnknown = true;
       const afterMarker = reply.replace(UNKNOWN_MARKER, '').trim();
-      const hasContent = afterMarker.length > 20 && !/^(I'm forwarding|Forwarding|I'll forward)/i.test(afterMarker.slice(0, 30));
-      reply = hasContent
+      const hasClearNo = /don't have|don't know|do not have|do not know|don\'t have|haven\'t got/i.test(afterMarker.slice(0, 120));
+      const hasJokeLabel = /complete nonsense joke|nonsense joke|as a joke/i.test(afterMarker);
+      const hasContent = afterMarker.length > 30 && hasClearNo;
+      const usedJokes = getUsedJokeFallbacksInHistory(history);
+      reply = hasContent && (hasJokeLabel || afterMarker.includes('\n\n'))
         ? afterMarker
-        : `${pickUnknownFallback()} I'm forwarding your question to the team so we can learn for the future.`;
+        : formatUnknownReply(pickUnknownFallback(usedJokes));
       await prisma.chatbotUnansweredQuestion.create({
         data: { userId, question: lastMessage },
       });
