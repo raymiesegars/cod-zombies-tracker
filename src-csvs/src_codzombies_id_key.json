@@ -1,0 +1,3649 @@
+{
+  "_usage": "Resolve IDs in existing SRC CSVs: games[id], categories[id], levels[id], platforms[id]. For sub_category 'var_id=value_id' use variables[var_id].name and variables[var_id].values[value_id].",
+  "games": {
+    "j1n0zydp": "Call Of Duty Zombies Category Extension",
+    "46w3zy71": "Call of Duty: Advanced Warfare Zombies",
+    "268pep5d": "Call of Duty: Black Ops 3 Category Extension",
+    "46wroj31": "Call of Duty: Black Ops 6 Zombies",
+    "46wrk371": "Call of Duty: Black Ops 7 Zombies",
+    "j1neozx1": "Call of Duty: Black Ops Cold War Zombies",
+    "4d7zzr67": "Call of Duty: Black Ops II Zombies",
+    "m1m2oxd2": "Call of Duty: Black Ops III Zombies",
+    "268ex4o6": "Call of Duty: Black Ops IIII Zombies",
+    "nd2ggq10": "Call of Duty: Black Ops Zombies",
+    "kdkzx7xd": "Call of Duty: Black Ops Zombies DS",
+    "w6jlrn4d": "Call of Duty: Black Ops Zombies Mobile",
+    "m1zgg060": "Call of Duty: Infinite Warfare Zombies",
+    "9d3w7yw1": "Call of Duty: Modern Warfare III Zombies",
+    "76r3goe6": "Call of Duty: Vanguard Zombies",
+    "w6j5y41j": "Call of Duty: World at War Zombies",
+    "o6glzxod": "Call of Duty: WWII Zombies"
+  },
+  "categories": {
+    "9d8eoe3d": "All Maps",
+    "9d8eowld": "All Songs",
+    "xd14144d": "25K Points",
+    "wdmyjg4d": "PAP All Guns",
+    "ndxxqzjd": "Misc. Runs",
+    "82477ng2": "Challenge Round Runs",
+    "rklqgln2": "Outbreak",
+    "ndxm89r2": "Infection",
+    "w20wzg5d": "Carrier",
+    "wdmwqxo2": "Descent",
+    "xd1xj4wk": "Super EE Speedrun",
+    "n2yp5q72": "SOE with Round Skips",
+    "q25lqojk": "Mini Easter Egg",
+    "02q1og7d": "All Songs",
+    "7dgwr8g2": "Super 15",
+    "mkegzoj2": "Super 30",
+    "5dwm5j5k": "25K Points",
+    "xk9og0vk": "Pack-A-Punch All Guns",
+    "wk6x7pok": "Rainbow Perk Challenge",
+    "z2706g4d": "Specialist%",
+    "824v6xe2": "NML 100 Kills",
+    "wk6x7yxk": "DOA II",
+    "824vrxe2": "Challenge Runs",
+    "9kvzl78d": "Liberty Falls",
+    "zd3er8vk": "Terminus",
+    "z27x65zd": "Citadelle des Morts ",
+    "9d80o072": "The Tomb",
+    "z27xx60d": "Shattered Veil",
+    "8247j0e2": "The Reckoning ",
+    "wdmn80e2": "Super Easter Egg",
+    "zdnj7wek": "Ashes of the Damned ",
+    "wkp44y0k": "Astra Malorum ",
+    "7kjj3ogk": "Pardox Junction",
+    "9kvvl4jk": "Vandorn Farm",
+    "vdo9941d": "Exit 115 ",
+    "7dgw8nx2": "Zarya Cosmodrome",
+    "7dgw9n42": "Mars",
+    "jdzmo53k": "DOA 4",
+    "9kv6wvo2": "Die Maschine",
+    "wkp05xj2": "Firebase Z",
+    "vdozjq9k": "Mauer Der Toten",
+    "wkp5rm0d": "Forsaken",
+    "wkp04lg2": "Outbreak",
+    "rkl3w6rk": "Dead Ops Arcade 3",
+    "wdm5n9x2": "Super Egg",
+    "jdrq0onk": "TranZit",
+    "jdz346r2": "Die Rise",
+    "02qgxm7d": "Mob of the Dead",
+    "824xojed": "Buried",
+    "9d8pwewk": "Origins",
+    "ndx88p1k": "Town",
+    "w20zz1vd": "Farm",
+    "wdmqq4x2": "Bus Depot",
+    "vdo44q12": "Nuketown",
+    "z2750nok": "Songs",
+    "zd33yped": "Super EE Richtofen's Side",
+    "9kv4xwek": "Super EE Maxis's Side",
+    "9kvpggjk": "Shadows of Evil",
+    "jdz34wr2": "The Giant",
+    "n2yqywzk": "Der Eisendrache",
+    "5dwpp7ek": "Zetsubou No Shima",
+    "5dwp47nk": "Gorod Krovi",
+    "jdz5l03d": "Revelations",
+    "n2yjvoe2": "Nacht Der Untoten",
+    "7kjzg3gd": "Verruckt",
+    "xk9jwrxd": "Shi No Numa",
+    "z273wr5d": "Kino Der Toten",
+    "zdnrz072": "Ascension",
+    "q258jgw2": "Shangri-La",
+    "jdr1rv02": "Moon",
+    "jdzpl9xk": "Origins",
+    "7kj8ooxd": "EE/Buyable Ending",
+    "n2y9ee8d": "Round 5",
+    "xk9epwy2": "Round 15",
+    "z274mwg2": "Round 30",
+    "ndxopqrd": "Super Easter Egg",
+    "mkeryj9d": "Voyage of Despair",
+    "jdr741l2": "IX",
+    "7kjq074d": "Blood of the Dead",
+    "xk9nz962": "Classified",
+    "w20ylqjk": "Dead of the Night",
+    "wk6vexod": "Ancient Evil",
+    "5dw7zy0k": "Alpha Omega",
+    "z27rg54d": "Tag Der Toten",
+    "mkermjnd": "Tutorial",
+    "z27gj7g2": "Kino Der Toten",
+    "xk907lyk": "Five",
+    "vdo0vv1d": "Dead Ops Arcade",
+    "rklx88qk": "Ascension",
+    "ndxjww12": "Call of the Dead",
+    "w20p44vk": "Shangri-La",
+    "wdmz11x2": "Moon",
+    "wdmqzy42": "Nacht Der Untoten",
+    "vdo409o2": "Verrückt",
+    "wkpyj4vk": "Shi No Numa",
+    "n2yqzq8k": "Der Riese",
+    "jdzeqm3d": "House",
+    "02q9qnjk": "Facility",
+    "824ly7md": "Temple",
+    "9d8o7q62": "Overlook",
+    "q251nwyd": "All Maps",
+    "82404ped": "Kino Der Toten",
+    "7kj6wz32": "Ascension",
+    "xk9v7jvd": "Call of the Dead",
+    "z271j342": "Dead Ops Arcade",
+    "ndx85zvk": "Zombies in Spaceland",
+    "w20zxjod": "Rave in the Redwoods",
+    "wdm46p3d": "Shaolin Shuffle",
+    "wk61qred": "Attack of the Radioactive Thing",
+    "jdrxq0nd": "Beast From Beyond",
+    "wkpwpzwd": "Operation: Deadbolt",
+    "xd1jn38d": "Der Anfang",
+    "mkeyyq82": "Terra Maledicta",
+    "jdrwnz0k": "Shi No Numa",
+    "9d8npjld": "The Archon",
+    "vdo4wr12": "Nacht Der Untoten",
+    "wkpy680k": "Verrückt",
+    "7dgglwxd": "Shi No Numa",
+    "mke53gxk": "Der Riese",
+    "02qm907d": "First Room Round 15",
+    "824jl3e2": "No Perks Round 15",
+    "xd141nzd": "No Power Round 15",
+    "7dgrgnpk": "The Final Reich",
+    "jdrxy65d": "The Darkest Shore",
+    "7kjqr9zd": "The Shadowed Throne",
+    "jdr795l2": "The Tortured Path Easter Eggs",
+    "zd3o3ond": "The Tortured Path Survival",
+    "xd1876w2": "The Tortured Path Walkthrough",
+    "wdm87ze2": "The Frozen Dawn",
+    "mkez596k": "Groesten Haus",
+    "zdn441ek": "Prologue"
+  },
+  "levels": {
+    "ewpo4eld": "WAW",
+    "y9mg4yl9": "BO1",
+    "5wke485w": "BO2",
+    "592re3gd": "BO3",
+    "wkkp8vpw": "Infinite Warfare",
+    "kwj641nd": "BO4",
+    "owo54qod": "Cold War",
+    "9zp4mnlw": "BO6",
+    "9m58yvxd": "B07",
+    "5wk5n32w": "Super Easter Egg ",
+    "4950240d": "Shepherd of Fire Song",
+    "rdqv8lk9": "Aether Song",
+    "5d7018g9": "Archangel Song",
+    "kwjmgpnw": "Re-Danned Song",
+    "owovjyo9": "Samanthas Lullaby Song",
+    "xd1omxe9": "Coming Home (8 bit) Song",
+    "ewpv3ekw": "Rusty Cage Song",
+    "y9mv6y59": "Where are we going Song",
+    "5d7xqzg9": "Alien Isolation",
+    "xd06v3jd": "Blockade",
+    "rw65ke6d": "Daybreak",
+    "z9842g1w": "Dead Ship",
+    "n93z2yrw": "Der Riese: Declassified",
+    "xd4gvr8d": "Leviathan",
+    "ldyl4879": "Nuketown",
+    "rdn4k269": "Return to Das Herrenhaus",
+    "ywe3xmy9": "Rust",
+    "gdro616d": "Wanted",
+    "ewpo43jd": "Cheese Cube",
+    "y9mg46x9": "Cheese Cube U",
+    "5wke4xpw": "Subway",
+    "592rek3d": "Rust",
+    "592y8n6w": "thunder box",
+    "w6q3jxpd": "Nacht Der Untoten",
+    "93qo632w": "Verrückt",
+    "98rn1lrd": "Shi No Numa",
+    "dnoneg5w": "Der Riese"
+  },
+  "platforms": {
+    "4p9z0r6r": "Xbox One X",
+    "4p9zjrer": "PlayStation 5",
+    "7g6m8erk": "Nintendo DS",
+    "8gej2n93": "PC",
+    "8gejn93d": "Wii U",
+    "gde35n6k": "PlayStation 5 Pro",
+    "gde3xgek": "iOS",
+    "kz9w4oep": "Xbox Game Pass",
+    "lq60nl94": "Android",
+    "mx6pwe3g": "PlayStation 3",
+    "n568oevp": "Xbox 360",
+    "nzeljv9q": "PlayStation 4 Pro",
+    "nzelkr6q": "PlayStation 4",
+    "nzelyv9q": "Xbox Series X",
+    "o064j163": "Xbox One S",
+    "o7e2mx6w": "Xbox One",
+    "o7e2xj9w": "Xbox Series S",
+    "v06dk3e4": "Wii",
+    "w89rqoel": "Steam Deck"
+  },
+  "variables": {
+    "68kmpxzl": {
+      "name": "Players default",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "zqom2g41": "Solo",
+        "013w4jyq": "2 Players",
+        "rqv6z0yl": "3 Players",
+        "5le3vy6q": "4 Players"
+      }
+    },
+    "kn0j593l": {
+      "name": "BO3 Consumables",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "814yeme1": "No Gums",
+        "z19mgeyl": "All Gums"
+      }
+    },
+    "j84jwpw8": {
+      "name": "BO4 Consumables",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "qkernmkq": "All Elixers",
+        "q75nxrd1": "No Elixers"
+      }
+    },
+    "68k169zl": {
+      "name": "BO6 Consumables",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "10vwv85l": "All Gums",
+        "qj7x7rgq": "No Gums"
+      }
+    },
+    "5lyyo7jl": {
+      "name": "BO7 Consumables ",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "q5vn4ynl": "All Gums",
+        "lx5pgrr1": "No Gums"
+      }
+    },
+    "ylq9pd78": {
+      "name": "Category",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "81werxv1": "Pack a Punch",
+        "zqom26x1": "Pack a Punch (No Gum)",
+        "013w4nxq": "Round 15",
+        "rqv6z56l": "Round 30",
+        "5le3v7kq": "Round 50",
+        "0q5x7j21": "Round 100"
+      }
+    },
+    "p859k2xn": {
+      "name": "Category",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "klrjnxoq": "Nacht der Untoten (Free Max Ammo)",
+        "gq79k2yl": "Verruckt (Free Max Ammo)",
+        "21gey9ml": "Shi No Numa (Free Max Ammo)",
+        "jqzvkgml": "Kino Der Toten (Free Max Ammo)",
+        "klrjnx2q": "Moon (Space Dog)"
+      }
+    },
+    "38do5qxl": {
+      "name": "Category",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "21dvrvj1": "Apothicon Sword",
+        "5q8252kq": "Ragnarok dg4",
+        "4qy53571": "Skull of Nan Sapwe",
+        "mlndrdd1": "Gauntlet of Siegfried"
+      }
+    },
+    "p854qrvl": {
+      "name": "WAW 25K Points",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "81ppw8n1": "Nacht Der Untoten",
+        "xqkjk74l": "Verrückt",
+        "gq7jekrq": "Shi No Numa",
+        "21g8ryol": "Der Riese"
+      }
+    },
+    "yn2wg60n": {
+      "name": "WAW Misc",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "zqog9ng1": "P-A-P All Guns",
+        "1py75d81": "Peter%"
+      }
+    },
+    "38dz2p4n": {
+      "name": "WAW All Maps Categories",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "mlnw66jl": "Round 15",
+        "jqzp7kkl": "Round 30"
+      }
+    },
+    "38dg2ox8": {
+      "name": "B01 Challenge Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "lx5p85j1": "Kino Der Toten",
+        "14oyvowq": "Five",
+        "192m9xjq": "Ascension",
+        "12vdw9vq": "Shangri-La",
+        "1pyp0ee1": "Moon",
+        "qkej4o9q": "Nacht Der Untoten",
+        "q75j42n1": "Verruckt",
+        "1gn849xl": "Shi No Numa",
+        "qznp5g4q": "Der Riese"
+      }
+    },
+    "yn26e10l": {
+      "name": "BO1 Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "qkejodnq": "Kino Der Toten",
+        "q75j2pv1": "Five",
+        "1gn895nl": "Ascension",
+        "qznpg9gq": "COTD",
+        "lr3px9jl": "Shangri-la",
+        "1dkz654l": "Moon",
+        "q8k64pgq": "Der Riese"
+      }
+    },
+    "wl3vk3y8": {
+      "name": "BO2 Misc. Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "14oy9m0q": "Tranzit",
+        "192mxe0q": "Town",
+        "12vd9j7q": "Nuketown",
+        "1pypekg1": "Die Rise",
+        "qkejownq": "MOTD",
+        "q75j2mv1": "Buried",
+        "1gn89znl": "Origins"
+      }
+    },
+    "5lyp212l": {
+      "name": "BO1 Challenge Runs",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "4qyped6q": "No Mans Land 100 Kills"
+      }
+    },
+    "onvjov5n": {
+      "name": "BO1 Categories All Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "810zee2q": "Round 15",
+        "9qj0yy3l": "Round 30",
+        "jq60kkjq": "Pack-A-Punch",
+        "q75e7wp1": "Super Easter Egg"
+      }
+    },
+    "r8r6yow8": {
+      "name": "B01 Challenge Cat.",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "lr3p0x0l": "First Room",
+        "1dkzy63l": "No Perks",
+        "q8k604rq": "No Power"
+      }
+    },
+    "ylped6k8": {
+      "name": "BO1 25K Points",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "5lmkjjmq": "Kino Der Untoten",
+        "81wpwovq": "Five",
+        "zqopwox1": "Ascension",
+        "0138e7xq": "Call of the Dead",
+        "rqvpwo6q": "Shangri-La",
+        "5lergzkq": "Moon",
+        "0q5nez2q": "Nacht der Untoten",
+        "4lxpwo4q": "Verrückt",
+        "814yegv1": "Shi No Numa",
+        "z19mgy8l": "Der Riese"
+      }
+    },
+    "9l7gd19l": {
+      "name": "BO2 Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "le2rno5l": "Tranzit",
+        "q5vn46ml": "Town",
+        "lx5pgz21": "Nuketown",
+        "14oy9j0q": "Die Rise",
+        "192mx30q": "MOTD",
+        "12vd9n7q": "Buried",
+        "1pypejg1": "Origins"
+      }
+    },
+    "wl3vy6w8": {
+      "name": "B02 Challenge Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "1w4pdv9q": "Tranzit",
+        "qoxp38gq": "Nuketown",
+        "q75j4zd1": "Bus Depot",
+        "1gn84o8l": "Farm",
+        "1398mok1": "Town",
+        "qvvprk5q": "Die Rise",
+        "le2r46pl": "MOTD",
+        "q5vn59rl": "Buried",
+        "lx5p8vj1": "Origins"
+      }
+    },
+    "789eyj9l": {
+      "name": "BO2 Misc. Challenges",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "qj702meq": "First Room",
+        "q650vo3l": "No Power",
+        "lmok23j1": "No Perks",
+        "1w4p72oq": "Rainbow Perk Challenge",
+        "qoxpjepq": "Reverse Rainbow Perk Challenge",
+        "qoxpne2q": "Awaken The Gazebo"
+      }
+    },
+    "0nwozpdl": {
+      "name": "BO2 25K Points",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "p12dem4q": "TranZit",
+        "81ppwo81": "Bus Depot",
+        "xqkjk0kl": "Farm",
+        "gq7jeddq": "Town",
+        "21g8rd8l": "Nuketown",
+        "jqzp7e8l": "Die Rise",
+        "klrpw4mq": "Mob of the Dead",
+        "21dz7g5l": "Buried",
+        "5q867831": "Origins"
+      }
+    },
+    "2lgk7g78": {
+      "name": "Challenge Rounds",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "1398xkd1": "Round 15",
+        "qvvpx27q": "Round 30",
+        "le2rny5l": "Round 50",
+        "q5vn4wml": "Round 100",
+        "lx5pg221": "N/A"
+      }
+    },
+    "38dz2wxn": {
+      "name": "BO2 6 or 9 Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "p12der4q": "6 Maps",
+        "81ppwv81": "9 Maps"
+      }
+    },
+    "e8mr4xql": {
+      "name": "BO4 Misc Category",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "5lmk6nyq": "Empty"
+      }
+    },
+    "rn10dpd8": {
+      "name": "BO2 Categories All Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "5lerg9kq": "Round 15",
+        "0q5ney2q": "Round 30",
+        "z19mg68l": "Pack-A-Punch",
+        "1gnrx76l": "Super Easter Egg"
+      }
+    },
+    "68kwemq8": {
+      "name": "B02 Challenge Cat.",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "qkej4e9q": "No Power",
+        "q75j45n1": "No Perks",
+        "lmok4oy1": "No Magic",
+        "1gn84nxl": "First Room"
+      }
+    },
+    "6njpwqpn": {
+      "name": "BO3 Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "qyzp7941": "Shadows of Evil",
+        "ln8we90l": "The Giant",
+        "10vz6pwl": "Der Eisendrache",
+        "qj7029eq": "Zetsubo no Shima",
+        "q650vp3l": "Gorod Krovi",
+        "lmok2pj1": "Revelations",
+        "1w4p79oq": "Kino Der Toten",
+        "lmokzxy1": "Ascension",
+        "qoxpj9pq": "Shangri-La",
+        "1398xpd1": "Moon",
+        "qvvpx97q": "Origins"
+      }
+    },
+    "789671q8": {
+      "name": "BO3 25K Points",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "mlnw6mjl": "The Giant",
+        "4qypeo2q": "Shadows of Evil",
+        "810zej2q": "Der Eisendrache",
+        "9qj0yn3l": "Zetsubou No Shima",
+        "jq60krjq": "Gorod Krovi",
+        "5lmkj6mq": "Revelations",
+        "81wpwpvq": "Nacht Der Untoten",
+        "zqopwpx1": "Verrückt",
+        "0138e8xq": "Shi No Numa",
+        "rqvpwp6q": "Kino Der Toten",
+        "5lergrkq": "Ascension",
+        "0q5nen2q": "Shangri-La",
+        "4lxpwp4q": "Moon",
+        "814yeyv1": "Origins"
+      }
+    },
+    "r8r1y4wn": {
+      "name": "BO3 Categories All Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "xqkjk2kl": "Round 15",
+        "gq7je0dq": "Round 30",
+        "21g8rv8l": "Pack-A-Punch",
+        "1pywxjv1": "Super Easter Egg"
+      }
+    },
+    "gnxv72jl": {
+      "name": "BO3 Challenges",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "jqzp722l": "No Mans Land 100 Kills",
+        "q75jn4d1": "Rainbow Perk Challenge",
+        "1gn8j48l": "Reverse Rainbow Perk Challenge"
+      }
+    },
+    "onvym2wn": {
+      "name": "IW Consumables",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "ln8we70l": "No Cards",
+        "10vz6ywl": "All Cards"
+      }
+    },
+    "789eyj5l": {
+      "name": "IW Categories All Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "14oy960q": "Round 15",
+        "192mxv0q": "Round 30",
+        "12vd9k7q": "Pack-a-Punch",
+        "1pypezg1": "Super Easter Egg"
+      }
+    },
+    "ylpk4mj8": {
+      "name": "IW Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "qj702oeq": "Zombies in Spaceland",
+        "q650vw3l": "Rave in the Redwoods",
+        "lmok2ej1": "Shaolin Shuffle",
+        "1w4p7joq": "AOTRT",
+        "qoxpjgpq": "Beast From Beyond"
+      }
+    },
+    "jlz6vox8": {
+      "name": "IW Directors Cut",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "lmokn341": "DC",
+        "1w4p825q": "No DC"
+      }
+    },
+    "0nwyqk58": {
+      "name": "IW 25k Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "1398xjd1": "Zombies in Spaceland",
+        "qvvpx07q": "Rave in the Redwoods",
+        "le2rn05l": "Shaolin Shuffle",
+        "q5vn4mml": "AOTRT",
+        "lx5pgk21": "Beast from Beyond"
+      }
+    },
+    "onvjovwn": {
+      "name": "BO4 25K Points",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "z19mgm8l": "Voyage of Despair",
+        "p12ded4q": "IX",
+        "81ppwp81": "Blood of The Dead",
+        "xqkjkjkl": "Classified",
+        "gq7jejdq": "Dead of the Night",
+        "21g8r88l": "Ancient Evil",
+        "jqzp7p8l": "Alpha Omega",
+        "klrpwpmq": "Tag Der Toten"
+      }
+    },
+    "5lyp2xjl": {
+      "name": "BO4 Categories All Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "jqzp788l": "Round 15",
+        "klrpwvmq": "Round 30",
+        "gq7je0pq": "Pack-A-Punch",
+        "qkekzddq": "Super Easter Egg"
+      }
+    },
+    "kn0e6z38": {
+      "name": "BO4 Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "le2rn55l": "IX",
+        "q5vn4pml": "Voyage of Despair",
+        "lx5pg921": "BOTD",
+        "14oy9p0q": "Classified",
+        "192mxk0q": "DOTN",
+        "12vd9p7q": "Ancient Evil",
+        "1pype2g1": "Alpha Omega",
+        "qkejo5nq": "Tag Der Toten"
+      }
+    },
+    "ylped6j8": {
+      "name": "Cold War 25k Points",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "4qypoydq": "Die Maschine",
+        "xqk2gp4q": "Firebase Z",
+        "zqo9z3pq": "Mauer der Toten",
+        "5lex2z6q": "Forsaken"
+      }
+    },
+    "ql6954jl": {
+      "name": "Cold War Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "q75j2ov1": "Die Maschine",
+        "1gn896nl": "Firebase Z",
+        "qznpgwgq": "Outbreak",
+        "lr3pxdjl": "Mauer Der Toten",
+        "1dkz6n4l": "Forsaken"
+      }
+    },
+    "ylq41kmn": {
+      "name": "BO7 Challenges",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "1gn89vml": "No Power",
+        "qznpg8mq": "No Perks",
+        "lr3pxv2l": "First Room",
+        "q8k643gq": "No Support"
+      }
+    },
+    "0nwozdrl": {
+      "name": "Cold War All Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "klrp40wq": "Round 15",
+        "21dzgygl": "Round 30",
+        "5q868061": "Pack-A-Punch",
+        "1gnrx7ml": "Super Easter Egg"
+      }
+    },
+    "wle3vr48": {
+      "name": "CW Challenge Cat.",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "10vz3yol": "First Room (Support)",
+        "qj70jo7q": "First Room (No Support)",
+        "q6503wvl": "No Armor",
+        "lmokze81": "No Perks",
+        "1w4p3jmq": "No Power"
+      }
+    },
+    "gnxqxrj8": {
+      "name": "BO7 Categories",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "q75j2wv1": "Round 5",
+        "1gn897nl": "Round 15",
+        "qznpgdgq": "Round 30",
+        "lr3pxmjl": "Round 50",
+        "1dkz6w4l": "Round 70",
+        "q8k64ogq": "Round 100",
+        "qyzp7r41": "Pack-a-Punch",
+        "10vz6nwl": "N/A"
+      }
+    },
+    "68kooy3n": {
+      "name": "CW Challenge Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "21gv8zm1": "Die Maschine",
+        "013kxm3q": "Firebase Z",
+        "qoxpdg5q": "Mauer Der Toten",
+        "13983jr1": "Forsaken"
+      }
+    },
+    "j84pmk48": {
+      "name": "B06 Challenge Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "qznp5n4q": "Liberty Falls",
+        "lr3p030l": "Terminus",
+        "1dkzyk3l": "Citadelle Des Morts",
+        "q8k60krq": "The Tomb",
+        "qyzpyz31": "Shattered Veil",
+        "ln8w086l": "Reckoning"
+      }
+    },
+    "kn0e6e78": {
+      "name": "B07 Challenges",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "qkejr4kq": "No support"
+      }
+    },
+    "rn1kd1dl": {
+      "name": "B06 Challenge cat.",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "10vzmvjl": "No Perks",
+        "qj70470q": "First Room",
+        "q650x5nl": "No Support"
+      }
+    },
+    "jlz6z5x8": {
+      "name": "BO6 Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "q650vm3l": "Liberty Falls",
+        "lmok2yj1": "Terminus",
+        "1w4p7goq": "Citadelle De Morts",
+        "qoxpj0pq": "The Tomb",
+        "1398x0d1": "Shattered Veil",
+        "qvvpx77q": "Reckoning"
+      }
+    },
+    "0nwyqkr8": {
+      "name": "BO7 Challenge Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "qyzp7241": "Ashes of the Damned",
+        "ln8wev0l": "Vandorn Farm",
+        "qoxp3xgq": "Exit 115",
+        "1398m9k1": "Astra Malorum"
+      }
+    },
+    "rn1yv3vn": {
+      "name": "BO6 Categories All Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "1w454g5q": "Round 15",
+        "qoxrx02q": "Round 30",
+        "13959031": "Pack-a-Punch",
+        "qzn70dmq": "Super Easter Egg"
+      }
+    },
+    "j84j94y8": {
+      "name": "BO6 25k Points",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "lmogoy41": "Liberty Falls",
+        "q65z5m7l": "Terminus Island",
+        "qzn70d2q": "Citadelle Des Morts",
+        "lr3w5mol": "The Tomb",
+        "q75e7wy1": "The Shattered Veil",
+        "ln8mmgol": "Reckoning"
+      }
+    },
+    "e8mg3mm8": {
+      "name": "BO7 Categories All Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "192mx6kq": "Round 15",
+        "12vd9rkq": "Round 30",
+        "1pypevk1": "Song",
+        "qkejo2yq": "Pack-a-Punch",
+        "q75j20y1": "Super Easter Egg"
+      }
+    },
+    "dloek3rn": {
+      "name": "BO7 25k Points",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "ln8wen0l": "Ashes of the Damned",
+        "10vz68wl": "Vandorn Farm",
+        "qj702req": "DOA 4"
+      }
+    },
+    "9l7gdy4l": {
+      "name": "B07 PAP Maps",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "qvvp4xyq": "Ashes of the Damned",
+        "le2rk36l": "Vandorn Farm",
+        "qj70dmgq": "Exit 115",
+        "q6507o7l": "Astra Malorum"
+      }
+    },
+    "p85wq9x8": {
+      "name": "B07 Challenge Cat.",
+      "game_id": "j1n0zydp",
+      "game_name": "Call Of Duty Zombies Category Extension",
+      "values": {
+        "qvvprv5q": "No Support",
+        "le2r42pl": "No Perks",
+        "q5vn5vrl": "First Room"
+      }
+    },
+    "wle6xk48": {
+      "name": "Number of Players",
+      "game_id": "46w3zy71",
+      "game_name": "Call of Duty: Advanced Warfare Zombies",
+      "values": {
+        "zqom0w21": "Solo",
+        "013w0e3q": "2P Co-Op",
+        "rqv67wwl": "3P Co-Op",
+        "5le3ogzq": "4P Co-Op"
+      }
+    },
+    "68kmd73l": {
+      "name": "Category",
+      "game_id": "46w3zy71",
+      "game_name": "Call of Duty: Advanced Warfare Zombies",
+      "values": {
+        "p12onekl": "Round 5",
+        "81p4jwk1": "Round 15",
+        "xqk9dky1": "Round 30",
+        "gq79weyl": "Round 50",
+        "21ge7rml": "Round 70",
+        "jqzvd7ml": "Round 100",
+        "0q5x6en1": "Weapon Upgrade",
+        "4lx0zwrl": "Exo Suit",
+        "814kjejl": "Exo Upgrades",
+        "z1953gkq": "Easter Egg"
+      }
+    },
+    "j84k6d2n": {
+      "name": "Category",
+      "game_id": "46w3zy71",
+      "game_name": "Call of Duty: Advanced Warfare Zombies",
+      "values": {
+        "klrjm4jq": "Round 5",
+        "21dvwg41": "Round 15",
+        "5q82o8gq": "Round 30",
+        "4qy5ro41": "Round 50",
+        "mlndnm01": "Round 70",
+        "81008jw1": "Round 100",
+        "gq79wdvl": "Weapon Upgrade",
+        "21ge7dnl": "Exo Suit",
+        "jqzvdegl": "Exo Upgrades",
+        "klrjmw2q": "Easter Egg"
+      }
+    },
+    "rn114jon": {
+      "name": "Category",
+      "game_id": "46w3zy71",
+      "game_name": "Call of Duty: Advanced Warfare Zombies",
+      "values": {
+        "zqom0op1": "Round 5",
+        "013w07dq": "Round 15",
+        "rqv67o7l": "Round 30",
+        "5le3oz5q": "Round 50",
+        "0q5x6zm1": "Round 70",
+        "4lx0zo2l": "Round 100",
+        "jq6ymr31": "Weapon Upgrade",
+        "5lm8y6jq": "Exo Suit",
+        "81wegoo1": "Exo Upgrades",
+        "9qjwrne1": "Easter Egg"
+      }
+    },
+    "p859357n": {
+      "name": "Category",
+      "game_id": "46w3zy71",
+      "game_name": "Call of Duty: Advanced Warfare Zombies",
+      "values": {
+        "xqk9d0n1": "Round 5",
+        "gq79wjvl": "Round 15",
+        "21ge78nl": "Round 30",
+        "jqzvdpgl": "Round 50",
+        "klrjmpjq": "Round 70",
+        "21dvwz41": "Round 100",
+        "z1953y0q": "Weapon Upgrade",
+        "p12onm7l": "Exo Suit",
+        "81p4jog1": "Exo Upgrades",
+        "814kjg0l": "Easter Egg"
+      }
+    },
+    "p8509kvn": {
+      "name": "Patched",
+      "game_id": "46w3zy71",
+      "game_name": "Call of Duty: Advanced Warfare Zombies",
+      "values": {
+        "1dk9654l": "Non-Patched",
+        "q8kj4pgq": "Patched"
+      }
+    },
+    "onvx6j58": {
+      "name": "All Maps Categories",
+      "game_id": "268pep5d",
+      "game_name": "Call of Duty: Black Ops 3 Category Extension",
+      "values": {
+        "qzn8vv8q": "Round 15",
+        "lr3vjjml": "Round 30",
+        "1dk9vv5l": "Pack-a-Punch",
+        "q8kj223q": "All Songs"
+      }
+    },
+    "ylpxvekn": {
+      "name": "Round Number",
+      "game_id": "268pep5d",
+      "game_name": "Call of Duty: Black Ops 3 Category Extension",
+      "values": {
+        "q65nyyjl": "Round 15",
+        "lmov88m1": "Round 30"
+      }
+    },
+    "0nwd2od8": {
+      "name": "Maps",
+      "game_id": "268pep5d",
+      "game_name": "Call of Duty: Black Ops 3 Category Extension",
+      "values": {
+        "139dwvx1": "All Maps",
+        "1w4zemvq": "Base Game",
+        "qoxkmyxq": "Chronicles"
+      }
+    },
+    "ql6mg7w8": {
+      "name": "SOE Categories",
+      "game_id": "268pep5d",
+      "game_name": "Call of Duty: Black Ops 3 Category Extension",
+      "values": {
+        "q75099d1": "PAP All Guns",
+        "1gnvee8l": "25k Points"
+      }
+    },
+    "789mk6qn": {
+      "name": "Maps",
+      "game_id": "268pep5d",
+      "game_name": "Call of Duty: Black Ops 3 Category Extension",
+      "values": {
+        "q5vyxo2l": "All Maps",
+        "qvvg646q": "Base Game",
+        "le293kkl": "Chronicles"
+      }
+    },
+    "onvx6jw8": {
+      "name": "Map",
+      "game_id": "268pep5d",
+      "game_name": "Call of Duty: Black Ops 3 Category Extension",
+      "values": {
+        "lx5r0x41": "Shadows of Evil",
+        "14o8kxvq": "The Giant",
+        "1926548q": "Der Eisendrache",
+        "12vro54q": "Zetsubou No Shima",
+        "1pyv4781": "Gorod Krovi",
+        "qke29rkq": "Revelations",
+        "q7509nd1": "Nacht der Untoten",
+        "1gnvej8l": "Verruckt",
+        "qzn8v68q": "Shi No Numa",
+        "lr3vjzml": "Kino der Toten",
+        "1dk9v45l": "Ascension",
+        "q8kj2e3q": "Shangri-La",
+        "qyzd5x21": "Moon",
+        "ln8pdyjl": "Origins"
+      }
+    },
+    "ylpxvejn": {
+      "name": "Map",
+      "game_id": "268pep5d",
+      "game_name": "Call of Duty: Black Ops 3 Category Extension",
+      "values": {
+        "10vg052l": "Shadows of Evil",
+        "qj7vwz3q": "The Giant",
+        "q65ny4jl": "Der Eisendrache",
+        "lmov8xm1": "Zetsubou No Shima",
+        "1w4zenvq": "Gorod Krovi",
+        "qoxkm5xq": "Revelations",
+        "139dw2x1": "Nacht der Untoten",
+        "qvvg6m6q": "Verruckt",
+        "le293ekl": "Shi No Numa",
+        "q5vyx22l": "Kino der Toten",
+        "lx5r0y41": "Ascension",
+        "14o8k2vq": "Shangri-La",
+        "19265z8q": "Moon",
+        "12vro24q": "Origins"
+      }
+    },
+    "0nwd2o58": {
+      "name": "Map",
+      "game_id": "268pep5d",
+      "game_name": "Call of Duty: Black Ops 3 Category Extension",
+      "values": {
+        "1pyv4x81": "Shadows of Evil",
+        "qke29zkq": "Der Eisendrache",
+        "q75097d1": "Zetsubou No Shima",
+        "1gnvex8l": "Gorod Krovi"
+      }
+    },
+    "789mk65n": {
+      "name": "Mini EE Map",
+      "game_id": "268pep5d",
+      "game_name": "Call of Duty: Black Ops 3 Category Extension",
+      "values": {
+        "qzn8v08q": "Nacht der Untoten",
+        "lr3vj5ml": "Verruckt",
+        "1dk9v25l": "Shi No Numa",
+        "q8kj2g3q": "Kino der Toten",
+        "qyzd5n21": "Moon"
+      }
+    },
+    "2lgxzr6n": {
+      "name": "Challenge Variant",
+      "game_id": "268pep5d",
+      "game_name": "Call of Duty: Black Ops 3 Category Extension",
+      "values": {
+        "ln8pd5jl": "Standard",
+        "10vg0x2l": "Reverse Rainbow Perk"
+      }
+    },
+    "rn1610d8": {
+      "name": "Custom Map",
+      "game_id": "268pep5d",
+      "game_name": "Call of Duty: Black Ops 3 Category Extension",
+      "values": {
+        "1pyv4n81": "Alien Isolation",
+        "qke298kq": "Blockade",
+        "q7509gd1": "Daybreak",
+        "1gnveg8l": "Dead Ship",
+        "qzn8v48q": "Der Reise: Declassified",
+        "lr3vj7ml": "Leviathan",
+        "q7509gp1": "Nuketown",
+        "1gnveg6l": "Return to Das Herrenhaus",
+        "qzn8v42q": "Rust",
+        "lr3vj7ol": "Wanted"
+      }
+    },
+    "p85094xn": {
+      "name": "Category",
+      "game_id": "268pep5d",
+      "game_name": "Call of Duty: Black Ops 3 Category Extension",
+      "values": {
+        "1dk9vdpl": "Easter Egg/Buyable Ending",
+        "q8kj2zyq": "Round 5",
+        "qyzd5461": "Round 15",
+        "ln8pd3ol": "Round 30"
+      }
+    },
+    "0nwd2rk8": {
+      "name": "Challenge",
+      "game_id": "268pep5d",
+      "game_name": "Call of Duty: Black Ops 3 Category Extension",
+      "values": {
+        "qj7ve4oq": "Starting Room",
+        "q65ngxol": "No Perks",
+        "lmovw401": "No Power"
+      }
+    },
+    "789mkg6n": {
+      "name": "Map",
+      "game_id": "268pep5d",
+      "game_name": "Call of Duty: Black Ops 3 Category Extension",
+      "values": {
+        "1w4zrd6q": "Shadows of Evil",
+        "qoxk234q": "The Giant",
+        "139d4my1": "Der Eisendrache",
+        "qvvgzryq": "Zetsubou No Shima",
+        "le29vm6l": "Gorod Krovi",
+        "q5vy7gvl": "Revelations",
+        "lx5rdeg1": "Nacht Der Untoten",
+        "14o847kq": "Verruckt",
+        "1926d84q": "Shi No Numa",
+        "12vr4x2q": "Kino Der Toten",
+        "1pyv6dn1": "Ascension",
+        "qke26m4q": "Shangri-La",
+        "q750zrr1": "Moon",
+        "1gnvo2ol": "Origins"
+      }
+    },
+    "6njxv458": {
+      "name": "Gobblegum Loadout",
+      "game_id": "268pep5d",
+      "game_name": "Call of Duty: Black Ops 3 Category Extension",
+      "values": {
+        "q5vyxx2l": "Megas",
+        "lx5r0041": "Classics",
+        "14o8kkvq": "No Gums"
+      }
+    },
+    "kn034j0n": {
+      "name": "Number of Players",
+      "game_id": "268pep5d",
+      "game_name": "Call of Duty: Black Ops 3 Category Extension",
+      "values": {
+        "1926558q": "1 Player",
+        "12vroo4q": "2 Players",
+        "1pyv4481": "3 Players",
+        "qke299kq": "4 Players"
+      }
+    },
+    "jlzpexqn": {
+      "name": "Liberty Falls Categories",
+      "game_id": "46wroj31",
+      "game_name": "Call of Duty: Black Ops 6 Zombies",
+      "values": {
+        "qoxrn5gq": "Main Quest",
+        "qj747goq": "Main Quest (No Major Skips) [OBSOLETE]",
+        "qkem8vyq": "Main Quest Any% (Build Wonder Weapon) [OBSOLETE]",
+        "lmogndy1": "Main Quest (Any%) [OBSOLETE]",
+        "10vmvxpl": "Pack-A-Punch",
+        "1gn2npxl": "Exfil",
+        "q8kdxwgq": "Song Easter Egg",
+        "q8kdkokq": "Bowling Easter Egg",
+        "le2m29ml": "Build Wonder Weapon",
+        "q65x52ol": "Round 5",
+        "lmo4od01": "Round 15",
+        "1w4d4n6q": "Round 30",
+        "qox3x54q": "Round 50",
+        "lr3y320l": "Round 70",
+        "139m92y1": "Round 100"
+      }
+    },
+    "789v4yqn": {
+      "name": "Terminus Categories",
+      "game_id": "46wroj31",
+      "game_name": "Call of Duty: Black Ops 6 Zombies",
+      "values": {
+        "1395r2k1": "Main Quest",
+        "14o7o8eq": "Main Quest (No Major Skips) [OBSOLETE]",
+        "1w458n9q": "Main Quest (Any%) [OBSOLETE]",
+        "lr3y3vol": "Song Easter Egg",
+        "192826yq": "Build Wonder Weapon",
+        "qznxn82q": "Pack-a-Punch",
+        "qznxn34q": "Exfil",
+        "12vxvrdq": "Round 5",
+        "1pydyvv1": "Round 15",
+        "qkeme2dq": "Round 30",
+        "q75r50p1": "Round 50",
+        "1gn2nv6l": "Round 70",
+        "q75r50y1": "Round 100"
+      }
+    },
+    "789vy65n": {
+      "name": "CDM Categories",
+      "game_id": "46wroj31",
+      "game_name": "Call of Duty: Black Ops 6 Zombies",
+      "values": {
+        "1pydo5v1": "Main Quest",
+        "qkem0ndq": "Pack-a-Punch",
+        "q75rdxp1": "Exfil",
+        "qznxpm8q": "Song Easter Egg",
+        "1928mw8q": "Round 5",
+        "12vxd84q": "Round 15",
+        "1pydpg81": "Round 30",
+        "qkemjxkq": "Round 50",
+        "q75rj6d1": "Round 70",
+        "1gn2838l": "Round 100"
+      }
+    },
+    "yn26gvjl": {
+      "name": "The Tomb Categories",
+      "game_id": "46wroj31",
+      "game_name": "Call of Duty: Black Ops 6 Zombies",
+      "values": {
+        "ln8kzvol": "Main Quest",
+        "10v9wkol": "Pack-a-Punch",
+        "qj7exk7q": "Song",
+        "le2vm7ml": "Exfil",
+        "1gnygzml": "Build Wonder Weapon",
+        "q65gz6vl": "Round 5",
+        "lmowg081": "Round 15",
+        "1w4r5xmq": "Round 30",
+        "qox2r65q": "Round 50",
+        "13945nr1": "Round 70",
+        "qvvze5rq": "Round 100"
+      }
+    },
+    "gnxqjz68": {
+      "name": "Shattered Veil Categories",
+      "game_id": "46wroj31",
+      "game_name": "Call of Duty: Black Ops 6 Zombies",
+      "values": {
+        "1393rex1": "Main Quest",
+        "qvv3dw6q": "Pack-a-Punch",
+        "12vd5w4q": "Build Wonder Weapon",
+        "le2d8gkl": "Song",
+        "qznk4zmq": "Exfil",
+        "q5vk8e2l": "Round 5",
+        "lx534w41": "Round 15",
+        "14o3devq": "Round 30",
+        "1927rg8q": "Round 50",
+        "12v3ze4q": "Round 70",
+        "1py8nw81": "Round 100"
+      }
+    },
+    "6njpd4en": {
+      "name": "Reckoning Categories",
+      "game_id": "46wroj31",
+      "game_name": "Call of Duty: Black Ops 6 Zombies",
+      "values": {
+        "12ve0wdq": "Main Quest",
+        "1pyw50v1": "Pack-a-Punch",
+        "1pyp7081": "Build Wonder Weapon",
+        "qyzewy61": "Exfil",
+        "qkekn4dq": "Song",
+        "q75ex4p1": "Round 5",
+        "1gnrp46l": "Round 15",
+        "qzn7352q": "Round 30",
+        "lr3w20ol": "Round 50",
+        "1dk7eypl": "Round 70",
+        "q8k790yq": "Round 100"
+      }
+    },
+    "68k16z3l": {
+      "name": "Rampage Inducer",
+      "game_id": "46wroj31",
+      "game_name": "Call of Duty: Black Ops 6 Zombies",
+      "values": {
+        "qyzjvg41": "Rampage ON",
+        "ln8z4j0l": "Rampage OFF"
+      }
+    },
+    "yn202mel": {
+      "name": "Player Count",
+      "game_id": "46wroj31",
+      "game_name": "Call of Duty: Black Ops 6 Zombies",
+      "values": {
+        "lx5854g1": "1 Player",
+        "14ovodkq": "2 Players",
+        "19292r4q": "3 Players",
+        "12vwvz2q": "4 Players"
+      }
+    },
+    "9l7y25pl": {
+      "name": "Gobblegums Ruleset",
+      "game_id": "46wroj31",
+      "game_name": "Call of Duty: Black Ops 6 Zombies",
+      "values": {
+        "q5v5v8vl": "No Gums",
+        "qvvrvmyq": "All Gums",
+        "le24286l": "Classic Gums"
+      }
+    },
+    "rn1y7dvn": {
+      "name": "Wonder Weapon Ruleset",
+      "game_id": "46wroj31",
+      "game_name": "Call of Duty: Black Ops 6 Zombies",
+      "values": {
+        "q8kdzmkq": "Quest Wonder Weapon",
+        "qyzj4671": "Mystery Box Wonder Weapon",
+        "qoxrn72q": "No Wonder Weapon"
+      }
+    },
+    "38d925xl": {
+      "name": "Jingle Hells",
+      "game_id": "46wroj31",
+      "game_name": "Call of Duty: Black Ops 6 Zombies",
+      "values": {
+        "qvve0p7q": "Jingle Hells",
+        "le2m0r5l": "Normal Version",
+        "lr3ydpjl": "Main Quest",
+        "1dk3nz4l": "Pack-a-Punch",
+        "1395j8d1": "Build Wonder Weapon",
+        "qoxrgppq": "Bowling Easter Egg",
+        "1w45jpoq": "Exfil",
+        "q8kd36gq": "Song",
+        "qyzjmp41": "Round 5",
+        "ln8z7w0l": "Round 15",
+        "10vwyzwl": "Round 30",
+        "qj7xo0eq": "Round 50",
+        "q65zw03l": "Round 70",
+        "lmogekj1": "Round 100"
+      }
+    },
+    "ylpy4ejl": {
+      "name": "Liberty Falls Exploits & Glitches Ruleset",
+      "game_id": "46wroj31",
+      "game_name": "Call of Duty: Black Ops 6 Zombies",
+      "values": {
+        "1928ypyq": "Current Patch",
+        "12vxm0dq": "Old Patches",
+        "q8kd3prq": "Jingle Hells L.T.E."
+      }
+    },
+    "68k1vezl": {
+      "name": "Terminus Exploits & Glitches Ruleset ",
+      "game_id": "46wroj31",
+      "game_name": "Call of Duty: Black Ops 6 Zombies",
+      "values": {
+        "q75rg8y1": "Current Patch",
+        "qoxrpdgq": "Old Patches",
+        "1dk3yw5l": "Unrestricted [v11.5]",
+        "1gn2gmml": "Unrestricted [v11.2]"
+      }
+    },
+    "wlegod2n": {
+      "name": "CDM Exploits & Glitches Ruleset ",
+      "game_id": "46wroj31",
+      "game_name": "Call of Duty: Black Ops 6 Zombies",
+      "values": {
+        "1gn2dp6l": "No Major Skips",
+        "qkemdj9q": "Current Patch",
+        "lr3yprml": "Old Patches"
+      }
+    },
+    "6njprv5n": {
+      "name": "The Tomb Glitches & Exploits",
+      "game_id": "46wroj31",
+      "game_name": "Call of Duty: Black Ops 6 Zombies",
+      "values": {
+        "q5v7gj7l": "Current Patch",
+        "lx5de731": "Old Patches"
+      }
+    },
+    "dloe7zen": {
+      "name": "Shattered Veil Glitches & Exploits",
+      "game_id": "46wroj31",
+      "game_name": "Call of Duty: Black Ops 6 Zombies",
+      "values": {
+        "qke78kkq": "Current Patch",
+        "q75kged1": "Old Patches"
+      }
+    },
+    "kn0eoj78": {
+      "name": "Reckoning Exploits & Glitches Ruleset",
+      "game_id": "46wroj31",
+      "game_name": "Call of Duty: Black Ops 6 Zombies",
+      "values": {
+        "ln86o0ol": "Current Patch",
+        "10vedwol": "Old Patches"
+      }
+    },
+    "68kw0kk8": {
+      "name": "Player Count",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "q8k88wyq": "1 Player",
+        "qyzoog61": "2 Players",
+        "ln8mmjol": "3 Players",
+        "10vjj2ol": "4 players"
+      }
+    },
+    "wle3mz28": {
+      "name": "AOTD Gobblegum Ruleset",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "1dkggxpl": "All Gums",
+        "lr344ool": "No Gums"
+      }
+    },
+    "rn1kv91l": {
+      "name": "AOTD Categories",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "qvvoojrq": "Main Quest",
+        "1398vxy1": "Build Wonder Weapon",
+        "le2zzpml": "Pack-a-Punch",
+        "q5vzzd7l": "Song",
+        "lx5oojr1": "Exfil",
+        "lx5oom31": "Round 5",
+        "14oggreq": "Round 15",
+        "192yy0yq": "Round 30",
+        "12vmmgdq": "Round 50",
+        "1pyoorv1": "Round 70",
+        "qke00pdq": "Round 100"
+      }
+    },
+    "j84p9ww8": {
+      "name": "AOTD Game Mode",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "qj7nnp7q": "Standard Mode",
+        "q65rr8vl": "Cursed Mode (No Relics)",
+        "10vz5g5l": "Cursed Mode (Tier 1)",
+        "qyzpxm41": "Cursed Mode (Tier 2)",
+        "10vz7n5l": "Cursed Mode (Tier 3)",
+        "q5vzy7rl": "Cursed Mode (All Relics) [Launch]",
+        "13983ry1": "Cursed Mode (All Relics) [S1]"
+      }
+    },
+    "dloedpen": {
+      "name": "AOTD Glitches & Ruleset",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "le2zzwzl": "No Major Skips",
+        "q5vzz0nl": "Unrestricted"
+      }
+    },
+    "rn1kv6kl": {
+      "name": "AOTD Rampage Inducer",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "lr34vn0l": "RI On",
+        "1dkg9r3l": "RI Off"
+      }
+    },
+    "789e9z6l": {
+      "name": "AOTD  Ruleset",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "14ogwwkq": "Unrestricted [Launch Version]",
+        "192ypp4q": "No Major Skips"
+      }
+    },
+    "p85wg008": {
+      "name": "DOA4 Gobblegum Ruleset",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "q8k8j5rq": "All Gobblegums",
+        "qyzod331": "No Gobblegums"
+      }
+    },
+    "p85wgk38": {
+      "name": "DOA Categories",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "q75ddyp1": "Defeat Final Boss",
+        "1gnddk6l": "Round 5",
+        "qzneeo2q": "Round 15",
+        "lr3448ol": "Round 30",
+        "1dkggppl": "Round 50",
+        "q8k88nyq": "Round 70",
+        "qyzook61": "Round 100"
+      }
+    },
+    "p85wgzv8": {
+      "name": "Vandorn Farm Gobblegums",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "qyzo9rd1": "All Gums",
+        "ln8m9nnl": "No Gums"
+      }
+    },
+    "38dgv448": {
+      "name": "Vandorn Farm Categories",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "10vjp8pl": "Pack-a-Punch",
+        "qj7n9roq": "Round 5",
+        "q65rpmol": "Round 15",
+        "lmo6py01": "Round 30",
+        "1w4o9g6q": "Round 50",
+        "qoxo904q": "Round 100"
+      }
+    },
+    "p85w11v8": {
+      "name": "DOA4 Difficulty",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "ln8w3dnl": "Regular",
+        "10vz70pl": "Hardcore"
+      }
+    },
+    "r8r6m958": {
+      "name": "Vandorn Farm Gobblegums",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "1397p0y1": "All Gums",
+        "qvvo97yq": "No Gums"
+      }
+    },
+    "j84p91j8": {
+      "name": "Vandorn Farm Categories",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "lx5ordj1": "Pack-a-Punch",
+        "14og84wq": "Exfil",
+        "192y67jq": "Song",
+        "12vmr3vq": "Round 5",
+        "1pyov8e1": "Round 15",
+        "qke0279q": "Round 30",
+        "q75d0kn1": "Round 50",
+        "1gndvyxl": "Round 70",
+        "qzne8k4q": "Round 100"
+      }
+    },
+    "5lyyg52l": {
+      "name": "Vandorn Farm Rampage Inducer",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "le2z556l": "RI On",
+        "q5vzppvl": "RI Off"
+      }
+    },
+    "e8mxyewl": {
+      "name": "Vandorn Farm Game Mode",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "qvvgw0rq": "Standard Mode",
+        "le29g0ml": "Cursed Mode (No Relics)"
+      }
+    },
+    "68kw99z8": {
+      "name": "Exit 115 Gobblegum Ruleset",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "14oydkkq": "All Gums",
+        "192mr54q": "No Gums"
+      }
+    },
+    "rn1k33vl": {
+      "name": "Exit 115 Categories",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "qkej894q": "Exfil",
+        "q75jg9r1": "Pack-a-Punch",
+        "1gn8geol": "Round 5",
+        "qznp4vkq": "Round 15",
+        "lr3p7jwl": "Round 30",
+        "1dkzdvgl": "Round 50",
+        "q8k6z26q": "Round 70",
+        "qyzp45d1": "Round 100"
+      }
+    },
+    "j84p44y8": {
+      "name": "Exit 115 Rampage Inducer",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "12vdzo2q": "RI On",
+        "1pypn4n1": "RI Off"
+      }
+    },
+    "5lydjzgl": {
+      "name": "Exit 115 Game Mode",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "qoxkwg5q": "Cursed Mode (No Relics)",
+        "139dejr1": "Standard Mode"
+      }
+    },
+    "38dg6648": {
+      "name": "AM Gobblegum Ruleset",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "qj70dwoq": "All Gums",
+        "q6507yol": "No Gums"
+      }
+    },
+    "r8r65558": {
+      "name": "AM Categories",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "lmokn801": "Main Quest",
+        "1w4p8e6q": "Build Wonder Weapon",
+        "qoxpnm4q": "Pack-a-Punch",
+        "1398rwy1": "Song",
+        "qvvpd6yq": "Exfil",
+        "le2r8k6l": "Round 5",
+        "q5vn8ovl": "Round 15",
+        "lx5p4xg1": "Round 30",
+        "14oydxkq": "Round 50",
+        "192mr44q": "Round 70",
+        "12vdz52q": "Round 100"
+      }
+    },
+    "5lyyoo2l": {
+      "name": "AM Game Mode",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "qkej8r4q": "Standard Mode",
+        "q75jgnr1": "Cursed Mode (No Relics)",
+        "1gn8gjol": "Cursed Mode (All Relics)"
+      }
+    },
+    "ylq4117n": {
+      "name": "AM Rampage Inducer",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "1dkzd4gl": "RI On",
+        "q8k6ze6q": "RI Off"
+      }
+    },
+    "e8mg33e8": {
+      "name": "AM Ruleset",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "qznp46kq": "No Major Skips",
+        "lr3p7zwl": "Unrestricted"
+      }
+    },
+    "5lyyrmgl": {
+      "name": "ZC Gobblegum Ruleset",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "192m0v4q": "All Gums",
+        "12vdgk2q": "No Gums"
+      }
+    },
+    "38dgxd08": {
+      "name": "ZC Categories",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "q6508pol": "Exfil",
+        "lmok7p01": "Pack-a-Punch",
+        "1w4p696q": "Round 5",
+        "qoxpz94q": "Round 15",
+        "1398zpy1": "Round 30",
+        "qvvpj9yq": "Round 50",
+        "le2rp06l": "Round 70",
+        "q5vndmvl": "Round 100"
+      }
+    },
+    "r8rxgd08": {
+      "name": "ZC Game Mode",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "lmovje81": "Standard Mode",
+        "1w4zwjmq": "Cursed Mode (No Relics)"
+      }
+    },
+    "r8r6jk08": {
+      "name": "ZC Rampage Inducer",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "lx5pmkg1": "RI On",
+        "14oyr6kq": "RI Off"
+      }
+    },
+    "p8509x7n": {
+      "name": "Mars Gobblegum Ruleset",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "qyzde961": "All Gums",
+        "ln8p69ol": "No Gums"
+      }
+    },
+    "rn161ro8": {
+      "name": "Mars Categories",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "1pyvw2v1": "Exfil",
+        "qke2k5dq": "Pack-a-Punch",
+        "q750epp1": "Round 5",
+        "1gnvr56l": "Round 15",
+        "qzn8792q": "Round 30",
+        "lr3vw9ol": "Round 50",
+        "1dk975pl": "Round 70",
+        "q8kj7pyq": "Round 100"
+      }
+    },
+    "j841kq28": {
+      "name": "Mars Rampage Inducer",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "1926gkyq": "RI On",
+        "12vrepdq": "RI Off"
+      }
+    },
+    "38dko70n": {
+      "name": "Mars Game Mode",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "qj7vyo7q": "Standard Mode",
+        "q65nkwvl": "Cursed Mode (No Relics)"
+      }
+    },
+    "yn2k51jn": {
+      "name": "PD Gobblegum Ruleset",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "qj7vkdeq": "All Gumes",
+        "q65n673l": "No Gums"
+      }
+    },
+    "6njx4q58": {
+      "name": "PD Categories",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "lmov0nj1": "Main Quest",
+        "1w4zx8oq": "Build Wonder Weapon",
+        "qoxk6npq": "Pack-a-Punch",
+        "139dnrd1": "Song",
+        "qvvg5d7q": "Exfil",
+        "le29785l": "Round 5",
+        "q5vyj8ml": "Round 15",
+        "lx5r7421": "Round 30",
+        "14o80d0q": "Round 50",
+        "1926or0q": "Round 70",
+        "12vryz7q": "Round 100"
+      }
+    },
+    "kn03jz0n": {
+      "name": "PD Game Mode",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "1pyvmng1": "Standard Mode",
+        "qke2y8nq": "Cursed Mode (No Relics)",
+        "q750m4v1": "Cursed Mode (All Relics) [Launch]",
+        "1gnvz4nl": "Cursed Mode (All Relics) [S1]"
+      }
+    },
+    "ql6m74w8": {
+      "name": "PD Rampage Inducer",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "qzn8z5gq": "RI On",
+        "lr3vo0jl": "RI Off"
+      }
+    },
+    "onvxj258": {
+      "name": "PD Ruleset",
+      "game_id": "46wrk371",
+      "game_name": "Call of Duty: Black Ops 7 Zombies",
+      "values": {
+        "1dk9xy4l": "Unrestricted [Launch Version]",
+        "q8kjw0gq": "No Major Skips"
+      }
+    },
+    "2lgr6kon": {
+      "name": "Player(s)",
+      "game_id": "j1neozx1",
+      "game_name": "Call of Duty: Black Ops Cold War Zombies",
+      "values": {
+        "0137jrdl": "Solo",
+        "rqvo0d7l": "2P Co-Op",
+        "5lez085l": "3P Co-Op",
+        "0q5zm8mq": "4P Co-Op"
+      }
+    },
+    "wledm3xn": {
+      "name": "Die Maschine Categories",
+      "game_id": "j1neozx1",
+      "game_name": "Call of Duty: Black Ops Cold War Zombies",
+      "values": {
+        "4qyomy4l": "Easter Egg",
+        "814g6d01": "Round 5",
+        "81pozngq": "Round 15",
+        "xqk038n1": "Round 30",
+        "klr4d0jq": "Round 50",
+        "21dgny41": "Round 70",
+        "5q8830gq": "Round 100",
+        "9qjno4e1": "Exfiltration",
+        "jq6rwx3q": "Pack-A-Punch",
+        "5lm6e4j1": "Song",
+        "0q5zd5nq": "Coffin Dance"
+      }
+    },
+    "0nw715r8": {
+      "name": "Firebase Z Categories",
+      "game_id": "j1neozx1",
+      "game_name": "Call of Duty: Black Ops Cold War Zombies",
+      "values": {
+        "xqk2g6yq": "Easter Egg",
+        "1w47e7oq": "Build%",
+        "gq70vzyl": "Round 5",
+        "21gvwom1": "Round 15",
+        "jqz8rymq": "Round 30",
+        "klrve62q": "Round 50",
+        "21d9jrjq": "Round 70",
+        "5q8jx5kl": "Round 100",
+        "4qydv37q": "Exfiltration",
+        "mlnp4rd1": "Pack-A-Punch",
+        "810go35l": "Song",
+        "zqogr6p1": "Bunny Dance"
+      }
+    },
+    "wl313m68": {
+      "name": "Outbreak Categories",
+      "game_id": "j1neozx1",
+      "game_name": "Call of Duty: Black Ops Cold War Zombies",
+      "values": {
+        "0q56mw21": "Easter Egg",
+        "5q8p4m6l": "Easter Egg 2.0",
+        "klrvyvoq": "Exfiltration",
+        "ln85zy0l": "Survival",
+        "0q5yey7l": "Difficulty Level 3",
+        "81pvd2k1": "Difficulty Level 5",
+        "xqk2m5yq": "Difficulty Level 10",
+        "gq70rpyl": "Pack-A-Punch"
+      }
+    },
+    "p8546w5l": {
+      "name": "Dead Ops Arcade Categories",
+      "game_id": "j1neozx1",
+      "game_name": "Call of Duty: Black Ops Cold War Zombies",
+      "values": {
+        "81wojdol": "Any%",
+        "5q8jzwgl": "Round 5",
+        "4qyd4g4q": "Round 15",
+        "mlnp3j01": "Round 30",
+        "810g7kwl": "Round 50"
+      }
+    },
+    "5ly1w0kl": {
+      "name": "Mauer Der Toten Categories",
+      "game_id": "j1neozx1",
+      "game_name": "Call of Duty: Black Ops Cold War Zombies",
+      "values": {
+        "z19kgw0q": "Easter Egg",
+        "klr9w92l": "Song",
+        "21d57njl": "Pack-A-Punch",
+        "p12pepkq": "Round 5",
+        "81p2w2kl": "Round 15",
+        "xqk5k5yq": "Round 30",
+        "gq7pepyq": "Round 50",
+        "21g5r5ml": "Round 70",
+        "jqz979m1": "Round 100",
+        "z19kgkkq": "Exfiltration",
+        "mln9j50q": "Bunny Disco"
+      }
+    },
+    "yn2wg5gn": {
+      "name": "Forsaken Categories",
+      "game_id": "j1neozx1",
+      "game_name": "Call of Duty: Black Ops Cold War Zombies",
+      "values": {
+        "z19v3zjl": "Easter Egg",
+        "qoxjmjpq": "Build%",
+        "0q5m67vl": "Round 5",
+        "p12kn2v1": "Round 15",
+        "81pzjxel": "Round 30",
+        "xqk3dz91": "Round 50",
+        "gq7ow7nl": "Round 70",
+        "21g67xxq": "Round 100",
+        "9qjor4ol": "Exfiltration",
+        "jqzwd04q": "Pack-A-Punch",
+        "klrdg9wq": "Burger Defence",
+        "gq7o8pdl": "Grand Prix",
+        "21g6m58q": "Grand Prix (Race Only)"
+      }
+    },
+    "gnxj7pgl": {
+      "name": "Classic or Rampage (DM)",
+      "game_id": "j1neozx1",
+      "game_name": "Call of Duty: Black Ops Cold War Zombies",
+      "values": {
+        "810y752l": "Classic",
+        "9qjodz3l": "Rampage"
+      }
+    },
+    "dlo750j8": {
+      "name": "Classic or Rampage (FBZ)",
+      "game_id": "j1neozx1",
+      "game_name": "Call of Duty: Black Ops Cold War Zombies",
+      "values": {
+        "jq6w74jl": "Classic",
+        "5lmenxmq": "Rampage"
+      }
+    },
+    "jlzrv9y8": {
+      "name": "Classic or Rampage (MDT)",
+      "game_id": "j1neozx1",
+      "game_name": "Call of Duty: Black Ops Cold War Zombies",
+      "values": {
+        "81wj8nvq": "Classic",
+        "zqogn5x1": "Rampage"
+      }
+    },
+    "6nj5r4vl": {
+      "name": "Classic or Rampage (FS)",
+      "game_id": "j1neozx1",
+      "game_name": "Call of Duty: Black Ops Cold War Zombies",
+      "values": {
+        "21dnw23l": "Classic",
+        "5q83ogr1": "Rampage"
+      }
+    },
+    "2lg5r278": {
+      "name": "Outbreak or No Outbreak",
+      "game_id": "j1neozx1",
+      "game_name": "Call of Duty: Black Ops Cold War Zombies",
+      "values": {
+        "rqv26v61": "With Outbreak",
+        "0q5wxv2q": "Without Outbreak"
+      }
+    },
+    "wl390gyl": {
+      "name": "Classic or Rampage",
+      "game_id": "j1neozx1",
+      "game_name": "Call of Duty: Black Ops Cold War Zombies",
+      "values": {
+        "xqkw9ekq": "Classic",
+        "gq7395dl": "Rampage"
+      }
+    },
+    "789x5q8w": {
+      "name": "Number of Players",
+      "game_id": "4d7zzr67",
+      "game_name": "Call of Duty: Black Ops II Zombies",
+      "values": {
+        "5lmyj4lv": "Solo",
+        "81wgw5q4": "2P Co-Op",
+        "zqo0w2qy": "3P Co-Op",
+        "rqv7wwq6": "4P Co-Op"
+      }
+    },
+    "wl3drko8": {
+      "name": "Patched",
+      "game_id": "4d7zzr67",
+      "game_name": "Call of Duty: Black Ops II Zombies",
+      "values": {
+        "q5v99y2l": "Non-Patched",
+        "le2669kl": "Patched"
+      }
+    },
+    "2lg32qnp": {
+      "name": "Category",
+      "game_id": "4d7zzr67",
+      "game_name": "Call of Duty: Black Ops II Zombies",
+      "values": {
+        "0130e315": "Easter Egg Richtofen's Side",
+        "5leogzqo": "Easter Egg Maxis's Side",
+        "xqkdkyl9": "Pack-a-Punch",
+        "21g5knlz": "Pack-a-Punch No Bank",
+        "rqv9j5l6": "All Buildables",
+        "p12o4vdl": "Round 5",
+        "xqkoez91": "Round 15",
+        "21d503le": "Round 30",
+        "5q8pyrld": "Round 50",
+        "4qy903l7": "Round 70",
+        "mln9x6qp": "Round 100",
+        "9qjz7mg1": "Song"
+      }
+    },
+    "68kozzn2": {
+      "name": "Category",
+      "game_id": "4d7zzr67",
+      "game_name": "Call of Duty: Black Ops II Zombies",
+      "values": {
+        "p12nek1x": "Easter Egg Richtofen's Side",
+        "gq7268v1": "Easter Egg Maxis's Side",
+        "81pjwk17": "Pack-a-Punch",
+        "gq7pyvqp": "Pack-a-Punch No Bank",
+        "5le5pplo": "All Buildables",
+        "jqzvyn2l": "Round 5",
+        "gq7257n1": "Round 15",
+        "z19knjq4": "Round 30",
+        "p12p7vqx": "Round 50",
+        "81p29el7": "Round 70",
+        "xqk5v9q9": "Round 100",
+        "jq645o71": "Song"
+      }
+    },
+    "p85revng": {
+      "name": "Category",
+      "game_id": "4d7zzr67",
+      "game_name": "Call of Duty: Black Ops II Zombies",
+      "values": {
+        "21dwgjle": "Easter Egg",
+        "5q8o8k1d": "Pack-a-Punch",
+        "0q5pdrlp": "All Buildables",
+        "klrj63oq": "Round 5",
+        "21g9nxxq": "Round 15",
+        "gq7p8nqp": "Round 30",
+        "21g5mxlz": "Round 50",
+        "jqz9j41p": "Round 70",
+        "klr9g0lp": "Round 100",
+        "5lmxo341": "Song"
+      }
+    },
+    "5ly102l4": {
+      "name": "Category",
+      "game_id": "4d7zzr67",
+      "game_name": "Call of Duty: Black Ops II Zombies",
+      "values": {
+        "jq6mr71m": "Easter Egg Richtofen's Side",
+        "21g93mnq": "Easter Egg Maxis's Side",
+        "5lmy64lv": "Pack-a-Punch",
+        "gq72yep1": "Pack-a-Punch No Bank",
+        "4lx9mjl2": "All Buildables",
+        "21geonml": "Round 5",
+        "jqzgn04l": "Round 15",
+        "810p4jlv": "Round 30",
+        "9qj930l4": "Round 50",
+        "jq6pdn1m": "Round 70",
+        "5lmp5ylv": "Round 100",
+        "81wm425q": "Song"
+      }
+    },
+    "gnxjp4lv": {
+      "name": "Category",
+      "game_id": "4d7zzr67",
+      "game_name": "Call of Duty: Black Ops II Zombies",
+      "values": {
+        "5leozzqo": "Easter Egg",
+        "0q56zn1p": "Pack-a-Punch",
+        "814prw1d": "All Buildables",
+        "klrj632q": "Round 5",
+        "klrx350l": "Round 15",
+        "81w9y9l4": "Round 30",
+        "zqo94gqy": "Round 50",
+        "013pgkl5": "Round 70",
+        "rqv985l6": "Round 100",
+        "zqoyxe21": "Song"
+      }
+    },
+    "jlz2ryl2": {
+      "name": "Category",
+      "game_id": "4d7zzr67",
+      "game_name": "Call of Duty: Black Ops II Zombies",
+      "values": {
+        "814nn0ld": "Pack-a-Punch",
+        "21dvo6j1": "Round 5",
+        "21d6k23q": "Round 15",
+        "xqkxxn19": "Round 30",
+        "gq76xvlp": "Round 50",
+        "21g3pnqz": "Round 70",
+        "jqzm3glp": "Round 100"
+      }
+    },
+    "9l79x4n1": {
+      "name": "Category",
+      "game_id": "4d7zzr67",
+      "game_name": "Call of Duty: Black Ops II Zombies",
+      "values": {
+        "4qy58771": "Round 5",
+        "5q84kgrl": "Round 15",
+        "klrr2jlp": "Round 30",
+        "21dme41e": "Round 50",
+        "5q8m9gld": "Round 70",
+        "4qy6w4l7": "Round 100"
+      }
+    },
+    "yn23jdl5": {
+      "name": "Category",
+      "game_id": "4d7zzr67",
+      "game_name": "Call of Duty: Black Ops II Zombies",
+      "values": {
+        "81009651": "Round 5",
+        "4qy7zn3q": "Round 15",
+        "mln2o0lp": "Round 30",
+        "810rdw1v": "Round 50",
+        "9qj58e14": "Round 70",
+        "jq6je31m": "Round 100"
+      }
+    },
+    "6njyzen4": {
+      "name": "Category",
+      "game_id": "4d7zzr67",
+      "game_name": "Call of Duty: Black Ops II Zombies",
+      "values": {
+        "81pggg17": "Pack-a-Punch",
+        "9qjwe2g1": "Round 5",
+        "mlne856l": "Round 15",
+        "5lm9mj1v": "Round 30",
+        "81wk0o14": "Round 50",
+        "zqo7vp1y": "Round 70",
+        "013y6dl5": "Round 100",
+        "0q5ovwn1": "Song"
+      }
+    },
+    "0nwkydkn": {
+      "name": "Gobblegum Loadout",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "5lemnmk1": "Megas",
+        "z198x88q": "Classics",
+        "0q5g4g2l": "No Gums"
+      }
+    },
+    "2lggkx3l": {
+      "name": "Gobblegum Loadout",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "xqkmomkl": "Megas",
+        "p12x9x4l": "Classics",
+        "81pded81": "No Gums"
+      }
+    },
+    "wl33v49l": {
+      "name": "Gobblegum Loadout",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "jqzxgx81": "Megas",
+        "gq7r2rdl": "Classics",
+        "21g2928l": "No Gums"
+      }
+    },
+    "wlex34k8": {
+      "name": "Gobblegum Loadout",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "5q8d4d3l": "Megas",
+        "klryxymq": "Classics",
+        "21d3635q": "No Gums"
+      }
+    },
+    "68kdwxyl": {
+      "name": "Gobblegum Loadout",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "810w6w2q": "Megas",
+        "4qyj7j2q": "Classics",
+        "mlnzezjl": "No Gums"
+      }
+    },
+    "rn14k6kn": {
+      "name": "Gobblegum Loadout",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "5lmg2gml": "Megas",
+        "9qjx2x3l": "Classics",
+        "jq6zvzjl": "No Gums"
+      }
+    },
+    "p853w00n": {
+      "name": "Gobblegum Loadout",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "0135x4xq": "Megas",
+        "81w57rv1": "Classics",
+        "zqorj2xq": "No Gums"
+      }
+    },
+    "38djgk18": {
+      "name": "Gobblegum Loadout",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "0q5g472l": "Megas",
+        "rqvexz61": "Classics",
+        "5lemnvk1": "No Gums"
+      }
+    },
+    "r8ro6x28": {
+      "name": "Gobblegum Loadout",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "z198xd8q": "Megas",
+        "4lxegd41": "Classics",
+        "814794v1": "No Gums"
+      }
+    },
+    "5ly7ydkl": {
+      "name": "Gobblegum Loadout",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "xqkmo6kl": "Megas",
+        "p12x944l": "Classics",
+        "81pde681": "No Gums"
+      }
+    },
+    "e8mmgxv8": {
+      "name": "Gobblegum Loadout",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "jqzxgy81": "Megas",
+        "gq7r2zdl": "Classics",
+        "21g29o8l": "No Gums"
+      }
+    },
+    "ylqk4dzl": {
+      "name": "Gobblegum Loadout",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "5q8d4r3l": "Megas",
+        "klryx6mq": "Classics",
+        "21d36o5q": "No Gums"
+      }
+    },
+    "gnxrqmpn": {
+      "name": "Gobblegum Loadout",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "810w692q": "Megas",
+        "4qyj782q": "Classics",
+        "mlnzekjl": "No Gums"
+      }
+    },
+    "dlo3exdl": {
+      "name": "Gobblegum Loadout",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "5lmg2wml": "Megas",
+        "9qjx2e3l": "Classics",
+        "jq6zvgjl": "No Gums"
+      }
+    },
+    "2lg396np": {
+      "name": "Number of Players",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "5leo55qo": "1 Player",
+        "0q56pm1p": "2 Players",
+        "4lxz9212": "3 Players",
+        "814jp01d": "4 Players"
+      }
+    },
+    "wlewprl6": {
+      "name": "Category",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "xqkd5nl9": "Easter Egg",
+        "1py09481": "Any% EE",
+        "gq7wov1p": "Apocalypse Averted",
+        "21dvj0j1": "Pack-A-Punch",
+        "814kpgjl": "Song",
+        "jq6yg731": "Round 5",
+        "21dv3g31": "Round 15",
+        "5q8ppgld": "Round 30",
+        "4qy994l7": "Round 50",
+        "jq6pp31m": "Round 70",
+        "810ppwlv": "Round 100"
+      }
+    },
+    "6njz75l4": {
+      "name": "Category",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "jqzdkmlp": "Easter Egg",
+        "jqzdk2lp": "Pack-A-Punch",
+        "z195kykq": "Song",
+        "5lm8wnjq": "Round 5",
+        "5q82d8rq": "Round 15",
+        "21d554le": "Round 30",
+        "5leo05qo": "Round 50",
+        "9qj99el4": "Round 70",
+        "mln990qp": "Round 100"
+      }
+    },
+    "38dw04n0": {
+      "name": "Category",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "jqz2ogqp": "Easter Egg",
+        "lmo458m1": "Any% EE",
+        "jq6om7qm": "Pack-A-Punch",
+        "p12opmkl": "Song",
+        "81wer8o1": "Round 5",
+        "4qy5jo31": "Round 15",
+        "5lm3y41v": "Round 30",
+        "81w2g514": "Round 50",
+        "zqoe02ly": "Round 70",
+        "013k03q5": "Round 100"
+      }
+    },
+    "p85pd5lg": {
+      "name": "Category",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "rqvvk45q": "Easter Egg",
+        "1w4dymvq": "Any%",
+        "zqov8p1y": "Pack-A-Punch",
+        "81p42ok1": "Song",
+        "zqom2np1": "Round 5",
+        "mlndzm61": "Round 15",
+        "0136od15": "Round 30",
+        "rqvyk7q6": "Round 50",
+        "5lex65qo": "Round 70",
+        "0q539m1p": "Round 100"
+      }
+    },
+    "ylqx7m8r": {
+      "name": "Category",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "p12v5gdq": "Easter Egg",
+        "qox34yxq": "Any% EE",
+        "814oxreq": "Pack-A-Punch",
+        "xqk950y1": "Song",
+        "013w4rdq": "Round 5",
+        "8100wjj1": "Round 15",
+        "81py7rv1": "Round 30",
+        "xqkerpdq": "Round 50",
+        "gq75nyp1": "Round 70",
+        "21gnjk6l": "Round 100"
+      }
+    },
+    "gnx65jnv": {
+      "name": "Category",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "gq75zgy1": "Easter Egg",
+        "139mgvx1": "Any% EE",
+        "81py6nk1": "Pack-A-Punch",
+        "gq79pdyl": "Song",
+        "rqv6zd7l": "Round 5",
+        "9qjwxn01": "Round 15",
+        "21gnogml": "Round 30",
+        "jqzny4mq": "Round 50",
+        "klr3672l": "Round 70",
+        "21dkoyjl": "Round 100"
+      }
+    },
+    "2lg7e6lp": {
+      "name": "Category",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "21ge5dml": "Song",
+        "5le3v85q": "Round 5",
+        "jq6yzrn1": "Round 15",
+        "810624w1": "Round 30",
+        "jq6vd5n1": "Round 50",
+        "klrj9mjq": "Round 70",
+        "5lm25oyq": "Round 100"
+      }
+    },
+    "ql659jn9": {
+      "name": "Category",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "jqzv9eml": "Song",
+        "0q5x78m1": "Round 5",
+        "5lm8g6yq": "Round 15",
+        "81w7y49q": "Round 30",
+        "zqoj4xg1": "Round 50",
+        "21dv5w41": "Round 70",
+        "013xg9k1": "Round 100"
+      }
+    },
+    "onvmywnm": {
+      "name": "Category",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "klrj942q": "Song",
+        "4lx0d42l": "Round 5",
+        "81we5o91": "Round 15",
+        "rqvx8v5l": "Round 30",
+        "5lenj2pl": "Round 50",
+        "5q82pogq": "Round 70",
+        "0q54rvrl": "Round 100"
+      }
+    },
+    "jlzz6xl2": {
+      "name": "Category",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "0q54r9rl": "Pack-A-Punch",
+        "gq79pjvl": "Song",
+        "814k4d0l": "Round 5",
+        "zqomrog1": "Round 15",
+        "013xgok1": "Round 30",
+        "rqvx8k5l": "Round 50",
+        "5le35o5q": "Round 70",
+        "5lenj6pl": "Round 100"
+      }
+    },
+    "ylp4kjlg": {
+      "name": "Category",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "21g9m9oq": "Easter Egg",
+        "5q84y46l": "Pack a Punch",
+        "21ge58nl": "Song",
+        "z195dr0q": "Round 5",
+        "013w57kq": "Round 15",
+        "4lxgn5jq": "Round 30",
+        "8149zowq": "Round 50",
+        "mlnd9j61": "Round 70",
+        "z19xnxj1": "Round 100"
+      }
+    },
+    "789ye5nw": {
+      "name": "Category",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "gq7282r1": "Easter Egg",
+        "810646p1": "Pack a Punch",
+        "jqzv9pgl": "Song",
+        "p12o4z7l": "Round 5",
+        "rqv6eo5l": "Round 15",
+        "p12979vl": "Round 30",
+        "8100pkj1": "Round 70",
+        "81pe9eel": "Round 50",
+        "xqkovo91": "Round 100"
+      }
+    },
+    "2lg7k6lp": {
+      "name": "Category",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "gq7282n1": "Easter Egg",
+        "qvvr846q": "Any% EE",
+        "mlnexenl": "Pack a Punch",
+        "klrj9pjq": "Song",
+        "81p46ng1": "Round 5",
+        "5le3mzpq": "Round 15",
+        "21g9m9xq": "Round 30",
+        "jqzgjg4l": "Round 50",
+        "4qy5mk31": "Round 70",
+        "klrxgx0l": "Round 100"
+      }
+    },
+    "ylp4gjlg": {
+      "name": "Category",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "gq72yjp1": "Easter Egg",
+        "le24jkkl": "Any% EE",
+        "4qy707dq": "Pack a Punch",
+        "21dv5z41": "Song",
+        "xqk968n1": "Round 5",
+        "0q5xgzr1": "Round 15",
+        "jqzgjgkl": "Round 30",
+        "klrxgxwl": "Round 50",
+        "jqzvwz4l": "Round 70",
+        "21d606gq": "Round 100"
+      }
+    },
+    "2lg56q8p": {
+      "name": "Category",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "xqkw3yq9": "Defeat the Cyber Silverback"
+      }
+    },
+    "gnxm044l": {
+      "name": "Gobblegum Loadout",
+      "game_id": "m1m2oxd2",
+      "game_name": "Call of Duty: Black Ops III Zombies",
+      "values": {
+        "1pyvepk1": "Megas",
+        "qke2ojyq": "Classics",
+        "q7502jy1": "No Gums",
+        "qzn840kq": "Any%"
+      }
+    },
+    "dlomvkd8": {
+      "name": "Consumables Voyage",
+      "game_id": "268ex4o6",
+      "game_name": "Call of Duty: Black Ops IIII Zombies",
+      "values": {
+        "jq67v3j1": "Classic Elixir",
+        "5lmn2zmq": "No Elixir",
+        "814d4oj1": "All Elixir"
+      }
+    },
+    "ylpvd4vl": {
+      "name": "Consumables IX",
+      "game_id": "268ex4o6",
+      "game_name": "Call of Duty: Black Ops IIII Zombies",
+      "values": {
+        "5lmnwj0q": "Classic Elixir",
+        "81w8rw61": "No Elixir",
+        "zqon2w4l": "All Elixir"
+      }
+    },
+    "0nw2zqkn": {
+      "name": "Consumables Blood",
+      "game_id": "268ex4o6",
+      "game_name": "Call of Duty: Black Ops IIII Zombies",
+      "values": {
+        "013r4ey1": "Classic Elixir",
+        "rqvdzwyq": "No Elixir",
+        "5le8vz6l": "All Elixir"
+      }
+    },
+    "789k7y6l": {
+      "name": "Consumables Classified",
+      "game_id": "268ex4o6",
+      "game_name": "Call of Duty: Black Ops IIII Zombies",
+      "values": {
+        "0q587zvq": "Classic Elixir",
+        "4lx4dogq": "No Elixir",
+        "814d4gk1": "All Elixir"
+      }
+    },
+    "6njqrjpl": {
+      "name": "Consumables Dead Night",
+      "game_id": "268ex4o6",
+      "game_name": "Call of Duty: Black Ops IIII Zombies",
+      "values": {
+        "5q8zn5kq": "Classic Elixir",
+        "4qy4k37q": "No Elixir",
+        "mln3grdq": "All Elixir"
+      }
+    },
+    "wl339yyl": {
+      "name": "Consumables Ancient Evil",
+      "game_id": "268ex4o6",
+      "game_name": "Call of Duty: Black Ops IIII Zombies",
+      "values": {
+        "81wdpz6q": "Classic Elixir",
+        "zqo3pk4q": "No Elixir",
+        "013m8dyl": "All Elixir"
+      }
+    },
+    "9l71mw7l": {
+      "name": "Consumables Alpha Omega",
+      "game_id": "268ex4o6",
+      "game_name": "Call of Duty: Black Ops IIII Zombies",
+      "values": {
+        "21g2g66l": "Classic Elixir",
+        "jqzx4w21": "No Elixir",
+        "klry7doq": "All Elixir"
+      }
+    },
+    "p853770n": {
+      "name": "Consumable Tag Der Toten",
+      "game_id": "268ex4o6",
+      "game_name": "Call of Duty: Black Ops IIII Zombies",
+      "values": {
+        "klryod0q": "Classic Elixir",
+        "21d3xn3q": "No Elixir",
+        "5q8dw3rl": "All Elixir"
+      }
+    },
+    "5lyjm0yl": {
+      "name": "Number of Players",
+      "game_id": "268ex4o6",
+      "game_name": "Call of Duty: Black Ops IIII Zombies",
+      "values": {
+        "0132y83q": "Solo",
+        "rqvmnpwq": "2P Co-Op",
+        "5leewrzl": "3P Co-Op",
+        "0q520nnq": "4P Co-Op"
+      }
+    },
+    "e8mywzx8": {
+      "name": "Categories Voyage",
+      "game_id": "268ex4o6",
+      "game_name": "Call of Duty: Black Ops IIII Zombies",
+      "values": {
+        "4lxyjprq": "Main Quest",
+        "4lx4gw4q": "Round 5",
+        "814d9ev1": "Round 15",
+        "4lx4d8jq": "Round 30",
+        "gq7gz3dq": "Round 50",
+        "21ggo081": "Round 70",
+        "jqz4y28l": "Round 100",
+        "0q55kgrq": "Gauntlet",
+        "1gne65nl": "Gauntlet (Hard)",
+        "21gg9r81": "Pack-A-Punch",
+        "81w87wv1": "Kraken Side Quest"
+      }
+    },
+    "0nw2z6xn": {
+      "name": "Categories IX",
+      "game_id": "268ex4o6",
+      "game_name": "Call of Duty: Black Ops IIII Zombies",
+      "values": {
+        "p12z4ev1": "Main Quest",
+        "21ggorx1": "Round 15",
+        "jqz4y74l": "Round 30",
+        "klr76kmq": "Round 50",
+        "21ddo851": "Round 70",
+        "5q8zrv3q": "Round 100",
+        "4lx83ej1": "Gauntlet",
+        "xqk86k9q": "Pack-A-Punch",
+        "gq7gzenq": "Round 5",
+        "81pn6wel": "Death of Orion"
+      }
+    },
+    "789k790l": {
+      "name": "Categories Blood",
+      "game_id": "268ex4o6",
+      "game_name": "Call of Duty: Black Ops IIII Zombies",
+      "values": {
+        "klr76w0q": "Main Quest",
+        "klr76wwq": "Round 15",
+        "21ddo7g1": "Round 30",
+        "4qy4822q": "Round 50",
+        "mln3kvjq": "Round 70",
+        "81079n2l": "Round 100",
+        "q759opv1": "Gauntlet",
+        "21ggoro1": "Pack-A-Punch",
+        "jqz4y7kl": "Round 5",
+        "gq7gzerq": "Magmagat"
+      }
+    },
+    "onv6omr8": {
+      "name": "Categories Classified",
+      "game_id": "268ex4o6",
+      "game_name": "Call of Duty: Black Ops IIII Zombies",
+      "values": {
+        "5q8zr76q": "Main Quest",
+        "9qjdeyoq": "Round 15",
+        "jq67gko1": "Round 30",
+        "9qjdem3q": "Round 50",
+        "jq67goj1": "Round 70",
+        "5lmnw3mq": "Round 100",
+        "814v37w1": "Gauntlet",
+        "81079epl": "Round 5",
+        "mln3k6nq": "Pack-A-Punch",
+        "4qy48edq": "Project Skadi"
+      }
+    },
+    "kn0zwr38": {
+      "name": "Categories Dead Night",
+      "game_id": "268ex4o6",
+      "game_name": "Call of Duty: Black Ops IIII Zombies",
+      "values": {
+        "8107235l": "Main Quest",
+        "81w86351": "Round 15",
+        "zqonzd2l": "Round 30",
+        "013rz331": "Round 50",
+        "rqvdj3wq": "Round 70",
+        "5le8pdzl": "Round 100",
+        "qznvw9gq": "Gauntlet",
+        "jq678371": "Pack-A-Punch",
+        "5lmn7z4q": "Round 5",
+        "9qjdpjgq": "Alistair's Folly"
+      }
+    },
+    "wlex9v28": {
+      "name": "Categories Ancient Evil",
+      "game_id": "268ex4o6",
+      "game_name": "Call of Duty: Black Ops IIII Zombies",
+      "values": {
+        "rqvrpgyl": "Main Quest",
+        "4lx8pzg1": "Round 15",
+        "814vyjk1": "Round 30",
+        "z199m341": "Round 50",
+        "p12wdn21": "Round 70",
+        "81p0pjnq": "Round 100",
+        "lr3jd9jl": "Gauntlet",
+        "5le4ro61": "Pack-A-Punch",
+        "0q55n6vq": "Round 5"
+      }
+    },
+    "yn21k7j8": {
+      "name": "Categories Alpha Omega",
+      "game_id": "268ex4o6",
+      "game_name": "Call of Duty: Black Ops IIII Zombies",
+      "values": {
+        "21d3dnpq": "Main Quest",
+        "mlnz37ol": "Round 15",
+        "810w7noq": "Round 30",
+        "9qjxdm7l": "Round 50",
+        "jq6z7ovl": "Round 70",
+        "5lmgn38l": "Round 100",
+        "1dkvn54l": "Gauntlet",
+        "5q8dz3yl": "Pack-A-Punch",
+        "4qyj4m6q": "Round 5"
+      }
+    },
+    "38dj3318": {
+      "name": "Categories Tag Der Toten",
+      "game_id": "268ex4o6",
+      "game_name": "Call of Duty: Black Ops IIII Zombies",
+      "values": {
+        "4qyjgm3q": "Main Quest",
+        "jq6z6wnl": "Round 15",
+        "5lmg0eyl": "Round 30",
+        "81w5xj91": "Round 50",
+        "zqor6ggq": "Round 70",
+        "0135njkq": "Round 100",
+        "q8k23pgq": "Gauntlet",
+        "mlnzj76l": "Pack-A-Punch",
+        "810wkyjq": "Golden Pack-A-Punch",
+        "9qjxko0l": "Round 5"
+      }
+    },
+    "onv6okm8": {
+      "name": "Tutorial",
+      "game_id": "268ex4o6",
+      "game_name": "Call of Duty: Black Ops IIII Zombies",
+      "values": {
+        "rqvdz35q": "Tutorial"
+      }
+    },
+    "68ko6qn2": {
+      "name": "Number of Players",
+      "game_id": "nd2ggq10",
+      "game_name": "Call of Duty: Black Ops Zombies",
+      "values": {
+        "jqzdwglp": "Solo",
+        "klrmdjqp": "2 Player",
+        "21dwn4le": "3 Player",
+        "5q8o3g1d": "4 Player"
+      }
+    },
+    "r8rq1rle": {
+      "name": "Kino Der Toten",
+      "game_id": "nd2ggq10",
+      "game_name": "Call of Duty: Black Ops Zombies",
+      "values": {
+        "gq79z5yl": "Round 5",
+        "z19xxnk1": "Round 15",
+        "21dnjgle": "Round 30",
+        "5q83x61d": "Round 50",
+        "4qymvdq7": "Round 70",
+        "mln74n1p": "Round 100",
+        "klrdewqp": "Pack A Punch",
+        "21dv57j1": "Song"
+      }
+    },
+    "38dwzen0": {
+      "name": "Five",
+      "game_id": "nd2ggq10",
+      "game_name": "Call of Duty: Black Ops Zombies",
+      "values": {
+        "21geon6l": "Round 5",
+        "81499zjq": "Round 15",
+        "klrde0qp": "Round 30",
+        "gq7ovrlp": "Round 50",
+        "21g6woqz": "Round 70",
+        "jqzwrkqp": "Round 100",
+        "jqzwr4qp": "Pack A Punch",
+        "klrj9n2q": "Song",
+        "1dkzez4l": "Pig%"
+      }
+    },
+    "r8r7kwne": {
+      "name": "Dead Ops Arcade",
+      "game_id": "nd2ggq10",
+      "game_name": "Call of Duty: Black Ops Zombies",
+      "values": {
+        "0130jd15": "Any% (Defeat Cosmic Silverback)"
+      }
+    },
+    "j84594n9": {
+      "name": "Ascension",
+      "game_id": "nd2ggq10",
+      "game_name": "Call of Duty: Black Ops Zombies",
+      "values": {
+        "jq6ygv71": "Round 5",
+        "013xxg31": "Round 15",
+        "4qy9w3l7": "Round 30",
+        "mln9o6qp": "Round 50",
+        "810pdjlv": "Round 70",
+        "9qj980l4": "Round 100",
+        "mlnn70lp": "Easter Egg",
+        "4qyrm4l7": "Pack A Punch",
+        "81p428k1": "Song"
+      }
+    },
+    "rn1zvdlj": {
+      "name": "Call of the Dead",
+      "game_id": "nd2ggq10",
+      "game_name": "Call of Duty: Black Ops Zombies",
+      "values": {
+        "z195d2yq": "Round 5",
+        "rqvxx8wl": "Round 15",
+        "jq6pen1m": "Round 30",
+        "5lmpmylv": "Round 50",
+        "81w909l4": "Round 70",
+        "zqo9vgqy": "Round 100",
+        "8108ywqv": "Easter Egg",
+        "9qjroel4": "Pack A Punch",
+        "xqk957y1": "Song"
+      }
+    },
+    "p85rgxng": {
+      "name": "Shangri-La",
+      "game_id": "nd2ggq10",
+      "game_name": "Call of Duty: Black Ops Zombies",
+      "values": {
+        "81p46yv1": "Round 5",
+        "5lennjzl": "Round 15",
+        "013p6kl5": "Round 30",
+        "rqv9y5l6": "Round 50",
+        "5le5xplo": "Round 70",
+        "0q5p3rlp": "Round 100",
+        "jq6mw31m": "Easter Egg",
+        "5lmyejlv": "Pack A Punch",
+        "gq79pkyl": "Song"
+      }
+    },
+    "38dpvx80": {
+      "name": "Moon",
+      "game_id": "nd2ggq10",
+      "game_name": "Call of Duty: Black Ops Zombies",
+      "values": {
+        "xqk96ed1": "Round 5",
+        "0q544rnl": "Round 15",
+        "4lx96jl2": "Round 30",
+        "814pww1d": "Round 50",
+        "z19vjjl4": "Round 70",
+        "p12k6v1x": "Round 100",
+        "81wgjoq4": "Easter Egg",
+        "zqo0gpqy": "Pack A Punch",
+        "21ge5yml": "Song"
+      }
+    },
+    "7893j98w": {
+      "name": "Nacht Der Untoten",
+      "game_id": "nd2ggq10",
+      "game_name": "Call of Duty: Black Ops Zombies",
+      "values": {
+        "jqzvynml": "Round 5",
+        "p12997kl": "Round 15",
+        "z19wvyq4": "Round 30",
+        "p128kd1x": "Round 50",
+        "81pgzv17": "Round 70",
+        "xqkx3d19": "Round 100",
+        "5q82p7kq": "Song"
+      }
+    },
+    "onv92m8m": {
+      "name": "Verrückt",
+      "game_id": "nd2ggq10",
+      "game_name": "Call of Duty: Black Ops Zombies",
+      "values": {
+        "5q82r4kq": "Round 5",
+        "81pee9kl": "Round 15",
+        "gq76oplp": "Round 30",
+        "21g366qz": "Round 50",
+        "jqzmw2lp": "Round 70",
+        "klrrdolp": "Round 100",
+        "4qy59e71": "Song"
+      }
+    },
+    "ylpgmdlg": {
+      "name": "Shi No Numa",
+      "game_id": "nd2ggq10",
+      "game_name": "Call of Duty: Black Ops Zombies",
+      "values": {
+        "mlndked1": "Round 5",
+        "xqkoovy1": "Round 15",
+        "gq76oylp": "Round 30",
+        "21g36mqz": "Round 50",
+        "jqzmwmlp": "Round 70",
+        "klrrd2lp": "Round 100",
+        "mlnd96d1": "Song"
+      }
+    },
+    "p85d45lg": {
+      "name": "Der Riese",
+      "game_id": "nd2ggq10",
+      "game_name": "Call of Duty: Black Ops Zombies",
+      "values": {
+        "gq79z5pl": "Round 5",
+        "4lxggnrq": "Round 15",
+        "81pz3el7": "Round 30",
+        "xqk3g919": "Round 50",
+        "gq7ovnlp": "Round 70",
+        "21g6wxqz": "Round 100",
+        "5q8p9rld": "Easter Egg (Fly Trap)",
+        "21d5e3le": "Pack A Punch",
+        "jqzv9kml": "Song"
+      }
+    },
+    "6njxrpj8": {
+      "name": "Rounds",
+      "game_id": "nd2ggq10",
+      "game_name": "Call of Duty: Black Ops Zombies",
+      "values": {
+        "1w4p0poq": "Round 5",
+        "qoxpvppq": "Round 15",
+        "139868d1": "Round 30",
+        "qvvpyp7q": "Round 50",
+        "le2rxr5l": "Round 70",
+        "q5vn3nml": "Round 100",
+        "lx5p6p21": "Round 163",
+        "14oywy0q": "Round 200"
+      }
+    },
+    "7891w69n": {
+      "name": "Platform",
+      "game_id": "kdkzx7xd",
+      "game_name": "Call of Duty: Black Ops Zombies DS",
+      "values": {
+        "mlnjgd01": "Emulator",
+        "810k20wq": "DS"
+      }
+    },
+    "rn1zppol": {
+      "name": "Number of Players",
+      "game_id": "kdkzx7xd",
+      "game_name": "Call of Duty: Black Ops Zombies DS",
+      "values": {
+        "p12rkevl": "Solo",
+        "5q8nrk3q": "2P Co-Op"
+      }
+    },
+    "p85rdd7n": {
+      "name": "House",
+      "game_id": "kdkzx7xd",
+      "game_name": "Call of Duty: Black Ops Zombies DS",
+      "values": {
+        "81pvzwe1": "Round 5",
+        "xqk23k9q": "Round 10",
+        "gq70oenl": "Round 15"
+      }
+    },
+    "38dpww08": {
+      "name": "Facility",
+      "game_id": "kdkzx7xd",
+      "game_name": "Call of Duty: Black Ops Zombies DS",
+      "values": {
+        "21gv6rx1": "Round 5",
+        "jqz8w74q": "Round 10",
+        "klrvdw0q": "Round 15"
+      }
+    },
+    "r8r7qq0n": {
+      "name": "Temple",
+      "game_id": "kdkzx7xd",
+      "game_name": "Call of Duty: Black Ops Zombies DS",
+      "values": {
+        "gq70oerl": "Round 5",
+        "21gv6ro1": "Round 10",
+        "jqz8w7kq": "Round 15"
+      }
+    },
+    "5ly199gl": {
+      "name": "Overlook",
+      "game_id": "kdkzx7xd",
+      "game_name": "Call of Duty: Black Ops Zombies DS",
+      "values": {
+        "klrvdwwq": "Round 5",
+        "21d9n7gq": "Round 10",
+        "5q8j376l": "Round 15"
+      }
+    },
+    "jlzgy0qn": {
+      "name": "All Maps",
+      "game_id": "kdkzx7xd",
+      "game_name": "Call of Duty: Black Ops Zombies DS",
+      "values": {
+        "9qjkv3e1": "Round 5",
+        "jq66nd3q": "Round 10",
+        "5lm0v5j1": "Round 15"
+      }
+    },
+    "6njz1mpl": {
+      "name": "Players",
+      "game_id": "w6jlrn4d",
+      "game_name": "Call of Duty: Black Ops Zombies Mobile",
+      "values": {
+        "21dwdp3l": "Solo",
+        "5q8oznr1": "2-player",
+        "81pjrek1": "3-player"
+      }
+    },
+    "rn102wo8": {
+      "name": "Category",
+      "game_id": "w6jlrn4d",
+      "game_name": "Call of Duty: Black Ops Zombies Mobile",
+      "values": {
+        "810j0rjl": "Round 5",
+        "9qjnw501": "Round 15",
+        "jq6ryjnq": "Round 30",
+        "5lm689y1": "Round 50",
+        "81woek9l": "Round 70",
+        "zqoom7gq": "Round 100",
+        "gq7d9xnq": "Pack A Punch",
+        "21g74mn1": "Song",
+        "5lm08e01": "Song (No Cod Points)",
+        "013nwjyq": "Pack A Punch (No Cod Points)",
+        "gq76gxdl": "Starting Room Challenge"
+      }
+    },
+    "p8542e7l": {
+      "name": "Category",
+      "game_id": "w6jlrn4d",
+      "game_name": "Call of Duty: Black Ops Zombies Mobile",
+      "values": {
+        "0137wykl": "Round 5",
+        "814gknw1": "Round 15",
+        "z19y5pjl": "Round 30",
+        "p12mo0vq": "Round 50",
+        "81po45eq": "Round 70",
+        "xqk09n91": "Round 100",
+        "21gdepx1": "Pack A Punch",
+        "jqzd5jgl": "Song",
+        "81wxej6l": "Song (No Cod Points)",
+        "rqv560y1": "Pack A Punch (No Cod Points)",
+        "21g3gp8q": "Starting Room Challenge"
+      }
+    },
+    "38dzq00n": {
+      "name": "Category",
+      "game_id": "w6jlrn4d",
+      "game_name": "Call of Duty: Black Ops Zombies Mobile",
+      "values": {
+        "rqvo6n5l": "Round 5",
+        "jqzev34q": "Round 15",
+        "klr4j20q": "Round 30",
+        "21dgve31": "Round 50",
+        "5q8829rq": "Round 70",
+        "4qyo5w3l": "Round 100",
+        "mlnmdo61": "Pack A Punch",
+        "klrm0gjq": "Song",
+        "5q8o3761": "Kill George Romero",
+        "zqo6mg4q": "Song (No Cod Points)",
+        "5le73y61": "Pack A Punch (No Cod Points)",
+        "jqzm438l": "Starting Room Challenge"
+      }
+    },
+    "r8r12z0n": {
+      "name": "Category",
+      "game_id": "w6jlrn4d",
+      "game_name": "Call of Duty: Black Ops Zombies Mobile",
+      "values": {
+        "5lez3wpl": "Round 5",
+        "810j0djl": "Round 15",
+        "9qjnw801": "Round 30",
+        "jq6ryenq": "Defeat Cosmic Silverback"
+      }
+    },
+    "9l73pdpn": {
+      "name": "Fate & Fortune Cards",
+      "game_id": "m1zgg060",
+      "game_name": "Call of Duty: Infinite Warfare Zombies",
+      "values": {
+        "z19rxg81": "FF Cards",
+        "p12z9e41": "No FF Cards",
+        "q65nyr7l": "Fate Card Only"
+      }
+    },
+    "yn2vqee8": {
+      "name": "Directors Cut",
+      "game_id": "m1zgg060",
+      "game_name": "Call of Duty: Infinite Warfare Zombies",
+      "values": {
+        "81pnew8l": "No DC",
+        "xqk8okkq": "DC"
+      }
+    },
+    "ql6937l9": {
+      "name": "Number of Players",
+      "game_id": "m1zgg060",
+      "game_name": "Call of Duty: Infinite Warfare Zombies",
+      "values": {
+        "jq6576jl": "Solo",
+        "5lmon0m1": "2P Co-Op",
+        "81w486vq": "3P Co-Op",
+        "zqoxnzxq": "4P Co-Op"
+      }
+    },
+    "onvyp7nm": {
+      "name": "Category",
+      "game_id": "m1zgg060",
+      "game_name": "Call of Duty: Infinite Warfare Zombies",
+      "values": {
+        "0139rzx1": "Easter Egg",
+        "rqvvdj6q": "Pack-A-Punch",
+        "9qjw9k01": "Aliens Boss Battle",
+        "mlnd9v61": "Round 5",
+        "21g9gyxq": "Round 15",
+        "z19xr7j1": "Round 30",
+        "p129z3vl": "Round 50",
+        "81p4djn1": "Round 70",
+        "jqzg4k4l": "Round 100",
+        "5q87x43l": "Ghosts and Skulls"
+      }
+    },
+    "ylpkr68g": {
+      "name": "Category",
+      "game_id": "m1zgg060",
+      "game_name": "Call of Duty: Infinite Warfare Zombies",
+      "values": {
+        "0q5v8d2l": "Easter Egg",
+        "5le28pkl": "Pack-A-Punch",
+        "jq6yp6n1": "Slasher Boss Battle",
+        "8100pnj1": "Round 5",
+        "gq72gkn1": "Round 15",
+        "81pen8el": "Round 30",
+        "xqko8791": "Round 50",
+        "xqk9md41": "Round 70",
+        "klrx7n0l": "Round 100",
+        "21d7j651": "Ghosts and Skulls"
+      }
+    },
+    "6njo6684": {
+      "name": "Category",
+      "game_id": "m1zgg060",
+      "game_name": "Call of Duty: Infinite Warfare Zombies",
+      "values": {
+        "5len58ml": "Easter Egg",
+        "0q54p87l": "Pack-A-Punch",
+        "5lm8p0yq": "Boss Battle",
+        "xqk95y91": "Round 5",
+        "4lxg943q": "Round 15",
+        "8149pdeq": "Round 30",
+        "jqzg942l": "Round 50",
+        "gq79rwrl": "Round 70",
+        "21d65dpq": "Round 100",
+        "klrwexm1": "Ghosts and Skulls"
+      }
+    },
+    "ylq5o7lr": {
+      "name": "Category",
+      "game_id": "m1zgg060",
+      "game_name": "Call of Duty: Infinite Warfare Zombies",
+      "values": {
+        "gq792yyl": "Easter Egg",
+        "21ge9kml": "Pack-A-Punch",
+        "81we9x91": "Boss Battle",
+        "jq6ypon1": "Round 5",
+        "21dv60j1": "Round 15",
+        "5q824ykq": "Round 30",
+        "4qy57071": "Round 50",
+        "21ge27ol": "Round 70",
+        "mlndexd1": "Round 100",
+        "21grw98q": "Ghosts and Skulls"
+      }
+    },
+    "789kjr0l": {
+      "name": "Category",
+      "game_id": "m1zgg060",
+      "game_name": "Call of Duty: Infinite Warfare Zombies",
+      "values": {
+        "21gev7xl": "Easter Egg",
+        "qyzd5j61": "Easter Egg + Mephistopheles",
+        "jqzv8d4l": "Pack-A-Punch",
+        "21gjjyo1": "Cryptid Boss Battle",
+        "jqz66kk1": "Mephistopheles",
+        "5lm8p3yq": "Round 5",
+        "klrjvm0q": "Round 15",
+        "21dv9w31": "Round 30",
+        "5q82jorq": "Round 50",
+        "0q5xpwr1": "Round 70",
+        "4qy5dr31": "Round 100",
+        "jqz7rg8l": "Ghosts and Skulls"
+      }
+    },
+    "p85pgqvl": {
+      "name": "Category",
+      "game_id": "9d3w7yw1",
+      "game_name": "Call of Duty: Modern Warfare III Zombies",
+      "values": {
+        "1dkv0rpl": "Pack-a-Punch",
+        "14oxvmvq": "Pack-a-Punch 2",
+        "19249e8q": "Pack-a-Punch 3",
+        "q8k2y5yq": "Worm Boss Fight",
+        "qyz50361": "Exfil"
+      }
+    },
+    "wl3e7z9n": {
+      "name": "Number of Players",
+      "game_id": "9d3w7yw1",
+      "game_name": "Call of Duty: Modern Warfare III Zombies",
+      "values": {
+        "10v5o7pl": "Solo",
+        "qj7z6doq": "2 Players",
+        "q65497ol": "3 Players",
+        "lmoxrn01": "4 Players"
+      }
+    },
+    "gnxwrkj8": {
+      "name": "Players",
+      "game_id": "76r3goe6",
+      "game_name": "Call of Duty: Vanguard Zombies",
+      "values": {
+        "9qjo82gl": "Solo",
+        "jq6wev7l": "2P Co-op",
+        "5lmem24q": "3P Co-op",
+        "81wj075q": "4P Co-op"
+      }
+    },
+    "2lg50gq8": {
+      "name": "Rampage",
+      "game_id": "76r3goe6",
+      "game_name": "Call of Duty: Vanguard Zombies",
+      "values": {
+        "5leppz61": "Classic",
+        "rqvjjwyq": "Rampage"
+      }
+    },
+    "dlor31rl": {
+      "name": "Der Anfang Categories",
+      "game_id": "76r3goe6",
+      "game_name": "Call of Duty: Vanguard Zombies",
+      "values": {
+        "zqogvj21": "Exfil",
+        "013j6x3l": "Pack-A-Punch"
+      }
+    },
+    "wl394zol": {
+      "name": "Terra Maledicta Categories",
+      "game_id": "76r3goe6",
+      "game_name": "Call of Duty: Vanguard Zombies",
+      "values": {
+        "81pmemn1": "Easter Egg",
+        "xqkyoy4l": "Exfil",
+        "gq7m2mrq": "Pack-A-Punch"
+      }
+    },
+    "78910jqn": {
+      "name": "Shi No Numa Categories",
+      "game_id": "76r3goe6",
+      "game_name": "Call of Duty: Vanguard Zombies",
+      "values": {
+        "81w66w6l": "Easter Egg",
+        "0q5ddzvl": "Easter Egg Build%",
+        "013zzeyq": "Pack-a-Punch",
+        "qkezrz9q": "Round 5",
+        "q757n7n1": "Round 15",
+        "1gnxjxxl": "Round 30",
+        "qzn0604q": "Round 50",
+        "lr35z50l": "Round 70",
+        "1dk2423l": "Round 100",
+        "zqozzw4l": "Exfil",
+        "4lxnn8j1": "Song"
+      }
+    },
+    "rn1jz3pn": {
+      "name": "The Archon Categories",
+      "game_id": "76r3goe6",
+      "game_name": "Call of Duty: Vanguard Zombies",
+      "values": {
+        "9qj3mw0l": "Easter Egg",
+        "jq6doyn1": "Exfil",
+        "5lm538yq": "Pack-a-Punch",
+        "q8kgegrq": "Round 5",
+        "qyznxn31": "Round 15",
+        "ln85y56l": "Round 30",
+        "10vx5xjl": "Round 50",
+        "qj7gzg0q": "Round 70",
+        "q65242nl": "Round 100"
+      }
+    },
+    "r8r475rn": {
+      "name": "Rampage or Classic",
+      "game_id": "76r3goe6",
+      "game_name": "Call of Duty: Vanguard Zombies",
+      "values": {
+        "5lejy3p1": "Classic",
+        "0q5rwxr1": "Rampage"
+      }
+    },
+    "5ly09jn4": {
+      "name": "Number of Players",
+      "game_id": "w6j5y41j",
+      "game_name": "Call of Duty: World at War Zombies",
+      "values": {
+        "4lxg0jrq": "Solo",
+        "8149knjq": "2P Co-Op",
+        "z19x5wk1": "3P Co-Op",
+        "p129o8kl": "4P Co-Op"
+      }
+    },
+    "e8mz6mn6": {
+      "name": "Nacht Der Untoten",
+      "game_id": "w6j5y41j",
+      "game_name": "Call of Duty: World at War Zombies",
+      "values": {
+        "gq79oynl": "Song",
+        "zqon0r2l": "Door",
+        "5lm8w24q": "Round 5",
+        "81pe4gkl": "Round 15",
+        "xqko9xy1": "Round 30",
+        "gq7296y1": "Round 50",
+        "jqzvwj4l": "Round 70",
+        "5lm8gv0q": "Round 100"
+      }
+    },
+    "jlzjgxn2": {
+      "name": "Verrückt",
+      "game_id": "w6j5y41j",
+      "game_name": "Call of Duty: World at War Zombies",
+      "values": {
+        "21ge6kxl": "Song",
+        "81wer751": "Round 5",
+        "4qy75w7q": "Round 15",
+        "5lm28m4q": "Round 30",
+        "81we5z61": "Round 50",
+        "zqomrk41": "Round 70",
+        "013w5dyq": "Round 100"
+      }
+    },
+    "9l74r9l1": {
+      "name": "Shi No Numa",
+      "game_id": "w6j5y41j",
+      "game_name": "Call of Duty: World at War Zombies",
+      "values": {
+        "jqzvwo4l": "Song",
+        "zqom2j21": "Round 5",
+        "81060d51": "Round 15",
+        "jq6vye71": "Round 30",
+        "rqv6egyl": "Round 50",
+        "5le3mo6q": "Round 70",
+        "0q5xg6v1": "Round 100"
+      }
+    },
+    "ylqzqmlr": {
+      "name": "Der Riese",
+      "game_id": "w6j5y41j",
+      "game_name": "Call of Duty: World at War Zombies",
+      "values": {
+        "klrjd80q": "Song",
+        "21g9e3mq": "Pack A Punch",
+        "013w4x3q": "Round 5",
+        "mlnedodl": "Round 15",
+        "9qj2w8g1": "Round 30",
+        "4lx0ezgl": "Round 50",
+        "814k7jkl": "Round 70",
+        "z195834q": "Round 100",
+        "p12oxn2l": "Easter Egg (Fly Trap)"
+      }
+    },
+    "38dojm0l": {
+      "name": "Number of Players",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "5q82o6gq": "Solo",
+        "4qy5rp41": "2P Co-op",
+        "mlndnw01": "3P Co-op",
+        "81008zw1": "4P Co-op"
+      }
+    },
+    "wle6d348": {
+      "name": "Number of Players.",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "4qy52k31": "Solo",
+        "mlndvg61": "2P Co-op",
+        "8100n2j1": "3P Co-op",
+        "9qjwmp01": "4P Co-op"
+      }
+    },
+    "wl36vq9l": {
+      "name": "Number of Players",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "z194mp8l": "Solo",
+        "p125d041": "2P Co-op",
+        "81p7p581": "3P Co-op",
+        "xqkrjnk1": "4P Co-op"
+      }
+    },
+    "kn04rxzl": {
+      "name": "Number of Players",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "4qynxw71": "Solo",
+        "mln5yodl": "2P Co-op",
+        "810x5d51": "3P Co-op",
+        "9qjgz8gq": "4P Co-op"
+      }
+    },
+    "68kmqk3l": {
+      "name": "Number of Players",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "4qy47k7q": "Solo",
+        "8107625l": "2P Co-op",
+        "9qjd2pgq": "3P Co-op",
+        "jq67v871": "4P Co-op"
+      }
+    },
+    "onv6kdr8": {
+      "name": "Number of Player",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "81w87791": "Solo",
+        "rqvdxx5q": "2P Co-op",
+        "5le8nnpl": "3P Co-op",
+        "0q5844rq": "4P Co-op"
+      }
+    },
+    "j845epyn": {
+      "name": "Number of Players",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "21d9r4gq": "Solo",
+        "5q8j5e6l": "2P Co-op",
+        "4qyd3xdq": "3P Co-op",
+        "mlnpryn1": "4P Co-op"
+      }
+    },
+    "r8rgo40n": {
+      "name": "Category",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "9qjwr0e1": "Casual Easter Egg",
+        "5le3775q": "Hardcore Easter Egg",
+        "jq6ym031": "Pack A Punch",
+        "0q5xwen1": "Wave 5",
+        "4lx02wrl": "Wave 15",
+        "814kmejl": "Wave 30",
+        "z195egkq": "Wave 50",
+        "p12ojekl": "Wave 70",
+        "81p4kwk1": "Wave 100"
+      }
+    },
+    "5lyj7xgl": {
+      "name": "Category",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "81wegpo1": "Pack-A-Punch",
+        "xqk9wky1": "Wave 5",
+        "gq793eyl": "Wave 15",
+        "21ge0rml": "Wave 30",
+        "jqzv27ml": "Wave 50",
+        "klrjkw2q": "Wave 70",
+        "21dv8gj1": "Wave 100"
+      }
+    },
+    "9l7375zn": {
+      "name": "Prologue",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "5q82vogq": "Any %",
+        "jqz6vrg1": "100%"
+      }
+    },
+    "2lgzkp38": {
+      "name": "Darkest Shore",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "jq640jj1": "Easter Egg",
+        "81wmp0vq": "Pack-A-Punch",
+        "zqoypvx1": "Wave 5",
+        "013v86xl": "Wave 15",
+        "rqv4py6q": "Wave 30",
+        "5lekrxkl": "Wave 50",
+        "0q5on321": "Wave 70",
+        "4lxxp64l": "Wave 100"
+      }
+    },
+    "ql6g0378": {
+      "name": "The Shadowed Throne",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "jq624e7l": "Easter Egg",
+        "qke2py4q": "Any% EE",
+        "81wnm051": "Pack-A-Punch",
+        "zqo5yv2l": "Wave 5",
+        "0132v63q": "Wave 15",
+        "rqvm4ywq": "Wave 30",
+        "5leekxzl": "Wave 50",
+        "0q52o3nq": "Wave 70",
+        "4lxyx6rq": "Wave 100"
+      }
+    },
+    "ylq9y5w8": {
+      "name": "The Tortured Path",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "z19z06kq": "Chapter 1",
+        "p122grk1": "Chapter 2",
+        "81pxrvkq": "Chapter 3"
+      }
+    },
+    "gnxjvm4l": {
+      "name": "Tortured Path",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "0q5yk8vl": "Bodega Cervantes",
+        "4lxr34gl": "U.S.S. Mount Olympus",
+        "81483dkl": "Altar of Blood"
+      }
+    },
+    "789k940l": {
+      "name": "The Frozen Dawn",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "21dd6631": "Easter Egg",
+        "klr7xx0q": "Pack-A-Punch",
+        "5q8z44rq": "Wave 5",
+        "4qy4773q": "Wave 15",
+        "mln3ee6q": "Wave 30",
+        "810766jl": "Wave 50",
+        "9qjd220q": "Wave 70",
+        "jq67vvn1": "Wave 100"
+      }
+    },
+    "e8mxy1vl": {
+      "name": "Numbers of Players",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "14o842kq": "Solo",
+        "1926dz4q": "2P Co-Op",
+        "12vr422q": "3P Co-Op",
+        "1pyv6xn1": "4P Co-Op"
+      }
+    },
+    "dlo7yxm8": {
+      "name": "The Tortured Path Survival",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "jqz8k4kq": "Pack-A-Punch",
+        "z1967r41": "Wave 5",
+        "p12r3z2l": "Wave 15",
+        "81pv8nn1": "Wave 30",
+        "xqk2784q": "Wave 50",
+        "gq70kgrl": "Wave 70",
+        "21gvygo1": "Wave 100"
+      }
+    },
+    "onv7j35n": {
+      "name": "Consumables",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "4qyd382q": "No Consumables",
+        "mlnprkj1": "All Consumables",
+        "qoxy044q": "No mods No Consumables",
+        "12v5n82q": "Yes mods Yes consumables",
+        "qkerdx4q": "Yes mods No consumables",
+        "1py7jgn1": "No Mods Yes consumables"
+      }
+    },
+    "0nwgxvk8": {
+      "name": "MODS",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "le2kow6l": "OFF MODS",
+        "14oxjnkq": "ON MODS"
+      }
+    },
+    "68ko4wzn": {
+      "name": "The Tortured Path Chapters",
+      "game_id": "o6glzxod",
+      "game_name": "Call of Duty: WWII Zombies",
+      "values": {
+        "810g35pl": "All 3 Chapters",
+        "21gvyjo1": "Into The Storm",
+        "jqz8k6kq": "Across The Depths",
+        "klrvnzwq": "Beneath The Ice"
+      }
+    }
+  }
+}
