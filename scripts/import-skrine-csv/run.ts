@@ -44,6 +44,7 @@ for (const file of ['.env', '.env.local']) {
 
 import { PrismaClient } from '@prisma/client';
 import { GAME_CODES, SKIP_GAMES, MAP_SLUG_BY_GAME, MAP_SLUG_OVERRIDES, getRecordMapping, DEFAULTS } from './config';
+import { getRoundForSpeedrunChallengeType } from './speedrun-round-by-type';
 import type { ParsedCsvRow, ReportRow } from './types';
 import { getCztUserIdForZwrId } from './zwr-to-czt-users';
 import { normalizeProofUrls } from '../../src/lib/utils';
@@ -419,7 +420,7 @@ async function main() {
         map: row.map,
         record: row.record,
         sub_record: row.sub_record,
-        reason: `Game "${gameCode}" is skipped (community/custom)`,
+        reason: `Game "${gameCode}" is skipped (not tracked on CZT)`,
       });
       report.push({
         csvRowIndex: row._rowIndex,
@@ -428,7 +429,7 @@ async function main() {
         map: row.map,
         record: row.record,
         sub_record: row.sub_record,
-        message: 'Game is community/custom',
+        message: 'Game skipped (not tracked on CZT)',
       });
       skipped++;
       continue;
@@ -504,7 +505,8 @@ async function main() {
     }
 
     const { round, completionTimeSeconds } = parseAchieved(row.achieved);
-    const roundReached = round ?? 0;
+    const speedrunRound = getRoundForSpeedrunChallengeType(mapping.challengeType as string);
+    const roundReached = round ?? (speedrunRound ?? 0);
     const proofUrls = parseProofUrls(row);
     const completedAt = parseAddedDate(row.added);
     const playerCount = parsePlayerCount(row.player_count);

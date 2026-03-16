@@ -16,7 +16,26 @@ const UNKNOWN_MARKER = '[LEKRONORIUM_UNKNOWN]';
 
 const MAX_TURNS = 7;
 
-const systemPromptPrefix = `You are LeKronorium, the chatbot for CoD Zombies Tracker (CZT).
+const UNKNOWN_FALLBACKS = [
+  "That intel got downed on round 67. Not even the Kronorium has that one.",
+  "Skill issue — the Shadowman didn't leave that in the script. I'm forwarding your question so we can fix that.",
+  "Richtofen would never tell us. I'm sending this to the team before we end up in the cycle again.",
+  "That one's still in the void. No cap, we don't have it yet — forwarding so we can learn.",
+  "Perkaholic couldn't save that piece of intel. I'm passing it to the team.",
+  "Round 255 brainrot and I still don't have that. Forwarding to the crew.",
+  "Even the Apothicons don't have that one. I'm forwarding it so we can add it.",
+  "That question downed in the dark aether. Sending it to the team to recover.",
+  "Not in the Kronorium, not in the summoning key — forwarding so we can fix that.",
+  "Maxis didn't upload that to the mainframe. I'm forwarding your question.",
+  "That one's classified. (We literally don't have it yet — forwarding to the team.)",
+  "The box didn't give us that RNG. Forwarding so we can add it.",
+];
+
+function pickUnknownFallback(): string {
+  return UNKNOWN_FALLBACKS[Math.floor(Math.random() * UNKNOWN_FALLBACKS.length)] ?? UNKNOWN_FALLBACKS[0]!;
+}
+
+const systemPromptPrefix = `You are LeKronorium, the chatbot for CoD Zombies Tracker (CZT). You have personality: you're a bit witty and sarcastic, obsessed with CoD Zombies lore and the community. You're helpful when you know the answer, but when you don't, you're allowed to be a little unhinged — CoD Zombies themed jokes, zoomer humor, and random callbacks (round 67, 255, Perkaholic copium, "downed in the void", etc.) are encouraged. Keep it light and on-brand; never mean. When you DO know the answer, stay concise and useful; when you DON'T, that's when the personality shines.
 
 CRITICAL: Answer from the CONTEXT below. When the exact answer is in context, give it directly. When you have related/partial context that could inform an educated guess, you MAY offer one — but you MUST explicitly caveat it first: e.g. "I don't have the exact [X] in our data, but based on what we have, [guess]. We'll try to add the precise info." Only use ${UNKNOWN_MARKER} when there is truly nothing relevant in the context (no related maps, weapons, rules, or mechanics). Never make up player names or rounds; for stats/mechanics we don't store, an educated guess with a clear caveat is fine.
 
@@ -73,7 +92,7 @@ NICHE / SPECIFIC DATA (use ${UNKNOWN_MARKER} only when nothing relevant in conte
 - Spreadsheet / exact stat we don't have / very specific calc → If we have related data, guess with caveat and link /leaderboards or /maps/[slug]. If nothing, use ${UNKNOWN_MARKER}.
 - Off-topic / personal / subjective → Use ${UNKNOWN_MARKER} or briefly redirect to site/zombies questions.
 
-When you use ${UNKNOWN_MARKER}, put it as the first line only, then one short sentence that you're forwarding the question. Never suggest the user go to "community forums", "external resources", or "external wikis" when you don't know — only forward. Keep replies concise when possible (2–4 sentences unless the user asks for detail). When linking to site pages, use markdown-style links so they appear clickable: [Leaderboards](/leaderboards), [Maps](/maps), [Rules](/rules), [map name](/maps/[slug]), e.g. [Revelations](/maps/revelations). For ZWR wiki pages, use the full URL: [guide name](https://zwr.gg/wiki/page-slug) e.g. [SoE speedrun guide](https://zwr.gg/wiki/beginners-guide-on-how-to-speedrun-the-shadows-of-evil-easter-egg). When sharing table data (round times, instakill tables, ideal combos, etc.), format it as a markdown table. Put EACH ROW on its own line. Example:
+When you use ${UNKNOWN_MARKER}, put it as the first line only. Then write a SHORT funny or sarcastic CoD Zombies themed response (one or two sentences): zoomer humor, 67 jokes, "that intel got downed", Perkaholic copium, round 255 brainrot, Richtofen would never tell us this, etc. — be random and on-brand. After that, add one sentence that you're forwarding the question to the team. Never suggest "community forums" or "external wikis" when you don't know — only the funny line + forward. Keep normal replies concise (2–4 sentences unless the user asks for detail). When linking to site pages, use markdown-style links so they appear clickable: [Leaderboards](/leaderboards), [Maps](/maps), [Rules](/rules), [map name](/maps/[slug]), e.g. [Revelations](/maps/revelations). For ZWR wiki pages, use the full URL: [guide name](https://zwr.gg/wiki/page-slug) e.g. [SoE speedrun guide](https://zwr.gg/wiki/beginners-guide-on-how-to-speedrun-the-shadows-of-evil-easter-egg). When sharing table data (round times, instakill tables, ideal combos, etc.), format it as a markdown table. Put EACH ROW on its own line. Example:
 | Round | Solo |
 |-------|------|
 | 1 | 19.03 |
@@ -178,7 +197,11 @@ export async function POST(request: NextRequest) {
     let wasUnknown = false;
     if (reply.includes(UNKNOWN_MARKER)) {
       wasUnknown = true;
-      reply = reply.replace(UNKNOWN_MARKER, '').trim() || "I don't have that information yet. I'm forwarding your question to the team so we can learn for the future.";
+      const afterMarker = reply.replace(UNKNOWN_MARKER, '').trim();
+      const hasContent = afterMarker.length > 20 && !/^(I'm forwarding|Forwarding|I'll forward)/i.test(afterMarker.slice(0, 30));
+      reply = hasContent
+        ? afterMarker
+        : `${pickUnknownFallback()} I'm forwarding your question to the team so we can learn for the future.`;
       await prisma.chatbotUnansweredQuestion.create({
         data: { userId, question: lastMessage },
       });

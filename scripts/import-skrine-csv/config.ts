@@ -22,7 +22,7 @@ export const GAME_CODES: Record<string, string> = {
 };
 
 /** Games we skip entirely (no import). */
-export const SKIP_GAMES = new Set<string>(['community', 'custom']);
+export const SKIP_GAMES = new Set<string>(['community', 'custom', 'mw3']);
 
 // ---------------------------------------------------------------------------
 // MAP SLUG OVERRIDES (per-game): source CSV game + map slug → CZT map slug
@@ -56,9 +56,11 @@ export const MAP_SLUG_BY_GAME: Record<string, Record<string, string | null>> = {
     ascension: 'bo3-ascension',
     'shi-no-numa': 'bo3-shi-no-numa',
   },
-  // BO4: gauntlet / board names in CSV → CZT map slug
+  // BO4: gauntlet / board names in CSV → CZT map slug (hardcore boards use same map, difficulty from sub_record)
   bo4: {
     'super-blood-wolf-moon': 'tag-der-toten',
+    'tag-der-toten-hardcore': 'tag-der-toten',
+    'ancient-evil-hardcore': 'ancient-evil',
     'veni-vidi-zombie': 'ix',
     hellcatraz: 'blood-of-the-dead',
     'an-ice-day-in-hell': 'alpha-omega',
@@ -80,10 +82,14 @@ export const MAP_SLUG_BY_GAME: Record<string, Record<string, string | null>> = {
     'shi-no-numa-van': 'shi-no-numa-reborn',
     'van-archon': 'the-archon',
   },
-  // WW2: CSV slugs → CZT map slugs
+  // WW2: CSV slugs → CZT map slugs (Tortured Path: ZWR episode names → our map slugs; base-game not mapped — super speedruns not on CZT)
   wwii: {
     'frozen-dawn': 'the-frozen-dawn',
     'gresten-haus': 'groesten-haus',
+    'into-the-storm': 'bodega-cervantes',
+    'across-the-depths': 'uss-mount-olympus',
+    'beneath-the-ice': 'altar-of-blood',
+    'full-walkthrough': 'altar-of-blood',
   },
   // BO7: all 7 maps. ZWR "farm" → CZT "vandorn-farm"; others use same slug.
   bo7: {
@@ -257,6 +263,7 @@ const RECORD_MAPPINGS: Record<string, RecordMappingResult> = {
   '10-speedrun|*': { challengeType: 'ROUND_10_SPEEDRUN', modifiers: {} },
   '20-speedrun|': { challengeType: 'ROUND_20_SPEEDRUN', modifiers: {} },
   '20-speedrun|*': { challengeType: 'ROUND_20_SPEEDRUN', modifiers: {} },
+  // 30-super-speedrun: not tracked on CZT; no mapping → skipped
 
   // ---- Exfil (BOCW / Vanguard) ----
   'exfil-speedrun|round-11': { challengeType: 'EXFIL_SPEEDRUN', modifiers: {} },
