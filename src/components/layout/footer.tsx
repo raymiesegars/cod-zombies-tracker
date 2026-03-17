@@ -61,7 +61,7 @@ export function Footer() {
         </nav>
 
         <p className="text-xs text-bunker-500 text-center mb-1">
-          This website uses no AI.
+          This website uses no AI art.
         </p>
         <div className="text-center text-xs text-bunker-500">
           <p>© {year} CoD Zombies Tracker. Not affiliated with Activision or Treyarch.</p>
