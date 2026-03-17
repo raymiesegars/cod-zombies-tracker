@@ -918,9 +918,9 @@ export default function TournamentsPage() {
                         <p className="text-blue-300 text-xs font-semibold uppercase tracking-wider mb-2">Admin: current votes</p>
                         <ul className="space-y-1.5">
                           {(poll.options as PollOption[]).map((opt) => (
-                            <li key={opt.id} className="flex items-center gap-3 text-sm min-h-[1.5rem]">
-                              <span className="text-blue-100 font-medium truncate flex-1 min-w-0 max-w-[38ch] flex items-center" style={{ minHeight: '1.5rem' }} title={opt.label}>{truncateOptionLabel(opt.label)}</span>
-                              <span className="text-military-400 font-semibold tabular-nums text-right shrink-0 flex items-center justify-end" style={{ width: POLL_VOTE_COUNT_WIDTH, minHeight: '1.5rem' }}>{opt.voteCount ?? 0}</span>
+                            <li key={opt.id} className="flex items-center gap-3 text-sm min-h-[1.5rem] w-full">
+                              <span className="text-blue-100 font-medium truncate flex-1 min-w-0 flex items-center" style={{ minHeight: '1.5rem' }} title={opt.label}>{truncateOptionLabel(opt.label)}</span>
+                              <span className="text-military-400 font-semibold tabular-nums text-right shrink-0 flex items-center justify-end ml-auto" style={{ width: POLL_VOTE_COUNT_WIDTH, minHeight: '1.5rem' }}>{opt.voteCount ?? 0}</span>
                             </li>
                           ))}
                         </ul>
@@ -930,8 +930,8 @@ export default function TournamentsPage() {
                       <div className="mt-1 min-h-[200px] overflow-y-auto">
                         <ul className="space-y-3">
                           {(poll.options as PollOption[]).map((opt) => (
-                            <li key={opt.id} className="flex items-center gap-3 py-3 px-4 rounded-lg bg-bunker-800/50 border border-bunker-700 min-h-[3rem]">
-                              <span className="text-bunker-100 font-zombies text-base font-semibold tracking-wide truncate flex-1 min-w-0 max-w-[38ch] flex items-center" title={opt.label}>{truncateOptionLabel(opt.label)}</span>
+                            <li key={opt.id} className="flex items-center gap-3 py-3 px-4 rounded-lg bg-bunker-800/50 border border-bunker-700 min-h-[3rem] w-full">
+                              <span className="text-bunker-100 font-zombies text-base font-semibold tracking-wide truncate flex-1 min-w-0 flex items-center" title={opt.label}>{truncateOptionLabel(opt.label)}</span>
                               <span className="text-military-400 font-semibold tabular-nums ml-auto shrink-0 flex items-center justify-end" style={{ width: POLL_VOTE_COUNT_WIDTH }}>{opt.voteCount ?? 0}</span>
                             </li>
                           ))}
@@ -943,14 +943,14 @@ export default function TournamentsPage() {
                           {(poll.options as PollOption[]).map((opt) => {
                             const isVoted = poll.userVoteOptionId === opt.id;
                             return (
-                              <li key={opt.id}>
+                              <li key={opt.id} className="w-full">
                                 {isVoted ? (
                                   <div
                                     className="w-full flex items-center gap-3 py-4 px-5 rounded-xl border-2 border-blue-700/80 bg-blue-950/50 cursor-not-allowed opacity-90 min-h-[3.25rem]"
                                     aria-disabled="true"
                                   >
-                                    <span className="text-blue-100 font-zombies text-base font-semibold tracking-wide truncate flex-1 min-w-0 max-w-[38ch] flex items-center" title={opt.label}>{truncateOptionLabel(opt.label)}</span>
-                                    <span className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-800/80 text-blue-200 font-semibold text-sm border border-blue-600/60">
+                                    <span className="text-blue-100 font-zombies text-base font-semibold tracking-wide truncate flex-1 min-w-0 flex items-center" title={opt.label}>{truncateOptionLabel(opt.label)}</span>
+                                    <span className="shrink-0 ml-auto inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-800/80 text-blue-200 font-semibold text-sm border border-blue-600/60">
                                       <Lock className="w-4 h-4" />
                                       Voted (locked)
                                     </span>
@@ -962,8 +962,8 @@ export default function TournamentsPage() {
                                     disabled={voting || pollEnded || !!poll.userVoteOptionId}
                                     className="w-full flex items-center gap-3 py-4 px-5 rounded-xl border-2 border-blood-500/70 bg-blood-900/40 hover:bg-blood-800/50 hover:border-blood-500 disabled:opacity-50 disabled:cursor-not-allowed text-left transition-all shadow-md hover:shadow-blood-900/30 min-h-[3.25rem]"
                                   >
-                                    <span className="text-white font-zombies text-base font-semibold tracking-wide truncate flex-1 min-w-0 max-w-[38ch] flex items-center" title={opt.label}>{truncateOptionLabel(opt.label)}</span>
-                                    <span className="shrink-0 px-4 py-2 rounded-lg bg-blood-600 hover:bg-blood-500 text-white font-semibold text-sm border border-blood-500 shadow-sm flex items-center">Vote</span>
+                                    <span className="text-white font-zombies text-base font-semibold tracking-wide truncate flex-1 min-w-0 flex items-center" title={opt.label}>{truncateOptionLabel(opt.label)}</span>
+                                    <span className="shrink-0 ml-auto px-4 py-2 rounded-lg bg-blood-600 hover:bg-blood-500 text-white font-semibold text-sm border border-blood-500 shadow-sm flex items-center">Vote</span>
                                   </button>
                                 )}
                               </li>
