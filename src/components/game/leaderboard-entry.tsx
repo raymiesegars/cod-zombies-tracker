@@ -18,7 +18,7 @@ interface LeaderboardEntryProps {
   isCurrentUser?: boolean;
   showRound?: boolean;
   invertRanking?: boolean;
-  valueKind?: 'round' | 'xp' | 'time' | 'score';
+  valueKind?: 'round' | 'xp' | 'time' | 'score' | 'rankOneCount';
   hidePlayerCount?: boolean;
   mapSlug?: string;
   /** When true (e.g. verified XP rank leaderboard), show blue verified checkmark on every entry */
@@ -55,7 +55,8 @@ export function LeaderboardEntry({
       ? `/maps/${mapSlug}/run/${entry.runType === 'easter-egg' ? 'easter-egg' : 'challenge'}/${entry.logId}`
       : undefined;
 
-  const hasRightSlots = !hidePlayerCount && (valueKind === 'time' || valueKind === 'round' || valueKind === 'score');
+  const hasRightSlots =
+    !hidePlayerCount && (valueKind === 'time' || valueKind === 'round' || valueKind === 'score');
   /** For time leaderboards, value is completion time in seconds; coerce so string from API still works */
   const timeSeconds = valueKind === 'time' ? Number(entry.value) : null;
   /** For RUSH leaderboards, value is score */
@@ -178,9 +179,20 @@ export function LeaderboardEntry({
       )}
 
       {/* Value: compact on small (rank/name/value only), full on md+; 1rem right padding on timed leaderboards */}
-      {(showRound || valueKind === 'xp' || valueKind === 'time' || valueKind === 'score') && (
+      {(showRound ||
+        valueKind === 'xp' ||
+        valueKind === 'rankOneCount' ||
+        valueKind === 'time' ||
+        valueKind === 'score') && (
         <div className={cn('min-w-0 flex items-center justify-end flex-shrink-0', valueKind === 'time' ? 'pr-4' : 'pr-2 sm:pr-0')}>
-          {valueKind === 'xp' ? (
+          {valueKind === 'rankOneCount' ? (
+            <span className="inline-flex items-center justify-end gap-1.5 tabular-nums">
+              <span className="text-xs sm:text-sm font-semibold text-military-400 leading-none whitespace-nowrap lg:text-base">
+                {entry.value.toLocaleString()}
+              </span>
+              <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-yellow-400 shrink-0" aria-hidden />
+            </span>
+          ) : valueKind === 'xp' ? (
             <>
               <span className="text-xs sm:text-sm font-semibold text-military-400 tabular-nums leading-none whitespace-nowrap lg:hidden">
                 {formatXpCompact(entry.value)}{' '}

@@ -65,6 +65,15 @@ type LogWithMeta = {
   ww2ConsumablesUsed?: boolean | null;
 };
 
+type WRBucketEntry = { userId: string; value: number; isVerified: boolean; log: LogWithMeta };
+
+export type WorldRecordBucketState = {
+  mapById: Map<string, { slug: string; name: string; gameShortName: string }>;
+  challengeBuckets: Map<string, WRBucketEntry[]>;
+  eeBuckets: Map<string, WRBucketEntry[]>;
+  hrByKey: Map<string, { userId: string; round: number; isVerified: boolean; log: LogWithMeta }>;
+};
+
 function getFilterKeyVariants(log: LogWithMeta, gameShortName: string, mapSlug?: string): string[] {
   const variants: string[] = [];
   variants.push('');
@@ -190,6 +199,38 @@ function getFilterLabels(filterKey: string): string[] {
   return labels;
 }
 
+function aggregateRankOneCountsFromBuckets(
+  state: WorldRecordBucketState
+): Map<string, { worldRecords: number; verifiedWorldRecords: number }> {
+  const counts = new Map<string, { worldRecords: number; verifiedWorldRecords: number }>();
+  const bump = (userId: string, isVerified: boolean) => {
+    const cur = counts.get(userId) ?? { worldRecords: 0, verifiedWorldRecords: 0 };
+    cur.worldRecords++;
+    if (isVerified) cur.verifiedWorldRecords++;
+    counts.set(userId, cur);
+  };
+  const pickBest = (entries: WRBucketEntry[], isSpeedrun: boolean, isEe: boolean) => {
+    if (entries.length === 0) return;
+    const best =
+      isSpeedrun || isEe
+        ? entries.reduce((a, b) => (a.value <= b.value ? a : b))
+        : entries.reduce((a, b) => (a.value >= b.value ? a : b));
+    bump(best.userId, best.isVerified);
+  };
+  for (const [, entries] of Array.from(state.challengeBuckets.entries())) {
+    const ct = entries[0]?.log.challengeType ?? '';
+    if (ct === 'HIGHEST_ROUND') continue;
+    pickBest(entries, isSpeedrunCategory(ct), false);
+  }
+  for (const [, entries] of Array.from(state.eeBuckets.entries())) {
+    pickBest(entries, true, true);
+  }
+  for (const [, data] of Array.from(state.hrByKey.entries())) {
+    bump(data.userId, data.isVerified);
+  }
+  return counts;
+}
+
 const WR_CACHE_TTL_MS = 60_000; // 1 minute
 const wrCache = new Map<string, { result: WorldRecordsResult; expiresAt: number }>();
 
@@ -204,7 +245,15 @@ export async function computeWorldRecords(userId: string): Promise<WorldRecordsR
   return result;
 }
 
-export async function computeWorldRecordsDetailed(userId: string): Promise<WorldRecordsDetailedResult> {
+
+const BUCKET_CACHE_TTL_MS = WR_CACHE_TTL_MS;
+let wrBucketCache: {
+  state: WorldRecordBucketState;
+  rankCounts: Map<string, { worldRecords: number; verifiedWorldRecords: number }>;
+  expiresAt: number;
+} | null = null;
+
+async function buildWorldRecordBucketState(): Promise<WorldRecordBucketState> {
   const maps = await prisma.map.findMany({
     select: { id: true, slug: true, name: true, game: { select: { shortName: true } } },
   });
@@ -259,7 +308,6 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
     },
   });
 
-  // Game filter columns from schema (ChallengeLog)
   const clRaw = challengeLogs as unknown as Array<{
     bo3GobbleGumMode?: string | null;
     bo3AatUsed?: boolean | null;
@@ -288,14 +336,14 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
   }>;
 
   const toLog = (
-    log: typeof challengeLogs[0] | typeof eeLogs[0],
+    log: (typeof challengeLogs)[0] | (typeof eeLogs)[0],
     type: 'challenge' | 'ee',
     raw: { rampageInducerUsed?: boolean | null } & Record<string, unknown>
   ): LogWithMeta => {
     const mapMeta = mapById.get(log.mapId);
     if (!mapMeta) return null as unknown as LogWithMeta;
     if (type === 'challenge') {
-      const c = log as typeof challengeLogs[0];
+      const c = log as (typeof challengeLogs)[0];
       if (!c.challenge) return null as unknown as LogWithMeta;
       const r = raw as (typeof clRaw)[0];
       return {
@@ -336,7 +384,7 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
         ww2ConsumablesUsed: r.ww2ConsumablesUsed,
       };
     } else {
-      const e = log as typeof eeLogs[0];
+      const e = log as (typeof eeLogs)[0];
       const r = raw as (typeof eeRaw)[0];
       return {
         userId: e.userId,
@@ -364,7 +412,7 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
   };
 
   type BucketKey = string;
-  type BucketEntry = { userId: string; value: number; isVerified: boolean; log: LogWithMeta };
+  type BucketEntry = WRBucketEntry;
   const challengeBuckets = new Map<BucketKey, BucketEntry[]>();
   const eeBuckets = new Map<BucketKey, BucketEntry[]>();
 
@@ -418,7 +466,6 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
     if (log?.easterEggId) addEe(log);
   }
 
-  // Highest Round: merge challenge + EE rounds (map-specific, only for HIGHEST_ROUND)
   const hrChallengeLogs = challengeLogs.filter((l) => (l.challenge?.type ?? '') === 'HIGHEST_ROUND');
   const hrEeLogs = eeLogs.filter((e) => (e as { roundCompleted?: number | null }).roundCompleted != null);
   const hrByKey = new Map<string, { userId: string; round: number; isVerified: boolean; log: LogWithMeta }>();
@@ -430,7 +477,6 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
     const log = toLog(e, 'ee', eeRaw[eeLogs.indexOf(e)] ?? {});
     if (!log) continue;
     (log as LogWithMeta & { roundReached: number }).roundReached = round;
-    const raw = eeRaw[eeLogs.indexOf(e)] ?? {};
     const filterVariants = getFilterKeyVariants(log, mapMeta.gameShortName, mapMeta.slug);
     for (const fv of filterVariants) {
       for (const verifiedView of [true, false]) {
@@ -472,6 +518,38 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
     }
   }
 
+  return { mapById, challengeBuckets, eeBuckets, hrByKey };
+}
+
+async function getWRBucketCache(): Promise<{
+  mapById: WorldRecordBucketState['mapById'];
+  challengeBuckets: WorldRecordBucketState['challengeBuckets'];
+  eeBuckets: WorldRecordBucketState['eeBuckets'];
+  hrByKey: WorldRecordBucketState['hrByKey'];
+  rankCounts: Map<string, { worldRecords: number; verifiedWorldRecords: number }>;
+}> {
+  const now = Date.now();
+  if (wrBucketCache && wrBucketCache.expiresAt > now) {
+    const { state, rankCounts } = wrBucketCache;
+    return { ...state, rankCounts };
+  }
+  const state = await buildWorldRecordBucketState();
+  const rankCounts = aggregateRankOneCountsFromBuckets(state);
+  wrBucketCache = { state, rankCounts, expiresAt: now + BUCKET_CACHE_TTL_MS };
+  return { ...state, rankCounts };
+}
+
+export async function computeRankOneCountsByUserId(): Promise<
+  Map<string, { worldRecords: number; verifiedWorldRecords: number }>
+> {
+  const { rankCounts } = await getWRBucketCache();
+  return rankCounts;
+}
+
+export async function computeWorldRecordsDetailed(userId: string): Promise<WorldRecordsDetailedResult> {
+  const { mapById, challengeBuckets, eeBuckets, hrByKey } = await getWRBucketCache();
+  type BucketKey = string;
+  type BucketEntry = WRBucketEntry;
   const challengeTypeLabels: Record<string, string> = {
     HIGHEST_ROUND: 'Highest Round',
     NO_DOWNS: 'No Downs',
@@ -497,13 +575,6 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
   let worldRecords = 0;
   let verifiedWorldRecords = 0;
   const details: WorldRecordDetail[] = [];
-
-  const playerCountLabel: Record<string, string> = {
-    SOLO: 'Solo',
-    DUO: 'Duo',
-    TRIO: 'Trio',
-    SQUAD: 'Squad',
-  };
 
   const processBucket = (
     key: BucketKey,
@@ -535,12 +606,9 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
   };
 
   for (const [key, entries] of Array.from(challengeBuckets.entries())) {
-    const isHr = key.includes(':HIGHEST_ROUND') || false;
     const ct = entries[0]?.log.challengeType ?? '';
     const isSpeedrun = isSpeedrunCategory(ct);
-    const isNoMansLand = ct === 'NO_MANS_LAND';
-    const isRush = ct === 'RUSH';
-    if (ct === 'HIGHEST_ROUND') continue; // handled by hrByKey
+    if (ct === 'HIGHEST_ROUND') continue;
     processBucket(key, entries, isSpeedrun, false);
   }
 

@@ -34,13 +34,19 @@ export async function POST(
     const { id: tournamentId } = await params;
     const tournament = await prisma.tournament.findUnique({
       where: { id: tournamentId },
-      select: { id: true, status: true },
+      select: { id: true, status: true, endsAt: true },
     });
     if (!tournament) {
       return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
     }
-    if (tournament.status !== TournamentStatus.LOCKED) {
-      return NextResponse.json({ error: 'Tournament must be locked before awarding trophies' }, { status: 400 });
+    const now = new Date();
+    const canAwardTrophies =
+      tournament.status === TournamentStatus.LOCKED || new Date(tournament.endsAt) < now;
+    if (!canAwardTrophies) {
+      return NextResponse.json(
+        { error: 'Tournament must be ended before awarding trophies (wait until the timer ends or use End tournament).' },
+        { status: 400 }
+      );
     }
 
     const body = await request.json().catch(() => ({}));

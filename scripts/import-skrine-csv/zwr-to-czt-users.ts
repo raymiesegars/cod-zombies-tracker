@@ -167,6 +167,16 @@ export const ZWR_TO_CZT_USERS: Record<string, ZwrToCztEntry> = {
     displayName: 'Hushkitten',
     note: 'Import from top-178-csv/Hushkitten.csv with --source-player-id=Hushkitten --czt-user=cmmkkpirp0004l5fz0f6fd4xr.',
   },
+  Vexxo: {
+    cztUserId: 'cmlzpezn10000imgpbbh3l2ic',
+    displayName: 'Vexxo',
+    note: 'Import from top-178-csv/Vexxo.csv with --source-player-id=Vexxo --czt-user=cmlzpezn10000imgpbbh3l2ic.',
+  },
+  swagrobuc: {
+    cztUserId: 'cmlzkq69q00001063gwe7zldz',
+    displayName: 'swagrobuc',
+    note: 'ZWR swagrobuc.csv; SRC swagrobuc-1.csv (import-src-csv) --source-player=swagrobuc.',
+  },
 };
 
 /**

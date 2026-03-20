@@ -13,6 +13,12 @@ export function LeaderboardsHelpContent() {
         </p>
       </section>
       <section>
+        <h3 className="text-base font-semibold text-white mb-2">Site-wide leaderboards</h3>
+        <p>
+          Under <strong className="text-bunker-200">Rank (by XP)</strong> everyone is ordered by total or verified XP (and Custom Zombies variants). Under <strong className="text-bunker-200">Rank 1&apos;s (site)</strong> we rank by how many leaderboard combinations you hold #1 on—the same numbers as the Rank 1&apos;s / Verified Rank 1&apos;s stats on your profile.
+        </p>
+      </section>
+      <section>
         <h3 className="text-base font-semibold text-white mb-2">Filters</h3>
         <p className="mb-2">
           Pick a map (and optionally a game first to narrow the list). Then filter by <strong className="text-bunker-200">player count</strong> (Solo, Duo, etc.) and <strong className="text-bunker-200">challenge type</strong> (Highest Round, No Downs, and others). The board updates to show only runs that match.
