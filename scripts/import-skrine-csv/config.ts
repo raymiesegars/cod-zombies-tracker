@@ -42,6 +42,10 @@ export const MAP_SLUG_BY_GAME: Record<string, Record<string, string | null>> = {
   bo: {
     'shi-no-numa': 'bo1-shi-no-numa',
     verruckt: 'bo1-verruckt',
+    'der-riese': 'bo1-der-riese',
+  },
+  bo2: {
+    nuketown: 'nuketown-zombies',
   },
   // BO3: base maps match by name; Zombie Chronicles use bo3- prefix
   bo3: {

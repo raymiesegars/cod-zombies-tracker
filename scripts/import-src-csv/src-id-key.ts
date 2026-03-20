@@ -222,6 +222,38 @@ export function resolveSpeedrunTypeFromSubCategory(
     if (varName !== 'category' && varName !== 'round number') continue;
     const challengeType = ROUND_LABEL_TO_CHALLENGE_TYPE[labelNorm];
     if (challengeType) return challengeType;
+    const roundMatch = /^round\s+(\d+)/i.exec(label.trim());
+    if (roundMatch) {
+      const key = `round ${roundMatch[1]}`;
+      const fromDigits = ROUND_LABEL_TO_CHALLENGE_TYPE[key];
+      if (fromDigits) return fromDigits;
+    }
+  }
+  for (const [varId, valueId] of Object.entries(vars)) {
+    const v = idKeyVars[varId];
+    if (!v?.values) continue;
+    const label = v.values[valueId];
+    if (!label) continue;
+    const labelNorm = norm(label);
+    if (labelNorm === 'easter egg' || labelNorm === 'any% ee') return 'EASTER_EGG_SPEEDRUN';
+    if (labelNorm === 'main quest') return 'EASTER_EGG_SPEEDRUN';
+    if (labelNorm.startsWith('main quest') && !labelNorm.includes('obsolete'))
+      return 'EASTER_EGG_SPEEDRUN';
+  }
+  for (const [varId, valueId] of Object.entries(vars)) {
+    const v = idKeyVars[varId];
+    if (!v?.values) continue;
+    const label = v.values[valueId];
+    if (!label) continue;
+    const labelNorm = norm(label);
+    const challengeType = ROUND_LABEL_TO_CHALLENGE_TYPE[labelNorm];
+    if (challengeType) return challengeType;
+    const roundMatch = /^round\s+(\d+)/i.exec(label.trim());
+    if (roundMatch) {
+      const key = `round ${roundMatch[1]}`;
+      const fromDigits = ROUND_LABEL_TO_CHALLENGE_TYPE[key];
+      if (fromDigits) return fromDigits;
+    }
   }
   return null;
 }
