@@ -199,34 +199,39 @@ function getFilterLabels(filterKey: string): string[] {
   return labels;
 }
 
+function isVerifiedOnlyLeaderboardKey(key: string): boolean {
+  const prefix = key.includes('::') ? key.slice(0, key.indexOf('::')) : key;
+  return prefix.endsWith(':true');
+}
+
 function aggregateRankOneCountsFromBuckets(
   state: WorldRecordBucketState
 ): Map<string, { worldRecords: number; verifiedWorldRecords: number }> {
   const counts = new Map<string, { worldRecords: number; verifiedWorldRecords: number }>();
-  const bump = (userId: string, isVerified: boolean) => {
+  const bump = (userId: string, verifiedOnlyBoard: boolean) => {
     const cur = counts.get(userId) ?? { worldRecords: 0, verifiedWorldRecords: 0 };
-    cur.worldRecords++;
-    if (isVerified) cur.verifiedWorldRecords++;
+    if (verifiedOnlyBoard) cur.verifiedWorldRecords++;
+    else cur.worldRecords++;
     counts.set(userId, cur);
   };
-  const pickBest = (entries: WRBucketEntry[], isSpeedrun: boolean, isEe: boolean) => {
+  const pickBest = (key: string, entries: WRBucketEntry[], isSpeedrun: boolean, isEe: boolean) => {
     if (entries.length === 0) return;
     const best =
       isSpeedrun || isEe
         ? entries.reduce((a, b) => (a.value <= b.value ? a : b))
         : entries.reduce((a, b) => (a.value >= b.value ? a : b));
-    bump(best.userId, best.isVerified);
+    bump(best.userId, isVerifiedOnlyLeaderboardKey(key));
   };
-  for (const [, entries] of Array.from(state.challengeBuckets.entries())) {
+  for (const [key, entries] of Array.from(state.challengeBuckets.entries())) {
     const ct = entries[0]?.log.challengeType ?? '';
     if (ct === 'HIGHEST_ROUND') continue;
-    pickBest(entries, isSpeedrunCategory(ct), false);
+    pickBest(key, entries, isSpeedrunCategory(ct), false);
   }
-  for (const [, entries] of Array.from(state.eeBuckets.entries())) {
-    pickBest(entries, true, true);
+  for (const [key, entries] of Array.from(state.eeBuckets.entries())) {
+    pickBest(key, entries, true, true);
   }
-  for (const [, data] of Array.from(state.hrByKey.entries())) {
-    bump(data.userId, data.isVerified);
+  for (const [key, data] of Array.from(state.hrByKey.entries())) {
+    bump(data.userId, isVerifiedOnlyLeaderboardKey(key));
   }
   return counts;
 }
@@ -587,8 +592,8 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
       ? entries.reduce((a, b) => (a.value <= b.value ? a : b))
       : entries.reduce((a, b) => (a.value >= b.value ? a : b));
     if (best.userId !== userId) return;
-    worldRecords++;
-    if (best.isVerified) verifiedWorldRecords++;
+    if (isVerifiedOnlyLeaderboardKey(key)) verifiedWorldRecords++;
+    else worldRecords++;
     const [prefix, filterKey] = key.includes('::') ? key.split('::') : [key, ''];
     const [, mapId, , playerCount] = prefix.split(':');
     const log = best.log;
@@ -618,8 +623,8 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
 
   for (const [key, data] of Array.from(hrByKey.entries())) {
     if (data.userId !== userId) continue;
-    worldRecords++;
-    if (data.isVerified) verifiedWorldRecords++;
+    if (isVerifiedOnlyLeaderboardKey(key)) verifiedWorldRecords++;
+    else worldRecords++;
     const [prefix, filterKey] = key.includes('::') ? key.split('::') : [key, ''];
     const [, mapId, , playerCount] = prefix.split(':');
     const mapMeta = mapById.get(mapId);
