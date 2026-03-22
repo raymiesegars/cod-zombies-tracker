@@ -704,9 +704,12 @@ export default function LeaderboardsPage() {
           label: getLabel(c.type, c.name),
         }));
     }
+    const visibleChallengeOptions = mapEasterEggs.length > 1
+      ? challengeOptions.filter((option) => option.value !== 'EASTER_EGG_SPEEDRUN')
+      : challengeOptions;
     return [
       { value: 'HIGHEST_ROUND', label: 'Highest Round' },
-      ...challengeOptions,
+      ...visibleChallengeOptions,
       ...mapEasterEggs.map((ee) => ({ value: `ee-time-${ee.id}`, label: `${ee.name} (Time)` })),
     ];
   }, [mapChallenges, mapEasterEggs, selectedMapData?.game?.shortName, selectedMap]);

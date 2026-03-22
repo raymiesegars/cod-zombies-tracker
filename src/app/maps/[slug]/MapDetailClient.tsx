@@ -1218,9 +1218,12 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
       .map((c) => ({ value: c.type, label: getLabel(c.type, c.name) }));
   }, [map?.challenges, map?.game?.shortName, map?.slug]);
   const mainQuestEasterEggs = (map?.easterEggs ?? []).filter((ee) => ee.type === 'MAIN_QUEST');
+  const visibleMapChallengeOptions = mainQuestEasterEggs.length > 1
+    ? mapChallengeOptions.filter((option) => option.value !== 'EASTER_EGG_SPEEDRUN')
+    : mapChallengeOptions;
   const leaderboardCategoryOptions = [
     { value: 'HIGHEST_ROUND', label: 'Highest Round' },
-    ...mapChallengeOptions,
+    ...visibleMapChallengeOptions,
     ...mainQuestEasterEggs.map((ee) => ({
       value: `ee-time-${ee.id}`,
       label: `${ee.name} (Time)` as string,

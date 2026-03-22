@@ -154,6 +154,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Challenge or map not found' }, { status: 404 });
     }
 
+    if (challenge.type === 'EASTER_EGG_SPEEDRUN') {
+      const mainQuestCount = await prisma.easterEgg.count({
+        where: { mapId: map.id, type: 'MAIN_QUEST' },
+      });
+      if (mainQuestCount > 1) {
+        return NextResponse.json(
+          { error: 'This map has multiple main quests. Log EE Speedrun from a specific main quest tab so we can track the right leaderboard.' },
+          { status: 400 }
+        );
+      }
+    }
+
     if (challenge.type === 'NO_MANS_LAND') {
       if (killsReached == null || Number.isNaN(killsReached) || killsReached < 1) {
         return NextResponse.json(

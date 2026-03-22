@@ -321,7 +321,34 @@ async function resolveChallenge(mapId: string, challengeType: string): Promise<{
   return c;
 }
 
-async function resolveMainQuestEasterEgg(mapId: string): Promise<{ id: string } | null> {
+function inferMainQuestEasterEggSlug(
+  mapSlug: string,
+  record: string,
+  subRecord: string
+): string | null {
+  const normalizedRecord = record.trim().toLowerCase();
+  const normalizedSubRecord = subRecord.trim().toLowerCase();
+  if (mapSlug === 'the-final-reich' && normalizedRecord === 'ee-speedrun') {
+    if (normalizedSubRecord.includes('hardcore-ee')) return 'dark-reunion';
+    if (normalizedSubRecord.includes('casual-ee')) return 'fireworks';
+  }
+  return null;
+}
+
+async function resolveMainQuestEasterEgg(
+  mapId: string,
+  mapSlug: string,
+  record: string,
+  subRecord: string
+): Promise<{ id: string } | null> {
+  const inferredSlug = inferMainQuestEasterEggSlug(mapSlug, record, subRecord);
+  if (inferredSlug) {
+    const specific = await prisma.easterEgg.findFirst({
+      where: { mapId, type: 'MAIN_QUEST', slug: inferredSlug },
+      select: { id: true },
+    });
+    if (specific) return specific;
+  }
   const ee = await prisma.easterEgg.findFirst({
     where: { mapId, type: 'MAIN_QUEST' },
     select: { id: true },
@@ -651,7 +678,7 @@ async function main() {
       const logIds: string[] = [challengeLog.id];
 
       if (mapping.createEasterEggLog) {
-        const mainEe = await resolveMainQuestEasterEgg(mapRecord.id);
+        const mainEe = await resolveMainQuestEasterEgg(mapRecord.id, mapSlug, row.record, row.sub_record);
         if (mainEe) {
           const eeExists = skipExisting && (await findExistingEasterEggLog(
             user.id,

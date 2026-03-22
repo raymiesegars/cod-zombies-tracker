@@ -14,6 +14,7 @@ export const SRC_GAME_TO_SHORT_NAME: Record<string, string> = {
   'black ops iii zombies': 'BO3',
   'black ops 3 category extension': 'BO3',
   'black ops 6 zombies': 'BO6',
+  'black ops cold war zombies': 'BOCW',
   'infinite warfare zombies': 'IW',
   'vanguard zombies': 'VANGUARD',
   'world at war zombies': 'WAW',
@@ -80,6 +81,13 @@ export const SRC_CATEGORY_TO_MAP_SLUG: Record<string, Record<string, string>> = 
   BO6: {
     'the tomb': 'the-tomb',
     'liberty falls': 'liberty-falls',
+  },
+  BOCW: {
+    'die maschine': 'die-maschine',
+    'firebase z': 'firebase-z',
+    outbreak: 'outbreak',
+    'mauer der toten': 'mauer-der-toten',
+    forsaken: 'forsaken',
   },
   IW: {
     'zombies in spaceland': 'zombies-in-spaceland',

@@ -1147,8 +1147,12 @@ export default function EditMapProgressPage() {
   );
 
   const sortedLoggableChallenges = useMemo(() => {
-    return sortChallengesForDisplay(map?.challenges ?? [], map?.game?.shortName, map?.slug);
-  }, [map?.challenges, map?.game?.shortName, map?.slug]);
+    const mainQuestCount = (map?.easterEggs ?? []).filter((ee: { type: string }) => ee.type === 'MAIN_QUEST').length;
+    const challenges = (map?.challenges ?? []).filter((c: { type: string }) => (
+      !(c.type === 'EASTER_EGG_SPEEDRUN' && mainQuestCount > 1)
+    ));
+    return sortChallengesForDisplay(challenges, map?.game?.shortName, map?.slug);
+  }, [map?.challenges, map?.game?.shortName, map?.slug, map?.easterEggs]);
 
   if (authLoading || isLoading) {
     if (!showLoadingUI) {

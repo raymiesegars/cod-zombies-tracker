@@ -199,6 +199,12 @@ const ROUND_LABEL_TO_CHALLENGE_TYPE: Record<string, string> = {
   'round 255': 'ROUND_255_SPEEDRUN',
   'round 935': 'ROUND_935_SPEEDRUN',
   'round 999': 'ROUND_999_SPEEDRUN',
+  'wave 5': 'ROUND_5_SPEEDRUN',
+  'wave 15': 'ROUND_15_SPEEDRUN',
+  'wave 30': 'ROUND_30_SPEEDRUN',
+  'wave 50': 'ROUND_50_SPEEDRUN',
+  'wave 70': 'ROUND_70_SPEEDRUN',
+  'wave 100': 'ROUND_100_SPEEDRUN',
 };
 
 /**
