@@ -1259,12 +1259,17 @@ export default function EditMapProgressPage() {
                 <TabsList>
                   {mainQuestEasterEggs.map((ee: { id: string; name: string }) => (
                     <TabsTrigger key={ee.id} value={`ee-${ee.id}`}>
-                      {ee.name}
+                      {ee.name} <span className="opacity-75">- EE Speedrun</span>
                     </TabsTrigger>
                   ))}
                 </TabsList>
               ) : (
                 <p className="text-sm text-bunker-500">No main quest Easter Eggs on this map.</p>
+              )}
+              {mainQuestEasterEggs.length > 1 && (
+                <p className="text-xs text-bunker-400">
+                  This map has multiple main quests. Log EE speedrun times from the selected main quest tab above.
+                </p>
               )}
             </div>
             <div className="sm:col-span-1 flex flex-col min-w-0 overflow-hidden self-stretch">
