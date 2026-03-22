@@ -18,6 +18,36 @@ import { getVanguardMapConfig } from '@/lib/vanguard/vanguard-map-config';
 import { getAwMapConfig } from '@/lib/aw/aw-map-config';
 import { BO3_CUSTOM_CHALLENGE_TYPES } from '@/lib/bo3-custom';
 
+const ROUND_SPEEDRUN_REGEX = /^ROUND_(\d+)_SPEEDRUN$/;
+
+function normalizeChallengeTypeSequence(types: string[]): string[] {
+  const deduped = Array.from(new Set(types));
+  const roundEntries: Array<{ index: number; round: number }> = [];
+
+  for (let i = 0; i < deduped.length; i++) {
+    const t = deduped[i]!;
+    const m = t.match(ROUND_SPEEDRUN_REGEX);
+    if (!m) continue;
+    roundEntries.push({ index: i, round: parseInt(m[1]!, 10) });
+  }
+
+  if (roundEntries.length <= 1) return deduped;
+
+  const sortedRoundTypes = roundEntries
+    .map((e) => deduped[e.index]!)
+    .sort((a, b) => {
+      const ar = parseInt((a.match(ROUND_SPEEDRUN_REGEX) ?? [])[1] ?? '0', 10);
+      const br = parseInt((b.match(ROUND_SPEEDRUN_REGEX) ?? [])[1] ?? '0', 10);
+      return ar - br;
+    });
+
+  const out = [...deduped];
+  for (let i = 0; i < roundEntries.length; i++) {
+    out[roundEntries[i]!.index] = sortedRoundTypes[i]!;
+  }
+  return out;
+}
+
 /** Get ordered challenge types for a map. Highest Round is always first; rest follow config order. */
 export function getChallengeTypeOrderForMap(
   gameShortName: string | null | undefined,
@@ -45,9 +75,9 @@ export function getChallengeTypeOrderForMap(
             : gameShortName === 'AW' ? getAwMapConfig(mapSlug)
             : null;
           if (!cfg?.challengeTypes) return [];
-          return (cfg.challengeTypes as string[]).filter((t) => t !== 'HIGHEST_ROUND');
+          return normalizeChallengeTypeSequence((cfg.challengeTypes as string[]).filter((t) => t !== 'HIGHEST_ROUND'));
         })();
-  return ['HIGHEST_ROUND', ...rest];
+  return ['HIGHEST_ROUND', ...normalizeChallengeTypeSequence(rest)];
 }
 
 /** Sort challenges for log view / dropdowns using config order. Unknown types go at end. */

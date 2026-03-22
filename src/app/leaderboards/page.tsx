@@ -30,6 +30,7 @@ import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap, hasFirstRoomGumM
 import { hasNoJugSupport } from '@/lib/no-jug-support';
 import { getStoredLeaderboardVerifiedOnly, setStoredLeaderboardVerifiedOnly } from '@/lib/achievements-verified-prefs';
 import { getGameDisplayShortName, isBo3CustomGame, BO3_CUSTOM_CHALLENGE_TYPES } from '@/lib/bo3-custom';
+import { getChallengeTypeOrderForMap } from '@/lib/challenge-order';
 
 const RANK_VIEW = '__rank__';
 const RANK_ONES_VIEW = '__rank_ones__';
@@ -707,9 +708,17 @@ export default function LeaderboardsPage() {
     const visibleChallengeOptions = mapEasterEggs.length > 1
       ? challengeOptions.filter((option) => option.value !== 'EASTER_EGG_SPEEDRUN')
       : challengeOptions;
+    const orderedTypes = getChallengeTypeOrderForMap(selectedMapData?.game?.shortName, selectedMap);
+    const rankByType = new Map(orderedTypes.map((t, i) => [t, i]));
+    const orderedChallengeOptions = [...visibleChallengeOptions].sort((a, b) => {
+      const ai = rankByType.has(a.value) ? rankByType.get(a.value)! : Number.MAX_SAFE_INTEGER;
+      const bi = rankByType.has(b.value) ? rankByType.get(b.value)! : Number.MAX_SAFE_INTEGER;
+      if (ai !== bi) return ai - bi;
+      return a.label.localeCompare(b.label);
+    });
     return [
       { value: 'HIGHEST_ROUND', label: 'Highest Round' },
-      ...visibleChallengeOptions,
+      ...orderedChallengeOptions,
       ...mapEasterEggs.map((ee) => ({ value: `ee-time-${ee.id}`, label: `${ee.name} (Time)` })),
     ];
   }, [mapChallenges, mapEasterEggs, selectedMapData?.game?.shortName, selectedMap]);
