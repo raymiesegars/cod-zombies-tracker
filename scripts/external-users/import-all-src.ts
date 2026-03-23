@@ -1,0 +1,163 @@
+#!/usr/bin/env npx tsx
+import * as fs from 'fs';
+import * as path from 'path';
+import { spawnSync } from 'child_process';
+
+const ROOT = path.resolve(__dirname, '../..');
+const SRC_DIR = path.join(ROOT, 'src_codzombies_player_csv');
+
+type Args = {
+  dryRun: boolean;
+  revalidateEnd: boolean;
+  onlyPlayer: string | null;
+  limit: number | null;
+  stopOnError: boolean;
+};
+
+type Candidate = {
+  player: string;
+  csvPath: string;
+};
+
+function parseArgs(): Args {
+  const args = process.argv.slice(2);
+  let dryRun = false;
+  let revalidateEnd = false;
+  let onlyPlayer: string | null = null;
+  let limit: number | null = null;
+  let stopOnError = false;
+
+  for (const a of args) {
+    if (a === '--dry-run') dryRun = true;
+    else if (a === '--revalidate-end') revalidateEnd = true;
+    else if (a === '--stop-on-error') stopOnError = true;
+    else if (a.startsWith('--only-player=')) onlyPlayer = a.slice(14).trim() || null;
+    else if (a.startsWith('--limit=')) {
+      const n = parseInt(a.slice(8).trim(), 10);
+      if (!Number.isNaN(n) && n > 0) limit = n;
+    }
+  }
+  return { dryRun, revalidateEnd, onlyPlayer, limit, stopOnError };
+}
+
+function getCsvFiles(dir: string): string[] {
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir)
+    .filter((f) => f.toLowerCase().endsWith('.csv'))
+    .map((f) => path.join(dir, f));
+}
+
+function playerFromCsvPath(csvPath: string): string {
+  return path.basename(csvPath).replace(/\.csv$/i, '').trim();
+}
+
+function normalizeName(s: string): string {
+  return s.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function runAndEcho(command: string, args: string[], env?: NodeJS.ProcessEnv): { status: number; output: string } {
+  const res = spawnSync(command, args, {
+    cwd: ROOT,
+    env: env ? { ...process.env, ...env } : process.env,
+    encoding: 'utf-8',
+  });
+  const output = `${res.stdout ?? ''}${res.stderr ?? ''}`;
+  if (output.trim()) process.stdout.write(output);
+  return { status: res.status ?? 1, output };
+}
+
+function parseTargetUserId(output: string): string | null {
+  const m = output.match(/CZT user id:\s*([a-zA-Z0-9:_-]+)/);
+  return m?.[1] ?? null;
+}
+
+function parseImported(output: string): number {
+  const m = output.match(/Imported:\s*(\d+)/);
+  return m ? parseInt(m[1]!, 10) : 0;
+}
+
+function parseRemoved(output: string): number {
+  const m = output.match(/Removed:\s*(\d+)/);
+  return m ? parseInt(m[1]!, 10) : 0;
+}
+
+async function main() {
+  const opts = parseArgs();
+  const files = getCsvFiles(SRC_DIR);
+  let candidates: Candidate[] = files
+    .map((csvPath) => ({ player: playerFromCsvPath(csvPath), csvPath }))
+    .sort((a, b) => a.player.localeCompare(b.player));
+
+  if (opts.onlyPlayer) {
+    const only = normalizeName(opts.onlyPlayer);
+    candidates = candidates.filter((c) => normalizeName(c.player) === only);
+  }
+  if (opts.limit != null) candidates = candidates.slice(0, opts.limit);
+
+  console.log(`SRC candidates: ${candidates.length}`);
+  if (opts.revalidateEnd) console.log('Mode: revalidate impacted users at end.');
+  if (opts.dryRun) console.log('Mode: DRY RUN.');
+
+  let processed = 0;
+  let failed = 0;
+  const impactedUserIds = new Set<string>();
+
+  for (const c of candidates) {
+    processed++;
+    console.log(`\n[${processed}/${candidates.length}] ${c.player}`);
+    const cmdArgs = [
+      'exec',
+      'tsx',
+      'scripts/import-src-csv/run.ts',
+      `--csv=${c.csvPath}`,
+      `--source-player=${c.player}`,
+      '--auto-user',
+      '--skip-revalidate',
+    ];
+    if (opts.dryRun) cmdArgs.push('--dry-run');
+
+    const res = runAndEcho('pnpm', cmdArgs);
+    if (res.status !== 0) {
+      failed++;
+      console.error(`Failed import for ${c.player}`);
+      if (opts.stopOnError) break;
+      continue;
+    }
+
+    const imported = parseImported(res.output);
+    const removed = parseRemoved(res.output);
+    const targetUserId = parseTargetUserId(res.output);
+    if (!opts.dryRun && targetUserId && (imported > 0 || removed > 0)) {
+      impactedUserIds.add(targetUserId);
+    }
+  }
+
+  if (!opts.dryRun && opts.revalidateEnd && impactedUserIds.size > 0) {
+    console.log(`\nRevalidating ${impactedUserIds.size} impacted user(s)...`);
+    for (const userId of impactedUserIds) {
+      console.log(`\nRevalidating user ${userId}`);
+      const revalEnv = { BACKFILL_USER_ID: userId };
+      const a = runAndEcho('pnpm', ['db:reunlock-achievements'], revalEnv);
+      if (a.status !== 0 && opts.stopOnError) break;
+      const b = runAndEcho('pnpm', ['db:recompute-verified-xp'], revalEnv);
+      if (b.status !== 0 && opts.stopOnError) break;
+    }
+  }
+
+  console.log('\n--- SRC Bulk Summary ---');
+  console.log(`Candidates: ${candidates.length}`);
+  console.log(`Processed: ${processed}`);
+  console.log(`Failed: ${failed}`);
+  console.log(`Impacted users: ${impactedUserIds.size}`);
+  if (!opts.revalidateEnd) {
+    console.log('Revalidation: skipped (use --revalidate-end or run targeted revalidation later).');
+  }
+
+  if (failed > 0) process.exit(1);
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

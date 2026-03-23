@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     const counts = await computeRankOneCountsByUserId();
 
     const users = await prisma.user.findMany({
-      where: { isPublic: true },
+      where: { isPublic: true, isArchived: false },
       select: {
         id: true,
         username: true,

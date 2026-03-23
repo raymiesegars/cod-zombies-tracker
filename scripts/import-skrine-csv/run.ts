@@ -48,6 +48,7 @@ import { getRoundForSpeedrunChallengeType } from './speedrun-round-by-type';
 import type { ParsedCsvRow, ReportRow } from './types';
 import { getCztUserIdForZwrId } from './zwr-to-czt-users';
 import { normalizeProofUrls } from '../../src/lib/utils';
+import { resolveImportTargetUser } from '../external-users/import-user-resolution';
 
 const prisma = new PrismaClient({
   datasources: { db: { url: process.env.DIRECT_URL || process.env.DATABASE_URL } },
@@ -253,36 +254,42 @@ function getTeammateUserIdsAndNames(row: ParsedCsvRow, sourcePlayerId: string): 
 function parseArgs(): {
   csvPath: string;
   sourcePlayerId: string;
-  cztUser: string;
+  cztUser: string | null;
+  autoUser: boolean;
   dryRun: boolean;
   reportPath: string | null;
   skipExisting: boolean;
   ww2Only: boolean;
+  skipRevalidate: boolean;
 } {
   const args = process.argv.slice(2);
   let csvPath = '';
   let sourcePlayerId = '';
-  let cztUser = '';
+  let cztUser: string | null = null;
+  let autoUser = false;
   let dryRun = false;
   let reportPath: string | null = null;
   let skipExisting = true;
   let ww2Only = false;
+  let skipRevalidate = false;
 
   for (const a of args) {
     if (a.startsWith('--csv=')) csvPath = a.slice(6).trim().replace(/^=+/, '');
     else if (a.startsWith('--source-player-id=')) sourcePlayerId = a.slice(18).trim().replace(/^=+/, '');
-    else if (a.startsWith('--czt-user=')) cztUser = a.slice(11).trim().replace(/^=+/, '');
+    else if (a.startsWith('--czt-user=')) cztUser = a.slice(11).trim().replace(/^=+/, '') || null;
+    else if (a === '--auto-user') autoUser = true;
     else if (a === '--dry-run') dryRun = true;
     else if (a.startsWith('--report=')) reportPath = a.slice(9).trim().replace(/^=+/, '') || null;
     else if (a === '--no-skip-existing') skipExisting = false;
     else if (a === '--ww2-only') ww2Only = true;
+    else if (a === '--skip-revalidate') skipRevalidate = true;
   }
 
-  if (!csvPath || !sourcePlayerId || !cztUser) {
-    console.error('Usage: npx tsx scripts/import-skrine-csv/run.ts --csv=<path> --source-player-id=<id> --czt-user=<username|id|displayName> [--dry-run] [--report=<path>] [--no-skip-existing] [--ww2-only]');
+  if (!csvPath || !sourcePlayerId || (!cztUser && !autoUser)) {
+    console.error('Usage: npx tsx scripts/import-skrine-csv/run.ts --csv=<path> --source-player-id=<id> [--czt-user=<username|id|displayName> | --auto-user] [--dry-run] [--report=<path>] [--no-skip-existing] [--ww2-only] [--skip-revalidate]');
     process.exit(1);
   }
-  return { csvPath, sourcePlayerId, cztUser, dryRun, reportPath, skipExisting, ww2Only };
+  return { csvPath, sourcePlayerId, cztUser, autoUser, dryRun, reportPath, skipExisting, ww2Only, skipRevalidate };
 }
 
 async function resolveCztUser(cztUser: string): Promise<{ id: string }> {
@@ -402,7 +409,7 @@ async function findExistingEasterEggLog(
 }
 
 async function main() {
-  const { csvPath, sourcePlayerId, cztUser, dryRun, reportPath, skipExisting, ww2Only } = parseArgs();
+  const { csvPath, sourcePlayerId, cztUser, autoUser, dryRun, reportPath, skipExisting, ww2Only, skipRevalidate } = parseArgs();
   const csvAbs = path.isAbsolute(csvPath) ? csvPath : path.resolve(process.cwd(), csvPath);
   if (!fs.existsSync(csvAbs)) {
     console.error('CSV file not found:', csvAbs);
@@ -410,8 +417,20 @@ async function main() {
   }
 
   console.log('Resolving CZT user...');
-  const user = await resolveCztUser(cztUser);
+  const user = await resolveImportTargetUser({
+    prisma,
+    source: 'ZWR',
+    sourcePlayerName: sourcePlayerId,
+    explicitCztUser: cztUser,
+    mappedUserId: getCztUserIdForZwrId(sourcePlayerId),
+    allowAutoUser: autoUser,
+    dryRun,
+    resolveExplicitUser: resolveCztUser,
+  });
   console.log('CZT user id:', user.id);
+  if (autoUser || !cztUser) {
+    console.log(`User resolution mode: ${user.resolution}`);
+  }
 
   const content = fs.readFileSync(csvAbs, 'utf-8');
   const allRows = parseCsv(content);
@@ -767,7 +786,7 @@ async function main() {
     console.log('Report written to:', out);
   }
 
-  if ((imported > 0 || updated > 0) && !dryRun) {
+  if ((imported > 0 || updated > 0) && !dryRun && !skipRevalidate) {
     console.log('\n--- Revalidating (reunlock + recompute verified XP) ---');
     const revalEnv = { ...process.env, BACKFILL_USER_ID: user.id };
     if (ww2Only) revalEnv.BACKFILL_GAMES = 'WW2';

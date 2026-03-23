@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
                 RANK() OVER (ORDER BY u."verifiedTotalXp" DESC, u.id ASC)::int as rank
               FROM "User" u
               WHERE u."isPublic" = true
+                AND u."isArchived" = false
                 AND (u.username ILIKE ${pattern} OR u."displayName" ILIKE ${pattern})
             ) sub
             ORDER BY rank
@@ -43,6 +44,7 @@ export async function GET(request: NextRequest) {
                 RANK() OVER (ORDER BY COALESCE(u."customZombiesTotalXp", 0) DESC, u.id ASC)::int as rank
               FROM "User" u
               WHERE u."isPublic" = true
+                AND u."isArchived" = false
                 AND (u.username ILIKE ${pattern} OR u."displayName" ILIKE ${pattern})
             ) sub
             ORDER BY rank
@@ -56,6 +58,7 @@ export async function GET(request: NextRequest) {
                 RANK() OVER (ORDER BY COALESCE(u."verifiedCustomZombiesTotalXp", 0) DESC, u.id ASC)::int as rank
               FROM "User" u
               WHERE u."isPublic" = true
+                AND u."isArchived" = false
                 AND (u.username ILIKE ${pattern} OR u."displayName" ILIKE ${pattern})
             ) sub
             ORDER BY rank
@@ -67,6 +70,7 @@ export async function GET(request: NextRequest) {
                 RANK() OVER (ORDER BY u."totalXp" DESC, u.id ASC)::int as rank
               FROM "User" u
               WHERE u."isPublic" = true
+                AND u."isArchived" = false
                 AND (u.username ILIKE ${pattern} OR u."displayName" ILIKE ${pattern})
             ) sub
             ORDER BY rank
@@ -108,6 +112,7 @@ export async function GET(request: NextRequest) {
               RANK() OVER (ORDER BY COALESCE(u."customZombiesTotalXp", 0) DESC, u.id ASC)::int as rank
             FROM "User" u
             WHERE u."isPublic" = true
+              AND u."isArchived" = false
           ) sub
           ORDER BY rank
           LIMIT ${limit} OFFSET ${offset}
@@ -120,6 +125,7 @@ export async function GET(request: NextRequest) {
               RANK() OVER (ORDER BY COALESCE(u."verifiedCustomZombiesTotalXp", 0) DESC, u.id ASC)::int as rank
             FROM "User" u
             WHERE u."isPublic" = true
+              AND u."isArchived" = false
           ) sub
           ORDER BY rank
           LIMIT ${limit} OFFSET ${offset}
@@ -131,6 +137,7 @@ export async function GET(request: NextRequest) {
               RANK() OVER (ORDER BY u."verifiedTotalXp" DESC, u.id ASC)::int as rank
             FROM "User" u
             WHERE u."isPublic" = true
+              AND u."isArchived" = false
           ) sub
           ORDER BY rank
           LIMIT ${limit} OFFSET ${offset}
@@ -141,12 +148,19 @@ export async function GET(request: NextRequest) {
               RANK() OVER (ORDER BY u."totalXp" DESC, u.id ASC)::int as rank
             FROM "User" u
             WHERE u."isPublic" = true
+              AND u."isArchived" = false
           ) sub
           ORDER BY rank
           LIMIT ${limit} OFFSET ${offset}
         `;
 
-    const total = await prisma.user.count({ where: { isPublic: true } });
+    const totalRows = await prisma.$queryRaw<Array<{ count: bigint }>>`
+      SELECT COUNT(*)::bigint AS count
+      FROM "User" u
+      WHERE u."isPublic" = true
+        AND u."isArchived" = false
+    `;
+    const total = Number(totalRows[0]?.count ?? BigInt(0));
     const getXp = (u: RankRow) =>
       xpType === 'customZombies' ? (u.customZombiesTotalXp ?? 0) : xpType === 'verifiedCustomZombies' ? (u.verifiedCustomZombiesTotalXp ?? 0) : verifiedOnly ? (u.verifiedTotalXp ?? 0) : (u.totalXp ?? 0);
     const entries = rows.map((user) => {
