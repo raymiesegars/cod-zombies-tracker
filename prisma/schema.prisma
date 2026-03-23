@@ -44,6 +44,17 @@ model User {
   
   // Privacy settings
   isPublic      Boolean   @default(true)
+  isArchived    Boolean   @default(false)
+  archivedAt    DateTime?
+  archivedReason String?
+
+  // External placeholder/import identity
+  isExternalPlaceholder Boolean @default(false)
+  externalAvatarSource ExternalSource?
+  externalDisplayName String?
+  mergedIntoUserId String?
+  mergedIntoUser User? @relation("MergedUsers", fields: [mergedIntoUserId], references: [id], onDelete: SetNull)
+  mergedUsers User[] @relation("MergedUsers")
   
   // Maps page: game order and visibility. Json: { gameOrder: string[], hasSeenSetupModal?: boolean }. gameOrder = game ids in display order; games not in list are hidden.
   mapsPagePreferences Json?
@@ -107,9 +118,53 @@ model User {
   chatbotUnansweredQuestions ChatbotUnansweredQuestion[]
   mapSubmissions          MapSubmission[]
   mapSubmissionsReviewed  MapSubmission[] @relation("MapSubmissionReviewedBy")
+  externalIdentities      ExternalAccountIdentity[]
+  mergeAuditsAsSource     UserMergeAudit[] @relation("MergeSourceUser")
+  mergeAuditsAsTarget     UserMergeAudit[] @relation("MergeTargetUser")
+  mergeAuditsPerformed    UserMergeAudit[] @relation("MergePerformedByUser")
 
   @@index([username])
   @@index([supabaseId])
+  @@index([isPublic, isArchived])
+  @@index([isExternalPlaceholder])
+  @@index([mergedIntoUserId])
+}
+
+model ExternalAccountIdentity {
+  id           String         @id @default(cuid())
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source       ExternalSource
+  externalName String
+  externalKey  String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@unique([source, externalKey])
+  @@index([userId])
+  @@index([source, externalName])
+}
+
+model UserMergeAudit {
+  id                             String   @id @default(cuid())
+  sourceUserId                   String
+  targetUserId                   String
+  mergedByUserId                 String
+  movedChallengeLogCount         Int      @default(0)
+  movedEasterEggLogCount         Int      @default(0)
+  skippedChallengeDuplicateCount Int      @default(0)
+  skippedEasterEggDuplicateCount Int      @default(0)
+  notes                          String?
+  createdAt                      DateTime @default(now())
+
+  sourceUser User @relation("MergeSourceUser", fields: [sourceUserId], references: [id], onDelete: Restrict)
+  targetUser User @relation("MergeTargetUser", fields: [targetUserId], references: [id], onDelete: Restrict)
+  mergedByUser User @relation("MergePerformedByUser", fields: [mergedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([sourceUserId])
+  @@index([targetUserId])
+  @@index([mergedByUserId])
+  @@index([createdAt(sort: Desc)])
 }
 
 // ============================================================================
@@ -269,6 +324,11 @@ enum FriendRequestStatus {
   PENDING
   ACCEPTED
   DENIED
+}
+
+enum ExternalSource {
+  ZWR
+  SRC
 }
 
 // ============================================================================

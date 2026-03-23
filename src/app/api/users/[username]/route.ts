@@ -60,6 +60,10 @@ export async function GET(
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    if (user.isArchived && !viewerIsAdmin) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
     const totalXp = user.totalXp ?? 0;
     const verifiedTotalXp = user.verifiedTotalXp ?? 0;
     const level = getLevelFromXp(totalXp).level;

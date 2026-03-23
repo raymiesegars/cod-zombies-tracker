@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
       where: {
         id: { not: me.id },
         isPublic: true,
+        isArchived: false,
         OR: [
           { username: { contains: q, mode: 'insensitive' } },
           { displayName: { contains: q, mode: 'insensitive' } },

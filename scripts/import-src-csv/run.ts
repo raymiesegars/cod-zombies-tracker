@@ -44,6 +44,7 @@ import {
 import { loadSrcIdKey, resolveModifiersWithIdKey, resolveSpeedrunTypeFromSubCategory } from './src-id-key';
 import { getRoundForSpeedrunChallengeType } from '../import-skrine-csv/speedrun-round-by-type';
 import { normalizeProofUrls } from '../../src/lib/utils';
+import { resolveImportTargetUser } from '../external-users/import-user-resolution';
 
 const prisma = new PrismaClient({
   datasources: { db: { url: process.env.DIRECT_URL || process.env.DATABASE_URL } },
@@ -301,39 +302,45 @@ async function findImportedLogToRemove(
 function parseArgs(): {
   csvPath: string;
   sourcePlayer: string;
-  cztUser: string;
+  cztUser: string | null;
+  autoUser: boolean;
   dryRun: boolean;
   skipExisting: boolean;
   removeImported: boolean;
+  skipRevalidate: boolean;
 } {
   const args = process.argv.slice(2);
   let csvPath = '';
   let sourcePlayer = '';
-  let cztUser = '';
+  let cztUser: string | null = null;
+  let autoUser = false;
   let dryRun = false;
   let skipExisting = true;
   let removeImported = false;
+  let skipRevalidate = false;
 
   for (const a of args) {
     if (a.startsWith('--csv=')) csvPath = a.slice(6).trim().replace(/^=+/, '');
     else if (a.startsWith('--source-player=')) sourcePlayer = a.slice(16).trim().replace(/^=+/, '');
-    else if (a.startsWith('--czt-user=')) cztUser = a.slice(11).trim().replace(/^=+/, '');
+    else if (a.startsWith('--czt-user=')) cztUser = a.slice(11).trim().replace(/^=+/, '') || null;
+    else if (a === '--auto-user') autoUser = true;
     else if (a === '--dry-run') dryRun = true;
     else if (a === '--no-skip-existing') skipExisting = false;
     else if (a === '--remove-imported') removeImported = true;
+    else if (a === '--skip-revalidate') skipRevalidate = true;
   }
 
-  if (!csvPath || !sourcePlayer || !cztUser) {
+  if (!csvPath || !sourcePlayer || (!cztUser && !autoUser)) {
     console.error(
-      'Usage: pnpm db:import-src-csv -- --csv=<path> --source-player=<SRC name> --czt-user=<CZT id|username> [--dry-run] [--no-skip-existing] [--remove-imported]'
+      'Usage: pnpm db:import-src-csv -- --csv=<path> --source-player=<SRC name> [--czt-user=<CZT id|username> | --auto-user] [--dry-run] [--no-skip-existing] [--remove-imported] [--skip-revalidate]'
     );
     process.exit(1);
   }
-  return { csvPath, sourcePlayer, cztUser, dryRun, skipExisting, removeImported };
+  return { csvPath, sourcePlayer, cztUser, autoUser, dryRun, skipExisting, removeImported, skipRevalidate };
 }
 
 async function main() {
-  const { csvPath, sourcePlayer, cztUser, dryRun, skipExisting, removeImported } = parseArgs();
+  const { csvPath, sourcePlayer, cztUser, autoUser, dryRun, skipExisting, removeImported, skipRevalidate } = parseArgs();
   const csvAbs = path.isAbsolute(csvPath) ? csvPath : path.resolve(process.cwd(), csvPath);
   if (!fs.existsSync(csvAbs)) {
     console.error('CSV file not found:', csvAbs);
@@ -341,8 +348,19 @@ async function main() {
   }
 
   console.log('Resolving CZT user...');
-  const user = await resolveCztUser(cztUser);
+  const user = await resolveImportTargetUser({
+    prisma,
+    source: 'SRC',
+    sourcePlayerName: sourcePlayer,
+    explicitCztUser: cztUser,
+    allowAutoUser: autoUser,
+    dryRun,
+    resolveExplicitUser: resolveCztUser,
+  });
   console.log('CZT user id:', user.id);
+  if (autoUser || !cztUser) {
+    console.log(`User resolution mode: ${user.resolution}`);
+  }
 
   if (removeImported) {
     console.log('Mode: --remove-imported (delete logs that match this CSV, then revalidate user)');
@@ -586,7 +604,7 @@ async function main() {
     }
   }
 
-  const shouldRevalidate = !dryRun && (imported > 0 || (removeImported && removed > 0));
+  const shouldRevalidate = !dryRun && !skipRevalidate && (imported > 0 || (removeImported && removed > 0));
   if (shouldRevalidate) {
     console.log('\n--- Revalidating (reunlock + recompute verified XP) ---');
     execSync('pnpm db:reunlock-achievements', {
