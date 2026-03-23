@@ -17,6 +17,7 @@ export const GAME_CODES: Record<string, string> = {
   bo7: 'BO7',
   iw: 'IW',
   vanguard: 'VANGUARD',
+  waw: 'WAW',
   wwii: 'WW2',
   // community, custom are skipped (no entry)
 };
@@ -234,6 +235,10 @@ const RECORD_MAPPINGS: Record<string, RecordMappingResult> = {
   'no-perks|*': { challengeType: 'NO_PERKS', modifiers: {} },
   'no-jug|': { challengeType: 'NO_JUG', modifiers: {} },
   'no-jug|*': { challengeType: 'NO_JUG', modifiers: {} },
+  'purist-highrounds|': { challengeType: 'PURIST', modifiers: {} },
+  'purist-highrounds|*': { challengeType: 'PURIST', modifiers: {} },
+  'points-rush|': { challengeType: 'RUSH', modifiers: {} },
+  'points-rush|*': { challengeType: 'RUSH', modifiers: {} },
   'no-armor|': { challengeType: 'NO_ARMOR', modifiers: {} },
   'no-blitz|': { challengeType: 'NO_BLITZ', modifiers: {} },
   'wwii-no-armor|': { challengeType: 'NO_ARMOR', modifiers: {} },
@@ -242,6 +247,7 @@ const RECORD_MAPPINGS: Record<string, RecordMappingResult> = {
   'iw-no-perks|': { challengeType: 'NO_PERKS', modifiers: {} },
   'iw-no-perks|*': { challengeType: 'NO_PERKS', modifiers: {} },
   'no-aat|': { challengeType: 'NO_ATS', modifiers: { bo3AatUsed: false } },
+  'no-aat|*': { challengeType: 'NO_ATS', modifiers: { bo3AatUsed: false } },
   'no-aat|no-gobblegum': { challengeType: 'NO_ATS', modifiers: { bo3AatUsed: false, bo3GobbleGumMode: 'NONE' } },
   'no-aat|classic-gobblegum': { challengeType: 'NO_ATS', modifiers: { bo3AatUsed: false, bo3GobbleGumMode: 'CLASSIC_ONLY' } },
   'no-aat|classic-gobblegum-only': { challengeType: 'NO_ATS', modifiers: { bo3AatUsed: false, bo3GobbleGumMode: 'CLASSIC_ONLY' } },
@@ -267,6 +273,10 @@ const RECORD_MAPPINGS: Record<string, RecordMappingResult> = {
   '10-speedrun|*': { challengeType: 'ROUND_10_SPEEDRUN', modifiers: {} },
   '20-speedrun|': { challengeType: 'ROUND_20_SPEEDRUN', modifiers: {} },
   '20-speedrun|*': { challengeType: 'ROUND_20_SPEEDRUN', modifiers: {} },
+  'build-speedrun|': { challengeType: 'BUILD_EE_SPEEDRUN', modifiers: {} },
+  'build-speedrun|*': { challengeType: 'BUILD_EE_SPEEDRUN', modifiers: {} },
+  'build-ee-speedrun|': { challengeType: 'BUILD_EE_SPEEDRUN', modifiers: {} },
+  'build-ee-speedrun|*': { challengeType: 'BUILD_EE_SPEEDRUN', modifiers: {} },
   // 30-super-speedrun: not tracked on CZT; no mapping → skipped
 
   // ---- Exfil (BOCW / Vanguard) ----

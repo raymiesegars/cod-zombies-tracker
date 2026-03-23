@@ -16,7 +16,7 @@ type ResolveImportTargetUserInput = {
 
 type ResolvedUser = {
   id: string;
-  resolution: 'explicit' | 'mapped' | 'identity' | 'placeholder_created' | 'placeholder_dry_run';
+  resolution: 'explicit' | 'mapped' | 'identity' | 'name_match' | 'placeholder_created' | 'placeholder_dry_run';
 };
 
 const DRY_RUN_PLACEHOLDER_ID = 'dry-run-external-user';
@@ -152,6 +152,35 @@ async function findPlaceholderByDisplayName(
   }
 }
 
+async function findExistingUserByExactName(
+  prisma: PrismaClient,
+  sourcePlayerName: string
+): Promise<string | null> {
+  try {
+    const rows = await prisma.user.findMany({
+      where: {
+        isArchived: false,
+        OR: [
+          { username: { equals: sourcePlayerName, mode: 'insensitive' } },
+          { displayName: { equals: sourcePlayerName, mode: 'insensitive' } },
+        ],
+      },
+      select: { id: true },
+      take: 3,
+    });
+    if (rows.length === 0) return null;
+    if (rows.length > 1) {
+      throw new Error(
+        `Ambiguous existing user match for "${sourcePlayerName}". Multiple users match exact name; pass --czt-user explicitly.`
+      );
+    }
+    return rows[0]!.id;
+  } catch (error) {
+    if (isMissingSchemaError(error)) return null;
+    throw error;
+  }
+}
+
 export async function resolveImportTargetUser(input: ResolveImportTargetUserInput): Promise<ResolvedUser> {
   const {
     prisma,
@@ -200,6 +229,12 @@ export async function resolveImportTargetUser(input: ResolveImportTargetUserInpu
   if (placeholderByNameUserId) {
     await upsertIdentity(prisma, source, sourcePlayerName, normalizedKey, placeholderByNameUserId);
     return { id: placeholderByNameUserId, resolution: 'identity' };
+  }
+
+  const exactNameUserId = await findExistingUserByExactName(prisma, sourcePlayerName);
+  if (exactNameUserId) {
+    await upsertIdentity(prisma, source, sourcePlayerName, normalizedKey, exactNameUserId);
+    return { id: exactNameUserId, resolution: 'name_match' };
   }
 
   if (!allowAutoUser) {

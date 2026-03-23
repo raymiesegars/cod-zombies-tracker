@@ -14,6 +14,7 @@ type Args = {
   dryRun: boolean;
   includeMapped: boolean;
   revalidateEnd: boolean;
+  revalidatePerUser: boolean;
   onlyPlayer: string | null;
   limit: number | null;
   stopOnError: boolean;
@@ -30,6 +31,7 @@ function parseArgs(): Args {
   let dryRun = false;
   let includeMapped = false;
   let revalidateEnd = false;
+  let revalidatePerUser = true;
   let onlyPlayer: string | null = null;
   let limit: number | null = null;
   let stopOnError = false;
@@ -38,6 +40,8 @@ function parseArgs(): Args {
     if (a === '--dry-run') dryRun = true;
     else if (a === '--include-mapped') includeMapped = true;
     else if (a === '--revalidate-end') revalidateEnd = true;
+    else if (a === '--revalidate-per-user') revalidatePerUser = true;
+    else if (a === '--no-revalidate') revalidatePerUser = false;
     else if (a === '--stop-on-error') stopOnError = true;
     else if (a.startsWith('--only-player=')) onlyPlayer = a.slice(14).trim() || null;
     else if (a.startsWith('--limit=')) {
@@ -46,7 +50,7 @@ function parseArgs(): Args {
     }
   }
 
-  return { dryRun, includeMapped, revalidateEnd, onlyPlayer, limit, stopOnError };
+  return { dryRun, includeMapped, revalidateEnd, revalidatePerUser, onlyPlayer, limit, stopOnError };
 }
 
 function getCsvFiles(dir: string): string[] {
@@ -121,6 +125,7 @@ async function main() {
 
   console.log(`ZWR candidates: ${candidates.length} (deduped, duplicate files skipped: ${duplicateFiles})`);
   if (!opts.includeMapped) console.log('Mode: skipping players already in zwr-to-czt mapping.');
+  if (opts.revalidatePerUser) console.log('Mode: revalidate per-user during import.');
   if (opts.revalidateEnd) console.log('Mode: revalidate impacted users at end.');
   if (opts.dryRun) console.log('Mode: DRY RUN.');
   console.log('');
@@ -146,8 +151,8 @@ async function main() {
       'scripts/import-skrine-csv/run.ts',
       `--csv=${c.csvPath}`,
       `--source-player-id=${c.player}`,
-      '--skip-revalidate',
     ];
+    if (!opts.revalidatePerUser) cmdArgs.push('--skip-revalidate');
     if (mappedUserId) cmdArgs.push(`--czt-user=${mappedUserId}`);
     else cmdArgs.push('--auto-user');
     if (opts.dryRun) cmdArgs.push('--dry-run');
@@ -163,12 +168,12 @@ async function main() {
     const imported = parseImportedLike(res.output);
     const updated = parseUpdatedLike(res.output);
     const targetUserId = parseTargetUserId(res.output);
-    if (!opts.dryRun && targetUserId && (imported > 0 || updated > 0)) {
+    if (!opts.dryRun && targetUserId && (imported > 0 || updated > 0) && !opts.revalidatePerUser) {
       impactedUserIds.add(targetUserId);
     }
   }
 
-  if (!opts.dryRun && opts.revalidateEnd && impactedUserIds.size > 0) {
+  if (!opts.dryRun && opts.revalidateEnd && !opts.revalidatePerUser && impactedUserIds.size > 0) {
     console.log(`\nRevalidating ${impactedUserIds.size} impacted user(s)...`);
     for (const userId of impactedUserIds) {
       console.log(`\nRevalidating user ${userId}`);
@@ -186,8 +191,8 @@ async function main() {
   console.log(`Skipped mapped: ${skippedMapped}`);
   console.log(`Failed: ${failed}`);
   console.log(`Impacted users: ${impactedUserIds.size}`);
-  if (!opts.revalidateEnd) {
-    console.log('Revalidation: skipped (use --revalidate-end or run targeted revalidation later).');
+  if (!opts.revalidatePerUser && !opts.revalidateEnd) {
+    console.log('Revalidation: skipped (use --revalidate-per-user or --revalidate-end).');
   }
 
   if (failed > 0) process.exit(1);

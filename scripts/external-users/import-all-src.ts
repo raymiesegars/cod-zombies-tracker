@@ -9,6 +9,7 @@ const SRC_DIR = path.join(ROOT, 'src_codzombies_player_csv');
 type Args = {
   dryRun: boolean;
   revalidateEnd: boolean;
+  revalidatePerUser: boolean;
   onlyPlayer: string | null;
   limit: number | null;
   stopOnError: boolean;
@@ -23,6 +24,7 @@ function parseArgs(): Args {
   const args = process.argv.slice(2);
   let dryRun = false;
   let revalidateEnd = false;
+  let revalidatePerUser = true;
   let onlyPlayer: string | null = null;
   let limit: number | null = null;
   let stopOnError = false;
@@ -30,6 +32,8 @@ function parseArgs(): Args {
   for (const a of args) {
     if (a === '--dry-run') dryRun = true;
     else if (a === '--revalidate-end') revalidateEnd = true;
+    else if (a === '--revalidate-per-user') revalidatePerUser = true;
+    else if (a === '--no-revalidate') revalidatePerUser = false;
     else if (a === '--stop-on-error') stopOnError = true;
     else if (a.startsWith('--only-player=')) onlyPlayer = a.slice(14).trim() || null;
     else if (a.startsWith('--limit=')) {
@@ -37,7 +41,7 @@ function parseArgs(): Args {
       if (!Number.isNaN(n) && n > 0) limit = n;
     }
   }
-  return { dryRun, revalidateEnd, onlyPlayer, limit, stopOnError };
+  return { dryRun, revalidateEnd, revalidatePerUser, onlyPlayer, limit, stopOnError };
 }
 
 function getCsvFiles(dir: string): string[] {
@@ -96,6 +100,7 @@ async function main() {
   if (opts.limit != null) candidates = candidates.slice(0, opts.limit);
 
   console.log(`SRC candidates: ${candidates.length}`);
+  if (opts.revalidatePerUser) console.log('Mode: revalidate per-user during import.');
   if (opts.revalidateEnd) console.log('Mode: revalidate impacted users at end.');
   if (opts.dryRun) console.log('Mode: DRY RUN.');
 
@@ -113,8 +118,8 @@ async function main() {
       `--csv=${c.csvPath}`,
       `--source-player=${c.player}`,
       '--auto-user',
-      '--skip-revalidate',
     ];
+    if (!opts.revalidatePerUser) cmdArgs.push('--skip-revalidate');
     if (opts.dryRun) cmdArgs.push('--dry-run');
 
     const res = runAndEcho('pnpm', cmdArgs);
@@ -128,12 +133,12 @@ async function main() {
     const imported = parseImported(res.output);
     const removed = parseRemoved(res.output);
     const targetUserId = parseTargetUserId(res.output);
-    if (!opts.dryRun && targetUserId && (imported > 0 || removed > 0)) {
+    if (!opts.dryRun && targetUserId && (imported > 0 || removed > 0) && !opts.revalidatePerUser) {
       impactedUserIds.add(targetUserId);
     }
   }
 
-  if (!opts.dryRun && opts.revalidateEnd && impactedUserIds.size > 0) {
+  if (!opts.dryRun && opts.revalidateEnd && !opts.revalidatePerUser && impactedUserIds.size > 0) {
     console.log(`\nRevalidating ${impactedUserIds.size} impacted user(s)...`);
     for (const userId of impactedUserIds) {
       console.log(`\nRevalidating user ${userId}`);
@@ -150,8 +155,8 @@ async function main() {
   console.log(`Processed: ${processed}`);
   console.log(`Failed: ${failed}`);
   console.log(`Impacted users: ${impactedUserIds.size}`);
-  if (!opts.revalidateEnd) {
-    console.log('Revalidation: skipped (use --revalidate-end or run targeted revalidation later).');
+  if (!opts.revalidatePerUser && !opts.revalidateEnd) {
+    console.log('Revalidation: skipped (use --revalidate-per-user or --revalidate-end).');
   }
 
   if (failed > 0) process.exit(1);

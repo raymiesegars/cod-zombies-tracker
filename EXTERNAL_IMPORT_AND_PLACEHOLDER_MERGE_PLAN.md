@@ -187,12 +187,18 @@ Notes:
   - dedupes by normalized player name
   - skips mapped users by default (override: `--include-mapped`)
   - supports `--dry-run`, `--limit`, `--only-player`, `--stop-on-error`
-  - optional `--revalidate-end` for targeted user revalidation batch
+  - revalidation behavior:
+    - default: per-user revalidation during import
+    - `--no-revalidate` disables per-user revalidation
+    - optional `--revalidate-end` for targeted batch revalidation (used with `--no-revalidate`)
 - Added SRC bulk orchestrator:
   - `scripts/external-users/import-all-src.ts`
   - scans `src_codzombies_player_csv`
   - supports `--dry-run`, `--limit`, `--only-player`, `--stop-on-error`
-  - optional `--revalidate-end` for targeted user revalidation batch
+  - revalidation behavior:
+    - default: per-user revalidation during import
+    - `--no-revalidate` disables per-user revalidation
+    - optional `--revalidate-end` for targeted batch revalidation (used with `--no-revalidate`)
 - Added package scripts:
   - `db:import-all-zwr-external`
   - `db:import-all-src-external`
