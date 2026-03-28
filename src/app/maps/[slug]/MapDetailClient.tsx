@@ -723,7 +723,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     if (typeof window === 'undefined') return;
     setLeaderboardVerifiedOnly(getStoredLeaderboardVerifiedOnly());
   }, []);
-  const [leaderboardFortuneCards, setLeaderboardFortuneCards] = useState<string>('false');
+  const [leaderboardFortuneCards, setLeaderboardFortuneCards] = useState<string>('');
   const [leaderboardDirectorsCut, setLeaderboardDirectorsCut] = useState(false);
   // BO3
   const [lbBo3GobbleGumMode, setLbBo3GobbleGumMode] = useState<string>('');
@@ -812,6 +812,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
     if (isNewMap) {
       leaderboardSlugRef.current = slug;
       setSelectedLeaderboardCategory('HIGHEST_ROUND');
+      setLeaderboardFortuneCards('');
     }
 
     setLeaderboard([]);
@@ -2115,6 +2116,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                         </button>
                         <Select
                           options={[
+                            { value: '', label: 'All (Fate & Fortune)' },
                             { value: 'false', label: 'Fate only' },
                             { value: 'true', label: 'Fate & Fortune' },
                           ]}

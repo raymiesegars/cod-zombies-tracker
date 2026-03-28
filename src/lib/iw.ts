@@ -19,6 +19,7 @@ const IW_SPEEDRUN_TYPES = [
   'ALIENS_BOSS_FIGHT',
   'CRYPTID_FIGHT',
   'MEPHISTOPHELES',
+  'PACK_A_PUNCH_SPEEDRUN',
 ] as const;
 
 export function isIwGame(shortName: string | null | undefined): boolean {
@@ -52,6 +53,7 @@ export function isSpeedrunChallengeType(type: string): boolean {
     || type === 'ROUND_255_SPEEDRUN'
     || type === 'BUYABLE_ENDING_SPEEDRUN'
     || type === 'INSTAKILL_ROUND_SPEEDRUN'
+    || type === 'PACK_A_PUNCH_SPEEDRUN'
     || type === 'SUPER_30_SPEEDRUN'
     || type === 'EXFIL_R5_SPEEDRUN'
     || type === 'EXFIL_R10_SPEEDRUN'
@@ -83,6 +85,7 @@ export function getMinRoundForSpeedrunChallengeType(type: string): number {
     case 'ROUND_935_SPEEDRUN': return 935;
     case 'ROUND_999_SPEEDRUN': return 999;
     case 'SUPER_30_SPEEDRUN': return 30; // Multi-map run; display as round 30
+    case 'PACK_A_PUNCH_SPEEDRUN': return 1;
     default: return 1;
   }
 }
@@ -109,4 +112,5 @@ export const IW_CHALLENGE_TYPES_ORDER: string[] = [
   'ALIENS_BOSS_FIGHT',
   'CRYPTID_FIGHT',
   'MEPHISTOPHELES',
+  'PACK_A_PUNCH_SPEEDRUN',
 ];

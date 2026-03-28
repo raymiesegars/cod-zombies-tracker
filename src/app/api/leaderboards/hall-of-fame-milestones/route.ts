@@ -50,6 +50,13 @@ export async function GET() {
       { headers: { 'Cache-Control': 'private, no-store, max-age=0' } }
     );
   } catch (error) {
+    const code = typeof error === 'object' && error && 'code' in error ? (error as { code?: string }).code : undefined;
+    if (code === 'P2021' || code === 'P2022') {
+      return NextResponse.json(
+        { trackedFromLevel: VERIFIED_MILESTONE_MIN_LEVEL, milestones: [] },
+        { headers: { 'Cache-Control': 'private, no-store, max-age=0' } }
+      );
+    }
     console.error('Error fetching hall-of-fame milestones:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

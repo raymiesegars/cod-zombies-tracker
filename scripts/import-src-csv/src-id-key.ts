@@ -65,6 +65,7 @@ export function resolveModifiersWithIdKey(
     bo7SupportMode: DEFAULTS.bo7SupportMode,
     bo7GobbleGumMode: DEFAULTS.bo7GobbleGumMode,
     vanguardVoidUsed: DEFAULTS.vanguardVoidUsed,
+    bo2BankUsed: DEFAULTS.bo2BankUsed,
     useFortuneCards: DEFAULTS.useFortuneCards,
     useDirectorsCut: DEFAULTS.useDirectorsCut,
     ww2ConsumablesUsed: DEFAULTS.ww2ConsumablesUsed,
@@ -149,6 +150,20 @@ export function resolveModifiersWithIdKey(
       }
     }
 
+    if ((name === 'category' || name === 'round number') && gameShortName === 'BO2') {
+      if (labelMatches(label, 'No Bank')) {
+        mods.bo2BankUsed = false;
+        if (!summaryParts.some((s) => s.startsWith('bank:'))) summaryParts.push('bank: no (SRC)');
+      }
+    }
+
+    if ((name === 'category' || name === 'round number') && (gameShortName === 'BO3' || gameShortName === 'BO1')) {
+      if (labelMatches(label, 'No Gum', 'No Gums')) {
+        mods.bo3GobbleGumMode = 'NONE';
+        if (!summaryParts.some((s) => s.startsWith('gums:'))) summaryParts.push('gums: no gums (SRC)');
+      }
+    }
+
     if (name === 'directors cut' && gameShortName === 'IW') {
       if (labelMatches(label, 'No DC')) {
         mods.useDirectorsCut = false;
@@ -226,6 +241,15 @@ export function resolveSpeedrunTypeFromSubCategory(
     const varName = norm(v.name);
     const labelNorm = norm(label);
     if (varName !== 'category' && varName !== 'round number') continue;
+    if (
+      labelNorm.includes('pack-a-punch') ||
+      labelNorm.includes('pack a punch') ||
+      labelNorm.includes('pack-a-punch no bank') ||
+      labelNorm.includes('pap') ||
+      labelNorm.includes('weapon upgrade')
+    ) {
+      return 'PACK_A_PUNCH_SPEEDRUN';
+    }
     const challengeType = ROUND_LABEL_TO_CHALLENGE_TYPE[labelNorm];
     if (challengeType) return challengeType;
     const roundMatch = /^round\s+(\d+)/i.exec(label.trim());

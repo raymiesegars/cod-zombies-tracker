@@ -36,6 +36,7 @@ export async function GET() {
     const mainEEByMap = new Set<string>();
 
     for (const log of user.challengeLogs) {
+      if (log.challenge?.type === 'RUSH') continue;
       const round = log.roundReached;
       const current = highestByMap.get(log.mapId) ?? 0;
       if (round > current && isBo4Game(log.map?.game?.shortName)) {

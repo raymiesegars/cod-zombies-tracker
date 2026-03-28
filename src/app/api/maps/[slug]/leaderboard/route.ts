@@ -205,6 +205,8 @@ export async function GET(
     const isRush = isSpecificChallenge && challengeType === 'RUSH';
     if (isSpecificChallenge) {
       whereClause.challenge = { type: challengeType };
+    } else {
+      whereClause.challenge = { type: { not: 'RUSH' } };
     }
     if (
       challengeType === 'STARTING_ROOM' &&

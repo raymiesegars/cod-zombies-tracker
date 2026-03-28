@@ -55,7 +55,7 @@ export async function GET(
 
     const [highestFromChallenges, highestFromEE] = await Promise.all([
       prisma.challengeLog.findFirst({
-        where: { mapId: map.id },
+        where: { mapId: map.id, challenge: { type: { not: 'RUSH' } } },
         orderBy: { roundReached: 'desc' },
         select: { roundReached: true },
       }),

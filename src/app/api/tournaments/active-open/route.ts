@@ -24,6 +24,6 @@ export async function GET() {
     return NextResponse.json(tournament ? { tournament: { id: tournament.id, title: tournament.title } } : { tournament: null });
   } catch (error) {
     console.error('Error fetching active open tournament:', error);
-    return NextResponse.json({ error: 'Failed to load tournament' }, { status: 500 });
+    return NextResponse.json({ tournament: null });
   }
 }

@@ -46,6 +46,7 @@ const CHALLENGE_TYPE_ICONS: Record<ChallengeType, LucideIcon> = {
   EXFIL_R20_SPEEDRUN: Timer,
   NO_JUG_NO_ARMOR: Shield,
   BUILD_EE_SPEEDRUN: Timer,
+  PACK_A_PUNCH_SPEEDRUN: Timer,
   SUPER_30_SPEEDRUN: Timer,
   NO_JUG: CircleOff,
   NO_ARMOR: Shield,

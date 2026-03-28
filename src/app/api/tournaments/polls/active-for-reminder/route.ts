@@ -53,6 +53,6 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Error fetching active poll for reminder:', error);
-    return NextResponse.json({ error: 'Failed to load poll' }, { status: 500 });
+    return NextResponse.json({ poll: null, hasVoted: false });
   }
 }

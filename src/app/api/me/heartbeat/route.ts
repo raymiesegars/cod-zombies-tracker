@@ -28,6 +28,6 @@ export async function PATCH() {
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error('Error updating heartbeat:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ ok: false });
   }
 }
