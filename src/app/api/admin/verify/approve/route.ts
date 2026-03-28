@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
         select: { game: { select: { shortName: true } } },
       });
       const isBo3Custom = mapWithGame?.game?.shortName === 'BO3_CUSTOM';
-      const { verifiedTotalXp, verifiedCustomZombiesTotalXp, xpGained } = await grantVerifiedAchievementsForMap(log.userId, log.mapId);
+      const { verifiedTotalXp, verifiedCustomZombiesTotalXp, xpGained } = await grantVerifiedAchievementsForMap(log.userId, log.mapId, { recordMilestones: true });
       await prisma.notification.create({
         data: {
           userId: log.userId,
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       select: { game: { select: { shortName: true } } },
     });
     const isBo3CustomEe = mapWithGameEe?.game?.shortName === 'BO3_CUSTOM';
-    const { verifiedTotalXp, verifiedCustomZombiesTotalXp, xpGained } = await grantVerifiedAchievementsForMap(log.userId, log.mapId);
+    const { verifiedTotalXp, verifiedCustomZombiesTotalXp, xpGained } = await grantVerifiedAchievementsForMap(log.userId, log.mapId, { recordMilestones: true });
     await prisma.notification.create({
       data: {
         userId: log.userId,

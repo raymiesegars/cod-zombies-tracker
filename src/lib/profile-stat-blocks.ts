@@ -39,8 +39,8 @@ export function parseProfileStatBlocks(value: unknown): ProfileStatBlockId[] | n
 }
 
 export const DEFAULT_PROFILE_STAT_BLOCK_IDS: ProfileStatBlockId[] = [
-  'maps-played',
-  'easter-eggs',
-  'avg-round',
-  'achievements',
+  'verified-world-records',
+  'rank',
+  'verified-runs',
+  'verified-achievements',
 ];

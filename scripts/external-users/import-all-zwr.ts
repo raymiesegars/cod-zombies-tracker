@@ -153,6 +153,7 @@ async function main() {
       `--source-player-id=${c.player}`,
     ];
     if (!opts.revalidatePerUser) cmdArgs.push('--skip-revalidate');
+    if (opts.revalidatePerUser) cmdArgs.push('--force-revalidate');
     if (mappedUserId) cmdArgs.push(`--czt-user=${mappedUserId}`);
     else cmdArgs.push('--auto-user');
     if (opts.dryRun) cmdArgs.push('--dry-run');

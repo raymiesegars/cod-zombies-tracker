@@ -14,6 +14,13 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
+    const existingUser = await prisma.user.findUnique({
+      where: { supabaseId: supabaseUser.id },
+      select: { profileStatBlocks: true },
+    });
+    if (!existingUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
     const { displayName, username: rawUsername, bio, isPublic, showBothXpRanks, preferredRankView, profileStatBlocks: rawBlocks, hideCustomZombiesEverywhere, profileRankDisplay } = body;
 
     const data: {
@@ -59,7 +66,11 @@ export async function PATCH(request: NextRequest) {
           { status: 400 }
         );
       }
-      data.profileStatBlocks = { selectedBlockIds: parsed };
+      const existing =
+        existingUser.profileStatBlocks && typeof existingUser.profileStatBlocks === 'object'
+          ? (existingUser.profileStatBlocks as Record<string, unknown>)
+          : {};
+      data.profileStatBlocks = { ...existing, selectedBlockIds: parsed };
     }
     if (hideCustomZombiesEverywhere !== undefined) data.hideCustomZombiesEverywhere = Boolean(hideCustomZombiesEverywhere);
     if (profileRankDisplay !== undefined && typeof profileRankDisplay === 'object') {

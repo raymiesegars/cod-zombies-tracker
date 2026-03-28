@@ -12,6 +12,7 @@ import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from 
 import type { PlayerCount } from '@prisma/client';
 
 export type WorldRecordsResult = { worldRecords: number; verifiedWorldRecords: number };
+export type RankOneScopeFilter = { gameId?: string | null; mapId?: string | null };
 
 export type WorldRecordDetail = {
   mapSlug: string;
@@ -68,7 +69,7 @@ type LogWithMeta = {
 type WRBucketEntry = { userId: string; value: number; isVerified: boolean; log: LogWithMeta };
 
 export type WorldRecordBucketState = {
-  mapById: Map<string, { slug: string; name: string; gameShortName: string }>;
+  mapById: Map<string, { slug: string; name: string; gameId: string; gameShortName: string }>;
   challengeBuckets: Map<string, WRBucketEntry[]>;
   eeBuckets: Map<string, WRBucketEntry[]>;
   hrByKey: Map<string, { userId: string; round: number; isVerified: boolean; log: LogWithMeta }>;
@@ -205,9 +206,16 @@ function isVerifiedOnlyLeaderboardKey(key: string): boolean {
 }
 
 function aggregateRankOneCountsFromBuckets(
-  state: WorldRecordBucketState
+  state: WorldRecordBucketState,
+  filter?: RankOneScopeFilter
 ): Map<string, { worldRecords: number; verifiedWorldRecords: number }> {
   const counts = new Map<string, { worldRecords: number; verifiedWorldRecords: number }>();
+  const mapMatchesScope = (mapId: string): boolean => {
+    if (!filter?.gameId && !filter?.mapId) return true;
+    if (filter.mapId) return mapId === filter.mapId;
+    const meta = state.mapById.get(mapId);
+    return !!meta && meta.gameId === filter.gameId;
+  };
   const bump = (userId: string, verifiedOnlyBoard: boolean) => {
     const cur = counts.get(userId) ?? { worldRecords: 0, verifiedWorldRecords: 0 };
     if (verifiedOnlyBoard) cur.verifiedWorldRecords++;
@@ -216,6 +224,7 @@ function aggregateRankOneCountsFromBuckets(
   };
   const pickBest = (key: string, entries: WRBucketEntry[], isSpeedrun: boolean, isEe: boolean) => {
     if (entries.length === 0) return;
+    if (!mapMatchesScope(entries[0]!.log.mapId)) return;
     const best =
       isSpeedrun || isEe
         ? entries.reduce((a, b) => (a.value <= b.value ? a : b))
@@ -231,6 +240,7 @@ function aggregateRankOneCountsFromBuckets(
     pickBest(key, entries, true, true);
   }
   for (const [key, data] of Array.from(state.hrByKey.entries())) {
+    if (!mapMatchesScope(data.log.mapId)) continue;
     bump(data.userId, isVerifiedOnlyLeaderboardKey(key));
   }
   return counts;
@@ -260,9 +270,9 @@ let wrBucketCache: {
 
 async function buildWorldRecordBucketState(): Promise<WorldRecordBucketState> {
   const maps = await prisma.map.findMany({
-    select: { id: true, slug: true, name: true, game: { select: { shortName: true } } },
+    select: { id: true, slug: true, name: true, gameId: true, game: { select: { shortName: true } } },
   });
-  const mapById = new Map(maps.map((m) => [m.id, { slug: m.slug, name: m.name, gameShortName: m.game.shortName }]));
+  const mapById = new Map(maps.map((m) => [m.id, { slug: m.slug, name: m.name, gameId: m.gameId, gameShortName: m.game.shortName }]));
 
   const challengeLogs = await prisma.challengeLog.findMany({
     select: {
@@ -549,6 +559,18 @@ export async function computeRankOneCountsByUserId(): Promise<
 > {
   const { rankCounts } = await getWRBucketCache();
   return rankCounts;
+}
+
+export async function computeScopedRankOneCountsByUserId(
+  filter: RankOneScopeFilter
+): Promise<Map<string, { worldRecords: number; verifiedWorldRecords: number }>> {
+  const hasScope = Boolean(filter.gameId || filter.mapId);
+  if (!hasScope) return computeRankOneCountsByUserId();
+  const { mapById, challengeBuckets, eeBuckets, hrByKey } = await getWRBucketCache();
+  return aggregateRankOneCountsFromBuckets(
+    { mapById, challengeBuckets, eeBuckets, hrByKey },
+    filter
+  );
 }
 
 export async function computeWorldRecordsDetailed(userId: string): Promise<WorldRecordsDetailedResult> {

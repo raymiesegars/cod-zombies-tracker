@@ -261,6 +261,7 @@ function parseArgs(): {
   skipExisting: boolean;
   ww2Only: boolean;
   skipRevalidate: boolean;
+  forceRevalidate: boolean;
 } {
   const args = process.argv.slice(2);
   let csvPath = '';
@@ -272,6 +273,7 @@ function parseArgs(): {
   let skipExisting = true;
   let ww2Only = false;
   let skipRevalidate = false;
+  let forceRevalidate = false;
 
   for (const a of args) {
     if (a.startsWith('--csv=')) csvPath = a.slice(6).trim().replace(/^=+/, '');
@@ -283,13 +285,14 @@ function parseArgs(): {
     else if (a === '--no-skip-existing') skipExisting = false;
     else if (a === '--ww2-only') ww2Only = true;
     else if (a === '--skip-revalidate') skipRevalidate = true;
+    else if (a === '--force-revalidate') forceRevalidate = true;
   }
 
   if (!csvPath || !sourcePlayerId || (!cztUser && !autoUser)) {
-    console.error('Usage: npx tsx scripts/import-skrine-csv/run.ts --csv=<path> --source-player-id=<id> [--czt-user=<username|id|displayName> | --auto-user] [--dry-run] [--report=<path>] [--no-skip-existing] [--ww2-only] [--skip-revalidate]');
+    console.error('Usage: npx tsx scripts/import-skrine-csv/run.ts --csv=<path> --source-player-id=<id> [--czt-user=<username|id|displayName> | --auto-user] [--dry-run] [--report=<path>] [--no-skip-existing] [--ww2-only] [--skip-revalidate] [--force-revalidate]');
     process.exit(1);
   }
-  return { csvPath, sourcePlayerId, cztUser, autoUser, dryRun, reportPath, skipExisting, ww2Only, skipRevalidate };
+  return { csvPath, sourcePlayerId, cztUser, autoUser, dryRun, reportPath, skipExisting, ww2Only, skipRevalidate, forceRevalidate };
 }
 
 async function resolveCztUser(cztUser: string): Promise<{ id: string }> {
@@ -409,7 +412,7 @@ async function findExistingEasterEggLog(
 }
 
 async function main() {
-  const { csvPath, sourcePlayerId, cztUser, autoUser, dryRun, reportPath, skipExisting, ww2Only, skipRevalidate } = parseArgs();
+  const { csvPath, sourcePlayerId, cztUser, autoUser, dryRun, reportPath, skipExisting, ww2Only, skipRevalidate, forceRevalidate } = parseArgs();
   const csvAbs = path.isAbsolute(csvPath) ? csvPath : path.resolve(process.cwd(), csvPath);
   if (!fs.existsSync(csvAbs)) {
     console.error('CSV file not found:', csvAbs);
@@ -786,7 +789,7 @@ async function main() {
     console.log('Report written to:', out);
   }
 
-  if ((imported > 0 || updated > 0) && !dryRun && !skipRevalidate) {
+  if ((imported > 0 || updated > 0 || forceRevalidate) && !dryRun && !skipRevalidate) {
     console.log('\n--- Revalidating (reunlock + recompute verified XP) ---');
     const revalEnv = { ...process.env, BACKFILL_USER_ID: user.id };
     if (ww2Only) revalEnv.BACKFILL_GAMES = 'WW2';

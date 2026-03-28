@@ -120,6 +120,7 @@ async function main() {
       '--auto-user',
     ];
     if (!opts.revalidatePerUser) cmdArgs.push('--skip-revalidate');
+    if (opts.revalidatePerUser) cmdArgs.push('--force-revalidate');
     if (opts.dryRun) cmdArgs.push('--dry-run');
 
     const res = runAndEcho('pnpm', cmdArgs);

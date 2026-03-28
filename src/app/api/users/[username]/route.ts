@@ -4,6 +4,19 @@ import { getLevelFromXp } from '@/lib/ranks';
 import { getUser } from '@/lib/supabase/server';
 import { computeUserStats, type UserWithLogs } from '@/lib/user-stats';
 
+function getCachedWorldRecords(profileStatBlocks: unknown): {
+  worldRecords: number;
+  verifiedWorldRecords: number;
+} | null {
+  if (!profileStatBlocks || typeof profileStatBlocks !== 'object') return null;
+  const cache = (profileStatBlocks as { worldRecordsCache?: unknown }).worldRecordsCache;
+  if (!cache || typeof cache !== 'object') return null;
+  const worldRecords = (cache as { worldRecords?: unknown }).worldRecords;
+  const verifiedWorldRecords = (cache as { verifiedWorldRecords?: unknown }).verifiedWorldRecords;
+  if (typeof worldRecords !== 'number' || typeof verifiedWorldRecords !== 'number') return null;
+  return { worldRecords, verifiedWorldRecords };
+}
+
 // Public profile (logs, achievements, counts). Private = minimal.
 // ?withStats=true returns profile + stats in one response to reduce connection usage.
 export async function GET(
@@ -133,6 +146,11 @@ export async function GET(
 
     if (withStats && 'challengeLogs' in user && 'easterEggLogs' in user) {
       const stats = await computeUserStats(user as unknown as UserWithLogs, hideCustom);
+      const cached = getCachedWorldRecords(user.profileStatBlocks);
+      if (cached) {
+        stats.worldRecords = cached.worldRecords;
+        stats.verifiedWorldRecords = cached.verifiedWorldRecords;
+      }
       Object.assign(payload, stats);
     }
 
