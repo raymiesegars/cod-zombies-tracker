@@ -386,6 +386,7 @@ export function getAllowedSpeedrunCategoriesForMap(
     'ROUND_70_SPEEDRUN',
     'ROUND_100_SPEEDRUN',
     'ROUND_200_SPEEDRUN',
+    'PACK_A_PUNCH_SPEEDRUN',
     'EASTER_EGG_SPEEDRUN',
   ];
   if (gameShortName === 'WAW') {

@@ -1123,96 +1123,104 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                     : map?.game?.shortName === 'AW'
                     ? (challengeTypeLabels[type] ?? getAwChallengeTypeLabel(type) ?? fallbackName ?? type)
                     : (fallbackName ?? challengeTypeLabels[type] ?? type);
+    const mergeWithDbChallenges = (options: Array<{ value: string; label: string }>) => {
+      const optionTypes = new Set(options.map((o) => o.value));
+      const extras = challenges
+        .filter((c) => !optionTypes.has(c.type))
+        .sort((a, b) => (a.name || a.type).localeCompare(b.name || b.type))
+        .map((c) => ({ value: c.type, label: getLabel(c.type, c.name) }));
+      return [...options, ...extras];
+    };
     if (map?.game?.shortName === 'IW' && challenges.length > 0) {
       const ordered = IW_CHALLENGE_TYPES_ORDER.filter((t) => challenges.some((c) => c.type === t));
-      return ordered.map((t) => {
+      return mergeWithDbChallenges(ordered.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: c?.name ?? challengeTypeLabels[t] ?? t };
-      });
+      }));
     }
     if (map?.game?.shortName === 'WAW' && map?.slug && getWaWMapConfig(map.slug)) {
       const types = getWaWMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
-      return types.map((t) => {
+      return mergeWithDbChallenges(types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
-      });
+      }));
     }
     if (map?.game?.shortName === 'BO1' && map?.slug && getBo1MapConfig(map.slug)) {
       const types = getBo1MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
-      return types.map((t) => {
+      return mergeWithDbChallenges(types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
-      });
+      }));
     }
     if (map?.game?.shortName === 'BO2' && map?.slug && getBo2MapConfig(map.slug)) {
       const types = getBo2MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
-      return types.map((t) => {
+      return mergeWithDbChallenges(types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
-      });
+      }));
     }
     if (map?.game?.shortName === 'BO3' && map?.slug && getBo3MapConfig(map.slug)) {
       const types = getBo3MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
-      return types.map((t) => {
+      return mergeWithDbChallenges(types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
-      });
+      }));
     }
     if (map?.game?.shortName === 'BO4' && map?.slug && getBo4MapConfig(map.slug)) {
       const types = getBo4MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
-      return types.map((t) => {
+      return mergeWithDbChallenges(types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
-      });
+      }));
     }
     if (map?.game?.shortName === 'BOCW' && map?.slug && getBocwMapConfig(map.slug)) {
       const types = getBocwMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
-      return types.map((t) => {
+      return mergeWithDbChallenges(types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
-      });
+      }));
     }
     if (map?.game?.shortName === 'BO6' && map?.slug && getBo6MapConfig(map.slug)) {
       const types = getBo6MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
-      return types.map((t) => {
+      return mergeWithDbChallenges(types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
-      });
+      }));
     }
     if (map?.game?.shortName === 'BO7' && map?.slug && getBo7MapConfig(map.slug)) {
       const types = getBo7MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
-      return types.map((t) => {
+      return mergeWithDbChallenges(types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
-      });
+      }));
     }
     if (map?.game?.shortName === 'WW2' && map?.slug && getWw2MapConfig(map.slug)) {
       const types = getWw2MapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
-      return types.map((t) => {
+      return mergeWithDbChallenges(types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
-      });
+      }));
     }
     if (map?.game?.shortName === 'VANGUARD' && map?.slug && getVanguardMapConfig(map.slug)) {
       const types = getVanguardMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
-      return types.map((t) => {
+      return mergeWithDbChallenges(types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
-      });
+      }));
     }
     if (map?.game?.shortName === 'AW' && map?.slug && getAwMapConfig(map.slug)) {
       const types = getAwMapConfig(map.slug)!.challengeTypes.filter((t) => t !== 'HIGHEST_ROUND');
-      return types.map((t) => {
+      return mergeWithDbChallenges(types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
-      });
+      }));
     }
     if (map?.game?.shortName === 'BO3_CUSTOM' && challenges.length > 0) {
       const types = BO3_CUSTOM_CHALLENGE_TYPES.filter((t) => challenges.some((c) => c.type === t));
-      return types.map((t) => {
+      return mergeWithDbChallenges(types.map((t) => {
         const c = challenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) ?? getBo3ChallengeTypeLabel(t) };
-      });
+      }));
     }
     return challenges
       .sort((a, b) => (a.name || a.type).localeCompare(b.name || b.type))

@@ -276,6 +276,42 @@ async function ensureChallenge(mapId: string, challengeType: string): Promise<{ 
   }
 }
 
+function loadPapEnabledMapKeys(): Set<string> {
+  const out = new Set<string>();
+  const numberOnesPath = path.join(root, 'number_ones.json');
+  if (!fs.existsSync(numberOnesPath)) return out;
+  try {
+    const data = JSON.parse(fs.readFileSync(numberOnesPath, 'utf-8')) as Record<string, unknown>;
+    const keyToGame: Record<string, string> = {
+      aw: 'AW',
+      waw: 'WAW',
+      bo: 'BO1',
+      bo2: 'BO2',
+      bo3: 'BO3',
+      bo4: 'BO4',
+      iw: 'IW',
+      wwii: 'WW2',
+    };
+    for (const [noGameKey, shortName] of Object.entries(keyToGame)) {
+      const byGame = data[noGameKey] as Record<string, unknown> | undefined;
+      const byCategory = byGame?.['pack-a-punch-speedrun'] as Record<string, unknown> | undefined;
+      if (!byCategory || typeof byCategory !== 'object') continue;
+      for (const noMapKey of Object.keys(byCategory)) {
+        const mapSlug =
+          shortName === 'IW' && noMapKey === 'spaceland'
+            ? 'zombies-in-spaceland'
+            : shortName === 'IW' && noMapKey === 'beast-from-beyond'
+              ? 'the-beast-from-beyond'
+              : noMapKey;
+        out.add(`${shortName}:${mapSlug}`);
+      }
+    }
+  } catch {
+    return out;
+  }
+  return out;
+}
+
 const ensuredPackAchievements = new Set<string>();
 
 async function ensurePackSpeedrunAchievementsForMap(
@@ -436,6 +472,7 @@ async function main() {
   }
 
   const idKey = removeImported ? null : loadSrcIdKey(root);
+  const papEnabledMapKeys = loadPapEnabledMapKeys();
   if (idKey?.variables) {
     console.log('Loaded SRC id key: variables available for modifier resolution');
   } else if (!removeImported) {
@@ -539,6 +576,19 @@ async function main() {
       continue;
     }
     const usedSrcRound = !removeImported;
+    if (challengeType === 'PACK_A_PUNCH_SPEEDRUN') {
+      const papKey = `${mapRecord.gameShortName}:${mapSlug}`;
+      if (!papEnabledMapKeys.has(papKey)) {
+        skippedReasons.push({
+          row: row._rowIndex,
+          game: row.game,
+          category: row.category,
+          reason: `Pack-a-Punch speedrun is not enabled for ${mapRecord.gameShortName}/${mapSlug} (no WR board in number_ones)`,
+        });
+        skipped++;
+        continue;
+      }
+    }
 
     const challenge = await ensureChallenge(mapRecord.id, challengeType);
     if (!challenge) {
