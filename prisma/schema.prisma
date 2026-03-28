@@ -122,6 +122,7 @@ model User {
   mergeAuditsAsSource     UserMergeAudit[] @relation("MergeSourceUser")
   mergeAuditsAsTarget     UserMergeAudit[] @relation("MergeTargetUser")
   mergeAuditsPerformed    UserMergeAudit[] @relation("MergePerformedByUser")
+  verifiedLevelMilestones VerifiedLevelMilestoneClaim[]
 
   @@index([username])
   @@index([supabaseId])
@@ -165,6 +166,18 @@ model UserMergeAudit {
   @@index([targetUserId])
   @@index([mergedByUserId])
   @@index([createdAt(sort: Desc)])
+}
+
+model VerifiedLevelMilestoneClaim {
+  id              String   @id @default(cuid())
+  level           Int      @unique
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  verifiedTotalXp Int
+  reachedAt       DateTime @default(now())
+
+  @@index([userId])
+  @@index([reachedAt(sort: Desc)])
 }
 
 // ============================================================================

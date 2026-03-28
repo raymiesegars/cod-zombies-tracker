@@ -308,6 +308,7 @@ function parseArgs(): {
   skipExisting: boolean;
   removeImported: boolean;
   skipRevalidate: boolean;
+  forceRevalidate: boolean;
 } {
   const args = process.argv.slice(2);
   let csvPath = '';
@@ -318,6 +319,7 @@ function parseArgs(): {
   let skipExisting = true;
   let removeImported = false;
   let skipRevalidate = false;
+  let forceRevalidate = false;
 
   for (const a of args) {
     if (a.startsWith('--csv=')) csvPath = a.slice(6).trim().replace(/^=+/, '');
@@ -328,19 +330,20 @@ function parseArgs(): {
     else if (a === '--no-skip-existing') skipExisting = false;
     else if (a === '--remove-imported') removeImported = true;
     else if (a === '--skip-revalidate') skipRevalidate = true;
+    else if (a === '--force-revalidate') forceRevalidate = true;
   }
 
   if (!csvPath || !sourcePlayer || (!cztUser && !autoUser)) {
     console.error(
-      'Usage: pnpm db:import-src-csv -- --csv=<path> --source-player=<SRC name> [--czt-user=<CZT id|username> | --auto-user] [--dry-run] [--no-skip-existing] [--remove-imported] [--skip-revalidate]'
+      'Usage: pnpm db:import-src-csv -- --csv=<path> --source-player=<SRC name> [--czt-user=<CZT id|username> | --auto-user] [--dry-run] [--no-skip-existing] [--remove-imported] [--skip-revalidate] [--force-revalidate]'
     );
     process.exit(1);
   }
-  return { csvPath, sourcePlayer, cztUser, autoUser, dryRun, skipExisting, removeImported, skipRevalidate };
+  return { csvPath, sourcePlayer, cztUser, autoUser, dryRun, skipExisting, removeImported, skipRevalidate, forceRevalidate };
 }
 
 async function main() {
-  const { csvPath, sourcePlayer, cztUser, autoUser, dryRun, skipExisting, removeImported, skipRevalidate } = parseArgs();
+  const { csvPath, sourcePlayer, cztUser, autoUser, dryRun, skipExisting, removeImported, skipRevalidate, forceRevalidate } = parseArgs();
   const csvAbs = path.isAbsolute(csvPath) ? csvPath : path.resolve(process.cwd(), csvPath);
   if (!fs.existsSync(csvAbs)) {
     console.error('CSV file not found:', csvAbs);
@@ -604,7 +607,7 @@ async function main() {
     }
   }
 
-  const shouldRevalidate = !dryRun && !skipRevalidate && (imported > 0 || (removeImported && removed > 0));
+  const shouldRevalidate = !dryRun && !skipRevalidate && (imported > 0 || (removeImported && removed > 0) || forceRevalidate);
   if (shouldRevalidate) {
     console.log('\n--- Revalidating (reunlock + recompute verified XP) ---');
     execSync('pnpm db:reunlock-achievements', {

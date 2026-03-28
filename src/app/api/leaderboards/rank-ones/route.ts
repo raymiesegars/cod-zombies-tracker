@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getLevelFromXp } from '@/lib/ranks';
-import { computeRankOneCountsByUserId } from '@/lib/world-records';
+import { computeScopedRankOneCountsByUserId } from '@/lib/world-records';
 import type { PlayerCount } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
@@ -40,9 +40,20 @@ export async function GET(request: NextRequest) {
     const offset = Math.max(0, parseInt(searchParams.get('offset') ?? '0', 10) || 0);
     const limit = Math.min(MAX_LIMIT, Math.max(1, parseInt(searchParams.get('limit') ?? String(DEFAULT_LIMIT), 10) || DEFAULT_LIMIT));
     const verifiedOnly = searchParams.get('verified') === '1' || searchParams.get('verified') === 'true';
+    const gameId = searchParams.get('gameId')?.trim() || null;
+    const mapId = searchParams.get('mapId')?.trim() || null;
     const valueKey: 'worldRecords' | 'verifiedWorldRecords' = verifiedOnly ? 'verifiedWorldRecords' : 'worldRecords';
+    if (mapId && gameId) {
+      const map = await prisma.map.findFirst({ where: { id: mapId, gameId }, select: { id: true } });
+      if (!map) {
+        return NextResponse.json(
+          { error: 'mapId does not belong to gameId' },
+          { status: 400, headers: { 'Cache-Control': 'private, no-store, max-age=0' } }
+        );
+      }
+    }
 
-    const counts = await computeRankOneCountsByUserId();
+    const counts = await computeScopedRankOneCountsByUserId({ gameId, mapId });
 
     const users = await prisma.user.findMany({
       where: { isPublic: true, isArchived: false },

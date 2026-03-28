@@ -12,7 +12,7 @@ import { isBo3Game, BO3_GOBBLEGUM_MODES, getBo3GobbleGumLabel } from '@/lib/bo3'
 import { isBocwGame, BOCW_SUPPORT_MODES, getBocwSupportLabel } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
 import { isBo7Game, BO7_GOBBLEGUM_MODES, BO7_SUPPORT_MODES, getBo7GobbleGumLabel, getBo7SupportLabel } from '@/lib/bo7';
-import { Trophy, Medal, Filter, Search, X, ShieldCheck, CheckCircle2, Loader2, Crown } from 'lucide-react';
+import { Trophy, Medal, Filter, Search, X, ShieldCheck, CheckCircle2, Loader2, Crown, Star } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 import { getWaWChallengeTypeLabel, getWaWMapConfig } from '@/lib/waw/waw-map-config';
 import { getBo2MapConfig, getBo2ChallengeTypeLabel } from '@/lib/bo2/bo2-map-config';
@@ -33,9 +33,18 @@ import { getGameDisplayShortName, isBo3CustomGame, BO3_CUSTOM_CHALLENGE_TYPES } 
 import { getChallengeTypeOrderForMap } from '@/lib/challenge-order';
 
 const RANK_VIEW = '__rank__';
-const RANK_ONES_VIEW = '__rank_ones__';
 const PAGE_SIZE = 25;
 const SEARCH_DEBOUNCE_MS = 300;
+
+type LeaderboardTab = 'current' | 'hall' | 'best';
+type HallMode = 'rankOnes' | 'xp';
+type HallMilestone = {
+  level: number;
+  claimed: boolean;
+  reachedAt: string | null;
+  verifiedTotalXp: number | null;
+  user: { id: string; username: string; displayName: string | null; avatarUrl: string | null; avatarPreset: string | null } | null;
+};
 
 const challengeTypeLabels: Record<string, string> = {
   HIGHEST_ROUND: 'Highest Round',
@@ -109,7 +118,13 @@ export default function LeaderboardsPage() {
   const [verifiedOnly, setVerifiedOnly] = useState(true);
   const [rankVerifiedXpOnly, setRankVerifiedXpOnly] = useState(true);
   const [xpType, setXpType] = useState<'total' | 'verified' | 'customZombies' | 'verifiedCustomZombies'>('verified');
-  const [rankOnesVerifiedOnly, setRankOnesVerifiedOnly] = useState(true);
+  const [leaderboardTab, setLeaderboardTab] = useState<LeaderboardTab>('current');
+  const [hallMode, setHallMode] = useState<HallMode>('rankOnes');
+  const [hallVerifiedOnly, setHallVerifiedOnly] = useState(true);
+  const [hallGameId, setHallGameId] = useState('');
+  const [hallMapId, setHallMapId] = useState('');
+  const [hallMilestones, setHallMilestones] = useState<HallMilestone[]>([]);
+  const [hallMilestonesLoading, setHallMilestonesLoading] = useState(false);
   const [leaderboardStorageHydrated, setLeaderboardStorageHydrated] = useState(false);
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -140,8 +155,7 @@ export default function LeaderboardsPage() {
   const [bo7RelicsFilter, setBo7RelicsFilter] = useState<string[]>([]);
 
   const isRankView = selectedGame === RANK_VIEW;
-  const isRankOnesView = selectedGame === RANK_ONES_VIEW;
-  const isSiteRankView = isRankView || isRankOnesView;
+  const isSiteRankView = isRankView;
   const selectedMapData = maps.find((m) => m.slug === selectedMap);
   const isBo4Map = selectedMapData?.game?.shortName === 'BO4';
   const isIwMap = selectedMapData?.game?.shortName === 'IW';
@@ -193,7 +207,7 @@ export default function LeaderboardsPage() {
           const mapsData = await mapsRes.json();
           setMaps(mapsData);
           // On initial load, only set first map when not on Rank view
-          if (mapsData.length > 0 && selectedGame !== RANK_VIEW && selectedGame !== RANK_ONES_VIEW) {
+          if (mapsData.length > 0 && selectedGame !== RANK_VIEW) {
             setSelectedMap(mapsData[0].slug);
           }
         }
@@ -208,22 +222,34 @@ export default function LeaderboardsPage() {
 
   useEffect(() => {
     async function fetchLeaderboard() {
-      if (isRankOnesView) {
+      if (leaderboardTab === 'hall') {
+        setIsLoading(false);
+        return;
+      }
+      if (leaderboardTab === 'best') {
         setIsLoading(true);
         try {
           const params = new URLSearchParams();
           params.set('offset', '0');
           params.set('limit', String(PAGE_SIZE));
           if (searchForFetch) params.set('search', searchForFetch);
-          if (rankOnesVerifiedOnly) params.set('verified', '1');
-          const res = await fetch(`/api/leaderboards/rank-ones?${params}`, { cache: 'no-store' });
+          if (hallVerifiedOnly) params.set('verified', '1');
+          if (hallGameId) params.set('gameId', hallGameId);
+          if (hallMapId) params.set('mapId', hallMapId);
+          const endpoint = hallMode === 'rankOnes'
+            ? '/api/leaderboards/rank-ones'
+            : '/api/leaderboards/hall-of-fame-xp';
+          const res = await fetch(`${endpoint}?${params}`, { cache: 'no-store' });
           if (res.ok) {
             const data = await res.json();
             setTotal(data.total ?? 0);
             setLeaderboard(data.entries ?? []);
+          } else {
+            setTotal(0);
+            setLeaderboard([]);
           }
         } catch (error) {
-          console.error('Error fetching rank-ones leaderboard:', error);
+          console.error('Error fetching hall-of-fame leaderboard:', error);
         } finally {
           setIsLoading(false);
         }
@@ -367,7 +393,28 @@ export default function LeaderboardsPage() {
 
     fetchLeaderboard();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRankView, isRankOnesView, rankOnesVerifiedOnly, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, isVanguardMap, hasVanguardVoid, hasVanguardRampage, searchForFetch, verifiedOnly, rankVerifiedXpOnly, xpType, leaderboardStorageHydrated, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7GobbleGumFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter]);
+  }, [leaderboardTab, hallMode, hallVerifiedOnly, hallGameId, hallMapId, isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, isVanguardMap, hasVanguardVoid, hasVanguardRampage, searchForFetch, verifiedOnly, rankVerifiedXpOnly, xpType, leaderboardStorageHydrated, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7GobbleGumFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter]);
+
+  useEffect(() => {
+    if (leaderboardTab !== 'hall') return;
+    let cancelled = false;
+    setHallMilestonesLoading(true);
+    fetch('/api/leaderboards/hall-of-fame-milestones', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled) return;
+        setHallMilestones(Array.isArray(data?.milestones) ? data.milestones : []);
+      })
+      .catch(() => {
+        if (!cancelled) setHallMilestones([]);
+      })
+      .finally(() => {
+        if (!cancelled) setHallMilestonesLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [leaderboardTab]);
 
   const loadMore = useCallback(async () => {
     if (leaderboard.length >= total || total === 0) return;
@@ -376,13 +423,18 @@ export default function LeaderboardsPage() {
     setLoadMoreLoading(true);
     const offset = leaderboard.length;
     try {
-      if (isRankOnesView) {
+      if (leaderboardTab === 'best') {
         const params = new URLSearchParams();
         params.set('offset', String(offset));
         params.set('limit', String(PAGE_SIZE));
         if (searchForFetch) params.set('search', searchForFetch);
-        if (rankOnesVerifiedOnly) params.set('verified', '1');
-        const res = await fetch(`/api/leaderboards/rank-ones?${params}`, { cache: 'no-store' });
+        if (hallVerifiedOnly) params.set('verified', '1');
+        if (hallGameId) params.set('gameId', hallGameId);
+        if (hallMapId) params.set('mapId', hallMapId);
+        const endpoint = hallMode === 'rankOnes'
+          ? '/api/leaderboards/rank-ones'
+          : '/api/leaderboards/hall-of-fame-xp';
+        const res = await fetch(`${endpoint}?${params}`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           const nextEntries = data.entries ?? [];
@@ -493,7 +545,7 @@ export default function LeaderboardsPage() {
       setLoadMoreLoading(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRankView, isRankOnesView, rankOnesVerifiedOnly, searchForFetch, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, hasVanguardVoid, hasVanguardRampage, verifiedOnly, rankVerifiedXpOnly, xpType, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7GobbleGumFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter, leaderboard.length, total]);
+  }, [leaderboardTab, hallMode, hallVerifiedOnly, hallGameId, hallMapId, isRankView, searchForFetch, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, hasVanguardVoid, hasVanguardRampage, verifiedOnly, rankVerifiedXpOnly, xpType, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7GobbleGumFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter, leaderboard.length, total]);
 
   // Observe sentinel when search is empty and more entries exist; trigger well before sentinel is visible
   useEffect(() => {
@@ -520,9 +572,14 @@ export default function LeaderboardsPage() {
 
   const gameOptions = [
     { value: RANK_VIEW, label: 'Rank (by XP)' },
-    { value: RANK_ONES_VIEW, label: "Rank 1's (site)" },
     { value: '', label: 'All Games' },
     ...filteredGamesForOptions.map((game) => ({ value: game.id, label: getGameDisplayShortName(game.shortName, game.name) })),
+  ];
+
+  const hallMaps = hallGameId ? filteredMapsForOptions.filter((m) => m.gameId === hallGameId) : filteredMapsForOptions;
+  const hallMapOptions = [
+    { value: '', label: 'All Maps' },
+    ...hallMaps.map((map) => ({ value: map.id, label: map.name })),
   ];
 
   const mapOptions = [
@@ -542,7 +599,7 @@ export default function LeaderboardsPage() {
   const [mapChallenges, setMapChallenges] = useState<{ type: string; name?: string }[]>([]);
   const [mapEasterEggs, setMapEasterEggs] = useState<{ id: string; name: string }[]>([]);
   useEffect(() => {
-    if (!selectedMap || isSiteRankView) {
+    if (leaderboardTab !== 'current' || !selectedMap || isSiteRankView) {
       setMapChallenges([]);
       setMapEasterEggs([]);
       return;
@@ -568,7 +625,7 @@ export default function LeaderboardsPage() {
         }
       });
     return () => { cancelled = true; };
-  }, [selectedMap, isSiteRankView]);
+  }, [leaderboardTab, selectedMap, isSiteRankView]);
 
   // Build options: Highest Round, each challenge this map has (IW/BO2 in canonical order), each loggable EE (Time)
   const challengeTypeOptionsWithEe = useMemo(() => {
@@ -748,6 +805,12 @@ export default function LeaderboardsPage() {
     }
   }, [selectedMap, selectedGame, filteredMaps]);
 
+  useEffect(() => {
+    if (hallMapId && !hallMaps.some((m) => m.id === hallMapId)) {
+      setHallMapId('');
+    }
+  }, [hallMapId, hallMaps]);
+
   // When map changes, reset to Highest Round
   useEffect(() => {
     setSelectedChallengeType('HIGHEST_ROUND');
@@ -781,6 +844,47 @@ export default function LeaderboardsPage() {
             <p className="text-sm text-bunker-500 mt-3 max-w-2xl">
               CoD Zombies high round and speedrun leaderboards for every Treyarch map. Filter by Solo, Duo, Trio, or Squad and by challenge type: Highest Round, No Downs, No Perks, No Pack-a-Punch, and more. Log your runs from any map page to appear on the board.
             </p>
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 w-full max-w-3xl">
+              <button
+                type="button"
+                onClick={() => setLeaderboardTab('current')}
+                className={cn(
+                  'rounded-xl border px-4 py-3 sm:px-5 sm:py-4 text-sm sm:text-base font-semibold transition-colors min-h-[48px]',
+                  leaderboardTab === 'current'
+                    ? 'border-blood-500/70 bg-blood-950/85 text-white'
+                    : 'border-bunker-600 bg-bunker-800/80 text-bunker-300 hover:bg-bunker-700/80'
+                )}
+                aria-pressed={leaderboardTab === 'current'}
+              >
+                Current
+              </button>
+              <button
+                type="button"
+                onClick={() => setLeaderboardTab('hall')}
+                className={cn(
+                  'rounded-xl border px-4 py-3 sm:px-5 sm:py-4 text-sm sm:text-base font-semibold transition-colors min-h-[48px]',
+                  leaderboardTab === 'hall'
+                    ? 'border-yellow-500/70 bg-yellow-950/35 text-yellow-100'
+                    : 'border-bunker-600 bg-bunker-800/80 text-bunker-300 hover:bg-bunker-700/80'
+                )}
+                aria-pressed={leaderboardTab === 'hall'}
+              >
+                Hall of Fame
+              </button>
+              <button
+                type="button"
+                onClick={() => setLeaderboardTab('best')}
+                className={cn(
+                  'rounded-xl border px-4 py-3 sm:px-5 sm:py-4 text-sm sm:text-base font-semibold transition-colors min-h-[48px]',
+                  leaderboardTab === 'best'
+                    ? 'border-blue-500/70 bg-blue-950/45 text-blue-100'
+                    : 'border-bunker-600 bg-bunker-800/80 text-bunker-300 hover:bg-bunker-700/80'
+                )}
+                aria-pressed={leaderboardTab === 'best'}
+              >
+                Best Players
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -803,6 +907,8 @@ export default function LeaderboardsPage() {
       <div className="bg-bunker-950 border-b border-bunker-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex flex-col gap-3 sm:gap-4">
+            {leaderboardTab !== 'hall' && (
+            <>
             <div className="w-full">
               <Input
                 type="search"
@@ -824,6 +930,7 @@ export default function LeaderboardsPage() {
               <Filter className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
               <span className="text-xs sm:text-sm font-medium">Filters:</span>
             </div>
+            {leaderboardTab === 'current' && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 [&>*]:min-w-0">
               <Select
                 options={gameOptions}
@@ -831,7 +938,7 @@ export default function LeaderboardsPage() {
                 onChange={(e) => {
                   const v = e.target.value;
                   setSelectedGame(v);
-                  if (v === RANK_VIEW || v === RANK_ONES_VIEW) {
+                  if (v === RANK_VIEW) {
                     setSelectedMap('');
                   } else {
                     const nextMaps = v ? maps.filter((m) => m.gameId === v) : maps;
@@ -875,41 +982,6 @@ export default function LeaderboardsPage() {
               )}
               {isSiteRankView && (
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4 min-w-0 col-span-2 sm:col-span-4">
-                  {isRankOnesView && (
-                    <div className="flex flex-col gap-1.5 xl:col-span-2">
-                      <span className="text-xs font-medium text-bunker-500">#1 leaderboard spots (profile stats):</span>
-                      <div className="grid grid-cols-2 rounded-lg border border-bunker-600 p-1 bg-bunker-800/80 w-full max-w-xl">
-                        <button
-                          type="button"
-                          onClick={() => setRankOnesVerifiedOnly(false)}
-                          className={cn(
-                            'w-full min-w-0 min-h-[40px] flex items-center justify-center gap-1 px-2 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors text-center whitespace-nowrap',
-                            !rankOnesVerifiedOnly
-                              ? 'bg-bunker-700 text-white shadow-sm'
-                              : 'text-bunker-400 hover:text-bunker-300'
-                          )}
-                          aria-pressed={!rankOnesVerifiedOnly}
-                        >
-                          <Crown className="w-3.5 h-3.5 shrink-0 text-yellow-400" aria-hidden />
-                          Rank 1&apos;s
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setRankOnesVerifiedOnly(true)}
-                          className={cn(
-                            'w-full min-w-0 min-h-[40px] flex items-center justify-center gap-1 px-2 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors text-center whitespace-nowrap',
-                            rankOnesVerifiedOnly
-                              ? 'bg-blue-600 text-white shadow-sm'
-                              : 'text-bunker-400 hover:text-bunker-300'
-                          )}
-                          aria-pressed={rankOnesVerifiedOnly}
-                        >
-                          <ShieldCheck className="w-3.5 h-3.5 shrink-0" aria-hidden />
-                          Verified rank 1&apos;s
-                        </button>
-                      </div>
-                    </div>
-                  )}
                   {isRankView && (
                   <>
                   <div className="flex flex-col gap-1.5">
@@ -1242,47 +1314,146 @@ export default function LeaderboardsPage() {
                 </div>
               )}
             </div>
+            )}
+            {leaderboardTab === 'best' && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 [&>*]:min-w-0">
+                <div className="col-span-2 sm:col-span-4 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setHallMode('rankOnes')}
+                    className={cn(
+                      'w-full min-h-[40px] flex items-center justify-center gap-1 px-3 py-2 rounded-lg border text-xs sm:text-sm font-medium transition-colors',
+                      hallMode === 'rankOnes'
+                        ? 'border-blue-500/60 bg-blue-950/80 text-blue-200'
+                        : 'border-bunker-600 bg-bunker-800/80 text-bunker-300 hover:bg-bunker-700/80'
+                    )}
+                    aria-pressed={hallMode === 'rankOnes'}
+                  >
+                    <Crown className="w-4 h-4 text-yellow-400" />
+                    {hallVerifiedOnly ? "Verified Rank 1's" : "Rank 1's"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setHallMode('xp')}
+                    className={cn(
+                      'w-full min-h-[40px] flex items-center justify-center gap-1 px-3 py-2 rounded-lg border text-xs sm:text-sm font-medium transition-colors',
+                      hallMode === 'xp'
+                        ? 'border-blue-500/60 bg-blue-950/80 text-blue-200'
+                        : 'border-bunker-600 bg-bunker-800/80 text-bunker-300 hover:bg-bunker-700/80'
+                    )}
+                    aria-pressed={hallMode === 'xp'}
+                  >
+                    <Star className="w-4 h-4 text-yellow-400" />
+                    {hallVerifiedOnly ? 'Verified XP' : 'XP'}
+                  </button>
+                </div>
+                <Select
+                  options={[{ value: '', label: 'All Games' }, ...filteredGamesForOptions.map((game) => ({ value: game.id, label: getGameDisplayShortName(game.shortName, game.name) }))]}
+                  value={hallGameId}
+                  onChange={(e) => {
+                    const nextGame = e.target.value;
+                    setHallGameId(nextGame);
+                    setHallMapId('');
+                  }}
+                  className="w-full"
+                />
+                <Select
+                  options={hallMapOptions}
+                  value={hallMapId}
+                  onChange={(e) => setHallMapId(e.target.value)}
+                  className="w-full col-span-2 sm:col-span-1"
+                />
+                <button
+                  type="button"
+                  onClick={() => setHallVerifiedOnly((v) => !v)}
+                  className={cn(
+                    'flex items-center justify-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors min-h-[40px]',
+                    hallVerifiedOnly
+                      ? 'border-blue-500/60 bg-blue-950/80 text-blue-200 hover:bg-blue-900/60'
+                      : 'border-bunker-600 bg-bunker-800/80 text-bunker-300 hover:bg-bunker-700/80'
+                  )}
+                  aria-pressed={hallVerifiedOnly}
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  {hallVerifiedOnly ? 'Verified' : 'All runs'}
+                </button>
+              </div>
+            )}
+            </>
+            )}
           </div>
         </div>
       </div>
 
       {/* Leaderboard Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {isSiteRankView && (
-          <div className="mb-6">
+        {(leaderboardTab === 'hall' || leaderboardTab === 'best') && (
+          <div className="mb-6 space-y-4">
+            {leaderboardTab === 'hall' && (
+            <Card variant="bordered">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
+                  Verified Level Milestones (70+)
+                </CardTitle>
+                <p className="text-xs sm:text-sm text-bunker-400 mt-1">
+                  Tracked exactly from this feature rollout forward.
+                </p>
+              </CardHeader>
+              <CardContent>
+                {hallMilestonesLoading ? (
+                  <div className="flex justify-center py-8">
+                    <PageLoader message="Loading milestone showcase…" inline />
+                  </div>
+                ) : hallMilestones.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {hallMilestones.map((m) => (
+                      <div key={m.level} className="rounded-lg border border-bunker-700 bg-bunker-900/50 p-3">
+                        <p className="text-xs text-bunker-400">Verified Level {m.level}</p>
+                        {m.claimed && m.user ? (
+                          <>
+                            <p className="text-sm font-semibold text-white truncate">
+                              {m.user.displayName || m.user.username}
+                            </p>
+                            <p className="text-xs text-bunker-400">
+                              {m.reachedAt ? new Date(m.reachedAt).toLocaleDateString() : 'Claimed'}
+                            </p>
+                          </>
+                        ) : (
+                          <p className="text-sm text-bunker-500">Unclaimed</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-bunker-400">No milestones tracked yet.</p>
+                )}
+              </CardContent>
+            </Card>
+            )}
+
+            {leaderboardTab === 'best' && (
             <Card variant="glow">
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
                   <div>
                     <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                      {isRankOnesView ? (
+                      {hallMode === 'rankOnes' ? (
                         <>
                           <Crown className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
-                          {rankOnesVerifiedOnly ? 'Verified rank 1\'s' : 'Rank 1\'s'}
+                          {hallVerifiedOnly ? "Verified Rank 1's" : "Rank 1's"}
                         </>
                       ) : (
                         <>
-                          <Medal className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
-                          {xpType === 'total' && 'Rank (by Total XP)'}
-                          {xpType === 'verified' && 'Rank (by Verified XP)'}
-                          {xpType === 'customZombies' && <>Rank (by <span className="font-extrabold text-element-300">CUSTOM</span> Zombies XP)</>}
-                          {xpType === 'verifiedCustomZombies' && <>Rank (by <span className="font-extrabold text-element-300">CUSTOM</span> Verified Zombies XP)</>}
+                          <Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
+                          {hallVerifiedOnly ? 'Verified XP (Scoped)' : 'XP (Scoped)'}
                         </>
                       )}
                     </CardTitle>
                     <p className="text-xs sm:text-sm text-bunker-400 mt-1">
-                      {isRankOnesView ? (
-                        rankOnesVerifiedOnly
-                          ? 'Matches the “Verified Rank 1’s” total on your profile.'
-                          : 'Matches the “Rank 1’s” total on your profile.'
-                      ) : (
-                        <>
-                          {xpType === 'total' && 'All members ranked by total XP'}
-                          {xpType === 'verified' && 'All members ranked by verified XP only'}
-                          {xpType === 'customZombies' && <>All members ranked by <span className="font-extrabold text-element-300">CUSTOM</span> Zombies XP</>}
-                          {xpType === 'verifiedCustomZombies' && <>All members ranked by <span className="font-extrabold text-element-300">CUSTOM</span> Verified Zombies XP only</>}
-                        </>
-                      )}
+                      {hallMode === 'rankOnes'
+                        ? 'Top players by #1 leaderboard spots, filtered by game/map scope.'
+                        : 'Top players by scoped achievement XP, filtered by game/map scope.'}
                     </p>
                   </div>
                   <span className="inline-flex items-center px-3 py-1.5 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-sm font-semibold shadow-[0_0_1px_rgba(0,0,0,1),0_0_3px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.8)] [text-shadow:0_0_1px_rgba(0,0,0,1),0_0_2px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">
@@ -1305,13 +1476,105 @@ export default function LeaderboardsPage() {
                         entry={entry}
                         index={index}
                         isCurrentUser={entry.user.id === profile?.id}
-                        valueKind={isRankOnesView ? 'rankOneCount' : 'xp'}
+                        valueKind={hallMode === 'rankOnes' ? 'rankOneCount' : 'xp'}
                         hidePlayerCount
-                        showVerifiedBadge={
-                          isRankOnesView
-                            ? rankOnesVerifiedOnly
-                            : xpType === 'verified' || xpType === 'verifiedCustomZombies'
-                        }
+                        showVerifiedBadge={hallVerifiedOnly}
+                        xpLabel="XP"
+                      />
+                    ))}
+                    {!isSearchActive && leaderboard.length < total && (
+                      <>
+                        <div ref={loadMoreSentinelRef} className="min-h-[40px] py-4" aria-hidden />
+                        <div className="flex justify-center pt-2 pb-2">
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => loadMore()}
+                            disabled={loadMoreLoading}
+                            className="border-bunker-600 text-bunker-200 hover:bg-white/5 hover:border-bunker-500"
+                          >
+                            {loadMoreLoading ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin mr-2 inline" aria-hidden />
+                                Loading…
+                              </>
+                            ) : (
+                              `Load more (${leaderboard.length} of ${total})`
+                            )}
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </>
+                ) : searchQuery.trim() ? (
+                  <div className="text-center py-8 sm:py-12">
+                    <Search className="w-10 h-10 text-bunker-600 mx-auto mb-4" />
+                    <p className="text-sm sm:text-base text-bunker-400">
+                      No users match &quot;{searchQuery.trim()}&quot;
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 sm:py-12">
+                    <Trophy className="w-10 h-10 sm:w-12 sm:h-12 text-bunker-600 mx-auto mb-4" />
+                    <p className="text-sm sm:text-base text-bunker-400">
+                      No entries for this scope yet.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            )}
+          </div>
+        )}
+
+        {leaderboardTab === 'current' && isSiteRankView && (
+          <div className="mb-6">
+            <Card variant="glow">
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+                  <div>
+                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                      <>
+                        <Medal className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
+                        {xpType === 'total' && 'Rank (by Total XP)'}
+                        {xpType === 'verified' && 'Rank (by Verified XP)'}
+                        {xpType === 'customZombies' && <>Rank (by <span className="font-extrabold text-element-300">CUSTOM</span> Zombies XP)</>}
+                        {xpType === 'verifiedCustomZombies' && <>Rank (by <span className="font-extrabold text-element-300">CUSTOM</span> Verified Zombies XP)</>}
+                      </>
+                    </CardTitle>
+                    <p className="text-xs sm:text-sm text-bunker-400 mt-1">
+                      <>
+                        {xpType === 'total' && 'All members ranked by total XP'}
+                        {xpType === 'verified' && 'All members ranked by verified XP only'}
+                        {xpType === 'customZombies' && <>All members ranked by <span className="font-extrabold text-element-300">CUSTOM</span> Zombies XP</>}
+                        {xpType === 'verifiedCustomZombies' && <>All members ranked by <span className="font-extrabold text-element-300">CUSTOM</span> Verified Zombies XP only</>}
+                      </>
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center px-3 py-1.5 rounded-full border border-blood-600/60 bg-blood-950/95 text-white text-sm font-semibold shadow-[0_0_1px_rgba(0,0,0,1),0_0_3px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,0.8)] [text-shadow:0_0_1px_rgba(0,0,0,1),0_0_2px_rgba(0,0,0,1),0_1px_3px_rgba(0,0,0,0.9)]">
+                    {searchQuery.trim()
+                      ? `Showing ${leaderboard.length} of ${total}`
+                      : `${total} entries`}
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2 min-w-0">
+                {isLoading ? (
+                  <div className="flex justify-center py-12">
+                    <PageLoader message="Loading leaderboard…" inline />
+                  </div>
+                ) : leaderboard.length > 0 ? (
+                  <>
+                    {leaderboard.map((entry, index) => (
+                      <LeaderboardEntry
+                        key={entry.user.id}
+                        entry={entry}
+                        index={index}
+                        isCurrentUser={entry.user.id === profile?.id}
+                        valueKind='xp'
+                        hidePlayerCount
+                        showVerifiedBadge={xpType === 'verified' || xpType === 'verifiedCustomZombies'}
                         xpLabel="XP"
                       />
                     ))}
@@ -1360,7 +1623,7 @@ export default function LeaderboardsPage() {
           </div>
         )}
 
-        {selectedMapData && !isSiteRankView && (
+        {leaderboardTab === 'current' && selectedMapData && !isSiteRankView && (
           <div className="mb-6">
             <Card variant="glow">
               <CardHeader>
@@ -1449,7 +1712,7 @@ export default function LeaderboardsPage() {
           </div>
         )}
 
-        {!selectedMap && !isSiteRankView && (
+        {leaderboardTab === 'current' && !selectedMap && !isSiteRankView && (
           <div className="text-center py-16 sm:py-20">
             <Logo size="xl" animated={false} className="mx-auto mb-4 opacity-50" />
             <p className="text-sm sm:text-lg text-bunker-400">

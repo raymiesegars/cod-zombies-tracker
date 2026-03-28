@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma';
 import { isAchievementSatisfiedByVerifiedRun } from '@/lib/achievements';
+import { claimVerifiedLevelMilestones } from '@/lib/verified-level-milestones';
 
 /**
  * When a run is verified, grant verified status ONLY to map-specific achievements
@@ -10,10 +11,11 @@ import { isAchievementSatisfiedByVerifiedRun } from '@/lib/achievements';
 export async function grantVerifiedAchievementsForMap(
   userId: string,
   mapId: string,
-  options?: { skipUserUpdate?: boolean }
+  options?: { skipUserUpdate?: boolean; recordMilestones?: boolean }
 ): Promise<{ verifiedTotalXp: number; verifiedCustomZombiesTotalXp: number; xpGained: number }> {
   const now = new Date();
   const skipUserUpdate = options?.skipUserUpdate ?? false;
+  const recordMilestones = options?.recordMilestones ?? false;
 
   const user = skipUserUpdate
     ? null
@@ -99,6 +101,10 @@ export async function grantVerifiedAchievementsForMap(
     where: { id: userId },
     data: { verifiedTotalXp, verifiedCustomZombiesTotalXp },
   });
+
+  if (recordMilestones) {
+    await claimVerifiedLevelMilestones(userId, previousVerifiedTotalXp, verifiedTotalXp);
+  }
 
   const xpGained = Math.max(
     0,

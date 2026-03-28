@@ -652,6 +652,7 @@ export default function UserProfilePage() {
   const [achievementFilterRestricted, setAchievementFilterRestricted] = useState(false);
   const [achievementMapLoading, setAchievementMapLoading] = useState(false);
   const [profileRefreshTrigger, setProfileRefreshTrigger] = useState(0);
+  const [isWorldRecordsRefreshing, setIsWorldRecordsRefreshing] = useState(false);
 
   const [runsModalOpen, setRunsModalOpen] = useState<'all' | 'verified' | null>(null);
   const [easterEggsModalOpen, setEasterEggsModalOpen] = useState(false);
@@ -974,6 +975,7 @@ export default function UserProfilePage() {
           });
 
           setTimeout(() => {
+            setIsWorldRecordsRefreshing(true);
             fetch(`/api/users/${username}/world-records-summary`, { credentials: 'same-origin', cache: 'no-store' })
               .then((r) => (r.ok ? r.json() : null))
               .then((wr) => {
@@ -985,7 +987,8 @@ export default function UserProfilePage() {
                   }));
                 }
               })
-              .catch(() => {});
+              .catch(() => {})
+              .finally(() => setIsWorldRecordsRefreshing(false));
           }, 100);
         }
 
@@ -1137,9 +1140,25 @@ export default function UserProfilePage() {
         return { label: 'Verified Achievements', value: `${verified}/${total}`, suffix: total > 0 ? `(${pct}%)` : null, icon: ShieldCheck, iconClass: verifiedIconClass, tooltip: tooltips['verified-achievements'] };
       }
       case 'world-records':
-        return { label: "Rank 1's", value: String(statsTotals.worldRecords ?? 0), suffix: null, icon: Crown, iconClass: 'text-yellow-400', tooltip: tooltips['world-records'] };
+        return {
+          label: "Rank 1's",
+          value: String(statsTotals.worldRecords ?? 0),
+          suffix: null,
+          icon: Crown,
+          iconClass: 'text-yellow-400',
+          tooltip: tooltips['world-records'],
+          isRefreshing: isWorldRecordsRefreshing,
+        };
       case 'verified-world-records':
-        return { label: "Verified Rank 1's", value: String(statsTotals.verifiedWorldRecords ?? 0), suffix: null, icon: ShieldCheck, iconClass: verifiedIconClass, tooltip: tooltips['verified-world-records'] };
+        return {
+          label: "Verified Rank 1's",
+          value: String(statsTotals.verifiedWorldRecords ?? 0),
+          suffix: null,
+          icon: ShieldCheck,
+          iconClass: verifiedIconClass,
+          tooltip: tooltips['verified-world-records'],
+          isRefreshing: isWorldRecordsRefreshing,
+        };
       case 'total-runs':
         return { label: 'Total Runs', value: String(statsTotals.totalRuns ?? 0), suffix: null, icon: ListOrdered, iconClass: 'text-blood-400', tooltip: tooltips['total-runs'] };
       case 'verified-runs':
@@ -1377,7 +1396,7 @@ export default function UserProfilePage() {
           )}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             {selectedBlockIds.map((blockId) => {
-              const { label, value, suffix, icon: Icon, iconClass, tooltip } = getBlockDisplay(blockId);
+              const { label, value, suffix, icon: Icon, iconClass, tooltip, isRefreshing } = getBlockDisplay(blockId) as ReturnType<typeof getBlockDisplay> & { isRefreshing?: boolean };
               const isRunsBlock = blockId === 'total-runs' || blockId === 'verified-runs';
               const isEasterEggsBlock = blockId === 'easter-eggs';
               const isMapsBlock = blockId === 'maps-played';
@@ -1421,7 +1440,10 @@ export default function UserProfilePage() {
                         {value}
                         {suffix != null && <span className={`${iconClass}/80`}> {suffix}</span>}
                       </p>
-                      <p className="text-xs text-bunker-400">{label}</p>
+                      <p className="text-xs text-bunker-400 inline-flex items-center justify-center gap-1.5">
+                        {label}
+                        {isRefreshing && <Loader2 className="w-3 h-3 animate-spin text-bunker-500" aria-hidden />}
+                      </p>
                     </Card>
                   </Wrapper>
                 </div>
