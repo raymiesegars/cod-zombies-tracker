@@ -24,15 +24,18 @@ export async function computeUserStats(user: UserWithLogs, hideCustom = false) {
 
   for (const log of user.challengeLogs) {
     mapIds.add(log.mapId);
+    const isRush = log.challenge?.type === 'RUSH';
     const current = highestByMap.get(log.mapId) ?? 0;
-    const round = log.roundReached;
-    if (round > current) {
-      highestByMap.set(log.mapId, round);
-      if (isBo4Game(log.map?.game?.shortName)) {
-        highestDifficultyByMap.set(log.mapId, (log as { difficulty?: string | null }).difficulty ?? 'NORMAL');
+    if (!isRush) {
+      const round = log.roundReached;
+      if (round > current) {
+        highestByMap.set(log.mapId, round);
+        if (isBo4Game(log.map?.game?.shortName)) {
+          highestDifficultyByMap.set(log.mapId, (log as { difficulty?: string | null }).difficulty ?? 'NORMAL');
+        }
+      } else {
+        highestByMap.set(log.mapId, Math.max(current, round));
       }
-    } else {
-      highestByMap.set(log.mapId, Math.max(current, round));
     }
     const count = challengesCompletedByMap.get(log.mapId) ?? 0;
     challengesCompletedByMap.set(log.mapId, count + 1);
@@ -87,7 +90,9 @@ export async function computeUserStats(user: UserWithLogs, hideCustom = false) {
   const speedrunCompletions = speedrunChallengeCount + speedrunEeCount;
 
   const allRounds: number[] = [];
-  for (const log of user.challengeLogs) allRounds.push(log.roundReached);
+  for (const log of user.challengeLogs) {
+    if (log.challenge?.type !== 'RUSH') allRounds.push(log.roundReached);
+  }
   for (const log of user.easterEggLogs) if (log.roundCompleted != null) allRounds.push(log.roundCompleted);
   const avgRoundLoggedRuns =
     allRounds.length > 0 ? allRounds.reduce((a, b) => a + b, 0) / allRounds.length : 0;

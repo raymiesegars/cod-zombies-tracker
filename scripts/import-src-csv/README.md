@@ -27,6 +27,7 @@ pnpm db:import-src-csv -- --csv=src-csvs/FallnightYT.csv --source-player=Fallnig
 - **Game**: `config.ts` maps SRC game names → CZT `Game.shortName` (AW, BO1, BO2, BO3, BO6, IW, VANGUARD, WAW, WW2).
 - **Map**: `(game, category)` → CZT map slug (e.g. "Ascension" + BO3 → `bo3-ascension`). Add entries in `SRC_CATEGORY_TO_MAP_SLUG` for new games/categories.
 - **Challenge type**: Resolved **only** from `sub_category` via the id key (no time inference): SRC stores the actual round (e.g. "Round 5", "Round 15", "Round 30") in a "Category" or "Round Number" variable. If that yields a type that exists on the map, we use it; otherwise the row is skipped. `--remove-imported` still uses time inference only to find logs created by a previous buggy import.
+- **Pack-a-Punch speedruns**: SRC labels like `Pack-A-Punch`, `Pack a Punch`, `Pack-a-Punch No Bank`, and AW `Weapon Upgrade` map to `PACK_A_PUNCH_SPEEDRUN`. Missing map challenges are auto-created during import.
 - **Modifiers**: Place `src_codzombies_id_key.json` (from your SRC scraper/export) at `src-csvs/src_codzombies_id_key.json`. The importer loads it and resolves `sub_category` variable=value IDs using the `variables` section: variable names (e.g. "Gobblegum Loadout", "Rampage Inducer") and value labels (e.g. "Megas", "Classics", "No Gums") are matched to set gums, rampage, consumables, fate cards, Directors Cut, etc. If the file is missing, runs use default modifiers.
 
 ## After import

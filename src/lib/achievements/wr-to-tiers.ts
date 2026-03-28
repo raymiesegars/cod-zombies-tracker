@@ -94,6 +94,7 @@ const SPEEDRUN_CATEGORY: Record<string, string> = {
   BUYABLE_ENDING_SPEEDRUN: 'buyable-ending-speedrun',
   EXFIL_SPEEDRUN: 'exfil-speedrun',
   BUILD_EE_SPEEDRUN: 'build-speedrun',
+  PACK_A_PUNCH_SPEEDRUN: 'pack-a-punch-speedrun',
 };
 
 /** Board variant substring for "megas/any" (with gums, support, all cards). */
@@ -161,6 +162,70 @@ const GAME_TO_NO_KEY: Record<string, string> = {
 
 function gameToNo(gameShortName: string): string {
   return GAME_TO_NO_KEY[gameShortName.toUpperCase()] ?? gameShortName.toLowerCase();
+}
+
+function getCommunityPapMapCandidates(gameShortName: string, cztMapSlug: string): string[] {
+  const g = gameShortName.toUpperCase();
+  const map = cztMapSlugToNo(gameShortName, cztMapSlug);
+  const out: string[] = [];
+  const push = (s: string) => {
+    if (!s || out.includes(s)) return;
+    out.push(s);
+  };
+  push(map);
+  if (g === 'WAW') {
+    push(`waw-${map}`);
+    return out;
+  }
+  if (g === 'BO3') {
+    const bare = map.replace(/^bo3-/, '');
+    push(`com-${bare}`);
+    push(bare);
+    return out;
+  }
+  if (g === 'WW2') {
+    push(`com-${map}`);
+    return out;
+  }
+  if (g === 'IW') {
+    const aliases: Record<string, string> = {
+      'zombies-in-spaceland': 'spaceland',
+      'the-beast-from-beyond': 'beast-from-beyond',
+    };
+    const aliased = aliases[map] ?? map;
+    push(aliased);
+    push(`com-${aliased}`);
+    return out;
+  }
+  if (g === 'AW') {
+    push(`aw-${map}`);
+    return out;
+  }
+  return out;
+}
+
+function getCommunityPapSoloWRTimeSeconds(
+  gameShortName: string,
+  cztMapSlug: string,
+  variant?: string
+): number | null {
+  const data = loadNumberOnes();
+  if (!data) return null;
+  const category = data.community?.['com-pap-speedruns'];
+  if (!category || typeof category !== 'object') return null;
+  for (const key of getCommunityPapMapCandidates(gameShortName, cztMapSlug)) {
+    const records = category[key];
+    if (!Array.isArray(records)) continue;
+    const solo = records.filter((r: { player_count?: number; board_id?: string }) => r.player_count === 1);
+    const pick = variant
+      ? solo.find((r: { board_id?: string }) => r.board_id?.includes(variant))
+      : solo[0];
+    const rec = pick ?? solo[0];
+    if (!rec) continue;
+    const parsed = parseAchieved(rec.achieved);
+    if (parsed && 'timeSeconds' in parsed) return parsed.timeSeconds;
+  }
+  return null;
 }
 
 /** Get solo WR round from number_ones for (game, category, map, optional variant). */
@@ -301,6 +366,10 @@ export function getWRTimeForSeed(
     : options?.variant === 'megas'
       ? (useSpeedrun ? getMegasVariantForSpeedrun(gameShortName) : getMegasVariant(gameShortName))
       : undefined;
+  if (noCategoryKey === 'PACK_A_PUNCH_SPEEDRUN') {
+    const fromCommunity = getCommunityPapSoloWRTimeSeconds(gameShortName, cztMapSlug, variant || undefined);
+    if (fromCommunity != null && fromCommunity > 0) return fromCommunity;
+  }
   const fromNo = getSoloWRTimeSeconds(gameShortName, noCategory, cztMapSlug, variant || undefined);
   if (fromNo != null && fromNo > 0) return fromNo;
   const fallback =

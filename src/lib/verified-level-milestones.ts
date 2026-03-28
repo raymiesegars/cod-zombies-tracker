@@ -35,7 +35,8 @@ export async function claimVerifiedLevelMilestones(
       });
     } catch (error) {
       const code = typeof error === 'object' && error && 'code' in error ? (error as { code?: string }).code : undefined;
-      if (code === 'P2002') continue;
+      // P2002: unique conflict (already claimed), P2021/P2022: table/column missing before migration deploy.
+      if (code === 'P2002' || code === 'P2021' || code === 'P2022') continue;
       throw error;
     }
   }

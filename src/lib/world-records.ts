@@ -254,8 +254,8 @@ export async function computeWorldRecords(userId: string): Promise<WorldRecordsR
   const now = Date.now();
   const cached = wrCache.get(userId);
   if (cached && cached.expiresAt > now) return cached.result;
-  const r = await computeWorldRecordsDetailed(userId);
-  const result: WorldRecordsResult = { worldRecords: r.worldRecords, verifiedWorldRecords: r.verifiedWorldRecords };
+  const rankCounts = await computeRankOneCountsByUserId();
+  const result: WorldRecordsResult = rankCounts.get(userId) ?? { worldRecords: 0, verifiedWorldRecords: 0 };
   wrCache.set(userId, { result, expiresAt: now + WR_CACHE_TTL_MS });
   return result;
 }

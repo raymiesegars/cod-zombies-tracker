@@ -13,7 +13,10 @@ export const SRC_GAME_TO_SHORT_NAME: Record<string, string> = {
   'black ops ii zombies': 'BO2',
   'black ops iii zombies': 'BO3',
   'black ops 3 category extension': 'BO3',
+  'black ops iiii zombies': 'BO4',
+  'black ops 4 zombies': 'BO4',
   'black ops 6 zombies': 'BO6',
+  'black ops 7 zombies': 'BO7',
   'black ops cold war zombies': 'BOCW',
   'infinite warfare zombies': 'IW',
   'vanguard zombies': 'VANGUARD',
@@ -41,11 +44,16 @@ export function getGameShortNameFromSrc(game: string): string | null {
 export const SRC_CATEGORY_TO_MAP_SLUG: Record<string, Record<string, string>> = {
   AW: {
     outbreak: 'aw-outbreak',
+    infection: 'aw-infection',
+    carrier: 'aw-carrier',
+    descent: 'aw-descent',
   },
   BO1: {
+    'nacht der untoten': 'nacht-der-untoten',
     verrückt: 'bo1-verruckt',
     verruckt: 'bo1-verruckt',
     five: 'five',
+    ascension: 'ascension',
     'shi no numa': 'bo1-shi-no-numa',
     'der riese': 'bo1-der-riese',
     'kino der toten': 'kino-der-toten',
@@ -78,9 +86,30 @@ export const SRC_CATEGORY_TO_MAP_SLUG: Record<string, Record<string, string>> = 
     revelations: 'revelations',
     'shadows of evil': 'shadows-of-evil',
   },
+  BO4: {
+    ix: 'ix',
+    'blood of the dead': 'blood-of-the-dead',
+    'voyage of despair': 'voyage-of-despair',
+    classified: 'classified',
+    'dead of the night': 'dead-of-the-night',
+    'ancient evil': 'ancient-evil',
+    'alpha omega': 'alpha-omega',
+    'tag der toten': 'tag-der-toten',
+  },
   BO6: {
     'the tomb': 'the-tomb',
     'liberty falls': 'liberty-falls',
+    terminus: 'terminus',
+    'citadelle des morts': 'citadelle-des-morts',
+    'shattered veil': 'shattered-veil',
+    'the reckoning': 'the-reckoning',
+  },
+  BO7: {
+    'vandorn farm': 'vandorn-farm',
+    'ashes of the damned': 'ashes-of-the-damned',
+    'astra malorum': 'astra-malorum',
+    'exit 115': 'exit-115',
+    'zarya cosmodrome': 'zarya-cosmodrome',
   },
   BOCW: {
     'die maschine': 'die-maschine',
@@ -92,9 +121,16 @@ export const SRC_CATEGORY_TO_MAP_SLUG: Record<string, Record<string, string>> = 
   IW: {
     'zombies in spaceland': 'zombies-in-spaceland',
     spaceland: 'zombies-in-spaceland',
+    'rave in the redwoods': 'rave-in-the-redwoods',
+    'shaolin shuffle': 'shaolin-shuffle',
+    'attack of the radioactive thing': 'attack-of-the-radioactive-thing',
+    'beast from beyond': 'the-beast-from-beyond',
   },
   VANGUARD: {
+    'der anfang': 'der-anfang',
+    'terra maledicta': 'terra-maledicta',
     'shi no numa': 'shi-no-numa-reborn',
+    'the archon': 'the-archon',
   },
   WAW: {
     'shi no numa': 'shi-no-numa',
@@ -102,9 +138,13 @@ export const SRC_CATEGORY_TO_MAP_SLUG: Record<string, Record<string, string>> = 
     verruckt: 'verruckt',
     'nacht der untoten': 'nacht-der-untoten',
     nacht: 'nacht-der-untoten',
+    'der riese': 'der-riese',
   },
   WW2: {
     'the final reich': 'the-final-reich',
+    'groesten haus': 'groesten-haus',
+    'the darkest shore': 'the-darkest-shore',
+    'the shadowed throne': 'the-shadowed-throne',
     'the frozen dawn': 'the-frozen-dawn',
   },
 };
@@ -168,6 +208,7 @@ export const DEFAULTS = {
   bo7SupportMode: 'WITH_SUPPORT' as const,
   bo7GobbleGumMode: 'WITH_GOBBLEGUMS' as const,
   vanguardVoidUsed: true as boolean,
+  bo2BankUsed: true as boolean,
   useFortuneCards: true as boolean,
   useDirectorsCut: false as boolean,
   ww2ConsumablesUsed: true as boolean,
@@ -214,6 +255,7 @@ export type ResolvedModifiers = {
   bo7SupportMode: string | null;
   bo7GobbleGumMode: string | null;
   vanguardVoidUsed: boolean;
+  bo2BankUsed: boolean;
   useFortuneCards: boolean | undefined;
   useDirectorsCut: boolean | undefined;
   ww2ConsumablesUsed: boolean | undefined;
@@ -234,6 +276,7 @@ export function resolveModifiersFromSubCategory(
     bo7SupportMode: DEFAULTS.bo7SupportMode,
     bo7GobbleGumMode: DEFAULTS.bo7GobbleGumMode,
     vanguardVoidUsed: DEFAULTS.vanguardVoidUsed,
+    bo2BankUsed: DEFAULTS.bo2BankUsed,
     useFortuneCards: DEFAULTS.useFortuneCards,
     useDirectorsCut: DEFAULTS.useDirectorsCut,
     ww2ConsumablesUsed: DEFAULTS.ww2ConsumablesUsed,

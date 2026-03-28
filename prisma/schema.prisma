@@ -498,6 +498,7 @@ enum ChallengeType {
   EXFIL_R10_SPEEDRUN   // Vanguard: Exfil Round 10 speedrun (all 4 maps)
   EXFIL_R20_SPEEDRUN   // Vanguard: Exfil Round 20 speedrun (Shi No Numa Reborn, The Archon)
   BUILD_EE_SPEEDRUN    // BOCW: Build% EE speedrun (Firebase Z, Forsaken)
+  PACK_A_PUNCH_SPEEDRUN // Fastest time to unlock Pack-a-Punch / weapon upgrade
   SUPER_30_SPEEDRUN    // WW2: Multi-map R30 (Final Reich→Groesten Haus→Darkest Shore→Shadowed Throne→Frozen Dawn)
   EASTER_EGG_SPEEDRUN
   BUYABLE_ENDING_SPEEDRUN   // BO3 Custom: Buyable ending speedrun (optional per map)

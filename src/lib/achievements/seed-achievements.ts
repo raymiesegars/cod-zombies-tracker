@@ -1615,6 +1615,7 @@ const SPEEDRUN_TYPE_LABELS: Record<string, string> = {
   EXFIL_R10_SPEEDRUN: 'Exfil Round 10',
   EXFIL_R20_SPEEDRUN: 'Exfil Round 20',
   BUILD_EE_SPEEDRUN: 'Build% EE',
+  PACK_A_PUNCH_SPEEDRUN: 'Pack-a-Punch',
   SUPER_30_SPEEDRUN: 'Super 30 Speedrun',
   INSTAKILL_ROUND_SPEEDRUN: 'Instakill Round',
   EASTER_EGG_SPEEDRUN: 'Easter Egg',
@@ -1740,10 +1741,22 @@ export function getSpeedrunAchievementDefinitions(
     : gameShortName === 'VANGUARD' ? VANGUARD_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : gameShortName === 'AW' ? AW_SPEEDRUN_TIERS_BY_MAP[mapSlug]
     : undefined;
-  if (!tiersByType) return [];
-  const r5r15Tiers = getR5R15TiersForMap(gameShortName, mapSlug);
-  const mergedTiers: SpeedrunTiersByType = { ...tiersByType, ...r5r15Tiers };
   const rows: AchievementSeedRow[] = [];
+  if (!tiersByType) {
+    // Continue for dynamic speedrun categories that are sourced only from number_ones.
+  }
+  const r5r15Tiers = getR5R15TiersForMap(gameShortName, mapSlug);
+  const mergedTiers: SpeedrunTiersByType = {
+    ...(tiersByType ?? {}),
+    ...r5r15Tiers,
+    // Keep these low-XP by design (below typical Round 30 speedrun rewards).
+    PACK_A_PUNCH_SPEEDRUN: [
+      { maxTimeSeconds: 0, xpReward: 50 },
+      { maxTimeSeconds: 0, xpReward: 90 },
+      { maxTimeSeconds: 0, xpReward: 140 },
+      { maxTimeSeconds: 0, xpReward: 220 },
+    ],
+  };
   const vgVoidMaps = ['der-anfang', 'terra-maledicta'];
   const isVgVoidMap = gameShortName === 'VANGUARD' && vgVoidMaps.includes(mapSlug);
   const restrictedModifier: Record<string, unknown> =
@@ -1820,6 +1833,9 @@ export function getSpeedrunAchievementDefinitions(
     }
 
     const wrTimeMegas = getWRTimeForSeed(gameShortName, categoryKey, mapSlug, configWrSec ?? undefined, { variant: 'megas', useSpeedrunVariant: true });
+    if (challengeType === 'PACK_A_PUNCH_SPEEDRUN' && (wrTimeMegas == null || wrTimeMegas <= 0)) {
+      continue;
+    }
     const wrTimeRestricted = hasRestricted
       ? getWRTimeForSeed(gameShortName, categoryKey, mapSlug, configWrSec ?? undefined, {
           variant: 'restricted',

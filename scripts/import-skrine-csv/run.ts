@@ -555,7 +555,13 @@ async function main() {
 
     const { round, completionTimeSeconds } = parseAchieved(row.achieved);
     const speedrunRound = getRoundForSpeedrunChallengeType(mapping.challengeType as string);
-    const roundReached = round ?? (speedrunRound ?? 0);
+    const isRushChallenge = mapping.challengeType === 'RUSH';
+    const rushScoreParsed = isRushChallenge
+      ? parseInt(String(row.achieved ?? '').replace(/\D/g, ''), 10)
+      : NaN;
+    const rushScore = Number.isNaN(rushScoreParsed) || rushScoreParsed <= 0 ? null : rushScoreParsed;
+    const roundReached = isRushChallenge ? 1 : (round ?? (speedrunRound ?? 0));
+    const effectiveCompletionTimeSeconds = isRushChallenge ? null : completionTimeSeconds;
     const proofUrls = parseProofUrls(row);
     const completedAt = parseAddedDate(row.added);
     const playerCount = parsePlayerCount(row.player_count);
@@ -593,7 +599,7 @@ async function main() {
         mapRecord.id,
         challenge.id,
         roundReached,
-        completionTimeSeconds,
+        effectiveCompletionTimeSeconds,
         proofUrls
       );
       if (existing) {
@@ -672,7 +678,7 @@ async function main() {
         roundReached,
         playerCount,
         completedAt,
-        completionTimeSeconds,
+        completionTimeSeconds: effectiveCompletionTimeSeconds,
         proofUrls,
         teammateUserIds,
         teammateNonUserNames,
@@ -692,6 +698,7 @@ async function main() {
         bo6SupportMode,
         bo7SupportMode,
         bo7GobbleGumMode,
+        ...(isRushChallenge && rushScore != null ? { scoreReached: rushScore } : {}),
       };
 
       const challengeLog = await prisma.challengeLog.create({
@@ -706,7 +713,7 @@ async function main() {
             user.id,
             mapRecord.id,
             mainEe.id,
-            completionTimeSeconds,
+            effectiveCompletionTimeSeconds,
             proofUrls
           ));
           if (!eeExists) {
@@ -718,7 +725,7 @@ async function main() {
                 roundCompleted: roundReached > 0 ? roundReached : null,
                 playerCount,
                 completedAt,
-                completionTimeSeconds,
+                completionTimeSeconds: effectiveCompletionTimeSeconds,
                 proofUrls,
                 teammateUserIds,
                 teammateNonUserNames,

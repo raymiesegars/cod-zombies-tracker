@@ -45,6 +45,7 @@ import { loadSrcIdKey, resolveModifiersWithIdKey, resolveSpeedrunTypeFromSubCate
 import { getRoundForSpeedrunChallengeType } from '../import-skrine-csv/speedrun-round-by-type';
 import { normalizeProofUrls } from '../../src/lib/utils';
 import { resolveImportTargetUser } from '../external-users/import-user-resolution';
+import { getSpeedrunAchievementDefinitions } from '../../src/lib/achievements/seed-achievements';
 
 const prisma = new PrismaClient({
   datasources: { db: { url: process.env.DIRECT_URL || process.env.DATABASE_URL } },
@@ -212,33 +213,30 @@ async function resolveMap(gameShortName: string, mapSlug: string): Promise<{ id:
 }
 
 async function getMapSpeedrunChallengeTypes(mapId: string): Promise<string[]> {
+  const SPEEDRUN_TYPES = new Set([
+    'ROUND_5_SPEEDRUN',
+    'ROUND_10_SPEEDRUN',
+    'ROUND_15_SPEEDRUN',
+    'ROUND_20_SPEEDRUN',
+    'ROUND_30_SPEEDRUN',
+    'ROUND_50_SPEEDRUN',
+    'ROUND_70_SPEEDRUN',
+    'ROUND_100_SPEEDRUN',
+    'ROUND_200_SPEEDRUN',
+    'ROUND_255_SPEEDRUN',
+    'SUPER_30_SPEEDRUN',
+    'EXFIL_SPEEDRUN',
+    'EXFIL_R5_SPEEDRUN',
+    'EXFIL_R10_SPEEDRUN',
+    'EXFIL_R20_SPEEDRUN',
+    'EXFIL_R21_SPEEDRUN',
+    'PACK_A_PUNCH_SPEEDRUN',
+  ]);
   const challenges = await prisma.challenge.findMany({
-    where: {
-      mapId,
-      type: {
-        in: [
-          'ROUND_5_SPEEDRUN',
-          'ROUND_10_SPEEDRUN',
-          'ROUND_15_SPEEDRUN',
-          'ROUND_20_SPEEDRUN',
-          'ROUND_30_SPEEDRUN',
-          'ROUND_50_SPEEDRUN',
-          'ROUND_70_SPEEDRUN',
-          'ROUND_100_SPEEDRUN',
-          'ROUND_200_SPEEDRUN',
-          'ROUND_255_SPEEDRUN',
-          'SUPER_30_SPEEDRUN',
-          'EXFIL_SPEEDRUN',
-          'EXFIL_R5_SPEEDRUN',
-          'EXFIL_R10_SPEEDRUN',
-          'EXFIL_R20_SPEEDRUN',
-          'EXFIL_R21_SPEEDRUN',
-        ],
-      },
-    },
+    where: { mapId },
     select: { type: true },
   });
-  return challenges.map((c) => c.type);
+  return challenges.map((c) => c.type).filter((t) => SPEEDRUN_TYPES.has(t));
 }
 
 async function resolveChallenge(mapId: string, challengeType: string): Promise<{ id: string } | null> {
@@ -247,6 +245,74 @@ async function resolveChallenge(mapId: string, challengeType: string): Promise<{
     select: { id: true },
   });
   return c;
+}
+
+async function ensureChallenge(mapId: string, challengeType: string): Promise<{ id: string } | null> {
+  const existing = await resolveChallenge(mapId, challengeType);
+  if (existing) return existing;
+  if (challengeType !== 'PACK_A_PUNCH_SPEEDRUN') return null;
+  try {
+    const created = await prisma.challenge.create({
+      data: {
+        mapId,
+        type: challengeType as never,
+        name: 'Pack-a-Punch Speedrun',
+        slug: 'pack-a-punch-speedrun',
+        description: 'Reach Pack-a-Punch / weapon upgrade as fast as possible',
+        xpReward: 0,
+        isActive: true,
+      },
+      select: { id: true },
+    });
+    return created;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.includes('PACK_A_PUNCH_SPEEDRUN') || message.includes('enum \"ChallengeType\"')) {
+      throw new Error(
+        'PACK_A_PUNCH_SPEEDRUN enum is not in the database yet. Run `pnpm db:migrate:deploy` before importing this SRC category.'
+      );
+    }
+    throw error;
+  }
+}
+
+const ensuredPackAchievements = new Set<string>();
+
+async function ensurePackSpeedrunAchievementsForMap(
+  mapId: string,
+  mapSlug: string,
+  gameShortName: string,
+  challengeId: string,
+  dryRun: boolean
+): Promise<void> {
+  const key = `${mapId}:${challengeId}`;
+  if (ensuredPackAchievements.has(key)) return;
+  ensuredPackAchievements.add(key);
+  if (dryRun) return;
+
+  const defs = getSpeedrunAchievementDefinitions(mapSlug, gameShortName).filter(
+    (d) => d.criteria?.challengeType === 'PACK_A_PUNCH_SPEEDRUN'
+  );
+  for (const def of defs) {
+    const existing = await prisma.achievement.findFirst({
+      where: { mapId, slug: def.slug },
+      select: { id: true },
+    });
+    if (existing) continue;
+    await prisma.achievement.create({
+      data: {
+        name: def.name,
+        slug: def.slug,
+        type: def.type,
+        criteria: def.criteria as object,
+        xpReward: def.xpReward,
+        rarity: def.rarity as never,
+        mapId,
+        challengeId,
+        isActive: true,
+      } as never,
+    });
+  }
 }
 
 async function findExistingChallengeLog(
@@ -474,7 +540,7 @@ async function main() {
     }
     const usedSrcRound = !removeImported;
 
-    const challenge = await resolveChallenge(mapRecord.id, challengeType);
+    const challenge = await ensureChallenge(mapRecord.id, challengeType);
     if (!challenge) {
       skippedReasons.push({
         row: row._rowIndex,
@@ -484,6 +550,15 @@ async function main() {
       });
       skipped++;
       continue;
+    }
+    if (challengeType === 'PACK_A_PUNCH_SPEEDRUN') {
+      await ensurePackSpeedrunAchievementsForMap(
+        mapRecord.id,
+        mapSlug,
+        mapRecord.gameShortName,
+        challenge.id,
+        dryRun
+      );
     }
 
     const roundReached = getRoundForSpeedrunChallengeType(challengeType) ?? 0;
@@ -567,6 +642,7 @@ async function main() {
         bo3AatUsed: undefined as boolean | undefined,
         ww2ConsumablesUsed: resolvedMods.ww2ConsumablesUsed ?? true,
         vanguardVoidUsed: resolvedMods.vanguardVoidUsed,
+        bo2BankUsed: resolvedMods.bo2BankUsed,
         useFortuneCards: resolvedMods.useFortuneCards ?? true,
         useDirectorsCut: resolvedMods.useDirectorsCut ?? false,
         bo6GobbleGumMode: resolvedMods.bo6GobbleGumMode ?? DEFAULTS.bo6GobbleGumMode,

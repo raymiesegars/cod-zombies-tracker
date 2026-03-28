@@ -27,7 +27,7 @@ async function getMapStats(mapId: string) {
           select: { userId: true },
         }),
       prisma.challengeLog.findFirst({
-        where: { mapId },
+        where: { mapId, challenge: { type: { not: 'RUSH' } } },
         orderBy: { roundReached: 'desc' },
         select: { roundReached: true },
       }),
