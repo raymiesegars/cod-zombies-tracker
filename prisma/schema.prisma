@@ -123,6 +123,7 @@ model User {
   mergeAuditsAsTarget     UserMergeAudit[] @relation("MergeTargetUser")
   mergeAuditsPerformed    UserMergeAudit[] @relation("MergePerformedByUser")
   verifiedLevelMilestones VerifiedLevelMilestoneClaim[]
+  rankOneCounts           UserRankOneCount[]
 
   @@index([username])
   @@index([supabaseId])
@@ -178,6 +179,25 @@ model VerifiedLevelMilestoneClaim {
 
   @@index([userId])
   @@index([reachedAt(sort: Desc)])
+}
+
+model UserRankOneCount {
+  id                   String   @id @default(cuid())
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scopeKey             String   // global | game:<gameId> | map:<mapId>
+  gameId               String?
+  mapId                String?
+  worldRecords         Int      @default(0)
+  verifiedWorldRecords Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@unique([userId, scopeKey])
+  @@index([scopeKey, worldRecords(sort: Desc)])
+  @@index([scopeKey, verifiedWorldRecords(sort: Desc)])
+  @@index([scopeKey, updatedAt])
+  @@index([userId])
 }
 
 // ============================================================================

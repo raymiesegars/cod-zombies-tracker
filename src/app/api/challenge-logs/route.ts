@@ -16,6 +16,7 @@ import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from 
 import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap } from '@/lib/first-room-variants';
 import { hasNoJugSupport } from '@/lib/no-jug-support';
 import { computeMysteryBoxXp, type MysteryBoxFilterSettings } from '@/lib/mystery-box';
+import { refreshStoredRankOneCountsForMap } from '@/lib/world-records';
 import type { Bo4Difficulty } from '@prisma/client';
 
 // Log a new run. We run the achievement check when it’s a new best for that user+challenge+map+playerCount.
@@ -477,6 +478,7 @@ export async function POST(request: NextRequest) {
     if (isImprovement) {
       newlyUnlocked = await processMapAchievements(user.id, mapId);
     }
+    await refreshStoredRankOneCountsForMap(mapId);
 
     const xpGained = newlyUnlocked.reduce((sum, a) => sum + a.xpReward, 0);
     const isBo3Custom = mapWithGame?.game?.shortName === 'BO3_CUSTOM';

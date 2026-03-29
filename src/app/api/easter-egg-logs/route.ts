@@ -10,6 +10,7 @@ import { isBo6Game } from '@/lib/bo6';
 import { isBo7Game } from '@/lib/bo7';
 import { isWw2Game, WW2_CONSUMABLES_DEFAULT } from '@/lib/ww2';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
+import { refreshStoredRankOneCountsForMap } from '@/lib/world-records';
 import type { Bo4Difficulty } from '@prisma/client';
 
 // Log an EE completion (new run each time). Main-quest XP once per user per EE.
@@ -137,6 +138,7 @@ export async function POST(request: NextRequest) {
 
     // Main quest = one-time XP; we track so we don’t double-award
     const newlyUnlocked = await processMapAchievements(user.id, mapId);
+    await refreshStoredRankOneCountsForMap(mapId);
     const xpGained = newlyUnlocked.reduce((sum, a) => sum + a.xpReward, 0);
     const isBo3Custom = map.game?.shortName === 'BO3_CUSTOM';
     const userAfterXp = xpGained > 0

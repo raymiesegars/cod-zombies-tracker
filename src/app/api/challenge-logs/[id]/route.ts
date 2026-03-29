@@ -15,6 +15,7 @@ import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES } from '@/lib/bo6';
 import { isBo7Game, BO7_GOBBLEGUM_MODES, BO7_SUPPORT_MODES, BO7_RELICS } from '@/lib/bo7';
 import { isWw2Game } from '@/lib/ww2';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
+import { refreshStoredRankOneCountsForMap } from '@/lib/world-records';
 import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap } from '@/lib/first-room-variants';
 import type { Bo4Difficulty } from '@prisma/client';
 
@@ -317,6 +318,36 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         map: { include: { game: true } },
       },
     });
+    const rankOneAffectingFields = [
+      'roundReached',
+      'killsReached',
+      'scoreReached',
+      'playerCount',
+      'completionTimeSeconds',
+      'difficulty',
+      'useFortuneCards',
+      'useDirectorsCut',
+      'bo3GobbleGumMode',
+      'bo3AatUsed',
+      'bo4ElixirMode',
+      'bocwSupportMode',
+      'bo6GobbleGumMode',
+      'bo6SupportMode',
+      'bo7GobbleGumMode',
+      'bo7SupportMode',
+      'bo7IsCursedRun',
+      'bo7RelicsUsed',
+      'rampageInducerUsed',
+      'vanguardVoidUsed',
+      'ww2ConsumablesUsed',
+      'firstRoomVariant',
+      'wawNoJug',
+      'wawFixedWunderwaffe',
+      'bo2BankUsed',
+    ];
+    if (rankOneAffectingFields.some((k) => Object.prototype.hasOwnProperty.call(body, k))) {
+      await refreshStoredRankOneCountsForMap(log.mapId);
+    }
     const isOwner = log.userId === user.id;
     if (isOwner && resendToCoopMembers && teammateUserIds !== undefined && teammateUserIds.length > 0) {
       await createCoOpRunPendingsForChallengeLog(id, user.id, teammateUserIds);
@@ -356,6 +387,7 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
     await prisma.challengeLog.delete({ where: { id } });
     const { xpSubtracted } = await revokeAchievementsForMapAfterDelete(userId, mapId);
     await revokeVerifiedAchievementsForMapIfNeeded(userId, mapId);
+    await refreshStoredRankOneCountsForMap(mapId);
 
     return NextResponse.json({
       deleted: true,

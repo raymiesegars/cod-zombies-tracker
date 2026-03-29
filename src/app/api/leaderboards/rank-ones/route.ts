@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getLevelFromXp } from '@/lib/ranks';
-import { computeScopedRankOneCountsByUserId } from '@/lib/world-records';
+import { getRankOneCountsByScope } from '@/lib/world-records';
 import type { PlayerCount } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
@@ -22,6 +22,71 @@ type Row = {
   verifiedWorldRecords: number;
   rank: number;
 };
+
+type ProfileBlocksWithCache = {
+  selectedBlockIds?: unknown;
+  worldRecordsCache?: {
+    worldRecords?: unknown;
+    verifiedWorldRecords?: unknown;
+    updatedAt?: unknown;
+  };
+};
+
+function getCachedWorldRecords(blocks: unknown): { worldRecords: number; verifiedWorldRecords: number } | null {
+  if (!blocks || typeof blocks !== 'object') return null;
+  const cache = (blocks as ProfileBlocksWithCache).worldRecordsCache;
+  if (!cache || typeof cache !== 'object') return null;
+  const worldRecords = cache.worldRecords;
+  const verifiedWorldRecords = cache.verifiedWorldRecords;
+  if (typeof worldRecords !== 'number' || typeof verifiedWorldRecords !== 'number') return null;
+  return { worldRecords, verifiedWorldRecords };
+}
+
+async function persistRankOneCache(rows: Row[]): Promise<void> {
+  if (rows.length === 0) return;
+  const users = await prisma.user.findMany({
+    where: { id: { in: rows.map((r) => r.id) } },
+    select: { id: true, profileStatBlocks: true },
+  });
+  const byId = new Map(users.map((u) => [u.id, u]));
+  const updates: Array<Promise<unknown>> = [];
+
+  for (const row of rows) {
+    const user = byId.get(row.id);
+    if (!user) continue;
+    const cached = getCachedWorldRecords(user.profileStatBlocks);
+    if (
+      cached &&
+      cached.worldRecords === row.worldRecords &&
+      cached.verifiedWorldRecords === row.verifiedWorldRecords
+    ) {
+      continue;
+    }
+    const existing =
+      user.profileStatBlocks && typeof user.profileStatBlocks === 'object'
+        ? (user.profileStatBlocks as Record<string, unknown>)
+        : {};
+    const selectedBlockIds = Array.isArray(existing.selectedBlockIds) ? existing.selectedBlockIds : undefined;
+    const merged: Record<string, unknown> = {
+      ...existing,
+      ...(selectedBlockIds ? { selectedBlockIds } : {}),
+      worldRecordsCache: {
+        worldRecords: row.worldRecords,
+        verifiedWorldRecords: row.verifiedWorldRecords,
+        updatedAt: new Date().toISOString(),
+      },
+    };
+    updates.push(
+      prisma.user.update({
+        where: { id: row.id },
+        data: { profileStatBlocks: merged as never },
+      })
+    );
+  }
+  if (updates.length > 0) {
+    await Promise.allSettled(updates);
+  }
+}
 
 function assignCompetitionRanks(rows: Row[], valueKey: 'worldRecords' | 'verifiedWorldRecords'): Row[] {
   let rank = 1;
@@ -53,7 +118,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const counts = await computeScopedRankOneCountsByUserId({ gameId, mapId });
+    const counts = await getRankOneCountsByScope({ gameId, mapId });
 
     const users = await prisma.user.findMany({
       where: { isPublic: true, isArchived: false },
@@ -98,6 +163,7 @@ export async function GET(request: NextRequest) {
           (r.displayName && r.displayName.toLowerCase().includes(q))
       );
       const sliced = rows.slice(0, SEARCH_LIMIT);
+      await persistRankOneCache(sliced);
       const entries = sliced.map((user) => {
         const val = user[valueKey];
         const level = getLevelFromXp(user.totalXp).level;
@@ -125,6 +191,7 @@ export async function GET(request: NextRequest) {
 
     const total = rows.length;
     const page = rows.slice(offset, offset + limit);
+    await persistRankOneCache(page);
     const entries = page.map((user) => {
       const val = user[valueKey];
       const level = getLevelFromXp(user.totalXp).level;

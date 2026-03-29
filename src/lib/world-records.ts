@@ -248,13 +248,181 @@ function aggregateRankOneCountsFromBuckets(
 
 const WR_CACHE_TTL_MS = 60_000; // 1 minute
 const wrCache = new Map<string, { result: WorldRecordsResult; expiresAt: number }>();
+const STORED_RANK_ONE_TTL_MS = 30 * 60 * 1000; // 30 minutes
+
+type RankCountMap = Map<string, { worldRecords: number; verifiedWorldRecords: number }>;
+
+function getScopeKey(filter?: RankOneScopeFilter): string {
+  if (filter?.mapId) return `map:${filter.mapId}`;
+  if (filter?.gameId) return `game:${filter.gameId}`;
+  return 'global';
+}
+
+function isMissingStoredRankOneTableError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const code = (error as { code?: unknown }).code;
+  return code === 'P2021' || code === 'P2022';
+}
+
+async function readStoredRankOneCounts(
+  filter?: RankOneScopeFilter
+): Promise<{ counts: RankCountMap; updatedAtMs: number | null; hasRows: boolean } | null> {
+  const scopeKey = getScopeKey(filter);
+  try {
+    const rows = await (prisma as any).userRankOneCount.findMany({
+      where: { scopeKey },
+      select: { userId: true, worldRecords: true, verifiedWorldRecords: true, updatedAt: true },
+    });
+    const counts: RankCountMap = new Map();
+    let latest = 0;
+    for (const r of rows) {
+      counts.set(r.userId, { worldRecords: r.worldRecords, verifiedWorldRecords: r.verifiedWorldRecords });
+      const t = r.updatedAt.getTime();
+      if (t > latest) latest = t;
+    }
+    return {
+      counts,
+      updatedAtMs: latest > 0 ? latest : null,
+      hasRows: rows.length > 0,
+    };
+  } catch (error) {
+    if (isMissingStoredRankOneTableError(error)) return null;
+    throw error;
+  }
+}
+
+async function writeStoredRankOneCounts(
+  counts: RankCountMap,
+  filter?: RankOneScopeFilter
+): Promise<void> {
+  const scopeKey = getScopeKey(filter);
+  const now = new Date();
+  const entries = Array.from(counts.entries())
+    .filter(([, c]) => c.worldRecords > 0 || c.verifiedWorldRecords > 0)
+    .map(([userId, c]) => ({
+      userId,
+      scopeKey,
+      gameId: filter?.mapId ? null : (filter?.gameId ?? null),
+      mapId: filter?.mapId ?? null,
+      worldRecords: c.worldRecords,
+      verifiedWorldRecords: c.verifiedWorldRecords,
+      createdAt: now,
+      updatedAt: now,
+    }));
+  try {
+    await prisma.$transaction(async (tx) => {
+      await (tx as any).userRankOneCount.deleteMany({ where: { scopeKey } });
+      if (entries.length > 0) {
+        await (tx as any).userRankOneCount.createMany({ data: entries });
+      }
+    });
+  } catch (error) {
+    if (isMissingStoredRankOneTableError(error)) return;
+    throw error;
+  }
+}
+
+export async function refreshStoredRankOneCountsForScope(filter?: RankOneScopeFilter): Promise<RankCountMap> {
+  const counts = filter?.gameId || filter?.mapId
+    ? await computeScopedRankOneCountsByUserId(filter)
+    : await computeRankOneCountsByUserId();
+  await writeStoredRankOneCounts(counts, filter);
+  return counts;
+}
+
+export async function refreshStoredRankOneCountsForMap(mapId: string): Promise<void> {
+  if (!mapId) return;
+  const map = await prisma.map.findUnique({
+    where: { id: mapId },
+    select: { gameId: true },
+  });
+  if (!map) return;
+  await refreshStoredRankOneCountsForScope();
+  await refreshStoredRankOneCountsForScope({ gameId: map.gameId });
+  await refreshStoredRankOneCountsForScope({ mapId });
+}
+
+export async function refreshStoredRankOneCountsForMaps(mapIds: string[]): Promise<void> {
+  const uniqueMapIds = Array.from(new Set(mapIds.filter(Boolean)));
+  if (uniqueMapIds.length === 0) {
+    await refreshStoredRankOneCountsForScope();
+    return;
+  }
+  const maps = await prisma.map.findMany({
+    where: { id: { in: uniqueMapIds } },
+    select: { id: true, gameId: true },
+  });
+  const gameIds = Array.from(new Set(maps.map((m) => m.gameId)));
+  await refreshStoredRankOneCountsForScope();
+  for (const gameId of gameIds) {
+    await refreshStoredRankOneCountsForScope({ gameId });
+  }
+  for (const map of maps) {
+    await refreshStoredRankOneCountsForScope({ mapId: map.id });
+  }
+}
+
+export async function invalidateStoredRankOneCountsForUsers(
+  userIds: string[],
+  options?: { mapIds?: string[] }
+): Promise<void> {
+  const uniqueUserIds = Array.from(new Set(userIds.filter(Boolean)));
+  if (uniqueUserIds.length === 0) return;
+  try {
+    const scopeKeys = new Set<string>(['global']);
+    const mapIds = Array.from(new Set((options?.mapIds ?? []).filter(Boolean)));
+    if (mapIds.length > 0) {
+      for (const mapId of mapIds) scopeKeys.add(`map:${mapId}`);
+      const maps = await prisma.map.findMany({
+        where: { id: { in: mapIds } },
+        select: { gameId: true },
+        distinct: ['gameId'],
+      });
+      for (const m of maps) scopeKeys.add(`game:${m.gameId}`);
+    }
+    await (prisma as any).userRankOneCount.deleteMany({
+      where: {
+        userId: { in: uniqueUserIds },
+        scopeKey: { in: Array.from(scopeKeys) },
+      },
+    });
+  } catch (error) {
+    if (isMissingStoredRankOneTableError(error)) return;
+    throw error;
+  }
+}
+
+export async function getRankOneCountsByScope(
+  filter?: RankOneScopeFilter,
+  options?: { maxAgeMs?: number }
+): Promise<RankCountMap> {
+  const maxAgeMs = options?.maxAgeMs ?? STORED_RANK_ONE_TTL_MS;
+  const stored = await readStoredRankOneCounts(filter);
+  if (stored && stored.hasRows) {
+    if (
+      stored.updatedAtMs != null &&
+      Date.now() - stored.updatedAtMs > maxAgeMs
+    ) {
+      // Reads stay fast: stale rows are still served; writes refresh these scopes eagerly.
+      return stored.counts;
+    }
+    return stored.counts;
+  }
+  if (stored && !stored.hasRows) {
+    if (!filter?.gameId && !filter?.mapId) {
+      return refreshStoredRankOneCountsForScope(filter);
+    }
+    return stored.counts;
+  }
+  return refreshStoredRankOneCountsForScope(filter);
+}
 
 /** Compute world records across all leaderboard combinations (player count, game filters, verified) and optional details. Cached per user for 1 minute. */
 export async function computeWorldRecords(userId: string): Promise<WorldRecordsResult> {
   const now = Date.now();
   const cached = wrCache.get(userId);
   if (cached && cached.expiresAt > now) return cached.result;
-  const rankCounts = await computeRankOneCountsByUserId();
+  const rankCounts = await getRankOneCountsByScope();
   const result: WorldRecordsResult = rankCounts.get(userId) ?? { worldRecords: 0, verifiedWorldRecords: 0 };
   wrCache.set(userId, { result, expiresAt: now + WR_CACHE_TTL_MS });
   return result;
@@ -291,6 +459,7 @@ async function buildWorldRecordBucketState(): Promise<WorldRecordBucketState> {
       vanguardVoidUsed: true,
       ww2ConsumablesUsed: true,
       bo3GobbleGumMode: true,
+      bo3AatUsed: true,
       bo4ElixirMode: true,
       bocwSupportMode: true,
       bo6GobbleGumMode: true,
@@ -299,6 +468,11 @@ async function buildWorldRecordBucketState(): Promise<WorldRecordBucketState> {
       bo7SupportMode: true,
       bo7IsCursedRun: true,
       bo7RelicsUsed: true,
+      useFortuneCards: true,
+      useDirectorsCut: true,
+      wawNoJug: true,
+      wawFixedWunderwaffe: true,
+      bo2BankUsed: true,
       challenge: { select: { type: true, name: true } },
       map: { select: { slug: true, name: true, game: { select: { shortName: true } } } },
     },
