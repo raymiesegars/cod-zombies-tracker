@@ -67,7 +67,7 @@ export function LeaderboardEntry({
 
   // <400px: 4 cols. 400–768px: 5 cols. 771px+: 6 cols. lg: +full value. Fixed/min widths on value columns so Solo/Duo/Trio/Squad and round digits align vertically.
   const gridClass = cn(
-    'grid items-center gap-x-3 p-3 sm:p-3 md:p-4 rounded-lg transition-colors min-h-[3.25rem] sm:min-h-[3.5rem] min-w-0 w-full',
+    'grid items-center gap-x-3 p-3 sm:p-3 md:p-4 rounded-lg transition-colors min-h-[3.25rem] sm:min-h-[3.5rem] min-w-0 w-full overflow-hidden',
     isCurrentUser
       ? 'bg-blood-950/30 border border-blood-800/30'
       : 'bg-bunker-900/50 hover:bg-bunker-900',
@@ -134,7 +134,7 @@ export function LeaderboardEntry({
       </div>
 
       {/* Display name – always truncate; link to profile; verified checkmark */}
-      <div className="min-w-0 flex items-center gap-1.5">
+      <div className="min-w-0 flex items-center gap-1.5 overflow-hidden">
         <Link
           href={`/users/${entry.user.username}`}
           className="font-medium text-white truncate block hover:text-blood-400 transition-colors leading-none min-w-0"
@@ -230,7 +230,7 @@ export function LeaderboardEntry({
                     </span>
                   ) : null
                 ) : valueKind === 'score' && scoreValue != null ? (
-                  <span className="text-xs sm:text-sm font-zombies font-semibold text-element-400 tabular-nums leading-none truncate">
+                  <span className="text-xs sm:text-sm font-zombies font-semibold text-element-400 tabular-nums leading-none whitespace-nowrap truncate">
                     {formatRushScore(scoreValue)}
                   </span>
                 ) : (
