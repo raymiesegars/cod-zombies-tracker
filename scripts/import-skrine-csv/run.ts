@@ -83,8 +83,7 @@ function parseTimeSegment(seg: string): number {
 
 /**
  * Parse "achieved" — round number or time to seconds.
- * Supports: plain round number; MM:SS; MM:SS.ms (milliseconds stripped); HH:MM:SS; MM:SS:00 (ZWR export where :00 is subseconds — treat as MM:SS).
- * ZWR can export e.g. "34:50:00" meaning 34 min 50 sec (with trailing :00); we must not interpret that as 34 hours.
+ * Supports: plain round number; MM:SS; MM:SS.ms (milliseconds stripped); HH:MM:SS.
  */
 export function parseAchieved(achieved: string): { round: number | null; completionTimeSeconds: number | null } {
   const s = (achieved || '').trim();
@@ -101,12 +100,12 @@ export function parseAchieved(achieved: string): { round: number | null; complet
     return { round: null, completionTimeSeconds: (min ?? 0) * 60 + (sec ?? 0) };
   }
   if (parts.length === 3) {
-    const [a, b, c] = parts;
-    // ZWR often exports MM:SS with trailing :00 (e.g. "34:50:00" = 34 min 50 sec). Treat as MM:SS when third segment is 0.
-    if (c === 0) {
-      return { round: null, completionTimeSeconds: (a ?? 0) * 60 + (b ?? 0) };
+    const [h, min, sec] = parts;
+    // If third segment exceeds 59, treat it as fractional noise from export and fall back to MM:SS.
+    if ((sec ?? 0) > 59) {
+      return { round: null, completionTimeSeconds: (h ?? 0) * 60 + (min ?? 0) };
     }
-    return { round: null, completionTimeSeconds: (a ?? 0) * 3600 + (b ?? 0) * 60 + (c ?? 0) };
+    return { round: null, completionTimeSeconds: (h ?? 0) * 3600 + (min ?? 0) * 60 + (sec ?? 0) };
   }
   return { round: null, completionTimeSeconds: null };
 }

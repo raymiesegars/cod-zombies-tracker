@@ -1,12 +1,9 @@
 #!/usr/bin/env npx tsx
 /**
  * Backfill speedrun completion times for ZWR-imported users.
- * ZWR sometimes exported times as "34:50:00" (34 min 50 sec) which we wrongly
- * parsed as 34 hours 50 minutes. This script re-reads each user's CSV, detects
- * rows where the corrected parse (parseAchieved) differs from the legacy parse
- * (parseAchievedLegacy), finds the matching ChallengeLog/EasterEggLog in the DB,
- * updates completionTimeSeconds to the correct value, then runs reunlock-achievements
- * and recompute-verified-xp for every affected user.
+ * Detects parser mismatches against source CSV and fixes outliers in either direction:
+ * - minute-like values that should be hour-format (e.g. 2:41:00 stored as 2:41)
+ * - hour-like values that should be minute-format from old parser edge cases
  *
  * Only processes users in ZWR_TO_CZT_USERS who have a CSV in top-178-csv.
  *
@@ -83,6 +80,21 @@ function rowHasPlayer(row: ParsedCsvRow, sourcePlayerId: string): boolean {
   return players.includes(sourcePlayerId);
 }
 
+/** Old buggy interpretation for X:Y:00 where trailing :00 was treated as MM:SS. */
+function parseAchievedTrailingZeroAsMinutes(achieved: string): number | null {
+  const s = (achieved || '').trim();
+  if (!s) return null;
+  const parts = s.split(':').map((p) => p.trim());
+  if (parts.length !== 3) return null;
+  const [a, b, c] = parts;
+  const nA = parseInt(a ?? '', 10);
+  const nB = parseInt(b ?? '', 10);
+  const nC = parseInt((c ?? '').split('.')[0] ?? '', 10);
+  if ([nA, nB, nC].some(Number.isNaN)) return null;
+  if (nC !== 0) return null;
+  return nA * 60 + nB;
+}
+
 async function findChallengeLogByWrongTime(
   userId: string,
   mapId: string,
@@ -135,11 +147,12 @@ async function findChallengeLogByProof(
   return { id: log.id, completionTimeSeconds: log.completionTimeSeconds };
 }
 
-/** True if stored seconds look like hours bug (e.g. 28:00 min stored as 28*3600 = 100800). */
-function looksLikeHoursBug(storedSeconds: number | null, correctSeconds: number): boolean {
+/** True if stored and correct are likely a 60x parser mismatch in either direction. */
+function looksLikeSixtyXMismatch(storedSeconds: number | null, correctSeconds: number): boolean {
   if (storedSeconds == null || storedSeconds === correctSeconds) return false;
   if (correctSeconds <= 0) return false;
-  const ratio = storedSeconds / correctSeconds;
+  if (storedSeconds <= 0) return false;
+  const ratio = Math.max(storedSeconds, correctSeconds) / Math.min(storedSeconds, correctSeconds);
   return ratio >= 55 && ratio <= 65; // ~60x (min→hour)
 }
 
@@ -202,6 +215,7 @@ async function main() {
 
       const correct = parseAchieved(row.achieved);
       const legacy = parseAchievedLegacy(row.achieved);
+      const trailingZeroMinutes = parseAchievedTrailingZeroAsMinutes(row.achieved);
       const correctSeconds = correct.completionTimeSeconds ?? legacy.completionTimeSeconds;
       if (correctSeconds == null) continue;
 
@@ -215,20 +229,42 @@ async function main() {
       let challengeLog: { id: string; completionTimeSeconds: number | null } | null = null;
       let wrongSeconds: number | null = null;
 
-      if (
-        correct.completionTimeSeconds != null &&
-        legacy.completionTimeSeconds != null &&
-        correct.completionTimeSeconds !== legacy.completionTimeSeconds
-      ) {
-        wrongSeconds = legacy.completionTimeSeconds;
+      const wrongCandidates = Array.from(
+        new Set(
+          [legacy.completionTimeSeconds, trailingZeroMinutes].filter(
+            (v): v is number => v != null && v !== correctSeconds
+          )
+        )
+      );
+
+      if (wrongCandidates.length > 0) {
+        wrongSeconds = wrongCandidates[0] ?? null;
         challengeLog = await findChallengeLogByWrongTime(
           cztUserId,
           mapRecord.id,
           challenge.id,
           roundReached,
-          wrongSeconds,
+          wrongSeconds!,
           proofUrls
         );
+        if (!challengeLog) {
+          for (let i = 1; i < wrongCandidates.length; i++) {
+            const candidate = wrongCandidates[i]!;
+            const maybe = await findChallengeLogByWrongTime(
+              cztUserId,
+              mapRecord.id,
+              challenge.id,
+              roundReached,
+              candidate,
+              proofUrls
+            );
+            if (maybe) {
+              challengeLog = maybe;
+              wrongSeconds = candidate;
+              break;
+            }
+          }
+        }
       }
 
       if (!challengeLog && isSpeedrun(mapping.challengeType as string)) {
@@ -243,12 +279,12 @@ async function main() {
           challengeLog &&
           challengeLog.completionTimeSeconds != null &&
           challengeLog.completionTimeSeconds !== correctSeconds &&
-          looksLikeHoursBug(challengeLog.completionTimeSeconds, correctSeconds)
+          looksLikeSixtyXMismatch(challengeLog.completionTimeSeconds, correctSeconds)
         ) {
           wrongSeconds = challengeLog.completionTimeSeconds;
         } else if (challengeLog && challengeLog.completionTimeSeconds === correctSeconds) {
           challengeLog = null;
-        } else if (challengeLog && !looksLikeHoursBug(challengeLog.completionTimeSeconds, correctSeconds)) {
+        } else if (challengeLog && !looksLikeSixtyXMismatch(challengeLog.completionTimeSeconds, correctSeconds)) {
           challengeLog = null;
         }
       }
