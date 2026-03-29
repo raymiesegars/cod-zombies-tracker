@@ -355,6 +355,9 @@ export async function refreshStoredRankOneCountsForScope(filter?: RankOneScopeFi
 
 export async function refreshStoredRankOneCountsForMap(mapId: string): Promise<void> {
   if (!mapId) return;
+  // Safety guard: inline global/game/map refresh can be too heavy on serverless runtimes.
+  // Keep it opt-in; use backfill script or explicit admin jobs for full recomputes.
+  if (process.env.ENABLE_INLINE_WR_REFRESH !== '1') return;
   const map = await prisma.map.findUnique({
     where: { id: mapId },
     select: { gameId: true },
@@ -366,6 +369,7 @@ export async function refreshStoredRankOneCountsForMap(mapId: string): Promise<v
 }
 
 export async function refreshStoredRankOneCountsForMaps(mapIds: string[]): Promise<void> {
+  if (process.env.ENABLE_INLINE_WR_REFRESH !== '1') return;
   const uniqueMapIds = Array.from(new Set(mapIds.filter(Boolean)));
   if (uniqueMapIds.length === 0) {
     await refreshStoredRankOneCountsForScope();
@@ -431,13 +435,9 @@ export async function getRankOneCountsByScope(
     }
     return stored.counts;
   }
-  if (stored && !stored.hasRows) {
-    if (!filter?.gameId && !filter?.mapId) {
-      return refreshStoredRankOneCountsForScope(filter);
-    }
-    return stored.counts;
-  }
-  return refreshStoredRankOneCountsForScope(filter);
+  if (stored && !stored.hasRows) return stored.counts;
+  // Missing table or no rows yet: never trigger heavy recompute on request path.
+  return new Map();
 }
 
 /** Compute world records across all leaderboard combinations (player count, game filters, verified) and optional details. Cached per user for 1 minute. */

@@ -25,14 +25,25 @@ export async function GET() {
       where: { OR: [{ fromUserId: userId }, { toUserId: userId }] },
       orderBy: { createdAt: 'desc' },
       select: { id: true, fromUserId: true, toUserId: true, content: true, readAt: true, createdAt: true },
-      take: 1000,
+      take: 250,
     });
 
     const seenPartners = new Set<string>();
     const partnerIds: string[] = [];
+    const conversationState = new Map<
+      string,
+      { lastMessage: RawMsg | null; unreadCount: number }
+    >();
     for (const msg of allMessages) {
       const partnerId = msg.fromUserId === userId ? msg.toUserId : msg.fromUserId;
-      if (!seenPartners.has(partnerId)) { seenPartners.add(partnerId); partnerIds.push(partnerId); }
+      if (!seenPartners.has(partnerId)) {
+        seenPartners.add(partnerId);
+        partnerIds.push(partnerId);
+      }
+      const existing = conversationState.get(partnerId) ?? { lastMessage: null, unreadCount: 0 };
+      if (!existing.lastMessage) existing.lastMessage = msg;
+      if (msg.fromUserId === partnerId && msg.readAt == null) existing.unreadCount += 1;
+      conversationState.set(partnerId, existing);
     }
 
     const totalUnread = await dm.count({ where: { toUserId: userId, readAt: null } });
@@ -46,11 +57,9 @@ export async function GET() {
     const partnerMap = Object.fromEntries(partnerUsers.map((u) => [u.id, u]));
 
     const conversations = partnerIds.map((partnerId) => {
-      const msgs = allMessages.filter(
-        (m) => (m.fromUserId === partnerId && m.toUserId === userId) || (m.fromUserId === userId && m.toUserId === partnerId)
-      );
-      const lastMessage = msgs[0] ?? null;
-      const unreadCount = msgs.filter((m) => m.fromUserId === partnerId && m.readAt == null).length;
+      const state = conversationState.get(partnerId) ?? { lastMessage: null, unreadCount: 0 };
+      const lastMessage = state.lastMessage;
+      const unreadCount = state.unreadCount;
       const partnerUser = partnerMap[partnerId];
       if (!partnerUser) return null;
       const isOnline = partnerUser.lastSeenAt != null && Date.now() - new Date(partnerUser.lastSeenAt).getTime() < 5 * 60 * 1000;

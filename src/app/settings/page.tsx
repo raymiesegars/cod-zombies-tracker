@@ -23,6 +23,7 @@ import {
   AlertCircle,
   ImageIcon,
   Trophy,
+  Loader2,
 } from 'lucide-react';
 import { PublicProfileHelpContent } from '@/components/game';
 import { Avatar } from '@/components/ui';
@@ -47,6 +48,9 @@ export default function SettingsPage() {
   const [avatarPreset, setAvatarPreset] = useState<AvatarPreset | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [mergeRequestMessage, setMergeRequestMessage] = useState('');
+  const [mergeRequestSubmitting, setMergeRequestSubmitting] = useState(false);
+  const [mergeRequestSent, setMergeRequestSent] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !profile) {
@@ -114,6 +118,37 @@ export default function SettingsPage() {
     }
   };
 
+  const handleSubmitMergeRequest = async () => {
+    const body = mergeRequestMessage.trim();
+    if (body.length < 20) {
+      alert('Please include enough detail so admins can action the merge request.');
+      return;
+    }
+    setMergeRequestSubmitting(true);
+    try {
+      const payload = [
+        '[PROFILE MERGE REQUEST]',
+        '',
+        'Include exact external names and your CZT name:',
+        body,
+      ].join('\n');
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ type: 'feedback', message: payload }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? 'Failed to submit request');
+      setMergeRequestSent(true);
+      setMergeRequestMessage('');
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Failed to submit request');
+    } finally {
+      setMergeRequestSubmitting(false);
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-bunker-950 flex items-center justify-center">
@@ -149,6 +184,44 @@ export default function SettingsPage() {
 
       {/* Content */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-4 sm:space-y-6">
+        <div>
+          <Card variant="bordered">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <User className="w-4 h-4 sm:w-5 sm:h-5 text-blood-400" />
+                Request ZWR or SRC Profile Merge
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-bunker-300">
+                Include your CZT display name and exact names from ZWR/SRC. You can include multiple external accounts.
+              </p>
+              <textarea
+                value={mergeRequestMessage}
+                onChange={(e) => {
+                  setMergeRequestMessage(e.target.value);
+                  if (mergeRequestSent) setMergeRequestSent(false);
+                }}
+                placeholder={`CZT display name: ${profile.displayName || profile.username}\nZWR names: name1, name2\nSRC names: name3\nNotes: any extra context`}
+                className="w-full min-h-[130px] bg-bunker-900 border border-bunker-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-bunker-500 focus:outline-none focus:ring-2 focus:ring-blood-500/50"
+              />
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  variant="primary"
+                  onClick={handleSubmitMergeRequest}
+                  disabled={mergeRequestSubmitting}
+                  leftIcon={mergeRequestSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}
+                >
+                  {mergeRequestSubmitting ? 'Submitting...' : 'Submit merge request'}
+                </Button>
+                {mergeRequestSent && (
+                  <span className="text-sm text-military-400">Request submitted to admin feedback queue.</span>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Profile Section */}
         <div>
           <Card variant="bordered">
