@@ -669,9 +669,6 @@ export default function UserProfilePage() {
   const [contributorModalOpen, setContributorModalOpen] = useState(false);
   const [adminActionLoading, setAdminActionLoading] = useState(false);
   const [friendActionLoading, setFriendActionLoading] = useState<'add' | 'accept' | 'deny' | null>(null);
-  const [mergeRequestMessage, setMergeRequestMessage] = useState('');
-  const [mergeRequestSubmitting, setMergeRequestSubmitting] = useState(false);
-  const [mergeRequestSent, setMergeRequestSent] = useState(false);
 
   // so "Your runs" vs "Back to runs" and map links point the right place
   const isOwnProfile = Boolean(profile && currentProfile && profile.id === currentProfile.id);
@@ -935,38 +932,6 @@ export default function UserProfilePage() {
     }
   }, [profileStatBlockSelection, refreshProfile]);
 
-  const handleSubmitMergeRequest = useCallback(async () => {
-    if (!currentUser) return;
-    const body = mergeRequestMessage.trim();
-    if (body.length < 20) {
-      alert('Please include enough detail so admins can action the merge request.');
-      return;
-    }
-    setMergeRequestSubmitting(true);
-    try {
-      const payload = [
-        '[PROFILE MERGE REQUEST]',
-        '',
-        'Include exact external names and your CZT name:',
-        body,
-      ].join('\n');
-      const res = await fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify({ type: 'feedback', message: payload }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error ?? 'Failed to submit request');
-      setMergeRequestSent(true);
-      setMergeRequestMessage('');
-    } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed to submit request');
-    } finally {
-      setMergeRequestSubmitting(false);
-    }
-  }, [currentUser, mergeRequestMessage]);
-
   useEffect(() => {
     setIsLoading(true);
     async function fetchProfile() {
@@ -1229,51 +1194,6 @@ export default function UserProfilePage() {
 
   return (
     <div className="min-h-screen bg-bunker-950">
-      <div className="border-b border-element-800/50 bg-element-950/25">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Card variant="glow" className="border-element-700/60">
-            <CardHeader>
-              <CardTitle className="text-lg sm:text-xl text-element-300">
-                Request ZWR or SRC Profile Merge
-              </CardTitle>
-              <p className="text-sm text-bunker-300 mt-1">
-                Submit a ticket for admins to merge external profiles into your CZT account.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm text-bunker-300">
-                Include: (1) your <span className="text-white font-medium">CZT display name</span>, and (2) exact
-                external names from <span className="text-white font-medium">ZWR/SRC</span>. You can list multiple names.
-              </p>
-              <textarea
-                value={mergeRequestMessage}
-                onChange={(e) => {
-                  setMergeRequestMessage(e.target.value);
-                  if (mergeRequestSent) setMergeRequestSent(false);
-                }}
-                placeholder={`CZT display name: ${currentProfile?.displayName || currentProfile?.username || 'your-name'}\nZWR names: name1, name2\nSRC names: name3\nNotes: any extra context`}
-                className="w-full min-h-[130px] bg-bunker-900 border border-bunker-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-bunker-500 focus:outline-none focus:ring-2 focus:ring-element-500/50"
-              />
-              <div className="flex flex-wrap items-center gap-3">
-                <Button
-                  variant="primary"
-                  onClick={handleSubmitMergeRequest}
-                  disabled={!currentUser || mergeRequestSubmitting}
-                  leftIcon={mergeRequestSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}
-                >
-                  {mergeRequestSubmitting ? 'Submitting…' : 'Submit merge request'}
-                </Button>
-                {!currentUser && (
-                  <span className="text-sm text-bunker-400">Sign in to submit a request.</span>
-                )}
-                {mergeRequestSent && (
-                  <span className="text-sm text-military-400">Request submitted to admin feedback queue.</span>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
       {/* Profile Header */}
       <div className="bg-bunker-900 border-b border-bunker-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">

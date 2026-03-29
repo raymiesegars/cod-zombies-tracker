@@ -23,7 +23,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { PrismaClient } from '@prisma/client';
-import { getMapAchievementDefinitions, getSpeedrunAchievementDefinitions, ACHIEVEMENT_TYPES_NEVER_DEACTIVATE } from '../src/lib/achievements/seed-achievements';
+import {
+  getMapAchievementDefinitions,
+  getSpeedrunAchievementDefinitions,
+  getBo2EeSpeedrunDefinitions,
+  ACHIEVEMENT_TYPES_NEVER_DEACTIVATE,
+} from '../src/lib/achievements/seed-achievements';
 import { isRestrictedAchievement } from '../src/lib/achievements/categories';
 
 const root = path.resolve(__dirname, '..');
@@ -76,6 +81,7 @@ async function main() {
     include: {
       game: { select: { shortName: true } },
       challenges: { where: { isActive: true } },
+      easterEggs: { select: { id: true, slug: true, type: true, xpReward: true, isActive: true } },
     },
   });
 
@@ -99,7 +105,30 @@ async function main() {
   for (const map of maps) {
     const gameShortName = map.game?.shortName ?? '';
     const mapDefs = getMapAchievementDefinitions(map.slug, map.roundCap, gameShortName);
-    const speedrunDefs = getSpeedrunAchievementDefinitions(map.slug, gameShortName);
+    let speedrunDefs = getSpeedrunAchievementDefinitions(map.slug, gameShortName);
+    if (gameShortName === 'BO2') {
+      const bo2SplitDefs = getBo2EeSpeedrunDefinitions(map.slug);
+      if (bo2SplitDefs.length > 0) {
+        speedrunDefs = speedrunDefs.filter((d) => d.criteria?.challengeType !== 'EASTER_EGG_SPEEDRUN');
+        for (const def of bo2SplitDefs) {
+          const ee = map.easterEggs.find((e) => e.slug === def.easterEggSlug);
+          if (!ee) continue;
+          speedrunDefs.push({ ...def, easterEggId: ee.id, easterEggSlug: undefined });
+        }
+      } else {
+        const mainQuestEes = map.easterEggs.filter(
+          (e) => e.isActive && e.type === 'MAIN_QUEST' && e.xpReward > 0
+        );
+        if (mainQuestEes.length === 1) {
+          const eeId = mainQuestEes[0]!.id;
+          speedrunDefs = speedrunDefs.map((def) =>
+            def.criteria?.challengeType === 'EASTER_EGG_SPEEDRUN'
+              ? { ...def, easterEggId: eeId }
+              : def
+          );
+        }
+      }
+    }
     const defs = [...mapDefs, ...speedrunDefs];
     const currentKeys = new Set(defs.map((d) => `${d.slug}\0${(d.difficulty ?? null) ?? ''}`));
     const challengesByType = Object.fromEntries(map.challenges.map((c) => [c.type, c]));
@@ -120,6 +149,7 @@ async function main() {
         xpReward: def.xpReward,
         criteria: def.criteria as object,
         challengeId: challengeId ?? null,
+        easterEggId: def.easterEggId ?? null,
         difficulty,
         isActive: true,
       };
@@ -168,6 +198,7 @@ async function main() {
             xpReward: data.xpReward,
             criteria: data.criteria,
             challengeId: data.challengeId ?? undefined,
+            easterEggId: data.easterEggId ?? undefined,
             isActive: data.isActive,
           },
         });
@@ -184,6 +215,7 @@ async function main() {
           data: {
             ...data,
             challengeId: data.challengeId ?? undefined,
+            easterEggId: data.easterEggId ?? undefined,
           },
         });
         created++;

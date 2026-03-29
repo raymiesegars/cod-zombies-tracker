@@ -84,6 +84,18 @@ export async function GET(
       }
       throw computeError;
     }
+    if (
+      cached &&
+      cached.worldRecords > 0 &&
+      cached.verifiedWorldRecords >= 0 &&
+      result.worldRecords === 0 &&
+      result.verifiedWorldRecords === 0
+    ) {
+      return NextResponse.json({
+        worldRecords: cached.worldRecords,
+        verifiedWorldRecords: cached.verifiedWorldRecords,
+      });
+    }
     const existingBlocks =
       typeof user.profileStatBlocks === 'object' && user.profileStatBlocks !== null
         ? (user.profileStatBlocks as ProfileBlocksWithCache)

@@ -32,7 +32,7 @@ import { isBo4Game, BO4_DIFFICULTIES, BO4_DIFFICULTY_XP_MULTIPLIER, type Bo4Diff
 /** BO4 difficulties that have achievement/leaderboard WRs (excludes CASUAL). */
 const BO4_ACHIEVEMENT_DIFFICULTIES: Bo4DifficultyType[] = ['NORMAL', 'HARDCORE', 'REALISTIC'];
 import { isBocwGame } from '../bocw';
-import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, IW_AOTRT_SPEEDRUN_TIERS, IW_BEAST_SPEEDRUN_TIERS, WAW_SPEEDRUN_TIERS_BY_MAP, BO1_SPEEDRUN_TIERS_BY_MAP, BO2_SPEEDRUN_TIERS_BY_MAP, BO3_SPEEDRUN_TIERS_BY_MAP, BO4_SPEEDRUN_TIERS_BY_MAP, BOCW_SPEEDRUN_TIERS_BY_MAP, BO6_SPEEDRUN_TIERS_BY_MAP, BO7_SPEEDRUN_TIERS_BY_MAP, WW2_SPEEDRUN_TIERS_BY_MAP, VANGUARD_SPEEDRUN_TIERS_BY_MAP, AW_SPEEDRUN_TIERS_BY_MAP, BO1_COTD_STAND_IN_EE_TIERS, BO1_COTD_ENSEMBLE_CAST_EE_TIERS, BO2_TRANZIT_RICHTOFEN_EE_TIERS, BO2_TRANZIT_MAXIS_EE_TIERS, BO2_DIE_RISE_RICHTOFEN_EE_TIERS, BO2_DIE_RISE_MAXIS_EE_TIERS, BO2_BURIED_RICHTOFEN_EE_TIERS, BO2_BURIED_MAXIS_EE_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
+import { IW_ZIS_SPEEDRUN_TIERS, IW_RAVE_SPEEDRUN_TIERS, IW_SHAOLIN_SPEEDRUN_TIERS, IW_AOTRT_SPEEDRUN_TIERS, IW_BEAST_SPEEDRUN_TIERS, WAW_SPEEDRUN_TIERS_BY_MAP, BO1_SPEEDRUN_TIERS_BY_MAP, BO2_SPEEDRUN_TIERS_BY_MAP, BO3_SPEEDRUN_TIERS_BY_MAP, BO4_SPEEDRUN_TIERS_BY_MAP, BOCW_SPEEDRUN_TIERS_BY_MAP, BO6_SPEEDRUN_TIERS_BY_MAP, BO7_SPEEDRUN_TIERS_BY_MAP, WW2_SPEEDRUN_TIERS_BY_MAP, VANGUARD_SPEEDRUN_TIERS_BY_MAP, AW_SPEEDRUN_TIERS_BY_MAP, BO1_COTD_STAND_IN_EE_TIERS, BO1_COTD_ENSEMBLE_CAST_EE_TIERS, formatSpeedrunTime, type SpeedrunTiersByType } from './speedrun-tiers';
 import { getR5R15TiersForMap, getR5R15WRSeconds } from './round-5-15-wr-data';
 import {
   getWRRoundForSeed,
@@ -1893,13 +1893,14 @@ export function getSpeedrunAchievementDefinitions(
 /** BO2 EE speedruns: Tranzit, Die Rise, Buried have Richtofen vs Maxis variants. Balance patch resolves easterEggSlug. */
 export function getBo2EeSpeedrunDefinitions(mapSlug: string): AchievementSeedRow[] {
   const rows: AchievementSeedRow[] = [];
-  const variants: [string, string, import('./speedrun-tiers').SpeedrunTier[]][] = (() => {
-    if (mapSlug === 'tranzit') return [['tower-of-babble-richtofen', 'Richtofen', BO2_TRANZIT_RICHTOFEN_EE_TIERS], ['tower-of-babble-maxis', 'Maxis', BO2_TRANZIT_MAXIS_EE_TIERS]];
-    if (mapSlug === 'die-rise') return [['high-maintenance-richtofen', 'Richtofen', BO2_DIE_RISE_RICHTOFEN_EE_TIERS], ['high-maintenance-maxis', 'Maxis', BO2_DIE_RISE_MAXIS_EE_TIERS]];
-    if (mapSlug === 'buried') return [['mined-games-richtofen', 'Richtofen', BO2_BURIED_RICHTOFEN_EE_TIERS], ['mined-games-maxis', 'Maxis', BO2_BURIED_MAXIS_EE_TIERS]];
+  const variants: [string, string, number][] = (() => {
+    if (mapSlug === 'tranzit') return [['tower-of-babble-richtofen', 'Richtofen', 656], ['tower-of-babble-maxis', 'Maxis', 366]];
+    if (mapSlug === 'die-rise') return [['high-maintenance-richtofen', 'Richtofen', 280], ['high-maintenance-maxis', 'Maxis', 368]];
+    if (mapSlug === 'buried') return [['mined-games-richtofen', 'Richtofen', 500], ['mined-games-maxis', 'Maxis', 750]];
     return [];
   })();
-  for (const [eeSlug, variantLabel, tiers] of variants) {
+  for (const [eeSlug, variantLabel, wrSeconds] of variants) {
+    const tiers = buildSpeedrunTiersFromWR(wrSeconds, [200, 600, 1500, 2500], 1.05);
     for (let i = 0; i < tiers.length; i++) {
       const { maxTimeSeconds, xpReward } = tiers[i]!;
       const timeStr = formatSpeedrunTime(maxTimeSeconds).replace(/:/g, '-');
