@@ -13,6 +13,7 @@ import { isBo6Game } from '@/lib/bo6';
 import { isBo7Game } from '@/lib/bo7';
 import { isWw2Game } from '@/lib/ww2';
 import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from '@/lib/vanguard';
+import { refreshStoredRankOneCountsForMap } from '@/lib/world-records';
 import type { Bo4Difficulty } from '@prisma/client';
 
 type Params = { params: Promise<{ id: string }> };
@@ -224,6 +225,20 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         map: { include: { game: true } },
       },
     });
+    const rankOneAffectingFields = [
+      'roundCompleted',
+      'playerCount',
+      'completionTimeSeconds',
+      'difficulty',
+      'isSolo',
+      'isNoGuide',
+      'rampageInducerUsed',
+      'vanguardVoidUsed',
+      'ww2ConsumablesUsed',
+    ];
+    if (rankOneAffectingFields.some((k) => Object.prototype.hasOwnProperty.call(body, k))) {
+      await refreshStoredRankOneCountsForMap(log.mapId);
+    }
     const isOwner = log.userId === user.id;
     if (isOwner && resendToCoopMembers && teammateUserIds !== undefined && teammateUserIds.length > 0) {
       await createCoOpRunPendingsForEasterEggLog(id, user.id, teammateUserIds);
@@ -263,6 +278,7 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
     await prisma.easterEggLog.delete({ where: { id } });
     const { xpSubtracted } = await revokeAchievementsForMapAfterDelete(userId, mapId);
     await revokeVerifiedAchievementsForMapIfNeeded(userId, mapId);
+    await refreshStoredRankOneCountsForMap(mapId);
     const totalXpRemoved = xpSubtracted;
 
     const updated = await prisma.user.findUnique({ where: { id: userId }, select: { totalXp: true, level: true } });

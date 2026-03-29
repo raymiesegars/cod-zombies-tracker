@@ -97,6 +97,7 @@
     "db:revalidate-bo4-speedruns": "tsx scripts/revalidate-bo4-speedruns.ts",
     "db:revalidate-speedrun-achievements": "tsx scripts/revalidate-speedrun-achievements.ts",
     "db:revalidate-ww2-users": "tsx scripts/revalidate-ww2-users.ts",
+    "db:backfill-rank-ones": "tsx scripts/backfill-rank-one-counts.ts",
     "db:fetch-wiki-for-chatbot": "tsx scripts/fetch-wiki-for-chatbot.ts",
     "db:ingest-skrine-zombies-info": "tsx scripts/ingest-skrine-zombies-info.ts",
     "db:backfill-skrine-embeddings": "tsx scripts/backfill-skrine-embeddings.ts"

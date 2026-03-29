@@ -4,6 +4,7 @@ import { getUser } from '@/lib/supabase/server';
 import { isSuperAdmin } from '@/lib/admin';
 import { grantVerifiedAchievementsForMap } from '@/lib/verified-xp';
 import { adminXpForRun } from '@/lib/admin-levels';
+import { refreshStoredRankOneCountsForMap } from '@/lib/world-records';
 import { NotificationType } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
@@ -53,6 +54,7 @@ export async function POST(request: NextRequest) {
       });
       const isBo3Custom = mapWithGame?.game?.shortName === 'BO3_CUSTOM';
       const { verifiedTotalXp, verifiedCustomZombiesTotalXp, xpGained } = await grantVerifiedAchievementsForMap(log.userId, log.mapId, { recordMilestones: true });
+      await refreshStoredRankOneCountsForMap(log.mapId);
       await prisma.notification.create({
         data: {
           userId: log.userId,
@@ -94,6 +96,7 @@ export async function POST(request: NextRequest) {
     });
     const isBo3CustomEe = mapWithGameEe?.game?.shortName === 'BO3_CUSTOM';
     const { verifiedTotalXp, verifiedCustomZombiesTotalXp, xpGained } = await grantVerifiedAchievementsForMap(log.userId, log.mapId, { recordMilestones: true });
+    await refreshStoredRankOneCountsForMap(log.mapId);
     await prisma.notification.create({
       data: {
         userId: log.userId,
