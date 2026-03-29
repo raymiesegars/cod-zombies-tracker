@@ -64,6 +64,8 @@ type LogWithMeta = {
   rampageInducerUsed?: boolean | null;
   vanguardVoidUsed?: boolean | null;
   ww2ConsumablesUsed?: boolean | null;
+  firstRoomVariant?: string | null;
+  teammateUserIds?: string[];
 };
 
 type WRBucketEntry = { userId: string; value: number; isVerified: boolean; log: LogWithMeta };
@@ -164,6 +166,9 @@ function getFilterKeyVariants(log: LogWithMeta, gameShortName: string, mapSlug?:
     const consumables = log.ww2ConsumablesUsed;
     if (consumables !== undefined && consumables !== null) variants.push(`ww2consumables:${consumables}`);
   }
+  if (log.firstRoomVariant) {
+    variants.push(`frv:${log.firstRoomVariant}`);
+  }
 
   return Array.from(new Set(variants));
 }
@@ -195,6 +200,7 @@ function getFilterLabels(filterKey: string): string[] {
     else if (k === 'bank') labels.push(v === 'true' ? 'Bank Used' : 'No Bank');
     else if (k === 'ww2consumables') labels.push(v === 'true' ? 'With Consumables' : 'No Consumables');
     else if (k === 'vanguardVoid') labels.push(v === 'true' ? 'With Void' : 'Without Void');
+    else if (k === 'frv') labels.push(`First Room: ${v}`);
     else labels.push(`${k}: ${v}`);
   }
   return labels;
@@ -210,17 +216,28 @@ function aggregateRankOneCountsFromBuckets(
   filter?: RankOneScopeFilter
 ): Map<string, { worldRecords: number; verifiedWorldRecords: number }> {
   const counts = new Map<string, { worldRecords: number; verifiedWorldRecords: number }>();
+  const awardedByUserAndBoard = new Set<string>();
   const mapMatchesScope = (mapId: string): boolean => {
     if (!filter?.gameId && !filter?.mapId) return true;
     if (filter.mapId) return mapId === filter.mapId;
     const meta = state.mapById.get(mapId);
     return !!meta && meta.gameId === filter.gameId;
   };
-  const bump = (userId: string, verifiedOnlyBoard: boolean) => {
+  const bump = (leaderboardKey: string, userId: string, verifiedOnlyBoard: boolean) => {
+    const dedupeKey = `${leaderboardKey}::${userId}`;
+    if (awardedByUserAndBoard.has(dedupeKey)) return;
+    awardedByUserAndBoard.add(dedupeKey);
     const cur = counts.get(userId) ?? { worldRecords: 0, verifiedWorldRecords: 0 };
     if (verifiedOnlyBoard) cur.verifiedWorldRecords++;
     else cur.worldRecords++;
     counts.set(userId, cur);
+  };
+  const getWinnerUserIds = (ownerUserId: string, teammateUserIds?: string[]): string[] => {
+    const out = new Set<string>([ownerUserId]);
+    for (const id of teammateUserIds ?? []) {
+      if (id) out.add(id);
+    }
+    return Array.from(out);
   };
   const pickBest = (key: string, entries: WRBucketEntry[], isSpeedrun: boolean, isEe: boolean) => {
     if (entries.length === 0) return;
@@ -229,7 +246,10 @@ function aggregateRankOneCountsFromBuckets(
       isSpeedrun || isEe
         ? entries.reduce((a, b) => (a.value <= b.value ? a : b))
         : entries.reduce((a, b) => (a.value >= b.value ? a : b));
-    bump(best.userId, isVerifiedOnlyLeaderboardKey(key));
+    const verifiedOnlyBoard = isVerifiedOnlyLeaderboardKey(key);
+    for (const winnerUserId of getWinnerUserIds(best.userId, best.log.teammateUserIds)) {
+      bump(key, winnerUserId, verifiedOnlyBoard);
+    }
   };
   for (const [key, entries] of Array.from(state.challengeBuckets.entries())) {
     const ct = entries[0]?.log.challengeType ?? '';
@@ -241,7 +261,10 @@ function aggregateRankOneCountsFromBuckets(
   }
   for (const [key, data] of Array.from(state.hrByKey.entries())) {
     if (!mapMatchesScope(data.log.mapId)) continue;
-    bump(data.userId, isVerifiedOnlyLeaderboardKey(key));
+    const verifiedOnlyBoard = isVerifiedOnlyLeaderboardKey(key);
+    for (const winnerUserId of getWinnerUserIds(data.userId, data.log.teammateUserIds)) {
+      bump(key, winnerUserId, verifiedOnlyBoard);
+    }
   }
   return counts;
 }
@@ -452,6 +475,8 @@ async function buildWorldRecordBucketState(): Promise<WorldRecordBucketState> {
       completionTimeSeconds: true,
       killsReached: true,
       scoreReached: true,
+      firstRoomVariant: true,
+      teammateUserIds: true,
       isVerified: true,
       playerCount: true,
       difficulty: true,
@@ -492,6 +517,7 @@ async function buildWorldRecordBucketState(): Promise<WorldRecordBucketState> {
       rampageInducerUsed: true,
       vanguardVoidUsed: true,
       ww2ConsumablesUsed: true,
+      teammateUserIds: true,
       easterEgg: { select: { name: true } },
       map: { select: { slug: true, name: true, game: { select: { shortName: true } } } },
     },
@@ -516,12 +542,15 @@ async function buildWorldRecordBucketState(): Promise<WorldRecordBucketState> {
     rampageInducerUsed?: boolean | null;
     vanguardVoidUsed?: boolean | null;
     ww2ConsumablesUsed?: boolean | null;
+    firstRoomVariant?: string | null;
+    teammateUserIds?: string[];
   }>;
 
   const eeRaw = eeLogs as unknown as Array<{
     rampageInducerUsed?: boolean | null;
     vanguardVoidUsed?: boolean | null;
     ww2ConsumablesUsed?: boolean | null;
+    teammateUserIds?: string[];
   }>;
 
   const toLog = (
@@ -571,6 +600,8 @@ async function buildWorldRecordBucketState(): Promise<WorldRecordBucketState> {
         rampageInducerUsed: r.rampageInducerUsed,
         vanguardVoidUsed: r.vanguardVoidUsed,
         ww2ConsumablesUsed: r.ww2ConsumablesUsed,
+        firstRoomVariant: r.firstRoomVariant,
+        teammateUserIds: r.teammateUserIds ?? [],
       };
     } else {
       const e = log as (typeof eeLogs)[0];
@@ -596,6 +627,7 @@ async function buildWorldRecordBucketState(): Promise<WorldRecordBucketState> {
         vanguardVoidUsed: r.vanguardVoidUsed,
         ww2ConsumablesUsed: r.ww2ConsumablesUsed,
         difficulty: (e as { difficulty?: string | null }).difficulty ?? null,
+        teammateUserIds: r.teammateUserIds ?? [],
       };
     }
   };
@@ -787,7 +819,8 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
     const best = isSpeedrun || isEe
       ? entries.reduce((a, b) => (a.value <= b.value ? a : b))
       : entries.reduce((a, b) => (a.value >= b.value ? a : b));
-    if (best.userId !== userId) return;
+    const winnerUserIds = new Set<string>([best.userId, ...(best.log.teammateUserIds ?? [])]);
+    if (!winnerUserIds.has(userId)) return;
     if (isVerifiedOnlyLeaderboardKey(key)) verifiedWorldRecords++;
     else worldRecords++;
     const [prefix, filterKey] = key.includes('::') ? key.split('::') : [key, ''];
@@ -818,7 +851,8 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
   }
 
   for (const [key, data] of Array.from(hrByKey.entries())) {
-    if (data.userId !== userId) continue;
+    const winnerUserIds = new Set<string>([data.userId, ...(data.log.teammateUserIds ?? [])]);
+    if (!winnerUserIds.has(userId)) continue;
     if (isVerifiedOnlyLeaderboardKey(key)) verifiedWorldRecords++;
     else worldRecords++;
     const [prefix, filterKey] = key.includes('::') ? key.split('::') : [key, ''];

@@ -3,6 +3,39 @@ import prisma from '@/lib/prisma';
 import { slugify } from '@/lib/utils';
 import { getLevelFromXp } from '@/lib/ranks';
 
+const NAME_PREFIXES = [
+  'Perka',
+  'Round',
+  'Mystic',
+  'Aether',
+  'Zombie',
+  'Void',
+  'Omega',
+  'Arcane',
+  'Relic',
+  'Ghoul',
+];
+const NAME_SUFFIXES = [
+  'Slayer',
+  'Walker',
+  'Hunter',
+  'Runner',
+  'Player',
+  'Knight',
+  'Warden',
+  'Sprinter',
+  'Survivor',
+  'Striker',
+];
+
+function randomInt(max: number): number {
+  return Math.floor(Math.random() * max);
+}
+
+function buildRandomBaseName(): string {
+  return `${NAME_PREFIXES[randomInt(NAME_PREFIXES.length)]}${NAME_SUFFIXES[randomInt(NAME_SUFFIXES.length)]}`;
+}
+
 // Get profile by Supabase id (e.g. right after auth).
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -41,20 +74,16 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Create or update profile after sign-in. Username from email, uniquified if taken.
+// Create or update profile after sign-in.
 export async function POST(request: NextRequest) {
   let supabaseId = '';
   let email = '';
   let displayName: string | null = null;
-  let avatarUrl: string | null = null;
 
   try {
     const body = await request.json();
     supabaseId = typeof body.supabaseId === 'string' ? body.supabaseId.trim() : '';
     email = typeof body.email === 'string' ? body.email.trim() : '';
-    displayName = body.displayName != null ? String(body.displayName).trim() || null : null;
-    avatarUrl = body.avatarUrl != null ? String(body.avatarUrl).trim() || null : null;
-
     if (!supabaseId || !email) {
       return NextResponse.json(
         { error: 'supabaseId and email are required' },
@@ -62,20 +91,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const emailUsername = email.split('@')[0] ?? '';
-    let username = slugify(emailUsername);
+    let baseName = buildRandomBaseName();
+    let username = slugify(baseName);
+    let displayCandidate = baseName;
+
+    for (let i = 0; i < 8; i++) {
+      const exists = await prisma.user.findUnique({ where: { username } });
+      if (!exists || exists.supabaseId === supabaseId) break;
+      const suffix = Math.random().toString(36).slice(2, 6);
+      displayCandidate = `${baseName}${suffix.toUpperCase()}`;
+      username = slugify(`${baseName}-${suffix}`);
+    }
     if (!username) {
-      username = `user-${Date.now().toString(36)}`;
+      const fallback = Math.random().toString(36).slice(2, 9);
+      username = `player-${fallback}`;
+      displayCandidate = `Player${fallback.toUpperCase()}`;
     }
+    displayName = displayCandidate;
 
-    const existingByUsername = await prisma.user.findUnique({
-      where: { username },
-    });
-    if (existingByUsername && existingByUsername.supabaseId !== supabaseId) {
-      username = `${username}-${Date.now().toString(36)}`;
-    }
-
-    // Only set displayName/avatarUrl on create.
+    // On first login, force game-themed defaults instead of provider names/avatars.
     const user = await prisma.user.upsert({
       where: { supabaseId },
       update: {
@@ -86,7 +120,8 @@ export async function POST(request: NextRequest) {
         email,
         username,
         displayName,
-        avatarUrl,
+        avatarUrl: null,
+        avatarPreset: 'perkaholic',
       },
     });
 
