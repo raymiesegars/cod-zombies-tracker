@@ -14,12 +14,14 @@ type WorldRecordDetail = {
   playerCount: string;
   filters: string[];
   isVerified: boolean;
+  isVerifiedLeaderboard: boolean;
 };
 
 type WorldRecordsData = {
   worldRecords: number;
   verifiedWorldRecords: number;
   details: WorldRecordDetail[];
+  detailsUnavailable?: boolean;
 };
 
 const PLAYER_COUNT_LABEL: Record<string, string> = {
@@ -62,7 +64,7 @@ export function WorldRecordsModal({
 
   const details = data?.details ?? [];
   const filtered =
-    filterVerified === 'verified' ? details.filter((d) => d.isVerified) : details;
+    filterVerified === 'verified' ? details.filter((d) => d.isVerifiedLeaderboard) : details;
 
   return (
     <Modal
@@ -104,6 +106,11 @@ export function WorldRecordsModal({
               <ShieldCheck className="w-4 h-4" />
               Verified ({data.verifiedWorldRecords})
             </button>
+          </div>
+        )}
+        {!loading && data?.detailsUnavailable && (
+          <div className="rounded-lg border border-amber-700/40 bg-amber-950/20 px-3 py-2 text-xs text-amber-300">
+            Detailed rank 1 breakdown is temporarily unavailable. Totals are still accurate.
           </div>
         )}
 
@@ -155,7 +162,7 @@ export function WorldRecordsModal({
                             {item.filters.join(' · ')}
                           </span>
                         )}
-                        {item.isVerified && (
+                        {item.isVerifiedLeaderboard && (
                           <span className="inline-flex items-center gap-0.5 text-xs text-blue-400">
                             <ShieldCheck className="w-3 h-3" />
                             Verified

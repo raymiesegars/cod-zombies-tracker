@@ -21,6 +21,7 @@ export type WorldRecordDetail = {
   playerCount: PlayerCount;
   filters: string[];
   isVerified: boolean;
+  isVerifiedLeaderboard: boolean;
 };
 
 export type WorldRecordsDetailedResult = WorldRecordsResult & {
@@ -441,28 +442,28 @@ export async function getRankOneCountsByScope(
     const isFresh =
       stored.updatedAtMs != null &&
       now - stored.updatedAtMs <= maxAgeMs;
-    if (isFresh) {
-      scopeCountsCache.set(scopeKey, {
-        counts: stored.counts,
-        expiresAt: now + WR_CACHE_TTL_MS,
-      });
-      return stored.counts;
+    if (!isFresh) {
+      console.warn(
+        `[world-records] serving stale stored rank-one counts for scope="${scopeKey}" (ageMs=${stored.updatedAtMs != null ? now - stored.updatedAtMs : 'unknown'})`
+      );
     }
+    scopeCountsCache.set(scopeKey, {
+      counts: stored.counts,
+      expiresAt: now + WR_CACHE_TTL_MS,
+    });
+    return stored.counts;
   }
 
-  const liveCounts = filter?.gameId || filter?.mapId
-    ? await computeScopedRankOneCountsByUserId(filter)
-    : await computeRankOneCountsByUserId();
-  scopeCountsCache.set(scopeKey, {
-    counts: liveCounts,
-    expiresAt: now + WR_CACHE_TTL_MS,
-  });
-
-  if (stored !== null) {
-    await writeStoredRankOneCounts(liveCounts, filter);
+  if (stored && !stored.hasRows) {
+    scopeCountsCache.set(scopeKey, {
+      counts: stored.counts,
+      expiresAt: now + WR_CACHE_TTL_MS,
+    });
+    return stored.counts;
   }
 
-  return liveCounts;
+  // Table missing (pre-migration): avoid heavy live recompute in request path.
+  return new Map();
 }
 
 /** Compute world records across all leaderboard combinations (player count, game filters, verified) and optional details. Cached per user for 1 minute. */
@@ -861,6 +862,7 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
       playerCount: playerCount as PlayerCount,
       filters: getFilterLabels(filterKey),
       isVerified: best.isVerified,
+      isVerifiedLeaderboard: isVerifiedOnlyLeaderboardKey(key),
     });
   };
 
@@ -891,6 +893,7 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
         playerCount: playerCount as PlayerCount,
         filters: getFilterLabels(filterKey),
         isVerified: data.isVerified,
+        isVerifiedLeaderboard: isVerifiedOnlyLeaderboardKey(key),
       });
     }
   }
