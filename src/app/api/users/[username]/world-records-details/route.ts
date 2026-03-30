@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
-import { computeWorldRecordsDetailed } from '@/lib/world-records';
+import { computeWorldRecords, computeWorldRecordsDetailed } from '@/lib/world-records';
 
 /** GET /api/users/[username]/world-records-details
  * Returns the list of leaderboard combinations where the user is ranked #1.
@@ -30,11 +30,21 @@ export async function GET(
       return NextResponse.json({ error: 'Profile is private' }, { status: 403 });
     }
 
-    const result = await computeWorldRecordsDetailed(user.id);
+    let result;
+    let detailsUnavailable = false;
+    try {
+      result = await computeWorldRecordsDetailed(user.id);
+    } catch (detailsError) {
+      console.error('Error computing world records details; falling back to totals only:', detailsError);
+      const totals = await computeWorldRecords(user.id);
+      result = { ...totals, details: [] };
+      detailsUnavailable = true;
+    }
     return NextResponse.json({
       worldRecords: result.worldRecords,
       verifiedWorldRecords: result.verifiedWorldRecords,
       details: result.details,
+      detailsUnavailable,
     });
   } catch (error) {
     console.error('Error fetching world records details:', error);

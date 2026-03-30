@@ -107,6 +107,7 @@ export default function LeaderboardsPage() {
   const [loadMoreLoading, setLoadMoreLoading] = useState(false);
   const loadMoreSentinelRef = useRef<HTMLDivElement>(null);
   const loadingMoreRef = useRef(false);
+  const leaderboardFetchSeqRef = useRef(0);
 
   const [selectedGame, setSelectedGame] = useState(RANK_VIEW);
   const [selectedMap, setSelectedMap] = useState('');
@@ -222,12 +223,15 @@ export default function LeaderboardsPage() {
 
   useEffect(() => {
     async function fetchLeaderboard() {
+      const fetchSeq = ++leaderboardFetchSeqRef.current;
       if (leaderboardTab === 'hall') {
         setIsLoading(false);
         return;
       }
       if (leaderboardTab === 'best') {
         setIsLoading(true);
+        setLeaderboard([]);
+        setTotal(0);
         try {
           const params = new URLSearchParams();
           params.set('offset', '0');
@@ -240,8 +244,10 @@ export default function LeaderboardsPage() {
             ? '/api/leaderboards/rank-ones'
             : '/api/leaderboards/hall-of-fame-xp';
           const res = await fetch(`${endpoint}?${params}`, { cache: 'no-store' });
+          if (fetchSeq !== leaderboardFetchSeqRef.current) return;
           if (res.ok) {
             const data = await res.json();
+            if (fetchSeq !== leaderboardFetchSeqRef.current) return;
             setTotal(data.total ?? 0);
             setLeaderboard(data.entries ?? []);
           } else {
@@ -251,6 +257,7 @@ export default function LeaderboardsPage() {
         } catch (error) {
           console.error('Error fetching hall-of-fame leaderboard:', error);
         } finally {
+          if (fetchSeq !== leaderboardFetchSeqRef.current) return;
           setIsLoading(false);
         }
         return;
@@ -261,6 +268,8 @@ export default function LeaderboardsPage() {
       }
       if (isRankView) {
         setIsLoading(true);
+        setLeaderboard([]);
+        setTotal(0);
         try {
           const params = new URLSearchParams();
           params.set('offset', '0');
@@ -269,14 +278,17 @@ export default function LeaderboardsPage() {
           if (xpType === 'verified' || xpType === 'verifiedCustomZombies') params.set('verified', '1');
           params.set('xpType', xpType);
           const res = await fetch(`/api/leaderboards/rank?${params}`, { cache: 'no-store' });
+          if (fetchSeq !== leaderboardFetchSeqRef.current) return;
           if (res.ok) {
             const data = await res.json();
+            if (fetchSeq !== leaderboardFetchSeqRef.current) return;
             setTotal(data.total ?? 0);
             setLeaderboard(data.entries ?? []);
           }
         } catch (error) {
           console.error('Error fetching rank leaderboard:', error);
         } finally {
+          if (fetchSeq !== leaderboardFetchSeqRef.current) return;
           setIsLoading(false);
         }
         return;
@@ -306,8 +318,10 @@ export default function LeaderboardsPage() {
           if (hasVanguardVoid && (vanguardVoidFilter === 'true' || vanguardVoidFilter === 'false')) params.set('vanguardVoidUsed', vanguardVoidFilter);
           if (isWw2Map && (ww2ConsumablesFilter === 'true' || ww2ConsumablesFilter === 'false')) params.set('ww2ConsumablesUsed', ww2ConsumablesFilter);
           const res = await fetch(`/api/maps/${selectedMap}/easter-egg-leaderboard?${params}`);
+          if (fetchSeq !== leaderboardFetchSeqRef.current) return;
           if (res.ok) {
             const data = await res.json();
+            if (fetchSeq !== leaderboardFetchSeqRef.current) return;
             const verifiedTotal = data.verifiedTotal ?? 0;
             const unverifiedTotal = data.unverifiedTotal ?? 0;
             if (verifiedTotal === 0 && unverifiedTotal > 0 && verifiedOnly) {
@@ -370,8 +384,10 @@ export default function LeaderboardsPage() {
           if ((isBocwMap || isBo6Map || isBo7Map || hasVanguardRampage) && (rampageInducerFilter === 'true' || rampageInducerFilter === 'false')) params.set('rampageInducerUsed', rampageInducerFilter);
           if (hasVanguardVoid && (vanguardVoidFilter === 'true' || vanguardVoidFilter === 'false')) params.set('vanguardVoidUsed', vanguardVoidFilter);
           const res = await fetch(`/api/maps/${selectedMap}/leaderboard?${params}`);
+          if (fetchSeq !== leaderboardFetchSeqRef.current) return;
           if (res.ok) {
             const data = await res.json();
+            if (fetchSeq !== leaderboardFetchSeqRef.current) return;
             const verifiedTotal = data.verifiedTotal ?? 0;
             const unverifiedTotal = data.unverifiedTotal ?? 0;
             if (verifiedTotal === 0 && unverifiedTotal > 0 && verifiedOnly) {
@@ -387,6 +403,7 @@ export default function LeaderboardsPage() {
       } catch (error) {
         console.error('Error fetching leaderboard:', error);
       } finally {
+        if (fetchSeq !== leaderboardFetchSeqRef.current) return;
         setIsLoading(false);
       }
     }
