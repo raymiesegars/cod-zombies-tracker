@@ -62,8 +62,9 @@ export function LeaderboardEntry({
   /** For RUSH leaderboards, value is score */
   const scoreValue = valueKind === 'score' ? Number(entry.value) : null;
   const showTime = valueKind === 'time' && timeSeconds != null && Number.isFinite(timeSeconds) && timeSeconds >= 0;
-  /** Time leaderboards: value column needs min width so "1:23:45" is never truncated; use 7rem min */
-  const valueColWidth = valueKind === 'time' ? 'minmax(7rem,1fr)' : '5.5rem';
+  /** Time leaderboards need a wider value column so "1:23:45" never truncates. */
+  const hasTimeValueCol = valueKind === 'time';
+  const isTightSpeedrunRow = valueKind === 'time' && !hidePlayerCount;
   const verifiedBadgeTitle = showVerifiedBadge
     ? valueKind === 'rankOneCount'
       ? 'Verified rank 1'
@@ -71,6 +72,10 @@ export function LeaderboardEntry({
     : 'Verified run';
 
   // <400px: 4 cols. 400–768px: 5 cols. 771px+: 6 cols. lg: +full value. Fixed/min widths on value columns so Solo/Duo/Trio/Squad and round digits align vertically.
+  const hasRightSlotsGridClass = hasTimeValueCol
+    ? 'grid-cols-[2rem_1.5rem_minmax(5rem,1fr)_auto] min-[400px]:grid-cols-[2rem_1.5rem_1.75rem_minmax(6rem,1fr)_auto] md:grid-cols-[2rem_2rem_2rem_minmax(7rem,1fr)_auto] min-[771px]:grid-cols-[2rem_auto_2rem_2rem_minmax(0,1fr)_minmax(7rem,1fr)] lg:grid-cols-[2.5rem_auto_2.5rem_2.25rem_minmax(0,1fr)_minmax(0,1fr)]'
+    : 'grid-cols-[2rem_1.5rem_minmax(0,1fr)_5.5rem] min-[400px]:grid-cols-[2rem_1.5rem_1.75rem_minmax(0,1fr)_5.5rem] md:grid-cols-[2rem_2rem_2rem_minmax(0,1fr)_5.5rem] min-[771px]:grid-cols-[2rem_auto_2rem_2rem_minmax(0,1fr)_5.5rem] lg:grid-cols-[2.5rem_auto_2.5rem_2.25rem_minmax(0,1fr)_minmax(0,1fr)]';
+
   const gridClass = cn(
     'grid items-center gap-x-3 p-3 sm:p-3 md:p-4 rounded-lg transition-colors min-h-[3.25rem] sm:min-h-[3.5rem] min-w-0 w-full overflow-hidden',
     isCurrentUser
@@ -80,7 +85,7 @@ export function LeaderboardEntry({
     hidePlayerCount
       ? 'grid-cols-[2rem_1.5rem_minmax(0,1fr)_minmax(0,5.5rem)] min-[400px]:grid-cols-[2rem_1.5rem_1.75rem_minmax(0,1fr)_minmax(0,5.5rem)] md:grid-cols-[2rem_2rem_2rem_minmax(0,1fr)_minmax(0,5.5rem)] min-[771px]:grid-cols-[2rem_auto_2rem_2rem_minmax(0,1fr)_minmax(0,5.5rem)] lg:grid-cols-[2.5rem_auto_2.5rem_2.25rem_minmax(0,1fr)_minmax(0,6.5rem)]'
       : hasRightSlots
-        ? `grid-cols-[2rem_1.5rem_minmax(0,1fr)_${valueColWidth}] min-[400px]:grid-cols-[2rem_1.5rem_1.75rem_minmax(0,1fr)_${valueColWidth}] md:grid-cols-[2rem_2rem_2rem_minmax(0,1fr)_${valueColWidth}] min-[771px]:grid-cols-[2rem_auto_2rem_2rem_minmax(0,1fr)_${valueColWidth}] lg:grid-cols-[2.5rem_auto_2.5rem_2.25rem_minmax(0,1fr)_minmax(0,1fr)]`
+        ? hasRightSlotsGridClass
         : 'grid-cols-[2rem_1.5rem_minmax(0,1fr)_5.5rem] min-[400px]:grid-cols-[2rem_1.5rem_1.75rem_minmax(0,1fr)_5.5rem] md:grid-cols-[2rem_2rem_2rem_minmax(0,1fr)_5.5rem] min-[771px]:grid-cols-[2rem_auto_2rem_2rem_minmax(0,1fr)_5.5rem] lg:grid-cols-[2.5rem_auto_2.5rem_2.25rem_minmax(0,1fr)_auto_5.5rem]'
   );
 
@@ -129,7 +134,7 @@ export function LeaderboardEntry({
       </div>
 
       {/* Avatar – always visible, scaled for mobile */}
-      <div className="flex items-center justify-center flex-shrink-0">
+      <div className={cn('flex items-center justify-center flex-shrink-0', isTightSpeedrunRow && 'min-w-0')}>
         <Avatar
           src={getDisplayAvatarUrl(entry.user)}
           fallback={displayName}
@@ -148,7 +153,14 @@ export function LeaderboardEntry({
           {displayName}
         </Link>
         {(showVerifiedBadge || (entry as LeaderboardEntryType & { isVerified?: boolean }).isVerified) && (
-          <span className="flex-shrink-0 min-w-[1rem] w-4 h-4 inline-grid place-items-center rounded-full bg-blue-500/90 text-white" title={verifiedBadgeTitle} aria-hidden>
+          <span
+            className={cn(
+              'flex-shrink-0 min-w-[1rem] w-4 h-4 inline-grid place-items-center rounded-full bg-blue-500/90 text-white',
+              isTightSpeedrunRow && 'max-[313px]:hidden'
+            )}
+            title={verifiedBadgeTitle}
+            aria-hidden
+          >
             <ShieldCheck className="w-2.5 h-2.5 block shrink-0" strokeWidth={2.5} />
           </span>
         )}
@@ -189,7 +201,12 @@ export function LeaderboardEntry({
         valueKind === 'rankOneCount' ||
         valueKind === 'time' ||
         valueKind === 'score') && (
-        <div className={cn('min-w-0 flex items-center justify-end flex-shrink-0', valueKind === 'time' ? 'pr-4' : 'pr-2 sm:pr-0')}>
+        <div
+          className={cn(
+            'min-w-0 flex items-center justify-end flex-shrink-0 justify-self-end',
+            valueKind === 'time' ? 'pr-1 sm:pr-2 md:pr-3 lg:pr-4' : 'pr-2 sm:pr-0'
+          )}
+        >
           {valueKind === 'rankOneCount' ? (
             <span className="inline-flex items-center justify-end gap-1.5 tabular-nums">
               <span className="text-xs sm:text-sm font-semibold text-military-400 leading-none whitespace-nowrap lg:text-base">

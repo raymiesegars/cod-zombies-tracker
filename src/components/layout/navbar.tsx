@@ -7,6 +7,7 @@ import { useAuth } from '@/context/auth-context';
 import { useShowLoadingAfter } from '@/hooks/use-show-loading-after';
 import { Button, Logo, MapIcon, MysteryBoxIcon } from '@/components/ui';
 import { UserWithRank } from '@/components/game';
+import { cn } from '@/lib/utils';
 import { NotificationsDropdown } from '@/components/layout/notifications-dropdown';
 import { ChatbotTrigger } from '@/components/chatbot/chatbot-trigger';
 import { useChatbot } from '@/context/chatbot-context';
@@ -44,10 +45,11 @@ export function Navbar() {
   const iconOnlyClass =
     'inline-flex items-center justify-center p-2 rounded-lg border border-transparent text-bunker-200 hover:text-white hover:bg-white/5 hover:border-bunker-600/60 transition-colors shrink-0';
 
-  const navLinks: { href: string; label: string; icon: React.ComponentType<{ className?: string }>; iconClass: string }[] = [
+  const navLinks: { href: string; label: string; icon: React.ComponentType<{ className?: string }>; iconClass: string; labelClass?: string }[] = [
     { href: '/maps', label: 'Maps', icon: MapIcon, iconClass: 'text-blood-400' },
     { href: '/leaderboards', label: 'Leaderboards', icon: Trophy, iconClass: 'text-amber-400' },
     { href: '/tournaments', label: 'Tourney', icon: Medal, iconClass: 'text-amber-500' },
+    { href: '/find-group', label: 'LFG', icon: Users, iconClass: 'text-element-300', labelClass: 'min-[1110px]:inline' },
   ];
 
   return (
@@ -70,10 +72,19 @@ export function Navbar() {
           <div className="hidden navbar:flex flex-1 items-center justify-center gap-px min-w-0 overflow-visible ml-1">
             {navLinks.map((link) => {
               const Icon = link.icon;
+              const isLfg = link.href === '/find-group';
               return (
-                <Link key={link.href} href={link.href} className={`${linkClass} inline-flex items-center gap-1`} aria-label={link.label}>
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    `${linkClass} inline-flex items-center gap-1`,
+                    isLfg && 'border-element-700/60 bg-element-950/30 hover:bg-element-900/40 hover:border-element-600/70'
+                  )}
+                  aria-label={link.label}
+                >
                   <Icon className={`w-4 h-4 flex-shrink-0 ${link.iconClass}`} />
-                  <span className="hidden min-[1230px]:inline">{link.label}</span>
+                  <span className={cn('hidden min-[1230px]:inline', link.labelClass)}>{link.label}</span>
                 </Link>
               );
             })}
@@ -123,14 +134,6 @@ export function Navbar() {
                         <DiscordIcon className="w-4 h-4 flex-shrink-0" />
                         Discord
                       </a>
-                      <Link
-                        href="/find-group"
-                        onClick={() => setIsMoreMenuOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-white hover:text-blood-400 hover:bg-bunker-800/50"
-                      >
-                        <Users className="w-4 h-4 flex-shrink-0 text-element-400" />
-                        LFG
-                      </Link>
                       <Link
                         href="/tools"
                         onClick={() => setIsMoreMenuOpen(false)}
@@ -348,7 +351,7 @@ export function Navbar() {
                   Log Progress
                 </button>
               )}
-              {/* Main nav: Maps, Leaderboards, Tourney, LFG */}
+              {/* Main nav: Maps, Leaderboards, LFG */}
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -388,7 +391,7 @@ export function Navbar() {
                 <MysteryBoxIcon className="w-5 h-5 flex-shrink-0 text-current" />
                 Mystery Box
               </Link>
-              {/* Discord + LFG + Tools */}
+              {/* Community + utilities */}
               <a
                 href={DISCORD_URL}
                 target="_blank"
@@ -400,15 +403,6 @@ export function Navbar() {
                 <DiscordIcon className="w-5 h-5 flex-shrink-0" />
                 Discord
               </a>
-              <Link
-                href="/find-group"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 min-h-[44px] text-base font-zombies text-white hover:text-blood-400 hover:bg-bunker-800/50 rounded-lg transition-colors tracking-wide touch-manipulation"
-                aria-label="Find Group"
-              >
-                <Users className="w-5 h-5 flex-shrink-0 text-element-400" />
-                LFG
-              </Link>
               <Link
                 href="/tools"
                 onClick={() => setIsMobileMenuOpen(false)}
