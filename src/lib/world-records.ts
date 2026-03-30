@@ -75,7 +75,7 @@ export type WorldRecordBucketState = {
   mapById: Map<string, { slug: string; name: string; gameId: string; gameShortName: string }>;
   challengeBuckets: Map<string, WRBucketEntry[]>;
   eeBuckets: Map<string, WRBucketEntry[]>;
-  hrByKey: Map<string, { userId: string; round: number; isVerified: boolean; log: LogWithMeta }>;
+  hrByKey: Map<string, { round: number; entries: WRBucketEntry[] }>;
 };
 
 function getFilterKeyVariants(log: LogWithMeta, gameShortName: string, mapSlug?: string): string[] {
@@ -243,13 +243,16 @@ function aggregateRankOneCountsFromBuckets(
   const pickBest = (key: string, entries: WRBucketEntry[], isSpeedrun: boolean, isEe: boolean) => {
     if (entries.length === 0) return;
     if (!mapMatchesScope(entries[0]!.log.mapId)) return;
-    const best =
-      isSpeedrun || isEe
-        ? entries.reduce((a, b) => (a.value <= b.value ? a : b))
-        : entries.reduce((a, b) => (a.value >= b.value ? a : b));
+    const bestValue = entries.reduce((best, entry) => {
+      if (isSpeedrun || isEe) return entry.value < best ? entry.value : best;
+      return entry.value > best ? entry.value : best;
+    }, entries[0]!.value);
+    const bestEntries = entries.filter((entry) => entry.value === bestValue);
     const verifiedOnlyBoard = isVerifiedOnlyLeaderboardKey(key);
-    for (const winnerUserId of getWinnerUserIds(best.userId, best.log.teammateUserIds)) {
-      bump(key, winnerUserId, verifiedOnlyBoard);
+    for (const bestEntry of bestEntries) {
+      for (const winnerUserId of getWinnerUserIds(bestEntry.userId, bestEntry.log.teammateUserIds)) {
+        bump(key, winnerUserId, verifiedOnlyBoard);
+      }
     }
   };
   for (const [key, entries] of Array.from(state.challengeBuckets.entries())) {
@@ -261,10 +264,13 @@ function aggregateRankOneCountsFromBuckets(
     pickBest(key, entries, true, true);
   }
   for (const [key, data] of Array.from(state.hrByKey.entries())) {
-    if (!mapMatchesScope(data.log.mapId)) continue;
+    const scopedEntries = data.entries.filter((entry) => mapMatchesScope(entry.log.mapId));
+    if (scopedEntries.length === 0) continue;
     const verifiedOnlyBoard = isVerifiedOnlyLeaderboardKey(key);
-    for (const winnerUserId of getWinnerUserIds(data.userId, data.log.teammateUserIds)) {
-      bump(key, winnerUserId, verifiedOnlyBoard);
+    for (const entry of scopedEntries) {
+      for (const winnerUserId of getWinnerUserIds(entry.userId, entry.log.teammateUserIds)) {
+        bump(key, winnerUserId, verifiedOnlyBoard);
+      }
     }
   }
   return counts;
@@ -715,7 +721,17 @@ async function buildWorldRecordBucketState(): Promise<WorldRecordBucketState> {
 
   const hrChallengeLogs = challengeLogs.filter((l) => (l.challenge?.type ?? '') === 'HIGHEST_ROUND');
   const hrEeLogs = eeLogs.filter((e) => (e as { roundCompleted?: number | null }).roundCompleted != null);
-  const hrByKey = new Map<string, { userId: string; round: number; isVerified: boolean; log: LogWithMeta }>();
+  const hrByKey = new Map<string, { round: number; entries: WRBucketEntry[] }>();
+  const upsertHrEntry = (key: string, round: number, entry: WRBucketEntry) => {
+    const existing = hrByKey.get(key);
+    if (!existing || round > existing.round) {
+      hrByKey.set(key, { round, entries: [entry] });
+      return;
+    }
+    if (round === existing.round) {
+      existing.entries.push(entry);
+    }
+  };
   for (const e of hrEeLogs) {
     const round = (e as { roundCompleted?: number | null }).roundCompleted;
     if (round == null) continue;
@@ -729,15 +745,12 @@ async function buildWorldRecordBucketState(): Promise<WorldRecordBucketState> {
       for (const verifiedView of [true, false]) {
         if (verifiedView && !e.isVerified) continue;
         const key = `hr:${e.mapId}:${e.playerCount}:${verifiedView}::${fv}`;
-        const existing = hrByKey.get(key);
-        if (!existing || round > existing.round) {
-          hrByKey.set(key, {
-            userId: e.userId,
-            round,
-            isVerified: e.isVerified ?? false,
-            log: { ...log, roundReached: round },
-          });
-        }
+        upsertHrEntry(key, round, {
+          userId: e.userId,
+          value: -round,
+          isVerified: e.isVerified ?? false,
+          log: { ...log, roundReached: round },
+        });
       }
     }
   }
@@ -751,16 +764,13 @@ async function buildWorldRecordBucketState(): Promise<WorldRecordBucketState> {
       for (const verifiedView of [true, false]) {
         if (verifiedView && !c.isVerified) continue;
         const key = `hr:${c.mapId}:${c.playerCount}:${verifiedView}::${fv}`;
-        const existing = hrByKey.get(key);
         const round = log.roundReached;
-        if (!existing || round > existing.round) {
-          hrByKey.set(key, {
-            userId: c.userId,
-            round,
-            isVerified: c.isVerified ?? false,
-            log,
-          });
-        }
+        upsertHrEntry(key, round, {
+          userId: c.userId,
+          value: -round,
+          isVerified: c.isVerified ?? false,
+          log,
+        });
       }
     }
   }
@@ -842,27 +852,40 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
     isEe: boolean
   ) => {
     if (entries.length === 0) return;
-    const best = isSpeedrun || isEe
-      ? entries.reduce((a, b) => (a.value <= b.value ? a : b))
-      : entries.reduce((a, b) => (a.value >= b.value ? a : b));
-    const winnerUserIds = new Set<string>([best.userId, ...(best.log.teammateUserIds ?? [])]);
+    const bestValue = entries.reduce((best, entry) => {
+      if (isSpeedrun || isEe) return entry.value < best ? entry.value : best;
+      return entry.value > best ? entry.value : best;
+    }, entries[0]!.value);
+    const bestEntries = entries.filter((entry) => entry.value === bestValue);
+    const winnerUserIds = new Set<string>();
+    for (const bestEntry of bestEntries) {
+      winnerUserIds.add(bestEntry.userId);
+      for (const teammateUserId of bestEntry.log.teammateUserIds ?? []) {
+        if (teammateUserId) winnerUserIds.add(teammateUserId);
+      }
+    }
     if (!winnerUserIds.has(userId)) return;
-    if (isVerifiedOnlyLeaderboardKey(key)) verifiedWorldRecords++;
+    const isVerifiedLeaderboard = isVerifiedOnlyLeaderboardKey(key);
+    if (isVerifiedLeaderboard) verifiedWorldRecords++;
     else worldRecords++;
     const [prefix, filterKey] = key.includes('::') ? key.split('::') : [key, ''];
     const [, mapId, , playerCount] = prefix.split(':');
-    const log = best.log;
+    const representativeLog = bestEntries[0]!.log;
     const mapMeta = mapById.get(mapId);
     if (!mapMeta) return;
-    const challengeLabel = isEe ? log.easterEggName ?? 'EE Time' : log.challengeType === 'HIGHEST_ROUND' ? 'Highest Round' : challengeTypeLabels[log.challengeType] ?? log.challengeName;
+    const challengeLabel = isEe
+      ? representativeLog.easterEggName ?? 'EE Time'
+      : representativeLog.challengeType === 'HIGHEST_ROUND'
+        ? 'Highest Round'
+        : challengeTypeLabels[representativeLog.challengeType] ?? representativeLog.challengeName;
     details.push({
       mapSlug: mapMeta.slug,
       mapName: mapMeta.name,
       challengeLabel,
       playerCount: playerCount as PlayerCount,
       filters: getFilterLabels(filterKey),
-      isVerified: best.isVerified,
-      isVerifiedLeaderboard: isVerifiedOnlyLeaderboardKey(key),
+      isVerified: bestEntries.some((entry) => entry.isVerified),
+      isVerifiedLeaderboard,
     });
   };
 
@@ -878,13 +901,21 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
   }
 
   for (const [key, data] of Array.from(hrByKey.entries())) {
-    const winnerUserIds = new Set<string>([data.userId, ...(data.log.teammateUserIds ?? [])]);
+    const winnerUserIds = new Set<string>();
+    for (const entry of data.entries) {
+      winnerUserIds.add(entry.userId);
+      for (const teammateUserId of entry.log.teammateUserIds ?? []) {
+        if (teammateUserId) winnerUserIds.add(teammateUserId);
+      }
+    }
     if (!winnerUserIds.has(userId)) continue;
-    if (isVerifiedOnlyLeaderboardKey(key)) verifiedWorldRecords++;
+    const isVerifiedLeaderboard = isVerifiedOnlyLeaderboardKey(key);
+    if (isVerifiedLeaderboard) verifiedWorldRecords++;
     else worldRecords++;
     const [prefix, filterKey] = key.includes('::') ? key.split('::') : [key, ''];
     const [, mapId, , playerCount] = prefix.split(':');
     const mapMeta = mapById.get(mapId);
+    const isVerified = data.entries.some((entry) => entry.isVerified);
     if (mapMeta) {
       details.push({
         mapSlug: mapMeta.slug,
@@ -892,8 +923,8 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
         challengeLabel: 'Highest Round',
         playerCount: playerCount as PlayerCount,
         filters: getFilterLabels(filterKey),
-        isVerified: data.isVerified,
-        isVerifiedLeaderboard: isVerifiedOnlyLeaderboardKey(key),
+        isVerified,
+        isVerifiedLeaderboard,
       });
     }
   }
