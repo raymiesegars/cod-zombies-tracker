@@ -21,6 +21,7 @@ export type WorldRecordDetail = {
   playerCount: PlayerCount;
   filters: string[];
   isVerified: boolean;
+  isVerifiedLeaderboard: boolean;
 };
 
 export type WorldRecordsDetailedResult = WorldRecordsResult & {
@@ -861,6 +862,7 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
       playerCount: playerCount as PlayerCount,
       filters: getFilterLabels(filterKey),
       isVerified: best.isVerified,
+      isVerifiedLeaderboard: isVerifiedOnlyLeaderboardKey(key),
     });
   };
 
@@ -891,6 +893,7 @@ export async function computeWorldRecordsDetailed(userId: string): Promise<World
         playerCount: playerCount as PlayerCount,
         filters: getFilterLabels(filterKey),
         isVerified: data.isVerified,
+        isVerifiedLeaderboard: isVerifiedOnlyLeaderboardKey(key),
       });
     }
   }

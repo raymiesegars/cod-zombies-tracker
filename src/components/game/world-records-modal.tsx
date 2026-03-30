@@ -14,6 +14,7 @@ type WorldRecordDetail = {
   playerCount: string;
   filters: string[];
   isVerified: boolean;
+  isVerifiedLeaderboard: boolean;
 };
 
 type WorldRecordsData = {
@@ -63,7 +64,7 @@ export function WorldRecordsModal({
 
   const details = data?.details ?? [];
   const filtered =
-    filterVerified === 'verified' ? details.filter((d) => d.isVerified) : details;
+    filterVerified === 'verified' ? details.filter((d) => d.isVerifiedLeaderboard) : details;
 
   return (
     <Modal
@@ -161,7 +162,7 @@ export function WorldRecordsModal({
                             {item.filters.join(' · ')}
                           </span>
                         )}
-                        {item.isVerified && (
+                        {item.isVerifiedLeaderboard && (
                           <span className="inline-flex items-center gap-0.5 text-xs text-blue-400">
                             <ShieldCheck className="w-3 h-3" />
                             Verified
