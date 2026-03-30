@@ -18,6 +18,7 @@
  *   pnpm db:sync-achievements --dry-run # Log what would be created/updated, no writes
  *   pnpm db:sync-achievements --prune   # Also deactivate achievements not in defs (DANGEROUS: can remove splits)
  *   GAMES=BO4,BOCW,BO6,BO7 pnpm db:sync-achievements   # Only sync maps for these games (faster, targeted)
+ *   MAP_SLUGS=tranzit,die-rise pnpm db:sync-achievements # Only these maps (narrowest scope)
  */
 
 import * as fs from 'fs';
@@ -59,6 +60,10 @@ const ENABLE_PRUNE = process.argv.includes('--prune');
 const GAMES_FILTER = process.env.GAMES?.trim()
   ? new Set(process.env.GAMES.split(',').map((g) => g.trim()).filter(Boolean))
   : null;
+/** Optional: comma-separated map slugs, e.g. MAP_SLUGS=tranzit,die-rise */
+const MAP_SLUGS_FILTER = process.env.MAP_SLUGS?.trim()
+  ? new Set(process.env.MAP_SLUGS.split(',').map((s) => s.trim()).filter(Boolean))
+  : null;
 
 async function main() {
   const dbUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
@@ -76,6 +81,9 @@ async function main() {
   if (GAMES_FILTER) {
     console.log(`Filtering to games: ${Array.from(GAMES_FILTER).join(', ')}\n`);
   }
+  if (MAP_SLUGS_FILTER) {
+    console.log(`Filtering to map slugs: ${Array.from(MAP_SLUGS_FILTER).join(', ')}\n`);
+  }
 
   const allMaps = await prisma.map.findMany({
     include: {
@@ -85,15 +93,18 @@ async function main() {
     },
   });
 
-  const maps = GAMES_FILTER
-    ? allMaps.filter((m) => m.game && GAMES_FILTER.has(m.game.shortName))
-    : allMaps;
-  if (GAMES_FILTER && maps.length === 0) {
-    console.log('No maps match the GAMES filter.');
+  const maps = allMaps.filter((m) => {
+    if (GAMES_FILTER && (!m.game || !GAMES_FILTER.has(m.game.shortName))) return false;
+    if (MAP_SLUGS_FILTER && !MAP_SLUGS_FILTER.has(m.slug)) return false;
+    return true;
+  });
+  if (maps.length === 0) {
+    const reason = GAMES_FILTER || MAP_SLUGS_FILTER ? 'provided filters' : 'current configuration';
+    console.log(`No maps match ${reason}.`);
     await prisma.$disconnect();
     return;
   }
-  if (GAMES_FILTER) {
+  if (GAMES_FILTER || MAP_SLUGS_FILTER) {
     console.log(`Processing ${maps.length} maps (of ${allMaps.length} total).\n`);
   }
 

@@ -15,6 +15,7 @@
  *   pnpm db:recompute-verified-xp --dry-run # Preview without writing
  *   BACKFILL_USER_ID=userId pnpm db:recompute-verified-xp [--dry-run]  # Only that user (clear/grant/recalc for them only)
  *   BACKFILL_GAMES=BO4,BOCW,BO6,BO7 pnpm db:recompute-verified-xp     # Only maps in these games + recalc only affected users (faster)
+ *   BACKFILL_MAP_SLUGS=tranzit,die-rise pnpm db:recompute-verified-xp  # Only these map slugs
  */
 
 import * as fs from 'fs';
@@ -45,6 +46,10 @@ const filterUserId = process.env.BACKFILL_USER_ID?.trim();
 const backfillGames = process.env.BACKFILL_GAMES?.trim()
   ? new Set(process.env.BACKFILL_GAMES.split(',').map((g) => g.trim()).filter(Boolean))
   : null;
+/** Optional: comma-separated map slugs — intersects with BACKFILL_GAMES if both are set. */
+const backfillMapSlugs = process.env.BACKFILL_MAP_SLUGS?.trim()
+  ? new Set(process.env.BACKFILL_MAP_SLUGS.split(',').map((s) => s.trim()).filter(Boolean))
+  : null;
 
 async function main() {
   const dbUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
@@ -63,15 +68,23 @@ async function main() {
   if (backfillGames) {
     console.log(`Filtering to games: ${Array.from(backfillGames).join(', ')}\n`);
   }
+  if (backfillMapSlugs) {
+    console.log(`Filtering to map slugs: ${Array.from(backfillMapSlugs).join(', ')}\n`);
+  }
 
   let allowedMapIds: Set<string> | null = null;
-  if (backfillGames) {
+  if (backfillGames || backfillMapSlugs) {
     const maps = await prisma.map.findMany({
-      where: { game: { shortName: { in: Array.from(backfillGames) } } },
+      where: {
+        ...(backfillGames
+          ? { game: { shortName: { in: Array.from(backfillGames) } } }
+          : {}),
+        ...(backfillMapSlugs ? { slug: { in: Array.from(backfillMapSlugs) } } : {}),
+      },
       select: { id: true },
     });
     allowedMapIds = new Set(maps.map((m) => m.id));
-    console.log(`  ${allowedMapIds.size} maps in selected games.\n`);
+    console.log(`  ${allowedMapIds.size} maps in selected filters.\n`);
   }
 
   const baseWhere = filterUserId ? { isVerified: true, userId: filterUserId } : { isVerified: true };

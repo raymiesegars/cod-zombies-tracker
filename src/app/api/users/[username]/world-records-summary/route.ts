@@ -62,15 +62,6 @@ export async function GET(
     }
 
     const cached = parseCachedWorldRecords(user.profileStatBlocks);
-    const isCacheFresh =
-      cached?.updatedAtMs != null &&
-      Date.now() - cached.updatedAtMs < WR_PROFILE_CACHE_MAX_AGE_MS;
-    if (cached && isCacheFresh) {
-      return NextResponse.json({
-        worldRecords: cached.worldRecords,
-        verifiedWorldRecords: cached.verifiedWorldRecords,
-      });
-    }
 
     let result;
     try {
@@ -83,18 +74,6 @@ export async function GET(
         });
       }
       throw computeError;
-    }
-    if (
-      cached &&
-      cached.worldRecords > 0 &&
-      cached.verifiedWorldRecords >= 0 &&
-      result.worldRecords === 0 &&
-      result.verifiedWorldRecords === 0
-    ) {
-      return NextResponse.json({
-        worldRecords: cached.worldRecords,
-        verifiedWorldRecords: cached.verifiedWorldRecords,
-      });
     }
     const existingBlocks =
       typeof user.profileStatBlocks === 'object' && user.profileStatBlocks !== null
@@ -116,7 +95,8 @@ export async function GET(
       !cached ||
       cached.worldRecords !== result.worldRecords ||
       cached.verifiedWorldRecords !== result.verifiedWorldRecords ||
-      !isCacheFresh;
+      cached.updatedAtMs == null ||
+      Date.now() - cached.updatedAtMs >= WR_PROFILE_CACHE_MAX_AGE_MS;
     if (shouldWriteCache) {
       try {
         await prisma.user.update({

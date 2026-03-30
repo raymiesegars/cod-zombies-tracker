@@ -119,7 +119,6 @@ export async function GET(request: NextRequest) {
     }
 
     const counts = await getRankOneCountsByScope({ gameId, mapId });
-    const hasStoredCounts = counts.size > 0;
 
     const users = await prisma.user.findMany({
       where: { isPublic: true, isArchived: false },
@@ -164,7 +163,7 @@ export async function GET(request: NextRequest) {
           (r.displayName && r.displayName.toLowerCase().includes(q))
       );
       const sliced = rows.slice(0, SEARCH_LIMIT);
-      if (hasStoredCounts) await persistRankOneCache(sliced);
+      if (counts.size > 0) await persistRankOneCache(sliced);
       const entries = sliced.map((user) => {
         const val = user[valueKey];
         const level = getLevelFromXp(user.totalXp).level;
@@ -192,7 +191,7 @@ export async function GET(request: NextRequest) {
 
     const total = rows.length;
     const page = rows.slice(offset, offset + limit);
-    if (hasStoredCounts) await persistRankOneCache(page);
+    if (counts.size > 0) await persistRankOneCache(page);
     const entries = page.map((user) => {
       const val = user[valueKey];
       const level = getLevelFromXp(user.totalXp).level;

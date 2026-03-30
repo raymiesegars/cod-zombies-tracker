@@ -44,6 +44,7 @@ import {
 } from './wr-to-tiers';
 import { getBo4SpeedrunWRSeconds } from './bo4-speedrun-wr-data';
 import { hasFirstRoomGumMachineBo3 } from '@/lib/first-room-variants';
+import { hasVanguardRampageFilter } from '@/lib/vanguard';
 
 const CHALLENGE_TYPES = [
   'HIGHEST_ROUND',
@@ -1759,6 +1760,7 @@ export function getSpeedrunAchievementDefinitions(
   };
   const vgVoidMaps = ['der-anfang', 'terra-maledicta'];
   const isVgVoidMap = gameShortName === 'VANGUARD' && vgVoidMaps.includes(mapSlug);
+  const isVgRampageMap = gameShortName === 'VANGUARD' && hasVanguardRampageFilter(mapSlug);
   const restrictedModifier: Record<string, unknown> =
     gameShortName === 'BO3' ? { bo3GobbleGumMode: 'CLASSIC_ONLY' }
     : gameShortName === 'BO4' ? { bo4ElixirMode: 'CLASSIC_ONLY' }
@@ -1767,6 +1769,7 @@ export function getSpeedrunAchievementDefinitions(
     : gameShortName === 'BO7' ? { bo7GobbleGumMode: 'NO_GOBBLEGUMS', rampageInducerUsed: false }
     : gameShortName === 'IW' ? { useDirectorsCut: false }
     : isVgVoidMap ? { vanguardVoidUsed: false }
+    : isVgRampageMap ? { rampageInducerUsed: true }
     : gameShortName === 'VANGUARD' ? { rampageInducerUsed: false }
     : {};
   const hasRestricted = Object.keys(restrictedModifier).length > 0;
@@ -1776,6 +1779,7 @@ export function getSpeedrunAchievementDefinitions(
     : gameShortName === 'BO6' ? ' (No Gum / No Rampage)'
     : gameShortName === 'BOCW' ? ' (No Rampage)'
     : isVgVoidMap ? ' (Without Void)'
+    : isVgRampageMap ? ' (With Rampage)'
     : gameShortName === 'VANGUARD' ? ' (No Rampage)'
     : gameShortName === 'IW' ? ' (Fate Only)'
     : '';
@@ -1851,7 +1855,11 @@ export function getSpeedrunAchievementDefinitions(
       challengeType === 'ROUND_20_SPEEDRUN' &&
       configWrSec == null &&
       configRestrictedSec != null;
-    const baseCriteriaModifier = isVgVoidMap ? { vanguardVoidUsed: true } : {};
+    const baseCriteriaModifier = isVgVoidMap
+      ? { vanguardVoidUsed: true }
+      : isVgRampageMap
+        ? { rampageInducerUsed: false }
+        : {};
     const tiersToUse = isR20DerAnfangNoVoidOnly ? (restrictedTiers ?? buildSpeedrunTiersFromWR(configRestrictedSec!, baseXpRewards, 1.05)) : baseTiers;
     const modifierToUse = (hasRestricted || isR20DerAnfangNoVoidOnly) ? restrictedModifier : baseCriteriaModifier;
     const suffixToUse = (hasRestricted || isR20DerAnfangNoVoidOnly) ? restrictedLabelSuffix : '';
