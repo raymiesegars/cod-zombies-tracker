@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { getLevelFromXp } from '@/lib/ranks';
 import { getUser } from '@/lib/supabase/server';
 import { computeUserStats, type UserWithLogs } from '@/lib/user-stats';
+import { computeWorldRecords } from '@/lib/world-records';
 
 function getCachedWorldRecords(profileStatBlocks: unknown): {
   worldRecords: number;
@@ -146,10 +147,16 @@ export async function GET(
 
     if (withStats && 'challengeLogs' in user && 'easterEggLogs' in user) {
       const stats = await computeUserStats(user as unknown as UserWithLogs, hideCustom);
-      const cached = getCachedWorldRecords(user.profileStatBlocks);
-      if (cached) {
-        stats.worldRecords = cached.worldRecords;
-        stats.verifiedWorldRecords = cached.verifiedWorldRecords;
+      try {
+        const records = await computeWorldRecords(user.id);
+        stats.worldRecords = records.worldRecords;
+        stats.verifiedWorldRecords = records.verifiedWorldRecords;
+      } catch {
+        const cached = getCachedWorldRecords(user.profileStatBlocks);
+        if (cached) {
+          stats.worldRecords = cached.worldRecords;
+          stats.verifiedWorldRecords = cached.verifiedWorldRecords;
+        }
       }
       Object.assign(payload, stats);
     }

@@ -271,9 +271,10 @@ function aggregateRankOneCountsFromBuckets(
 
 const WR_CACHE_TTL_MS = 60_000; // 1 minute
 const wrCache = new Map<string, { result: WorldRecordsResult; expiresAt: number }>();
-const STORED_RANK_ONE_TTL_MS = 30 * 60 * 1000; // 30 minutes
+const STORED_RANK_ONE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 type RankCountMap = Map<string, { worldRecords: number; verifiedWorldRecords: number }>;
+const scopeCountsCache = new Map<string, { counts: RankCountMap; expiresAt: number }>();
 
 function getScopeKey(filter?: RankOneScopeFilter): string {
   if (filter?.mapId) return `map:${filter.mapId}`;
@@ -343,6 +344,10 @@ async function writeStoredRankOneCounts(
     if (isMissingStoredRankOneTableError(error)) return;
     throw error;
   }
+  scopeCountsCache.set(scopeKey, {
+    counts,
+    expiresAt: Date.now() + WR_CACHE_TTL_MS,
+  });
 }
 
 export async function refreshStoredRankOneCountsForScope(filter?: RankOneScopeFilter): Promise<RankCountMap> {
@@ -423,21 +428,41 @@ export async function getRankOneCountsByScope(
   filter?: RankOneScopeFilter,
   options?: { maxAgeMs?: number }
 ): Promise<RankCountMap> {
+  const scopeKey = getScopeKey(filter);
+  const now = Date.now();
+  const cachedScopeCounts = scopeCountsCache.get(scopeKey);
+  if (cachedScopeCounts && cachedScopeCounts.expiresAt > now) {
+    return cachedScopeCounts.counts;
+  }
+
   const maxAgeMs = options?.maxAgeMs ?? STORED_RANK_ONE_TTL_MS;
   const stored = await readStoredRankOneCounts(filter);
   if (stored && stored.hasRows) {
-    if (
+    const isFresh =
       stored.updatedAtMs != null &&
-      Date.now() - stored.updatedAtMs > maxAgeMs
-    ) {
-      // Reads stay fast: stale rows are still served; writes refresh these scopes eagerly.
+      now - stored.updatedAtMs <= maxAgeMs;
+    if (isFresh) {
+      scopeCountsCache.set(scopeKey, {
+        counts: stored.counts,
+        expiresAt: now + WR_CACHE_TTL_MS,
+      });
       return stored.counts;
     }
-    return stored.counts;
   }
-  if (stored && !stored.hasRows) return stored.counts;
-  // Missing table or no rows yet: never trigger heavy recompute on request path.
-  return new Map();
+
+  const liveCounts = filter?.gameId || filter?.mapId
+    ? await computeScopedRankOneCountsByUserId(filter)
+    : await computeRankOneCountsByUserId();
+  scopeCountsCache.set(scopeKey, {
+    counts: liveCounts,
+    expiresAt: now + WR_CACHE_TTL_MS,
+  });
+
+  if (stored !== null) {
+    await writeStoredRankOneCounts(liveCounts, filter);
+  }
+
+  return liveCounts;
 }
 
 /** Compute world records across all leaderboard combinations (player count, game filters, verified) and optional details. Cached per user for 1 minute. */

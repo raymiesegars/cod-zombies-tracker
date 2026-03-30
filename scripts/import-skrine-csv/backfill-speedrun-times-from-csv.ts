@@ -7,12 +7,14 @@
  *
  * Only processes users in ZWR_TO_CZT_USERS who have a CSV in top-178-csv.
  *
- * Usage: npx tsx scripts/import-skrine-csv/backfill-speedrun-times-from-csv.ts [--dry-run]
+ * Usage:
+ *   npx tsx scripts/import-skrine-csv/backfill-speedrun-times-from-csv.ts [--dry-run]
+ *   npx tsx scripts/import-skrine-csv/backfill-speedrun-times-from-csv.ts --game=bo2 --challenge-type=EASTER_EGG_SPEEDRUN --map=tranzit
+ *   npx tsx scripts/import-skrine-csv/backfill-speedrun-times-from-csv.ts --only-player=Notyoursistermister --dry-run
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { execSync } from 'child_process';
 
 const root = path.resolve(__dirname, '../..');
 for (const file of ['.env', '.env.local']) {
@@ -35,12 +37,111 @@ import { ZWR_TO_CZT_USERS } from './zwr-to-czt-users';
 import { parseCsv, parseProofUrls, parseAchieved, parseAchievedLegacy } from './run';
 import type { ParsedCsvRow } from './types';
 import { normalizeProofUrls } from '../../src/lib/utils';
+import { processMapAchievements } from '../../src/lib/achievements';
+import { grantVerifiedAchievementsForMap } from '../../src/lib/verified-xp';
+import { getLevelFromXp } from '../../src/lib/ranks';
 
 const prisma = new PrismaClient({
   datasources: { db: { url: process.env.DIRECT_URL || process.env.DATABASE_URL } },
 });
 
 const TOP_178_DIR = path.join(root, 'top-178-csv');
+const SAVED_PLAYERS_DIR = path.join(root, 'saved player csv');
+
+type Args = {
+  dryRun: boolean;
+  onlyPlayer: string | null;
+  cztUser: string | null;
+  includeAllCsv: boolean;
+  gameFilter: string | null;
+  challengeTypeFilter: string | null;
+  mapFilter: string | null;
+  limitUsers: number | null;
+};
+
+function parseArgs(): Args {
+  const args = process.argv.slice(2);
+  let dryRun = false;
+  let onlyPlayer: string | null = null;
+  let cztUser: string | null = null;
+  let includeAllCsv = true;
+  let gameFilter: string | null = null;
+  let challengeTypeFilter: string | null = null;
+  let mapFilter: string | null = null;
+  let limitUsers: number | null = null;
+
+  for (const a of args) {
+    if (a === '--dry-run') dryRun = true;
+    else if (a.startsWith('--only-player=')) onlyPlayer = a.slice(14).trim() || null;
+    else if (a.startsWith('--czt-user=')) cztUser = a.slice(11).trim() || null;
+    else if (a === '--mapped-only') includeAllCsv = false;
+    else if (a.startsWith('--game=')) gameFilter = a.slice(7).trim().toLowerCase() || null;
+    else if (a.startsWith('--challenge-type=')) challengeTypeFilter = a.slice(17).trim().toUpperCase() || null;
+    else if (a.startsWith('--map=')) mapFilter = a.slice(6).trim().toLowerCase() || null;
+    else if (a.startsWith('--limit-users=')) {
+      const n = parseInt(a.slice(14).trim(), 10);
+      if (!Number.isNaN(n) && n > 0) limitUsers = n;
+    }
+  }
+
+  return { dryRun, onlyPlayer, cztUser, includeAllCsv, gameFilter, challengeTypeFilter, mapFilter, limitUsers };
+}
+
+function normalizeExternalKey(value: string): string {
+  return value.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function getCsvBasenames(dir: string): string[] {
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir)
+    .filter((f) => f.toLowerCase().endsWith('.csv'))
+    .map((f) => f.replace(/\.csv$/i, '').trim())
+    .filter(Boolean);
+}
+
+async function resolveAuditUserId(sourcePlayerName: string, mappedUserId?: string | null): Promise<string | null> {
+  if (mappedUserId) {
+    const byId = await prisma.user.findUnique({ where: { id: mappedUserId }, select: { id: true } });
+    if (byId) return byId.id;
+  }
+
+  const externalKey = normalizeExternalKey(sourcePlayerName);
+  try {
+    const identity = await prisma.externalAccountIdentity.findUnique({
+      where: { source_externalKey: { source: 'ZWR', externalKey } },
+      select: { userId: true },
+    });
+    if (identity?.userId) return identity.userId;
+  } catch {
+    // External identity table can be absent in older environments; continue with name-based lookup.
+  }
+
+  const byName = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { username: { equals: sourcePlayerName, mode: 'insensitive' } },
+        { displayName: { equals: sourcePlayerName, mode: 'insensitive' } },
+        { externalDisplayName: { equals: sourcePlayerName, mode: 'insensitive' } },
+      ],
+    },
+    select: { id: true, mergedIntoUserId: true, isArchived: true },
+  });
+  if (!byName) return null;
+  if (byName.isArchived && byName.mergedIntoUserId) return byName.mergedIntoUserId;
+  return byName.id;
+}
+
+async function resolveCztUserId(cztUser: string): Promise<string | null> {
+  if (!cztUser) return null;
+  const byId = await prisma.user.findUnique({ where: { id: cztUser }, select: { id: true } });
+  if (byId) return byId.id;
+  const byUsername = await prisma.user.findUnique({ where: { username: cztUser }, select: { id: true } });
+  if (byUsername) return byUsername.id;
+  const byDisplay = await prisma.user.findFirst({ where: { displayName: cztUser }, select: { id: true } });
+  if (byDisplay) return byDisplay.id;
+  return null;
+}
 
 async function resolveMap(gameCode: string, mapSlug: string): Promise<{ id: string } | null> {
   const code = gameCode.toLowerCase();
@@ -182,19 +283,119 @@ async function findEasterEggLogByWrongTime(
   return match ? { id: match.id } : candidates[0] ? { id: candidates[0].id } : null;
 }
 
+async function recomputeUserTotals(userId: string): Promise<void> {
+  const uas = await prisma.userAchievement.findMany({
+    where: { userId },
+    include: { achievement: { select: { xpReward: true, isActive: true } } },
+  });
+  const totalXp = uas
+    .filter((ua) => ua.achievement.isActive)
+    .reduce((sum, ua) => sum + ua.achievement.xpReward, 0);
+  const verifiedTotalXp = uas
+    .filter((ua) => ua.achievement.isActive && ua.verifiedAt != null)
+    .reduce((sum, ua) => sum + ua.achievement.xpReward, 0);
+  const { level } = getLevelFromXp(totalXp);
+  await prisma.user.update({
+    where: { id: userId },
+    data: { totalXp, verifiedTotalXp, level },
+  });
+}
+
 async function main() {
-  const dryRun = process.argv.includes('--dry-run');
-  if (dryRun) console.log('*** DRY RUN – no DB updates, no reunlock/recompute ***\n');
+  const { dryRun, onlyPlayer, cztUser, includeAllCsv, gameFilter, challengeTypeFilter, mapFilter, limitUsers } = parseArgs();
+  if (dryRun) console.log('*** DRY RUN – no DB updates, no achievement/XP revalidation writes ***\n');
+  if (onlyPlayer) console.log(`Filter: only player "${onlyPlayer}"`);
+  if (cztUser) console.log(`Filter: czt user "${cztUser}"`);
+  if (!includeAllCsv) console.log('Filter: mapped users only');
+  if (gameFilter) console.log(`Filter: game=${gameFilter}`);
+  if (challengeTypeFilter) console.log(`Filter: challengeType=${challengeTypeFilter}`);
+  if (mapFilter) console.log(`Filter: map=${mapFilter}`);
+  if (limitUsers != null) console.log(`Filter: limit users=${limitUsers}`);
+  if (onlyPlayer || gameFilter || challengeTypeFilter || mapFilter || limitUsers != null) console.log('');
 
-  const entries = Object.entries(ZWR_TO_CZT_USERS);
-  const affectedUserIds = new Set<string>();
+  type ImportEntry = { sourcePlayerId: string; displayName: string; cztUserId: string | null };
+  const mappedEntries: ImportEntry[] = Object.entries(ZWR_TO_CZT_USERS).map(([sourcePlayerId, entry]) => ({
+    sourcePlayerId,
+    displayName: entry.displayName,
+    cztUserId: entry.cztUserId,
+  }));
+  let entries: ImportEntry[] = mappedEntries;
+  if (includeAllCsv) {
+    const csvNames = new Set<string>([
+      ...getCsvBasenames(TOP_178_DIR),
+      ...getCsvBasenames(SAVED_PLAYERS_DIR),
+    ]);
+    const existingKeys = new Set(entries.map((e) => normalizeExternalKey(e.sourcePlayerId)));
+    for (const name of csvNames) {
+      const key = normalizeExternalKey(name);
+      if (existingKeys.has(key)) continue;
+      entries.push({ sourcePlayerId: name, displayName: name, cztUserId: null });
+      existingKeys.add(key);
+    }
+  }
+  if (onlyPlayer) {
+    const needle = onlyPlayer.trim().toLowerCase();
+    entries = entries.filter((e) =>
+      e.sourcePlayerId.toLowerCase() === needle || e.displayName.toLowerCase() === needle
+    );
+    if (entries.length === 0) {
+      const resolvedUserId = cztUser ? await resolveCztUserId(cztUser) : await resolveCztUserId(onlyPlayer);
+      if (!resolvedUserId) {
+        console.log('No mapping found for --only-player and could not resolve --czt-user. Provide --czt-user=<id|username|displayName>.');
+        await prisma.$disconnect();
+        return;
+      }
+      entries = [{ sourcePlayerId: onlyPlayer, displayName: onlyPlayer, cztUserId: resolvedUserId }];
+    }
+  }
+  if (cztUser && !onlyPlayer) {
+    const resolvedUserId = await resolveCztUserId(cztUser);
+    if (!resolvedUserId) {
+      console.log('Could not resolve --czt-user. Provide a valid id/username/displayName.');
+      await prisma.$disconnect();
+      return;
+    }
+    entries = entries.filter((e) => e.cztUserId === resolvedUserId || e.cztUserId == null);
+  }
+  if (limitUsers != null) entries = entries.slice(0, limitUsers);
+  console.log(`Users queued: ${entries.length}`);
+  if (entries.length === 0) {
+    console.log('No users matched filters.');
+    await prisma.$disconnect();
+    return;
+  }
+  const affectedUserMapIds = new Map<string, Set<string>>();
+  const revalidateUserMapIds = new Map<string, Set<string>>();
   let totalFixed = 0;
+  let unresolvedUserEntries = 0;
+  let totalRowsScanned = 0;
+  let totalCandidateRows = 0;
+  let totalMismatchRows = 0;
+  let totalNoDbMatchRows = 0;
+  const mismatchReasonCounts = new Map<string, number>();
+  let totalAlreadyCorrectMatches = 0;
 
-  for (const [sourcePlayerId, entry] of entries) {
-    const cztUserId = entry.cztUserId;
+  for (let userIndex = 0; userIndex < entries.length; userIndex++) {
+    const entry = entries[userIndex]!;
+    const sourcePlayerId = entry.sourcePlayerId;
+    const cztUserId = cztUser
+      ? (await resolveCztUserId(cztUser))
+      : (entry.cztUserId ?? (await resolveAuditUserId(sourcePlayerId, entry.cztUserId)));
+    if (!cztUserId) {
+      unresolvedUserEntries++;
+      console.log(`\n[User ${userIndex + 1}/${entries.length}] ${sourcePlayerId} -> unresolved (skip)`);
+      continue;
+    }
+    console.log(`\n[User ${userIndex + 1}/${entries.length}] ${sourcePlayerId} -> ${cztUserId}`);
     let csvPath = path.join(TOP_178_DIR, `${sourcePlayerId}.csv`);
     if (!fs.existsSync(csvPath)) {
       csvPath = path.join(TOP_178_DIR, `${entry.displayName}.csv`);
+    }
+    if (!fs.existsSync(csvPath)) {
+      csvPath = path.join(SAVED_PLAYERS_DIR, `${sourcePlayerId}.csv`);
+    }
+    if (!fs.existsSync(csvPath)) {
+      csvPath = path.join(SAVED_PLAYERS_DIR, `${entry.displayName}.csv`);
     }
     if (!fs.existsSync(csvPath)) {
       console.log(`Skip ${sourcePlayerId}: no CSV found`);
@@ -206,12 +407,18 @@ async function main() {
     const rows = allRows.filter(
       (r) => rowHasPlayer(r, sourcePlayerId) || rowHasPlayer(r, entry.displayName)
     );
+    totalRowsScanned += rows.length;
+    console.log(`  CSV matched rows: ${rows.length}`);
 
     const isSpeedrun = (ct: string) => (ct || '').includes('SPEEDRUN');
     let userFixed = 0;
     for (const row of rows) {
+      if (gameFilter && row.game.toLowerCase().trim() !== gameFilter) continue;
+      if (mapFilter && row.map.toLowerCase().trim() !== mapFilter) continue;
       const mapping = getRecordMapping(row.record, row.sub_record);
       if (!mapping) continue;
+      if (challengeTypeFilter && String(mapping.challengeType).toUpperCase() !== challengeTypeFilter) continue;
+      totalCandidateRows++;
 
       const correct = parseAchieved(row.achieved);
       const legacy = parseAchievedLegacy(row.achieved);
@@ -236,6 +443,14 @@ async function main() {
           )
         )
       );
+      if (wrongCandidates.length > 0) {
+        totalMismatchRows++;
+        const reason =
+          trailingZeroMinutes != null && wrongCandidates.includes(trailingZeroMinutes)
+            ? 'h:mm:00-was-read-as-mm:ss'
+            : 'legacy-hh:mm:ss-mismatch';
+        mismatchReasonCounts.set(reason, (mismatchReasonCounts.get(reason) ?? 0) + 1);
+      }
 
       if (wrongCandidates.length > 0) {
         wrongSeconds = wrongCandidates[0] ?? null;
@@ -282,7 +497,12 @@ async function main() {
           looksLikeSixtyXMismatch(challengeLog.completionTimeSeconds, correctSeconds)
         ) {
           wrongSeconds = challengeLog.completionTimeSeconds;
+          if (!revalidateUserMapIds.has(cztUserId)) revalidateUserMapIds.set(cztUserId, new Set());
+          revalidateUserMapIds.get(cztUserId)!.add(mapRecord.id);
         } else if (challengeLog && challengeLog.completionTimeSeconds === correctSeconds) {
+          totalAlreadyCorrectMatches++;
+          if (!revalidateUserMapIds.has(cztUserId)) revalidateUserMapIds.set(cztUserId, new Set());
+          revalidateUserMapIds.get(cztUserId)!.add(mapRecord.id);
           challengeLog = null;
         } else if (challengeLog && !looksLikeSixtyXMismatch(challengeLog.completionTimeSeconds, correctSeconds)) {
           challengeLog = null;
@@ -305,7 +525,15 @@ async function main() {
         }
         userFixed++;
         totalFixed++;
-        affectedUserIds.add(cztUserId);
+        if (!affectedUserMapIds.has(cztUserId)) affectedUserMapIds.set(cztUserId, new Set());
+        affectedUserMapIds.get(cztUserId)!.add(mapRecord.id);
+        if (!revalidateUserMapIds.has(cztUserId)) revalidateUserMapIds.set(cztUserId, new Set());
+        revalidateUserMapIds.get(cztUserId)!.add(mapRecord.id);
+      } else if (wrongCandidates.length > 0) {
+        totalNoDbMatchRows++;
+        console.log(
+          `  [INFO] mismatch detected but no DB match: row ${row._rowIndex} ${row.game}/${row.map} ${row.record}/${row.sub_record} achieved="${row.achieved}"`
+        );
       }
 
       if (mapping.createEasterEggLog && (challengeLog || wrongSeconds != null)) {
@@ -331,7 +559,10 @@ async function main() {
             if (!challengeLog) {
               userFixed++;
               totalFixed++;
-              affectedUserIds.add(cztUserId);
+              if (!affectedUserMapIds.has(cztUserId)) affectedUserMapIds.set(cztUserId, new Set());
+              affectedUserMapIds.get(cztUserId)!.add(mapRecord.id);
+              if (!revalidateUserMapIds.has(cztUserId)) revalidateUserMapIds.set(cztUserId, new Set());
+              revalidateUserMapIds.get(cztUserId)!.add(mapRecord.id);
             }
           }
         }
@@ -341,29 +572,85 @@ async function main() {
     if (userFixed > 0) {
       console.log(`${sourcePlayerId}: ${userFixed} speedrun time(s) corrected`);
     }
+    if ((userIndex + 1) % 100 === 0) {
+      console.log(
+        `Progress: users ${userIndex + 1}/${entries.length}, rows scanned ${totalRowsScanned}, fixes ${totalFixed}`
+      );
+    }
   }
 
   console.log(`\nTotal speedrun time fixes: ${totalFixed}`);
-  console.log(`Affected users: ${affectedUserIds.size}`);
-
-  if (affectedUserIds.size > 0 && !dryRun) {
-    console.log('\n--- Reunlock achievements & recompute verified XP for affected users ---');
-    for (const userId of affectedUserIds) {
-      console.log(`\n--- User ${userId} ---`);
-      execSync('pnpm db:reunlock-achievements', {
-        stdio: 'inherit',
-        cwd: root,
-        env: { ...process.env, BACKFILL_USER_ID: userId },
-      });
-      execSync('pnpm db:recompute-verified-xp', {
-        stdio: 'inherit',
-        cwd: root,
-        env: { ...process.env, BACKFILL_USER_ID: userId },
-      });
+  console.log(`Affected users: ${affectedUserMapIds.size}`);
+  console.log(`Rows scanned: ${totalRowsScanned}`);
+  console.log(`Candidate speedrun rows after filters: ${totalCandidateRows}`);
+  console.log(`Rows with parser mismatch: ${totalMismatchRows}`);
+  console.log(`Mismatch rows without DB match: ${totalNoDbMatchRows}`);
+  console.log(`Mismatch rows already correct in DB: ${totalAlreadyCorrectMatches}`);
+  console.log(`Unresolved user entries skipped: ${unresolvedUserEntries}`);
+  if (mismatchReasonCounts.size > 0) {
+    console.log('Mismatch reason breakdown:');
+    for (const [reason, count] of mismatchReasonCounts.entries()) {
+      console.log(`  - ${reason}: ${count}`);
     }
-    console.log('\n--- Done. Speedrun time backfill and revalidation complete. ---');
-  } else if (dryRun && affectedUserIds.size > 0) {
-    console.log('\n[DRY] Would run reunlock-achievements and recompute-verified-xp for above users.');
+  }
+
+  if (revalidateUserMapIds.size > 0 && !dryRun) {
+    console.log('\n--- Revalidating achievements/XP for affected users/maps ---');
+    for (const [userId, mapIds] of revalidateUserMapIds.entries()) {
+      const scopedMapIds = Array.from(mapIds);
+      if (scopedMapIds.length === 0) continue;
+      console.log(`\n--- User ${userId} (${scopedMapIds.length} map(s)) ---`);
+
+      const speedrunAchievementRows = await prisma.achievement.findMany({
+        where: {
+          mapId: { in: scopedMapIds },
+          isActive: true,
+        },
+        select: { id: true, challenge: { select: { type: true } } },
+      });
+      const speedrunAchievementIds = speedrunAchievementRows
+        .filter((a) => (a.challenge?.type ?? '').includes('SPEEDRUN'))
+        .map((a) => a.id);
+
+      if (speedrunAchievementIds.length > 0) {
+        const deleted = await prisma.userAchievement.deleteMany({
+          where: { userId, achievementId: { in: speedrunAchievementIds } },
+        });
+        if (deleted.count > 0) {
+          console.log(`  Reset ${deleted.count} speedrun achievement unlock(s)`);
+        }
+      }
+
+      await recomputeUserTotals(userId);
+
+      for (const mapId of scopedMapIds) {
+        const unlocked = await processMapAchievements(userId, mapId, false);
+        if (unlocked.length > 0) {
+          console.log(`  map ${mapId.slice(0, 8)}... unlocked ${unlocked.length}`);
+        }
+        const [hasVerifiedChallenge, hasVerifiedEe] = await Promise.all([
+          prisma.challengeLog.findFirst({
+            where: {
+              userId,
+              mapId,
+              isVerified: true,
+              completionTimeSeconds: { not: null },
+            },
+            select: { id: true },
+          }).then((r) => !!r),
+          prisma.easterEggLog.findFirst({
+            where: { userId, mapId, isVerified: true, completionTimeSeconds: { not: null } },
+            select: { id: true },
+          }).then((r) => !!r),
+        ]);
+        if (hasVerifiedChallenge || hasVerifiedEe) {
+          await grantVerifiedAchievementsForMap(userId, mapId);
+        }
+      }
+    }
+    console.log('\n--- Done. Speedrun time backfill + targeted achievement revalidation complete. ---');
+  } else if (dryRun && revalidateUserMapIds.size > 0) {
+    console.log('\n[DRY] Would revalidate only affected user/map achievements and XP.');
   }
 
   await prisma.$disconnect();

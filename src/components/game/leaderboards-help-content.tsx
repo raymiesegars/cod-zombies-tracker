@@ -15,7 +15,7 @@ export function LeaderboardsHelpContent() {
       <section>
         <h3 className="text-base font-semibold text-white mb-2">Site-wide leaderboards</h3>
         <p>
-          Under <strong className="text-bunker-200">Rank (by XP)</strong> everyone is ordered by total or verified XP (and Custom Zombies variants). Under <strong className="text-bunker-200">Rank 1&apos;s (site)</strong> we rank by how many leaderboard combinations you hold #1 on—the same numbers as the Rank 1&apos;s / Verified Rank 1&apos;s stats on your profile.
+          Under <strong className="text-bunker-200">Rank (by XP)</strong> everyone is ordered by total or verified XP (and Custom Zombies variants). Under <strong className="text-bunker-200">Rank 1&apos;s (site)</strong> we rank by how many leaderboard combinations you hold #1 on. In <strong className="text-bunker-200">All games</strong>, these totals match your profile Rank 1&apos;s / Verified Rank 1&apos;s stats for the same mode.
         </p>
       </section>
       <section>

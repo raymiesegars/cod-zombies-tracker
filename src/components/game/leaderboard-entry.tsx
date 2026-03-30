@@ -64,6 +64,11 @@ export function LeaderboardEntry({
   const showTime = valueKind === 'time' && timeSeconds != null && Number.isFinite(timeSeconds) && timeSeconds >= 0;
   /** Time leaderboards: value column needs min width so "1:23:45" is never truncated; use 7rem min */
   const valueColWidth = valueKind === 'time' ? 'minmax(7rem,1fr)' : '5.5rem';
+  const verifiedBadgeTitle = showVerifiedBadge
+    ? valueKind === 'rankOneCount'
+      ? 'Verified rank 1'
+      : 'Verified XP'
+    : 'Verified run';
 
   // <400px: 4 cols. 400–768px: 5 cols. 771px+: 6 cols. lg: +full value. Fixed/min widths on value columns so Solo/Duo/Trio/Squad and round digits align vertically.
   const gridClass = cn(
@@ -143,7 +148,7 @@ export function LeaderboardEntry({
           {displayName}
         </Link>
         {(showVerifiedBadge || (entry as LeaderboardEntryType & { isVerified?: boolean }).isVerified) && (
-          <span className="flex-shrink-0 min-w-[1rem] w-4 h-4 inline-grid place-items-center rounded-full bg-blue-500/90 text-white" title={showVerifiedBadge ? 'Verified XP' : 'Verified run'} aria-hidden>
+          <span className="flex-shrink-0 min-w-[1rem] w-4 h-4 inline-grid place-items-center rounded-full bg-blue-500/90 text-white" title={verifiedBadgeTitle} aria-hidden>
             <ShieldCheck className="w-2.5 h-2.5 block shrink-0" strokeWidth={2.5} />
           </span>
         )}
