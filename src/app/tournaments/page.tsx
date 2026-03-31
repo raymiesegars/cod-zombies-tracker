@@ -100,7 +100,7 @@ function formatCountdown(seconds: number | null): string {
 }
 
 export default function TournamentsPage() {
-  const { user, profile } = useAuth();
+  const { user, profile, signInWithGoogle } = useAuth();
   const [polls, setPolls] = useState<{ id: string; title: string; status: string; endsAt: string }[]>([]);
   const [pollId, setPollId] = useState<string | null>(null);
   const [poll, setPoll] = useState<Poll | null>(null);
@@ -123,6 +123,7 @@ export default function TournamentsPage() {
   const [pollModalOptions, setPollModalOptions] = useState<string[]>(['', '']);
   const [pollModalSaving, setPollModalSaving] = useState(false);
   const [voteConfirmModal, setVoteConfirmModal] = useState<{ optionId: string; optionLabel: string } | null>(null);
+  const [voteSignInModalOpen, setVoteSignInModalOpen] = useState(false);
   const [concludePollLoading, setConcludePollLoading] = useState(false);
   const [createLeaderboardOpen, setCreateLeaderboardOpen] = useState(false);
   const [createLeaderboardLoading, setCreateLeaderboardLoading] = useState(false);
@@ -335,6 +336,11 @@ export default function TournamentsPage() {
 
   const handleVote = (optionId: string) => {
     if (!pollId || voting) return;
+    if (!user) {
+      setVoteConfirmModal(null);
+      setVoteSignInModalOpen(true);
+      return;
+    }
     setVoteConfirmModal(null);
     setVoting(true);
     fetch(`/api/tournaments/polls/${pollId}/vote`, {
@@ -343,11 +349,24 @@ export default function TournamentsPage() {
       body: JSON.stringify({ optionId }),
       credentials: 'same-origin',
     })
-      .then((r) => {
+      .then(async (r) => {
         if (r.ok) fetch(`/api/tournaments/polls/${pollId}`).then((res) => res.json()).then(setPoll);
-        else return r.json().then((d) => Promise.reject(new Error(d.error)));
+        else {
+          const d = await r.json().catch(() => ({} as { error?: string }));
+          const err = new Error(d.error || 'Failed to submit vote') as Error & { status?: number };
+          err.status = r.status;
+          return Promise.reject(err);
+        }
       })
-      .catch((e) => alert(e.message))
+      .catch((e: unknown) => {
+        const status = typeof e === 'object' && e !== null && 'status' in e ? (e as { status?: number }).status : undefined;
+        const message = e instanceof Error ? e.message : 'Failed to submit vote';
+        if (status === 401 || message.toLowerCase() === 'unauthorized') {
+          setVoteSignInModalOpen(true);
+          return;
+        }
+        alert(message);
+      })
       .finally(() => setVoting(false));
   };
 
@@ -958,7 +977,13 @@ export default function TournamentsPage() {
                                 ) : (
                                   <button
                                     type="button"
-                                    onClick={() => setVoteConfirmModal({ optionId: opt.id, optionLabel: opt.label })}
+                                    onClick={() => {
+                                      if (!user) {
+                                        setVoteSignInModalOpen(true);
+                                        return;
+                                      }
+                                      setVoteConfirmModal({ optionId: opt.id, optionLabel: opt.label });
+                                    }}
                                     disabled={voting || pollEnded || !!poll.userVoteOptionId}
                                     className="w-full flex items-center gap-3 py-4 px-5 rounded-xl border-2 border-blood-500/70 bg-blood-900/40 hover:bg-blood-800/50 hover:border-blood-500 disabled:opacity-50 disabled:cursor-not-allowed text-left transition-all shadow-md hover:shadow-blood-900/30 min-h-[3.25rem]"
                                   >
@@ -1217,6 +1242,33 @@ export default function TournamentsPage() {
               >
                 {voting ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
                 Confirm vote
+              </Button>
+            </div>
+          </div>
+        </Modal>
+
+        <Modal
+          isOpen={voteSignInModalOpen}
+          onClose={() => setVoteSignInModalOpen(false)}
+          title="Sign in required to vote"
+          description="You need to be signed in to cast a poll vote."
+          size="sm"
+        >
+          <div className="flex flex-col gap-4 pt-1">
+            <p className="text-sm text-bunker-300">
+              Voting is only available for signed-in users so each player gets one vote.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" onClick={() => setVoteSignInModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  setVoteSignInModalOpen(false);
+                  signInWithGoogle();
+                }}
+              >
+                Sign in to vote
               </Button>
             </div>
           </div>
