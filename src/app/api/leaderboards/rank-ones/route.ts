@@ -122,13 +122,13 @@ export async function GET(request: NextRequest) {
     const counts = await getRankOneCountsByScope({ gameId, mapId });
 
     const rankedUserIds: string[] = [];
-    for (const [userId, c] of counts.entries()) {
+    counts.forEach((c, userId) => {
       if (valueKey === 'verifiedWorldRecords') {
         if (c.verifiedWorldRecords > 0) rankedUserIds.push(userId);
       } else if (c.worldRecords > 0) {
         rankedUserIds.push(userId);
       }
-    }
+    });
 
     if (rankedUserIds.length === 0) {
       return NextResponse.json(
