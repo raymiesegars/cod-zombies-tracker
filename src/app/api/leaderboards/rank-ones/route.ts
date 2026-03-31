@@ -121,8 +121,28 @@ export async function GET(request: NextRequest) {
 
     const counts = await getRankOneCountsByScope({ gameId, mapId });
 
+    const rankedUserIds: string[] = [];
+    counts.forEach((c, userId) => {
+      if (valueKey === 'verifiedWorldRecords') {
+        if (c.verifiedWorldRecords > 0) rankedUserIds.push(userId);
+      } else if (c.worldRecords > 0) {
+        rankedUserIds.push(userId);
+      }
+    });
+
+    if (rankedUserIds.length === 0) {
+      return NextResponse.json(
+        { total: 0, entries: [] },
+        { headers: { 'Cache-Control': 'private, no-store, max-age=0' } }
+      );
+    }
+
     const users = await prisma.user.findMany({
-      where: { isPublic: true, isArchived: false },
+      where: {
+        id: { in: rankedUserIds },
+        isPublic: true,
+        isArchived: false,
+      },
       select: {
         id: true,
         username: true,

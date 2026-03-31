@@ -4,6 +4,8 @@ import { getUser } from '@/lib/supabase/server';
 import { getDisplayAvatarUrl } from '@/lib/avatar';
 
 export const dynamic = 'force-dynamic';
+const DEFAULT_LIMIT = 250;
+const MAX_LIMIT = 500;
 
 /** List all runs pending verification (challenge + easter egg). Admin only. Query: game (shortName), runType (all | speedrun). */
 export async function GET(request: NextRequest) {
@@ -24,6 +26,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const game = searchParams.get('game')?.trim() || null;
     const runType = searchParams.get('runType') === 'speedrun' ? 'speedrun' : 'all';
+    const requestedLimit = parseInt(searchParams.get('limit') ?? String(DEFAULT_LIMIT), 10);
+    const limit = Number.isFinite(requestedLimit)
+      ? Math.min(MAX_LIMIT, Math.max(1, requestedLimit))
+      : DEFAULT_LIMIT;
 
     const challengeWhere = {
       verificationRequestedAt: { not: null },
@@ -46,6 +52,7 @@ export async function GET(request: NextRequest) {
         map: { select: { name: true, slug: true, imageUrl: true, game: { select: { shortName: true } } } },
       },
       orderBy: { verificationRequestedAt: 'desc' },
+      take: limit,
     });
     type EELogWithInclude = Awaited<typeof eeLogsQuery>[number];
 
@@ -58,6 +65,7 @@ export async function GET(request: NextRequest) {
           map: { select: { name: true, slug: true, imageUrl: true, game: { select: { shortName: true } } } },
         },
         orderBy: { verificationRequestedAt: 'desc' },
+        take: limit,
       }),
       runType === 'speedrun' ? Promise.resolve([] as EELogWithInclude[]) : eeLogsQuery,
     ]);
@@ -120,11 +128,13 @@ export async function GET(request: NextRequest) {
       createdAt: log.verificationRequestedAt!.toISOString(),
     }));
 
-    const runs = [...challengeItems, ...eeItems].sort(
+    const runs = [...challengeItems, ...eeItems]
+      .sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+      )
+      .slice(0, limit);
 
-    return NextResponse.json({ runs });
+    return NextResponse.json({ runs, isTruncated: challengeItems.length + eeItems.length > limit });
   } catch (error) {
     console.error('Error fetching pending verification:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

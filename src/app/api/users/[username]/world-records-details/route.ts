@@ -30,16 +30,26 @@ export async function GET(
       return NextResponse.json({ error: 'Profile is private' }, { status: 403 });
     }
 
+    const totals = await computeWorldRecords(user.id);
     let result;
     let detailsUnavailable = false;
-    try {
-      result = await computeWorldRecordsDetailed(user.id);
-    } catch (detailsError) {
-      console.error('Error computing world records details; falling back to totals only:', detailsError);
-      const totals = await computeWorldRecords(user.id);
+    const allowLiveDetails =
+      process.env.ENABLE_WR_DETAILS_LIVE === '1' ||
+      process.env.NODE_ENV !== 'production';
+
+    if (allowLiveDetails) {
+      try {
+        result = await computeWorldRecordsDetailed(user.id);
+      } catch (detailsError) {
+        console.error('Error computing world records details; falling back to totals only:', detailsError);
+        result = { ...totals, details: [] };
+        detailsUnavailable = true;
+      }
+    } else {
       result = { ...totals, details: [] };
       detailsUnavailable = true;
     }
+
     return NextResponse.json({
       worldRecords: result.worldRecords,
       verifiedWorldRecords: result.verifiedWorldRecords,

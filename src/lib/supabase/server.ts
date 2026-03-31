@@ -31,6 +31,12 @@ export function createServerSupabaseClient() {
   );
 }
 
+function isExpectedAuthRefreshError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const code = (error as { code?: unknown }).code;
+  return code === 'refresh_token_not_found' || code === 'invalid_refresh_token';
+}
+
 export async function getSession() {
   const supabase = createServerSupabaseClient();
   try {
@@ -39,7 +45,9 @@ export async function getSession() {
     } = await supabase.auth.getSession();
     return session;
   } catch (error) {
-    console.error('Error getting session:', error);
+    if (!isExpectedAuthRefreshError(error)) {
+      console.error('Error getting session:', error);
+    }
     return null;
   }
 }
@@ -53,7 +61,9 @@ export async function getUser() {
     } = await supabase.auth.getUser();
     return user;
   } catch (error) {
-    console.error('Error getting user:', error);
+    if (!isExpectedAuthRefreshError(error)) {
+      console.error('Error getting user:', error);
+    }
     return null;
   }
 }
