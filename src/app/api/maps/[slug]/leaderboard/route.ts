@@ -104,12 +104,19 @@ export async function GET(
       eeWhereClause.playerCount = playerCount;
     }
 
-    if (isBo4Game(map.game?.shortName) && difficulty && BO4_DIFFICULTIES.includes(difficulty as any)) {
+    const gameShortName = map.game?.shortName;
+    const isSpecificChallenge = challengeType && challengeType !== 'HIGHEST_ROUND';
+    const isSpeedrun =
+      isSpecificChallenge &&
+      isSpeedrunChallengeType(challengeType!);
+    const isNoMansLand = isSpecificChallenge && challengeType === 'NO_MANS_LAND';
+    const isRush = isSpecificChallenge && challengeType === 'RUSH';
+
+    // BO4 Rush doesn't use difficulty; applying difficulty filter here can hide valid Rush logs.
+    if (isBo4Game(map.game?.shortName) && !isRush && difficulty && BO4_DIFFICULTIES.includes(difficulty as any)) {
       whereClause.difficulty = difficulty;
       eeWhereClause.difficulty = difficulty;
     }
-
-    const gameShortName = map.game?.shortName;
 
     if (isIwGame(gameShortName)) {
       if (fortuneCards === 'true') whereClause.useFortuneCards = true;
@@ -197,12 +204,6 @@ export async function GET(
     }
 
     // "Highest Round" (or no filter) = best round from any challenge OR easter egg; specific challenge = only that challenge's logs
-    const isSpecificChallenge = challengeType && challengeType !== 'HIGHEST_ROUND';
-    const isSpeedrun =
-      isSpecificChallenge &&
-      isSpeedrunChallengeType(challengeType!);
-    const isNoMansLand = isSpecificChallenge && challengeType === 'NO_MANS_LAND';
-    const isRush = isSpecificChallenge && challengeType === 'RUSH';
     if (isSpecificChallenge) {
       whereClause.challenge = { type: challengeType };
     } else {
@@ -221,9 +222,8 @@ export async function GET(
     if (isNoMansLand) {
       (whereClause as Record<string, unknown>).killsReached = { not: null };
     }
-    if (isRush) {
-      (whereClause as Record<string, unknown>).scoreReached = { not: null };
-    }
+    // Legacy imports stored Rush score in roundReached instead of scoreReached.
+    // Keep Rush rows eligible and normalize in ranking below.
 
     const orderBy =
       isSpeedrun
@@ -231,7 +231,7 @@ export async function GET(
         : isNoMansLand
           ? { killsReached: 'desc' as const }
           : isRush
-            ? { scoreReached: 'desc' as const }
+            ? [{ scoreReached: 'desc' as const }, { roundReached: 'desc' as const }]
             : { roundReached: 'desc' as const };
 
     const challengeLogs = await prisma.challengeLog.findMany({
@@ -314,12 +314,13 @@ export async function GET(
           });
         }
       } else if (isRush) {
-        if (logScore == null) continue;
-        if (!existing || logScore > existing.round) {
+        const rushScore = logScore ?? log.roundReached ?? null;
+        if (rushScore == null) continue;
+        if (!existing || rushScore > existing.round) {
           userBestMap.set(key, {
             userId: log.userId,
             playerCount: log.playerCount,
-            round: logScore,
+            round: rushScore,
             completionTimeSeconds: log.completionTimeSeconds,
             user: log.user,
             proofUrls: log.proofUrls ?? [],

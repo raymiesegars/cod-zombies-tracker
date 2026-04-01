@@ -294,7 +294,7 @@ export function LeaderboardEntry({
                     </span>
                   ) : null
                 ) : valueKind === 'score' && scoreValue != null ? (
-                  <span className="text-xs sm:text-sm font-zombies font-semibold text-element-400 tabular-nums leading-none whitespace-nowrap truncate">
+                  <span className="text-xs sm:text-sm font-semibold text-military-400 tabular-nums leading-none whitespace-nowrap">
                     {formatRushScore(scoreValue)}
                   </span>
                 ) : (
@@ -325,10 +325,6 @@ export function LeaderboardEntry({
                 <div className="flex items-center justify-end w-20 shrink-0 tabular-nums">
                   {valueKind === 'time' && entry.roundCompleted != null ? (
                     <RoundCounter round={entry.roundCompleted} size="sm" animated={false} className="shrink-0" />
-                  ) : valueKind === 'score' && scoreValue != null ? (
-                    <span className="text-sm font-zombies font-semibold text-element-400 tabular-nums leading-none">
-                      {formatRushScore(scoreValue)}
-                    </span>
                   ) : valueKind === 'round' ? (
                     <>
                       <RoundCounter round={entry.value} size="sm" animated={false} className="shrink-0" />
@@ -340,6 +336,10 @@ export function LeaderboardEntry({
                   {valueKind === 'time' && showTime ? (
                     <span className="text-sm font-zombies font-semibold text-element-400 tabular-nums leading-none whitespace-nowrap" title="Completion time">
                       {formatCompletionTime(timeSeconds)}
+                    </span>
+                  ) : valueKind === 'score' && scoreValue != null ? (
+                    <span className="text-sm font-semibold text-military-400 tabular-nums leading-none whitespace-nowrap">
+                      {formatRushScore(scoreValue)}
                     </span>
                   ) : null}
                 </div>

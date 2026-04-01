@@ -84,6 +84,7 @@ const challengeTypeLabels: Record<string, string> = {
   ROUND_10_SPEEDRUN: 'Round 10 Speedrun',
   SUPER_30_SPEEDRUN: 'Super 30 Speedrun',
   ROUND_20_SPEEDRUN: 'Round 20 Speedrun',
+  PACK_A_PUNCH_SPEEDRUN: 'Pack-a-Punch Speedrun',
   ROUND_935_SPEEDRUN: 'Round 935 Speedrun',
   ROUND_999_SPEEDRUN: 'Round 999 Speedrun',
   EXFIL_SPEEDRUN: 'Exfil Round 11',
@@ -314,7 +315,7 @@ export default function LeaderboardsPage() {
           params.set('limit', String(searchForFetch ? 100 : PAGE_SIZE));
           params.set('includeCounts', 'true');
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
-          if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
+          if (isBo4Map && selectedDifficulty && selectedChallengeType !== 'RUSH') params.set('difficulty', selectedDifficulty);
           if (searchForFetch) params.set('search', searchForFetch);
           if (verifiedOnly) params.set('verified', 'true');
           if ((isBocwMap || isBo6Map || isBo7Map || hasVanguardRampage) && (rampageInducerFilter === 'true' || rampageInducerFilter === 'false')) params.set('rampageInducerUsed', rampageInducerFilter);
@@ -346,7 +347,7 @@ export default function LeaderboardsPage() {
           params.set('includeCounts', 'true');
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
           if (selectedChallengeType) params.set('challengeType', selectedChallengeType);
-          if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
+          if (isBo4Map && selectedDifficulty && selectedChallengeType !== 'RUSH') params.set('difficulty', selectedDifficulty);
           if (searchForFetch) params.set('search', searchForFetch);
           if (verifiedOnly) params.set('verified', 'true');
           if (isIwMap) {
@@ -490,7 +491,7 @@ export default function LeaderboardsPage() {
           params.set('offset', String(offset));
           params.set('limit', String(PAGE_SIZE));
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
-          if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
+          if (isBo4Map && selectedDifficulty && selectedChallengeType !== 'RUSH') params.set('difficulty', selectedDifficulty);
           if (verifiedOnly) params.set('verified', 'true');
           if ((isBocwMap || isBo6Map || isBo7Map || hasVanguardRampage) && (rampageInducerFilter === 'true' || rampageInducerFilter === 'false')) params.set('rampageInducerUsed', rampageInducerFilter);
           if (hasVanguardVoid && (vanguardVoidFilter === 'true' || vanguardVoidFilter === 'false')) params.set('vanguardVoidUsed', vanguardVoidFilter);
@@ -507,7 +508,7 @@ export default function LeaderboardsPage() {
           params.set('limit', String(PAGE_SIZE));
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
           if (selectedChallengeType) params.set('challengeType', selectedChallengeType);
-          if (isBo4Map && selectedDifficulty) params.set('difficulty', selectedDifficulty);
+          if (isBo4Map && selectedDifficulty && selectedChallengeType !== 'RUSH') params.set('difficulty', selectedDifficulty);
           if (verifiedOnly) params.set('verified', 'true');
           if (isIwMap) {
             if (fortuneCardsFilter === 'true') params.set('fortuneCards', 'true');
@@ -673,6 +674,14 @@ export default function LeaderboardsPage() {
                         ? (fallbackName ?? challengeTypeLabels[type] ?? getAwChallengeTypeLabel(type) ?? type)
                         : (fallbackName ?? challengeTypeLabels[type] ?? type);
     let challengeOptions: { value: string; label: string }[];
+    const mergeWithMapChallenges = (options: { value: string; label: string }[]) => {
+      const optionTypes = new Set(options.map((o) => o.value));
+      const extras = mapChallenges
+        .filter((c) => c.type !== 'HIGHEST_ROUND' && !optionTypes.has(c.type))
+        .sort((a, b) => (a.name || a.type).localeCompare(b.name || b.type))
+        .map((c) => ({ value: c.type, label: getLabel(c.type, c.name) }));
+      return [...options, ...extras];
+    };
     if (selectedMapData?.game?.shortName === 'IW') {
       challengeOptions = mapChallenges.length > 0
         ? IW_CHALLENGE_TYPES_ORDER.filter((t) => mapChallenges.some((c) => c.type === t)).map((t) => {
@@ -680,6 +689,7 @@ export default function LeaderboardsPage() {
             return { value: t, label: c?.name ?? challengeTypeLabels[t] ?? t };
           })
         : [];
+      challengeOptions = mergeWithMapChallenges(challengeOptions);
     } else if (selectedMapData?.game?.shortName === 'BO2' && selectedMap) {
       const bo2Config = getBo2MapConfig(selectedMap);
       const types = bo2Config?.challengeTypes ?? mapChallenges.map((c) => c.type);
@@ -689,6 +699,7 @@ export default function LeaderboardsPage() {
           const c = mapChallenges.find((ch) => ch.type === t);
           return { value: t, label: getLabel(t, c?.name) };
         });
+      challengeOptions = mergeWithMapChallenges(challengeOptions);
     } else if (selectedMapData?.game?.shortName === 'BO3' && selectedMap) {
       const bo3Config = getBo3MapConfig(selectedMap);
       const types = bo3Config?.challengeTypes ?? mapChallenges.map((c) => c.type);
@@ -698,6 +709,7 @@ export default function LeaderboardsPage() {
           const c = mapChallenges.find((ch) => ch.type === t);
           return { value: t, label: getLabel(t, c?.name) };
         });
+      challengeOptions = mergeWithMapChallenges(challengeOptions);
     } else if (selectedMapData?.game?.shortName === 'BO3_CUSTOM' && selectedMap) {
       const types = BO3_CUSTOM_CHALLENGE_TYPES.filter((t) => mapChallenges.some((c) => c.type === t));
       challengeOptions = types
@@ -706,6 +718,7 @@ export default function LeaderboardsPage() {
           const c = mapChallenges.find((ch) => ch.type === t);
           return { value: t, label: getLabel(t, c?.name) };
         });
+      challengeOptions = mergeWithMapChallenges(challengeOptions);
     } else if (selectedMapData?.game?.shortName === 'BO4' && selectedMap) {
       const bo4Config = getBo4MapConfig(selectedMap);
       const types = bo4Config?.challengeTypes ?? mapChallenges.map((c) => c.type);
@@ -715,6 +728,7 @@ export default function LeaderboardsPage() {
           const c = mapChallenges.find((ch) => ch.type === t);
           return { value: t, label: getLabel(t, c?.name) };
         });
+      challengeOptions = mergeWithMapChallenges(challengeOptions);
     } else if (selectedMapData?.game?.shortName === 'BOCW' && selectedMap) {
       const bocwConfig = getBocwMapConfig(selectedMap);
       const types = bocwConfig?.challengeTypes ?? mapChallenges.map((c) => c.type);
@@ -724,6 +738,7 @@ export default function LeaderboardsPage() {
           const c = mapChallenges.find((ch) => ch.type === t);
           return { value: t, label: getLabel(t, c?.name) };
         });
+      challengeOptions = mergeWithMapChallenges(challengeOptions);
     } else if (selectedMapData?.game?.shortName === 'BO6' && selectedMap) {
       const bo6Config = getBo6MapConfig(selectedMap);
       const types = bo6Config?.challengeTypes ?? mapChallenges.map((c) => c.type);
@@ -733,6 +748,7 @@ export default function LeaderboardsPage() {
           const c = mapChallenges.find((ch) => ch.type === t);
           return { value: t, label: getLabel(t, c?.name) };
         });
+      challengeOptions = mergeWithMapChallenges(challengeOptions);
     } else if (selectedMapData?.game?.shortName === 'BO7' && selectedMap) {
       const bo7Config = getBo7MapConfig(selectedMap);
       const types = bo7Config?.challengeTypes ?? mapChallenges.map((c) => c.type);
@@ -742,6 +758,7 @@ export default function LeaderboardsPage() {
           const c = mapChallenges.find((ch) => ch.type === t);
           return { value: t, label: getLabel(t, c?.name) };
         });
+      challengeOptions = mergeWithMapChallenges(challengeOptions);
     } else if (selectedMapData?.game?.shortName === 'WW2' && selectedMap) {
       const ww2Config = getWw2MapConfig(selectedMap);
       const types = ww2Config?.challengeTypes ?? mapChallenges.map((c) => c.type);
@@ -751,6 +768,7 @@ export default function LeaderboardsPage() {
           const c = mapChallenges.find((ch) => ch.type === t);
           return { value: t, label: getLabel(t, c?.name) };
         });
+      challengeOptions = mergeWithMapChallenges(challengeOptions);
     } else if (selectedMapData?.game?.shortName === 'VANGUARD' && selectedMap) {
       const vanguardConfig = getVanguardMapConfig(selectedMap);
       const types = vanguardConfig?.challengeTypes ?? mapChallenges.map((c) => c.type);
@@ -760,6 +778,7 @@ export default function LeaderboardsPage() {
           const c = mapChallenges.find((ch) => ch.type === t);
           return { value: t, label: getLabel(t, c?.name) };
         });
+      challengeOptions = mergeWithMapChallenges(challengeOptions);
     } else if (selectedMapData?.game?.shortName === 'AW' && selectedMap) {
       const awConfig = getAwMapConfig(selectedMap);
       const types = awConfig?.challengeTypes ?? mapChallenges.map((c) => c.type);
@@ -769,6 +788,7 @@ export default function LeaderboardsPage() {
           const c = mapChallenges.find((ch) => ch.type === t);
           return { value: t, label: getLabel(t, c?.name) };
         });
+      challengeOptions = mergeWithMapChallenges(challengeOptions);
     } else if (selectedMapData?.game?.shortName === 'WAW' && selectedMap) {
       const wawConfig = getWaWMapConfig(selectedMap);
       const types = (wawConfig?.challengeTypes ?? mapChallenges.map((c) => c.type)).filter((t) => t !== 'HIGHEST_ROUND');
@@ -776,6 +796,7 @@ export default function LeaderboardsPage() {
         const c = mapChallenges.find((ch) => ch.type === t);
         return { value: t, label: getLabel(t, c?.name) };
       });
+      challengeOptions = mergeWithMapChallenges(challengeOptions);
     } else {
       challengeOptions = mapChallenges
         .map((c) => ({
