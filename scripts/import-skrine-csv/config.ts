@@ -154,11 +154,14 @@ export function getRecordMapping(record: string, subRecord: string): RecordMappi
 /** Apply sub_record to modifier object (e.g. classic-gobblegum → bo3GobbleGumMode). */
 function applySubRecordModifiers(record: string, subRecord: string, mods: Record<string, unknown>): void {
   if (!subRecord) return;
+  const compactSubRecord = subRecord.replace(/\s+/g, '').toLowerCase();
+  const isAnyPercent = compactSubRecord.includes('any%') || compactSubRecord.includes('anypercent');
 
   // BO3 (ZWR uses mega-gobblegum, classic-gobblegum-only, no-gobblegum; legacy used all-gobblegum, classic-gobblegum)
   if (subRecord === 'classic-gobblegum' || subRecord === 'classic-gobblegum-only') mods.bo3GobbleGumMode = 'CLASSIC_ONLY';
   else if (subRecord === 'no-gobblegum') mods.bo3GobbleGumMode = 'NONE';
   else if (subRecord === 'all-gobblegum' || subRecord === 'mega-gobblegum' || subRecord === 'mega-gobblegums') mods.bo3GobbleGumMode = 'MEGA';
+  else if (isAnyPercent) mods.bo3GobbleGumMode = 'ANY_PERCENT';
   else if (subRecord === 'no-aat') mods.bo3AatUsed = false;
 
   // BO4 (ZWR uses all-elixirs-and-talismans, all-elixirs-talismans, classic-elixirs, classic-elixirs-only)
@@ -166,6 +169,7 @@ function applySubRecordModifiers(record: string, subRecord: string, mods: Record
   else if (subRecord === 'classic-elixirs-only' || subRecord === 'classic-elixirs') mods.bo4ElixirMode = 'CLASSIC_ONLY';
   else if (subRecord === 'hc-all-elixirs' || subRecord === 'hc-classic-elixirs-only') mods.bo4ElixirMode = 'CLASSIC_ONLY';
   else if (subRecord === 'no-elixirs') mods.bo4ElixirMode = 'CLASSIC_ONLY';
+  else if (isAnyPercent) mods.bo4ElixirMode = 'ANY_PERCENT';
   if (subRecord === 'realistic' || subRecord.includes('realistic')) mods.difficulty = 'REALISTIC';
   else if (subRecord === 'hardcore' || subRecord.includes('hardcore')) mods.difficulty = 'HARDCORE';
   else if (subRecord === 'casual' || subRecord.includes('casual')) mods.difficulty = 'CASUAL';
@@ -191,6 +195,9 @@ function applySubRecordModifiers(record: string, subRecord: string, mods: Record
   } else if (subRecord.includes('no-gobblegums')) {
     mods.bo6GobbleGumMode = 'NO_GOBBLEGUMS';
     mods.bo7GobbleGumMode = 'NO_GOBBLEGUMS';
+  } else if (isAnyPercent) {
+    mods.bo6GobbleGumMode = 'ANY_PERCENT';
+    mods.bo7GobbleGumMode = 'ANY_PERCENT';
   }
   if (subRecord.includes('with-support')) mods.bo6SupportMode = 'WITH_SUPPORT';
   else if (subRecord.includes('no-support')) mods.bo6SupportMode = 'NO_SUPPORT';

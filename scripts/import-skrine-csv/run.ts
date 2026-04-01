@@ -602,11 +602,22 @@ async function main() {
         proofUrls
       );
       if (existing) {
-        const updates: { rampageInducerUsed?: boolean; difficulty?: string } = {};
+        const updates: {
+          rampageInducerUsed?: boolean;
+          difficulty?: string;
+          bo3GobbleGumMode?: string;
+          bo4ElixirMode?: string;
+          bo6GobbleGumMode?: string;
+          bo7GobbleGumMode?: string;
+        } = {};
         if (isSpeedrun && existing.rampageInducerUsed !== true) updates.rampageInducerUsed = true;
         if (gameCode === 'bo4' && existing.difficulty == null && difficulty != null) {
           updates.difficulty = difficulty as 'NORMAL' | 'HARDCORE' | 'CASUAL' | 'REALISTIC';
         }
+        if (mods.bo3GobbleGumMode === 'ANY_PERCENT') updates.bo3GobbleGumMode = 'ANY_PERCENT';
+        if (mods.bo4ElixirMode === 'ANY_PERCENT') updates.bo4ElixirMode = 'ANY_PERCENT';
+        if (mods.bo6GobbleGumMode === 'ANY_PERCENT') updates.bo6GobbleGumMode = 'ANY_PERCENT';
+        if (mods.bo7GobbleGumMode === 'ANY_PERCENT') updates.bo7GobbleGumMode = 'ANY_PERCENT';
         if (Object.keys(updates).length > 0 && !dryRun) {
           await prisma.challengeLog.update({
             where: { id: existing.id },
@@ -615,6 +626,10 @@ async function main() {
           const messages = [];
           if (updates.rampageInducerUsed) messages.push('with rampage');
           if (updates.difficulty) messages.push(`difficulty=${updates.difficulty}`);
+          if (updates.bo3GobbleGumMode) messages.push(`bo3GobbleGumMode=${updates.bo3GobbleGumMode}`);
+          if (updates.bo4ElixirMode) messages.push(`bo4ElixirMode=${updates.bo4ElixirMode}`);
+          if (updates.bo6GobbleGumMode) messages.push(`bo6GobbleGumMode=${updates.bo6GobbleGumMode}`);
+          if (updates.bo7GobbleGumMode) messages.push(`bo7GobbleGumMode=${updates.bo7GobbleGumMode}`);
           report.push({
             csvRowIndex: row._rowIndex,
             status: 'updated',

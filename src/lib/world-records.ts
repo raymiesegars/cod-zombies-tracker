@@ -185,11 +185,12 @@ function getFilterLabels(filterKey: string): string[] {
       if (v === 'CLASSIC_ONLY') labels.push('Classic GobbleGums');
       else if (v === 'MEGA') labels.push('Mega GobbleGums');
       else if (v === 'NONE') labels.push('No GobbleGums');
+      else if (v === 'ANY_PERCENT') labels.push('Any% (All GobbleGums)');
       else if (v === 'WITH_GOBBLEGUMS') labels.push('With GobbleGums');
       else if (v === 'NO_GOBBLEGUMS') labels.push('No GobbleGums');
       else labels.push(`GobbleGum: ${v}`);
     } else if (k === 'aat') labels.push(v === 'true' ? 'With AATs' : 'No AATs');
-    else if (k === 'elixir') labels.push(v === 'CLASSIC_ONLY' ? 'Classic Elixirs' : v === 'ALL_ELIXIRS_TALISMANS' ? 'All Elixirs' : `Elixir: ${v}`);
+    else if (k === 'elixir') labels.push(v === 'CLASSIC_ONLY' ? 'Classic Elixirs' : v === 'ALL_ELIXIRS_TALISMANS' ? 'All Elixirs' : v === 'ANY_PERCENT' ? 'Any% (All Elixirs)' : `Elixir: ${v}`);
     else if (k === 'diff') labels.push(`Difficulty: ${v}`);
     else if (k === 'support') labels.push(v === 'WITH_SUPPORT' ? 'With Support' : 'No Support');
     else if (k === 'ramp') labels.push(v === 'true' ? 'Rampage Inducer' : 'No Rampage');

@@ -27,7 +27,7 @@ import { useXpToast } from '@/context/xp-toast-context';
 import { useActionProgress } from '@/context/action-progress-context';
 import { getXpForChallengeLog, getXpForEasterEggLog, type AchievementForPreview } from '@/lib/xp-preview';
 import { computeMysteryBoxXp, type MysteryBoxFilterSettings } from '@/lib/mystery-box';
-import { isBo4Game, BO4_DIFFICULTIES, getBo4DifficultyLabel } from '@/lib/bo4';
+import { isBo4Game, BO4_DIFFICULTIES, BO4_ELIXIR_MODES, getBo4DifficultyLabel, getBo4ElixirModeLabel } from '@/lib/bo4';
 import { isIwGame, isIwSpeedrunChallengeType, isSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType } from '@/lib/iw';
 import { isBo3Game, BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT, getBo3GobbleGumLabel } from '@/lib/bo3';
 import { isBocwGame, BOCW_SUPPORT_MODES, BOCW_SUPPORT_DEFAULT, getBocwSupportLabel } from '@/lib/bocw';
@@ -1582,10 +1582,7 @@ export default function EditMapProgressPage() {
                     {map?.game?.shortName === 'BO4' && (
                       <Select
                         label="Elixirs / Talismans"
-                        options={[
-                          { value: 'CLASSIC_ONLY', label: 'Classic Elixirs Only' },
-                          { value: 'ALL_ELIXIRS_TALISMANS', label: 'All Elixirs & Talismans' },
-                        ]}
+                        options={BO4_ELIXIR_MODES.map((m) => ({ value: m, label: getBo4ElixirModeLabel(m) }))}
                         value={sharedChallengeForm.bo4ElixirMode ?? ''}
                         onChange={(e) => handleSharedChallengeChange('bo4ElixirMode', e.target.value || undefined)}
                         placeholder="Optional"

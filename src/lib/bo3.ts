@@ -5,7 +5,7 @@
 
 export const GAME_SHORT_NAME_BO3 = 'BO3';
 
-export const BO3_GOBBLEGUM_MODES = ['CLASSIC_ONLY', 'MEGA', 'NONE'] as const;
+export const BO3_GOBBLEGUM_MODES = ['CLASSIC_ONLY', 'MEGA', 'NONE', 'ANY_PERCENT'] as const;
 export type Bo3GobbleGumMode = (typeof BO3_GOBBLEGUM_MODES)[number];
 
 export const BO3_GOBBLEGUM_DEFAULT: Bo3GobbleGumMode = 'CLASSIC_ONLY';
@@ -19,6 +19,7 @@ export function getBo3GobbleGumLabel(mode: string): string {
     case 'CLASSIC_ONLY': return 'Classic GobbleGums Only';
     case 'MEGA': return 'Mega GobbleGums';
     case 'NONE': return 'No GobbleGums';
+    case 'ANY_PERCENT': return 'Any% (All GobbleGums)';
     default: return mode;
   }
 }

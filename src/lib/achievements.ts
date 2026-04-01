@@ -370,14 +370,14 @@ const MODIFIER_CRITERIA_KEYS = [
   'vanguardVoidUsed',
 ] as const;
 
-/** Hierarchy: stricter run satisfies looser achievement. NONE > CLASSIC_ONLY > MEGA. */
-const BO3_GUM_STRICTNESS = { NONE: 0, CLASSIC_ONLY: 1, MEGA: 2 } as const;
-/** CLASSIC_ONLY stricter than ALL_ELIXIRS_TALISMANS. */
-const BO4_ELIXIR_STRICTNESS = { CLASSIC_ONLY: 0, ALL_ELIXIRS_TALISMANS: 1 } as const;
+/** Hierarchy: stricter run satisfies looser achievement. NONE > CLASSIC_ONLY > MEGA > ANY_PERCENT. */
+const BO3_GUM_STRICTNESS = { NONE: 0, CLASSIC_ONLY: 1, MEGA: 2, ANY_PERCENT: 3 } as const;
+/** CLASSIC_ONLY stricter than ALL_ELIXIRS_TALISMANS, and ANY_PERCENT is loosest. */
+const BO4_ELIXIR_STRICTNESS = { CLASSIC_ONLY: 0, ALL_ELIXIRS_TALISMANS: 1, ANY_PERCENT: 2 } as const;
 /** WITHOUT/NO stricter than WITH. */
 const SUPPORT_STRICTNESS = { WITHOUT_SUPPORT: 0, NO_SUPPORT: 0, WITH_SUPPORT: 1 } as const;
-const BO6_GUM_STRICTNESS = { NO_GOBBLEGUMS: 0, WITH_GOBBLEGUMS: 1 } as const;
-const BO7_GUM_STRICTNESS = { NO_GOBBLEGUMS: 0, WITH_GOBBLEGUMS: 1 } as const;
+const BO6_GUM_STRICTNESS = { NO_GOBBLEGUMS: 0, WITH_GOBBLEGUMS: 1, ANY_PERCENT: 2 } as const;
+const BO7_GUM_STRICTNESS = { NO_GOBBLEGUMS: 0, WITH_GOBBLEGUMS: 1, ANY_PERCENT: 2 } as const;
 
 /** True if log's modifier satisfies achievement criteria. Stricter run (no gums, no support, etc.) satisfies looser achievements (classics, with support). */
 function logModifierSatisfiesCriteria(

@@ -4,7 +4,7 @@ import { getUser } from '@/lib/supabase/server';
 import { processMapAchievements } from '@/lib/achievements';
 import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
 import { createCoOpRunPendingsForChallengeLog } from '@/lib/coop-pending';
-import { isBo4Game, BO4_DIFFICULTIES } from '@/lib/bo4';
+import { isBo4Game, BO4_DIFFICULTIES, BO4_ELIXIR_MODES } from '@/lib/bo4';
 import { isIwGame, isSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType } from '@/lib/iw';
 import { isBo3Game, BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT } from '@/lib/bo3';
 import { isBocwGame, BOCW_SUPPORT_MODES, BOCW_SUPPORT_DEFAULT } from '@/lib/bocw';
@@ -248,6 +248,12 @@ export async function POST(request: NextRequest) {
       const mode = body.bo3GobbleGumMode ?? BO3_GOBBLEGUM_DEFAULT;
       if (!(BO3_GOBBLEGUM_MODES as readonly string[]).includes(mode)) {
         return NextResponse.json({ error: 'Invalid bo3GobbleGumMode' }, { status: 400 });
+      }
+    }
+
+    if (isBo4 && body.bo4ElixirMode !== undefined && body.bo4ElixirMode !== null) {
+      if (!(BO4_ELIXIR_MODES as readonly string[]).includes(body.bo4ElixirMode)) {
+        return NextResponse.json({ error: 'Invalid bo4ElixirMode' }, { status: 400 });
       }
     }
 

@@ -29,7 +29,7 @@ import {
 import { RoundCounter, LeaderboardEntry, RelockAchievementButton, ChallengeTypeIcon, MapChallengesEeHelpContent, Bo7RelicPicker } from '@/components/game';
 import { getPlayerCountLabel, formatRushScore, cn } from '@/lib/utils';
 import { getAssetUrl } from '@/lib/assets';
-import { getBo4DifficultyLabel, BO4_DIFFICULTIES, isBo4Game } from '@/lib/bo4';
+import { getBo4DifficultyLabel, getBo4ElixirModeLabel, BO4_DIFFICULTIES, BO4_ELIXIR_MODES, isBo4Game } from '@/lib/bo4';
 import { isIwGame, isIwSpeedrunChallengeType, IW_CHALLENGE_TYPES_ORDER } from '@/lib/iw';
 import { isBo3Game, BO3_GOBBLEGUM_MODES, getBo3GobbleGumLabel } from '@/lib/bo3';
 import { isBocwGame, BOCW_SUPPORT_MODES, getBocwSupportLabel } from '@/lib/bocw';
@@ -2160,8 +2160,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                       <Select
                         options={[
                           { value: '', label: 'All Elixirs' },
-                          { value: 'CLASSIC_ONLY', label: 'Classic Elixirs Only' },
-                          { value: 'ALL_ELIXIRS_TALISMANS', label: 'All Elixirs & Talismans' },
+                          ...BO4_ELIXIR_MODES.map((m) => ({ value: m, label: getBo4ElixirModeLabel(m) })),
                         ]}
                         value={lbBo4ElixirMode}
                         onChange={(e) => setLbBo4ElixirMode(e.target.value)}

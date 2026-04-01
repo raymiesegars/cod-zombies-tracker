@@ -18,7 +18,7 @@ import { Medal, Trophy, Clock, Award, Loader2, Lock, Plus, Banknote, Pencil, Boo
 import { TournamentRulesContent } from '@/components/tournament-rules-content';
 import { getGameDisplayShortName } from '@/lib/bo3-custom';
 import { BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT, getBo3GobbleGumLabel } from '@/lib/bo3';
-import { BO4_DIFFICULTIES, getBo4DifficultyLabel } from '@/lib/bo4';
+import { BO4_DIFFICULTIES, BO4_ELIXIR_MODES, getBo4DifficultyLabel, getBo4ElixirModeLabel } from '@/lib/bo4';
 import { BOCW_SUPPORT_MODES, BOCW_SUPPORT_DEFAULT, getBocwSupportLabel } from '@/lib/bocw';
 import { BO6_GOBBLEGUM_MODES, BO6_GOBBLEGUM_DEFAULT, BO6_SUPPORT_MODES, BO6_SUPPORT_DEFAULT, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
 import { BO7_SUPPORT_MODES, BO7_SUPPORT_DEFAULT, getBo7SupportLabel } from '@/lib/bo7';
@@ -378,8 +378,8 @@ export default function TournamentsPage() {
     if (!tournament) return;
     const cfg = (tournament.config && typeof tournament.config === 'object' ? tournament.config : {}) as Record<string, unknown>;
     const elixir = cfg.bo4ElixirMode as string | undefined;
-    if (elixir === 'CLASSIC_ONLY') cfg.bo4ElixirMode = 'CLASSIC';
-    else if (elixir === 'ALL_ELIXIRS_TALISMANS') cfg.bo4ElixirMode = 'ALL';
+    if (elixir === 'CLASSIC') cfg.bo4ElixirMode = 'CLASSIC_ONLY';
+    else if (elixir === 'ALL') cfg.bo4ElixirMode = 'ALL_ELIXIRS_TALISMANS';
     setEditTournamentConfig({ ...cfg });
     setEditTournamentModalOpen(true);
   };
@@ -491,7 +491,7 @@ export default function TournamentsPage() {
       }),
       ...(shortName === 'BO4' && {
         difficulty: (config?.difficulty as string) || 'NORMAL',
-        bo4ElixirMode: (config?.bo4ElixirMode as string) || 'CLASSIC',
+        bo4ElixirMode: (config?.bo4ElixirMode as string) || 'CLASSIC_ONLY',
       }),
       ...(shortName === 'BOCW' && {
         bocwSupportMode: (config?.bocwSupportMode as string) || BOCW_SUPPORT_DEFAULT,
@@ -1361,12 +1361,9 @@ export default function TournamentsPage() {
                         <div>
                           <label className="block text-sm font-medium text-bunker-300 mb-1">Elixirs</label>
                           <Select
-                            value={String(config.bo4ElixirMode ?? 'CLASSIC')}
+                            value={String(config.bo4ElixirMode ?? 'CLASSIC_ONLY')}
                             onChange={(e) => setConfig('bo4ElixirMode', e.target.value)}
-                            options={[
-                              { value: 'CLASSIC', label: 'Classic only' },
-                              { value: 'ALL', label: 'All elixirs' },
-                            ]}
+                            options={BO4_ELIXIR_MODES.map((m) => ({ value: m, label: getBo4ElixirModeLabel(m) }))}
                             className="w-full bg-bunker-800 border-bunker-600 text-white"
                           />
                         </div>
@@ -1659,12 +1656,9 @@ export default function TournamentsPage() {
                       <div>
                         <label className="block text-sm font-medium text-bunker-300 mb-1">Elixirs</label>
                         <Select
-                          value={String(config.bo4ElixirMode ?? 'CLASSIC')}
+                          value={String(config.bo4ElixirMode ?? 'CLASSIC_ONLY')}
                           onChange={(e) => setConfig('bo4ElixirMode', e.target.value)}
-                          options={[
-                            { value: 'CLASSIC', label: 'Classic only' },
-                            { value: 'ALL', label: 'All elixirs' },
-                          ]}
+                          options={BO4_ELIXIR_MODES.map((m) => ({ value: m, label: getBo4ElixirModeLabel(m) }))}
                           className="w-full bg-bunker-800 border-bunker-600 text-white"
                         />
                       </div>

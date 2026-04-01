@@ -30,14 +30,14 @@ export async function GET(
   const bo3GobbleGumMode = searchParams.get('bo3GobbleGumMode'); // 'CLASSIC_ONLY' | 'MEGA' | 'NONE' | null
   const bo3AatUsed = searchParams.get('bo3AatUsed'); // 'true' | 'false' | null (AATs used / No AATs)
   // BO4
-  const bo4ElixirMode = searchParams.get('bo4ElixirMode'); // 'CLASSIC_ONLY' | 'ALL_ELIXIRS_TALISMANS' | null
+  const bo4ElixirMode = searchParams.get('bo4ElixirMode'); // 'CLASSIC_ONLY' | 'ALL_ELIXIRS_TALISMANS' | 'ANY_PERCENT' | null
   // BOCW
   const bocwSupportMode = searchParams.get('bocwSupportMode'); // 'WITH_SUPPORT' | 'WITHOUT_SUPPORT' | null
   // BO6
-  const bo6GobbleGumMode = searchParams.get('bo6GobbleGumMode'); // 'WITH_GOBBLEGUMS' | 'NO_GOBBLEGUMS' | null
+  const bo6GobbleGumMode = searchParams.get('bo6GobbleGumMode'); // 'WITH_GOBBLEGUMS' | 'NO_GOBBLEGUMS' | 'ANY_PERCENT' | null
   const bo6SupportMode = searchParams.get('bo6SupportMode'); // 'WITH_SUPPORT' | 'NO_SUPPORT' | null
   // BO7
-  const bo7GobbleGumMode = searchParams.get('bo7GobbleGumMode'); // 'WITH_GOBBLEGUMS' | 'NO_GOBBLEGUMS' | null
+  const bo7GobbleGumMode = searchParams.get('bo7GobbleGumMode'); // 'WITH_GOBBLEGUMS' | 'NO_GOBBLEGUMS' | 'ANY_PERCENT' | null
   const bo7SupportMode = searchParams.get('bo7SupportMode'); // 'WITH_SUPPORT' | 'NO_SUPPORT' | null
   const bo7CursedFilter = searchParams.get('bo7CursedRun'); // 'true' | 'false' | null (no filter)
   // Comma-separated relic names; only applied when bo7CursedRun=true

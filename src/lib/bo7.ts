@@ -6,7 +6,7 @@
 
 export const GAME_SHORT_NAME_BO7 = 'BO7';
 
-export const BO7_GOBBLEGUM_MODES = ['WITH_GOBBLEGUMS', 'NO_GOBBLEGUMS'] as const;
+export const BO7_GOBBLEGUM_MODES = ['WITH_GOBBLEGUMS', 'NO_GOBBLEGUMS', 'ANY_PERCENT'] as const;
 export type Bo7GobbleGumMode = (typeof BO7_GOBBLEGUM_MODES)[number];
 
 export const BO7_GOBBLEGUM_DEFAULT: Bo7GobbleGumMode = 'WITH_GOBBLEGUMS';
@@ -32,6 +32,7 @@ export function getBo7GobbleGumLabel(mode: string): string {
   switch (mode) {
     case 'WITH_GOBBLEGUMS': return 'With GobbleGums';
     case 'NO_GOBBLEGUMS': return 'No GobbleGums';
+    case 'ANY_PERCENT': return 'Any% (All GobbleGums)';
     default: return mode;
   }
 }

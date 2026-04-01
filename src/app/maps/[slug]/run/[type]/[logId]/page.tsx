@@ -21,7 +21,7 @@ import { getAssetUrl } from '@/lib/assets';
 import { formatRushScore } from '@/lib/utils';
 import { RoundCounter, ProofEmbed, ChallengeTypeIcon, UserWithRank } from '@/components/game';
 import { getGameDisplayShortName } from '@/lib/bo3-custom';
-import { getBo4DifficultyLabel } from '@/lib/bo4';
+import { getBo4DifficultyLabel, getBo4ElixirModeLabel } from '@/lib/bo4';
 import { getBo3GobbleGumLabel } from '@/lib/bo3';
 import { getBocwSupportLabel } from '@/lib/bocw';
 import { getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
@@ -647,7 +647,7 @@ export default function RunDetailPage() {
                       <span className="text-bunker-400 text-sm">Elixirs</span>
                       <span className="text-white font-medium">
                         {(log as ChallengeLogDetail).bo4ElixirMode
-                          ? ((log as ChallengeLogDetail).bo4ElixirMode === 'CLASSIC_ONLY' ? 'Classic Only' : 'All Elixirs & Talismans')
+                          ? getBo4ElixirModeLabel((log as ChallengeLogDetail).bo4ElixirMode)
                           : 'Not specified'}
                       </span>
                     </div>

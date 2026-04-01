@@ -961,6 +961,7 @@ function formatStipulations(tags: object | null, mapSlug?: string | null): strin
   if (t.bo3AatUsed === false) out.push('No Alchemical Antithesis');
   if (t.bo4ElixirMode === 'CLASSIC_ONLY') out.push('Classic Elixirs Only');
   if (t.bo4ElixirMode === 'ALL_ELIXIRS_TALISMANS') out.push('All Elixirs & Talismans');
+  if (t.bo4ElixirMode === 'ANY_PERCENT') out.push('Any% (All Elixirs & Talismans)');
   if (t.bocwSupportMode && typeof t.bocwSupportMode === 'string') out.push(getBocwSupportLabel(t.bocwSupportMode));
   if (t.bo6GobbleGumMode && typeof t.bo6GobbleGumMode === 'string') out.push(getBo6GobbleGumLabel(t.bo6GobbleGumMode));
   if (t.bo6SupportMode && typeof t.bo6SupportMode === 'string') out.push(getBo6SupportLabel(t.bo6SupportMode));

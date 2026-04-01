@@ -7,7 +7,7 @@ import { getLevelFromXp } from '@/lib/ranks';
 import { revokeAchievementsForMapAfterDelete } from '@/lib/achievements';
 import { normalizeProofUrls, validateProofUrl } from '@/lib/utils';
 import { createCoOpRunPendingsForChallengeLog } from '@/lib/coop-pending';
-import { isBo4Game, BO4_DIFFICULTIES } from '@/lib/bo4';
+import { isBo4Game, BO4_DIFFICULTIES, BO4_ELIXIR_MODES } from '@/lib/bo4';
 import { isIwGame, isIwSpeedrunChallengeType, isSpeedrunChallengeType, getMinRoundForSpeedrunChallengeType } from '@/lib/iw';
 import { isBo3Game, BO3_GOBBLEGUM_MODES } from '@/lib/bo3';
 import { isBocwGame, BOCW_SUPPORT_MODES } from '@/lib/bocw';
@@ -182,7 +182,14 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       ? isBo3Game(gameShortName) && (BO3_GOBBLEGUM_MODES as readonly string[]).includes(body.bo3GobbleGumMode) ? body.bo3GobbleGumMode : undefined
       : undefined;
     const bo3AatUsed = body.bo3AatUsed !== undefined && isBo3Game(gameShortName) ? Boolean(body.bo3AatUsed) : undefined;
-    const bo4ElixirMode = body.bo4ElixirMode !== undefined && isBo4Game(gameShortName) ? body.bo4ElixirMode : undefined;
+    if (body.bo4ElixirMode !== undefined && isBo4Game(gameShortName) && !(BO4_ELIXIR_MODES as readonly string[]).includes(body.bo4ElixirMode)) {
+      return NextResponse.json({ error: 'Invalid bo4ElixirMode' }, { status: 400 });
+    }
+    const bo4ElixirMode = body.bo4ElixirMode !== undefined
+      ? isBo4Game(gameShortName) && (BO4_ELIXIR_MODES as readonly string[]).includes(body.bo4ElixirMode)
+        ? body.bo4ElixirMode
+        : undefined
+      : undefined;
     const bocwSupportMode = body.bocwSupportMode !== undefined
       ? isBocwGame(gameShortName) && (BOCW_SUPPORT_MODES as readonly string[]).includes(body.bocwSupportMode) ? body.bocwSupportMode : undefined
       : undefined;

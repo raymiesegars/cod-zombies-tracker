@@ -17,7 +17,7 @@ import {
 } from '@/components/ui';
 import { ProofEmbed, ProofUrlsInput, TeammatePicker, type TeammateUser } from '@/components/game';
 import { normalizeProofUrls } from '@/lib/utils';
-import { BO4_DIFFICULTIES, getBo4DifficultyLabel } from '@/lib/bo4';
+import { BO4_DIFFICULTIES, BO4_ELIXIR_MODES, getBo4DifficultyLabel, getBo4ElixirModeLabel } from '@/lib/bo4';
 import { isBo3Game, BO3_GOBBLEGUM_MODES, getBo3GobbleGumLabel } from '@/lib/bo3';
 import { isBocwGame, BOCW_SUPPORT_MODES, getBocwSupportLabel } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_SUPPORT_MODES, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
@@ -527,8 +527,7 @@ export default function EditRunPage() {
                     label="Elixirs / Talismans"
                     options={[
                       { value: '', label: 'Not specified' },
-                      { value: 'CLASSIC_ONLY', label: 'Classic Elixirs Only' },
-                      { value: 'ALL_ELIXIRS_TALISMANS', label: 'All Elixirs & Talismans' },
+                      ...BO4_ELIXIR_MODES.map((m) => ({ value: m, label: getBo4ElixirModeLabel(m) })),
                     ]}
                     value={bo4ElixirMode}
                     onChange={(e) => setBo4ElixirMode(e.target.value)}
