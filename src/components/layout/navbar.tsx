@@ -47,7 +47,7 @@ export function Navbar() {
 
   const navLinks: { href: string; label: string; icon: React.ComponentType<{ className?: string }>; iconClass: string; labelClass?: string }[] = [
     { href: '/maps', label: 'Maps', icon: MapIcon, iconClass: 'text-blood-400' },
-    { href: '/leaderboards', label: 'Leaderboards', icon: Trophy, iconClass: 'text-amber-400' },
+    { href: '/leaderboards', label: 'Boards', icon: Trophy, iconClass: 'text-amber-400' },
     { href: '/tournaments', label: 'Tourney', icon: Medal, iconClass: 'text-amber-500' },
     { href: '/find-group', label: 'LFG', icon: Users, iconClass: 'text-element-300', labelClass: 'min-[1110px]:inline' },
   ];
