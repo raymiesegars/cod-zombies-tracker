@@ -606,6 +606,7 @@ const challengeTypeLabels: Record<string, string> = {
   ROUND_999_SPEEDRUN: 'Round 999 Speedrun',
   ROUND_10_SPEEDRUN: 'Round 10 Speedrun',
   ROUND_20_SPEEDRUN: 'Round 20 Speedrun',
+  PACK_A_PUNCH_SPEEDRUN: 'Pack-a-Punch Speedrun',
   SUPER_30_SPEEDRUN: 'Super 30 Speedrun',
 };
 
@@ -829,7 +830,9 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           params.set('easterEggId', eeId);
           params.set('includeCounts', 'true');
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
-          if (map.game?.shortName === 'BO4' && selectedDifficulty) params.set('difficulty', selectedDifficulty);
+          if (map.game?.shortName === 'BO4' && selectedDifficulty && selectedLeaderboardCategory !== 'RUSH') {
+            params.set('difficulty', selectedDifficulty);
+          }
           if (leaderboardVerifiedOnly) params.set('verified', 'true');
           if ((isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName) || (isVanguardGame(map.game?.shortName) && hasVanguardRampageFilter(slug))) && (lbRampageInducerFilter === 'true' || lbRampageInducerFilter === 'false')) params.set('rampageInducerUsed', lbRampageInducerFilter);
           if (isVanguardGame(map.game?.shortName) && hasVanguardVoidFilter(slug) && (lbVanguardVoidFilter === 'true' || lbVanguardVoidFilter === 'false')) params.set('vanguardVoidUsed', lbVanguardVoidFilter);
@@ -851,7 +854,9 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
           if (selectedPlayerCount) params.set('playerCount', selectedPlayerCount);
           const challengeType = selectedLeaderboardCategory === 'HIGHEST_ROUND' ? '' : selectedLeaderboardCategory;
           if (challengeType) params.set('challengeType', challengeType);
-          if (map.game?.shortName === 'BO4' && selectedDifficulty) params.set('difficulty', selectedDifficulty);
+          if (map.game?.shortName === 'BO4' && selectedDifficulty && selectedLeaderboardCategory !== 'RUSH') {
+            params.set('difficulty', selectedDifficulty);
+          }
           if (leaderboardVerifiedOnly) params.set('verified', 'true');
           if (map.game?.shortName === 'IW') {
             if (leaderboardFortuneCards === 'true') params.set('fortuneCards', 'true');
