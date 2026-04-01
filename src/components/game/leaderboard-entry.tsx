@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { useRef } from 'react';
 import { cn, getPlayerCountLabel, formatXpCompact, formatRushScore } from '@/lib/utils';
 import { Badge, Avatar } from '@/components/ui';
 import { RoundCounter } from './round-counter';
@@ -32,6 +33,8 @@ const rankColors = {
   2: 'from-gray-300 to-gray-500',
   3: 'from-amber-600 to-amber-800',
 };
+const BOARD_NAME_MAX_LENGTH = 20;
+const BOARD_NAME_MAX_LENGTH_COMPACT = 15;
 
 export function LeaderboardEntry({
   entry,
@@ -45,11 +48,42 @@ export function LeaderboardEntry({
   showVerifiedBadge = false,
   xpLabel = 'XP',
 }: LeaderboardEntryProps) {
+  const touchRef = useRef<{ x: number; y: number; moved: boolean } | null>(null);
+
+  const onRowTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchRef.current = { x: touch.clientX, y: touch.clientY, moved: false };
+  };
+
+  const onRowTouchMove = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    const start = touchRef.current;
+    if (!start) return;
+    if (Math.abs(touch.clientX - start.x) > 8 || Math.abs(touch.clientY - start.y) > 8) {
+      start.moved = true;
+    }
+  };
+
+  const onRowClick = (e: React.MouseEvent) => {
+    if (touchRef.current?.moved) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
   const isTopThree = entry.rank <= 3;
   const level = entry.user.level ?? 1;
   const rank = getRankForLevel(level);
   const rankIcon = rank ? getRankIconPath(rank.icon) : null;
   const displayName = entry.user.displayName || entry.user.username;
+  const boardDisplayName =
+    displayName.length > BOARD_NAME_MAX_LENGTH
+      ? `${displayName.slice(0, BOARD_NAME_MAX_LENGTH)}...`
+      : displayName;
+  const boardDisplayNameCompact =
+    displayName.length > BOARD_NAME_MAX_LENGTH_COMPACT
+      ? `${displayName.slice(0, BOARD_NAME_MAX_LENGTH_COMPACT)}...`
+      : displayName;
   const logHref =
     mapSlug && entry.logId && entry.runType
       ? `/maps/${mapSlug}/run/${entry.runType === 'easter-egg' ? 'easter-egg' : 'challenge'}/${entry.logId}`
@@ -86,7 +120,8 @@ export function LeaderboardEntry({
       ? 'grid-cols-[2rem_1.5rem_minmax(0,1fr)_minmax(0,5.5rem)] min-[400px]:grid-cols-[2rem_1.5rem_1.75rem_minmax(0,1fr)_minmax(0,5.5rem)] md:grid-cols-[2rem_2rem_2rem_minmax(0,1fr)_minmax(0,5.5rem)] min-[771px]:grid-cols-[2rem_auto_2rem_2rem_minmax(0,1fr)_minmax(0,5.5rem)] lg:grid-cols-[2.5rem_auto_2.5rem_2.25rem_minmax(0,1fr)_minmax(0,6.5rem)]'
       : hasRightSlots
         ? hasRightSlotsGridClass
-        : 'grid-cols-[2rem_1.5rem_minmax(0,1fr)_5.5rem] min-[400px]:grid-cols-[2rem_1.5rem_1.75rem_minmax(0,1fr)_5.5rem] md:grid-cols-[2rem_2rem_2rem_minmax(0,1fr)_5.5rem] min-[771px]:grid-cols-[2rem_auto_2rem_2rem_minmax(0,1fr)_5.5rem] lg:grid-cols-[2.5rem_auto_2.5rem_2.25rem_minmax(0,1fr)_auto_5.5rem]'
+        : 'grid-cols-[2rem_1.5rem_minmax(0,1fr)_5.5rem] min-[400px]:grid-cols-[2rem_1.5rem_1.75rem_minmax(0,1fr)_5.5rem] md:grid-cols-[2rem_2rem_2rem_minmax(0,1fr)_5.5rem] min-[771px]:grid-cols-[2rem_auto_2rem_2rem_minmax(0,1fr)_5.5rem] lg:grid-cols-[2.5rem_auto_2.5rem_2.25rem_minmax(0,1fr)_auto_5.5rem]',
+    'max-[360px]:!grid-cols-[2rem_minmax(0,1fr)_auto] max-[360px]:gap-x-1 max-[360px]:p-2'
   );
 
   const cardContent = (
@@ -134,12 +169,12 @@ export function LeaderboardEntry({
       </div>
 
       {/* Avatar – always visible, scaled for mobile */}
-      <div className={cn('flex items-center justify-center flex-shrink-0', isTightSpeedrunRow && 'min-w-0')}>
+      <div className={cn('flex items-center justify-center flex-shrink-0 max-[360px]:hidden', isTightSpeedrunRow && 'min-w-0')}>
         <Avatar
           src={getDisplayAvatarUrl(entry.user)}
           fallback={displayName}
           size="sm"
-          className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 min-w-0"
+          className="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 min-w-0 max-[360px]:hidden"
         />
       </div>
 
@@ -149,14 +184,17 @@ export function LeaderboardEntry({
           href={`/users/${entry.user.username}`}
           className="font-medium text-white truncate block hover:text-blood-400 transition-colors leading-none min-w-0"
           onClick={(e) => e.stopPropagation()}
+          title={displayName}
         >
-          {displayName}
+          <span className="max-[470px]:hidden">{boardDisplayName}</span>
+          <span className="min-[471px]:hidden">{boardDisplayNameCompact}</span>
         </Link>
         {(showVerifiedBadge || (entry as LeaderboardEntryType & { isVerified?: boolean }).isVerified) && (
           <span
             className={cn(
               'flex-shrink-0 min-w-[1rem] w-4 h-4 inline-grid place-items-center rounded-full bg-blue-500/90 text-white',
-              isTightSpeedrunRow && 'max-[313px]:hidden'
+              isTightSpeedrunRow && 'max-[313px]:hidden',
+              'max-[470px]:hidden'
             )}
             title={verifiedBadgeTitle}
             aria-hidden
@@ -204,7 +242,8 @@ export function LeaderboardEntry({
         <div
           className={cn(
             'min-w-0 flex items-center justify-end flex-shrink-0 justify-self-end',
-            valueKind === 'time' ? 'pr-1 sm:pr-2 md:pr-3 lg:pr-4' : 'pr-2 sm:pr-0'
+            valueKind === 'time' ? 'pr-1 sm:pr-2 md:pr-3 lg:pr-4' : 'pr-2 sm:pr-0',
+            'max-[360px]:pr-0'
           )}
         >
           {valueKind === 'rankOneCount' ? (
@@ -212,21 +251,24 @@ export function LeaderboardEntry({
               <span className="text-xs sm:text-sm font-semibold text-military-400 leading-none whitespace-nowrap lg:text-base">
                 {entry.value.toLocaleString()}
               </span>
-              <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-yellow-400 shrink-0" aria-hidden />
+              <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-yellow-400 shrink-0 max-[360px]:hidden" aria-hidden />
             </span>
           ) : valueKind === 'xp' ? (
             <>
               <span className="text-xs sm:text-sm font-semibold text-military-400 tabular-nums leading-none whitespace-nowrap lg:hidden">
-                {formatXpCompact(entry.value)}{' '}
-                {xpLabel.includes('Custom') ? (
-                  <>
-                    <span className="font-extrabold text-element-300 uppercase tracking-wide">Custom</span>
-                    {xpLabel.startsWith('Verified ') ? ' Verified' : ''}
-                    {xpLabel.includes('Zombies') ? ' Zombies XP' : ' XP'}
-                  </>
-                ) : (
-                  xpLabel
-                )}
+                {formatXpCompact(entry.value)}
+                <span className="max-[360px]:hidden">
+                  {' '}
+                  {xpLabel.includes('Custom') ? (
+                    <>
+                      <span className="font-extrabold text-element-300 uppercase tracking-wide">Custom</span>
+                      {xpLabel.startsWith('Verified ') ? ' Verified' : ''}
+                      {xpLabel.includes('Zombies') ? ' Zombies XP' : ' XP'}
+                    </>
+                  ) : (
+                    xpLabel
+                  )}
+                </span>
               </span>
               <span className="hidden lg:inline text-sm font-semibold text-military-400 tabular-nums leading-none whitespace-nowrap">
                 {entry.value.toLocaleString()}{' '}
@@ -321,7 +363,13 @@ export function LeaderboardEntry({
 
   if (logHref) {
     return (
-      <Link href={logHref} className="block rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blood-500 min-w-0">
+      <Link
+        href={logHref}
+        className="block rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blood-500 min-w-0 touch-pan-y"
+        onTouchStart={onRowTouchStart}
+        onTouchMove={onRowTouchMove}
+        onClick={onRowClick}
+      >
         {cardContent}
       </Link>
     );

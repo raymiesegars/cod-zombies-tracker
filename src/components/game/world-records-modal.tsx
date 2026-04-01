@@ -114,7 +114,7 @@ export function WorldRecordsModal({
           </div>
         )}
 
-        <div className="max-h-[50vh] overflow-y-auto space-y-2">
+        <div className="max-h-[50vh] overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] space-y-2">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-blood-500" />

@@ -304,7 +304,7 @@ export function NotificationsDropdown() {
                   <span className="text-xs text-bunker-400">{unreadCount} unread</span>
                 )}
               </div>
-              <div className="flex-1 min-h-0 overflow-y-auto">
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
                 {loading ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="w-6 h-6 animate-spin text-bunker-500" />

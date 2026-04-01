@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Avatar } from '@/components/ui';
 import { formatCompletionTime } from '@/components/ui/time-input';
@@ -29,6 +30,7 @@ const rowHighlight = {
   2: 'bg-bunker-800/80 border-bunker-400/60',
   3: 'bg-amber-950/80 border-amber-800',
 };
+const BOARD_NAME_MAX_LENGTH = 15;
 
 export function TournamentLeaderboardEntry({
   entry,
@@ -41,10 +43,37 @@ export function TournamentLeaderboardEntry({
   mapSlug?: string;
   awardButtons?: React.ReactNode;
 }) {
+  const touchRef = useRef<{ x: number; y: number; moved: boolean } | null>(null);
+
+  const onRowTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchRef.current = { x: touch.clientX, y: touch.clientY, moved: false };
+  };
+
+  const onRowTouchMove = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    const start = touchRef.current;
+    if (!start) return;
+    if (Math.abs(touch.clientX - start.x) > 8 || Math.abs(touch.clientY - start.y) > 8) {
+      start.moved = true;
+    }
+  };
+
+  const onRowClick = (e: React.MouseEvent) => {
+    if (touchRef.current?.moved) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
   const level = entry.user.level ?? 1;
   const rankDef = getRankForLevel(level);
   const rankIcon = rankDef ? getRankIconPath(rankDef.icon) : null;
   const displayName = entry.user.displayName || entry.user.username;
+  const boardDisplayName =
+    displayName.length > BOARD_NAME_MAX_LENGTH
+      ? `${displayName.slice(0, BOARD_NAME_MAX_LENGTH)}...`
+      : displayName;
   const slug = mapSlug ?? entry.mapSlug;
   const runHref = entry.logId && slug && entry.logType
     ? `/maps/${slug}/run/${entry.logType}/${entry.logId}`
@@ -68,7 +97,7 @@ export function TournamentLeaderboardEntry({
   const inner = (
     <div
       className={cn(
-        'grid grid-cols-[auto_auto_auto_auto_1fr_auto] items-center gap-x-3 p-3 rounded-lg min-h-[3.25rem] min-w-0',
+        'grid grid-cols-[auto_auto_1fr_auto] max-[360px]:grid-cols-[auto_1fr_auto] min-[400px]:grid-cols-[auto_auto_auto_1fr_auto] sm:grid-cols-[auto_auto_auto_auto_1fr_auto] items-center gap-x-2 sm:gap-x-3 max-[360px]:gap-x-1 p-2.5 sm:p-3 max-[360px]:p-2 rounded-lg min-h-[3.25rem] min-w-0',
         borderClass
       )}
     >
@@ -97,18 +126,19 @@ export function TournamentLeaderboardEntry({
         src={getDisplayAvatarUrl(entry.user)}
         fallback={displayName}
         size="sm"
-        className="w-7 h-7 shrink-0"
+        className="w-7 h-7 shrink-0 max-[360px]:hidden"
       />
       <div className="min-w-0 flex items-center gap-1.5">
         <Link
           href={`/users/${entry.user.username}`}
           className="font-medium text-white truncate hover:text-blood-400 transition-colors"
           onClick={(e) => e.stopPropagation()}
+          title={displayName}
         >
-          {displayName}
+          {boardDisplayName}
         </Link>
         {entry.isVerified && (
-          <span className="shrink-0" title="Verified">
+          <span className="hidden min-[350px]:inline-flex shrink-0" title="Verified">
             <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
           </span>
         )}
@@ -133,7 +163,15 @@ export function TournamentLeaderboardEntry({
 
   if (runHref) {
     return (
-      <Link href={runHref} target="_blank" rel="noopener noreferrer" className="block min-w-0 hover:opacity-95 transition-opacity">
+      <Link
+        href={runHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block min-w-0 hover:opacity-95 transition-opacity touch-pan-y"
+        onTouchStart={onRowTouchStart}
+        onTouchMove={onRowTouchMove}
+        onClick={onRowClick}
+      >
         {inner}
       </Link>
     );

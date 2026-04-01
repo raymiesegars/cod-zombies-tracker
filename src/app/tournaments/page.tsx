@@ -80,13 +80,7 @@ function useCountdown(endsAt: string | null): number | null {
   return remaining;
 }
 
-const POLL_OPTION_MAX_LENGTH = 38;
 const POLL_VOTE_COUNT_WIDTH = '3rem'; // space for 3 digits
-
-function truncateOptionLabel(label: string): string {
-  if (label.length <= POLL_OPTION_MAX_LENGTH) return label;
-  return label.slice(0, POLL_OPTION_MAX_LENGTH - 1) + '…';
-}
 
 function formatCountdown(seconds: number | null): string {
   if (seconds == null) return '—';
@@ -1180,8 +1174,8 @@ export default function TournamentsPage() {
                         <p className="text-blue-300 text-xs font-semibold uppercase tracking-wider mb-2">Admin: current votes</p>
                         <ul className="space-y-1.5">
                           {(poll.options as PollOption[]).map((opt) => (
-                            <li key={opt.id} className="flex items-center gap-3 text-sm min-h-[1.5rem] w-full">
-                              <span className="text-blue-100 font-medium truncate flex-1 min-w-0 flex items-center" style={{ minHeight: '1.5rem' }} title={opt.label}>{truncateOptionLabel(opt.label)}</span>
+                            <li key={opt.id} className="flex items-start sm:items-center gap-3 text-sm min-h-[1.5rem] w-full">
+                              <span className="text-blue-100 font-medium whitespace-normal break-words leading-snug flex-1 min-w-0" style={{ minHeight: '1.5rem' }} title={opt.label}>{opt.label}</span>
                               <span className="text-military-400 font-semibold tabular-nums text-right shrink-0 flex items-center justify-end ml-auto" style={{ width: POLL_VOTE_COUNT_WIDTH, minHeight: '1.5rem' }}>{opt.voteCount ?? 0}</span>
                             </li>
                           ))}
@@ -1189,18 +1183,18 @@ export default function TournamentsPage() {
                       </div>
                     )}
                     {showPollResults ? (
-                      <div className="mt-1 min-h-[200px] overflow-y-auto">
+                      <div className="mt-1 min-h-[200px] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]">
                         <ul className="space-y-3">
                           {(poll.options as PollOption[]).map((opt) => (
-                            <li key={opt.id} className="flex items-center gap-3 py-3 px-4 rounded-lg bg-bunker-800/50 border border-bunker-700 min-h-[3rem] w-full">
-                              <span className="text-bunker-100 font-zombies text-base font-semibold tracking-wide truncate flex-1 min-w-0 flex items-center" title={opt.label}>{truncateOptionLabel(opt.label)}</span>
+                            <li key={opt.id} className="flex items-start sm:items-center gap-3 py-3 px-3 sm:px-4 rounded-lg bg-bunker-800/50 border border-bunker-700 min-h-[3rem] w-full">
+                              <span className="text-bunker-100 font-zombies text-base font-semibold tracking-wide whitespace-normal break-words leading-snug flex-1 min-w-0" title={opt.label}>{opt.label}</span>
                               <span className="text-military-400 font-semibold tabular-nums ml-auto shrink-0 flex items-center justify-end" style={{ width: POLL_VOTE_COUNT_WIDTH }}>{opt.voteCount ?? 0}</span>
                             </li>
                           ))}
                         </ul>
                       </div>
                     ) : (
-                      <div className="mt-1 min-h-[200px] overflow-y-auto">
+                      <div className="mt-1 min-h-[200px] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]">
                         <ul className="space-y-3">
                           {(poll.options as PollOption[]).map((opt) => {
                             const isVoted = poll.userVoteOptionId === opt.id;
@@ -1208,11 +1202,11 @@ export default function TournamentsPage() {
                               <li key={opt.id} className="w-full">
                                 {isVoted ? (
                                   <div
-                                    className="w-full flex items-center gap-3 py-4 px-5 rounded-xl border-2 border-blue-700/80 bg-blue-950/50 cursor-not-allowed opacity-90 min-h-[3.25rem]"
+                                    className="w-full flex flex-col sm:flex-row items-start sm:items-center gap-3 py-4 px-3 sm:px-5 rounded-xl border-2 border-blue-700/80 bg-blue-950/50 cursor-not-allowed opacity-90 min-h-[3.25rem]"
                                     aria-disabled="true"
                                   >
-                                    <span className="text-blue-100 font-zombies text-base font-semibold tracking-wide truncate flex-1 min-w-0 flex items-center" title={opt.label}>{truncateOptionLabel(opt.label)}</span>
-                                    <span className="shrink-0 ml-auto inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-800/80 text-blue-200 font-semibold text-sm border border-blue-600/60">
+                                    <span className="text-blue-100 font-zombies text-base font-semibold tracking-wide whitespace-normal break-words leading-snug w-full sm:flex-1 min-w-0" title={opt.label}>{opt.label}</span>
+                                    <span className="shrink-0 sm:ml-auto inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-800/80 text-blue-200 font-semibold text-sm border border-blue-600/60">
                                       <Lock className="w-4 h-4" />
                                       Voted (locked)
                                     </span>
@@ -1228,10 +1222,10 @@ export default function TournamentsPage() {
                                       setVoteConfirmModal({ optionId: opt.id, optionLabel: opt.label });
                                     }}
                                     disabled={voting || pollEnded || !!poll.userVoteOptionId}
-                                    className="w-full flex items-center gap-3 py-4 px-5 rounded-xl border-2 border-blood-500/70 bg-blood-900/40 hover:bg-blood-800/50 hover:border-blood-500 disabled:opacity-50 disabled:cursor-not-allowed text-left transition-all shadow-md hover:shadow-blood-900/30 min-h-[3.25rem]"
+                                    className="w-full flex flex-col sm:flex-row items-start sm:items-center gap-3 py-4 px-3 sm:px-5 rounded-xl border-2 border-blood-500/70 bg-blood-900/40 hover:bg-blood-800/50 hover:border-blood-500 disabled:opacity-50 disabled:cursor-not-allowed text-left transition-all shadow-md hover:shadow-blood-900/30 min-h-[3.25rem]"
                                   >
-                                    <span className="text-white font-zombies text-base font-semibold tracking-wide truncate flex-1 min-w-0 flex items-center" title={opt.label}>{truncateOptionLabel(opt.label)}</span>
-                                    <span className="shrink-0 ml-auto px-4 py-2 rounded-lg bg-blood-600 hover:bg-blood-500 text-white font-semibold text-sm border border-blood-500 shadow-sm flex items-center">Vote</span>
+                                    <span className="text-white font-zombies text-base font-semibold tracking-wide whitespace-normal break-words leading-snug w-full sm:flex-1 min-w-0" title={opt.label}>{opt.label}</span>
+                                    <span className="shrink-0 sm:ml-auto px-4 py-2 rounded-lg bg-blood-600 hover:bg-blood-500 text-white font-semibold text-sm border border-blood-500 shadow-sm flex items-center">Vote</span>
                                   </button>
                                 )}
                               </li>
@@ -1347,7 +1341,7 @@ export default function TournamentsPage() {
                     )}
                   </div>
                 </div>
-                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]">
                   {leaderboardLoading && tournamentId ? (
                     <div className="py-12 flex items-center justify-center">
                       <div className="w-8 h-8 border-2 border-blood-500 border-t-transparent rounded-full animate-spin" />
@@ -1418,8 +1412,8 @@ export default function TournamentsPage() {
           {/* Trophy leaderboard: right 2/5 on wide screens */}
           <div className={`flex flex-col min-h-0 min-w-0 h-full ${pollFirst ? 'order-3' : 'order-2'}`}>
             <Card variant="bordered" className="border-bunker-700 flex flex-col flex-1 min-h-[280px] lg:min-h-[380px] w-full min-w-0 overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between gap-2 shrink-0">
-              <CardTitle className="text-base font-zombies text-white flex items-center gap-2">
+            <CardHeader className="flex flex-row flex-wrap items-start sm:items-center justify-between gap-2 shrink-0">
+              <CardTitle className="text-base font-zombies text-white flex items-center gap-2 min-w-0">
                 <Award className="w-4 h-4 text-amber-500 shrink-0" />
                 Trophy Leaderboard
               </CardTitle>
@@ -1431,11 +1425,11 @@ export default function TournamentsPage() {
                   { value: 'silver', label: 'Silver' },
                   { value: 'bronze', label: 'Bronze' },
                 ]}
-                className="min-w-[100px] bg-bunker-800 border-bunker-600 text-white"
+                className="basis-full sm:basis-auto w-full sm:w-auto min-w-0 sm:min-w-[100px] bg-bunker-800 border-bunker-600 text-white"
               />
             </CardHeader>
             <CardContent className="min-h-0 flex-1 overflow-hidden pt-0">
-              <div className="h-[220px] overflow-y-auto overscroll-contain">
+              <div className="h-[220px] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]">
                 {trophyLeaderboardLoading ? (
                   <div className="h-full flex items-center justify-center py-12">
                     <div className="w-8 h-8 border-2 border-blood-500 border-t-transparent rounded-full animate-spin" />
@@ -1444,13 +1438,21 @@ export default function TournamentsPage() {
                 <ul className="space-y-1.5 text-sm pr-1">
                   {trophyEntries.slice(0, 15).map((e, i) => (
                     <li key={e.user.username} className="flex items-center gap-2 py-1.5 border-b border-bunker-800/50 last:border-0">
+                      {(() => {
+                        const fullName = e.user.displayName || e.user.username;
+                        const shortName = fullName.length > 15 ? `${fullName.slice(0, 15)}...` : fullName;
+                        return (
+                          <>
                       <span className="text-bunker-500 w-5 shrink-0 tabular-nums">{i + 1}.</span>
-                      <span className="text-white min-w-0 truncate flex-1">{e.user.displayName || e.user.username}</span>
+                      <span className="text-white min-w-0 truncate flex-1" title={fullName}>{shortName}</span>
                       <span className="ml-auto shrink-0 flex items-center gap-2">
                         <span className="text-amber-400">{e.gold}🥇</span>
                         <span className="text-bunker-400">{e.silver}🥈</span>
                         <span className="text-amber-700">{e.bronze}🥉</span>
                       </span>
+                          </>
+                        );
+                      })()}
                     </li>
                   ))}
                 </ul>
