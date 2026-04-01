@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent, Select, Input, Logo, PageLoad
 import { LeaderboardEntry, LeaderboardsHelpContent, Bo7RelicPicker } from '@/components/game';
 import type { LeaderboardEntry as LeaderboardEntryType, Game, MapWithGame, PlayerCount, ChallengeType } from '@/types';
 import { cn } from '@/lib/utils';
-import { getBo4DifficultyLabel, BO4_DIFFICULTIES, isBo4Game } from '@/lib/bo4';
+import { getBo4DifficultyLabel, getBo4ElixirModeLabel, BO4_DIFFICULTIES, BO4_ELIXIR_MODES, isBo4Game } from '@/lib/bo4';
 import { IW_CHALLENGE_TYPES_ORDER } from '@/lib/iw';
 import { isSpeedrunCategory } from '@/lib/achievements/categories';
 import { isBo3Game, BO3_GOBBLEGUM_MODES, getBo3GobbleGumLabel } from '@/lib/bo3';
@@ -1150,8 +1150,7 @@ export default function LeaderboardsPage() {
                     <Select
                       options={[
                         { value: '', label: 'All Elixirs' },
-                        { value: 'CLASSIC_ONLY', label: 'Classic Elixirs Only' },
-                        { value: 'ALL_ELIXIRS_TALISMANS', label: 'All Elixirs & Talismans' },
+                        ...BO4_ELIXIR_MODES.map((m) => ({ value: m, label: getBo4ElixirModeLabel(m) })),
                       ]}
                       value={bo4ElixirFilter}
                       onChange={(e) => setBo4ElixirFilter(e.target.value)}

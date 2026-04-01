@@ -13,7 +13,7 @@ function configToChallengeLogUpdate(config: Record<string, unknown>, gameShortNa
     out.playerCount = config.playerCount;
   }
   if (gameShortName === 'BO3') {
-    if (config.bo3GobbleGumMode && ['CLASSIC_ONLY', 'MEGA', 'NONE'].includes(config.bo3GobbleGumMode as string)) {
+    if (config.bo3GobbleGumMode && ['CLASSIC_ONLY', 'MEGA', 'NONE', 'ANY_PERCENT'].includes(config.bo3GobbleGumMode as string)) {
       out.bo3GobbleGumMode = config.bo3GobbleGumMode;
     }
     if (config.bo3AatUsed !== undefined) out.bo3AatUsed = Boolean(config.bo3AatUsed);
@@ -23,6 +23,7 @@ function configToChallengeLogUpdate(config: Record<string, unknown>, gameShortNa
     const elixir = config.bo4ElixirMode as string | undefined;
     if (elixir === 'CLASSIC' || elixir === 'CLASSIC_ONLY') out.bo4ElixirMode = 'CLASSIC_ONLY';
     else if (elixir === 'ALL' || elixir === 'ALL_ELIXIRS_TALISMANS') out.bo4ElixirMode = 'ALL_ELIXIRS_TALISMANS';
+    else if (elixir === 'ANY_PERCENT') out.bo4ElixirMode = 'ANY_PERCENT';
   }
   if (gameShortName === 'BOCW') {
     if (config.bocwSupportMode) out.bocwSupportMode = config.bocwSupportMode;
