@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getLevelFromXp } from '@/lib/ranks';
-import { getRankOneCountsByScope } from '@/lib/world-records';
+import { getRankOneCountsByScope, computeScopedRankOneCountsByUserId, type RankOneRunScope } from '@/lib/world-records';
 import type { PlayerCount } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
@@ -107,6 +107,11 @@ export async function GET(request: NextRequest) {
     const verifiedOnly = searchParams.get('verified') === '1' || searchParams.get('verified') === 'true';
     const gameId = searchParams.get('gameId')?.trim() || null;
     const mapId = searchParams.get('mapId')?.trim() || null;
+    const runScopeRaw = searchParams.get('runScope')?.trim();
+    const runScope: RankOneRunScope =
+      runScopeRaw === 'nonSpeedrun' || runScopeRaw === 'speedrun' || runScopeRaw === 'eeSpeedrun'
+        ? runScopeRaw
+        : 'all';
     const isGlobalScope = !gameId && !mapId;
     const valueKey: 'worldRecords' | 'verifiedWorldRecords' = verifiedOnly ? 'verifiedWorldRecords' : 'worldRecords';
     if (mapId && gameId) {
@@ -119,7 +124,10 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const counts = await getRankOneCountsByScope({ gameId, mapId });
+    const counts =
+      runScope === 'all'
+        ? await getRankOneCountsByScope({ gameId, mapId })
+        : await computeScopedRankOneCountsByUserId({ gameId, mapId }, { runScope });
 
     const rankedUserIds: string[] = [];
     counts.forEach((c, userId) => {
@@ -184,7 +192,7 @@ export async function GET(request: NextRequest) {
           (r.displayName && r.displayName.toLowerCase().includes(q))
       );
       const sliced = rows.slice(0, SEARCH_LIMIT);
-      if (isGlobalScope && counts.size > 0) await persistRankOneCache(sliced);
+      if (isGlobalScope && runScope === 'all' && counts.size > 0) await persistRankOneCache(sliced);
       const entries = sliced.map((user) => {
         const val = user[valueKey];
         const level = getLevelFromXp(user.totalXp).level;
@@ -212,7 +220,7 @@ export async function GET(request: NextRequest) {
 
     const total = rows.length;
     const page = rows.slice(offset, offset + limit);
-    if (isGlobalScope && counts.size > 0) await persistRankOneCache(page);
+    if (isGlobalScope && runScope === 'all' && counts.size > 0) await persistRankOneCache(page);
     const entries = page.map((user) => {
       const val = user[valueKey];
       const level = getLevelFromXp(user.totalXp).level;

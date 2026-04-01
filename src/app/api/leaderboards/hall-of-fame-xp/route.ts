@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getLevelFromXp } from '@/lib/ranks';
 import { Prisma, type PlayerCount } from '@prisma/client';
+import { SPEEDRUN_CATEGORIES } from '@/lib/achievements/categories';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -29,6 +30,10 @@ export async function GET(request: NextRequest) {
     const verifiedOnly = searchParams.get('verified') !== '0' && searchParams.get('verified') !== 'false';
     const gameId = searchParams.get('gameId')?.trim() || null;
     const mapId = searchParams.get('mapId')?.trim() || null;
+    const runScopeRaw = searchParams.get('runScope')?.trim();
+    const runScope = runScopeRaw === 'nonSpeedrun' || runScopeRaw === 'speedrun' || runScopeRaw === 'eeSpeedrun'
+      ? runScopeRaw
+      : 'all';
 
     if (mapId && gameId) {
       const map = await prisma.map.findFirst({ where: { id: mapId, gameId }, select: { id: true } });
@@ -44,6 +49,17 @@ export async function GET(request: NextRequest) {
     const verifiedSql = verifiedOnly ? Prisma.sql`AND ua."verifiedAt" IS NOT NULL` : Prisma.empty;
     const mapSql = mapId ? Prisma.sql`AND COALESCE(a."mapId", ee."mapId") = ${mapId}` : Prisma.empty;
     const gameSql = !mapId && gameId ? Prisma.sql`AND m."gameId" = ${gameId}` : Prisma.empty;
+    const speedrunCategoriesWithoutEe = SPEEDRUN_CATEGORIES.filter((c) => c !== 'EASTER_EGG_SPEEDRUN');
+    const speedrunCategoriesSql = Prisma.join(speedrunCategoriesWithoutEe);
+    const challengeTypeExpr = Prisma.sql`COALESCE(a.criteria->>'challengeType', '')`;
+    const runScopeSql =
+      runScope === 'nonSpeedrun'
+        ? Prisma.sql`AND (${challengeTypeExpr} = '' OR ${challengeTypeExpr} NOT IN (${speedrunCategoriesSql}))`
+        : runScope === 'speedrun'
+          ? Prisma.sql`AND ${challengeTypeExpr} IN (${speedrunCategoriesSql})`
+          : runScope === 'eeSpeedrun'
+            ? Prisma.sql`AND ${challengeTypeExpr} = 'EASTER_EGG_SPEEDRUN'`
+            : Prisma.empty;
     const searchSql = searchQ
       ? Prisma.sql`AND (u.username ILIKE ${searchPattern} OR u."displayName" ILIKE ${searchPattern})`
       : Prisma.empty;
@@ -61,6 +77,7 @@ export async function GET(request: NextRequest) {
           ${verifiedSql}
           ${mapSql}
           ${gameSql}
+          ${runScopeSql}
         GROUP BY ua."userId"
       ),
       ranked AS (
@@ -98,6 +115,7 @@ export async function GET(request: NextRequest) {
           ${verifiedSql}
           ${mapSql}
           ${gameSql}
+          ${runScopeSql}
         GROUP BY ua."userId"
       )
       SELECT COUNT(*)::bigint AS count

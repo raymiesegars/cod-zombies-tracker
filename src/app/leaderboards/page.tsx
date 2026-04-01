@@ -38,6 +38,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 
 type LeaderboardTab = 'current' | 'hall' | 'best';
 type HallMode = 'rankOnes' | 'xp';
+type BestRunScope = 'nonSpeedrun' | 'speedrun' | 'eeSpeedrun' | '';
 type HallMilestone = {
   level: number;
   claimed: boolean;
@@ -122,6 +123,7 @@ export default function LeaderboardsPage() {
   const [leaderboardTab, setLeaderboardTab] = useState<LeaderboardTab>('current');
   const [hallMode, setHallMode] = useState<HallMode>('rankOnes');
   const [hallVerifiedOnly, setHallVerifiedOnly] = useState(true);
+  const [bestRunScope, setBestRunScope] = useState<BestRunScope>('');
   const [hallGameId, setHallGameId] = useState('');
   const [hallMapId, setHallMapId] = useState('');
   const [hallMilestones, setHallMilestones] = useState<HallMilestone[]>([]);
@@ -240,6 +242,7 @@ export default function LeaderboardsPage() {
           if (hallVerifiedOnly) params.set('verified', '1');
           if (hallGameId) params.set('gameId', hallGameId);
           if (hallMapId) params.set('mapId', hallMapId);
+          if (bestRunScope) params.set('runScope', bestRunScope);
           const endpoint = hallMode === 'rankOnes'
             ? '/api/leaderboards/rank-ones'
             : '/api/leaderboards/hall-of-fame-xp';
@@ -410,7 +413,7 @@ export default function LeaderboardsPage() {
 
     fetchLeaderboard();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [leaderboardTab, hallMode, hallVerifiedOnly, hallGameId, hallMapId, isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, isVanguardMap, hasVanguardVoid, hasVanguardRampage, searchForFetch, verifiedOnly, rankVerifiedXpOnly, xpType, leaderboardStorageHydrated, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7GobbleGumFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter]);
+  }, [leaderboardTab, hallMode, hallVerifiedOnly, bestRunScope, hallGameId, hallMapId, isRankView, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, isVanguardMap, hasVanguardVoid, hasVanguardRampage, searchForFetch, verifiedOnly, rankVerifiedXpOnly, xpType, leaderboardStorageHydrated, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7GobbleGumFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter]);
 
   useEffect(() => {
     if (leaderboardTab !== 'hall') return;
@@ -448,6 +451,7 @@ export default function LeaderboardsPage() {
         if (hallVerifiedOnly) params.set('verified', '1');
         if (hallGameId) params.set('gameId', hallGameId);
         if (hallMapId) params.set('mapId', hallMapId);
+        if (bestRunScope) params.set('runScope', bestRunScope);
         const endpoint = hallMode === 'rankOnes'
           ? '/api/leaderboards/rank-ones'
           : '/api/leaderboards/hall-of-fame-xp';
@@ -562,7 +566,7 @@ export default function LeaderboardsPage() {
       setLoadMoreLoading(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [leaderboardTab, hallMode, hallVerifiedOnly, hallGameId, hallMapId, isRankView, searchForFetch, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, hasVanguardVoid, hasVanguardRampage, verifiedOnly, rankVerifiedXpOnly, xpType, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7GobbleGumFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter, leaderboard.length, total]);
+  }, [leaderboardTab, hallMode, hallVerifiedOnly, bestRunScope, hallGameId, hallMapId, isRankView, searchForFetch, selectedMap, selectedPlayerCount, selectedChallengeType, selectedDifficulty, isBo4Map, isIwMap, isBo3Map, isBocwMap, isBo6Map, isBo7Map, isWawMap, isBo2Map, isWw2Map, hasVanguardVoid, hasVanguardRampage, verifiedOnly, rankVerifiedXpOnly, xpType, fortuneCardsFilter, directorsCutFilter, bo3GobbleGumFilter, bo3AatUsedFilter, bo4ElixirFilter, bocwSupportFilter, rampageInducerFilter, vanguardVoidFilter, bo6GobbleGumFilter, bo6SupportFilter, bo7GobbleGumFilter, bo7SupportFilter, bo7CursedFilter, bo7RelicsFilter, wawNoJugFilter, wawFixedWunderwaffeFilter, bo2BankUsedFilter, ww2ConsumablesFilter, firstRoomVariantFilter, leaderboard.length, total]);
 
   // Observe sentinel when search is empty and more entries exist; trigger well before sentinel is visible
   useEffect(() => {
@@ -1362,6 +1366,47 @@ export default function LeaderboardsPage() {
                   >
                     <Star className="w-4 h-4 text-yellow-400" />
                     {hallVerifiedOnly ? 'Verified XP' : 'XP'}
+                  </button>
+                </div>
+                <div className="col-span-2 sm:col-span-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setBestRunScope('nonSpeedrun')}
+                    className={cn(
+                      'w-full min-h-[40px] flex items-center justify-center px-3 py-2 rounded-lg border text-xs sm:text-sm font-medium transition-colors',
+                      bestRunScope === 'nonSpeedrun'
+                        ? 'border-blue-500/60 bg-blue-950/80 text-blue-200'
+                        : 'border-bunker-600 bg-bunker-800/80 text-bunker-300 hover:bg-bunker-700/80'
+                    )}
+                    aria-pressed={bestRunScope === 'nonSpeedrun'}
+                  >
+                    Non-speedrun only
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBestRunScope('speedrun')}
+                    className={cn(
+                      'w-full min-h-[40px] flex items-center justify-center px-3 py-2 rounded-lg border text-xs sm:text-sm font-medium transition-colors',
+                      bestRunScope === 'speedrun'
+                        ? 'border-blue-500/60 bg-blue-950/80 text-blue-200'
+                        : 'border-bunker-600 bg-bunker-800/80 text-bunker-300 hover:bg-bunker-700/80'
+                    )}
+                    aria-pressed={bestRunScope === 'speedrun'}
+                  >
+                    Speedruns only
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBestRunScope('eeSpeedrun')}
+                    className={cn(
+                      'w-full min-h-[40px] flex items-center justify-center px-3 py-2 rounded-lg border text-xs sm:text-sm font-medium transition-colors',
+                      bestRunScope === 'eeSpeedrun'
+                        ? 'border-blue-500/60 bg-blue-950/80 text-blue-200'
+                        : 'border-bunker-600 bg-bunker-800/80 text-bunker-300 hover:bg-bunker-700/80'
+                    )}
+                    aria-pressed={bestRunScope === 'eeSpeedrun'}
+                  >
+                    EE speedruns only
                   </button>
                 </div>
                 <Select

@@ -13,6 +13,7 @@ import type { PlayerCount } from '@prisma/client';
 
 export type WorldRecordsResult = { worldRecords: number; verifiedWorldRecords: number };
 export type RankOneScopeFilter = { gameId?: string | null; mapId?: string | null };
+export type RankOneRunScope = 'all' | 'nonSpeedrun' | 'speedrun' | 'eeSpeedrun';
 
 export type WorldRecordDetail = {
   mapSlug: string;
@@ -214,8 +215,10 @@ function isVerifiedOnlyLeaderboardKey(key: string): boolean {
 
 function aggregateRankOneCountsFromBuckets(
   state: WorldRecordBucketState,
-  filter?: RankOneScopeFilter
+  filter?: RankOneScopeFilter,
+  options?: { runScope?: RankOneRunScope }
 ): Map<string, { worldRecords: number; verifiedWorldRecords: number }> {
+  const runScope = options?.runScope ?? 'all';
   const counts = new Map<string, { worldRecords: number; verifiedWorldRecords: number }>();
   const awardedByUserAndBoard = new Set<string>();
   const mapMatchesScope = (mapId: string): boolean => {
@@ -243,6 +246,10 @@ function aggregateRankOneCountsFromBuckets(
   const pickBest = (key: string, entries: WRBucketEntry[], isSpeedrun: boolean, isEe: boolean) => {
     if (entries.length === 0) return;
     if (!mapMatchesScope(entries[0]!.log.mapId)) return;
+    const challengeType = entries[0]!.log.challengeType;
+    if (runScope === 'nonSpeedrun' && (isEe || isSpeedrun)) return;
+    if (runScope === 'speedrun' && (isEe || !isSpeedrun || challengeType === 'EASTER_EGG_SPEEDRUN')) return;
+    if (runScope === 'eeSpeedrun' && !(isEe || challengeType === 'EASTER_EGG_SPEEDRUN')) return;
     const bestValue = entries.reduce((best, entry) => {
       if (isSpeedrun || isEe) return entry.value < best ? entry.value : best;
       return entry.value > best ? entry.value : best;
@@ -264,6 +271,7 @@ function aggregateRankOneCountsFromBuckets(
     pickBest(key, entries, true, true);
   }
   for (const [key, data] of Array.from(state.hrByKey.entries())) {
+    if (runScope === 'speedrun' || runScope === 'eeSpeedrun') continue;
     const scopedEntries = data.entries.filter((entry) => mapMatchesScope(entry.log.mapId));
     if (scopedEntries.length === 0) continue;
     const verifiedOnlyBoard = isVerifiedOnlyLeaderboardKey(key);
@@ -804,14 +812,17 @@ export async function computeRankOneCountsByUserId(): Promise<
 }
 
 export async function computeScopedRankOneCountsByUserId(
-  filter: RankOneScopeFilter
+  filter: RankOneScopeFilter,
+  options?: { runScope?: RankOneRunScope }
 ): Promise<Map<string, { worldRecords: number; verifiedWorldRecords: number }>> {
+  const runScope = options?.runScope ?? 'all';
   const hasScope = Boolean(filter.gameId || filter.mapId);
-  if (!hasScope) return computeRankOneCountsByUserId();
+  if (!hasScope && runScope === 'all') return computeRankOneCountsByUserId();
   const { mapById, challengeBuckets, eeBuckets, hrByKey } = await getWRBucketCache();
   return aggregateRankOneCountsFromBuckets(
     { mapById, challengeBuckets, eeBuckets, hrByKey },
-    filter
+    filter,
+    { runScope }
   );
 }
 
