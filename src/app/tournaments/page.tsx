@@ -23,6 +23,7 @@ import { BOCW_SUPPORT_MODES, BOCW_SUPPORT_DEFAULT, getBocwSupportLabel } from '@
 import { BO6_GOBBLEGUM_MODES, BO6_GOBBLEGUM_DEFAULT, BO6_SUPPORT_MODES, BO6_SUPPORT_DEFAULT, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
 import { BO7_SUPPORT_MODES, BO7_SUPPORT_DEFAULT, getBo7SupportLabel } from '@/lib/bo7';
 import { TournamentLeaderboardEntry } from '@/components/game';
+import { DEFAULT_PRIZE_RULES, type PrizeRulesPayload, type PrizeRulesScope } from '@/lib/tournament-prize-rules';
 
 type PollOption = { id: string; label: string; order: number; voteCount?: number };
 type Poll = {
@@ -127,10 +128,18 @@ export default function TournamentsPage() {
   const [concludePollLoading, setConcludePollLoading] = useState(false);
   const [createLeaderboardOpen, setCreateLeaderboardOpen] = useState(false);
   const [createLeaderboardLoading, setCreateLeaderboardLoading] = useState(false);
-  const [prizePoolCents, setPrizePoolCents] = useState<number | null>(null);
-  const [tipsModalOpen, setTipsModalOpen] = useState(false);
+  const [currentPrizePoolCents, setCurrentPrizePoolCents] = useState<number | null>(null);
+  const [nextPrizePoolCents, setNextPrizePoolCents] = useState<number | null>(null);
+  const [currentPrizeRules, setCurrentPrizeRules] = useState<PrizeRulesPayload>(DEFAULT_PRIZE_RULES);
+  const [nextPrizeRules, setNextPrizeRules] = useState<PrizeRulesPayload>(DEFAULT_PRIZE_RULES);
+  const [prizeRulesModalScope, setPrizeRulesModalScope] = useState<PrizeRulesScope | null>(null);
+  const [prizeRulesEditOpen, setPrizeRulesEditOpen] = useState(false);
+  const [prizeRulesEditTitle, setPrizeRulesEditTitle] = useState('');
+  const [prizeRulesEditItems, setPrizeRulesEditItems] = useState('');
+  const [prizeRulesEditTipNote, setPrizeRulesEditTipNote] = useState('');
+  const [prizeRulesSaving, setPrizeRulesSaving] = useState(false);
   const [prizePoolEditValue, setPrizePoolEditValue] = useState('');
-  const [prizePoolEditOpen, setPrizePoolEditOpen] = useState(false);
+  const [prizePoolEditScope, setPrizePoolEditScope] = useState<PrizeRulesScope | null>(null);
   const [prizePoolSaving, setPrizePoolSaving] = useState(false);
   const [endTournamentModalOpen, setEndTournamentModalOpen] = useState(false);
   const [endTournamentLoading, setEndTournamentLoading] = useState(false);
@@ -207,10 +216,34 @@ export default function TournamentsPage() {
       .then((r) => (r.ok ? r.json() : { admin: null }))
       .then((d) => setAdminMe(d?.admin ? { isSuperAdmin: d.admin.isSuperAdmin === true } : null))
       .catch(() => setAdminMe(null));
-    fetch('/api/tournaments/prize-pool')
+    fetch('/api/tournaments/prize-pool?scope=current')
       .then((r) => r.json())
-      .then((d) => setPrizePoolCents(typeof d.amountCents === 'number' ? d.amountCents : 0))
-      .catch(() => setPrizePoolCents(0));
+      .then((d) => setCurrentPrizePoolCents(typeof d.amountCents === 'number' ? d.amountCents : 0))
+      .catch(() => setCurrentPrizePoolCents(0));
+    fetch('/api/tournaments/prize-pool?scope=next')
+      .then((r) => r.json())
+      .then((d) => setNextPrizePoolCents(typeof d.amountCents === 'number' ? d.amountCents : 0))
+      .catch(() => setNextPrizePoolCents(0));
+    fetch('/api/tournaments/prize-rules?scope=current')
+      .then((r) => r.json())
+      .then((d) =>
+        setCurrentPrizeRules({
+          title: typeof d.title === 'string' && d.title.trim() ? d.title : DEFAULT_PRIZE_RULES.title,
+          items: Array.isArray(d.items) ? d.items.filter((x: unknown): x is string => typeof x === 'string' && x.trim().length > 0) : DEFAULT_PRIZE_RULES.items,
+          tipNote: typeof d.tipNote === 'string' && d.tipNote.trim() ? d.tipNote : DEFAULT_PRIZE_RULES.tipNote,
+        })
+      )
+      .catch(() => setCurrentPrizeRules(DEFAULT_PRIZE_RULES));
+    fetch('/api/tournaments/prize-rules?scope=next')
+      .then((r) => r.json())
+      .then((d) =>
+        setNextPrizeRules({
+          title: typeof d.title === 'string' && d.title.trim() ? d.title : DEFAULT_PRIZE_RULES.title,
+          items: Array.isArray(d.items) ? d.items.filter((x: unknown): x is string => typeof x === 'string' && x.trim().length > 0) : DEFAULT_PRIZE_RULES.items,
+          tipNote: typeof d.tipNote === 'string' && d.tipNote.trim() ? d.tipNote : DEFAULT_PRIZE_RULES.tipNote,
+        })
+      )
+      .catch(() => setNextPrizeRules(DEFAULT_PRIZE_RULES));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -373,6 +406,11 @@ export default function TournamentsPage() {
   const showPollResults = poll && (pollEnded || poll.status === 'ENDED');
 
   const tournamentLocked = tournament && (tournament.status === 'LOCKED' || (tournament.endsAt && new Date(tournament.endsAt) < new Date()));
+  const hasLivePoll = !!poll && poll.status === 'ACTIVE' && !pollEnded;
+  const prizeRulesModalTitle =
+    prizeRulesModalScope === 'next' ? 'Next Tournament Prize Rules' : 'Current Tournament Prize Rules';
+  const selectedPrizeRules =
+    prizeRulesModalScope === 'next' ? nextPrizeRules : currentPrizeRules;
 
   const openEditTournamentModal = () => {
     if (!tournament) return;
@@ -644,6 +682,7 @@ export default function TournamentsPage() {
   };
 
   const handleSavePrizePool = async () => {
+    if (!prizePoolEditScope) return;
     const parsed = parseFloat(prizePoolEditValue);
     if (Number.isNaN(parsed) || parsed < 0) {
       alert('Enter a valid amount (0 or greater).');
@@ -654,13 +693,15 @@ export default function TournamentsPage() {
       const r = await fetch('/api/tournaments/prize-pool', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amountDollars: parsed }),
+        body: JSON.stringify({ scope: prizePoolEditScope, amountDollars: parsed }),
         credentials: 'same-origin',
       });
       const data = await r.json();
       if (!r.ok) throw new Error(data.error || 'Failed');
-      setPrizePoolCents(data.amountCents ?? Math.round(parsed * 100));
-      setPrizePoolEditOpen(false);
+      const cents = data.amountCents ?? Math.round(parsed * 100);
+      if (prizePoolEditScope === 'current') setCurrentPrizePoolCents(cents);
+      else setNextPrizePoolCents(cents);
+      setPrizePoolEditScope(null);
       setPrizePoolEditValue('');
     } catch (e) {
       alert((e as Error).message);
@@ -669,119 +710,321 @@ export default function TournamentsPage() {
     }
   };
 
+  const openPrizePoolEdit = (scope: PrizeRulesScope) => {
+    const value = scope === 'current' ? currentPrizePoolCents : nextPrizePoolCents;
+    setPrizePoolEditValue(String((value ?? 0) / 100));
+    setPrizePoolEditScope(scope);
+  };
+
+  const openPrizeRulesEditor = () => {
+    if (!prizeRulesModalScope) return;
+    const rules = prizeRulesModalScope === 'next' ? nextPrizeRules : currentPrizeRules;
+    setPrizeRulesEditTitle(rules.title);
+    setPrizeRulesEditItems(rules.items.join('\n'));
+    setPrizeRulesEditTipNote(rules.tipNote);
+    setPrizeRulesEditOpen(true);
+  };
+
+  const handleSavePrizeRules = async () => {
+    if (!prizeRulesModalScope) return;
+    const items = prizeRulesEditItems
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
+    if (items.length === 0) {
+      alert('Add at least one prize rule item.');
+      return;
+    }
+
+    setPrizeRulesSaving(true);
+    try {
+      const r = await fetch('/api/tournaments/prize-rules', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+          scope: prizeRulesModalScope,
+          title: prizeRulesEditTitle.trim() || DEFAULT_PRIZE_RULES.title,
+          items,
+          tipNote: prizeRulesEditTipNote.trim() || DEFAULT_PRIZE_RULES.tipNote,
+        }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || 'Failed to update prize rules');
+      const nextValue: PrizeRulesPayload = {
+        title: data.title,
+        items: data.items,
+        tipNote: data.tipNote,
+      };
+      if (prizeRulesModalScope === 'next') setNextPrizeRules(nextValue);
+      else setCurrentPrizeRules(nextValue);
+      setPrizeRulesEditOpen(false);
+    } catch (e) {
+      alert((e as Error).message);
+    } finally {
+      setPrizeRulesSaving(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-bunker-950 min-w-0 overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-6 xl:px-8 py-6 sm:py-8 min-w-0">
-        {/* Rules at top + Prize pool & Add to Prizepool */}
-        <section className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start gap-6 sm:gap-8 min-w-0">
-          <div className="max-w-2xl flex-1 min-w-0">
-            <h2 className="text-lg font-zombies text-white mb-2">Rules</h2>
-            <ul className="text-sm text-bunker-400 space-y-1 list-disc list-inside">
-              <li>Polls run for 5 days. When the timer ends, voting closes and results are revealed.</li>
-              <li>Each tournament runs for 12 days: 9 days to start runs, then 3 days to finish and submit. After that, no more runs can be submitted.</li>
-              <li>Top 3 verified runs receive gold (30k XP), silver (15k XP), and bronze (7.5k XP).</li>
-              <li>Trophies are awarded by a super admin after the tournament closes.</li>
-            </ul>
-          </div>
-          <div className="flex flex-col gap-4 shrink-0">
-            {prizePoolCents !== null && (
-              <div className="flex flex-col gap-1">
-                <span className="text-bunker-400 text-sm font-medium flex items-center gap-1.5">
-                  <Banknote className="w-5 h-5 text-amber-500 shrink-0" />
-                  Current prize pool
-                </span>
-                {adminMe?.isSuperAdmin && prizePoolEditOpen ? (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <input
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      value={prizePoolEditValue}
-                      onChange={(e) => setPrizePoolEditValue(e.target.value)}
-                      placeholder="0"
-                      className="w-28 px-3 py-2 rounded-lg bg-bunker-800 border border-bunker-600 text-white text-lg font-semibold tabular-nums"
-                    />
-                    <Button size="sm" onClick={handleSavePrizePool} disabled={prizePoolSaving}>
-                      {prizePoolSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
-                    </Button>
-                    <Button size="sm" variant="secondary" onClick={() => { setPrizePoolEditOpen(false); setPrizePoolEditValue(''); }} disabled={prizePoolSaving}>
-                      Cancel
-                    </Button>
+        <section className="mb-6 sm:mb-8 min-w-0">
+          <div className={`grid grid-cols-1 ${hasLivePoll ? 'xl:grid-cols-2' : ''} gap-4 sm:gap-6 min-w-0`}>
+            <Card variant="bordered" className="border-amber-600/40 bg-gradient-to-br from-bunker-900 to-bunker-950">
+              <CardContent className="pt-6 space-y-5">
+                <div className="space-y-2">
+                  <p className="text-xs uppercase tracking-wider text-amber-300/90 font-semibold">Current Tournament</p>
+                  <h2 className="text-2xl sm:text-3xl font-zombies text-white">Live Prize Pool</h2>
+                  <div className="flex items-center gap-2 text-bunker-300 text-xs sm:text-sm">
+                    <Clock className="w-4 h-4 shrink-0 text-blood-400" />
+                    <span>{tournamentEnded ? 'Tournament locked' : 'Time until lock'}</span>
                   </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <span className="text-3xl sm:text-4xl font-bold tabular-nums text-amber-400 drop-shadow-sm">
-                      ${((prizePoolCents ?? 0) / 100).toFixed(2)}
+                  <p className="text-3xl sm:text-5xl font-extrabold tabular-nums tracking-tight text-blood-300 leading-none">
+                    {tournament ? formatCountdown(tournamentCountdown) : '—'}
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <span className="text-bunker-300 text-sm font-medium flex items-center gap-1.5">
+                    <Banknote className="w-5 h-5 text-amber-500 shrink-0" />
+                    Current prize pool
+                  </span>
+                  {adminMe?.isSuperAdmin && prizePoolEditScope === 'current' ? (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <input
+                        type="number"
+                        min={0}
+                        step={0.01}
+                        value={prizePoolEditValue}
+                        onChange={(e) => setPrizePoolEditValue(e.target.value)}
+                        placeholder="0"
+                        className="w-32 px-3 py-2 rounded-lg bg-bunker-800 border border-bunker-600 text-white text-lg font-semibold tabular-nums"
+                      />
+                      <Button size="sm" onClick={handleSavePrizePool} disabled={prizePoolSaving}>
+                        {prizePoolSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+                      </Button>
+                      <Button size="sm" variant="secondary" onClick={() => { setPrizePoolEditScope(null); setPrizePoolEditValue(''); }} disabled={prizePoolSaving}>
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="text-3xl sm:text-4xl font-bold tabular-nums text-amber-400 drop-shadow-sm">
+                        ${((currentPrizePoolCents ?? 0) / 100).toFixed(2)}
+                      </span>
+                      {adminMe?.isSuperAdmin && (
+                        <button
+                          type="button"
+                          onClick={() => openPrizePoolEdit('current')}
+                          className="text-bunker-500 hover:text-amber-400/80 p-1.5 rounded-lg hover:bg-bunker-800/80 transition-colors"
+                          title="Edit current prize pool"
+                          aria-label="Edit current prize pool"
+                        >
+                          <Pencil className="w-5 h-5" />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPrizeRulesModalScope('current')}
+                    className="inline-flex flex-1 items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-bunker-950 font-bold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all border-2 border-amber-400/60"
+                  >
+                    <ShieldCheck className="w-5 h-5 shrink-0" />
+                    Prize Rules
+                  </button>
+                  <a
+                    href={process.env.NEXT_PUBLIC_KOFI_URL || 'https://ko-fi.com/raymiesegars'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-bunker-800 hover:bg-bunker-700 text-amber-200 font-semibold text-sm border border-amber-600/50"
+                    aria-label="Add to current tournament prize pool"
+                  >
+                    <Banknote className="w-4 h-4 shrink-0" />
+                    Add to Prize Pool
+                  </a>
+                </div>
+              </CardContent>
+            </Card>
+
+            {hasLivePoll && (
+              <Card variant="bordered" className="border-blue-600/40 bg-gradient-to-br from-bunker-900 to-bunker-950">
+                <CardContent className="pt-6 space-y-5">
+                  <div className="space-y-2">
+                    <p className="text-xs uppercase tracking-wider text-blue-300/90 font-semibold">Next Tournament</p>
+                    <h2 className="text-2xl sm:text-3xl font-zombies text-white">Poll Countdown</h2>
+                    <div className="flex items-center gap-2 text-bunker-300 text-xs sm:text-sm">
+                      <Clock className="w-4 h-4 shrink-0 text-blue-400" />
+                      <span>Poll closes in</span>
+                    </div>
+                    <p className="text-3xl sm:text-5xl font-extrabold tabular-nums tracking-tight text-blue-300 leading-none">
+                      {formatCountdown(countdown)}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <span className="text-bunker-300 text-sm font-medium flex items-center gap-1.5">
+                      <Banknote className="w-5 h-5 text-blue-400 shrink-0" />
+                      Next tournament prize pool
                     </span>
-                    {adminMe?.isSuperAdmin && !prizePoolEditOpen && (
-                      <button
-                        type="button"
-                        onClick={() => { setPrizePoolEditValue(String((prizePoolCents ?? 0) / 100)); setPrizePoolEditOpen(true); }}
-                        className="text-bunker-500 hover:text-amber-400/80 p-1.5 rounded-lg hover:bg-bunker-800/80 transition-colors"
-                        title="Edit prize pool"
-                        aria-label="Edit prize pool"
-                      >
-                        <Pencil className="w-5 h-5" />
-                      </button>
+                    {adminMe?.isSuperAdmin && prizePoolEditScope === 'next' ? (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <input
+                          type="number"
+                          min={0}
+                          step={0.01}
+                          value={prizePoolEditValue}
+                          onChange={(e) => setPrizePoolEditValue(e.target.value)}
+                          placeholder="0"
+                          className="w-32 px-3 py-2 rounded-lg bg-bunker-800 border border-bunker-600 text-white text-lg font-semibold tabular-nums"
+                        />
+                        <Button size="sm" onClick={handleSavePrizePool} disabled={prizePoolSaving}>
+                          {prizePoolSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+                        </Button>
+                        <Button size="sm" variant="secondary" onClick={() => { setPrizePoolEditScope(null); setPrizePoolEditValue(''); }} disabled={prizePoolSaving}>
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span className="text-3xl sm:text-4xl font-bold tabular-nums text-blue-300 drop-shadow-sm">
+                          ${((nextPrizePoolCents ?? 0) / 100).toFixed(2)}
+                        </span>
+                        {adminMe?.isSuperAdmin && (
+                          <button
+                            type="button"
+                            onClick={() => openPrizePoolEdit('next')}
+                            className="text-bunker-500 hover:text-blue-300 p-1.5 rounded-lg hover:bg-bunker-800/80 transition-colors"
+                            title="Edit next prize pool"
+                            aria-label="Edit next prize pool"
+                          >
+                            <Pencil className="w-5 h-5" />
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
-              </div>
+
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setPrizeRulesModalScope('next')}
+                      className="inline-flex flex-1 items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-blue-500 hover:bg-blue-400 text-bunker-950 font-bold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all border-2 border-blue-400/60"
+                    >
+                      <ShieldCheck className="w-5 h-5 shrink-0" />
+                      Prize Rules
+                    </button>
+                    <a
+                      href={process.env.NEXT_PUBLIC_KOFI_URL || 'https://ko-fi.com/raymiesegars'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-bunker-800 hover:bg-bunker-700 text-blue-200 font-semibold text-sm border border-blue-600/50"
+                      aria-label="Add to next tournament prize pool"
+                    >
+                      <Banknote className="w-4 h-4 shrink-0" />
+                      Add to Prize Pool
+                    </a>
+                  </div>
+                </CardContent>
+              </Card>
             )}
-            <button
-              type="button"
-              onClick={() => setTipsModalOpen(true)}
-              className="inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-bunker-950 font-bold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all border-2 border-amber-400/60 hover:scale-[1.02] active:scale-[0.98]"
-              aria-label="Add to prizepool — view tips policy"
-            >
-              <Banknote className="w-6 h-6 shrink-0" />
-              Add to Prizepool
-            </button>
           </div>
         </section>
 
-        {/* Tips / Prize pool policy modal */}
+        {/* Prize rules modal */}
         <Modal
-          isOpen={tipsModalOpen}
-          onClose={() => setTipsModalOpen(false)}
-          title="Tournament Prize Pool & Tips Policy"
+          isOpen={prizeRulesModalScope !== null}
+          onClose={() => setPrizeRulesModalScope(null)}
+          title={prizeRulesModalTitle}
           description="Official policy for tips and prize pool."
           size="md"
         >
           <div className="prose prose-invert prose-sm max-w-none text-bunker-300 space-y-4">
             <p className="text-bunker-400 text-xs uppercase tracking-wider font-semibold">⸻</p>
-            <h3 className="text-base font-zombies text-white">🏆 Tournament Prize Pool & Tips Policy</h3>
+            <h3 className="text-base font-zombies text-white">🏆 {selectedPrizeRules.title}</h3>
             <ul className="list-disc list-inside space-y-1.5 text-sm">
-              <li>This tournament is 100% free to enter.</li>
-              <li>Tips to the prize pool are completely optional.</li>
-              <li>Tipping does not increase your chances of winning.</li>
-              <li>Tipping does not grant special advantages.</li>
-              <li>95% of tips go to the tournament prize pool; 5% is held back for tax purposes.</li>
-              <li>Of the 95% that goes to the prize pool: 1st place receives 65%, 2nd place 25%, and 3rd place 10%.</li>
-              <li>All tips are posted in Discord for full transparency.</li>
-              <li>This is a skill-based competition — no element of chance determines outcomes.</li>
-              <li>By participating, you confirm you meet your local legal requirements for skill-based competitions.</li>
-              <li>The organizers reserve the right to verify runs and disqualify submissions that do not follow official rules.</li>
+              {selectedPrizeRules.items.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
             </ul>
             <p className="text-bunker-400 text-xs uppercase tracking-wider font-semibold">⸻</p>
             <h3 className="text-base font-zombies text-white">📝 When you tip</h3>
-            <p className="text-sm">
-              Please include the <strong className="text-bunker-200">tournament number</strong> (e.g. &quot;Tournament 1&quot; or &quot;CZT Tournament 2&quot;) and something about the tournament in your tip comment so we can track it easily and add it to the right prize pool.
-            </p>
+            <p className="text-sm">{selectedPrizeRules.tipNote}</p>
           </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4">
+            <div>
+              {adminMe?.isSuperAdmin && (
+                <Button variant="secondary" onClick={openPrizeRulesEditor}>
+                  <Pencil className="w-4 h-4 shrink-0 mr-1" />
+                  Edit Prize Rules
+                </Button>
+              )}
+            </div>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <a
               href={process.env.NEXT_PUBLIC_KOFI_URL || 'https://ko-fi.com/raymiesegars'}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => setTipsModalOpen(false)}
+              onClick={() => setPrizeRulesModalScope(null)}
               className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-bunker-950 font-bold text-base shadow-lg hover:shadow-xl transition-all border-2 border-amber-400/60 hover:scale-[1.02]"
               aria-label="Tip now — open tip link in new tab"
             >
               <Banknote className="w-5 h-5 shrink-0" />
               Tip Now
             </a>
-            <Button variant="secondary" onClick={() => setTipsModalOpen(false)}>Close</Button>
+            <Button variant="secondary" onClick={() => setPrizeRulesModalScope(null)}>Close</Button>
+            </div>
+          </div>
+        </Modal>
+
+        <Modal
+          isOpen={prizeRulesEditOpen}
+          onClose={() => !prizeRulesSaving && setPrizeRulesEditOpen(false)}
+          title={prizeRulesModalScope === 'next' ? 'Edit Next Tournament Prize Rules' : 'Edit Current Tournament Prize Rules'}
+          description="One bullet per line keeps formatting clean."
+          size="md"
+        >
+          <div className="space-y-3">
+            <Input
+              label="Rules heading"
+              value={prizeRulesEditTitle}
+              onChange={(e) => setPrizeRulesEditTitle(e.target.value)}
+              className="bg-bunker-800 border-bunker-600 text-white"
+              placeholder="Tournament Prize Pool & Tips Policy"
+            />
+            <div>
+              <label className="block text-sm font-medium text-bunker-300 mb-1">Rule bullets (one per line)</label>
+              <textarea
+                value={prizeRulesEditItems}
+                onChange={(e) => setPrizeRulesEditItems(e.target.value)}
+                rows={10}
+                className="w-full px-3 py-2 rounded-lg bg-bunker-800 border border-bunker-600 text-white text-sm"
+                placeholder="Each line becomes a bullet point"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-bunker-300 mb-1">When you tip note</label>
+              <textarea
+                value={prizeRulesEditTipNote}
+                onChange={(e) => setPrizeRulesEditTipNote(e.target.value)}
+                rows={4}
+                className="w-full px-3 py-2 rounded-lg bg-bunker-800 border border-bunker-600 text-white text-sm"
+                placeholder="Tip instructions shown in the Prize Rules modal"
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="secondary" onClick={() => setPrizeRulesEditOpen(false)} disabled={prizeRulesSaving}>
+                Cancel
+              </Button>
+              <Button onClick={handleSavePrizeRules} disabled={prizeRulesSaving}>
+                {prizeRulesSaving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
+                Save Rules
+              </Button>
+            </div>
           </div>
         </Modal>
 
