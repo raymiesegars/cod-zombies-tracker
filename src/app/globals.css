@@ -149,6 +149,7 @@ input[type='number']::-webkit-outer-spin-button {
 }
 
 input[type='number'] {
+  appearance: textfield;
   -moz-appearance: textfield;
 }
 
@@ -278,4 +279,74 @@ input[type='number'] {
 /* Default text for sections - white for readability */
 .text-default {
   @apply text-white;
+}
+
+/* Global mobile typography bump.
+   Keeps desktop/tablet unchanged while improving readability on phones. */
+@media (max-width: 640px) {
+  .text-\[10px\] {
+    font-size: 0.75rem !important; /* 12px */
+    line-height: 1rem !important;
+  }
+
+  .text-\[11px\] {
+    font-size: 0.8125rem !important; /* 13px */
+    line-height: 1.1rem !important;
+  }
+
+  .text-\[12px\] {
+    font-size: 0.875rem !important; /* 14px */
+    line-height: 1.25rem !important;
+  }
+
+  .text-xs {
+    font-size: 0.8125rem; /* 13px */
+    line-height: 1.2rem;
+  }
+
+  .text-sm {
+    font-size: 0.9375rem; /* 15px */
+    line-height: 1.4rem;
+  }
+
+  .text-base {
+    font-size: 1.0625rem; /* 17px */
+    line-height: 1.55rem;
+  }
+
+  .text-lg {
+    font-size: 1.1875rem; /* 19px */
+    line-height: 1.7rem;
+  }
+
+  .text-xl {
+    font-size: 1.3125rem; /* 21px */
+    line-height: 1.85rem;
+  }
+
+  .text-2xl {
+    font-size: 1.5rem; /* 24px */
+    line-height: 1.95rem;
+  }
+
+  .text-3xl {
+    font-size: 1.75rem; /* 28px */
+    line-height: 2.2rem;
+  }
+
+  .font-zombies {
+    letter-spacing: 0.05em;
+  }
+}
+
+@media (max-width: 400px) {
+  .text-sm {
+    font-size: 0.96875rem; /* 15.5px */
+    line-height: 1.42rem;
+  }
+
+  .text-base {
+    font-size: 1.09375rem; /* 17.5px */
+    line-height: 1.6rem;
+  }
 }

@@ -1381,7 +1381,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                   aria-label="Section"
                 />
               </div>
-              <div className="hidden min-[874px]:block overflow-x-auto [scrollbar-width:thin] [-webkit-overflow-scrolling:touch]">
+              <div className="hidden min-[874px]:block overflow-x-auto overscroll-contain touch-pan-x [scrollbar-width:thin] [-webkit-overflow-scrolling:touch]">
                 <TabsList className="w-max inline-flex gap-1 p-1">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="achievements">Achievements</TabsTrigger>
@@ -1478,6 +1478,10 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                   ) : leaderboard.length > 0 ? (
                     <div className="min-w-0">
                       {leaderboard.slice(0, 5).map((entry) => (
+                        (() => {
+                          const fullName = entry.user.displayName || entry.user.username;
+                          const shortName = fullName.length > 15 ? `${fullName.slice(0, 15)}...` : fullName;
+                          return (
                         <div
                           key={`${entry.user.id}-${entry.playerCount}`}
                           className="flex items-center gap-2 sm:gap-3 p-2 rounded-lg hover:bg-bunker-800/50"
@@ -1488,8 +1492,9 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                           <Link
                             href={`/users/${entry.user.username}`}
                             className="flex-1 min-w-0 text-xs sm:text-sm text-bunker-200 hover:text-blood-400 truncate"
+                            title={fullName}
                           >
-                            {entry.user.displayName || entry.user.username}
+                            {shortName}
                           </Link>
                           <span className="flex-shrink-0 w-14 text-xs sm:text-sm text-bunker-400 font-medium">
                             {getPlayerCountLabel(entry.playerCount)}
@@ -1508,6 +1513,8 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
                             )}
                           </div>
                         </div>
+                          );
+                        })()
                       ))}
                     </div>
                   ) : (
@@ -2343,7 +2350,7 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
               </div>
             </CardHeader>
               <CardContent>
-                <div className="space-y-2 min-h-[20rem] flex flex-col min-w-0">
+                <div className="space-y-2 min-h-[20rem] flex flex-col min-w-0 touch-pan-y">
                   {(!leaderboardFetchedOnce || (isLeaderboardLoading && leaderboard.length === 0)) ? (
                     <div className="flex-1 flex items-center justify-center py-12 min-h-[18rem]">
                       <PageLoader inline />

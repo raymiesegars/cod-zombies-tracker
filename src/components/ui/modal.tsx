@@ -121,7 +121,9 @@ export function Modal({
             <div
               className={cn(
                 'flex-1 min-h-0 p-4 sm:p-6',
-                contentScroll ? 'overflow-y-auto overflow-x-hidden' : 'overflow-hidden'
+                contentScroll
+                  ? 'overflow-y-auto overflow-x-hidden overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch]'
+                  : 'overflow-hidden'
               )}
             >
               {children}

@@ -79,7 +79,7 @@ export function RunsModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} description={`${total} run${total !== 1 ? 's' : ''} logged`}>
-      <div className="max-h-[60vh] overflow-y-auto">
+      <div className="max-h-[60vh] overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-blood-500" />

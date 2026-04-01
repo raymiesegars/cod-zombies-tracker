@@ -966,7 +966,7 @@ export default function LeaderboardsPage() {
                     setSelectedMap(nextMaps.length > 0 ? nextMaps[0].slug : '');
                   }
                 }}
-                className="w-full"
+                className="w-full col-span-2 sm:col-span-1"
               />
               <Select
                 options={mapOptions}
@@ -1043,8 +1043,25 @@ export default function LeaderboardsPage() {
                       <span className="text-xs font-bold text-element-300 uppercase tracking-wide">Custom Zombies rank:</span>
                       <div className="grid grid-cols-2 rounded-lg border border-bunker-600 p-1 bg-bunker-800/80 w-full">
                         {[
-                          { v: 'customZombies' as const, label: <><span className="font-extrabold text-element-300">CUSTOM</span> XP</> },
-                          { v: 'verifiedCustomZombies' as const, label: <><span className="font-extrabold text-element-300">CUSTOM</span> Verified</>, icon: CheckCircle2 },
+                          {
+                            v: 'customZombies' as const,
+                            label: (
+                              <>
+                                <span className="font-extrabold text-element-300">CUSTOM</span>
+                                <span className="max-[328px]:hidden"> XP</span>
+                              </>
+                            ),
+                          },
+                          {
+                            v: 'verifiedCustomZombies' as const,
+                            label: (
+                              <>
+                                <span className="font-extrabold text-element-300">CUSTOM</span>
+                                <span className="max-[328px]:hidden"> Verified</span>
+                              </>
+                            ),
+                            icon: CheckCircle2,
+                          },
                         ].map(({ v, label, icon: Icon }) => (
                           <button
                             key={v}
@@ -1524,7 +1541,7 @@ export default function LeaderboardsPage() {
                   </span>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2 min-w-0">
+              <CardContent className="space-y-2 min-w-0 touch-pan-y">
                 {isLoading ? (
                   <div className="flex justify-center py-12">
                     <PageLoader message="Loading leaderboard…" inline />
@@ -1620,7 +1637,7 @@ export default function LeaderboardsPage() {
                   </span>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2 min-w-0">
+              <CardContent className="space-y-2 min-w-0 touch-pan-y">
                 {isLoading ? (
                   <div className="flex justify-center py-12">
                     <PageLoader message="Loading leaderboard…" inline />
@@ -1708,7 +1725,7 @@ export default function LeaderboardsPage() {
                   </span>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2 min-w-0">
+              <CardContent className="space-y-2 min-w-0 touch-pan-y">
                 {isLoading ? (
                   <div className="flex justify-center py-12">
                     <PageLoader message="Loading leaderboard…" inline />
