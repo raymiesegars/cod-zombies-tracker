@@ -903,6 +903,7 @@ export const WW2_SPEEDRUN_TIERS_BY_MAP: Record<string, SpeedrunTiersByType> = {
     super30: hs(2, 30, 30),
   }),
   'groesten-haus': buildWw2SpeedrunTiers({
+    r10: m(6) + 20,
     r30: m(23) + 33,
     r50: m(53) + 15,
     r70: hs(2, 43, 40),

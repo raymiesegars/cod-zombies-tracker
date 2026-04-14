@@ -84,6 +84,7 @@ import { isVanguardGame, hasVanguardVoidFilter, hasVanguardRampageFilter } from 
 import { getAwMapConfig, getAwChallengeTypeLabel } from '@/lib/aw/aw-map-config';
 import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap } from '@/lib/first-room-variants';
 import { hasNoJugSupport } from '@/lib/no-jug-support';
+import { getChallengeTypeOrderForMap } from '@/lib/challenge-order';
 
 const BUILDABLE_PART_CACHE_KEY_PREFIX = 'buildable-parts';
 const BUILDABLE_PART_CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
@@ -1235,9 +1236,17 @@ export default function MapDetailClient({ initialMap = null, initialMapStats = n
   const visibleMapChallengeOptions = mainQuestEasterEggs.length > 1
     ? mapChallengeOptions.filter((option) => option.value !== 'EASTER_EGG_SPEEDRUN')
     : mapChallengeOptions;
+  const orderedTypes = getChallengeTypeOrderForMap(map?.game?.shortName, map?.slug);
+  const rankByType = new Map(orderedTypes.map((t, i) => [t, i]));
+  const orderedMapChallengeOptions = [...visibleMapChallengeOptions].sort((a, b) => {
+    const ai = rankByType.has(a.value) ? rankByType.get(a.value)! : Number.MAX_SAFE_INTEGER;
+    const bi = rankByType.has(b.value) ? rankByType.get(b.value)! : Number.MAX_SAFE_INTEGER;
+    if (ai !== bi) return ai - bi;
+    return a.label.localeCompare(b.label);
+  });
   const leaderboardCategoryOptions = [
     { value: 'HIGHEST_ROUND', label: 'Highest Round' },
-    ...visibleMapChallengeOptions,
+    ...orderedMapChallengeOptions,
     ...mainQuestEasterEggs.map((ee) => ({
       value: `ee-time-${ee.id}`,
       label: `${ee.name} (Time)` as string,

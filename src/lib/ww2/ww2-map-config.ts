@@ -84,11 +84,13 @@ export const WW2_MAP_CONFIG: Record<Ww2MapSlug, Ww2MapConfig> = {
   'groesten-haus': {
     challengeTypes: [
       'HIGHEST_ROUND', 'NO_DOWNS', 'NO_ARMOR', 'NO_BLITZ', 'ONE_BOX', 'STARTING_ROOM',
+      'ROUND_5_SPEEDRUN', 'ROUND_10_SPEEDRUN', 'ROUND_15_SPEEDRUN',
       'ROUND_30_SPEEDRUN', 'ROUND_50_SPEEDRUN', 'ROUND_70_SPEEDRUN',
     ],
     hasNoPower: false,
     hasFirstRoom: true,
     speedrunWRs: {
+      r10: min(6) + 20,
       r30: min(23) + 33,
       r50: min(53) + 15,
       r70: hms(2, 43, 40),

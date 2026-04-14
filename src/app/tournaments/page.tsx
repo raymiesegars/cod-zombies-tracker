@@ -1524,8 +1524,8 @@ export default function TournamentsPage() {
           isOpen={learnRulesModalOpen}
           onClose={() => setLearnRulesModalOpen(false)}
           title="Tournament rules"
-          description="Submission window, proof requirements, and top 3 verification."
-          size="md"
+          description="12-day window, ZWR category rules, speedrun proof, and required clan tag or emblem from Discord."
+          size="lg"
         >
           <div className="space-y-4">
             <TournamentRulesContent />
@@ -1786,7 +1786,7 @@ export default function TournamentsPage() {
           isOpen={createLeaderboardOpen}
           onClose={() => !createLeaderboardLoading && setCreateLeaderboardOpen(false)}
           title="Create tournament leaderboard"
-          description="Set the game, map, and category. The leaderboard runs 12 days (9 to start runs, 3 to finish and submit)."
+          description="Set the game, map, and category. The leaderboard is open for 12 days; all submissions must be in before the countdown ends."
           size="sm"
         >
           <div className="space-y-3">

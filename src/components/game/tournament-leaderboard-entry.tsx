@@ -9,7 +9,7 @@ import { formatCompletionTime } from '@/components/ui/time-input';
 import { formatRushScore } from '@/lib/utils';
 import { getDisplayAvatarUrl } from '@/lib/avatar';
 import { getRankForLevel, getRankIconPath } from '@/lib/ranks';
-import { Medal, ShieldCheck } from 'lucide-react';
+import { Medal, ShieldCheck, XCircle } from 'lucide-react';
 
 export type TournamentLeaderboardEntryData = {
   rank: number;
@@ -128,18 +128,26 @@ export function TournamentLeaderboardEntry({
         size="sm"
         className="w-7 h-7 shrink-0 max-[360px]:hidden"
       />
-      <div className="min-w-0 flex items-center gap-1.5">
+      <div className="min-w-0 flex flex-row flex-wrap items-center gap-x-1.5 gap-y-0.5">
         <Link
           href={`/users/${entry.user.username}`}
-          className="font-medium text-white truncate hover:text-blood-400 transition-colors"
+          className="font-medium text-white truncate max-w-full min-w-0 hover:text-blood-400 transition-colors"
           onClick={(e) => e.stopPropagation()}
           title={displayName}
         >
           {boardDisplayName}
         </Link>
-        {entry.isVerified && (
-          <span className="hidden min-[350px]:inline-flex shrink-0" title="Verified">
-            <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+        {entry.isVerified ? (
+          <span className="inline-flex shrink-0 items-center" title="Verified">
+            <ShieldCheck className="w-3.5 h-3.5 text-blue-400" aria-hidden />
+            <span className="sr-only">Verified</span>
+          </span>
+        ) : (
+          <span className="inline-flex shrink-0 items-center" title="Not yet verified" aria-label="Not yet verified">
+            <XCircle className="h-4 w-4 text-red-500 min-[645px]:hidden" strokeWidth={2.35} aria-hidden />
+            <span className="hidden min-[645px]:inline-block rounded-md border border-red-400/90 bg-red-950/95 px-2 py-0.5 text-center text-xs font-semibold leading-snug text-red-500 shadow-sm sm:text-sm">
+              Not yet verified
+            </span>
           </span>
         )}
       </div>
