@@ -71,7 +71,9 @@ export const ACHIEVEMENT_CATEGORY_LABELS: Record<string, string> = {
 /** Speedrun-only categories (IW and similar); used to split first filter = non-speedrun, second = Speedruns */
 export const SPEEDRUN_CATEGORIES: string[] = [
   'ROUND_5_SPEEDRUN',
+  'ROUND_10_SPEEDRUN',
   'ROUND_15_SPEEDRUN',
+  'ROUND_20_SPEEDRUN',
   'ROUND_30_SPEEDRUN',
   'ROUND_50_SPEEDRUN',
   'ROUND_70_SPEEDRUN',
@@ -80,13 +82,11 @@ export const SPEEDRUN_CATEGORIES: string[] = [
   'ROUND_255_SPEEDRUN',
   'ROUND_935_SPEEDRUN',
   'ROUND_999_SPEEDRUN',
-  'ROUND_10_SPEEDRUN',
-  'ROUND_20_SPEEDRUN',
-  'EXFIL_SPEEDRUN',
-  'EXFIL_R21_SPEEDRUN',
   'EXFIL_R5_SPEEDRUN',
   'EXFIL_R10_SPEEDRUN',
+  'EXFIL_SPEEDRUN',
   'EXFIL_R20_SPEEDRUN',
+  'EXFIL_R21_SPEEDRUN',
   'BUILD_EE_SPEEDRUN',
   'PACK_A_PUNCH_SPEEDRUN',
   'SUPER_30_SPEEDRUN',
@@ -128,7 +128,9 @@ const CATEGORY_ORDER = [
   'DOUBLE_FEATURE',
   'NO_MANS_LAND',
   'ROUND_5_SPEEDRUN',
+  'ROUND_10_SPEEDRUN',
   'ROUND_15_SPEEDRUN',
+  'ROUND_20_SPEEDRUN',
   'ROUND_30_SPEEDRUN',
   'ROUND_50_SPEEDRUN',
   'ROUND_70_SPEEDRUN',
@@ -137,13 +139,11 @@ const CATEGORY_ORDER = [
   'ROUND_255_SPEEDRUN',
   'ROUND_935_SPEEDRUN',
   'ROUND_999_SPEEDRUN',
-  'ROUND_10_SPEEDRUN',
-  'ROUND_20_SPEEDRUN',
-  'EXFIL_SPEEDRUN',
-  'EXFIL_R21_SPEEDRUN',
   'EXFIL_R5_SPEEDRUN',
   'EXFIL_R10_SPEEDRUN',
+  'EXFIL_SPEEDRUN',
   'EXFIL_R20_SPEEDRUN',
+  'EXFIL_R21_SPEEDRUN',
   'BUILD_EE_SPEEDRUN',
   'PACK_A_PUNCH_SPEEDRUN',
   'SUPER_30_SPEEDRUN',
@@ -446,7 +446,12 @@ export function getAllowedSpeedrunCategoriesForMap(
   if (gameShortName === 'WW2') {
     const cfg = getWw2MapConfig(mapSlug);
     if (cfg?.challengeTypes) {
-      return cfg.challengeTypes.filter((c) => isSpeedrunCategory(c));
+      return Array.from(
+        new Set([
+          ...(hasR5R15 ? ['ROUND_5_SPEEDRUN', 'ROUND_15_SPEEDRUN'] : []),
+          ...cfg.challengeTypes.filter((c) => isSpeedrunCategory(c)),
+        ])
+      );
     }
     return [...bo2Generic, 'ROUND_10_SPEEDRUN', 'SUPER_30_SPEEDRUN'];
   }

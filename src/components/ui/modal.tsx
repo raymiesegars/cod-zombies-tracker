@@ -16,6 +16,9 @@ interface ModalProps {
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
   /** When false, content area does not scroll (child handles its own overflow) */
   contentScroll?: boolean;
+  closeOnBackdrop?: boolean;
+  closeOnEscape?: boolean;
+  showCloseButton?: boolean;
 }
 
 const sizeStyles = {
@@ -35,12 +38,15 @@ export function Modal({
   className,
   size = 'md',
   contentScroll = true,
+  closeOnBackdrop = true,
+  closeOnEscape = true,
+  showCloseButton = true,
 }: ModalProps) {
   const handleEscape = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape' && closeOnEscape) onClose();
     },
-    [onClose]
+    [onClose, closeOnEscape]
   );
 
   useEffect(() => {
@@ -64,7 +70,7 @@ export function Modal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={closeOnBackdrop ? onClose : undefined}
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
           />
 
@@ -93,14 +99,16 @@ export function Modal({
                       <p className="mt-1 text-xs sm:text-sm text-bunker-400">{description}</p>
                     )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="p-2 -m-2 rounded-lg bg-blood-600 hover:bg-blood-500 text-white transition-colors shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation focus:outline-none focus:ring-2 focus:ring-blood-400 focus:ring-offset-2 focus:ring-offset-bunker-900"
-                    aria-label="Close"
-                  >
-                    <X className="w-5 h-5" strokeWidth={2.5} />
-                  </button>
+                  {showCloseButton ? (
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="p-2 -m-2 rounded-lg bg-blood-600 hover:bg-blood-500 text-white transition-colors shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation focus:outline-none focus:ring-2 focus:ring-blood-400 focus:ring-offset-2 focus:ring-offset-bunker-900"
+                      aria-label="Close"
+                    >
+                      <X className="w-5 h-5" strokeWidth={2.5} />
+                    </button>
+                  ) : null}
                 </div>
               </div>
             )}
