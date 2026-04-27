@@ -14,7 +14,7 @@ import {
   Modal,
   Avatar,
 } from '@/components/ui';
-import { Medal, Trophy, Clock, Award, Loader2, Lock, Plus, Banknote, Pencil, BookOpen, Trash2, ShieldCheck } from 'lucide-react';
+import { Medal, Trophy, Clock, Award, Loader2, Lock, Plus, Banknote, Pencil, BookOpen, Trash2, ShieldCheck, KeyRound } from 'lucide-react';
 import { TournamentRulesContent } from '@/components/tournament-rules-content';
 import { getGameDisplayShortName } from '@/lib/bo3-custom';
 import { BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT, getBo3GobbleGumLabel } from '@/lib/bo3';
@@ -145,6 +145,10 @@ export default function TournamentsPage() {
   const [editTournamentConfig, setEditTournamentConfig] = useState<Record<string, unknown>>({});
   const [editTournamentSaving, setEditTournamentSaving] = useState(false);
   const [learnRulesModalOpen, setLearnRulesModalOpen] = useState(false);
+  const [tournamentVerificationContent, setTournamentVerificationContent] = useState('');
+  const [tournamentVerificationEditOpen, setTournamentVerificationEditOpen] = useState(false);
+  const [tournamentVerificationDraft, setTournamentVerificationDraft] = useState('');
+  const [tournamentVerificationSaving, setTournamentVerificationSaving] = useState(false);
   const [awardingKey, setAwardingKey] = useState<string | null>(null); // `${userId}-${place}` when awarding
   const [games, setGames] = useState<{ id: string; name: string; shortName: string }[]>([]);
   const [mapsByGame, setMapsByGame] = useState<{ id: string; name: string; slug: string; gameId: string }[]>([]);
@@ -238,6 +242,10 @@ export default function TournamentsPage() {
         })
       )
       .catch(() => setNextPrizeRules(DEFAULT_PRIZE_RULES));
+    fetch('/api/tournaments/verification-message', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((d) => setTournamentVerificationContent(typeof d.content === 'string' ? d.content : ''))
+      .catch(() => setTournamentVerificationContent(''));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -444,6 +452,31 @@ export default function TournamentsPage() {
       alert((e as Error).message);
     } finally {
       setEditTournamentSaving(false);
+    }
+  };
+
+  const openTournamentVerificationEdit = () => {
+    setTournamentVerificationDraft(tournamentVerificationContent);
+    setTournamentVerificationEditOpen(true);
+  };
+
+  const saveTournamentVerificationMessage = async () => {
+    setTournamentVerificationSaving(true);
+    try {
+      const r = await fetch('/api/tournaments/verification-message', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: tournamentVerificationDraft }),
+        credentials: 'same-origin',
+      });
+      const data = (await r.json().catch(() => ({}))) as { error?: string; content?: string };
+      if (!r.ok) throw new Error(data.error || 'Failed to save');
+      setTournamentVerificationContent(typeof data.content === 'string' ? data.content : tournamentVerificationDraft);
+      setTournamentVerificationEditOpen(false);
+    } catch (e) {
+      alert((e as Error).message);
+    } finally {
+      setTournamentVerificationSaving(false);
     }
   };
 
@@ -1244,7 +1277,45 @@ export default function TournamentsPage() {
           </div>
 
           {/* Tournament Leaderboard: left 3/5 on wide screens */}
-          <div className={`flex flex-col min-h-0 min-w-0 h-full ${pollFirst ? 'order-2' : 'order-1'}`}>
+          <div className={`flex flex-col gap-4 min-h-0 min-w-0 h-full ${pollFirst ? 'order-2' : 'order-1'}`}>
+            {(tournamentVerificationContent.trim().length > 0 || adminMe?.isSuperAdmin) && (
+              <Card
+                variant="bordered"
+                className="border-amber-700/45 bg-gradient-to-br from-amber-950/35 via-bunker-950/90 to-bunker-900/95 shadow-lg shadow-amber-950/20 w-full min-w-0 overflow-hidden shrink-0"
+              >
+                <CardHeader className="flex flex-row items-start sm:items-center justify-between gap-3 flex-wrap shrink-0 pb-2">
+                  <CardTitle className="text-base sm:text-lg font-zombies text-amber-100 flex items-start sm:items-center gap-2.5 tracking-wide">
+                    <span className="mt-0.5 sm:mt-0 inline-flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg border border-amber-600/50 bg-amber-950/50 text-amber-300">
+                      <KeyRound className="w-5 h-5 sm:w-[1.35rem] sm:h-[1.35rem]" aria-hidden />
+                    </span>
+                    <span className="leading-snug">Tournament Secret Code for Verification</span>
+                  </CardTitle>
+                  {adminMe?.isSuperAdmin && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      type="button"
+                      onClick={openTournamentVerificationEdit}
+                      className="border-amber-700/60 bg-amber-950/40 text-amber-100 hover:bg-amber-900/50 hover:border-amber-600/70 shrink-0"
+                    >
+                      <Pencil className="w-4 h-4 mr-1" />
+                      Edit
+                    </Button>
+                  )}
+                </CardHeader>
+                <CardContent className="pt-0 pb-4 sm:pb-5">
+                  {tournamentVerificationContent.trim() ? (
+                    <div className="rounded-lg border border-bunker-700/80 bg-bunker-950/60 px-3 py-3 sm:px-4 sm:py-4 text-sm sm:text-base text-bunker-50 whitespace-pre-wrap break-words">
+                      {tournamentVerificationContent}
+                    </div>
+                  ) : adminMe?.isSuperAdmin ? (
+                    <p className="text-sm text-bunker-500 italic px-0.5">
+                      No message yet. Players will not see this block until you add text. Click Edit to publish instructions for the current tournament run.
+                    </p>
+                  ) : null}
+                </CardContent>
+              </Card>
+            )}
             <Card variant="bordered" className="border-bunker-700 flex flex-col flex-1 min-h-[320px] lg:min-h-[380px] w-full min-w-0 overflow-hidden">
               <CardHeader className="flex flex-row items-center justify-between gap-3 flex-wrap shrink-0">
                 <CardTitle className="text-lg font-zombies text-white flex items-center gap-2">
@@ -1532,6 +1603,37 @@ export default function TournamentsPage() {
           </div>
           <div className="flex justify-end pt-4">
             <Button onClick={() => setLearnRulesModalOpen(false)}>Close</Button>
+          </div>
+        </Modal>
+
+        <Modal
+          isOpen={tournamentVerificationEditOpen}
+          onClose={() => !tournamentVerificationSaving && setTournamentVerificationEditOpen(false)}
+          title="Tournament Secret Code for Verification"
+          description="Shown to everyone on the tournaments page. Line breaks and emoji are saved exactly as you type."
+          size="lg"
+        >
+          <textarea
+            value={tournamentVerificationDraft}
+            onChange={(e) => setTournamentVerificationDraft(e.target.value)}
+            rows={14}
+            className="w-full min-h-[220px] rounded-lg border border-bunker-600 bg-bunker-800 px-4 py-3 text-sm sm:text-base text-white placeholder:text-bunker-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-600/70 resize-y font-sans"
+            spellCheck
+            aria-label="Tournament verification message"
+          />
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => !tournamentVerificationSaving && setTournamentVerificationEditOpen(false)}
+              disabled={tournamentVerificationSaving}
+            >
+              Cancel
+            </Button>
+            <Button type="button" onClick={saveTournamentVerificationMessage} disabled={tournamentVerificationSaving}>
+              {tournamentVerificationSaving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
+              Save
+            </Button>
           </div>
         </Modal>
 
