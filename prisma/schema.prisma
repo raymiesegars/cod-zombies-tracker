@@ -1242,6 +1242,13 @@ model TournamentPrizePool {
   updatedAt   DateTime @updatedAt
 }
 
+// Singleton: live tournament verification instructions (plain text; line breaks and emoji preserved). Super admin updates via API.
+model TournamentVerificationMessage {
+  id        String   @id
+  content   String   @default("") @db.Text
+  updatedAt DateTime @updatedAt
+}
+
 enum TournamentPollStatus {
   DRAFT
   ACTIVE
