@@ -47,3 +47,6 @@ next-env.d.ts
 .cursor/
 *.swp
 *.swo
+
+# Rotating UTC password schedule (secrets)
+tournament-utc-passwords-2026.csv
