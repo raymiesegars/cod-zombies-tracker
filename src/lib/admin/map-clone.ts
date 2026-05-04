@@ -136,7 +136,12 @@ export function validateMapCloneCreatePayload(payload: MapCloneCreatePayload): s
   if (!Array.isArray(payload.challenges) || payload.challenges.length === 0) return 'At least one challenge is required';
   if (!Array.isArray(payload.achievements) || payload.achievements.length === 0) return 'At least one achievement is required';
 
-  const missingTypes = payload.expectedChallengeTypes.filter(
+  const requiresEasterEggChallenge = payload.easterEggs.length > 0;
+  const expectedTypes = payload.expectedChallengeTypes.filter(
+    (type) => requiresEasterEggChallenge || type !== 'EASTER_EGG_SPEEDRUN'
+  );
+
+  const missingTypes = expectedTypes.filter(
     (type) => !payload.challenges.some((challenge) => challenge.type === type)
   );
   if (missingTypes.length > 0) return `Missing required challenge types: ${missingTypes.join(', ')}`;
