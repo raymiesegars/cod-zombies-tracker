@@ -100,6 +100,13 @@ export default function AdminMapsPage() {
   }, [parsedAchievements.value]);
 
   const jsonValidationError = parsedChallenges.error ?? parsedEasterEggs.error ?? parsedAchievements.error;
+  const effectiveRequiredChallengeTypeCount = useMemo(() => {
+    if (!preview) return 0;
+    const hasEasterEggs = (parsedEasterEggs.value?.length ?? 0) > 0;
+    return preview.expectedChallengeTypes.filter(
+      (type) => hasEasterEggs || type !== 'EASTER_EGG_SPEEDRUN'
+    ).length;
+  }, [preview, parsedEasterEggs.value]);
 
   function resetDraftFromPreview(data: MapClonePreview) {
     setPreview(data);
@@ -483,7 +490,7 @@ export default function AdminMapsPage() {
 
             <div className="flex items-center justify-between gap-3 flex-wrap pt-2">
               <p className="text-xs text-bunker-400">
-                Required challenge types enforced: {preview.expectedChallengeTypes.length}
+                Required challenge types enforced: {effectiveRequiredChallengeTypeCount}
               </p>
               <Button
                 onClick={createMap}
