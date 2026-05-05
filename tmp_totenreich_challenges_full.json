@@ -1,0 +1,202 @@
+[
+  {
+    "sourceSlug": "highest-round",
+    "name": "Highest Round",
+    "slug": "highest-round",
+    "description": "Reach the highest round possible",
+    "type": "HIGHEST_ROUND",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "no-downs",
+    "name": "No Downs",
+    "slug": "no-downs",
+    "description": "Survive without going down",
+    "type": "NO_DOWNS",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "no-perks",
+    "name": "No Perks",
+    "slug": "no-perks",
+    "description": "Survive without purchasing any perks",
+    "type": "NO_PERKS",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "no-pack",
+    "name": "No Pack-a-Punch",
+    "slug": "no-pack",
+    "description": "Survive without using Pack-a-Punch",
+    "type": "NO_PACK",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "starting-room",
+    "name": "Starting Room Only",
+    "slug": "starting-room",
+    "description": "Never leave the starting room",
+    "type": "STARTING_ROOM",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "one-box",
+    "name": "One Box Challenge",
+    "slug": "one-box",
+    "description": "Only hit the mystery box once",
+    "type": "ONE_BOX",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "pistol-only",
+    "name": "Pistol Only",
+    "slug": "pistol-only",
+    "description": "Only use your starting pistol",
+    "type": "PISTOL_ONLY",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "no-power",
+    "name": "No Power",
+    "slug": "no-power",
+    "description": "Never turn on the power",
+    "type": "NO_POWER",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "round-30-speedrun",
+    "name": "ROUND 30 SPEEDRUN",
+    "slug": "round-30-speedrun",
+    "description": "Reach target as fast as possible",
+    "type": "ROUND_30_SPEEDRUN",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "round-50-speedrun",
+    "name": "ROUND 50 SPEEDRUN",
+    "slug": "round-50-speedrun",
+    "description": "Reach target as fast as possible",
+    "type": "ROUND_50_SPEEDRUN",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "round-70-speedrun",
+    "name": "ROUND 70 SPEEDRUN",
+    "slug": "round-70-speedrun",
+    "description": "Reach target as fast as possible",
+    "type": "ROUND_70_SPEEDRUN",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "round-100-speedrun",
+    "name": "ROUND 100 SPEEDRUN",
+    "slug": "round-100-speedrun",
+    "description": "Reach target as fast as possible",
+    "type": "ROUND_100_SPEEDRUN",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "easter-egg-speedrun",
+    "name": "EASTER EGG SPEEDRUN",
+    "slug": "easter-egg-speedrun",
+    "description": "Reach target as fast as possible",
+    "type": "EASTER_EGG_SPEEDRUN",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "round-200-speedrun",
+    "name": "ROUND 200 SPEEDRUN",
+    "slug": "round-200-speedrun",
+    "description": "Reach target as fast as possible",
+    "type": "ROUND_200_SPEEDRUN",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "no-jug",
+    "name": "No Jug",
+    "slug": "no-jug",
+    "description": "No Juggernog",
+    "type": "NO_JUG",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "exfil-speedrun",
+    "name": "Exfil Round 11",
+    "slug": "exfil-speedrun",
+    "description": "Reach target as fast as possible",
+    "type": "EXFIL_SPEEDRUN",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "exfil-r21-speedrun",
+    "name": "Exfil Round 21",
+    "slug": "exfil-r21-speedrun",
+    "description": "Reach target as fast as possible",
+    "type": "EXFIL_R21_SPEEDRUN",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "round-999-speedrun",
+    "name": "Round 999 Speedrun",
+    "slug": "round-999-speedrun",
+    "description": "Reach target as fast as possible",
+    "type": "ROUND_999_SPEEDRUN",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "round-5-speedrun",
+    "name": "ROUND 5 SPEEDRUN",
+    "slug": "round-5-speedrun",
+    "description": "Reach target as fast as possible",
+    "type": "ROUND_5_SPEEDRUN",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  },
+  {
+    "sourceSlug": "round-15-speedrun",
+    "name": "ROUND 15 SPEEDRUN",
+    "slug": "round-15-speedrun",
+    "description": "Reach target as fast as possible",
+    "type": "ROUND_15_SPEEDRUN",
+    "roundTarget": null,
+    "xpReward": 0,
+    "isActive": true
+  }
+]

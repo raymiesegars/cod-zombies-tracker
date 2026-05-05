@@ -1,0 +1,3540 @@
+[
+  {
+    "sourceSlug": "round-10",
+    "name": "Round 10",
+    "slug": "round-10",
+    "description": null,
+    "iconUrl": null,
+    "type": "ROUND_MILESTONE",
+    "criteria": {
+      "round": 10,
+      "challengeType": "HIGHEST_ROUND"
+    },
+    "xpReward": 50,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "highest-round",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-100",
+    "name": "Round 100",
+    "slug": "round-100",
+    "description": null,
+    "iconUrl": null,
+    "type": "ROUND_MILESTONE",
+    "criteria": {
+      "round": 100,
+      "challengeType": "HIGHEST_ROUND"
+    },
+    "xpReward": 1000,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "highest-round",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-110",
+    "name": "Round 110",
+    "slug": "round-110",
+    "description": null,
+    "iconUrl": null,
+    "type": "ROUND_MILESTONE",
+    "criteria": {
+      "round": 110,
+      "challengeType": "HIGHEST_ROUND"
+    },
+    "xpReward": 1000,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "highest-round",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-20",
+    "name": "Round 20",
+    "slug": "round-20",
+    "description": null,
+    "iconUrl": null,
+    "type": "ROUND_MILESTONE",
+    "criteria": {
+      "round": 20,
+      "challengeType": "HIGHEST_ROUND"
+    },
+    "xpReward": 90,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "highest-round",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-228",
+    "name": "Round 228",
+    "slug": "round-228",
+    "description": null,
+    "iconUrl": null,
+    "type": "ROUND_MILESTONE",
+    "criteria": {
+      "round": 228,
+      "challengeType": "HIGHEST_ROUND"
+    },
+    "xpReward": 1000,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "highest-round",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-30",
+    "name": "Round 30",
+    "slug": "round-30",
+    "description": null,
+    "iconUrl": null,
+    "type": "ROUND_MILESTONE",
+    "criteria": {
+      "round": 30,
+      "challengeType": "HIGHEST_ROUND"
+    },
+    "xpReward": 150,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "highest-round",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-359",
+    "name": "Round 359",
+    "slug": "round-359",
+    "description": null,
+    "iconUrl": null,
+    "type": "ROUND_MILESTONE",
+    "criteria": {
+      "round": 359,
+      "challengeType": "HIGHEST_ROUND"
+    },
+    "xpReward": 1000,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "highest-round",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-499",
+    "name": "Round 499",
+    "slug": "round-499",
+    "description": null,
+    "iconUrl": null,
+    "type": "ROUND_MILESTONE",
+    "criteria": {
+      "round": 499,
+      "challengeType": "HIGHEST_ROUND"
+    },
+    "xpReward": 1000,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "highest-round",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-50",
+    "name": "Round 50",
+    "slug": "round-50",
+    "description": null,
+    "iconUrl": null,
+    "type": "ROUND_MILESTONE",
+    "criteria": {
+      "round": 50,
+      "challengeType": "HIGHEST_ROUND"
+    },
+    "xpReward": 320,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "highest-round",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-647",
+    "name": "Round 647",
+    "slug": "round-647",
+    "description": null,
+    "iconUrl": null,
+    "type": "ROUND_MILESTONE",
+    "criteria": {
+      "round": 647,
+      "challengeType": "HIGHEST_ROUND"
+    },
+    "xpReward": 1165,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "highest-round",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-70",
+    "name": "Round 70",
+    "slug": "round-70",
+    "description": null,
+    "iconUrl": null,
+    "type": "ROUND_MILESTONE",
+    "criteria": {
+      "round": 70,
+      "challengeType": "HIGHEST_ROUND"
+    },
+    "xpReward": 580,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "highest-round",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-800",
+    "name": "Round 800",
+    "slug": "round-800",
+    "description": null,
+    "iconUrl": null,
+    "type": "ROUND_MILESTONE",
+    "criteria": {
+      "round": 800,
+      "challengeType": "HIGHEST_ROUND"
+    },
+    "xpReward": 1755,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "highest-round",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "exfil-r21-speedrun-under-10-30",
+    "name": "Exfil Round 21 in under 10:30",
+    "slug": "exfil-r21-speedrun-under-10-30",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EXFIL_R21_SPEEDRUN",
+      "maxTimeSeconds": 630
+    },
+    "xpReward": 1200,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "exfil-r21-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "exfil-r21-speedrun-under-10-30-restricted",
+    "name": "Exfil Round 21 in under 10:30 (No Rampage, No Gums)",
+    "slug": "exfil-r21-speedrun-under-10-30-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EXFIL_R21_SPEEDRUN",
+      "maxTimeSeconds": 630,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 2400,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "exfil-r21-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "exfil-r21-speedrun-under-12-00",
+    "name": "Exfil Round 21 in under 12:00",
+    "slug": "exfil-r21-speedrun-under-12-00",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EXFIL_R21_SPEEDRUN",
+      "maxTimeSeconds": 720
+    },
+    "xpReward": 500,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "exfil-r21-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "exfil-r21-speedrun-under-12-00-restricted",
+    "name": "Exfil Round 21 in under 12:00 (No Rampage, No Gums)",
+    "slug": "exfil-r21-speedrun-under-12-00-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EXFIL_R21_SPEEDRUN",
+      "maxTimeSeconds": 720,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 1000,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "exfil-r21-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "exfil-r21-speedrun-under-15-00",
+    "name": "Exfil Round 21 in under 15:00",
+    "slug": "exfil-r21-speedrun-under-15-00",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EXFIL_R21_SPEEDRUN",
+      "maxTimeSeconds": 900
+    },
+    "xpReward": 200,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "exfil-r21-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "exfil-r21-speedrun-under-15-00-restricted",
+    "name": "Exfil Round 21 in under 15:00 (No Rampage, No Gums)",
+    "slug": "exfil-r21-speedrun-under-15-00-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EXFIL_R21_SPEEDRUN",
+      "maxTimeSeconds": 900,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 400,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "exfil-r21-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "exfil-r21-speedrun-under-20-00",
+    "name": "Exfil Round 21 in under 20:00",
+    "slug": "exfil-r21-speedrun-under-20-00",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EXFIL_R21_SPEEDRUN",
+      "maxTimeSeconds": 1200
+    },
+    "xpReward": 80,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "exfil-r21-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "exfil-r21-speedrun-under-20-00-restricted",
+    "name": "Exfil Round 21 in under 20:00 (No Rampage, No Gums)",
+    "slug": "exfil-r21-speedrun-under-20-00-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EXFIL_R21_SPEEDRUN",
+      "maxTimeSeconds": 1200,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 160,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "exfil-r21-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "exfil-speedrun-under-4-35",
+    "name": "Exfil Round 11 in under 4:35",
+    "slug": "exfil-speedrun-under-4-35",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EXFIL_SPEEDRUN",
+      "maxTimeSeconds": 275
+    },
+    "xpReward": 1200,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "exfil-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "exfil-speedrun-under-4-35-restricted",
+    "name": "Exfil Round 11 in under 5:06 (No Rampage, No Gums)",
+    "slug": "exfil-speedrun-under-4-35-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EXFIL_SPEEDRUN",
+      "maxTimeSeconds": 306,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 2400,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "exfil-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "exfil-speedrun-under-5-12",
+    "name": "Exfil Round 11 in under 5:12",
+    "slug": "exfil-speedrun-under-5-12",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EXFIL_SPEEDRUN",
+      "maxTimeSeconds": 312
+    },
+    "xpReward": 500,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "exfil-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "exfil-speedrun-under-5-12-restricted",
+    "name": "Exfil Round 11 in under 5:49 (No Rampage, No Gums)",
+    "slug": "exfil-speedrun-under-5-12-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EXFIL_SPEEDRUN",
+      "maxTimeSeconds": 349,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 1000,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "exfil-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "exfil-speedrun-under-6-30",
+    "name": "Exfil Round 11 in under 6:30",
+    "slug": "exfil-speedrun-under-6-30",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EXFIL_SPEEDRUN",
+      "maxTimeSeconds": 390
+    },
+    "xpReward": 200,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "exfil-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "exfil-speedrun-under-6-30-restricted",
+    "name": "Exfil Round 11 in under 7:17 (No Rampage, No Gums)",
+    "slug": "exfil-speedrun-under-6-30-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EXFIL_SPEEDRUN",
+      "maxTimeSeconds": 437,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 400,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "exfil-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "exfil-speedrun-under-8-40",
+    "name": "Exfil Round 11 in under 8:40",
+    "slug": "exfil-speedrun-under-8-40",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EXFIL_SPEEDRUN",
+      "maxTimeSeconds": 520
+    },
+    "xpReward": 80,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "exfil-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "exfil-speedrun-under-8-40-restricted",
+    "name": "Exfil Round 11 in under 9:42 (No Rampage, No Gums)",
+    "slug": "exfil-speedrun-under-8-40-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EXFIL_SPEEDRUN",
+      "maxTimeSeconds": 582,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 160,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "exfil-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-downs-10",
+    "name": "No Downs Round 10",
+    "slug": "no-downs-10",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 10,
+      "challengeType": "NO_DOWNS"
+    },
+    "xpReward": 50,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-downs",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-downs-100",
+    "name": "No Downs Round 100",
+    "slug": "no-downs-100",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 100,
+      "challengeType": "NO_DOWNS"
+    },
+    "xpReward": 1000,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-downs",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-downs-110",
+    "name": "No Downs Round 110",
+    "slug": "no-downs-110",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 110,
+      "challengeType": "NO_DOWNS"
+    },
+    "xpReward": 1000,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-downs",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-downs-20",
+    "name": "No Downs Round 20",
+    "slug": "no-downs-20",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 20,
+      "challengeType": "NO_DOWNS"
+    },
+    "xpReward": 90,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-downs",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-downs-228",
+    "name": "No Downs Round 228",
+    "slug": "no-downs-228",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 228,
+      "challengeType": "NO_DOWNS"
+    },
+    "xpReward": 1000,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-downs",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-downs-30",
+    "name": "No Downs Round 30",
+    "slug": "no-downs-30",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 30,
+      "challengeType": "NO_DOWNS"
+    },
+    "xpReward": 150,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-downs",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-downs-359",
+    "name": "No Downs Round 359",
+    "slug": "no-downs-359",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 359,
+      "challengeType": "NO_DOWNS"
+    },
+    "xpReward": 1000,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-downs",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-downs-499",
+    "name": "No Downs Round 499",
+    "slug": "no-downs-499",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 499,
+      "challengeType": "NO_DOWNS"
+    },
+    "xpReward": 1000,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-downs",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-downs-50",
+    "name": "No Downs Round 50",
+    "slug": "no-downs-50",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 50,
+      "challengeType": "NO_DOWNS"
+    },
+    "xpReward": 320,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-downs",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-downs-647",
+    "name": "No Downs Round 647",
+    "slug": "no-downs-647",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 647,
+      "challengeType": "NO_DOWNS"
+    },
+    "xpReward": 1165,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-downs",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-downs-70",
+    "name": "No Downs Round 70",
+    "slug": "no-downs-70",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 70,
+      "challengeType": "NO_DOWNS"
+    },
+    "xpReward": 580,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-downs",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-downs-800",
+    "name": "No Downs Round 800",
+    "slug": "no-downs-800",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 800,
+      "challengeType": "NO_DOWNS"
+    },
+    "xpReward": 1755,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-downs",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-jug-10",
+    "name": "No Jug Round 10",
+    "slug": "no-jug-10",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 10,
+      "challengeType": "NO_JUG"
+    },
+    "xpReward": 50,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-jug",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-jug-10-no-support",
+    "name": "No Jug Round 10 (No Support)",
+    "slug": "no-jug-10-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 10,
+      "challengeType": "NO_JUG",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 100,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-jug",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-jug-100",
+    "name": "No Jug Round 100",
+    "slug": "no-jug-100",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 100,
+      "challengeType": "NO_JUG"
+    },
+    "xpReward": 1160,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-jug",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-jug-100-no-support",
+    "name": "No Jug Round 100 (No Support)",
+    "slug": "no-jug-100-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 100,
+      "challengeType": "NO_JUG",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 2000,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-jug",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-jug-128",
+    "name": "No Jug Round 128",
+    "slug": "no-jug-128",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 128,
+      "challengeType": "NO_JUG"
+    },
+    "xpReward": 2000,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-jug",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-jug-128-no-support",
+    "name": "No Jug Round 128 (No Support)",
+    "slug": "no-jug-128-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 128,
+      "challengeType": "NO_JUG",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 2000,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-jug",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-jug-166",
+    "name": "No Jug Round 166",
+    "slug": "no-jug-166",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 166,
+      "challengeType": "NO_JUG"
+    },
+    "xpReward": 2000,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-jug",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-jug-166-no-support",
+    "name": "No Jug Round 166 (No Support)",
+    "slug": "no-jug-166-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 166,
+      "challengeType": "NO_JUG",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 2314,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-jug",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-jug-20",
+    "name": "No Jug Round 20",
+    "slug": "no-jug-20",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 20,
+      "challengeType": "NO_JUG"
+    },
+    "xpReward": 100,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-jug",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-jug-20-no-support",
+    "name": "No Jug Round 20 (No Support)",
+    "slug": "no-jug-20-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 20,
+      "challengeType": "NO_JUG",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 180,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-jug",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-jug-206",
+    "name": "No Jug Round 206",
+    "slug": "no-jug-206",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 206,
+      "challengeType": "NO_JUG"
+    },
+    "xpReward": 2314,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-jug",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-jug-206-no-support",
+    "name": "No Jug Round 206 (No Support)",
+    "slug": "no-jug-206-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 206,
+      "challengeType": "NO_JUG",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 3508,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-jug",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-jug-30",
+    "name": "No Jug Round 30",
+    "slug": "no-jug-30",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 30,
+      "challengeType": "NO_JUG"
+    },
+    "xpReward": 180,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-jug",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-jug-30-no-support",
+    "name": "No Jug Round 30 (No Support)",
+    "slug": "no-jug-30-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 30,
+      "challengeType": "NO_JUG",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 300,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-jug",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-jug-50",
+    "name": "No Jug Round 50",
+    "slug": "no-jug-50",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 50,
+      "challengeType": "NO_JUG"
+    },
+    "xpReward": 320,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-jug",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-jug-50-no-support",
+    "name": "No Jug Round 50 (No Support)",
+    "slug": "no-jug-50-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 50,
+      "challengeType": "NO_JUG",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 640,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-jug",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-jug-70",
+    "name": "No Jug Round 70",
+    "slug": "no-jug-70",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 70,
+      "challengeType": "NO_JUG"
+    },
+    "xpReward": 640,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-jug",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-jug-70-no-support",
+    "name": "No Jug Round 70 (No Support)",
+    "slug": "no-jug-70-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 70,
+      "challengeType": "NO_JUG",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 1160,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-jug",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-perks-10",
+    "name": "NO PERKS Round 10",
+    "slug": "no-perks-10",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 10,
+      "challengeType": "NO_PERKS"
+    },
+    "xpReward": 50,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-perks",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-perks-10-no-support",
+    "name": "NO PERKS Round 10 (No Support)",
+    "slug": "no-perks-10-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 10,
+      "challengeType": "NO_PERKS",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 100,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-perks",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-perks-100",
+    "name": "NO PERKS Round 100",
+    "slug": "no-perks-100",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 100,
+      "challengeType": "NO_PERKS"
+    },
+    "xpReward": 1160,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-perks",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-perks-100-no-support",
+    "name": "NO PERKS Round 100 (No Support)",
+    "slug": "no-perks-100-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 100,
+      "challengeType": "NO_PERKS",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 2000,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-perks",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-perks-20",
+    "name": "NO PERKS Round 20",
+    "slug": "no-perks-20",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 20,
+      "challengeType": "NO_PERKS"
+    },
+    "xpReward": 100,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-perks",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-perks-20-no-support",
+    "name": "NO PERKS Round 20 (No Support)",
+    "slug": "no-perks-20-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 20,
+      "challengeType": "NO_PERKS",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 180,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-perks",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-perks-30",
+    "name": "NO PERKS Round 30",
+    "slug": "no-perks-30",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 30,
+      "challengeType": "NO_PERKS"
+    },
+    "xpReward": 180,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-perks",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-perks-30-no-support",
+    "name": "NO PERKS Round 30 (No Support)",
+    "slug": "no-perks-30-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 30,
+      "challengeType": "NO_PERKS",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 300,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-perks",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-perks-50",
+    "name": "NO PERKS Round 50",
+    "slug": "no-perks-50",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 50,
+      "challengeType": "NO_PERKS"
+    },
+    "xpReward": 320,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-perks",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-perks-50-no-support",
+    "name": "NO PERKS Round 50 (No Support)",
+    "slug": "no-perks-50-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 50,
+      "challengeType": "NO_PERKS",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 640,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-perks",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-perks-70",
+    "name": "NO PERKS Round 70",
+    "slug": "no-perks-70",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 70,
+      "challengeType": "NO_PERKS"
+    },
+    "xpReward": 640,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-perks",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-perks-70-no-support",
+    "name": "NO PERKS Round 70 (No Support)",
+    "slug": "no-perks-70-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 70,
+      "challengeType": "NO_PERKS",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 1160,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-perks",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-power-10",
+    "name": "NO POWER Round 10",
+    "slug": "no-power-10",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 10,
+      "challengeType": "NO_POWER"
+    },
+    "xpReward": 50,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-power",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-power-10-no-support",
+    "name": "NO POWER Round 10 (No Support, No Gums)",
+    "slug": "no-power-10-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 10,
+      "challengeType": "NO_POWER",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 100,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-power",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-power-100",
+    "name": "NO POWER Round 100",
+    "slug": "no-power-100",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 100,
+      "challengeType": "NO_POWER"
+    },
+    "xpReward": 1160,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-power",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-power-100-no-support",
+    "name": "NO POWER Round 100 (No Support, No Gums)",
+    "slug": "no-power-100-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 100,
+      "challengeType": "NO_POWER",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 2000,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-power",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-power-120",
+    "name": "NO POWER Round 120",
+    "slug": "no-power-120",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 120,
+      "challengeType": "NO_POWER"
+    },
+    "xpReward": 2000,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-power",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-power-120-no-support",
+    "name": "NO POWER Round 120 (No Support, No Gums)",
+    "slug": "no-power-120-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 120,
+      "challengeType": "NO_POWER",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 2000,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-power",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-power-156",
+    "name": "NO POWER Round 156",
+    "slug": "no-power-156",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 156,
+      "challengeType": "NO_POWER"
+    },
+    "xpReward": 2000,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-power",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-power-156-no-support",
+    "name": "NO POWER Round 156 (No Support, No Gums)",
+    "slug": "no-power-156-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 156,
+      "challengeType": "NO_POWER",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 2334,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-power",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-power-193",
+    "name": "NO POWER Round 193",
+    "slug": "no-power-193",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 193,
+      "challengeType": "NO_POWER"
+    },
+    "xpReward": 2334,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-power",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-power-193-no-support",
+    "name": "NO POWER Round 193 (No Support, No Gums)",
+    "slug": "no-power-193-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 193,
+      "challengeType": "NO_POWER",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 3520,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-power",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-power-20",
+    "name": "NO POWER Round 20",
+    "slug": "no-power-20",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 20,
+      "challengeType": "NO_POWER"
+    },
+    "xpReward": 100,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-power",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-power-20-no-support",
+    "name": "NO POWER Round 20 (No Support, No Gums)",
+    "slug": "no-power-20-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 20,
+      "challengeType": "NO_POWER",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 180,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-power",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-power-30",
+    "name": "NO POWER Round 30",
+    "slug": "no-power-30",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 30,
+      "challengeType": "NO_POWER"
+    },
+    "xpReward": 180,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-power",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-power-30-no-support",
+    "name": "NO POWER Round 30 (No Support, No Gums)",
+    "slug": "no-power-30-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 30,
+      "challengeType": "NO_POWER",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 300,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-power",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-power-50",
+    "name": "NO POWER Round 50",
+    "slug": "no-power-50",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 50,
+      "challengeType": "NO_POWER"
+    },
+    "xpReward": 320,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-power",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-power-50-no-support",
+    "name": "NO POWER Round 50 (No Support, No Gums)",
+    "slug": "no-power-50-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 50,
+      "challengeType": "NO_POWER",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 640,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-power",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-power-70",
+    "name": "NO POWER Round 70",
+    "slug": "no-power-70",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 70,
+      "challengeType": "NO_POWER"
+    },
+    "xpReward": 640,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-power",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "no-power-70-no-support",
+    "name": "NO POWER Round 70 (No Support, No Gums)",
+    "slug": "no-power-70-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 70,
+      "challengeType": "NO_POWER",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 1160,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "no-power",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "one-box-30",
+    "name": "One Box Round 30",
+    "slug": "one-box-30",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 30,
+      "challengeType": "ONE_BOX"
+    },
+    "xpReward": 600,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "one-box",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-100-speedrun-under-1-03-07",
+    "name": "Round 100 in under 1:03:07",
+    "slug": "round-100-speedrun-under-1-03-07",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_100_SPEEDRUN",
+      "maxTimeSeconds": 3787
+    },
+    "xpReward": 500,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-100-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-100-speedrun-under-1-03-07-restricted",
+    "name": "Round 100 in under 1:10:42 (No Rampage, No Gums)",
+    "slug": "round-100-speedrun-under-1-03-07-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_100_SPEEDRUN",
+      "maxTimeSeconds": 4242,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 1000,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-100-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-100-speedrun-under-1-18-54",
+    "name": "Round 100 in under 1:18:54",
+    "slug": "round-100-speedrun-under-1-18-54",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_100_SPEEDRUN",
+      "maxTimeSeconds": 4734
+    },
+    "xpReward": 200,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-100-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-100-speedrun-under-1-18-54-restricted",
+    "name": "Round 100 in under 1:28:23 (No Rampage, No Gums)",
+    "slug": "round-100-speedrun-under-1-18-54-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_100_SPEEDRUN",
+      "maxTimeSeconds": 5303,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 400,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-100-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-100-speedrun-under-1-45-12",
+    "name": "Round 100 in under 1:45:12",
+    "slug": "round-100-speedrun-under-1-45-12",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_100_SPEEDRUN",
+      "maxTimeSeconds": 6312
+    },
+    "xpReward": 80,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-100-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-100-speedrun-under-1-45-12-restricted",
+    "name": "Round 100 in under 1:57:50 (No Rampage, No Gums)",
+    "slug": "round-100-speedrun-under-1-45-12-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_100_SPEEDRUN",
+      "maxTimeSeconds": 7070,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 160,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-100-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-100-speedrun-under-55-14",
+    "name": "Round 100 in under 55:14",
+    "slug": "round-100-speedrun-under-55-14",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_100_SPEEDRUN",
+      "maxTimeSeconds": 3314
+    },
+    "xpReward": 1200,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-100-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-100-speedrun-under-55-14-restricted",
+    "name": "Round 100 in under 1:01:52 (No Rampage, No Gums)",
+    "slug": "round-100-speedrun-under-55-14-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_100_SPEEDRUN",
+      "maxTimeSeconds": 3712,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 2400,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-100-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-15-speedrun-under-11-16",
+    "name": "Round 15 in under 11:16",
+    "slug": "round-15-speedrun-under-11-16",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_15_SPEEDRUN",
+      "maxTimeSeconds": 676
+    },
+    "xpReward": 1000,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-15-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-15-speedrun-under-11-16-restricted",
+    "name": "Round 15 in under 12:58 (No Rampage, No Gums)",
+    "slug": "round-15-speedrun-under-11-16-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_15_SPEEDRUN",
+      "maxTimeSeconds": 778,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 2000,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-15-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-15-speedrun-under-12-53",
+    "name": "Round 15 in under 12:53",
+    "slug": "round-15-speedrun-under-12-53",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_15_SPEEDRUN",
+      "maxTimeSeconds": 773
+    },
+    "xpReward": 400,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-15-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-15-speedrun-under-12-53-restricted",
+    "name": "Round 15 in under 14:49 (No Rampage, No Gums)",
+    "slug": "round-15-speedrun-under-12-53-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_15_SPEEDRUN",
+      "maxTimeSeconds": 889,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 800,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-15-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-15-speedrun-under-16-06",
+    "name": "Round 15 in under 16:06",
+    "slug": "round-15-speedrun-under-16-06",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_15_SPEEDRUN",
+      "maxTimeSeconds": 966
+    },
+    "xpReward": 150,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-15-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-15-speedrun-under-16-06-restricted",
+    "name": "Round 15 in under 18:32 (No Rampage, No Gums)",
+    "slug": "round-15-speedrun-under-16-06-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_15_SPEEDRUN",
+      "maxTimeSeconds": 1112,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 300,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-15-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-15-speedrun-under-21-28",
+    "name": "Round 15 in under 21:28",
+    "slug": "round-15-speedrun-under-21-28",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_15_SPEEDRUN",
+      "maxTimeSeconds": 1288
+    },
+    "xpReward": 60,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-15-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-15-speedrun-under-21-28-restricted",
+    "name": "Round 15 in under 24:42 (No Rampage, No Gums)",
+    "slug": "round-15-speedrun-under-21-28-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_15_SPEEDRUN",
+      "maxTimeSeconds": 1482,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 120,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-15-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-200-speedrun-under-4-12-00",
+    "name": "Round 200 in under 4:12:00",
+    "slug": "round-200-speedrun-under-4-12-00",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_200_SPEEDRUN",
+      "maxTimeSeconds": 15120
+    },
+    "xpReward": 1200,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-200-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-200-speedrun-under-4-12-00-restricted",
+    "name": "Round 200 in under 4:42:14 (No Rampage, No Gums)",
+    "slug": "round-200-speedrun-under-4-12-00-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_200_SPEEDRUN",
+      "maxTimeSeconds": 16934,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 2400,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-200-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-200-speedrun-under-4-48-00",
+    "name": "Round 200 in under 4:48:00",
+    "slug": "round-200-speedrun-under-4-48-00",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_200_SPEEDRUN",
+      "maxTimeSeconds": 17280
+    },
+    "xpReward": 500,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-200-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-200-speedrun-under-4-48-00-restricted",
+    "name": "Round 200 in under 5:22:34 (No Rampage, No Gums)",
+    "slug": "round-200-speedrun-under-4-48-00-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_200_SPEEDRUN",
+      "maxTimeSeconds": 19354,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 1000,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-200-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-200-speedrun-under-6-00-00",
+    "name": "Round 200 in under 6:00:00",
+    "slug": "round-200-speedrun-under-6-00-00",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_200_SPEEDRUN",
+      "maxTimeSeconds": 21600
+    },
+    "xpReward": 200,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-200-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-200-speedrun-under-6-00-00-restricted",
+    "name": "Round 200 in under 6:43:12 (No Rampage, No Gums)",
+    "slug": "round-200-speedrun-under-6-00-00-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_200_SPEEDRUN",
+      "maxTimeSeconds": 24192,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 400,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-200-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-200-speedrun-under-8-00-00",
+    "name": "Round 200 in under 8:00:00",
+    "slug": "round-200-speedrun-under-8-00-00",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_200_SPEEDRUN",
+      "maxTimeSeconds": 28800
+    },
+    "xpReward": 80,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-200-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-200-speedrun-under-8-00-00-restricted",
+    "name": "Round 200 in under 8:57:36 (No Rampage, No Gums)",
+    "slug": "round-200-speedrun-under-8-00-00-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_200_SPEEDRUN",
+      "maxTimeSeconds": 32256,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 160,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-200-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-30-speedrun-under-14-04",
+    "name": "Round 30 in under 14:04",
+    "slug": "round-30-speedrun-under-14-04",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_30_SPEEDRUN",
+      "maxTimeSeconds": 844
+    },
+    "xpReward": 1200,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-30-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-30-speedrun-under-14-04-restricted",
+    "name": "Round 30 in under 15:45 (No Rampage, No Gums)",
+    "slug": "round-30-speedrun-under-14-04-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_30_SPEEDRUN",
+      "maxTimeSeconds": 945,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 2400,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-30-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-30-speedrun-under-16-05",
+    "name": "Round 30 in under 16:05",
+    "slug": "round-30-speedrun-under-16-05",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_30_SPEEDRUN",
+      "maxTimeSeconds": 965
+    },
+    "xpReward": 500,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-30-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-30-speedrun-under-16-05-restricted",
+    "name": "Round 30 in under 18:00 (No Rampage, No Gums)",
+    "slug": "round-30-speedrun-under-16-05-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_30_SPEEDRUN",
+      "maxTimeSeconds": 1080,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 1000,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-30-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-30-speedrun-under-20-06",
+    "name": "Round 30 in under 20:06",
+    "slug": "round-30-speedrun-under-20-06",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_30_SPEEDRUN",
+      "maxTimeSeconds": 1206
+    },
+    "xpReward": 200,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-30-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-30-speedrun-under-20-06-restricted",
+    "name": "Round 30 in under 22:30 (No Rampage, No Gums)",
+    "slug": "round-30-speedrun-under-20-06-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_30_SPEEDRUN",
+      "maxTimeSeconds": 1350,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 400,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-30-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-30-speedrun-under-26-48",
+    "name": "Round 30 in under 26:48",
+    "slug": "round-30-speedrun-under-26-48",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_30_SPEEDRUN",
+      "maxTimeSeconds": 1608
+    },
+    "xpReward": 80,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-30-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-30-speedrun-under-26-48-restricted",
+    "name": "Round 30 in under 30:00 (No Rampage, No Gums)",
+    "slug": "round-30-speedrun-under-26-48-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_30_SPEEDRUN",
+      "maxTimeSeconds": 1800,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 160,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-30-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-5-speedrun-under-3-21",
+    "name": "Round 5 in under 3:21",
+    "slug": "round-5-speedrun-under-3-21",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_5_SPEEDRUN",
+      "maxTimeSeconds": 201
+    },
+    "xpReward": 1000,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-5-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-5-speedrun-under-3-21-restricted",
+    "name": "Round 5 in under 3:49 (No Rampage, No Gums)",
+    "slug": "round-5-speedrun-under-3-21-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_5_SPEEDRUN",
+      "maxTimeSeconds": 229,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 2000,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-5-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-5-speedrun-under-3-43",
+    "name": "Round 5 in under 3:43",
+    "slug": "round-5-speedrun-under-3-43",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_5_SPEEDRUN",
+      "maxTimeSeconds": 223
+    },
+    "xpReward": 400,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-5-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-5-speedrun-under-3-43-restricted",
+    "name": "Round 5 in under 4:17 (No Rampage, No Gums)",
+    "slug": "round-5-speedrun-under-3-43-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_5_SPEEDRUN",
+      "maxTimeSeconds": 257,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 800,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-5-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-5-speedrun-under-4-39",
+    "name": "Round 5 in under 4:39",
+    "slug": "round-5-speedrun-under-4-39",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_5_SPEEDRUN",
+      "maxTimeSeconds": 279
+    },
+    "xpReward": 150,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-5-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-5-speedrun-under-4-39-restricted",
+    "name": "Round 5 in under 5:21 (No Rampage, No Gums)",
+    "slug": "round-5-speedrun-under-4-39-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_5_SPEEDRUN",
+      "maxTimeSeconds": 321,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 300,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-5-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-5-speedrun-under-6-12",
+    "name": "Round 5 in under 6:12",
+    "slug": "round-5-speedrun-under-6-12",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_5_SPEEDRUN",
+      "maxTimeSeconds": 372
+    },
+    "xpReward": 60,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-5-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-5-speedrun-under-6-12-restricted",
+    "name": "Round 5 in under 7:08 (No Rampage, No Gums)",
+    "slug": "round-5-speedrun-under-6-12-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_5_SPEEDRUN",
+      "maxTimeSeconds": 428,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 120,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-5-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-50-speedrun-under-25-40",
+    "name": "Round 50 in under 25:40",
+    "slug": "round-50-speedrun-under-25-40",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_50_SPEEDRUN",
+      "maxTimeSeconds": 1540
+    },
+    "xpReward": 1200,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-50-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-50-speedrun-under-25-40-restricted",
+    "name": "Round 50 in under 28:45 (No Rampage, No Gums)",
+    "slug": "round-50-speedrun-under-25-40-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_50_SPEEDRUN",
+      "maxTimeSeconds": 1725,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 2400,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-50-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-50-speedrun-under-29-20",
+    "name": "Round 50 in under 29:20",
+    "slug": "round-50-speedrun-under-29-20",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_50_SPEEDRUN",
+      "maxTimeSeconds": 1760
+    },
+    "xpReward": 500,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-50-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-50-speedrun-under-29-20-restricted",
+    "name": "Round 50 in under 32:52 (No Rampage, No Gums)",
+    "slug": "round-50-speedrun-under-29-20-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_50_SPEEDRUN",
+      "maxTimeSeconds": 1972,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 1000,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-50-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-50-speedrun-under-36-41",
+    "name": "Round 50 in under 36:41",
+    "slug": "round-50-speedrun-under-36-41",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_50_SPEEDRUN",
+      "maxTimeSeconds": 2201
+    },
+    "xpReward": 200,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-50-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-50-speedrun-under-36-41-restricted",
+    "name": "Round 50 in under 41:05 (No Rampage, No Gums)",
+    "slug": "round-50-speedrun-under-36-41-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_50_SPEEDRUN",
+      "maxTimeSeconds": 2465,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 400,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-50-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-50-speedrun-under-48-54",
+    "name": "Round 50 in under 48:54",
+    "slug": "round-50-speedrun-under-48-54",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_50_SPEEDRUN",
+      "maxTimeSeconds": 2934
+    },
+    "xpReward": 80,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-50-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-50-speedrun-under-48-54-restricted",
+    "name": "Round 50 in under 54:46 (No Rampage, No Gums)",
+    "slug": "round-50-speedrun-under-48-54-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_50_SPEEDRUN",
+      "maxTimeSeconds": 3286,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 160,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-50-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-70-speedrun-under-1-09-38",
+    "name": "Round 70 in under 1:09:38",
+    "slug": "round-70-speedrun-under-1-09-38",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_70_SPEEDRUN",
+      "maxTimeSeconds": 4178
+    },
+    "xpReward": 80,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-70-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-70-speedrun-under-1-09-38-restricted",
+    "name": "Round 70 in under 1:18:00 (No Rampage, No Gums)",
+    "slug": "round-70-speedrun-under-1-09-38-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_70_SPEEDRUN",
+      "maxTimeSeconds": 4680,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 160,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-70-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-70-speedrun-under-36-33",
+    "name": "Round 70 in under 36:33",
+    "slug": "round-70-speedrun-under-36-33",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_70_SPEEDRUN",
+      "maxTimeSeconds": 2193
+    },
+    "xpReward": 1200,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-70-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-70-speedrun-under-36-33-restricted",
+    "name": "Round 70 in under 40:57 (No Rampage, No Gums)",
+    "slug": "round-70-speedrun-under-36-33-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_70_SPEEDRUN",
+      "maxTimeSeconds": 2457,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 2400,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-70-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-70-speedrun-under-41-47",
+    "name": "Round 70 in under 41:47",
+    "slug": "round-70-speedrun-under-41-47",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_70_SPEEDRUN",
+      "maxTimeSeconds": 2507
+    },
+    "xpReward": 500,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-70-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-70-speedrun-under-41-47-restricted",
+    "name": "Round 70 in under 46:48 (No Rampage, No Gums)",
+    "slug": "round-70-speedrun-under-41-47-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_70_SPEEDRUN",
+      "maxTimeSeconds": 2808,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 1000,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-70-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-70-speedrun-under-52-14",
+    "name": "Round 70 in under 52:14",
+    "slug": "round-70-speedrun-under-52-14",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_70_SPEEDRUN",
+      "maxTimeSeconds": 3134
+    },
+    "xpReward": 200,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-70-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-70-speedrun-under-52-14-restricted",
+    "name": "Round 70 in under 58:30 (No Rampage, No Gums)",
+    "slug": "round-70-speedrun-under-52-14-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_70_SPEEDRUN",
+      "maxTimeSeconds": 3510,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 400,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-70-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-999-speedrun-under-144-00-00",
+    "name": "Round 999 in under 144:00:00",
+    "slug": "round-999-speedrun-under-144-00-00",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_999_SPEEDRUN",
+      "maxTimeSeconds": 518400
+    },
+    "xpReward": 1200,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-999-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-999-speedrun-under-144-00-00-restricted",
+    "name": "Round 999 in under 144:00:00 (No Rampage, No Gums)",
+    "slug": "round-999-speedrun-under-144-00-00-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_999_SPEEDRUN",
+      "maxTimeSeconds": 518400,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 2400,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-999-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-999-speedrun-under-192-00-00",
+    "name": "Round 999 in under 192:00:00",
+    "slug": "round-999-speedrun-under-192-00-00",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_999_SPEEDRUN",
+      "maxTimeSeconds": 691200
+    },
+    "xpReward": 500,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-999-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-999-speedrun-under-192-00-00-restricted",
+    "name": "Round 999 in under 192:00:00 (No Rampage, No Gums)",
+    "slug": "round-999-speedrun-under-192-00-00-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_999_SPEEDRUN",
+      "maxTimeSeconds": 691200,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 1000,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-999-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-999-speedrun-under-84-00-00",
+    "name": "Round 999 in under 84:00:00",
+    "slug": "round-999-speedrun-under-84-00-00",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_999_SPEEDRUN",
+      "maxTimeSeconds": 302400
+    },
+    "xpReward": 5000,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-999-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-999-speedrun-under-84-00-00-restricted",
+    "name": "Round 999 in under 84:00:00 (No Rampage, No Gums)",
+    "slug": "round-999-speedrun-under-84-00-00-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_999_SPEEDRUN",
+      "maxTimeSeconds": 302400,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 10000,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-999-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-999-speedrun-under-96-00-00",
+    "name": "Round 999 in under 96:00:00",
+    "slug": "round-999-speedrun-under-96-00-00",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_999_SPEEDRUN",
+      "maxTimeSeconds": 345600
+    },
+    "xpReward": 2500,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-999-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "round-999-speedrun-under-96-00-00-restricted",
+    "name": "Round 999 in under 96:00:00 (No Rampage, No Gums)",
+    "slug": "round-999-speedrun-under-96-00-00-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "ROUND_999_SPEEDRUN",
+      "maxTimeSeconds": 345600,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 5000,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "round-999-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "starting-room-10",
+    "name": "STARTING ROOM Round 10",
+    "slug": "starting-room-10",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 10,
+      "challengeType": "STARTING_ROOM"
+    },
+    "xpReward": 50,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "starting-room",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "starting-room-10-no-support",
+    "name": "STARTING ROOM Round 10 (No Support, No Gums)",
+    "slug": "starting-room-10-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 10,
+      "challengeType": "STARTING_ROOM",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 100,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "starting-room",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "starting-room-100",
+    "name": "STARTING ROOM Round 100",
+    "slug": "starting-room-100",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 100,
+      "challengeType": "STARTING_ROOM"
+    },
+    "xpReward": 1160,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "starting-room",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "starting-room-100-no-support",
+    "name": "STARTING ROOM Round 100 (No Support, No Gums)",
+    "slug": "starting-room-100-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 100,
+      "challengeType": "STARTING_ROOM",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 2000,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "starting-room",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "starting-room-120",
+    "name": "STARTING ROOM Round 120",
+    "slug": "starting-room-120",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 120,
+      "challengeType": "STARTING_ROOM"
+    },
+    "xpReward": 2000,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "starting-room",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "starting-room-120-no-support",
+    "name": "STARTING ROOM Round 120 (No Support, No Gums)",
+    "slug": "starting-room-120-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 120,
+      "challengeType": "STARTING_ROOM",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 2000,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "starting-room",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "starting-room-156",
+    "name": "STARTING ROOM Round 156",
+    "slug": "starting-room-156",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 156,
+      "challengeType": "STARTING_ROOM"
+    },
+    "xpReward": 2000,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "starting-room",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "starting-room-156-no-support",
+    "name": "STARTING ROOM Round 156 (No Support, No Gums)",
+    "slug": "starting-room-156-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 156,
+      "challengeType": "STARTING_ROOM",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 2334,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "starting-room",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "starting-room-193",
+    "name": "STARTING ROOM Round 193",
+    "slug": "starting-room-193",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 193,
+      "challengeType": "STARTING_ROOM"
+    },
+    "xpReward": 2334,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "starting-room",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "starting-room-193-no-support",
+    "name": "STARTING ROOM Round 193 (No Support, No Gums)",
+    "slug": "starting-room-193-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 193,
+      "challengeType": "STARTING_ROOM",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 3520,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "starting-room",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "starting-room-20",
+    "name": "STARTING ROOM Round 20",
+    "slug": "starting-room-20",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 20,
+      "challengeType": "STARTING_ROOM"
+    },
+    "xpReward": 100,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "starting-room",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "starting-room-20-no-support",
+    "name": "STARTING ROOM Round 20 (No Support, No Gums)",
+    "slug": "starting-room-20-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 20,
+      "challengeType": "STARTING_ROOM",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 180,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "starting-room",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "starting-room-30",
+    "name": "STARTING ROOM Round 30",
+    "slug": "starting-room-30",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 30,
+      "challengeType": "STARTING_ROOM"
+    },
+    "xpReward": 180,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "starting-room",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "starting-room-30-no-support",
+    "name": "STARTING ROOM Round 30 (No Support, No Gums)",
+    "slug": "starting-room-30-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 30,
+      "challengeType": "STARTING_ROOM",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 300,
+    "rarity": "COMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "starting-room",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "starting-room-50",
+    "name": "STARTING ROOM Round 50",
+    "slug": "starting-room-50",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 50,
+      "challengeType": "STARTING_ROOM"
+    },
+    "xpReward": 320,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "starting-room",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "starting-room-50-no-support",
+    "name": "STARTING ROOM Round 50 (No Support, No Gums)",
+    "slug": "starting-room-50-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 50,
+      "challengeType": "STARTING_ROOM",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 640,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "starting-room",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "starting-room-70",
+    "name": "STARTING ROOM Round 70",
+    "slug": "starting-room-70",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 70,
+      "challengeType": "STARTING_ROOM"
+    },
+    "xpReward": 640,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "starting-room",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "starting-room-70-no-support",
+    "name": "STARTING ROOM Round 70 (No Support, No Gums)",
+    "slug": "starting-room-70-no-support",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "round": 70,
+      "challengeType": "STARTING_ROOM",
+      "bo7SupportMode": "NO_SUPPORT"
+    },
+    "xpReward": 1160,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "starting-room",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "easter-egg-speedrun-under-31-30",
+    "name": "Easter Egg in under 31:30",
+    "slug": "easter-egg-speedrun-under-31-30",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EASTER_EGG_SPEEDRUN",
+      "maxTimeSeconds": 1890
+    },
+    "xpReward": 1200,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "easter-egg-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "easter-egg-speedrun-under-31-30-restricted",
+    "name": "Easter Egg in under 35:17 (No Rampage, No Gums)",
+    "slug": "easter-egg-speedrun-under-31-30-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EASTER_EGG_SPEEDRUN",
+      "maxTimeSeconds": 2117,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 2400,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "easter-egg-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "easter-egg-speedrun-under-36-00",
+    "name": "Easter Egg in under 36:00",
+    "slug": "easter-egg-speedrun-under-36-00",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EASTER_EGG_SPEEDRUN",
+      "maxTimeSeconds": 2160
+    },
+    "xpReward": 500,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "easter-egg-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "easter-egg-speedrun-under-36-00-restricted",
+    "name": "Easter Egg in under 40:19 (No Rampage, No Gums)",
+    "slug": "easter-egg-speedrun-under-36-00-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EASTER_EGG_SPEEDRUN",
+      "maxTimeSeconds": 2419,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 1000,
+    "rarity": "EPIC",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "easter-egg-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "easter-egg-speedrun-under-45-00",
+    "name": "Easter Egg in under 45:00",
+    "slug": "easter-egg-speedrun-under-45-00",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EASTER_EGG_SPEEDRUN",
+      "maxTimeSeconds": 2700
+    },
+    "xpReward": 200,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "easter-egg-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "easter-egg-speedrun-under-45-00-restricted",
+    "name": "Easter Egg in under 50:24 (No Rampage, No Gums)",
+    "slug": "easter-egg-speedrun-under-45-00-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EASTER_EGG_SPEEDRUN",
+      "maxTimeSeconds": 3024,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 400,
+    "rarity": "RARE",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "easter-egg-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "easter-egg-speedrun-under-1-00-00",
+    "name": "Easter Egg in under 1:00:00",
+    "slug": "easter-egg-speedrun-under-1-00-00",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EASTER_EGG_SPEEDRUN",
+      "maxTimeSeconds": 3600
+    },
+    "xpReward": 80,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "easter-egg-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "easter-egg-speedrun-under-1-00-00-restricted",
+    "name": "Easter Egg in under 1:07:12 (No Rampage, No Gums)",
+    "slug": "easter-egg-speedrun-under-1-00-00-restricted",
+    "description": null,
+    "iconUrl": null,
+    "type": "CHALLENGE_COMPLETE",
+    "criteria": {
+      "challengeType": "EASTER_EGG_SPEEDRUN",
+      "maxTimeSeconds": 4032,
+      "bo7GobbleGumMode": "NO_GOBBLEGUMS",
+      "rampageInducerUsed": false
+    },
+    "xpReward": 160,
+    "rarity": "UNCOMMON",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": "easter-egg-speedrun",
+    "easterEggSourceSlug": null
+  },
+  {
+    "sourceSlug": "totenreich-main-quest-complete",
+    "name": "Totenreich Main Quest",
+    "slug": "totenreich-main-quest-complete",
+    "description": null,
+    "iconUrl": null,
+    "type": "EASTER_EGG_COMPLETE",
+    "criteria": {},
+    "xpReward": 5000,
+    "rarity": "LEGENDARY",
+    "isActive": true,
+    "difficulty": null,
+    "mapScoped": true,
+    "challengeSourceSlug": null,
+    "easterEggSourceSlug": "totenreich-main-quest"
+  }
+]

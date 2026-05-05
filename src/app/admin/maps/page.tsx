@@ -28,6 +28,7 @@ function prettyJson(value: unknown) {
 }
 
 function parseArrayJson<T>(raw: string, label: string): { value: T[] | null; error: string | null } {
+  if (!raw.trim()) return { value: [], error: null };
   try {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return { value: null, error: `${label} must be a JSON array` };
@@ -100,6 +101,17 @@ export default function AdminMapsPage() {
   }, [parsedAchievements.value]);
 
   const jsonValidationError = parsedChallenges.error ?? parsedEasterEggs.error ?? parsedAchievements.error;
+  const createDisabledReasons = useMemo(() => {
+    if (!preview || !mapDraft) return [];
+    const reasons: string[] = [];
+    if (saving) reasons.push('Save already in progress');
+    if (!mapDraft.name.trim()) reasons.push('Map name is required');
+    if (!mapDraft.slug.trim()) reasons.push('Map slug is required');
+    if (parsedChallenges.error) reasons.push(parsedChallenges.error);
+    if (parsedEasterEggs.error) reasons.push(parsedEasterEggs.error);
+    if (parsedAchievements.error) reasons.push(parsedAchievements.error);
+    return reasons;
+  }, [preview, mapDraft, saving, parsedChallenges.error, parsedEasterEggs.error, parsedAchievements.error]);
   const effectiveRequiredChallengeTypeCount = useMemo(() => {
     if (!preview) return 0;
     const hasEasterEggs = (parsedEasterEggs.value?.length ?? 0) > 0;
@@ -489,12 +501,19 @@ export default function AdminMapsPage() {
             </div>
 
             <div className="flex items-center justify-between gap-3 flex-wrap pt-2">
-              <p className="text-xs text-bunker-400">
-                Required challenge types enforced: {effectiveRequiredChallengeTypeCount}
-              </p>
+              <div className="space-y-1">
+                <p className="text-xs text-bunker-400">
+                  Required challenge types enforced: {effectiveRequiredChallengeTypeCount}
+                </p>
+                {createDisabledReasons.length > 0 && (
+                  <p className="text-xs text-blood-300">
+                    Create disabled: {createDisabledReasons[0]}
+                  </p>
+                )}
+              </div>
               <Button
                 onClick={createMap}
-                disabled={saving || !mapDraft.name.trim() || !mapDraft.slug.trim() || Boolean(jsonValidationError)}
+                disabled={createDisabledReasons.length > 0}
                 leftIcon={saving ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}
               >
                 {saving ? 'Creating map...' : 'Create map'}

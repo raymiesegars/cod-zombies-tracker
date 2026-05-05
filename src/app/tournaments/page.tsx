@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
 import {
@@ -104,6 +104,9 @@ export default function TournamentsPage() {
   const [tournament, setTournament] = useState<(Tournament & { isOpen?: boolean }) | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+  const [leaderboardError, setLeaderboardError] = useState<string | null>(null);
+  const [leaderboardRefreshKey, setLeaderboardRefreshKey] = useState(0);
+  const leaderboardRequestSeq = useRef(0);
   const [search, setSearch] = useState('');
   const [trophySort, setTrophySort] = useState<'gold' | 'silver' | 'bronze'>('gold');
   const [trophyEntries, setTrophyEntries] = useState<{ user: { username: string; displayName: string | null }; gold: number; silver: number; bronze: number }[]>([]);
@@ -299,18 +302,44 @@ export default function TournamentsPage() {
   useEffect(() => {
     if (!tournamentId) {
       setLeaderboard([]);
+      setLeaderboardError(null);
       setLeaderboardLoading(false);
       return;
     }
-    setLeaderboardLoading(true);
+    const requestSeq = ++leaderboardRequestSeq.current;
+    const controller = new AbortController();
     const params = new URLSearchParams();
     if (search) params.set('search', search);
-    fetch(`/api/tournaments/${tournamentId}/leaderboard?${params}`)
-      .then((r) => r.json())
-      .then((d) => setLeaderboard(d.entries ?? []))
-      .catch(() => setLeaderboard([]))
-      .finally(() => setLeaderboardLoading(false));
-  }, [tournamentId, search]);
+    setLeaderboardLoading(true);
+    setLeaderboardError(null);
+
+    (async () => {
+      try {
+        const response = await fetch(`/api/tournaments/${tournamentId}/leaderboard?${params}`, {
+          cache: 'no-store',
+          signal: controller.signal,
+        });
+        const payload = (await response.json().catch(() => ({}))) as { entries?: LeaderboardEntry[]; error?: string };
+
+        if (controller.signal.aborted || requestSeq !== leaderboardRequestSeq.current) return;
+        if (!response.ok) {
+          setLeaderboardError(payload.error || 'Failed to load leaderboard.');
+          return;
+        }
+
+        setLeaderboard(Array.isArray(payload.entries) ? payload.entries : []);
+      } catch {
+        if (controller.signal.aborted || requestSeq !== leaderboardRequestSeq.current) return;
+        setLeaderboardError('Failed to load leaderboard. Please try again.');
+      } finally {
+        if (!controller.signal.aborted && requestSeq === leaderboardRequestSeq.current) {
+          setLeaderboardLoading(false);
+        }
+      }
+    })();
+
+    return () => controller.abort();
+  }, [tournamentId, search, leaderboardRefreshKey]);
 
   useEffect(() => {
     setTrophyLeaderboardLoading(true);
@@ -409,6 +438,9 @@ export default function TournamentsPage() {
 
   const tournamentLocked = tournament && (tournament.status === 'LOCKED' || (tournament.endsAt && new Date(tournament.endsAt) < new Date()));
   const hasLivePoll = !!poll && poll.status === 'ACTIVE' && !pollEnded;
+  const refreshLeaderboard = useCallback(() => {
+    setLeaderboardRefreshKey((prev) => prev + 1);
+  }, []);
   const prizeRulesModalTitle =
     prizeRulesModalScope === 'next' ? 'Next Tournament Prize Rules' : 'Current Tournament Prize Rules';
   const selectedPrizeRules =
@@ -442,12 +474,7 @@ export default function TournamentsPage() {
       if (!r.ok) throw new Error((data as { error?: string }).error || 'Failed');
       setTournament(data);
       setEditTournamentModalOpen(false);
-      const params = new URLSearchParams();
-      if (search) params.set('search', search);
-      fetch(`/api/tournaments/${tournamentId}/leaderboard?${params}`)
-        .then((res) => res.json())
-        .then((d) => setLeaderboard(d.entries ?? []))
-        .catch(() => {});
+      refreshLeaderboard();
     } catch (e) {
       alert((e as Error).message);
     } finally {
@@ -645,12 +672,7 @@ export default function TournamentsPage() {
       const data = await r.json();
       if (!r.ok) throw new Error(data.error || 'Failed to award trophy');
       // Refetch tournament leaderboard and global trophy leaderboard
-      const params = new URLSearchParams();
-      if (search) params.set('search', search);
-      fetch(`/api/tournaments/${tournamentId}/leaderboard?${params}`)
-        .then((res) => res.json())
-        .then((d) => setLeaderboard(d.entries ?? []))
-        .catch(() => {});
+      refreshLeaderboard();
       fetch(`/api/tournaments/trophy-leaderboard?sort=${trophySort}`)
         .then((res) => res.json())
         .then((d) => setTrophyEntries(d.entries ?? []))
@@ -794,7 +816,7 @@ export default function TournamentsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-bunker-950 min-w-0 overflow-x-hidden">
+    <div className="min-h-dvh bg-bunker-950 min-w-0 overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-6 xl:px-8 py-6 sm:py-8 min-w-0">
         <section className="mb-6 sm:mb-8 min-w-0">
           <div className={`grid grid-cols-1 ${hasLivePoll ? 'xl:grid-cols-2' : ''} gap-4 sm:gap-6 min-w-0`}>
@@ -1412,8 +1434,16 @@ export default function TournamentsPage() {
                     )}
                   </div>
                 </div>
-                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]">
-                  {leaderboardLoading && tournamentId ? (
+                <div className="min-h-[220px] sm:min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
+                  {leaderboardError && tournamentId && (
+                    <div className="mb-3 rounded-lg border border-blood-700/60 bg-blood-950/30 px-3 py-2 flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between">
+                      <p className="text-sm text-blood-200">{leaderboardError}</p>
+                      <Button size="sm" variant="secondary" onClick={refreshLeaderboard} className="w-full sm:w-auto">
+                        Retry
+                      </Button>
+                    </div>
+                  )}
+                  {leaderboardLoading && tournamentId && leaderboard.length === 0 ? (
                     <div className="py-12 flex items-center justify-center">
                       <div className="w-8 h-8 border-2 border-blood-500 border-t-transparent rounded-full animate-spin" />
                     </div>
@@ -1472,7 +1502,10 @@ export default function TournamentsPage() {
                   </ul>
                     );
                   })()}
-                  {!leaderboardLoading && leaderboard.length === 0 && tournamentId && (
+                  {leaderboardLoading && tournamentId && leaderboard.length > 0 && (
+                    <p className="text-bunker-500 text-xs py-2">Updating leaderboard...</p>
+                  )}
+                  {!leaderboardLoading && !leaderboardError && leaderboard.length === 0 && tournamentId && (
                     <p className="text-bunker-500 text-sm py-6 text-center">No runs yet.</p>
                   )}
                 </div>
@@ -1500,7 +1533,7 @@ export default function TournamentsPage() {
               />
             </CardHeader>
             <CardContent className="min-h-0 flex-1 overflow-hidden pt-0">
-              <div className="h-[220px] overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]">
+              <div className="min-h-[180px] max-h-[55dvh] sm:max-h-[320px] overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
                 {trophyLeaderboardLoading ? (
                   <div className="h-full flex items-center justify-center py-12">
                     <div className="w-8 h-8 border-2 border-blood-500 border-t-transparent rounded-full animate-spin" />

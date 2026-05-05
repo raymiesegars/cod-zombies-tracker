@@ -454,7 +454,7 @@ export function MessagingWidget() {
             exit={{ opacity: 0, y: 12, scale: 0.97 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
             className="fixed bottom-20 left-2 right-2 sm:left-4 sm:right-auto sm:w-96 z-[60] flex flex-col rounded-xl border border-bunker-700 bg-bunker-900 shadow-2xl overflow-hidden"
-            style={{ height: 'min(520px, calc(100vh - 6rem))' }}
+            style={{ height: 'min(520px, calc(100dvh - 6rem))' }}
           >
             {/* Header */}
             <div className="flex items-center gap-2 px-4 py-3 border-b border-bunker-800 flex-shrink-0 bg-bunker-900">
@@ -516,12 +516,12 @@ export function MessagingWidget() {
             )}
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto min-h-0">
+            <div className={cn('flex-1 min-h-0', chatWith ? 'overflow-hidden' : 'overflow-y-auto')}>
 
               {/* ── Chat view ── */}
               {chatWith && (
-                <div className="flex flex-col h-full">
-                  <div className="flex-1 overflow-y-auto p-3 space-y-1 min-h-0" style={{ maxHeight: 'calc(100vh - 18rem)' }}>
+                <div className="flex flex-col h-full min-h-0">
+                  <div className="flex-1 overflow-y-auto p-3 space-y-1 min-h-0">
                     {loadingMessages && messages.length === 0 && (
                       <div className="flex justify-center py-8">
                         <Loader2 className="w-5 h-5 animate-spin text-bunker-500" />
