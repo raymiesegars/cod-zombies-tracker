@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -29,6 +29,9 @@ const sizeStyles = {
   full: 'max-w-4xl',
 };
 
+let activeBodyScrollLocks = 0;
+let previousBodyOverflow = '';
+
 export function Modal({
   isOpen,
   onClose,
@@ -42,6 +45,7 @@ export function Modal({
   closeOnEscape = true,
   showCloseButton = true,
 }: ModalProps) {
+  const releaseBodyLockRef = useRef<(() => void) | null>(null);
   const handleEscape = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape' && closeOnEscape) onClose();
@@ -50,14 +54,26 @@ export function Modal({
   );
 
   useEffect(() => {
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
+    if (!isOpen) return;
+
+    if (activeBodyScrollLocks === 0) {
+      previousBodyOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
     }
+    activeBodyScrollLocks += 1;
+    releaseBodyLockRef.current = () => {
+      if (activeBodyScrollLocks > 0) activeBodyScrollLocks -= 1;
+      if (activeBodyScrollLocks === 0) {
+        document.body.style.overflow = previousBodyOverflow;
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      releaseBodyLockRef.current?.();
+      releaseBodyLockRef.current = null;
     };
   }, [isOpen, handleEscape]);
 
@@ -82,7 +98,7 @@ export function Modal({
             transition={{ type: 'spring', duration: 0.3 }}
             onClick={(e) => e.stopPropagation()}
             className={cn(
-              'relative z-10 flex flex-col w-full max-h-[90vh] rounded-xl shadow-2xl border border-bunker-700 bg-bunker-900',
+              'relative z-10 flex flex-col w-full max-h-[90dvh] rounded-xl shadow-2xl border border-bunker-700 bg-bunker-900',
               sizeStyles[size],
               className
             )}

@@ -154,10 +154,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen flex flex-col overflow-x-hidden">
+      <body className="min-h-dvh flex flex-col overflow-x-hidden">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <TVRoomBackground />
-        <div className="relative z-10 flex flex-col min-h-screen">
+        <div className="relative z-10 flex flex-col min-h-dvh">
           <AuthProvider>
             <XpToastProvider>
               <ActionProgressProvider>

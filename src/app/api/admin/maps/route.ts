@@ -203,7 +203,7 @@ async function handleCreate(body: Record<string, unknown>) {
           achievements: payload.achievements.length,
         },
       };
-    });
+    }, { maxWait: 10_000, timeout: 120_000 });
 
     revalidatePath('/maps');
     revalidatePath('/admin/maps');

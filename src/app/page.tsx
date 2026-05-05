@@ -85,7 +85,7 @@ export default function HomePage() {
   return (
     <div className="relative noise-overlay">
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden px-4">
+      <section className="relative min-h-[90dvh] flex items-center justify-center overflow-hidden px-4">
         {/* Menu background image is behind everything (in layout/TVRoomBackground); hero stays transparent so TVs show through */}
         {/* Local darkening only behind the headline + body text for better contrast */}
         <div

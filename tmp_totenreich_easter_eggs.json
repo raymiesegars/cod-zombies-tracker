@@ -1,0 +1,91 @@
+[
+  {
+    "sourceSlug": "totenreich-main-quest",
+    "name": "Totenreich Main Quest",
+    "slug": "totenreich-main-quest",
+    "description": "Complete the Totenreich main quest by restoring systems in Eidskallen, forging the Jotunn Star path, powering the Wundersignal, obtaining and charging the Atomkraft Core, solving the Vegvisir ritual, and defeating Dravakar.",
+    "type": "MAIN_QUEST",
+    "optimalRound": null,
+    "xpReward": 5000,
+    "playerCountRequirement": null,
+    "rewardsDescription": "Main quest completion rewards, post-fight loot burst, and continued run with perks retained.",
+    "videoEmbedUrl": null,
+    "variantTag": null,
+    "categoryTag": null,
+    "isActive": true,
+    "steps": [
+      {
+        "order": 1,
+        "label": "Power and setup: repair Market/Core Foundry power switches, restore power in Tyr's head, unlock Pack-a-Punch and Glocke Drop Controller, and complete Fishery Island lockdown.",
+        "imageUrl": null,
+        "buildableReferenceSlug": null
+      },
+      {
+        "order": 2,
+        "label": "Jotunn Star path part 1: obtain Lantern (Chilly Chunks + named Zursa) and Chain Links (Titan Crane interaction + ship wall jump), then open Burial Grounds chamber.",
+        "imageUrl": null,
+        "buildableReferenceSlug": null
+      },
+      {
+        "order": 3,
+        "label": "Jotunn Star path part 2: place Lantern, finish lockdown, input constellation wall symbols in shrine order (left, right, back, front), follow Astrid, survive Frost Zombie checks, and climb lighthouse to claim the Jotunn Star.",
+        "imageUrl": null,
+        "buildableReferenceSlug": null
+      },
+      {
+        "order": 4,
+        "label": "Repair Wundersignal part 1: collect Crowbar, read note to identify correct crate code, open correct crate for Flak Gun Round, load flak gun, strike with Jotunn Star, and retrieve Transmitter from robot head.",
+        "imageUrl": null,
+        "buildableReferenceSlug": null
+      },
+      {
+        "order": 5,
+        "label": "Repair Wundersignal part 2: install Transmitter in Tyr's head, read two blink-number sequences from left/right yellow lights, unlock Core Foundry ascender, enter both calibration numbers, and collect Wunderbarrage Controller.",
+        "imageUrl": null,
+        "buildableReferenceSlug": null
+      },
+      {
+        "order": 6,
+        "label": "Obtain Uranium #1: fish glowing green fish to spawn Irradiated Ravager sequence, then kill Irradiated Ravager to secure Uranium.",
+        "imageUrl": null,
+        "buildableReferenceSlug": null
+      },
+      {
+        "order": 7,
+        "label": "Obtain Uranium #2: use ARC-XD to access Group 935 Genetic Lab, solve jar-symbol sequence puzzle, unlock cell with Necrospike mini-game, and collect Uranium.",
+        "imageUrl": null,
+        "buildableReferenceSlug": null
+      },
+      {
+        "order": 8,
+        "label": "Obtain Uranium #3: activate Glocke Drop and shoot at least 20 zombies while airborne during active cycle, then collect dropped Uranium.",
+        "imageUrl": null,
+        "buildableReferenceSlug": null
+      },
+      {
+        "order": 9,
+        "label": "Atomkraft Core: clear Machine Workshop stairs with Wunderbarrage, place all 3 Uraniums in claw machine, complete cylinder mini-game, transport and charge core at Quick Revive defense, then place charged core at Storm Bridge and collect Dravakar Shard.",
+        "imageUrl": null,
+        "buildableReferenceSlug": null
+      },
+      {
+        "order": 10,
+        "label": "Vegvisir ritual: place shard in Blodheim Hall bonfire, ignite with Jotunn Star, feed bonfire with Disciple Injection zombies, defeat Necropincer HVT, obtain Sunstone, place Sunstone in church, and shoot rune piles in arrow-count order shown above church.",
+        "imageUrl": null,
+        "buildableReferenceSlug": null
+      },
+      {
+        "order": 11,
+        "label": "Boss initiation: return to Tyr's head and interact with console to begin Dravakar fight.",
+        "imageUrl": null,
+        "buildableReferenceSlug": null
+      },
+      {
+        "order": 12,
+        "label": "Dravakar phase cycle: break glowing weak points while managing arena freezes and traps; then stun/destroy Gjallarfrost heads with Jotunn Star ranged attack and continue weak-point damage through later arena-lock phases until Dravakar is defeated.",
+        "imageUrl": null,
+        "buildableReferenceSlug": null
+      }
+    ]
+  }
+]
