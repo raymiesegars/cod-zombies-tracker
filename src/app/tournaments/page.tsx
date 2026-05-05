@@ -1338,7 +1338,7 @@ export default function TournamentsPage() {
                 </CardContent>
               </Card>
             )}
-            <Card variant="bordered" className="border-bunker-700 flex flex-col flex-1 min-h-[320px] lg:min-h-[380px] w-full min-w-0 overflow-hidden">
+            <Card variant="bordered" className="border-bunker-700 flex flex-col min-h-[320px] lg:min-h-[380px] w-full min-w-0">
               <CardHeader className="flex flex-row items-center justify-between gap-3 flex-wrap shrink-0">
                 <CardTitle className="text-lg font-zombies text-white flex items-center gap-2">
                   <Medal className="w-5 h-5 text-blood-500 shrink-0" />
@@ -1378,7 +1378,7 @@ export default function TournamentsPage() {
                   )}
                 </div>
               </CardHeader>
-              <CardContent className="flex flex-col gap-3 pt-0 min-h-0 flex-1 overflow-hidden">
+              <CardContent className="flex flex-col gap-3 pt-0">
                 {tournament && (
                   <>
                     <p className="text-bunker-400 text-sm shrink-0">
@@ -1434,7 +1434,7 @@ export default function TournamentsPage() {
                     )}
                   </div>
                 </div>
-                <div className="min-h-[220px] sm:min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
+                <div className="min-h-[220px]">
                   {leaderboardError && tournamentId && (
                     <div className="mb-3 rounded-lg border border-blood-700/60 bg-blood-950/30 px-3 py-2 flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between">
                       <p className="text-sm text-blood-200">{leaderboardError}</p>
@@ -1515,7 +1515,7 @@ export default function TournamentsPage() {
 
           {/* Trophy leaderboard: right 2/5 on wide screens */}
           <div className={`flex flex-col min-h-0 min-w-0 h-full ${pollFirst ? 'order-3' : 'order-2'}`}>
-            <Card variant="bordered" className="border-bunker-700 flex flex-col flex-1 min-h-[280px] lg:min-h-[380px] w-full min-w-0 overflow-hidden">
+            <Card variant="bordered" className="border-bunker-700 flex flex-col min-h-[280px] lg:min-h-[380px] w-full min-w-0">
             <CardHeader className="flex flex-row flex-wrap items-start sm:items-center justify-between gap-2 shrink-0">
               <CardTitle className="text-base font-zombies text-white flex items-center gap-2 min-w-0">
                 <Award className="w-4 h-4 text-amber-500 shrink-0" />
@@ -1532,8 +1532,8 @@ export default function TournamentsPage() {
                 className="basis-full sm:basis-auto w-full sm:w-auto min-w-0 sm:min-w-[100px] bg-bunker-800 border-bunker-600 text-white"
               />
             </CardHeader>
-            <CardContent className="min-h-0 flex-1 overflow-hidden pt-0">
-              <div className="min-h-[180px] max-h-[55dvh] sm:max-h-[320px] overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
+            <CardContent className="pt-0">
+              <div className="min-h-[180px]">
                 {trophyLeaderboardLoading ? (
                   <div className="h-full flex items-center justify-center py-12">
                     <div className="w-8 h-8 border-2 border-blood-500 border-t-transparent rounded-full animate-spin" />
