@@ -10,6 +10,7 @@ interface Bo7RelicPickerProps {
   onChange: (relics: string[]) => void;
   className?: string;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export function Bo7RelicPicker({
@@ -17,6 +18,7 @@ export function Bo7RelicPicker({
   onChange,
   className,
   placeholder = 'Any relics',
+  disabled = false,
 }: Bo7RelicPickerProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -52,15 +54,20 @@ export function Bo7RelicPicker({
       {/* Trigger */}
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          if (disabled) return;
+          setOpen((v) => !v);
+        }}
         className={cn(
           'flex items-center justify-between gap-2 w-full px-3 py-2 rounded-lg border text-sm transition-colors min-h-[38px]',
+          disabled && 'opacity-70 cursor-not-allowed',
           open || value.length > 0
             ? 'border-blood-500/50 bg-bunker-800 text-white'
             : 'border-bunker-600 bg-bunker-800 text-bunker-400 hover:border-bunker-500 hover:text-bunker-300'
         )}
         aria-haspopup="listbox"
         aria-expanded={open}
+        disabled={disabled}
       >
         <span className="truncate text-left">{label}</span>
         <span className="flex items-center gap-1 shrink-0">
@@ -69,10 +76,12 @@ export function Bo7RelicPicker({
               role="button"
               tabIndex={0}
               onClick={(e) => {
+                if (disabled) return;
                 e.stopPropagation();
                 onChange([]);
               }}
               onKeyDown={(e) => {
+                if (disabled) return;
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.stopPropagation();
                   onChange([]);

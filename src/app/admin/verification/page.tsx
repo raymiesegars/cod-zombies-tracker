@@ -319,9 +319,12 @@ export default function AdminVerificationPage() {
                             {playerLabel}
                           </span>
                           {item.isTournamentRun && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded-full border border-amber-600/60 bg-amber-950/95 text-amber-300" title="Tournament submission">
+                            <span
+                              className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded-full border border-amber-600/60 bg-amber-950/95 text-amber-300"
+                              title={item.tournamentLabel || 'Tournament submission'}
+                            >
                               <Trophy className="w-3 h-3" />
-                              Tourney
+                              {item.tournamentLabel || 'Tourney'}
                             </span>
                           )}
                         </div>
@@ -389,7 +392,7 @@ export default function AdminVerificationPage() {
                     <dt className="text-bunker-500">Tournament</dt>
                     <dd className="text-amber-300 font-medium flex items-center gap-1">
                       <Trophy className="w-4 h-4 shrink-0" />
-                      Yes
+                      {quickReviewRun.tournamentLabel || 'Tournament submission'}
                     </dd>
                   </>
                 )}

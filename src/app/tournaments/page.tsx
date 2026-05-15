@@ -1,7 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { useAuth } from '@/context/auth-context';
 import {
   Card,
@@ -13,9 +16,13 @@ import {
   Input,
   Modal,
   Avatar,
+  Tabs,
+  TabsList,
+  TabsTrigger,
 } from '@/components/ui';
 import { Medal, Trophy, Clock, Award, Loader2, Lock, Plus, Banknote, Pencil, BookOpen, Trash2, ShieldCheck, KeyRound } from 'lucide-react';
 import { TournamentRulesContent } from '@/components/tournament-rules-content';
+import { SpeedrunGauntletRulesContent } from '@/components/speedrun-gauntlet-rules-content';
 import { getGameDisplayShortName } from '@/lib/bo3-custom';
 import { BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT, getBo3GobbleGumLabel } from '@/lib/bo3';
 import { BO4_DIFFICULTIES, BO4_ELIXIR_MODES, getBo4DifficultyLabel, getBo4ElixirModeLabel } from '@/lib/bo4';
@@ -45,7 +52,7 @@ type Tournament = {
   config?: Record<string, unknown>;
   game?: { shortName: string };
   map?: { name: string; slug: string };
-  challenge?: { name: string };
+  challenge?: { name: string; type?: string };
   easterEgg?: { name: string };
 };
 type LeaderboardEntry = {
@@ -81,6 +88,7 @@ function useCountdown(endsAt: string | null): number | null {
 }
 
 const POLL_VOTE_COUNT_WIDTH = '3rem'; // space for 3 digits
+const GAUNTLET_PRIZE_POOL_TOTAL = 2000;
 
 function formatCountdown(seconds: number | null): string {
   if (seconds == null) return '—';
@@ -95,6 +103,7 @@ function formatCountdown(seconds: number | null): string {
 }
 
 export default function TournamentsPage() {
+  const router = useRouter();
   const { user, profile, signInWithGoogle } = useAuth();
   const [polls, setPolls] = useState<{ id: string; title: string; status: string; endsAt: string }[]>([]);
   const [pollId, setPollId] = useState<string | null>(null);
@@ -106,7 +115,12 @@ export default function TournamentsPage() {
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [leaderboardError, setLeaderboardError] = useState<string | null>(null);
   const [leaderboardRefreshKey, setLeaderboardRefreshKey] = useState(0);
+  const [eventLeaderboard, setEventLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [eventLeaderboardLoading, setEventLeaderboardLoading] = useState(false);
+  const [eventLeaderboardError, setEventLeaderboardError] = useState<string | null>(null);
+  const [gauntletPrizePoolDisplay, setGauntletPrizePoolDisplay] = useState(GAUNTLET_PRIZE_POOL_TOTAL);
   const leaderboardRequestSeq = useRef(0);
+  const gauntletPrizeAnimatedRef = useRef(false);
   const [search, setSearch] = useState('');
   const [trophySort, setTrophySort] = useState<'gold' | 'silver' | 'bronze'>('gold');
   const [trophyEntries, setTrophyEntries] = useState<{ user: { username: string; displayName: string | null }; gold: number; silver: number; bronze: number }[]>([]);
@@ -148,6 +162,10 @@ export default function TournamentsPage() {
   const [editTournamentConfig, setEditTournamentConfig] = useState<Record<string, unknown>>({});
   const [editTournamentSaving, setEditTournamentSaving] = useState(false);
   const [learnRulesModalOpen, setLearnRulesModalOpen] = useState(false);
+  const [gauntletRulesModalOpen, setGauntletRulesModalOpen] = useState(false);
+  const [gauntletSubmitRulesModalOpen, setGauntletSubmitRulesModalOpen] = useState(false);
+  const [gauntletSubmitRulesScrolledToBottom, setGauntletSubmitRulesScrolledToBottom] = useState(false);
+  const [activePageTab, setActivePageTab] = useState<'event' | 'czt'>('event');
   const [tournamentVerificationContent, setTournamentVerificationContent] = useState('');
   const [tournamentVerificationEditOpen, setTournamentVerificationEditOpen] = useState(false);
   const [tournamentVerificationDraft, setTournamentVerificationDraft] = useState('');
@@ -438,6 +456,32 @@ export default function TournamentsPage() {
 
   const tournamentLocked = tournament && (tournament.status === 'LOCKED' || (tournament.endsAt && new Date(tournament.endsAt) < new Date()));
   const hasLivePoll = !!poll && poll.status === 'ACTIVE' && !pollEnded;
+  const speedrunGauntletTournament = useMemo(() => {
+    const normalized = tournaments.filter((t) => {
+      const game = t.game?.shortName?.toUpperCase() ?? '';
+      const mapSlug = t.map?.slug?.toLowerCase() ?? '';
+      const title = t.title?.toLowerCase() ?? '';
+      const challengeName = t.challenge?.name?.toLowerCase() ?? '';
+      const eeName = t.easterEgg?.name?.toLowerCase() ?? '';
+      const isTargetEventName = title.includes('speedrun gauntlet');
+      const isTargetCategory = challengeName.includes('easter egg speedrun') || eeName.includes('main quest');
+      return game === 'BO7' && mapSlug.includes('toten') && (isTargetEventName || isTargetCategory);
+    });
+    const fallback = tournaments.filter((t) => {
+      const game = t.game?.shortName?.toUpperCase() ?? '';
+      const mapSlug = t.map?.slug?.toLowerCase() ?? '';
+      return game === 'BO7' && mapSlug.includes('toten');
+    });
+    const ranked = normalized.length > 0 ? normalized : fallback;
+    if (ranked.length === 0) return null;
+    const openSpeedrunChallenge = ranked.find((t) => t.status === 'OPEN' && t.challenge?.type === 'EASTER_EGG_SPEEDRUN');
+    const openAny = ranked.find((t) => t.status === 'OPEN');
+    const anySpeedrunChallenge = ranked.find((t) => t.challenge?.type === 'EASTER_EGG_SPEEDRUN');
+    return openSpeedrunChallenge ?? openAny ?? anySpeedrunChallenge ?? ranked[0] ?? null;
+  }, [tournaments]);
+  const eventEndsAt = speedrunGauntletTournament?.endsAt ?? null;
+  const eventCountdown = useCountdown(eventEndsAt);
+  const eventEnded = eventCountdown !== null && eventCountdown <= 0;
   const refreshLeaderboard = useCallback(() => {
     setLeaderboardRefreshKey((prev) => prev + 1);
   }, []);
@@ -445,6 +489,65 @@ export default function TournamentsPage() {
     prizeRulesModalScope === 'next' ? 'Next Tournament Prize Rules' : 'Current Tournament Prize Rules';
   const selectedPrizeRules =
     prizeRulesModalScope === 'next' ? nextPrizeRules : currentPrizeRules;
+  const gauntletSubmitHref =
+    speedrunGauntletTournament?.id && speedrunGauntletTournament.map?.slug
+      ? `/maps/${speedrunGauntletTournament.map.slug}/edit?tournamentId=${speedrunGauntletTournament.id}&event=speedrun-gauntlet`
+      : '/maps/totenreich/edit?event=speedrun-gauntlet';
+  const openGauntletSubmitRulesGate = useCallback(() => {
+    setGauntletSubmitRulesScrolledToBottom(false);
+    setGauntletSubmitRulesModalOpen(true);
+  }, []);
+  const closeGauntletSubmitRulesGate = useCallback(() => {
+    setGauntletSubmitRulesModalOpen(false);
+    setGauntletSubmitRulesScrolledToBottom(false);
+  }, []);
+  const continueToGauntletSubmission = useCallback(() => {
+    if (!gauntletSubmitRulesScrolledToBottom) return;
+    closeGauntletSubmitRulesGate();
+    router.push(gauntletSubmitHref);
+  }, [closeGauntletSubmitRulesGate, gauntletSubmitHref, gauntletSubmitRulesScrolledToBottom, router]);
+
+  useEffect(() => {
+    if (activePageTab !== 'event') return;
+    if (!speedrunGauntletTournament?.id) return;
+    if (tournamentId === speedrunGauntletTournament.id) return;
+    setTournamentId(speedrunGauntletTournament.id);
+  }, [activePageTab, speedrunGauntletTournament?.id, tournamentId]);
+
+  useEffect(() => {
+    if (activePageTab !== 'event') return;
+    if (!gauntletPrizeAnimatedRef.current) gauntletPrizeAnimatedRef.current = true;
+    setGauntletPrizePoolDisplay(GAUNTLET_PRIZE_POOL_TOTAL);
+  }, [activePageTab]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setEventLeaderboardLoading(true);
+    setEventLeaderboardError(null);
+    fetch('/api/events/speedrun-gauntlet/leaderboard', {
+      cache: 'no-store',
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        const payload = (await response.json().catch(() => ({}))) as { entries?: LeaderboardEntry[]; error?: string };
+        if (controller.signal.aborted) return;
+        if (!response.ok) {
+          setEventLeaderboardError(payload.error || 'Failed to load Speedrun Gauntlet leaderboard.');
+          setEventLeaderboard([]);
+          return;
+        }
+        setEventLeaderboard(Array.isArray(payload.entries) ? payload.entries : []);
+      })
+      .catch(() => {
+        if (controller.signal.aborted) return;
+        setEventLeaderboardError('Failed to load Speedrun Gauntlet leaderboard. Please try again.');
+        setEventLeaderboard([]);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setEventLeaderboardLoading(false);
+      });
+    return () => controller.abort();
+  }, [leaderboardRefreshKey]);
 
   const openEditTournamentModal = () => {
     if (!tournament) return;
@@ -817,7 +920,206 @@ export default function TournamentsPage() {
 
   return (
     <div className="min-h-dvh bg-bunker-950 min-w-0 overflow-x-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-6 xl:px-8 py-6 sm:py-8 min-w-0">
+      <div className="max-w-7xl mx-auto px-3 sm:px-5 lg:px-6 xl:px-8 py-5 sm:py-8 min-w-0 overflow-x-hidden">
+        <div className="mb-6 sm:mb-8">
+          <Tabs
+            value={activePageTab}
+            onChange={(value) => setActivePageTab(value as 'event' | 'czt')}
+            variant="separate"
+          >
+            <TabsList className="w-full grid grid-cols-2 gap-2 rounded-2xl border border-amber-500/35 bg-bunker-900/85 p-2 shadow-[0_0_30px_rgba(245,158,11,0.14)]">
+              <TabsTrigger
+                value="event"
+                className="min-h-[56px] sm:min-h-[62px] rounded-xl border border-transparent px-2 sm:px-4 text-[11px] sm:text-sm md:text-base font-zombies uppercase tracking-[0.1em] text-amber-100/80 transition-all duration-200 data-[state=active]:border-amber-300/70 data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/35 data-[state=active]:via-amber-300/30 data-[state=active]:to-blood-500/30 data-[state=active]:text-white data-[state=active]:shadow-[0_0_24px_rgba(251,191,36,0.45)]"
+              >
+                Speedrun Gauntlet
+              </TabsTrigger>
+              <TabsTrigger
+                value="czt"
+                className="min-h-[56px] sm:min-h-[62px] rounded-xl border border-transparent px-2 sm:px-4 text-[11px] sm:text-sm md:text-base font-zombies uppercase tracking-[0.1em] text-amber-100/80 transition-all duration-200 data-[state=active]:border-amber-300/70 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blood-500/30 data-[state=active]:via-amber-400/25 data-[state=active]:to-amber-500/30 data-[state=active]:text-white data-[state=active]:shadow-[0_0_24px_rgba(251,191,36,0.45)]"
+              >
+                CZT Tournaments
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
+        {activePageTab === 'event' && (
+          <section className="space-y-5 sm:space-y-8 min-w-0">
+            <Card variant="bordered" className="border-amber-600/40 bg-gradient-to-br from-bunker-900 to-bunker-950 overflow-hidden min-w-0">
+              <CardContent className="relative overflow-hidden pt-6 space-y-5">
+                <div className="space-y-5 sm:space-y-6 min-w-0">
+                  <div className="relative z-10 w-full max-w-6xl mx-auto overflow-visible">
+                    <div className="relative h-[240px] sm:h-[380px] lg:h-[540px] w-full overflow-hidden rounded-2xl bg-bunker-950/75 ring-1 ring-bunker-600/45">
+                      <div
+                        aria-hidden
+                        className="pointer-events-none absolute -inset-2 sm:-inset-3 rounded-[1.1rem] border border-bunker-500/35 shadow-[0_0_28px_rgba(15,23,42,0.45)]"
+                      />
+                      <motion.div
+                        aria-hidden
+                        className="pointer-events-none absolute -inset-[18%] z-0 bg-[radial-gradient(circle_at_20%_30%,rgba(59,130,246,0.18),transparent_42%),radial-gradient(circle_at_82%_26%,rgba(168,85,247,0.16),transparent_44%),radial-gradient(circle_at_50%_80%,rgba(16,185,129,0.12),transparent_46%)] blur-2xl"
+                        animate={{ scale: [1, 1.1, 1], rotate: [0, 6, 0], opacity: [0.3, 0.52, 0.3] }}
+                        transition={{ duration: 9.5, ease: 'easeInOut', repeat: Infinity }}
+                      />
+                      <motion.div
+                        aria-hidden
+                        className="pointer-events-none absolute -inset-[22%] z-0 bg-[conic-gradient(from_0deg_at_50%_50%,rgba(56,189,248,0.12),rgba(0,0,0,0)_22%,rgba(52,211,153,0.10)_40%,rgba(0,0,0,0)_62%,rgba(139,92,246,0.12)_82%,rgba(0,0,0,0)_100%)] blur-3xl"
+                        animate={{ rotate: [0, 360], opacity: [0.16, 0.3, 0.16] }}
+                        transition={{ duration: 22, ease: 'linear', repeat: Infinity }}
+                      />
+                      <div className="absolute inset-0 z-10 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.52),rgba(0,0,0,0.03),rgba(0,0,0,0.58))]" />
+                      <div className="absolute inset-0 z-20">
+                        <div className="relative w-full h-full">
+                          <div className="absolute -inset-x-[18%] -inset-y-[66%] sm:-inset-x-[16%] sm:-inset-y-[60%] lg:-inset-x-[14%] lg:-inset-y-[58%]">
+                            <Image
+                              src="/images/Darker_Metal_Version_V2.png"
+                              alt="Speedrun Gauntlet logo"
+                              fill
+                              priority
+                              className="object-contain"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex-1 space-y-4 min-w-0">
+                    <div className="space-y-2">
+                      <p className="text-xs uppercase tracking-wider text-amber-300/90 font-semibold">Community Hosted Event</p>
+                      <h2 className="text-2xl sm:text-4xl font-zombies text-white break-words">Speedrun Gauntlet</h2>
+                      <p className="text-sm text-bunker-300 break-words">
+                        Totenreich Main Quest speedrun with fixed competitive settings and locked submission rules.
+                      </p>
+                      <p className="text-sm text-bunker-300 break-words">
+                        Hosted by{' '}
+                        <a
+                          href="https://www.youtube.com/@OfficialKingman"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-amber-300 hover:text-amber-200 underline underline-offset-2"
+                        >
+                          Kingman
+                        </a>
+                        .
+                      </p>
+                    </div>
+
+                    <div className="relative overflow-hidden rounded-2xl border-2 border-amber-500/70 bg-gradient-to-r from-amber-950/70 via-blood-950/40 to-amber-950/70 px-4 py-4 sm:px-7 sm:py-5">
+                      <motion.div
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-amber-300/25 to-transparent"
+                        initial={{ x: '-120%' }}
+                        animate={{ x: ['-120%', '120%'] }}
+                        transition={{ duration: 1.9, ease: 'easeInOut', repeat: Infinity, repeatDelay: 1.4 }}
+                      />
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.28),transparent_45%)]" />
+                      <div className="relative flex flex-col items-center justify-center gap-1.5 text-center">
+                        <span className="text-sm sm:text-base uppercase tracking-[0.22em] text-amber-100 font-bold">
+                          Total Prize Pool
+                        </span>
+                        <motion.span
+                          className="text-4xl sm:text-6xl font-extrabold tracking-tight text-amber-300 drop-shadow-[0_0_20px_rgba(251,191,36,0.35)]"
+                          animate={{ scale: [1, 1.03, 1] }}
+                          transition={{ duration: 2.2, ease: 'easeInOut', repeat: Infinity }}
+                        >
+                          ${(gauntletPrizePoolDisplay || GAUNTLET_PRIZE_POOL_TOTAL).toLocaleString()} USD
+                        </motion.span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <a
+                        href="https://new.express.adobe.com/webpage/2ZBRnAT6CxqDr"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-bunker-950 font-bold border-2 border-amber-400/60 min-h-[44px]"
+                      >
+                        Official Rules Page
+                      </a>
+                      <Button variant="secondary" onClick={() => setGauntletRulesModalOpen(true)} className="w-full sm:w-auto min-h-[44px]">
+                        <BookOpen className="w-4 h-4 mr-1" />
+                        View Rules On Site
+                      </Button>
+                    </div>
+                    {profile ? (
+                      <div className="space-y-2">
+                        <Button
+                          className="w-full sm:w-auto"
+                          onClick={openGauntletSubmitRulesGate}
+                        >
+                          <Plus className="w-4 h-4 mr-1" />
+                          Submit Speedrun Gauntlet Run
+                        </Button>
+                        {speedrunGauntletTournament?.id ? (
+                          <p className="text-xs text-bunker-400">Proof URL is required when requesting verification.</p>
+                        ) : (
+                          <p className="text-xs text-amber-300/90">
+                            Event leaderboard config is not active yet. You can still log runs on Totenreich now.
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Button className="w-full sm:w-auto" onClick={() => signInWithGoogle()}>
+                          <Plus className="w-4 h-4 mr-1" />
+                          Sign In to Submit Speedrun Gauntlet Run
+                        </Button>
+                        <p className="text-xs text-bunker-400">You must be signed in to submit a run.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card variant="bordered" className="border-bunker-700">
+              <CardHeader className="flex flex-row items-center justify-between gap-3 flex-wrap">
+                <CardTitle className="text-lg font-zombies text-white flex items-center gap-2">
+                  <Medal className="w-5 h-5 text-blood-500 shrink-0" />
+                  Speedrun Gauntlet Leaderboard
+                </CardTitle>
+                {eventEndsAt && (
+                  <div className="flex items-center gap-2 text-blood-400 text-sm shrink-0">
+                    <Clock className="w-4 h-4 shrink-0" />
+                    <span>{eventEnded ? 'Locked — submissions closed' : `Time until lock: ${formatCountdown(eventCountdown)}`}</span>
+                  </div>
+                )}
+              </CardHeader>
+              <CardContent className="pt-0">
+                <p className="text-sm text-bunker-400 mb-3">
+                  Verified and pending runs are both shown. Pending runs are marked as not yet verified.
+                </p>
+                {eventLeaderboardError && (
+                  <div className="mb-3 rounded-lg border border-blood-700/60 bg-blood-950/30 px-3 py-2">
+                    <p className="text-sm text-blood-200">{eventLeaderboardError}</p>
+                  </div>
+                )}
+                {eventLeaderboardLoading && eventLeaderboard.length === 0 ? (
+                  <div className="py-10 flex items-center justify-center">
+                    <div className="w-8 h-8 border-2 border-blood-500 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : eventLeaderboard.length > 0 ? (
+                  <ul className="space-y-2">
+                    {eventLeaderboard.map((entry, index) => (
+                      <li key={entry.user.id}>
+                        <TournamentLeaderboardEntry
+                          entry={entry}
+                          index={index}
+                          mapSlug={speedrunGauntletTournament?.map?.slug ?? tournament?.map?.slug}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-bunker-500 text-sm py-6 text-center">No runs yet.</p>
+                )}
+              </CardContent>
+            </Card>
+          </section>
+        )}
+
+        {activePageTab === 'czt' && (
+        <>
         <section className="mb-6 sm:mb-8 min-w-0">
           <div className={`grid grid-cols-1 ${hasLivePoll ? 'xl:grid-cols-2' : ''} gap-4 sm:gap-6 min-w-0`}>
             <Card variant="bordered" className="border-amber-600/40 bg-gradient-to-br from-bunker-900 to-bunker-950">
@@ -1568,6 +1870,8 @@ export default function TournamentsPage() {
         </div>
           );
         })()}
+        </>
+        )}
 
         {/* Vote confirmation modal */}
         <Modal
@@ -1636,6 +1940,50 @@ export default function TournamentsPage() {
           </div>
           <div className="flex justify-end pt-4">
             <Button onClick={() => setLearnRulesModalOpen(false)}>Close</Button>
+          </div>
+        </Modal>
+
+        <Modal
+          isOpen={gauntletRulesModalOpen}
+          onClose={() => setGauntletRulesModalOpen(false)}
+          title="Speedrun Gauntlet Rules"
+          description="Structured event rules for the BO7 Totenreich Speedrun Gauntlet."
+          size="xl"
+        >
+          <SpeedrunGauntletRulesContent />
+          <div className="flex justify-end pt-4">
+            <Button onClick={() => setGauntletRulesModalOpen(false)}>Close</Button>
+          </div>
+        </Modal>
+
+        <Modal
+          isOpen={gauntletSubmitRulesModalOpen}
+          onClose={closeGauntletSubmitRulesGate}
+          title="Read Rules Before Submitting"
+          description="Scroll through the full Speedrun Gauntlet rules, then continue to the run submission page."
+          size="xl"
+        >
+          <div
+            className="max-h-[55vh] overflow-y-auto pr-2"
+            onScroll={(e) => {
+              if (gauntletSubmitRulesScrolledToBottom) return;
+              const target = e.currentTarget;
+              const atBottom = target.scrollTop + target.clientHeight >= target.scrollHeight - 8;
+              if (atBottom) setGauntletSubmitRulesScrolledToBottom(true);
+            }}
+          >
+            <SpeedrunGauntletRulesContent />
+          </div>
+          <div className="mt-3 rounded-lg border border-bunker-700 bg-bunker-900/70 px-3 py-2 text-xs text-bunker-300">
+            {gauntletSubmitRulesScrolledToBottom
+              ? 'Rules acknowledged. You can continue to submission.'
+              : 'Scroll to the bottom of these rules to unlock submission.'}
+          </div>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="secondary" onClick={closeGauntletSubmitRulesGate}>Cancel</Button>
+            <Button onClick={continueToGauntletSubmission} disabled={!gauntletSubmitRulesScrolledToBottom}>
+              Continue to Submit
+            </Button>
           </div>
         </Modal>
 

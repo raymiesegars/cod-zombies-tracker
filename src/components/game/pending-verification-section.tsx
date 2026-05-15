@@ -27,6 +27,7 @@ export type PendingVerificationRun = {
   roundCompleted?: number | null;
   playerCount: string;
   isTournamentRun?: boolean;
+  tournamentLabel?: string | null;
   user: {
     id: string;
     username: string;
@@ -115,9 +116,12 @@ export function PendingVerificationSection() {
                         {playerLabel}
                       </span>
                       {item.isTournamentRun && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded-full border border-amber-600/60 bg-amber-950/95 text-amber-300" title="Tournament submission">
+                        <span
+                          className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded-full border border-amber-600/60 bg-amber-950/95 text-amber-300"
+                          title={item.tournamentLabel || 'Tournament submission'}
+                        >
                           <Trophy className="w-3 h-3" />
-                          Tourney
+                          {item.tournamentLabel || 'Tourney'}
                         </span>
                       )}
                     </div>
