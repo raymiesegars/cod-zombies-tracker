@@ -927,7 +927,7 @@ export default function TournamentsPage() {
             onChange={(value) => setActivePageTab(value as 'event' | 'czt')}
             variant="separate"
           >
-            <TabsList className="w-full grid grid-cols-2 gap-2 rounded-2xl border border-amber-500/35 bg-bunker-900/85 p-2 shadow-[0_0_30px_rgba(245,158,11,0.14)]">
+            <TabsList className="w-full grid grid-cols-2 max-[380px]:grid-cols-1 gap-2 rounded-2xl border border-amber-500/35 bg-bunker-900/85 p-2 shadow-[0_0_30px_rgba(245,158,11,0.14)]">
               <TabsTrigger
                 value="event"
                 className="min-h-[56px] sm:min-h-[62px] rounded-xl border border-transparent px-2 sm:px-4 text-[11px] sm:text-sm md:text-base font-zombies uppercase tracking-[0.1em] text-amber-100/80 transition-all duration-200 data-[state=active]:border-amber-300/70 data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/35 data-[state=active]:via-amber-300/30 data-[state=active]:to-blood-500/30 data-[state=active]:text-white data-[state=active]:shadow-[0_0_24px_rgba(251,191,36,0.45)]"
@@ -949,7 +949,21 @@ export default function TournamentsPage() {
             <Card variant="bordered" className="border-amber-600/40 bg-gradient-to-br from-bunker-900 to-bunker-950 overflow-hidden min-w-0">
               <CardContent className="relative overflow-hidden pt-6 space-y-5">
                 <div className="space-y-5 sm:space-y-6 min-w-0">
-                  <div className="relative z-10 w-full max-w-6xl mx-auto overflow-visible">
+                  <div className="relative z-10 w-full max-[460px]:block hidden overflow-hidden">
+                    <div className="relative h-[230px] max-[435px]:h-auto max-[435px]:aspect-[2.45/1] w-full overflow-hidden">
+                      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.34),rgba(0,0,0,0.08),rgba(0,0,0,0.4))]" />
+                      <div className="absolute -inset-x-[20%] -inset-y-[54%] max-[435px]:-inset-y-[34%]">
+                        <Image
+                          src="/images/Darker_Metal_Version_V2.png"
+                          alt="Speedrun Gauntlet logo"
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="relative z-10 w-full max-w-6xl mx-auto overflow-visible max-[460px]:hidden">
                     <div className="relative h-[240px] sm:h-[380px] lg:h-[540px] w-full overflow-hidden rounded-2xl bg-bunker-950/75 ring-1 ring-bunker-600/45">
                       <div
                         aria-hidden
