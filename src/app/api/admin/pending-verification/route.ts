@@ -6,6 +6,38 @@ import { getDisplayAvatarUrl } from '@/lib/avatar';
 export const dynamic = 'force-dynamic';
 const DEFAULT_LIMIT = 250;
 const MAX_LIMIT = 500;
+const SPEEDRUN_GAUNTLET_RELICS = [
+  'Teddy Bear',
+  'Dragon Wings',
+  'Gong',
+  'Seed',
+  'Rocket',
+  'Focusing Stone',
+  'Spider Fang',
+  'Elephant',
+  'Bus',
+  'Spork',
+] as const;
+
+function isSpeedrunGauntletChallengeLog(log: {
+  map: { slug: string; game: { shortName: string } };
+  challenge: { type: string };
+  playerCount: string;
+  bo7GobbleGumMode?: string | null;
+  bo7SupportMode?: string | null;
+  bo7IsCursedRun?: boolean | null;
+  bo7RelicsUsed?: string[] | null;
+}): boolean {
+  if (log.map.game.shortName !== 'BO7') return false;
+  if (!log.map.slug.toLowerCase().includes('toten')) return false;
+  if (log.challenge.type !== 'EASTER_EGG_SPEEDRUN') return false;
+  if (log.playerCount !== 'SOLO') return false;
+  if (log.bo7GobbleGumMode !== 'WITH_GOBBLEGUMS') return false;
+  if (log.bo7SupportMode !== 'WITH_SUPPORT') return false;
+  if (log.bo7IsCursedRun !== true) return false;
+  const relics = Array.isArray(log.bo7RelicsUsed) ? log.bo7RelicsUsed.map(String) : [];
+  return relics.length === SPEEDRUN_GAUNTLET_RELICS.length && SPEEDRUN_GAUNTLET_RELICS.every((r) => relics.includes(r));
+}
 
 /** List all runs pending verification (challenge + easter egg). Admin only. Query: game (shortName), runType (all | speedrun). */
 export async function GET(request: NextRequest) {
@@ -34,13 +66,11 @@ export async function GET(request: NextRequest) {
     const challengeWhere = {
       verificationRequestedAt: { not: null },
       isVerified: false,
-      userId: { not: me.id },
       ...(game && { map: { game: { shortName: game } } }),
     };
     const eeWhere = {
       verificationRequestedAt: { not: null },
       isVerified: false,
-      userId: { not: me.id },
       ...(game && { map: { game: { shortName: game } } }),
     };
 
@@ -59,7 +89,15 @@ export async function GET(request: NextRequest) {
     const [rawChallengeLogs, easterEggLogs] = await Promise.all([
       prisma.challengeLog.findMany({
         where: challengeWhere,
-        include: {
+        select: {
+          id: true,
+          verificationRequestedAt: true,
+          roundReached: true,
+          playerCount: true,
+          bo7RelicsUsed: true,
+          bo7GobbleGumMode: true,
+          bo7SupportMode: true,
+          bo7IsCursedRun: true,
           user: { select: { id: true, username: true, displayName: true, avatarUrl: true, avatarPreset: true } },
           challenge: { select: { name: true, type: true } },
           map: { select: { name: true, slug: true, imageUrl: true, game: { select: { shortName: true } } } },
@@ -77,16 +115,44 @@ export async function GET(request: NextRequest) {
 
     const challengeLogIds = challengeLogs.map((l) => l.id);
     const eeLogIds = easterEggLogs.map((l) => l.id);
-    const [tournamentChallengeLogIds, tournamentEeLogIds] = await Promise.all([
+    const [tournamentChallengeLogs, tournamentEeLogs] = await Promise.all([
       challengeLogIds.length > 0
-        ? prisma.tournamentLog.findMany({ where: { challengeLogId: { in: challengeLogIds } }, select: { challengeLogId: true } })
+        ? prisma.tournamentLog.findMany({
+            where: { challengeLogId: { in: challengeLogIds } },
+            select: {
+              challengeLogId: true,
+              tournament: { select: { title: true } },
+            },
+          })
         : Promise.resolve([]),
       eeLogIds.length > 0
-        ? prisma.tournamentLog.findMany({ where: { easterEggLogId: { in: eeLogIds } }, select: { easterEggLogId: true } })
+        ? prisma.tournamentLog.findMany({
+            where: { easterEggLogId: { in: eeLogIds } },
+            select: {
+              easterEggLogId: true,
+              tournament: { select: { title: true } },
+            },
+          })
         : Promise.resolve([]),
     ]);
-    const tournamentChallengeSet = new Set(tournamentChallengeLogIds.map((t) => t.challengeLogId).filter(Boolean));
-    const tournamentEeSet = new Set(tournamentEeLogIds.map((t) => t.easterEggLogId).filter(Boolean));
+    const tournamentChallengeLabelByLogId = new Map<string, string>();
+    for (const row of tournamentChallengeLogs) {
+      if (!row.challengeLogId) continue;
+      const title = row.tournament?.title?.trim() ?? '';
+      const label = title.toLowerCase().includes('speedrun gauntlet')
+        ? 'Speedrun Gauntlet'
+        : 'Sponsored Tournament';
+      tournamentChallengeLabelByLogId.set(row.challengeLogId, label);
+    }
+    const tournamentEeLabelByLogId = new Map<string, string>();
+    for (const row of tournamentEeLogs) {
+      if (!row.easterEggLogId) continue;
+      const title = row.tournament?.title?.trim() ?? '';
+      const label = title.toLowerCase().includes('speedrun gauntlet')
+        ? 'Speedrun Gauntlet'
+        : 'Sponsored Tournament';
+      tournamentEeLabelByLogId.set(row.easterEggLogId, label);
+    }
 
     const challengeItems = challengeLogs.map((log) => ({
       logType: 'challenge' as const,
@@ -98,7 +164,10 @@ export async function GET(request: NextRequest) {
       runLabel: `${log.challenge.name} – Round ${log.roundReached}`,
       roundReached: log.roundReached,
       playerCount: log.playerCount,
-      isTournamentRun: tournamentChallengeSet.has(log.id),
+      isTournamentRun: tournamentChallengeLabelByLogId.has(log.id) || isSpeedrunGauntletChallengeLog(log),
+      tournamentLabel:
+        tournamentChallengeLabelByLogId.get(log.id) ??
+        (isSpeedrunGauntletChallengeLog(log) ? 'Speedrun Gauntlet' : null),
       user: {
         id: log.user.id,
         username: log.user.username,
@@ -118,7 +187,8 @@ export async function GET(request: NextRequest) {
       runLabel: log.easterEgg.name,
       roundCompleted: log.roundCompleted,
       playerCount: log.playerCount,
-      isTournamentRun: tournamentEeSet.has(log.id),
+      isTournamentRun: tournamentEeLabelByLogId.has(log.id),
+      tournamentLabel: tournamentEeLabelByLogId.get(log.id) ?? null,
       user: {
         id: log.user.id,
         username: log.user.username,

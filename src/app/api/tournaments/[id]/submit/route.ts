@@ -5,6 +5,65 @@ import { TournamentStatus } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
+const SPEEDRUN_GAUNTLET_REQUIRED_RELICS = [
+  'Teddy Bear',
+  'Dragon Wings',
+  'Gong',
+  'Seed',
+  'Rocket',
+  'Focusing Stone',
+  'Spider Fang',
+  'Elephant',
+  'Bus',
+  'Spork',
+] as const;
+
+function valuesEqual(a: unknown, b: unknown): boolean {
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false;
+    const aSorted = [...a].map(String).sort();
+    const bSorted = [...b].map(String).sort();
+    return aSorted.every((v, idx) => v === bSorted[idx]);
+  }
+  return a === b;
+}
+
+function validateTournamentConfig(
+  rawConfig: unknown,
+  log: Record<string, unknown>
+): string | null {
+  if (!rawConfig || typeof rawConfig !== 'object') return null;
+  const config = rawConfig as Record<string, unknown>;
+  const enforcedKeys = Object.keys(config);
+  for (const key of enforcedKeys) {
+    const expected = config[key];
+    if (expected === undefined || expected === null) continue;
+    if (!(key in log)) continue;
+    const actual = log[key];
+    if (!valuesEqual(expected, actual)) {
+      return `Run does not match tournament requirement for ${key}`;
+    }
+  }
+  return null;
+}
+
+function isSpeedrunGauntletTournament(tournament: {
+  title?: string | null;
+  game?: { shortName?: string | null } | null;
+  map?: { slug?: string | null } | null;
+  challenge?: { name?: string | null } | null;
+  easterEgg?: { name?: string | null } | null;
+}): boolean {
+  const title = tournament.title?.toLowerCase() ?? '';
+  const challengeName = tournament.challenge?.name?.toLowerCase() ?? '';
+  const eeName = tournament.easterEgg?.name?.toLowerCase() ?? '';
+  return (
+    (title.includes('speedrun gauntlet') || challengeName.includes('easter egg speedrun') || eeName.includes('main quest')) &&
+    tournament.game?.shortName === 'BO7' &&
+    tournament.map?.slug?.toLowerCase() === 'totenreich'
+  );
+}
+
 /** POST: Link an existing log to this tournament. Body: { challengeLogId } or { easterEggLogId }. Tournament must be OPEN and not past endsAt. Log must match tournament category and belong to current user. */
 export async function POST(
   request: NextRequest,
@@ -28,11 +87,17 @@ export async function POST(
       where: { id: tournamentId },
       select: {
         id: true,
+        title: true,
         status: true,
         endsAt: true,
         challengeId: true,
         easterEggId: true,
         mapId: true,
+        config: true,
+        game: { select: { shortName: true } },
+        map: { select: { slug: true } },
+        challenge: { select: { name: true } },
+        easterEgg: { select: { name: true } },
       },
     });
     if (!tournament) {
@@ -64,9 +129,72 @@ export async function POST(
           challengeId: tournament.challengeId,
           mapId: tournament.mapId,
         },
+        select: {
+          id: true,
+          isVerified: true,
+          verificationRequestedAt: true,
+          playerCount: true,
+          difficulty: true,
+          bo3GobbleGumMode: true,
+          bo3AatUsed: true,
+          bo4ElixirMode: true,
+          bocwSupportMode: true,
+          bo6GobbleGumMode: true,
+          bo6SupportMode: true,
+          bo7GobbleGumMode: true,
+          bo7SupportMode: true,
+          bo7IsCursedRun: true,
+          bo7RelicsUsed: true,
+          rampageInducerUsed: true,
+          useFortuneCards: true,
+          useDirectorsCut: true,
+          ww2ConsumablesUsed: true,
+          vanguardVoidUsed: true,
+          firstRoomVariant: true,
+          bo2BankUsed: true,
+          wawNoJug: true,
+          wawFixedWunderwaffe: true,
+        },
       });
       if (!log) {
         return NextResponse.json({ error: 'Log not found or does not match tournament category' }, { status: 404 });
+      }
+      if (!log.isVerified && !log.verificationRequestedAt) {
+        return NextResponse.json({ error: 'Run must be verification pending or verified before tournament submission' }, { status: 400 });
+      }
+      const challengeConfigError = validateTournamentConfig(tournament.config, log as unknown as Record<string, unknown>);
+      if (challengeConfigError) {
+        return NextResponse.json({ error: challengeConfigError }, { status: 400 });
+      }
+      if (isSpeedrunGauntletTournament(tournament)) {
+        if (log.playerCount !== 'SOLO') {
+          return NextResponse.json({ error: 'Speedrun Gauntlet submissions must be Solo runs' }, { status: 400 });
+        }
+        if (log.bo7GobbleGumMode !== 'WITH_GOBBLEGUMS') {
+          return NextResponse.json(
+            { error: 'Speedrun Gauntlet submissions must use With GobbleGums mode' },
+            { status: 400 }
+          );
+        }
+        if (log.bo7SupportMode !== 'WITH_SUPPORT') {
+          return NextResponse.json(
+            { error: 'Speedrun Gauntlet submissions must use With Support mode' },
+            { status: 400 }
+          );
+        }
+        if (log.bo7IsCursedRun !== true) {
+          return NextResponse.json({ error: 'Speedrun Gauntlet submissions must be marked as Cursed runs' }, { status: 400 });
+        }
+        const relics = Array.isArray(log.bo7RelicsUsed) ? log.bo7RelicsUsed.map(String) : [];
+        const hasExactRelics =
+          relics.length === SPEEDRUN_GAUNTLET_REQUIRED_RELICS.length &&
+          [...SPEEDRUN_GAUNTLET_REQUIRED_RELICS].every((relic) => relics.includes(relic));
+        if (!hasExactRelics) {
+          return NextResponse.json(
+            { error: 'Speedrun Gauntlet submissions must include the exact 10 required relics' },
+            { status: 400 }
+          );
+        }
       }
       const existing = await prisma.tournamentLog.findUnique({
         where: { tournamentId_challengeLogId: { tournamentId, challengeLogId } },
@@ -88,9 +216,26 @@ export async function POST(
           easterEggId: tournament.easterEggId,
           mapId: tournament.mapId,
         },
+        select: {
+          id: true,
+          isVerified: true,
+          verificationRequestedAt: true,
+          playerCount: true,
+          difficulty: true,
+          rampageInducerUsed: true,
+          ww2ConsumablesUsed: true,
+          vanguardVoidUsed: true,
+        },
       });
       if (!log) {
         return NextResponse.json({ error: 'Log not found or does not match tournament category' }, { status: 404 });
+      }
+      if (!log.isVerified && !log.verificationRequestedAt) {
+        return NextResponse.json({ error: 'Run must be verification pending or verified before tournament submission' }, { status: 400 });
+      }
+      const eeConfigError = validateTournamentConfig(tournament.config, log as unknown as Record<string, unknown>);
+      if (eeConfigError) {
+        return NextResponse.json({ error: eeConfigError }, { status: 400 });
       }
       const existing = await prisma.tournamentLog.findUnique({
         where: { tournamentId_easterEggLogId: { tournamentId, easterEggLogId: easterEggLogId! } },

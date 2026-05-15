@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
@@ -55,6 +55,19 @@ import { sortChallengesForDisplay } from '@/lib/challenge-order';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap, hasFirstRoomGumMachineBo3 } from '@/lib/first-room-variants';
 import { ACHIEVEMENT_CATEGORY_LABELS } from '@/lib/achievements/categories';
+
+const SPEEDRUN_GAUNTLET_REQUIRED_RELICS = [
+  'Teddy Bear',
+  'Dragon Wings',
+  'Gong',
+  'Seed',
+  'Rocket',
+  'Focusing Stone',
+  'Spider Fang',
+  'Elephant',
+  'Bus',
+  'Spork',
+] as const;
 
 const challengeTypeLabels: Record<string, string> = {
   HIGHEST_ROUND: 'Highest Round',
@@ -366,6 +379,7 @@ export default function EditMapProgressPage() {
   const preselectedChallengeId = searchParams.get('challengeId');
   const mysteryBoxRollId = searchParams.get('mysteryBoxRollId');
   const tournamentId = searchParams.get('tournamentId');
+  const eventPreset = searchParams.get('event');
   const tournamentIdRef = useRef<string | null>(null);
   useEffect(() => {
     tournamentIdRef.current = searchParams.get('tournamentId');
@@ -469,6 +483,67 @@ export default function EditMapProgressPage() {
       }
     >
   >({});
+
+  const hasTournamentLock = !!tournamentId && !!tournament && tournament.mapId === map?.id;
+  const isGauntletPresetRoute = eventPreset === 'speedrun-gauntlet';
+  const isBo7TotenreichMap =
+    map?.game?.shortName === 'BO7' && (map?.slug?.toLowerCase().includes('toten') ?? false);
+  const speedrunGauntletChallengeId =
+    map?.challenges.find((c) => c.type === 'EASTER_EGG_SPEEDRUN')?.id ?? null;
+  const isGauntletTournamentConfig =
+    hasTournamentLock &&
+    (
+      (tournament?.challengeId != null &&
+        map?.challenges.some((c) => c.id === tournament.challengeId && c.type === 'EASTER_EGG_SPEEDRUN')) ||
+      (!!speedrunGauntletChallengeId && tournament?.challengeId == null)
+    );
+  const isSpeedrunGauntletSubmission =
+    isBo7TotenreichMap && (isGauntletPresetRoute || isGauntletTournamentConfig);
+  const tournamentLocked = hasTournamentLock || isSpeedrunGauntletSubmission;
+
+  const resolveTournamentIdForSubmission = useCallback(async () => {
+    const existing = tournamentId ?? tournamentIdRef.current;
+    if (existing) return existing;
+    if (!isSpeedrunGauntletSubmission) return null;
+    try {
+      const res = await fetch('/api/tournaments', { cache: 'no-store', credentials: 'same-origin' });
+      if (!res.ok) return null;
+      const list = (await res.json().catch(() => [])) as Array<{
+        id: string;
+        title?: string | null;
+        status?: string | null;
+        game?: { shortName?: string | null } | null;
+        map?: { slug?: string | null } | null;
+        challenge?: { name?: string | null; type?: string | null } | null;
+        easterEgg?: { name?: string | null } | null;
+      }>;
+      const normalized = list.filter((t) => {
+        const game = t.game?.shortName?.toUpperCase() ?? '';
+        const mapSlug = t.map?.slug?.toLowerCase() ?? '';
+        const title = t.title?.toLowerCase() ?? '';
+        const challengeName = t.challenge?.name?.toLowerCase() ?? '';
+        const eeName = t.easterEgg?.name?.toLowerCase() ?? '';
+        const isTargetEventName = title.includes('speedrun gauntlet');
+        const isTargetCategory = challengeName.includes('easter egg speedrun') || eeName.includes('main quest');
+        return game === 'BO7' && mapSlug.includes('toten') && (isTargetEventName || isTargetCategory);
+      });
+      const fallback = list.filter((t) => {
+        const game = t.game?.shortName?.toUpperCase() ?? '';
+        const mapSlug = t.map?.slug?.toLowerCase() ?? '';
+        return game === 'BO7' && mapSlug.includes('toten');
+      });
+      const ranked = normalized.length > 0 ? normalized : fallback;
+      const openSpeedrunChallenge = ranked.find((t) => t.status === 'OPEN' && t.challenge?.type === 'EASTER_EGG_SPEEDRUN');
+      const openAny = ranked.find((t) => t.status === 'OPEN');
+      const anySpeedrunChallenge = ranked.find((t) => t.challenge?.type === 'EASTER_EGG_SPEEDRUN');
+      const chosen = openSpeedrunChallenge ?? openAny ?? anySpeedrunChallenge ?? ranked[0] ?? null;
+      const id = chosen?.id ?? null;
+      if (id) tournamentIdRef.current = id;
+      return id;
+    } catch {
+      return null;
+    }
+  }, [isSpeedrunGauntletSubmission, tournamentId]);
 
   useEffect(() => {
     if (!authLoading && !profile) {
@@ -679,6 +754,23 @@ export default function EditMapProgressPage() {
   }, [map, tournament]);
 
   useEffect(() => {
+    if (!isSpeedrunGauntletSubmission || !map) return;
+    const challengeId = tournament?.challengeId ?? speedrunGauntletChallengeId;
+    if (challengeId) {
+      setSelectedChallengeIds(new Set([challengeId]));
+      setEeTabValue('ee-none');
+    }
+    setSharedChallengeForm((prev) => ({
+      ...prev,
+      playerCount: 'SOLO',
+      bo7GobbleGumMode: 'WITH_GOBBLEGUMS',
+      bo7SupportMode: 'WITH_SUPPORT',
+      bo7IsCursedRun: true,
+      bo7RelicsUsed: [...SPEEDRUN_GAUNTLET_REQUIRED_RELICS],
+    }));
+  }, [isSpeedrunGauntletSubmission, map, speedrunGauntletChallengeId, tournament?.challengeId]);
+
+  useEffect(() => {
     const wawCfg = map?.game?.shortName === 'WAW' ? getWaWMapConfig(map?.slug ?? '') : null;
     const hasNoDowns = map && Array.from(selectedChallengeIds).some((cid) =>
       map.challenges.find((ch) => ch.id === cid)?.type === 'NO_DOWNS'
@@ -701,8 +793,6 @@ export default function EditMapProgressPage() {
       },
     }));
   };
-
-  const tournamentLocked = !!tournamentId && !!tournament && tournament.mapId === map?.id;
 
   const toggleChallenge = (challengeId: string) => {
     if (tournamentLocked) return;
@@ -744,6 +834,7 @@ export default function EditMapProgressPage() {
 
   const handleSaveSelectedChallenges = async (requestVerification = false) => {
     if (!profile || !map || selectedChallengeIds.size === 0) return;
+    const effectiveRequestVerification = requestVerification || isSpeedrunGauntletSubmission;
     const form = sharedChallengeForm;
     const selectedChallenges = Array.from(selectedChallengeIds).map((cid) => map.challenges.find((c) => c.id === cid));
     const isNoMansLandOnly =
@@ -808,7 +899,7 @@ export default function EditMapProgressPage() {
         return;
       }
     }
-    if (requestVerification) {
+    if (effectiveRequestVerification) {
       const hasProof = (form.proofUrls ?? []).filter(Boolean).length > 0;
       if (!hasProof) {
         setSaveErrorModalMessage('To request verification, add at least one proof URL.');
@@ -887,7 +978,7 @@ export default function EditMapProgressPage() {
             })(),
             teammateUserIds: form.teammateUserIds ?? [],
             teammateNonUserNames: form.teammateNonUserNames ?? [],
-            requestVerification,
+            requestVerification: effectiveRequestVerification,
             ...(mysteryBoxRollId && challengeId === preselectedChallengeId && { mysteryBoxRollId }),
           }),
         });
@@ -903,7 +994,7 @@ export default function EditMapProgressPage() {
             label: 'Mystery Box Challenge Complete',
           });
         }
-        const tid = tournamentId ?? tournamentIdRef.current;
+        const tid = await resolveTournamentIdForSubmission();
         if (tid && data.id) {
           const subRes = await fetch(`/api/tournaments/${tid}/submit`, {
             method: 'POST',
@@ -961,12 +1052,13 @@ export default function EditMapProgressPage() {
 
   const handleSaveChallenge = async (challengeId: string, requestVerification = false) => {
     if (!profile || !map) return;
+    const effectiveRequestVerification = requestVerification || isSpeedrunGauntletSubmission;
 
     const form = challengeForms[challengeId];
     const challenge = map.challenges?.find((c) => c.id === challengeId);
     if (!form?.roundReached || parseInt(form.roundReached) <= 0) return;
 
-    if (requestVerification) {
+    if (effectiveRequestVerification) {
       const hasProof = (form.proofUrls ?? []).filter(Boolean).length > 0;
       if (!hasProof) {
         setSaveErrorModalMessage('To request verification, add at least one proof URL.');
@@ -1006,13 +1098,30 @@ export default function EditMapProgressPage() {
           completionTimeSeconds: form.completionTimeSeconds ?? null,
           teammateUserIds: form.teammateUserIds ?? [],
           teammateNonUserNames: form.teammateNonUserNames ?? [],
-          requestVerification,
+          requestVerification: effectiveRequestVerification,
           ...(mysteryBoxRollId && challengeId === preselectedChallengeId && { mysteryBoxRollId }),
         }),
       });
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.error || 'Failed to save');
+
+      const tid = await resolveTournamentIdForSubmission();
+      if (tid && data.id) {
+        const subRes = await fetch(`/api/tournaments/${tid}/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ challengeLogId: data.id }),
+          credentials: 'same-origin',
+        });
+        const subData = await subRes.json().catch(() => ({}));
+        if (!subRes.ok) {
+          const msg = subData.error || 'Run saved but could not be added to the tournament.';
+          if (!(subRes.status === 400 && typeof msg === 'string' && msg.toLowerCase().includes('already submitted'))) {
+            throw new Error(msg);
+          }
+        }
+      }
 
       if (typeof data.mysteryBoxXp === 'number' && data.mysteryBoxXp > 0) {
         showXpToast(data.mysteryBoxXp, {
@@ -1051,11 +1160,12 @@ export default function EditMapProgressPage() {
 
   const handleSaveEasterEgg = async (eeId: string, requestVerification = false) => {
     if (!profile || !map) return;
+    const effectiveRequestVerification = requestVerification || isSpeedrunGauntletSubmission;
 
     const form = easterEggForms[eeId];
     if (!form?.completed) return;
 
-    if (requestVerification) {
+    if (effectiveRequestVerification) {
       const hasProof = (form.proofUrls ?? []).filter(Boolean).length > 0;
       if (!hasProof) {
         setSaveErrorModalMessage('To request verification, add at least one proof URL.');
@@ -1086,7 +1196,7 @@ export default function EditMapProgressPage() {
           completionTimeSeconds: form.completionTimeSeconds ?? null,
           teammateUserIds: form.teammateUserIds ?? [],
           teammateNonUserNames: form.teammateNonUserNames ?? [],
-          requestVerification,
+          requestVerification: effectiveRequestVerification,
           ...((isBocwGame(map.game?.shortName) || isBo6Game(map.game?.shortName) || isBo7Game(map.game?.shortName) || (isVanguardGame(map.game?.shortName) && hasVanguardRampageFilter(map.slug))) && { rampageInducerUsed: form.rampageInducerUsed ?? false }),
           ...(isVanguardGame(map.game?.shortName) && hasVanguardVoidFilter(map.slug) && { vanguardVoidUsed: form.vanguardVoidUsed ?? true }),
           ...(isWw2Game(map.game?.shortName) && { ww2ConsumablesUsed: form.ww2ConsumablesUsed ?? true }),
@@ -1096,7 +1206,7 @@ export default function EditMapProgressPage() {
 
         if (!res.ok) throw new Error(data.error || 'Failed to save');
 
-        const tid = tournamentId ?? tournamentIdRef.current;
+        const tid = await resolveTournamentIdForSubmission();
         if (tid && data.id) {
           const subRes = await fetch(`/api/tournaments/${tid}/submit`, {
           method: 'POST',
@@ -1664,6 +1774,7 @@ export default function EditMapProgressPage() {
                               onChange={(relics) => handleSharedChallengeChange('bo7RelicsUsed', relics)}
                               placeholder="None (0 relics)"
                               className="w-48"
+                              disabled={tournamentLocked}
                             />
                           </div>
                         )}
