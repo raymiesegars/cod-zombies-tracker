@@ -1041,6 +1041,42 @@ export default function TournamentsPage() {
                       </div>
                     </div>
 
+                    <div className="rounded-2xl border border-bunker-700 bg-gradient-to-br from-bunker-900/95 to-bunker-950/90 p-4 sm:p-5 space-y-3">
+                      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-1">
+                        <h3 className="text-base sm:text-lg font-zombies text-white tracking-wide">Top 5 Prize Breakdown</h3>
+                        <p className="text-xs sm:text-sm text-bunker-400">Cash prizes paid out to final top 5 placements.</p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+                        <div className="rounded-xl border border-amber-400/60 bg-gradient-to-br from-amber-400/25 to-amber-800/25 px-3 py-3 min-w-0 text-center">
+                          <p className="text-xs uppercase tracking-[0.14em] text-amber-100 font-semibold">1st Place</p>
+                          <p className="text-2xl font-extrabold text-amber-300 leading-tight">$1,000</p>
+                          <p className="text-xs text-amber-100/90 mt-1 break-words">+ featured video with Kingman</p>
+                        </div>
+
+                        <div className="rounded-xl border border-slate-300/50 bg-gradient-to-br from-slate-300/18 to-slate-700/18 px-3 py-3 min-w-0 text-center flex flex-col justify-center">
+                          <p className="text-xs uppercase tracking-[0.14em] text-slate-100 font-semibold">2nd Place</p>
+                          <p className="text-2xl font-extrabold text-slate-100 leading-tight">$500</p>
+                        </div>
+
+                        <div className="rounded-xl border border-orange-500/55 bg-gradient-to-br from-orange-500/20 to-orange-900/22 px-3 py-3 min-w-0 text-center flex flex-col justify-center">
+                          <p className="text-xs uppercase tracking-[0.14em] text-orange-100 font-semibold">3rd Place</p>
+                          <p className="text-2xl font-extrabold text-orange-300 leading-tight">$250</p>
+                        </div>
+
+                        <div className="rounded-xl border border-rose-500/50 bg-gradient-to-br from-rose-500/18 to-rose-900/20 px-3 py-3 min-w-0 text-center flex flex-col justify-center">
+                          <p className="text-xs uppercase tracking-[0.14em] text-rose-100 font-semibold">4th Place</p>
+                          <p className="text-2xl font-extrabold text-rose-300 leading-tight">$150</p>
+                        </div>
+
+                        <div className="rounded-xl border border-cyan-500/50 bg-gradient-to-br from-cyan-500/16 to-cyan-900/22 px-3 py-3 min-w-0 text-center flex flex-col justify-center">
+                          <p className="text-xs uppercase tracking-[0.14em] text-cyan-100 font-semibold">5th Place</p>
+                          <p className="text-2xl font-extrabold text-cyan-300 leading-tight">$100</p>
+                        </div>
+                      </div>
+
+                    </div>
+
                     <div className="flex flex-col sm:flex-row gap-3">
                       <a
                         href="https://new.express.adobe.com/webpage/2ZBRnAT6CxqDr"
