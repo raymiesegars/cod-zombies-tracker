@@ -50,6 +50,7 @@ export async function GET() {
         isVerified: true,
         playerCount: true,
         bo7RelicsUsed: true,
+        map: { select: { slug: true } },
         user: {
           select: {
             id: true,
@@ -90,7 +91,7 @@ export async function GET() {
       playerCount: entry.playerCount,
       logId: entry.id,
       logType: 'challenge' as const,
-      mapSlug: 'totenreich',
+      mapSlug: entry.map.slug,
       trophyPlace: null,
     }));
 
