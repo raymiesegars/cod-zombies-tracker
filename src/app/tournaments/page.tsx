@@ -1155,7 +1155,6 @@ export default function TournamentsPage() {
                         <TournamentLeaderboardEntry
                           entry={entry}
                           index={index}
-                          mapSlug={speedrunGauntletTournament?.map?.slug ?? tournament?.map?.slug}
                         />
                       </li>
                     ))}
