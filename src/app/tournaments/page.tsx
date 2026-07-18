@@ -496,8 +496,26 @@ export default function TournamentsPage() {
     return openSpeedrunChallenge ?? openAny ?? anySpeedrunChallenge ?? ranked[0] ?? null;
   }, [tournaments, selectedGauntlet.mapSlug]);
   const eventEndsAt = selectedGauntlet.endsAt;
+  const eventStartsAt = selectedGauntlet.startsAt;
   const eventCountdown = useCountdown(eventEndsAt);
+  const eventStartsCountdown = useCountdown(
+    !selectedGauntletIsOpen && !selectedGauntletHasEnded ? eventStartsAt : null
+  );
   const eventEnded = selectedGauntletHasEnded || (eventCountdown !== null && eventCountdown <= 0);
+  const gauntletOpensAtLabel = useMemo(() => {
+    try {
+      return new Date(eventStartsAt).toLocaleString(undefined, {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        timeZoneName: 'short',
+      });
+    } catch {
+      return eventStartsAt;
+    }
+  }, [eventStartsAt]);
   const refreshLeaderboard = useCallback(() => {
     setLeaderboardRefreshKey((prev) => prev + 1);
   }, []);
@@ -1132,11 +1150,21 @@ export default function TournamentsPage() {
                             <p className="text-xs text-bunker-400">Proof URL is required when requesting verification.</p>
                           </>
                         ) : (
-                          <p className="text-sm text-amber-300/90 flex items-center gap-2">
-                            <Lock className="w-4 h-4 shrink-0" />
-                            {selectedGauntletHasEnded
-                              ? 'This gauntlet has ended. Leaderboards are locked.'
-                              : 'Submissions open when this gauntlet begins.'}
+                          <p className="text-sm text-amber-300/90 flex items-start gap-2">
+                            <Lock className="w-4 h-4 shrink-0 mt-0.5" />
+                            <span>
+                              {selectedGauntletHasEnded
+                                ? 'This gauntlet has ended. Leaderboards are locked.'
+                                : (
+                                  <>
+                                    Submissions open {gauntletOpensAtLabel}
+                                    {eventStartsCountdown != null && eventStartsCountdown > 0
+                                      ? ` — in ${formatCountdown(eventStartsCountdown)}`
+                                      : ''}
+                                    .
+                                  </>
+                                )}
+                            </span>
                           </p>
                         )}
                       </div>
@@ -1163,7 +1191,13 @@ export default function TournamentsPage() {
                 {eventEndsAt && (
                   <div className="flex items-center gap-2 text-blood-400 text-sm shrink-0">
                     <Clock className="w-4 h-4 shrink-0" />
-                    <span>{eventEnded ? 'Locked — submissions closed' : `Time until lock: ${formatCountdown(eventCountdown)}`}</span>
+                    <span>
+                      {eventEnded
+                        ? 'Locked — submissions closed'
+                        : selectedGauntletIsOpen
+                          ? `Time until lock: ${formatCountdown(eventCountdown)}`
+                          : `Opens in: ${formatCountdown(eventStartsCountdown)}`}
+                    </span>
                   </div>
                 )}
               </CardHeader>
