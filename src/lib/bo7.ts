@@ -49,6 +49,7 @@ export const BO7_RELICS = [
   'Golden Spork',
   'Gong',
   "Lawyer's Pen",
+  'Mannequin Turret',
   'Matryoshka Doll',
   'Relic',
   'Rocket',

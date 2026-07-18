@@ -33,6 +33,12 @@ import { isBo3Game, BO3_GOBBLEGUM_MODES, BO3_GOBBLEGUM_DEFAULT, getBo3GobbleGumL
 import { isBocwGame, BOCW_SUPPORT_MODES, BOCW_SUPPORT_DEFAULT, getBocwSupportLabel } from '@/lib/bocw';
 import { isBo6Game, BO6_GOBBLEGUM_MODES, BO6_GOBBLEGUM_DEFAULT, BO6_SUPPORT_MODES, BO6_SUPPORT_DEFAULT, getBo6GobbleGumLabel, getBo6SupportLabel } from '@/lib/bo6';
 import { isBo7Game, BO7_GOBBLEGUM_MODES, BO7_GOBBLEGUM_DEFAULT, BO7_SUPPORT_MODES, BO7_SUPPORT_DEFAULT, getBo7GobbleGumLabel, getBo7SupportLabel } from '@/lib/bo7';
+import {
+  getCurrentGauntlet,
+  getGauntlet,
+  getGauntletByMapSlug,
+  isGauntletOpen,
+} from '@/lib/speedrun-gauntlet';
 import type { MapWithDetails, ChallengeType, PlayerCount } from '@/types';
 import { ChevronLeft, Save, CheckCircle, AlertCircle, BookOpen } from 'lucide-react';
 import { WAW_OFFICIAL_RULES } from '@/lib/waw/waw-official-rules';
@@ -55,19 +61,6 @@ import { sortChallengesForDisplay } from '@/lib/challenge-order';
 import { getBo2MapConfig } from '@/lib/bo2/bo2-map-config';
 import { hasFirstRoomVariantFilter, getFirstRoomVariantsForMap, hasFirstRoomGumMachineBo3 } from '@/lib/first-room-variants';
 import { ACHIEVEMENT_CATEGORY_LABELS } from '@/lib/achievements/categories';
-
-const SPEEDRUN_GAUNTLET_REQUIRED_RELICS = [
-  'Teddy Bear',
-  'Dragon Wings',
-  'Gong',
-  'Seed',
-  'Rocket',
-  'Focusing Stone',
-  'Spider Fang',
-  'Elephant',
-  'Bus',
-  'Spork',
-] as const;
 
 const challengeTypeLabels: Record<string, string> = {
   HIGHEST_ROUND: 'Highest Round',
@@ -380,6 +373,14 @@ export default function EditMapProgressPage() {
   const mysteryBoxRollId = searchParams.get('mysteryBoxRollId');
   const tournamentId = searchParams.get('tournamentId');
   const eventPreset = searchParams.get('event');
+  const gauntletSlugParam = searchParams.get('gauntlet');
+  const activeGauntlet = useMemo(() => {
+    const fromParam = getGauntlet(gauntletSlugParam);
+    if (fromParam) return fromParam;
+    const fromMap = getGauntletByMapSlug(slug);
+    if (eventPreset === 'speedrun-gauntlet') return fromMap ?? getCurrentGauntlet();
+    return fromMap;
+  }, [eventPreset, gauntletSlugParam, slug]);
   const tournamentIdRef = useRef<string | null>(null);
   useEffect(() => {
     tournamentIdRef.current = searchParams.get('tournamentId');
@@ -486,8 +487,10 @@ export default function EditMapProgressPage() {
 
   const hasTournamentLock = !!tournamentId && !!tournament && tournament.mapId === map?.id;
   const isGauntletPresetRoute = eventPreset === 'speedrun-gauntlet';
-  const isBo7TotenreichMap =
-    map?.game?.shortName === 'BO7' && (map?.slug?.toLowerCase().includes('toten') ?? false);
+  const mapMatchesGauntlet =
+    !!activeGauntlet &&
+    map?.game?.shortName === 'BO7' &&
+    (map?.slug?.toLowerCase() === activeGauntlet.mapSlug.toLowerCase());
   const speedrunGauntletChallengeId =
     map?.challenges.find((c) => c.type === 'EASTER_EGG_SPEEDRUN')?.id ?? null;
   const isGauntletTournamentConfig =
@@ -498,13 +501,16 @@ export default function EditMapProgressPage() {
       (!!speedrunGauntletChallengeId && tournament?.challengeId == null)
     );
   const isSpeedrunGauntletSubmission =
-    isBo7TotenreichMap && (isGauntletPresetRoute || isGauntletTournamentConfig);
+    !!activeGauntlet &&
+    mapMatchesGauntlet &&
+    isGauntletOpen(activeGauntlet) &&
+    (isGauntletPresetRoute || isGauntletTournamentConfig);
   const tournamentLocked = hasTournamentLock || isSpeedrunGauntletSubmission;
 
   const resolveTournamentIdForSubmission = useCallback(async () => {
     const existing = tournamentId ?? tournamentIdRef.current;
     if (existing) return existing;
-    if (!isSpeedrunGauntletSubmission) return null;
+    if (!isSpeedrunGauntletSubmission || !activeGauntlet) return null;
     try {
       const res = await fetch('/api/tournaments', { cache: 'no-store', credentials: 'same-origin' });
       if (!res.ok) return null;
@@ -517,20 +523,21 @@ export default function EditMapProgressPage() {
         challenge?: { name?: string | null; type?: string | null } | null;
         easterEgg?: { name?: string | null } | null;
       }>;
+      const mapSlug = activeGauntlet.mapSlug.toLowerCase();
       const normalized = list.filter((t) => {
         const game = t.game?.shortName?.toUpperCase() ?? '';
-        const mapSlug = t.map?.slug?.toLowerCase() ?? '';
+        const tMapSlug = t.map?.slug?.toLowerCase() ?? '';
         const title = t.title?.toLowerCase() ?? '';
         const challengeName = t.challenge?.name?.toLowerCase() ?? '';
         const eeName = t.easterEgg?.name?.toLowerCase() ?? '';
         const isTargetEventName = title.includes('speedrun gauntlet');
         const isTargetCategory = challengeName.includes('easter egg speedrun') || eeName.includes('main quest');
-        return game === 'BO7' && mapSlug.includes('toten') && (isTargetEventName || isTargetCategory);
+        return game === 'BO7' && tMapSlug === mapSlug && (isTargetEventName || isTargetCategory);
       });
       const fallback = list.filter((t) => {
         const game = t.game?.shortName?.toUpperCase() ?? '';
-        const mapSlug = t.map?.slug?.toLowerCase() ?? '';
-        return game === 'BO7' && mapSlug.includes('toten');
+        const tMapSlug = t.map?.slug?.toLowerCase() ?? '';
+        return game === 'BO7' && tMapSlug === mapSlug;
       });
       const ranked = normalized.length > 0 ? normalized : fallback;
       const openSpeedrunChallenge = ranked.find((t) => t.status === 'OPEN' && t.challenge?.type === 'EASTER_EGG_SPEEDRUN');
@@ -543,7 +550,7 @@ export default function EditMapProgressPage() {
     } catch {
       return null;
     }
-  }, [isSpeedrunGauntletSubmission, tournamentId]);
+  }, [activeGauntlet, isSpeedrunGauntletSubmission, tournamentId]);
 
   useEffect(() => {
     if (!authLoading && !profile) {
@@ -754,7 +761,7 @@ export default function EditMapProgressPage() {
   }, [map, tournament]);
 
   useEffect(() => {
-    if (!isSpeedrunGauntletSubmission || !map) return;
+    if (!isSpeedrunGauntletSubmission || !map || !activeGauntlet) return;
     const challengeId = tournament?.challengeId ?? speedrunGauntletChallengeId;
     if (challengeId) {
       setSelectedChallengeIds(new Set([challengeId]));
@@ -766,9 +773,9 @@ export default function EditMapProgressPage() {
       bo7GobbleGumMode: 'WITH_GOBBLEGUMS',
       bo7SupportMode: 'WITH_SUPPORT',
       bo7IsCursedRun: true,
-      bo7RelicsUsed: [...SPEEDRUN_GAUNTLET_REQUIRED_RELICS],
+      bo7RelicsUsed: [...activeGauntlet.requiredRelics],
     }));
-  }, [isSpeedrunGauntletSubmission, map, speedrunGauntletChallengeId, tournament?.challengeId]);
+  }, [activeGauntlet, isSpeedrunGauntletSubmission, map, speedrunGauntletChallengeId, tournament?.challengeId]);
 
   useEffect(() => {
     const wawCfg = map?.game?.shortName === 'WAW' ? getWaWMapConfig(map?.slug ?? '') : null;

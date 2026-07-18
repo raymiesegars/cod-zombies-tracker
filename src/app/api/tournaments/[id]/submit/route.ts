@@ -2,21 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { TournamentStatus } from '@prisma/client';
+import {
+  hasExactRelics,
+  isGauntletOpen,
+  resolveGauntletFromTournament,
+} from '@/lib/speedrun-gauntlet';
 
 export const dynamic = 'force-dynamic';
-
-const SPEEDRUN_GAUNTLET_REQUIRED_RELICS = [
-  'Teddy Bear',
-  'Dragon Wings',
-  'Gong',
-  'Seed',
-  'Rocket',
-  'Focusing Stone',
-  'Spider Fang',
-  'Elephant',
-  'Bus',
-  'Spork',
-] as const;
 
 function valuesEqual(a: unknown, b: unknown): boolean {
   if (Array.isArray(a) && Array.isArray(b)) {
@@ -45,23 +37,6 @@ function validateTournamentConfig(
     }
   }
   return null;
-}
-
-function isSpeedrunGauntletTournament(tournament: {
-  title?: string | null;
-  game?: { shortName?: string | null } | null;
-  map?: { slug?: string | null } | null;
-  challenge?: { name?: string | null } | null;
-  easterEgg?: { name?: string | null } | null;
-}): boolean {
-  const title = tournament.title?.toLowerCase() ?? '';
-  const challengeName = tournament.challenge?.name?.toLowerCase() ?? '';
-  const eeName = tournament.easterEgg?.name?.toLowerCase() ?? '';
-  return (
-    (title.includes('speedrun gauntlet') || challengeName.includes('easter egg speedrun') || eeName.includes('main quest')) &&
-    tournament.game?.shortName === 'BO7' &&
-    tournament.map?.slug?.toLowerCase() === 'totenreich'
-  );
 }
 
 /** POST: Link an existing log to this tournament. Body: { challengeLogId } or { easterEggLogId }. Tournament must be OPEN and not past endsAt. Log must match tournament category and belong to current user. */
@@ -166,7 +141,11 @@ export async function POST(
       if (challengeConfigError) {
         return NextResponse.json({ error: challengeConfigError }, { status: 400 });
       }
-      if (isSpeedrunGauntletTournament(tournament)) {
+      const gauntlet = resolveGauntletFromTournament(tournament);
+      if (gauntlet && tournament.game?.shortName === 'BO7') {
+        if (!isGauntletOpen(gauntlet)) {
+          return NextResponse.json({ error: 'This Speedrun Gauntlet is not open for submissions' }, { status: 400 });
+        }
         if (log.playerCount !== 'SOLO') {
           return NextResponse.json({ error: 'Speedrun Gauntlet submissions must be Solo runs' }, { status: 400 });
         }
@@ -185,11 +164,7 @@ export async function POST(
         if (log.bo7IsCursedRun !== true) {
           return NextResponse.json({ error: 'Speedrun Gauntlet submissions must be marked as Cursed runs' }, { status: 400 });
         }
-        const relics = Array.isArray(log.bo7RelicsUsed) ? log.bo7RelicsUsed.map(String) : [];
-        const hasExactRelics =
-          relics.length === SPEEDRUN_GAUNTLET_REQUIRED_RELICS.length &&
-          [...SPEEDRUN_GAUNTLET_REQUIRED_RELICS].every((relic) => relics.includes(relic));
-        if (!hasExactRelics) {
+        if (!hasExactRelics(log.bo7RelicsUsed, gauntlet.requiredRelics)) {
           return NextResponse.json(
             { error: 'Speedrun Gauntlet submissions must include the exact 10 required relics' },
             { status: 400 }
