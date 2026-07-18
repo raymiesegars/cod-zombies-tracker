@@ -2,22 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getUser } from '@/lib/supabase/server';
 import { getDisplayAvatarUrl } from '@/lib/avatar';
+import { matchGauntletForLog } from '@/lib/speedrun-gauntlet';
 
 export const dynamic = 'force-dynamic';
 const DEFAULT_LIMIT = 250;
 const MAX_LIMIT = 500;
-const SPEEDRUN_GAUNTLET_RELICS = [
-  'Teddy Bear',
-  'Dragon Wings',
-  'Gong',
-  'Seed',
-  'Rocket',
-  'Focusing Stone',
-  'Spider Fang',
-  'Elephant',
-  'Bus',
-  'Spork',
-] as const;
 
 function isSpeedrunGauntletChallengeLog(log: {
   map: { slug: string; game: { shortName: string } };
@@ -29,14 +18,17 @@ function isSpeedrunGauntletChallengeLog(log: {
   bo7RelicsUsed?: string[] | null;
 }): boolean {
   if (log.map.game.shortName !== 'BO7') return false;
-  if (!log.map.slug.toLowerCase().includes('toten')) return false;
   if (log.challenge.type !== 'EASTER_EGG_SPEEDRUN') return false;
-  if (log.playerCount !== 'SOLO') return false;
-  if (log.bo7GobbleGumMode !== 'WITH_GOBBLEGUMS') return false;
-  if (log.bo7SupportMode !== 'WITH_SUPPORT') return false;
-  if (log.bo7IsCursedRun !== true) return false;
-  const relics = Array.isArray(log.bo7RelicsUsed) ? log.bo7RelicsUsed.map(String) : [];
-  return relics.length === SPEEDRUN_GAUNTLET_RELICS.length && SPEEDRUN_GAUNTLET_RELICS.every((r) => relics.includes(r));
+  return (
+    matchGauntletForLog({
+      mapSlug: log.map.slug,
+      playerCount: log.playerCount,
+      bo7GobbleGumMode: log.bo7GobbleGumMode,
+      bo7SupportMode: log.bo7SupportMode,
+      bo7IsCursedRun: log.bo7IsCursedRun,
+      bo7RelicsUsed: log.bo7RelicsUsed,
+    }) != null
+  );
 }
 
 /** List all runs pending verification (challenge + easter egg). Admin only. Query: game (shortName), runType (all | speedrun). */
@@ -167,7 +159,16 @@ export async function GET(request: NextRequest) {
       isTournamentRun: tournamentChallengeLabelByLogId.has(log.id) || isSpeedrunGauntletChallengeLog(log),
       tournamentLabel:
         tournamentChallengeLabelByLogId.get(log.id) ??
-        (isSpeedrunGauntletChallengeLog(log) ? 'Speedrun Gauntlet' : null),
+        (isSpeedrunGauntletChallengeLog(log)
+          ? matchGauntletForLog({
+              mapSlug: log.map.slug,
+              playerCount: log.playerCount,
+              bo7GobbleGumMode: log.bo7GobbleGumMode,
+              bo7SupportMode: log.bo7SupportMode,
+              bo7IsCursedRun: log.bo7IsCursedRun,
+              bo7RelicsUsed: log.bo7RelicsUsed,
+            })?.name ?? 'Speedrun Gauntlet'
+          : null),
       user: {
         id: log.user.id,
         username: log.user.username,
