@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Bot, ShieldCheck, MessageSquare, History, Trophy, Egg, Award, BookOpen, MapPin, GitMerge, Map } from 'lucide-react';
+import { Bot, ShieldCheck, MessageSquare, History, Trophy, Egg, Award, BookOpen, MapPin, GitMerge, Map, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const tabs = [
@@ -17,6 +17,7 @@ const tabs = [
   { href: '/admin/achievements', label: 'Achievements', icon: Award, badgeKey: null },
   { href: '/admin/maps', label: 'Maps', icon: Map, badgeKey: null, superAdminOnly: true },
   { href: '/admin/user-merge', label: 'User Merge', icon: GitMerge, badgeKey: null, superAdminOnly: true },
+  { href: '/admin/zcs3', label: 'ZCS-3', icon: Heart, badgeKey: null, superAdminOnly: true },
   { href: '/admin/chatbot', label: 'LeKronorium', icon: Bot, badgeKey: null },
   { href: '/rules', label: 'Rules', icon: BookOpen, badgeKey: null, superAdminOnly: true },
 ];

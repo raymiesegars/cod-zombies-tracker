@@ -1260,3 +1260,12 @@ enum TournamentStatus {
   OPEN
   LOCKED
 }
+
+// Charity event campaigns (e.g. ZCS-3). Super admin updates raised amount / merch URL via API.
+model CharityCampaign {
+  id          String   @id // e.g. "zcs3"
+  amountCents Int      @default(0)
+  goalCents   Int      @default(50000) // $500 default for ZCS-3
+  merchUrl    String?
+  updatedAt   DateTime @updatedAt
+}
