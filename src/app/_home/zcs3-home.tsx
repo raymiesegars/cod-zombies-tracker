@@ -5,18 +5,18 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { Button, Logo } from '@/components/ui';
-import { TwitchEmbed } from '@/components/events/twitch-embed';
+import { ChallengeCarousel } from '@/components/events/challenge-carousel';
+import { EventMediaEmbed } from '@/components/events/event-media-embed';
 import {
   ZCS3_CHARITY_NAME,
   ZCS3_CHARITY_TAGLINE,
   ZCS3_CHARITY_URL,
   ZCS3_ENLIST_URL,
-  ZCS3_FORMAT_REVEAL_LABEL,
   ZCS3_GAMES,
   ZCS3_LOGO_PATH,
+  ZCS3_MEDIA_MODE,
   ZCS3_REVEAL_TWEET_URL,
   ZCS3_SLUG,
-  ZCS3_TWITCH_URL,
 } from '@/lib/events/zcs3';
 import {
   ChevronDown,
@@ -26,7 +26,6 @@ import {
   Trophy,
   Users,
   Calendar,
-  Sparkles,
 } from 'lucide-react';
 
 type CharityData = {
@@ -89,11 +88,12 @@ export default function Zcs3HomePage() {
   const progress = goalCents > 0 ? Math.min(100, (amountCents / goalCents) * 100) : 0;
   const merchUrl = charity?.merchUrl ?? null;
   const merchReady = Boolean(merchUrl);
+  const mediaIsStream = ZCS3_MEDIA_MODE === 'stream';
 
   return (
     <div className="relative noise-overlay">
       {/* Hero */}
-      <section className="relative min-h-[78dvh] flex flex-col items-center justify-start overflow-hidden px-4 pt-3 sm:pt-4 pb-14 sm:pb-16">
+      <section className="relative min-h-[70dvh] flex flex-col items-center justify-start overflow-hidden px-4 pt-3 sm:pt-4 pb-10 sm:pb-12">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -142,18 +142,11 @@ export default function Zcs3HomePage() {
               />
             </div>
 
-            <div
-              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-orange-500/45 bg-black/70 text-orange-200 text-[11px] sm:text-xs font-medium mb-4 sm:mb-5 backdrop-blur-sm ${textPlate}`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-sky-300 shrink-0" />
-              Format reveal · {ZCS3_FORMAT_REVEAL_LABEL}
-            </div>
-
             <p
               className={`text-base sm:text-lg md:text-xl text-white/95 max-w-2xl mx-auto leading-relaxed px-1 ${textPlateStrong}`}
             >
               A 2-player community tournament across classic Zombies, racing challenges for charity.
-              September, just before the big releases.
+              September, just before the big releases. Challenges are live. Enlist your duo.
             </p>
 
             <p className={`mt-3 text-xs sm:text-sm text-bunker-100 tracking-wide uppercase ${textPlate}`}>
@@ -169,12 +162,12 @@ export default function Zcs3HomePage() {
             </div>
 
             <div className="mt-7 sm:mt-8 flex flex-col min-[720px]:flex-row items-stretch min-[720px]:items-center justify-center gap-3 w-full max-w-xl min-[720px]:max-w-none">
-              <a href="#stream" className="w-full min-[720px]:w-auto">
+              <a href="#challenges" className="w-full min-[720px]:w-auto">
                 <Button
                   size="lg"
                   className="w-full min-[720px]:w-auto bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white border-orange-400/40 shadow-lg shadow-orange-900/40"
                 >
-                  Watch Stream
+                  View Challenges
                 </Button>
               </a>
               <a
@@ -220,9 +213,9 @@ export default function Zcs3HomePage() {
 
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 hidden sm:block z-10">
           <a
-            href="#stream"
+            href="#challenges"
             className="block text-orange-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 rounded-full"
-            aria-label="Scroll to stream"
+            aria-label="Scroll to challenges"
           >
             <motion.div
               animate={{ y: [0, 6, 0] }}
@@ -235,22 +228,38 @@ export default function Zcs3HomePage() {
         </div>
       </section>
 
-      {/* Stream */}
-      <section id="stream" className="relative py-10 sm:py-14 px-4 border-y border-orange-900/30 bg-bunker-950/92 backdrop-blur-[2px]">
+      {/* Challenges by game */}
+      <section
+        id="challenges"
+        className="relative py-10 sm:py-14 px-4 border-y border-sky-900/30 bg-bunker-950/95"
+      >
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-6 sm:mb-8">
             <h2 className={`text-2xl sm:text-3xl md:text-4xl font-zombies text-white tracking-wide ${textPlateStrong}`}>
-              Live Cast
+              The Challenges
             </h2>
             <p className={`mt-2 text-sm sm:text-base text-bunker-100 max-w-xl mx-auto ${textPlate}`}>
-              The main event streams on{' '}
-              <a href={ZCS3_TWITCH_URL} target="_blank" rel="noopener noreferrer" className="text-sky-300 hover:underline">
-                xdflamer99
-              </a>
-              . Tune in for ZCS-3 Shattered Universe.
+              Pick a game with the tabs or big side arrows. Map rules update underneath.
             </p>
           </div>
-          <TwitchEmbed />
+          <ChallengeCarousel />
+        </div>
+      </section>
+
+      {/* Announcement video / live stream (toggle via ZCS3_MEDIA_MODE) */}
+      <section id="stream" className="relative py-10 sm:py-14 px-4 border-b border-orange-900/30 bg-bunker-950/92 backdrop-blur-[2px]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-6 sm:mb-8">
+            <h2 className={`text-2xl sm:text-3xl md:text-4xl font-zombies text-white tracking-wide ${textPlateStrong}`}>
+              {mediaIsStream ? 'Live Cast' : 'Format Reveal'}
+            </h2>
+            <p className={`mt-2 text-sm sm:text-base text-bunker-100 max-w-xl mx-auto ${textPlate}`}>
+              {mediaIsStream
+                ? 'The main event streams on xdflamer99. Tune in for ZCS-3 Shattered Universe.'
+                : 'Watch the official ZCS-3 Shattered Universe announcement and challenge breakdown.'}
+            </p>
+          </div>
+          <EventMediaEmbed />
         </div>
       </section>
 
@@ -371,7 +380,7 @@ export default function Zcs3HomePage() {
               Tournament Results
             </h2>
             <p className={`mt-2 text-sm text-bunker-100 ${textPlate}`}>
-              Leaderboard drops after challenges go public.
+              Standings go up once the September event is underway.
             </p>
           </div>
 
@@ -381,10 +390,10 @@ export default function Zcs3HomePage() {
                 Coming Soon
               </span>
               <p className={`text-lg sm:text-xl font-zombies text-white tracking-wide ${textPlateStrong}`}>
-                Challenges reveal {ZCS3_FORMAT_REVEAL_LABEL}
+                Results board locked until the tournament
               </p>
               <p className={`mt-2 text-sm text-bunker-100 max-w-md ${textPlate}`}>
-                Check back Friday for the format reveal, then we&apos;ll lock in results tracking here.
+                Challenges are revealed above. We&apos;ll track placements here when the event runs.
               </p>
             </div>
             <ul className="divide-y divide-bunker-800/80 opacity-40 select-none pointer-events-none" aria-hidden>
@@ -414,7 +423,7 @@ export default function Zcs3HomePage() {
           <h2 className={`text-2xl sm:text-3xl font-zombies text-white tracking-wide ${textPlateStrong}`}>About ZCS-3</h2>
           <p className={`mt-4 text-sm sm:text-base text-bunker-100 leading-relaxed ${textPlate}`}>
             Zombies Community Showdown 3: <span className="text-white font-medium">Shattered Universe</span>. A
-            by-the-players tournament. Team up in pairs, clear challenges fast across BO1, BO2, BO3, Infinite
+            by-the-players tournament. Team up in pairs, clear challenges fast across BO2, BO3, Infinite
             Warfare, and WW2, and help raise funds for {ZCS3_CHARITY_NAME}. Open to the community. Bring your
             duo and face formidable opponents.
           </p>
